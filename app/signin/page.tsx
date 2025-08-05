@@ -32,7 +32,7 @@ export default function LoginPage() {
             // If there's no error, the login was successful.
             console.log("Login success, redirecting to /profile...");
             // FIX: Redirect to the /profile page after a successful login
-            router.push("/profile");
+            router.push("/userdashboard");
         }
     };
 

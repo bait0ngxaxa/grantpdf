@@ -10,16 +10,28 @@ export default function Home() {
     };
 
     return (
-        <>
-            <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 text-6xl">
-                <h1>TEST PAGE</h1>
-                <button
-                    className="btn btn-primary border-r-4"
-                    onClick={handleClick}
-                >
-                    Next
-                </button>
+        <main className="min-h-screen flex items-center justify-center bg-base-200 px-4">
+            <div className="card w-full max-w-xl bg-white border border-base-300 shadow-xl p-8 sm:p-12 text-center">
+                <div className="card-body items-center">
+                    {/* ชื่อระบบ */}
+                    <h1 className="text-4xl font-bold text-primary mb-4">
+                        PDF Form Generator
+                    </h1>
+
+                    {/* คำอธิบาย */}
+                    <p className="text-base sm:text-lg text-base-content mb-6">
+                        ระบบสร้างและกรอกแบบฟอร์ม PDF อัตโนมัติ
+                    </p>
+
+                    {/* ปุ่ม */}
+                    <button
+                        className="btn btn-primary rounded-xl px-8 text-base"
+                        onClick={handleClick}
+                    >
+                        เริ่มต้นใช้งาน
+                    </button>
+                </div>
             </div>
-        </>
+        </main>
     );
 }

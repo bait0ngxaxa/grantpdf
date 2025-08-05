@@ -52,7 +52,13 @@ export default function ProfilePage() {
             onClick={() => signOut({ callbackUrl: '/signin' })}
             className="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300"
           >
-            ออกจากระบบ
+            Logout
+          </button>
+          <button
+            onClick={() => router.push("/admin")}
+            className="w-full bg-red-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300 mt-1"
+          >
+            Admin Panel
           </button>
         </div>
       </div>
