@@ -9,7 +9,7 @@ export default function AccessDeniedPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.push('/');
-    }, 3000);
+    }, 4000);
     return () => clearTimeout(timer);
   }, [router]);
 
@@ -37,7 +37,7 @@ export default function AccessDeniedPage() {
           </div>
 
           <h2 className="text-2xl font-semibold mt-4 text-red-600">
-            คุณไม่มีสิทธิ์เข้าถึงหน้านี้
+            คุณไม่มีสิทธิ์เข้าถึงหน้านี้ ติดต่อแอดมินเพื่อเข้าใช้งาน
           </h2>
 
           <p className="text-base-content text-sm mt-2">

@@ -18,7 +18,7 @@ export default function LoginPage() {
         // Use the signIn function provided by NextAuth.js
         // It handles the API call to /api/auth/callback/credentials for us.
         const result = await signIn("credentials", {
-            redirect: false, // Prevents automatic redirect so we can handle it manually
+            redirect: false, 
             email,
             password,
         });

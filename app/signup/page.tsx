@@ -1,3 +1,4 @@
+// /app/signup/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -10,12 +11,13 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [showToast, setShowToast] = useState(false); // State to control success toast visibility
   const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError(''); // Clear previous error
+    setShowToast(false); // Hide toast
     setIsSubmitting(true);
 
     try {
@@ -26,16 +28,21 @@ export default function SignupPage() {
       });
 
       if (res.ok) {
+        // Only show toast on success
         setShowToast(true);
+        // Redirect after toast is shown for a bit
         setTimeout(() => {
           router.push('/signin');
         }, 1500);
       } else {
         const data = await res.json();
+        // Display specific error message from API
         setError(data.error || 'เกิดข้อผิดพลาดในการสมัครสมาชิก');
+        console.error('Signup failed:', data.error);
       }
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      console.error('Network error during signup:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -43,7 +50,7 @@ export default function SignupPage() {
 
   return (
     <>
-      {/* ✅ Toast Notification */}
+      {/* ✅ Toast Notification for Success */}
       {showToast && (
         <div className="toast toast-top toast-center z-50">
           <div className="alert alert-success shadow-lg">
@@ -99,6 +106,7 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Display error message here */}
             {error && (
               <p className="text-error text-sm text-center">{error}</p>
             )}

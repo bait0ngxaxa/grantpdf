@@ -1,372 +1,375 @@
-'use client';
+"use client";
 
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useEffect, useState, useMemo } from 'react';
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useEffect, useState, useMemo } from "react";
+import Head from "next/head";
 
 // --- Mock Data ---
 // In a real application, this data would be fetched from your backend API.
 interface PdfFile { // Define interface for better type safety
-  id: string;
-  fileName: string;
-  createdAt: string;
-  lastModified: string;
-  userId: string;
-  userName: string;
-  pdfUrl: string;
+    id: string;
+    fileName: string;
+    createdAt: string;
+    lastModified: string;
+    userId: string;
+    userName: string;
+    pdfUrl: string;
 }
 
 const initialMockPdfFiles: PdfFile[] = [ // Changed to initial data to allow state modification
-  {
-    id: 'pdf-1',
-    fileName: 'ใบเสนอราคา_โปรเจกต์ A.pdf',
-    createdAt: '2024-07-25T10:00:00Z',
-    lastModified: '2024-07-25T10:30:00Z',
-    userId: 'user-101',
-    userName: 'สมชาย ใจดี',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Example public PDF
-  },
-  {
-    id: 'pdf-2',
-    fileName: 'สัญญา_บริการ B.pdf',
-    createdAt: '2024-07-22T14:30:00Z',
-    lastModified: '2024-07-23T09:15:00Z',
-    userId: 'user-102',
-    userName: 'สมหญิง รักชาติ',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-  },
-  {
-    id: 'pdf-3',
-    fileName: 'รายงานประจำเดือน_กรกฎาคม.pdf',
-    createdAt: '2024-07-18T08:00:00Z',
-    lastModified: '2024-07-18T08:00:00Z',
-    userId: 'user-101',
-    userName: 'สมชาย ใจดี',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-  },
-  {
-    id: 'pdf-4',
-    fileName: 'แผนงาน_Q3_2024.pdf',
-    createdAt: '2024-07-10T11:45:00Z',
-    lastModified: '2024-07-10T11:45:00Z',
-    userId: 'user-103',
-    userName: 'มานะ พากเพียร',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-  },
-  {
-    id: 'pdf-5',
-    fileName: 'เอกสารประชุม_20240705.pdf',
-    createdAt: '2024-07-05T16:00:00Z',
-    lastModified: '2024-07-05T16:00:00Z',
-    userId: 'user-102',
-    userName: 'สมหญิง รักชาติ',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-  },
-  {
-    id: 'pdf-6',
-    fileName: 'คู่มือการใช้งาน_V2.pdf',
-    createdAt: '2024-06-30T09:00:00Z',
-    lastModified: '2024-07-01T10:00:00Z',
-    userId: 'user-101',
-    userName: 'สมชาย ใจดี',
-    pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-  },
+    {
+        id: "pdf-1",
+        fileName: "ใบเสนอราคา_โปรเจกต์ A.pdf",
+        createdAt: "2025-07-25T10:00:00Z",
+        lastModified: "2025-07-25T10:30:00Z",
+        userId: "user-101",
+        userName: "สมชาย ใจดี",
+        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", // Example public PDF
+    },
+    {
+        id: "pdf-2",
+        fileName: "สัญญา_บริการ B.pdf",
+        createdAt: "2025-07-22T14:30:00Z",
+        lastModified: "2025-07-23T09:15:00Z",
+        userId: "user-102",
+        userName: "สมหญิง รักชาติ",
+        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    },
+    {
+        id: "pdf-3",
+        fileName: "รายงานประจำเดือน_กรกฎาคม.pdf",
+        createdAt: "2025-07-18T08:00:00Z",
+        lastModified: "2025-07-18T08:00:00Z",
+        userId: "user-101",
+        userName: "สมชาย ใจดี",
+        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    },
+    {
+        id: "pdf-4",
+        fileName: "แผนงาน_Q3_2024.pdf",
+        createdAt: "2025-07-10T11:45:00Z",
+        lastModified: "2025-07-10T11:45:00Z",
+        userId: "user-103",
+        userName: "มานะ พากเพียร",
+        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    },
+    {
+        id: "pdf-5",
+        fileName: "เอกสารประชุม_20240705.pdf",
+        createdAt: "2025-07-05T16:00:00Z",
+        lastModified: "2025-07-05T16:00:00Z",
+        userId: "user-102",
+        userName: "สมหญิง รักชาติ",
+        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    },
+    {
+        id: "pdf-6",
+        fileName: "คู่มือการใช้งาน_V2.pdf",
+        createdAt: "2025-06-30T09:00:00Z",
+        lastModified: "2025-07-01T10:00:00Z",
+        userId: "user-101",
+        userName: "สมชาย ใจดี",
+        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    },
 ];
 
 export default function AdminDashboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [pdfFiles, setPdfFiles] = useState<PdfFile[]>(initialMockPdfFiles); // FIX: Use state for pdfFiles
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('createdAtDesc');
+    const { data: session, status } = useSession();
+    const router = useRouter();
+    const [pdfFiles, setPdfFiles] = useState<PdfFile[]>(initialMockPdfFiles);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useState("createdAtDesc");
 
-  // State for managing the PDF preview modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [previewTitle, setPreviewTitle] = useState('');
+    // State for managing the delete confirmation modal
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedFileForDeletion, setSelectedFileForDeletion] = useState<PdfFile | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-  // FIX: State for managing the delete confirmation modal
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedFileForDeletion, setSelectedFileForDeletion] = useState<PdfFile | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+    // --- Authorization Check ---
+    useEffect(() => {
+        if (status === "loading") return;
+        if (!session || session.user?.role !== "admin") {
+            router.push("/access-denied");
+        }
+    }, [session, status, router]);
 
-  // --- Authorization Check ---
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session || session.user?.role !== 'admin') {
-      router.push('/access-denied');
+    // --- Delete PDF Functions ---
+    const openDeleteModal = (file: PdfFile) => {
+        setSelectedFileForDeletion(file);
+        setIsDeleteModalOpen(true);
+    };
+
+    const closeDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setSelectedFileForDeletion(null);
+    };
+
+    const handleDeleteFile = async () => {
+        if (!selectedFileForDeletion) return;
+
+        setIsDeleting(true);
+        // Simulate API call to delete the PDF file
+        try {
+            console.log("Deleting PDF file:", selectedFileForDeletion.id);
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+
+            // Remove the file from the local state
+            setPdfFiles((prevFiles) => prevFiles.filter((file) => file.id !== selectedFileForDeletion.id));
+            closeDeleteModal();
+        } catch (error) {
+            console.error("Failed to delete PDF file:", error);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    // --- Data Filtering and Sorting ---
+    const filteredAndSortedPdfs = useMemo(() => {
+        let filtered = pdfFiles.filter(
+            (file) =>
+                file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                file.userName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+            if (sortBy === "createdAtAsc") {
+                return dateA - dateB;
+            }
+            return dateB - dateA;
+        });
+
+        return filtered;
+    }, [searchTerm, sortBy, pdfFiles]);
+
+    // Derived stats for the cards
+    const totalUsers = 3; // Mock user count
+    const latestFile = useMemo(() => {
+        return filteredAndSortedPdfs.length > 0 ? filteredAndSortedPdfs[0] : null;
+    }, [filteredAndSortedPdfs]);
+
+    if (status === "loading") {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
     }
-  }, [session, status, router]);
 
-  // --- PDF Preview Modal Functions ---
-  const openPreviewModal = (url: string, title: string) => {
-    setPreviewUrl(url);
-    setPreviewTitle(title);
-    setIsModalOpen(true);
-  };
-  
-  const closePreviewModal = () => {
-    setIsModalOpen(false);
-    setPreviewUrl('');
-    setPreviewTitle('');
-  };
-
-  // --- Delete PDF Functions ---
-  const openDeleteModal = (file: PdfFile) => {
-    setSelectedFileForDeletion(file);
-    setIsDeleteModalOpen(true);
-  };
-
-  const closeDeleteModal = () => {
-    setIsDeleteModalOpen(false);
-    setSelectedFileForDeletion(null);
-  };
-
-  const handleDeleteFile = async () => {
-    if (!selectedFileForDeletion) return;
-
-    setIsDeleting(true);
-    // Simulate API call to delete the PDF file
-    try {
-      console.log('Deleting PDF file:', selectedFileForDeletion.id);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-
-      // Remove the file from the local state
-      setPdfFiles(prevFiles => prevFiles.filter(file => file.id !== selectedFileForDeletion.id));
-      closeDeleteModal();
-      // Consider a more user-friendly notification (e.g., a toast message)
-      alert('ลบเอกสาร PDF สำเร็จ!'); 
-    } catch (error) {
-      console.error('Failed to delete PDF file:', error);
-      alert('เกิดข้อผิดพลาดในการลบเอกสาร PDF');
-    } finally {
-      setIsDeleting(false);
+    if (!session || session.user?.role !== "admin") {
+        return null;
     }
-  };
 
-  // --- Data Filtering and Sorting ---
-  const filteredAndSortedPdfs = useMemo(() => {
-    let filtered = pdfFiles.filter(file => // FIX: Use pdfFiles state
-      file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      file.userName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime();
-      const dateB = new Date(b.createdAt).getTime();
-      if (sortBy === 'createdAtAsc') {
-        return dateA - dateB;
-      }
-      return dateB - dateA;
-    });
-
-    return filtered;
-  }, [searchTerm, sortBy, pdfFiles]); // FIX: Add pdfFiles to dependencies
-
-  if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-      </div>
+        <>
+            <Head>
+                <title>Admin Dashboard | ระบบจัดการเอกสาร</title>
+            </Head>
+            <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex flex-col">
+                {/* --- Admin Navbar --- */}
+                <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-6 z-10 rounded-b-lg">
+                    <div className="flex-1">
+                        <Link href="/admin" className="btn btn-ghost text-xl text-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                            </svg>
+                            <span className="ml-2 font-bold text-2xl">Admin Panel</span>
+                        </Link>
+                    </div>
+                    <div className="flex-none">
+                        <div className="flex items-center space-x-4">
+                            <span className="hidden sm:block font-medium">
+                                สวัสดี, {session.user?.name}
+                            </span>
+                            <Link href="/userdashboard" className="btn btn-secondary rounded-full shadow-lg">
+                                กลับสู่แดชบอร์ดผู้ใช้
+                            </Link>
+                            <button onClick={() => signOut()} className="btn btn-primary rounded-full shadow-lg">
+                                ออกจากระบบ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* --- Main Content Area --- */}
+                <div className="container mx-auto p-6 flex-1">
+                    <h1 className="text-4xl font-bold mb-6">ภาพรวมระบบ</h1>
+
+                    {/* --- System Overview Cards --- */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                            <div className="flex items-center space-x-4">
+                                <div className="text-primary bg-primary bg-opacity-10 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">จำนวนเอกสาร PDF</div>
+                                    <div className="text-3xl font-bold">{pdfFiles.length}</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">เอกสารทั้งหมดในระบบ</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                            <div className="flex items-center space-x-4">
+                                <div className="text-secondary bg-secondary bg-opacity-10 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.972 5.972 0 01-2.705-2.705L5.414 10.914a1 1 0 01.114-.114l6.467-6.467a1 1 0 011.414 0l6.467 6.467a1 1 0 01.114.114l-.657.657a5.972 5.972 0 01-2.705 2.705M12 14a3 3 0 100-6 3 3 0 000 6z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">ผู้ใช้งานทั้งหมด</div>
+                                    <div className="text-3xl font-bold">{totalUsers}</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">บัญชีผู้ใช้ในระบบ</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                            <div className="flex items-center space-x-4">
+                                <div className="text-info bg-info bg-opacity-10 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
+                                    <div className="text-lg font-bold truncate">
+                                        {latestFile?.fileName || "ไม่มี"}
+                                    </div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {latestFile?.createdAt ? new Date(latestFile.createdAt).toLocaleDateString("th-TH") : ""}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* --- PDF Management Section --- */}
+                    <h2 className="text-2xl font-bold mb-4">การจัดการเอกสาร PDF</h2>
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                        <input
+                            type="text"
+                            placeholder="ค้นหาชื่อไฟล์ หรือ ผู้สร้าง..."
+                            className="input input-bordered w-full sm:w-80 rounded-full"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <select
+                            className="select select-bordered w-full sm:w-auto rounded-full"
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                        >
+                            <option value="createdAtDesc">
+                                เรียงตามวันที่สร้าง (ใหม่สุด)
+                            </option>
+                            <option value="createdAtAsc">
+                                เรียงตามวันที่สร้าง (เก่าสุด)
+                            </option>
+                        </select>
+                    </div>
+
+                    <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl mb-8">
+                        <table className="table w-full">
+                            <thead>
+                                <tr className="text-lg text-gray-600 dark:text-gray-300">
+                                    <th>ชื่อไฟล์</th>
+                                    <th>ผู้สร้าง</th>
+                                    <th className="hidden md:table-cell">สร้างเมื่อ</th>
+                                    <th className="hidden md:table-cell">แก้ไขล่าสุด</th>
+                                    <th>การกระทำ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredAndSortedPdfs.length > 0 ? (
+                                    filteredAndSortedPdfs.map((file) => (
+                                        <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td className="font-semibold">{file.fileName}</td>
+                                            <td>{file.userName}</td>
+                                            <td className="text-gray-500 hidden md:table-cell">
+                                                {new Date(file.createdAt).toLocaleDateString("th-TH")}
+                                            </td>
+                                            <td className="text-gray-500 hidden md:table-cell">
+                                                {new Date(file.lastModified).toLocaleDateString("th-TH")}
+                                            </td>
+                                            <td className="flex space-x-2">
+                                                <a
+                                                    href={file.pdfUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="btn btn-sm btn-info text-white rounded-full"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                    </svg>
+                                                    <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
+                                                </a>
+                                                <button
+                                                    onClick={() => openDeleteModal(file)}
+                                                    className="btn btn-sm btn-error text-white rounded-full"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                    <span className="ml-1 hidden lg:block">ลบ</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={5} className="text-center py-4 text-gray-500">
+                                            ไม่พบเอกสาร PDF
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* --- User Management Section --- */}
+                    <h2 className="text-2xl font-bold mb-4">การจัดการผู้ใช้งาน</h2>
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <p className="text-lg">จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ</p>
+                        <Link href="/admin/users" className="btn btn-secondary rounded-full shadow-lg">
+                            ไปที่หน้าจัดการผู้ใช้งาน
+                        </Link>
+                    </div>
+                </div>
+
+                {/* --- Delete PDF Confirmation Modal --- */}
+                {isDeleteModalOpen && selectedFileForDeletion && (
+                    <dialog id="delete_pdf_modal" className="modal modal-open bg-black bg-opacity-50">
+                        <div className="modal-box bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+                            <h3 className="font-bold text-lg text-error">
+                                ยืนยันการลบเอกสาร
+                            </h3>
+                            <p className="py-4">
+                                คุณแน่ใจหรือไม่ว่าต้องการลบเอกสาร **{selectedFileForDeletion.fileName}**?
+                            </p>
+                            <p className="text-sm text-warning">การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+                            <div className="modal-action">
+                                <button
+                                    className="btn btn-error rounded-full"
+                                    onClick={handleDeleteFile}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? "กำลังลบ..." : "ลบ"}
+                                </button>
+                                <button className="btn rounded-full" onClick={closeDeleteModal}>
+                                    ยกเลิก
+                                </button>
+                            </div>
+                        </div>
+                        <form method="dialog" className="modal-backdrop">
+                            <button onClick={closeDeleteModal}>ปิด</button>
+                        </form>
+                    </dialog>
+                )}
+            </div>
+        </>
     );
-  }
-
-  if (!session || session.user?.role !== 'admin') {
-    return null;
-  }
-
-  return (
-    <div className="min-h-screen bg-base-200 text-base-content">
-      {/* --- Admin Navbar --- */}
-      <div className="navbar bg-base-100 shadow-lg px-6">
-        <div className="flex-1">
-          <Link href="/admin" className="btn btn-ghost text-xl">
-            Admin Panel
-          </Link>
-        </div>
-        <div className="flex-none">
-          <div className="flex items-center space-x-4">
-            <span className="hidden sm:block font-medium text-base-content">
-              สวัสดี, {session.user?.name} (Admin)
-            </span>
-            <Link href="/userdashboard" className="btn btn-primary">
-                กลับสู่แดชบอร์ดผู้ใช้
-            </Link>
-            <button onClick={() => signOut()} className="btn btn-primary">
-              ออกจากระบบ
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* --- Main Content Area --- */}
-      <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">ภาพรวมระบบ</h1>
-
-        {/* --- System Overview Cards --- */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="stats shadow bg-base-100">
-            <div className="stat">
-              <div className="stat-figure text-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              </div>
-              <div className="stat-title">จำนวนเอกสาร PDF</div>
-              <div className="stat-value text-primary">{pdfFiles.length}</div> {/* FIX: Use pdfFiles.length */}
-              <div className="stat-desc">เอกสารทั้งหมดในระบบ</div>
-            </div>
-          </div>
-          <div className="stats shadow bg-base-100">
-            <div className="stat">
-              <div className="stat-figure text-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-              </div>
-              <div className="stat-title">ผู้ใช้งานทั้งหมด</div>
-              <div className="stat-value text-secondary">3</div> {/* Mock user count */}
-              <div className="stat-desc">ผู้ใช้งานทั้งหมดในระบบ</div>
-            </div>
-          </div>
-          <div className="stats shadow bg-base-100">
-            <div className="stat">
-              <div className="stat-figure text-accent">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-              </div>
-              <div className="stat-title">เอกสารล่าสุด</div>
-              <div className="stat-value text-accent">{pdfFiles[0]?.fileName || 'ไม่มี'}</div> {/* FIX: Use pdfFiles[0] */}
-              <div className="stat-desc">สร้างเมื่อ {pdfFiles[0]?.createdAt ? new Date(pdfFiles[0].createdAt).toLocaleDateString('th-TH') : ''}</div> {/* FIX: Use pdfFiles[0] */}
-            </div>
-          </div>
-        </div>
-
-        {/* --- PDF Management Section --- */}
-        <h2 className="text-2xl font-bold mb-4">การจัดการเอกสาร PDF</h2>
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-          <input
-            type="text"
-            placeholder="ค้นหาชื่อไฟล์ หรือ ผู้สร้าง..."
-            className="input input-bordered w-full sm:w-80"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <select
-            className="select select-bordered w-full sm:w-auto"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <option value="createdAtDesc">เรียงตามวันที่สร้าง (ใหม่สุด)</option>
-            <option value="createdAtAsc">เรียงตามวันที่สร้าง (เก่าสุด)</option>
-          </select>
-        </div>
-
-        <div className="overflow-x-auto bg-base-100 rounded-box shadow-xl mb-8">
-          <table className="table w-full">
-            <thead>
-              <tr className="text-lg">
-                <th>ชื่อไฟล์</th>
-                <th>ผู้สร้าง</th>
-                <th>สร้างเมื่อ</th>
-                <th>แก้ไขล่าสุด</th>
-                <th>การกระทำ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAndSortedPdfs.length > 0 ? (
-                filteredAndSortedPdfs.map((file) => (
-                  <tr key={file.id}>
-                    <td className="font-semibold">{file.fileName}</td>
-                    <td>{file.userName}</td>
-                    <td>{new Date(file.createdAt).toLocaleDateString('th-TH')}</td>
-                    <td>{new Date(file.lastModified).toLocaleDateString('th-TH')}</td>
-                    <td className="flex space-x-2">
-                      <button
-                        onClick={() => openPreviewModal(file.pdfUrl, file.fileName)}
-                        className="btn btn-sm btn-success text-white"
-                      >
-                        พรีวิว
-                      </button>
-                      <a 
-                        href={file.pdfUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="btn btn-sm btn-info text-white"
-                        download
-                      >
-                        ดาวน์โหลด
-                      </a>
-                      {/* FIX: Add Delete button */}
-                      <button
-                        onClick={() => openDeleteModal(file)}
-                        className="btn btn-sm btn-error text-white"
-                      >
-                        ลบ
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="text-center py-4">ไม่พบเอกสาร PDF</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* --- User Management Section --- */}
-        <h2 className="text-2xl font-bold mb-4">การจัดการผู้ใช้งาน</h2>
-        <div className="bg-base-100 p-6 rounded-xl shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-lg">จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ</p>
-          <Link href="/admin/users" className="btn btn-secondary">
-            ไปที่หน้าจัดการผู้ใช้งาน
-          </Link>
-        </div>
-      </div>
-
-      {/* --- PDF Preview Modal --- */}
-      {isModalOpen && (
-        <dialog id="pdf_preview_modal" className="modal modal-open">
-          <div className="modal-box w-11/12 max-w-5xl h-[90vh]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg">{previewTitle}</h3>
-              <button className="btn btn-sm btn-circle btn-ghost" onClick={closePreviewModal}>✕</button>
-            </div>
-            <div className="h-[calc(100%-64px)]">
-              <iframe
-                src={previewUrl}
-                title={previewTitle}
-                width="100%"
-                height="100%"
-                className="border-2 border-gray-300 rounded-lg"
-              >
-                เบราว์เซอร์ของคุณไม่รองรับการแสดงผล PDF
-              </iframe>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={closePreviewModal}>ปิด</button>
-          </form>
-        </dialog>
-      )}
-
-      {/* FIX: Delete PDF Confirmation Modal */}
-      {isDeleteModalOpen && selectedFileForDeletion && (
-        <dialog id="delete_pdf_modal" className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg text-error">ยืนยันการลบเอกสาร</h3>
-            <p className="py-4">คุณแน่ใจหรือไม่ว่าต้องการลบเอกสาร **{selectedFileForDeletion.fileName}**?</p>
-            <p className="text-sm text-warning">การกระทำนี้ไม่สามารถย้อนกลับได้</p>
-            <div className="modal-action">
-              <button className="btn btn-error" onClick={handleDeleteFile} disabled={isDeleting}>
-                {isDeleting ? 'กำลังลบ...' : 'ลบ'}
-              </button>
-              <button className="btn" onClick={closeDeleteModal}>ยกเลิก</button>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={closeDeleteModal}>ปิด</button>
-          </form>
-        </dialog>
-      )}
-    </div>
-  );
 }

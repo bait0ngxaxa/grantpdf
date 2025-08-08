@@ -15,7 +15,7 @@ export default function Home() {
                 <div className="card-body items-center">
                     {/* ชื่อระบบ */}
                     <h1 className="text-4xl font-bold text-primary mb-4">
-                        PDF Form Generator
+                        GRANT ONLINE
                     </h1>
 
                     {/* คำอธิบาย */}
@@ -28,7 +28,7 @@ export default function Home() {
                         className="btn btn-primary rounded-xl px-8 text-base"
                         onClick={handleClick}
                     >
-                        เริ่มต้นใช้งาน
+                        Get Started
                     </button>
                 </div>
             </div>

@@ -5,28 +5,22 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, FormEvent } from 'react';
 
-// --- Mock User Data ---
-// In a real application, this data would be fetched from your backend API.
+// Define the UserData interface to match your Prisma model (after BigInt to string conversion)
 interface UserData {
-  id: string;
+  id: string; // Changed from BigInt to string for client-side representation
   name: string;
   email: string;
   role: 'member' | 'admin';
-  createdAt: string;
+  createdAt: string; // Dates will be stringified for display
 }
-
-const mockUsers: UserData[] = [
-  { id: 'user-101', name: 'สมชาย ใจดี', email: 'somchai@example.com', role: 'admin', createdAt: '2023-01-15T10:00:00Z' },
-  { id: 'user-102', name: 'สมหญิง รักชาติ', email: 'somying@example.com', role: 'member', createdAt: '2023-02-20T11:30:00Z' },
-  { id: 'user-103', name: 'มานะ พากเพียร', email: 'mana@example.com', role: 'member', createdAt: '2023-03-01T08:45:00Z' },
-  { id: 'user-104', name: 'ปรีชา อดทน', email: 'preecha@example.com', role: 'member', createdAt: '2023-04-10T15:00:00Z' },
-  { id: 'user-105', name: 'วิไล ใฝ่รู้', email: 'wilai@example.com', role: 'member', createdAt: '2023-05-05T09:00:00Z' },
-];
 
 export default function AdminUserManagementPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [users, setUsers] = useState<UserData[]>(mockUsers); // State to hold user data
+  const [users, setUsers] = useState<UserData[]>([]); // FIX: Initialize with empty array
+  const [loadingUsers, setLoadingUsers] = useState(true); // FIX: New loading state for user data
+  const [fetchError, setFetchError] = useState<string | null>(null); // FIX: New state for fetch error
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
@@ -41,6 +35,43 @@ export default function AdminUserManagementPage() {
       router.push('/access-denied');
     }
   }, [session, status, router]);
+
+  // --- Fetch Users from API ---
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    setFetchError(null);
+    try {
+      const res = await fetch('/api/admin/users'); // FIX: Call your actual API endpoint
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to fetch users');
+      }
+      const data = await res.json();
+      // FIX: Ensure BigInt IDs are converted to string if not already done by API
+      const processedUsers = data.users.map((user: any) => ({
+        ...user,
+        id: user.id.toString(),
+        createdAt: new Date(user.createdAt).toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+      }));
+      setUsers(processedUsers);
+    } catch (error: any) {
+      console.error('Error fetching users:', error);
+      setFetchError(error.message || 'ไม่สามารถโหลดข้อมูลผู้ใช้งานได้');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Fetch users when the component mounts and session is authenticated
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.role === 'admin') {
+      fetchUsers();
+    }
+  }, [status, session]); // Depend on status and session to refetch if auth state changes
 
   // --- Edit Modal Functions ---
   const openEditModal = (user: UserData) => {
@@ -68,22 +99,26 @@ export default function AdminUserManagementPage() {
     if (!selectedUser) return;
 
     setIsSaving(true);
-    // Simulate API call to update user
     try {
-      console.log('Updating user:', selectedUser.id, editFormData);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      // FIX: Call your actual API endpoint to update user
+      const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editFormData),
+      });
 
-      // Update the user in the local state (in a real app, you'd refetch from API)
-      setUsers(prevUsers =>
-        prevUsers.map(user =>
-          user.id === selectedUser.id ? { ...user, ...editFormData, role: editFormData.role as 'member' | 'admin' } : user
-        )
-      );
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to update user');
+      }
+
+      // Refetch users to get the latest data after update
+      await fetchUsers();
       closeEditModal();
-      alert('อัปเดตข้อมูลผู้ใช้สำเร็จ!'); // Using alert for simplicity, consider a custom toast/modal
-    } catch (error) {
+      alert('อัปเดตข้อมูลผู้ใช้สำเร็จ!');
+    } catch (error: any) {
       console.error('Failed to update user:', error);
-      alert('เกิดข้อผิดพลาดในการอัปเดตผู้ใช้');
+      alert(error.message || 'เกิดข้อผิดพลาดในการอัปเดตผู้ใช้');
     } finally {
       setIsSaving(false);
     }
@@ -104,24 +139,30 @@ export default function AdminUserManagementPage() {
     if (!selectedUser) return;
 
     setIsDeleting(true);
-    // Simulate API call to delete user
     try {
-      console.log('Deleting user:', selectedUser.id);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      // FIX: Call your actual API endpoint to delete user
+      const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'DELETE',
+      });
 
-      // Remove the user from the local state (in a real app, you'd refetch from API)
-      setUsers(prevUsers => prevUsers.filter(user => user.id !== selectedUser.id));
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to delete user');
+      }
+
+      // Refetch users to get the latest data after deletion
+      await fetchUsers();
       closeDeleteModal();
-      alert('ลบผู้ใช้สำเร็จ!'); // Using alert for simplicity
-    } catch (error) {
+      alert('ลบผู้ใช้สำเร็จ!');
+    } catch (error: any) {
       console.error('Failed to delete user:', error);
-      alert('เกิดข้อผิดพลาดในการลบผู้ใช้');
+      alert(error.message || 'เกิดข้อผิดพลาดในการลบผู้ใช้');
     } finally {
       setIsDeleting(false);
     }
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || loadingUsers) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-200">
         <span className="loading loading-spinner loading-lg text-primary"></span>
@@ -161,6 +202,13 @@ export default function AdminUserManagementPage() {
       <div className="container mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">การจัดการผู้ใช้งาน</h1>
 
+        {fetchError && (
+          <div role="alert" className="alert alert-error mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>{fetchError}</span>
+          </div>
+        )}
+
         <div className="overflow-x-auto bg-base-100 rounded-box shadow-xl mb-8">
           <table className="table w-full">
             <thead>
@@ -185,17 +233,17 @@ export default function AdminUserManagementPage() {
                         {user.role}
                       </span>
                     </td>
-                    <td>{new Date(user.createdAt).toLocaleDateString('th-TH')}</td>
+                    <td>{user.createdAt}</td> {/* Display formatted date */}
                     <td className="flex space-x-2">
                       <button
                         onClick={() => openEditModal(user)}
-                        className="btn btn-sm btn-info text-white"
+                        className="btn btn-sm btn-info text-white rounded-xl"
                       >
                         แก้ไข
                       </button>
                       <button
                         onClick={() => openDeleteModal(user)}
-                        className="btn btn-sm btn-error text-white"
+                        className="btn btn-sm btn-error text-white rounded-xl"
                       >
                         ลบ
                       </button>

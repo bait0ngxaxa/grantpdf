@@ -25,7 +25,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Find the user by email in the database
-        const user = await prisma.user.findUnique({
+        const user = await prisma.users.findUnique({
           where: { email: credentials.email },
         });
 
@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
             id: String(user.id),
             name: user.name,
             email: user.email,
-            role: user.role,
+            role: user.role ,
           };
           return authorizedUser;
         } else {
@@ -59,6 +59,7 @@ export const authOptions: NextAuthOptions = {
   // Use JWT strategy for session management
   session: {
     strategy: 'jwt',
+    maxAge: 60 * 60, // กำหนดอายุของ session เป็น 24 ชั่วโมง
   },
 
   // Callbacks to manage the JWT token and session
