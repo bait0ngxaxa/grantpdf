@@ -30,7 +30,7 @@ interface ProjectTemplate {
 const projectTemplates: ProjectTemplate[] = [
     {
         id: "web-dev",
-        title: "พัฒนาเว็บไซต์",
+        title: "โครงการพัฒนาเว็บไซต์",
         description: "สำหรับโครงการสร้างและพัฒนาเว็บไซต์ใหม่ทั้งหมด",
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,7 +50,7 @@ const projectTemplates: ProjectTemplate[] = [
     },
     {
         id: "marketing",
-        title: "การตลาดดิจิทัล",
+        title: "โครงการการตลาดดิจิทัล",
         description: "สำหรับโครงการวางแผนและดำเนินงานด้านการตลาดออนไลน์",
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,7 +70,7 @@ const projectTemplates: ProjectTemplate[] = [
     },
     {
         id: "consulting",
-        title: "ที่ปรึกษาทางธุรกิจ",
+        title: "โครงการที่ปรึกษาทางธุรกิจ",
         description: "สำหรับบริการให้คำปรึกษาและวางแผนเชิงกลยุทธ์",
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,7 +148,7 @@ export default function CreateTorsPage() {
             {/* Header and Back button */}
             <div className="navbar bg-base-100 rounded-box shadow-lg mb-6">
                 <div className="flex-1">
-                    <button onClick={handleBack} className="btn btn-ghost">
+                    <button onClick={handleBack} className="btn btn-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>

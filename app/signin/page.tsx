@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import Link from "next/link"; // FIX: Import Link component for navigation
+import Link from "next/link";
+import Head from "next/head";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -13,91 +14,116 @@ export default function LoginPage() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(""); // Clear any previous errors
+        setError("");
 
-        // Use the signIn function provided by NextAuth.js
-        // It handles the API call to /api/auth/callback/credentials for us.
-        const result = await signIn("credentials", {
-            redirect: false, 
-            email,
-            password,
-        });
+        try {
+            const result = await signIn("credentials", {
+                redirect: false,
+                email,
+                password,
+            });
 
-        // Check the result for an error
-        if (result?.error) {
-            // Set the error message if the login failed
-            setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-            console.error("Login failed:", result.error);
-        } else {
-            // If there's no error, the login was successful.
-            console.log("Login success, redirecting to /profile...");
-            // FIX: Redirect to the /profile page after a successful login
-            router.push("/userdashboard");
+            if (result?.error) {
+                setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+                console.error("Login failed:", result.error);
+            } else {
+                console.log("Login success, redirecting to /userdashboard...");
+                router.push("/userdashboard");
+            }
+        } catch (err) {
+            console.error("An unexpected error occurred:", err);
+            setError("เกิดข้อผิดพลาดบางอย่าง กรุณาลองใหม่อีกครั้ง");
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base-200">
-            <div className="card w-full max-w-md shadow-xl bg-base-100 p-6">
-                <h2 className="text-2xl font-semibold text-center mb-4">
-                    เข้าสู่ระบบ
-                </h2>
+        <>
+            <Head>
+                <title>Login | ระบบจัดการเอกสาร</title>
+            </Head>
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4">
+                <div className="card w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl rounded-2xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
+                    <div className="card-body p-8">
+                        <div className="flex flex-col items-center mb-6">
+                            {/* SVG Icon for Branding */}
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-primary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v3h8z" />
+                            </svg>
+                            <h2 className="text-3xl font-bold text-center">เข้าสู่ระบบ</h2>
+                            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                กรอกข้อมูลเพื่อเข้าสู่ระบบ
+                            </p>
+                        </div>
 
-                <form onSubmit={handleLogin} className="space-y-4">
-                    <div>
-                        <label className="label">
-                            <span className="label-text">อีเมล</span>
-                        </label>
-                        <input
-                            type="email"
-                            className="input input-bordered w-full"
-                            placeholder="your@email.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
+                        <form onSubmit={handleLogin} className="space-y-6">
+                            {/* Email Input */}
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text font-medium text-gray-600 dark:text-gray-300">อีเมล</span>
+                                </label>
+                                <input
+                                    type="email"
+                                    className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="your@email.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            {/* Password Input */}
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text font-medium text-gray-600 dark:text-gray-300">รหัสผ่าน</span>
+                                </label>
+                                <input
+                                    type="password"
+                                    className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="********"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                {/* Forgot password link */}
+                                <div className="text-right mt-2">
+                                    <Link href="/forgot-password" passHref>
+                                        <span className="text-sm link link-hover text-gray-500 dark:text-gray-400">
+                                            ลืมรหัสผ่าน?
+                                        </span>
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Error Message */}
+                            {error && (
+                                <div className="alert alert-error text-center text-sm rounded-lg shadow-md transition-all duration-300 animate-fadeIn">
+                                    {error}
+                                </div>
+                            )}
+
+                            {/* Submit Button */}
+                            <button
+                                type="submit"
+                                className="btn btn-primary w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                            >
+                                เข้าสู่ระบบ
+                            </button>
+                        </form>
+
+                        {/* Sign-up Link */}
+                        <div className="text-center mt-6">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                ยังไม่มีบัญชี?{" "}
+                                <Link href="/signup" passHref>
+                                    <span className="link link-hover text-primary font-semibold transition-colors duration-200 hover:text-primary-focus">
+                                        สมัครสมาชิก
+                                    </span>
+                                </Link>
+                            </p>
+                        </div>
                     </div>
-
-                    <div>
-                        <label className="label">
-                            <span className="label-text">รหัสผ่าน</span>
-                        </label>
-                        <input
-                            type="password"
-                            className="input input-bordered w-full"
-                            placeholder="********"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    {error && (
-                        <p className="text-error text-sm text-center">
-                            {error}
-                        </p>
-                    )}
-
-                    <button
-                        type="submit"
-                        className="btn btn-primary w-full mt-2"
-                    >
-                        เข้าสู่ระบบ
-                    </button>
-                </form>
-
-                {/* FIX: Add a new Link component for the sign-up page */}
-                <div className="text-center mt-4">
-                    <p className="text-sm">
-                        ยังไม่มีบัญชี?{" "}
-                        <Link href="/signup" passHref>
-                            <span className="link link-hover text-primary font-semibold">
-                                สมัครสมาชิก
-                            </span>
-                        </Link>
-                    </p>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
