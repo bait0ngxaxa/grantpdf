@@ -26,3 +26,5 @@ declare module 'next-auth/jwt' {
     role?: string;   // The new 'role' property
   }
 }
+
+
