@@ -6,65 +6,17 @@ import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import Head from "next/head";
 
-// This is mock data to simulate a list of created PDF files.
-// In a real application, you would fetch this data from your backend API.
-const mockPdfFiles = [
-    {
-        id: "file-123",
-        fileName: "ใบเสนอราคา_โครงการบ้าน.pdf",
-        createdAt: "2024-05-20T10:00:00Z",
-        lastModified: "2024-05-21T10:30:00Z",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        department: "ฝ่ายขาย",
-        imageUrl: "https://placehold.co/400x300/e5e7eb/6b7280?text=Quotation",
-    },
-    {
-        id: "file-456",
-        fileName: "สัญญาจ้าง_ออกแบบภายใน.pdf",
-        createdAt: "2024-05-18T14:30:00Z",
-        lastModified: "2024-05-19T09:15:00Z",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        department: "ฝ่ายขาย",
-        imageUrl: "https://placehold.co/400x300/e5e7eb/6b7280?text=Contract",
-    },
-    {
-        id: "file-789",
-        fileName: "รายงานประจำเดือน_พฤษภาคม.pdf",
-        createdAt: "2024-05-15T08:00:00Z",
-        lastModified: "2024-05-15T08:00:00Z",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        department: "ฝ่ายการตลาด",
-        imageUrl: "https://placehold.co/400x300/e5e7eb/6b7280?text=Report",
-    },
-    {
-        id: "file-101",
-        fileName: "บันทึกการประชุม_ทีม A.pdf",
-        createdAt: "2024-05-22T11:00:00Z",
-        lastModified: "2024-05-22T11:00:00Z",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        department: "ฝ่ายการตลาด",
-        imageUrl: "https://placehold.co/400x300/e5e7eb/6b7280?text=Meeting+Minutes",
-    },
-    {
-        id: "file-102",
-        fileName: "คู่มือการใช้งาน_ระบบใหม่.pdf",
-        createdAt: "2024-05-10T09:00:00Z",
-        lastModified: "2024-05-10T09:00:00Z",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        department: "ฝ่ายการเงิน",
-        imageUrl: "https://placehold.co/400x300/e5e7eb/6b7280?text=Manual",
-    },
-    {
-        id: "file-103",
-        fileName: "งบประมาณประจำปี 2567.pdf",
-        createdAt: "2024-05-11T09:00:00Z",
-        lastModified: "2024-05-11T09:00:00Z",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        department: "ฝ่ายการเงิน",
-        imageUrl: "https://placehold.co/400x300/e5e7eb/6b7280?text=Budget",
-    },
-];
+// API Response type for better type safety
+type UserFile = {
+    id: string;
+    originalFileName: string;
+    storagePath: string;
+    created_at: string;
+    updated_at: string;
+};
 
+// This is the new list of departments based on your mock data,
+// but in a real app, this should probably come from a separate API or config.
 const departmentList = [
     { name: "ทั้งหมด", icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,10 +50,37 @@ export default function DashboardPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("createdAtDesc");
     const [selectedDepartment, setSelectedDepartment] = useState("ทั้งหมด");
+    
+    // New state for fetching data from the API
+    const [userFiles, setUserFiles] = useState<UserFile[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+
+    // Fetch user documents from the API
+    const fetchUserFiles = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const res = await fetch("/api/user-docs"); // Your API endpoint
+            if (!res.ok) {
+                throw new Error("Failed to fetch user documents");
+            }
+            const data: UserFile[] = await res.json();
+            setUserFiles(data);
+        } catch (err) {
+            console.error("Error fetching documents:", err);
+            setError("ไม่สามารถโหลดเอกสารได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push("/signin");
+        } else if (status === "authenticated") {
+            fetchUserFiles();
         }
     }, [status, router]);
 
@@ -117,36 +96,47 @@ export default function DashboardPage() {
         setPreviewTitle("");
     };
 
-    const filteredAndSortedPdfs = useMemo(() => {
-        let filtered = mockPdfFiles;
-        
-        // Filter by selected department
-        if (selectedDepartment !== "ทั้งหมด") {
-            filtered = filtered.filter((file) => file.department === selectedDepartment);
-        }
+    // Filter and sort the actual data from the API
+    const filteredAndSortedFiles = useMemo(() => {
+        let filtered = userFiles;
+
+        // Note: The API does not provide a 'department' field.
+        // The filter by department is kept for consistency with the original code,
+        // but it will not filter any documents unless you add 'department' to your API response.
+        // if (selectedDepartment !== "ทั้งหมด") {
+        //     filtered = filtered.filter((file) => file.department === selectedDepartment);
+        // }
 
         // Filter by search term
         filtered = filtered.filter((file) =>
-            file.fileName.toLowerCase().includes(searchTerm.toLowerCase())
+            file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
         // Sort the files
-        filtered.sort((a, b) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
+        const sorted = [...filtered].sort((a, b) => {
+            const dateA = new Date(a.created_at).getTime();
+            const dateB = new Date(b.created_at).getTime();
             if (sortBy === "createdAtAsc") {
                 return dateA - dateB;
             }
             return dateB - dateA;
         });
 
-        return filtered;
-    }, [searchTerm, sortBy, selectedDepartment]);
+        return sorted;
+    }, [userFiles, searchTerm, sortBy]); // Removed `selectedDepartment` from dependency array as it's not being used for filtering the real data
 
-    if (status === "loading") {
+    if (status === "loading" || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
                 <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-red-500 text-center p-4">
+                <p>{error}</p>
             </div>
         );
     }
@@ -261,19 +251,19 @@ export default function DashboardPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredAndSortedPdfs.length > 0 ? (
-                                        filteredAndSortedPdfs.map((file) => (
+                                    {filteredAndSortedFiles.length > 0 ? (
+                                        filteredAndSortedFiles.map((file) => (
                                             <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                <td className="font-semibold">{file.fileName}</td>
+                                                <td className="font-semibold">{file.originalFileName}</td>
                                                 <td className="text-gray-500 hidden md:table-cell">
-                                                    {new Date(file.createdAt).toLocaleDateString("th-TH")}
+                                                    {new Date(file.created_at).toLocaleDateString("th-TH")}
                                                 </td>
                                                 <td className="text-gray-500 hidden md:table-cell">
-                                                    {new Date(file.lastModified).toLocaleDateString("th-TH")}
+                                                    {new Date(file.updated_at).toLocaleDateString("th-TH")}
                                                 </td>
                                                 <td className="flex space-x-2">
                                                     <button
-                                                        onClick={() => openPreviewModal(file.pdfUrl, file.fileName)}
+                                                        onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
                                                         className="btn btn-sm btn-success text-white rounded-full"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -300,7 +290,7 @@ export default function DashboardPage() {
                                                 colSpan={4}
                                                 className="text-center py-4 text-gray-500"
                                             >
-                                                ไม่พบเอกสาร PDF ในหน่วยงานนี้
+                                                ไม่พบเอกสาร PDF
                                             </td>
                                         </tr>
                                     )}

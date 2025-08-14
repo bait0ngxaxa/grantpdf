@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'กรุณากรอกอีเมล' }, { status: 400 });
         }
 
-        const user = await prisma.users.findUnique({
+        const user = await prisma.user.findUnique({
             where: { email },
         });
 
@@ -43,11 +43,11 @@ export async function POST(req: NextRequest) {
         // เนื่องจาก Prisma อาจส่งค่า id เป็น BigInt ซึ่งไม่สามารถแปลงเป็น JSON ได้โดยตรง
         const token = jwt.sign({ userId: String(user.id) }, JWT_SECRET, { expiresIn: '1h' });
 
-        await prisma.users.update({
+        await prisma.user.update({
             where: { id: user.id },
             data: {
                 passwordResetToken: token,
-                passwordResetExpiry: new Date(Date.now() + 3600000),
+                passwordResetExpire: new Date(Date.now() + 3600000),
             },
         });
 

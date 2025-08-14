@@ -39,7 +39,7 @@ export async function PUT(
         }
 
         // Find the user to ensure they exist before updating
-        const existingUser = await prisma.users.findUnique({
+        const existingUser = await prisma.user.findUnique({
             where: { id: BigInt(userId) }, // Convert string ID back to BigInt for Prisma query
         });
 
@@ -60,7 +60,7 @@ export async function PUT(
         }
 
         // Update the user in the database
-        const updatedUser = await prisma.users.update({
+        const updatedUser = await prisma.user.update({
             where: { id: BigInt(userId) }, // Convert string ID back to BigInt
             data: {
                 name,
@@ -125,7 +125,7 @@ export async function DELETE(
         }
 
         // Check if the user exists before deleting
-        const existingUser = await prisma.users.findUnique({
+        const existingUser = await prisma.user.findUnique({
             where: { id: BigInt(userId) }, // Convert string ID back to BigInt
         });
 
@@ -137,7 +137,7 @@ export async function DELETE(
         }
 
         // Delete the user from the database
-        await prisma.users.delete({
+        await prisma.user.delete({
             where: { id: BigInt(userId) }, // Convert string ID back to BigInt
         });
 

@@ -35,11 +35,11 @@ export async function PUT(req: NextRequest) {
         }
         
         // 4. Find the user by the token and check for expiry
-        const user = await prisma.users.findFirst({
+        const user = await prisma.user.findFirst({
             where: {
                 id: decodedToken.userId,
                 passwordResetToken: token,
-                passwordResetExpiry: {
+                passwordResetExpire: {
                     gt: new Date(),
                 },
             },
@@ -53,12 +53,12 @@ export async function PUT(req: NextRequest) {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         // 6. Update the user's password and clear the reset token
-        await prisma.users.update({
+        await prisma.user.update({
             where: { id: user.id },
             data: {
                 password: hashedPassword,
                 passwordResetToken: null,
-                passwordResetExpiry: null,
+                passwordResetExpire: null,
             },
         });
 

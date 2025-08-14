@@ -18,7 +18,8 @@ const PROTECTED_PAGES = [
     '/form',
     '/test-field',
     '/upload',
-    '/userdashboard'
+    '/userdashboard',
+    '/create-word-doc', // ✅ เพิ่มหน้า create-word-doc ใน protected pages
 ];
 
 // NEW: Array for the reset password page
@@ -71,7 +72,7 @@ export async function middleware(req: NextRequest) {
 }
 
 // Specify which paths the middleware should run on for efficiency.
-// This now includes the new reset password page.
+// This now includes the new reset password page and create-word-doc page.
 export const config = {
     matcher: [
         '/admin/:path*',
@@ -81,6 +82,7 @@ export const config = {
         '/test-field',
         '/userdashboard',
         '/upload',
+        '/create-word-doc', // ✅ เพิ่ม /create-word-doc ใน matcher
         '/reset-password', // NEW: Add the reset password page to the matcher
         '/' // Optional: include the homepage if you want to protect it
     ],

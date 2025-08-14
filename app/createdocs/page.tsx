@@ -1,9 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useState, FormEvent } from "react";
-// import { MdOutlineComputer, MdOutlineAnalytics, MdOutlineSettingsInputComponent } from "react-icons/md";
+import { useState } from "react";
 
 // Define the type for the form data to ensure type safety
 interface TorsData {
@@ -92,55 +90,18 @@ const projectTemplates: ProjectTemplate[] = [
 
 export default function CreateTorsPage() {
     const router = useRouter();
-    const [selectedProject, setSelectedProject] = useState<ProjectTemplate | null>(null);
-    const [formData, setFormData] = useState<TorsData | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
 
-    // Handle form input changes
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => {
-            if (!prevData) return null;
-            return {
-                ...prevData,
-                [name]: name === "budget" ? Number(value) : value,
-            };
-        });
-    };
-
-    // Handle form submission
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsSaving(true);
-        
-        if (!formData) return;
-
-        // In a real application, you would send this data to your backend API.
-        // For this example, we will simulate an API call with a timeout.
-        try {
-            console.log("Saving TORS data:", formData);
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate a 2-second API call
-            
-            console.log("Data saved successfully!");
-            
-            // After saving, redirect to the dashboard
-            router.push('/userdashboard');
-        } catch (error) {
-            console.error("Failed to save data:", error);
-            setIsSaving(false);
-        }
+    // ✅ ฟังก์ชันสำหรับการ redirect ไป /create-word-doc
+    const handleProjectSelection = (template: ProjectTemplate) => {
+        // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-doc
+        localStorage.setItem('selectedProjectTemplate', JSON.stringify(template));
+        // redirect ไปหน้า create-word-doc
+        router.push('/create-word-doc');
     };
     
     // Handle back button logic
     const handleBack = () => {
-        if (selectedProject) {
-            // If a project is selected, go back to the selection screen
-            setSelectedProject(null);
-            setFormData(null);
-        } else {
-            // If no project is selected, go back to the dashboard
-            router.push('/userdashboard');
-        }
+        router.push('/userdashboard');
     };
 
     return (
@@ -158,174 +119,26 @@ export default function CreateTorsPage() {
             </div>
 
             <div className="container mx-auto max-w-4xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
-                <h1 className="text-3xl font-bold text-center mb-8">
-                    {selectedProject ? `สร้างเอกสาร TORS: ${selectedProject.title}` : "เลือกประเภทโครงการ"}
-                </h1>
+                <h1 className="text-3xl font-bold text-center mb-8">เลือกประเภทโครงการ</h1>
                 
-                {!selectedProject ? (
-                    /* --- Project Selection Grid --- */
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {projectTemplates.map((template) => (
-                            <div
-                                key={template.id}
-                                className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-colors duration-200"
-                                onClick={() => {
-                                    setSelectedProject(template);
-                                    setFormData(template.initialData);
-                                }}
-                            >
-                                <div className="card-body items-center text-center">
-                                    <div className="flex items-center justify-center p-4 rounded-full bg-base-200 text-5xl">
-                                        {template.icon}
-                                    </div>
-                                    <h2 className="card-title mt-4">{template.title}</h2>
-                                    <p className="text-sm text-gray-500">{template.description}</p>
+                {/* --- Project Selection Grid --- */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {projectTemplates.map((template) => (
+                        <div
+                            key={template.id}
+                            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-colors duration-200"
+                            onClick={() => handleProjectSelection(template)}
+                        >
+                            <div className="card-body items-center text-center">
+                                <div className="flex items-center justify-center p-4 rounded-full bg-base-200 text-5xl">
+                                    {template.icon}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    /* --- TORS Creation Form --- */
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            {/* Project Name */}
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-lg">ชื่อโครงการ</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="projectName"
-                                    placeholder="เช่น โครงการพัฒนาเว็บไซต์บริษัท"
-                                    className="input input-bordered w-full text-lg"
-                                    value={formData?.projectName || ''}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            
-                            {/* Client Name */}
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-lg">ชื่อลูกค้า</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="clientName"
-                                    placeholder="เช่น บริษัท สยามเทค จำกัด"
-                                    className="input input-bordered w-full text-lg"
-                                    value={formData?.clientName || ''}
-                                    onChange={handleChange}
-                                    required
-                                />
+                                <h2 className="card-title mt-4">{template.title}</h2>
+                                <p className="text-sm text-gray-500">{template.description}</p>
                             </div>
                         </div>
-
-                        {/* Project Description */}
-                        <div className="form-control mb-4">
-                            <label className="label">
-                                <span className="label-text text-lg">รายละเอียดโครงการ</span>
-                            </label>
-                            <textarea
-                                name="projectDescription"
-                                placeholder="ระบุรายละเอียดโครงการโดยย่อ..."
-                                className="textarea textarea-bordered h-32 w-full text-lg"
-                                value={formData?.projectDescription || ''}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        
-                        {/* Scope of Work */}
-                        <div className="form-control mb-4">
-                            <label className="label">
-                                <span className="label-text text-lg">ขอบเขตของงาน (Scope of Work)</span>
-                            </label>
-                            <textarea
-                                name="scopeOfWork"
-                                placeholder="ระบุขอบเขตของงานและ deliverables..."
-                                className="textarea textarea-bordered h-40 w-full text-lg"
-                                value={formData?.scopeOfWork || ''}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Timeline and Budget Section */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-lg">วันเริ่มต้นโครงการ</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    className="input input-bordered w-full text-lg"
-                                    value={formData?.startDate || ''}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-lg">วันสิ้นสุดโครงการ</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    className="input input-bordered w-full text-lg"
-                                    value={formData?.endDate || ''}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-lg">งบประมาณ (บาท)</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    name="budget"
-                                    placeholder="เช่น 150000"
-                                    className="input input-bordered w-full text-lg"
-                                    value={formData?.budget || 0}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-lg">ผู้ประสานงาน</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="contactPerson"
-                                    placeholder="เช่น คุณสมชาย รักดี"
-                                    className="input input-bordered w-full text-lg"
-                                    value={formData?.contactPerson || ''}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                        </div>
-                        
-                        <div className="flex justify-center">
-                            <button type="submit" className="btn btn-primary btn-lg w-full max-w-xs" disabled={isSaving}>
-                                {isSaving ? (
-                                    <>
-                                        <span className="loading loading-spinner"></span>
-                                        กำลังบันทึก...
-                                    </>
-                                ) : (
-                                    'บันทึก'
-                                )}
-                            </button>
-                        </div>
-                    </form>
-                )}
+                    ))}
+                </div>
             </div>
         </div>
     );

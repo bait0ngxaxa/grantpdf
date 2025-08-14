@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import Head from "next/head";
+
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -38,88 +38,127 @@ export default function LoginPage() {
 
     return (
         <>
-            <Head>
-                <title>Login | ระบบจัดการเอกสาร</title>
-            </Head>
-            <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4">
-                <div className="card w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl rounded-2xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
-                    <div className="card-body p-8">
-                        <div className="flex flex-col items-center mb-6">
-                            {/* SVG Icon for Branding */}
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-primary mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v3h8z" />
-                            </svg>
-                            <h2 className="text-3xl font-bold text-center">เข้าสู่ระบบ</h2>
-                            <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                กรอกข้อมูลเพื่อเข้าสู่ระบบ
-                            </p>
+            {/* Component Head ของ Next.js ถูกถอดออกเพื่อแก้ไขข้อผิดพลาดในการคอมไพล์ */}
+
+            {/* Main Container */}
+            <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+                {/* Left Side: Background Image and "Welcome" Text */}
+                <div className="hidden md:flex md:w-1/2 bg-cover bg-center rounded-r-[40px] overflow-hidden relative">
+                    <div className="absolute inset-0 flex items-center justify-center p-8">
+                        <div className="text-gray-600 text-center">
+                            <h1 className="text-5xl font-extrabold mb-4 animate-fadeInDown">
+                                Welcome
+                            </h1>
                         </div>
+                    </div>
+                </div>
 
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            {/* Email Input */}
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text font-medium text-gray-600 dark:text-gray-300">อีเมล</span>
-                                </label>
-                                <input
-                                    type="email"
-                                    className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="your@email.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
+                {/* Right Side: Login Form Card */}
+                <div className="flex items-center justify-center w-full md:w-1/2 p-4">
+                    <div className="card w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl rounded-2xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
+                        <div className="card-body p-8">
+                            <div className="flex flex-col items-center mb-6">
+                                {/* SVG Icon for Branding */}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-16 w-16 text-primary mb-4 animate-scaleIn"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v3h8z"
+                                    />
+                                </svg>
+                                <h2 className="text-3xl font-bold text-center">
+                                    เข้าสู่ระบบ
+                                </h2>
+                                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                    กรอกข้อมูลเพื่อเข้าสู่ระบบ
+                                </p>
                             </div>
 
-                            {/* Password Input */}
-                            <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text font-medium text-gray-600 dark:text-gray-300">รหัสผ่าน</span>
-                                </label>
-                                <input
-                                    type="password"
-                                    className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="********"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                                {/* Forgot password link */}
-                                <div className="text-right mt-2">
-                                    <Link href="/forgot-password" passHref>
-                                        <span className="text-sm link link-hover text-gray-500 dark:text-gray-400">
-                                            ลืมรหัสผ่าน?
+                            <form onSubmit={handleLogin} className="space-y-6">
+                                {/* Email Input */}
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text font-medium text-gray-600 dark:text-gray-300">
+                                            อีเมล
                                         </span>
-                                    </Link>
+                                    </label>
+                                    <input
+                                        type="email"
+                                        className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="your@email.com"
+                                        value={email}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
+                                        }
+                                        required
+                                    />
                                 </div>
-                            </div>
 
-                            {/* Error Message */}
-                            {error && (
-                                <div className="alert alert-error text-center text-sm rounded-lg shadow-md transition-all duration-300 animate-fadeIn">
-                                    {error}
+                                {/* Password Input */}
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text font-medium text-gray-600 dark:text-gray-300">
+                                            รหัสผ่าน
+                                        </span>
+                                    </label>
+                                    <input
+                                        type="password"
+                                        className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                        placeholder="********"
+                                        value={password}
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
+                                        required
+                                    />
+                                    {/* Forgot password link */}
+                                    <div className="text-right mt-2">
+                                        {/* Link ถูกเปลี่ยนเป็นแท็ก <a> ปกติเพื่อแก้ไขข้อผิดพลาด */}
+                                        <a
+                                            href="/forgot-password"
+                                            className="text-sm link link-hover text-gray-500 dark:text-gray-400"
+                                        >
+                                            ลืมรหัสผ่าน?
+                                        </a>
+                                    </div>
                                 </div>
-                            )}
 
-                            {/* Submit Button */}
-                            <button
-                                type="submit"
-                                className="btn btn-primary w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
-                            >
-                                เข้าสู่ระบบ
-                            </button>
-                        </form>
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="alert alert-error text-center text-sm rounded-lg shadow-md transition-all duration-300 animate-fadeIn">
+                                        {error}
+                                    </div>
+                                )}
 
-                        {/* Sign-up Link */}
-                        <div className="text-center mt-6">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                ยังไม่มีบัญชี?{" "}
-                                <Link href="/signup" passHref>
-                                    <span className="link link-hover text-primary font-semibold transition-colors duration-200 hover:text-primary-focus">
+                                {/* Submit Button */}
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                                >
+                                    เข้าสู่ระบบ
+                                </button>
+                            </form>
+
+                            {/* Sign-up Link */}
+                            <div className="text-center mt-6">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    ยังไม่มีบัญชี?{" "}
+                                    {/* Link ถูกเปลี่ยนเป็นแท็ก <a> ปกติเพื่อแก้ไขข้อผิดพลาด */}
+                                    <Link
+                                        href="/signup"
+                                        className="link link-hover text-primary font-semibold transition-colors duration-200 hover:text-primary-focus"
+                                    >
                                         สมัครสมาชิก
-                                    </span>
-                                </Link>
-                            </p>
+                                    </Link>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
