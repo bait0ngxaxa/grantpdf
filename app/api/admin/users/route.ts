@@ -1,4 +1,4 @@
-// /app/api/admin/users/route.ts
+// เส้นดึงข้อมูล user จาก table user ทั้งหมด
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';

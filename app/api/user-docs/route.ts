@@ -1,3 +1,4 @@
+// เส้นแสดง dashboard user ทั่วไป
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";

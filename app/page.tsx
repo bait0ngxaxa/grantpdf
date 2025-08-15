@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Head from "next/head";
 
 export default function Home() {
@@ -15,6 +16,29 @@ export default function Home() {
             <Head>
                 <title>Home | Grant Online</title>
             </Head>
+            {/* Navbar */}
+            <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
+                <div className="flex-1">
+                    <Link href="/" className="btn btn-ghost normal-case text-xl text-primary">
+                        
+                        GRANT ONLINE
+                    </Link>
+                </div>
+                <div className="flex-none">
+                    <Link
+                        href="/signup"
+                        className="btn btn-outline btn-primary rounded-full mr-2 transition-all duration-300 hover:scale-105"
+                    >
+                        สมัครสมาชิก
+                    </Link>
+                    <Link
+                        href="/signin"
+                        className="btn btn-primary rounded-full transition-all duration-300 hover:scale-105"
+                    >
+                        เข้าสู่ระบบ
+                    </Link>
+                </div>
+            </div>
             <main className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4">
                 <div className="card w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl rounded-2xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
                     <div className="card-body p-8 sm:p-12 text-center">

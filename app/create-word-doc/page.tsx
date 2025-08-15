@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react"; // ✅ เพิ่ม useSession
+import { useSession } from "next-auth/react";
 
 interface WordDocumentData {
   head: string;
@@ -20,7 +20,7 @@ interface WordDocumentData {
 }
 
 export default function TestWordWithSignaturePage() {
-  const { data: session } = useSession(); // ✅ ดึง session
+  const { data: session } = useSession();
   const router = useRouter();
 
   const [formData, setFormData] = useState<WordDocumentData>({
@@ -88,13 +88,6 @@ export default function TestWordWithSignaturePage() {
     setGeneratedFileUrl(null);
     setIsError(false);
 
-    if (!signatureFile) {
-      setMessage("กรุณาอัปโหลดไฟล์ลายเซ็นก่อน");
-      setIsSubmitting(false);
-      setIsError(true);
-      return;
-    }
-
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
@@ -103,9 +96,10 @@ export default function TestWordWithSignaturePage() {
       Object.keys(fixedValues).forEach((key) => {
         data.append(key, fixedValues[key as keyof typeof fixedValues]);
       });
-      data.append("signatureFile", signatureFile);
+      if (signatureFile) {
+        data.append("signatureFile", signatureFile);
+      }
 
-      // ✅ ส่ง user id หรือ token ไปให้ API
       if (session.user?.id) {
         data.append("userId", session.user.id.toString());
       }
@@ -181,6 +175,22 @@ export default function TestWordWithSignaturePage() {
             <div className="form-control">
               <label className="label">
                 <span className="label-text">
+                  ชื่อโครงการ (filename)
+                </span>
+              </label>
+              <input
+                type="text"
+                name="fileName"
+                placeholder="ชื่อไฟล์ (ไม่จำเป็นต้องมี .docx)"
+                className="input input-bordered w-full"
+                value={formData.fileName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">
                   เลขที่หนังสือ (head)
                 </span>
               </label>
@@ -212,22 +222,7 @@ export default function TestWordWithSignaturePage() {
               />
             </div>
             
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  ชื่อโครงการ (filename)
-                </span>
-              </label>
-              <input
-                type="text"
-                name="fileName"
-                placeholder="ชื่อไฟล์ (ไม่จำเป็นต้องมี .docx)"
-                className="input input-bordered w-full"
-                value={formData.fileName}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            
           </div>
 
           <div className="form-control">
@@ -237,7 +232,7 @@ export default function TestWordWithSignaturePage() {
               </span>
             </label>
             <input
-            type="text"
+              type="text"
               name="topicdetail"
               placeholder="รายละเอียดหัวข้อ"
               className="input input-bordered w-full"
@@ -281,7 +276,7 @@ export default function TestWordWithSignaturePage() {
           <div className="form-control">
             <label className="label">
               <span className="label-text">
-                รายละเอียดเนื้อหา (detail)
+                เนื้อหา (detail)
               </span>
             </label>
             <textarea
@@ -388,7 +383,6 @@ export default function TestWordWithSignaturePage() {
               className="file-input file-input-bordered w-full"
               accept="image/png, image/jpeg"
               onChange={handleFileChange}
-              required
             />
           </div>
 
@@ -433,7 +427,7 @@ export default function TestWordWithSignaturePage() {
             <p className="mb-2">เอกสาร Word ของคุณพร้อมแล้ว:</p>
             <a
               href={generatedFileUrl}
-              download={downloadFileName} // Use the custom filename
+              download={downloadFileName}
               rel="noopener noreferrer"
               className="btn btn-info"
             >

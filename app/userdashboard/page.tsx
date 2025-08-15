@@ -56,13 +56,12 @@ export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-
     // Fetch user documents from the API
     const fetchUserFiles = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await fetch("/api/user-docs"); // Your API endpoint
+            const res = await fetch("/api/user-docs");
             if (!res.ok) {
                 throw new Error("Failed to fetch user documents");
             }
@@ -123,7 +122,7 @@ export default function DashboardPage() {
         });
 
         return sorted;
-    }, [userFiles, searchTerm, sortBy]); // Removed `selectedDepartment` from dependency array as it's not being used for filtering the real data
+    }, [userFiles, searchTerm, sortBy]);
 
     if (status === "loading" || isLoading) {
         return (
@@ -162,9 +161,28 @@ export default function DashboardPage() {
                     <div className="flex-none">
                         {session && (
                             <div className="flex items-center space-x-4">
-                                <span className="hidden sm:block font-medium">
-                                    สวัสดี, {session.user?.name}
-                                </span>
+                                <div className="dropdown">
+                                    <div tabIndex={0} role="button" className="btn btn-soft m-1 rounded-2xl shadow-md ">
+                                        <span className="font-medium">
+                                            สวัสดี : {session.user?.name}
+                                        </span>
+                                        {/* <svg className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg> */}
+                                    </div>
+                                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+                                        <li>
+                                            <Link href="/profile">
+                                                ข้อมูลส่วนตัว
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <button onClick={() => signOut()}>
+                                                ออกจากระบบ
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
                                 {session.user?.role === "admin" && (
                                     <Link
                                         href="/admin"
@@ -173,12 +191,6 @@ export default function DashboardPage() {
                                         แผงควบคุมแอดมิน
                                     </Link>
                                 )}
-                                <button
-                                    onClick={() => signOut()}
-                                    className="btn btn-primary rounded-full shadow-lg"
-                                >
-                                    ออกจากระบบ
-                                </button>
                             </div>
                         )}
                     </div>

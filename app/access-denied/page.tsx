@@ -15,7 +15,7 @@ export default function AccessDeniedPage() {
 
     // Redirect after 4 seconds
     const redirectTimer = setTimeout(() => {
-      router.push('/');
+      router.push('/userdashboard');
     }, 4000);
 
     // Cleanup timers on component unmount
@@ -59,7 +59,7 @@ export default function AccessDeniedPage() {
 
           <button
             className="btn btn-outline btn-error mt-6"
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/userdashboard')}
           >
             กลับหน้าหลักทันที
           </button>

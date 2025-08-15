@@ -11,7 +11,7 @@ interface UserData {
   name: string;
   email: string;
   role: 'member' | 'admin';
-  createdAt: string; // Dates will be stringified for display
+  created_at: string; // Dates will be stringified for display
 }
 
 export default function AdminUserManagementPage() {
@@ -51,11 +51,7 @@ export default function AdminUserManagementPage() {
       const processedUsers = data.users.map((user: any) => ({
         ...user,
         id: user.id.toString(),
-        createdAt: new Date(user.createdAt).toLocaleDateString('th-TH', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
+        createdAt: new Date(user.createdAt).toLocaleDateString('th-TH'),
       }));
       setUsers(processedUsers);
     } catch (error: any) {
@@ -233,7 +229,7 @@ export default function AdminUserManagementPage() {
                         {user.role}
                       </span>
                     </td>
-                    <td>{user.createdAt}</td> {/* Display formatted date */}
+                    <td>{new Date(user.created_at).toLocaleDateString("th-TH")}</td> {/* Display formatted date */}
                     <td className="flex space-x-2">
                       <button
                         onClick={() => openEditModal(user)}

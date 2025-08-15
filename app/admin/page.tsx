@@ -6,85 +6,36 @@ import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import Head from "next/head";
 
-// --- Mock Data ---
-// In a real application, this data would be fetched from your backend API.
-interface PdfFile { // Define interface for better type safety
+// Interface for PDF file data from API
+interface PdfFile {
     id: string;
     fileName: string;
     createdAt: string;
     lastModified: string;
     userId: string;
-    userName: string;
-    pdfUrl: string;
+    userName?: string;
+    userEmail?: string;
+    pdfUrl?: string;
+    originalFileName: string;
+    storagePath: string;
+    created_at: string;
+    updated_at: string;
 }
-
-const initialMockPdfFiles: PdfFile[] = [ // Changed to initial data to allow state modification
-    {
-        id: "pdf-1",
-        fileName: "ใบเสนอราคา_โปรเจกต์ A.pdf",
-        createdAt: "2025-07-25T10:00:00Z",
-        lastModified: "2025-07-25T10:30:00Z",
-        userId: "user-101",
-        userName: "สมชาย ใจดี",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", // Example public PDF
-    },
-    {
-        id: "pdf-2",
-        fileName: "สัญญา_บริการ B.pdf",
-        createdAt: "2025-07-22T14:30:00Z",
-        lastModified: "2025-07-23T09:15:00Z",
-        userId: "user-102",
-        userName: "สมหญิง รักชาติ",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-        id: "pdf-3",
-        fileName: "รายงานประจำเดือน_กรกฎาคม.pdf",
-        createdAt: "2025-07-18T08:00:00Z",
-        lastModified: "2025-07-18T08:00:00Z",
-        userId: "user-101",
-        userName: "สมชาย ใจดี",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-        id: "pdf-4",
-        fileName: "แผนงาน_Q3_2024.pdf",
-        createdAt: "2025-07-10T11:45:00Z",
-        lastModified: "2025-07-10T11:45:00Z",
-        userId: "user-103",
-        userName: "มานะ พากเพียร",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-        id: "pdf-5",
-        fileName: "เอกสารประชุม_20240705.pdf",
-        createdAt: "2025-07-05T16:00:00Z",
-        lastModified: "2025-07-05T16:00:00Z",
-        userId: "user-102",
-        userName: "สมหญิง รักชาติ",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-        id: "pdf-6",
-        fileName: "คู่มือการใช้งาน_V2.pdf",
-        createdAt: "2025-06-30T09:00:00Z",
-        lastModified: "2025-07-01T10:00:00Z",
-        userId: "user-101",
-        userName: "สมชาย ใจดี",
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-];
 
 export default function AdminDashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [pdfFiles, setPdfFiles] = useState<PdfFile[]>(initialMockPdfFiles);
+    const [pdfFiles, setPdfFiles] = useState<PdfFile[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("createdAtDesc");
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [totalUsers , setTotalUsers] = useState(0)
 
     // State for managing the delete confirmation modal
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedFileForDeletion, setSelectedFileForDeletion] = useState<PdfFile | null>(null);
+    const [selectedFileIdForDeletion, setSelectedFileIdForDeletion] = useState<string | null>(null);
+    const [selectedFileNameForDeletion, setSelectedFileNameForDeletion] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
     // --- Authorization Check ---
@@ -95,31 +46,99 @@ export default function AdminDashboardPage() {
         }
     }, [session, status, router]);
 
+    // --- Fetch PDF files from API ---
+    useEffect(() => {
+        const fetchPdfFiles = async () => {
+            if (!session) return;
+            
+            try {
+                setIsLoading(true);
+                setError(null);
+                
+                const response = await fetch('/api/admin/dashboard', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        throw new Error('คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้');
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Transform API data to match our interface
+                const transformedFiles: PdfFile[] = data.map((file: any) => ({
+                    id: file.id,
+                    fileName: file.originalFileName,
+                    createdAt: file.created_at,
+                    lastModified: file.updated_at,
+                    userId: file.userId,
+                    userName: file.userName,
+                    userEmail: file.userEmail,
+                    pdfUrl: `/api/download/${file.id}`,
+                    originalFileName: file.originalFileName,
+                    storagePath: file.storagePath,
+                    created_at: file.created_at,
+                    updated_at: file.updated_at,
+                }));
+                
+                setPdfFiles(transformedFiles);
+                const countUser = new Set(transformedFiles.map(f => f.userId)).size;
+                setTotalUsers(countUser)
+            } catch (error) {
+                console.error('Error fetching PDF files:', error);
+                setError(error instanceof Error ? error.message : 'ไม่สามารถโหลดข้อมูลเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (session && session.user?.role === "admin") {
+            fetchPdfFiles();
+        }
+    }, [session]);
+
     // --- Delete PDF Functions ---
     const openDeleteModal = (file: PdfFile) => {
-        setSelectedFileForDeletion(file);
+        setSelectedFileIdForDeletion(file.id);
+        setSelectedFileNameForDeletion(file.fileName);
         setIsDeleteModalOpen(true);
     };
 
     const closeDeleteModal = () => {
         setIsDeleteModalOpen(false);
-        setSelectedFileForDeletion(null);
+        setSelectedFileIdForDeletion(null);
+        setSelectedFileNameForDeletion(null);
     };
 
     const handleDeleteFile = async () => {
-        if (!selectedFileForDeletion) return;
+        if (!selectedFileIdForDeletion) return;
 
         setIsDeleting(true);
-        // Simulate API call to delete the PDF file
         try {
-            console.log("Deleting PDF file:", selectedFileForDeletion.id);
-            await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+            const response = await fetch(`/api/admin/dashboard/file/${selectedFileIdForDeletion}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: selectedFileIdForDeletion }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete file');
+            }
 
             // Remove the file from the local state
-            setPdfFiles((prevFiles) => prevFiles.filter((file) => file.id !== selectedFileForDeletion.id));
+            setPdfFiles((prevFiles) => prevFiles.filter((file) => file.id !== selectedFileIdForDeletion));
             closeDeleteModal();
         } catch (error) {
             console.error("Failed to delete PDF file:", error);
+            setError('ไม่สามารถลบเอกสารได้ กรุณาลองใหม่อีกครั้ง');
         } finally {
             setIsDeleting(false);
         }
@@ -130,7 +149,7 @@ export default function AdminDashboardPage() {
         let filtered = pdfFiles.filter(
             (file) =>
                 file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                file.userName.toLowerCase().includes(searchTerm.toLowerCase())
+                (file.userName && file.userName.toLowerCase().includes(searchTerm.toLowerCase()))
         );
 
         filtered.sort((a, b) => {
@@ -146,15 +165,18 @@ export default function AdminDashboardPage() {
     }, [searchTerm, sortBy, pdfFiles]);
 
     // Derived stats for the cards
-    const totalUsers = 3; // Mock user count
+    
     const latestFile = useMemo(() => {
         return filteredAndSortedPdfs.length > 0 ? filteredAndSortedPdfs[0] : null;
     }, [filteredAndSortedPdfs]);
 
-    if (status === "loading") {
+    if (status === "loading" || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
+                <div className="flex flex-col items-center space-y-4">
+                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                    <p className="text-gray-600 dark:text-gray-400">กำลังโหลดข้อมูล...</p>
+                </div>
             </div>
         );
     }
@@ -198,6 +220,22 @@ export default function AdminDashboardPage() {
                 <div className="container mx-auto p-6 flex-1">
                     <h1 className="text-4xl font-bold mb-6">ภาพรวมระบบ</h1>
 
+                    {/* Error Alert */}
+                    {error && (
+                        <div className="alert alert-error mb-6 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{error}</span>
+                            <button 
+                                className="btn btn-sm btn-outline"
+                                onClick={() => setError(null)}
+                            >
+                                ปิด
+                            </button>
+                        </div>
+                    )}
+
                     {/* --- System Overview Cards --- */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
@@ -218,7 +256,7 @@ export default function AdminDashboardPage() {
                             <div className="flex items-center space-x-4">
                                 <div className="text-secondary bg-secondary bg-opacity-10 p-3 rounded-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.972 5.972 0 01-2.705-2.705L5.414 10.914a1 1 0 01.114-.114l6.467-6.467a1 1 0 011.414 0l6.467 6.467a1 1 0 01.114.114l-.657.657a5.972 5.972 0 01-2.705 2.705M12 14a3 3 0 100-6 3 3 0 000 6z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.972 5.972 0 01-.569-2.533v-.001c0-.246.04-.487.117-.709A5.972 5.972 0 018 12a5.972 5.972 0 01.117-.709c.077-.222.117-.463.117-.709v-.001a5.972 5.972 0 01-.569-2.533m0 0a5.972 5.972 0 015.411-.533M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22L12 18.77L5.82 22L7 14.14l-5-4.87L8.91 8.26L12 2z" />
                                     </svg>
                                 </div>
                                 <div>
@@ -288,7 +326,7 @@ export default function AdminDashboardPage() {
                                     filteredAndSortedPdfs.map((file) => (
                                         <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                             <td className="font-semibold">{file.fileName}</td>
-                                            <td>{file.userName}</td>
+                                            <td>{file.userName || 'Unknown User'}</td>
                                             <td className="text-gray-500 hidden md:table-cell">
                                                 {new Date(file.createdAt).toLocaleDateString("th-TH")}
                                             </td>
@@ -296,17 +334,19 @@ export default function AdminDashboardPage() {
                                                 {new Date(file.lastModified).toLocaleDateString("th-TH")}
                                             </td>
                                             <td className="flex space-x-2">
-                                                <a
-                                                    href={file.pdfUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="btn btn-sm btn-info text-white rounded-full"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                    </svg>
-                                                    <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
-                                                </a>
+                                                {file.storagePath && (
+                                                    <a
+                                                        href={file.storagePath}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-sm btn-info text-white rounded-full"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                        </svg>
+                                                        <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
+                                                    </a>
+                                                )}
                                                 <button
                                                     onClick={() => openDeleteModal(file)}
                                                     className="btn btn-sm btn-error text-white rounded-full"
@@ -321,8 +361,15 @@ export default function AdminDashboardPage() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={5} className="text-center py-4 text-gray-500">
-                                            ไม่พบเอกสาร PDF
+                                        <td colSpan={5} className="text-center py-8 text-gray-500">
+                                            {isLoading ? (
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <span className="loading loading-spinner loading-sm"></span>
+                                                    <span>กำลังโหลดข้อมูล...</span>
+                                                </div>
+                                            ) : (
+                                                "ไม่พบเอกสาร PDF"
+                                            )}
                                         </td>
                                     </tr>
                                 )}
@@ -341,14 +388,14 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* --- Delete PDF Confirmation Modal --- */}
-                {isDeleteModalOpen && selectedFileForDeletion && (
+                {isDeleteModalOpen && selectedFileIdForDeletion && (
                     <dialog id="delete_pdf_modal" className="modal modal-open bg-black bg-opacity-50">
                         <div className="modal-box bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
                             <h3 className="font-bold text-lg text-error">
                                 ยืนยันการลบเอกสาร
                             </h3>
                             <p className="py-4">
-                                คุณแน่ใจหรือไม่ว่าต้องการลบเอกสาร **{selectedFileForDeletion.fileName}**?
+                                คุณแน่ใจหรือไม่ว่าต้องการลบเอกสาร **{selectedFileNameForDeletion}**?
                             </p>
                             <p className="text-sm text-warning">การกระทำนี้ไม่สามารถย้อนกลับได้</p>
                             <div className="modal-action">

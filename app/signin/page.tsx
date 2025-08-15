@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 
-
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -38,7 +37,7 @@ export default function LoginPage() {
 
     return (
         <>
-            {/* Component Head ของ Next.js ถูกถอดออกเพื่อแก้ไขข้อผิดพลาดในการคอมไพล์ */}
+            
 
             {/* Main Container */}
             <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -120,13 +119,12 @@ export default function LoginPage() {
                                     />
                                     {/* Forgot password link */}
                                     <div className="text-right mt-2">
-                                        {/* Link ถูกเปลี่ยนเป็นแท็ก <a> ปกติเพื่อแก้ไขข้อผิดพลาด */}
-                                        <a
+                                        <Link
                                             href="/forgot-password"
                                             className="text-sm link link-hover text-gray-500 dark:text-gray-400"
                                         >
                                             ลืมรหัสผ่าน?
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
 
@@ -150,7 +148,6 @@ export default function LoginPage() {
                             <div className="text-center mt-6">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                     ยังไม่มีบัญชี?{" "}
-                                    {/* Link ถูกเปลี่ยนเป็นแท็ก <a> ปกติเพื่อแก้ไขข้อผิดพลาด */}
                                     <Link
                                         href="/signup"
                                         className="link link-hover text-primary font-semibold transition-colors duration-200 hover:text-primary-focus"
