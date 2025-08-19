@@ -1,21 +1,23 @@
-// เส้นเขียนไฟล์ word บันทึกลง db storage
+// เส้นเขียนไฟล์ Word บันทึกลง db + local storage
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import ImageModule from "docxtemplater-image-module-free";
-import { supabaseAdmin } from "@/lib/supabase";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
+import { v4 as uuidv4 } from "uuid";
 
-// Helper function to generate a unique filename
+//Helper function to generate a unique filename
 const generateUniqueFilename = (originalName: string): string => {
   const sanitizedName = originalName.replace(/[^a-z0-9.]/gi, "_").toLowerCase();
-  const timestamp = Date.now();
-  return `${timestamp}_${sanitizedName}`;
+  const uniqueId = uuidv4()
+  return `${uniqueId}_${sanitizedName}`;
 };
+
+
 
 export async function POST(req: Request) {
   try {
@@ -25,8 +27,8 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // แปลง user.id เป็น bigint เพื่อใช้กับ Prisma
-    const userId = BigInt(session.user.id);
+    // แปลง user.id เป็น number เพื่อใช้กับ Prisma (ถ้า schema เป็น Int)
+    const userId = Number(session.user.id);
 
     // 1. Get the form data from the request body
     const formData = await req.formData();
@@ -94,52 +96,37 @@ export async function POST(req: Request) {
       signature: "signature",
     });
 
-    // 6. Generate Word buffer with proper encoding
+    // 6. Generate Word buffer
     const outputBuffer = doc.getZip().generate({
       type: "uint8array",
       compression: "DEFLATE",
     });
 
-    // 7. Upload file to Supabase
+    // 7. Save file to public/uploads
     const uniqueFileName = generateUniqueFilename(fileName + ".docx");
-    const storageBucket = "files";
+    const uploadDir = path.join(process.cwd(), "public", "upload");
 
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-      .from(storageBucket)
-      .upload(uniqueFileName, outputBuffer, {
-        contentType:
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      });
+    // สร้างโฟลเดอร์ถ้าไม่มี
+    await fs.mkdir(uploadDir, { recursive: true });
 
-    if (uploadError) {
-      console.error("Supabase upload error:", uploadError);
-      return new NextResponse(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${uploadError.message}`, { status: 500 });
-    }
-
-    // Get public URL
-    const { data: fileUrlData } = supabaseAdmin.storage
-      .from(storageBucket)
-      .getPublicUrl(uploadData.path);
-    const publicUrl = fileUrlData.publicUrl;
+    const filePath = path.join(uploadDir, uniqueFileName);
+    await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
     // 8. Save file info to Prisma
     await prisma.userFile.create({
       data: {
         originalFileName: fileName + ".docx",
-        storagePath: publicUrl,
+        storagePath: `/upload/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
         fileExtension: "docx",
         userId: userId,
       },
     });
 
-    // 9. Return generated Word file
-    // ✅ แก้ไข: ใช้ Uint8Array และ Response
-    return new Response(outputBuffer.buffer as any, {
-      headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="${encodeURIComponent(fileName)}.docx"`,
-      },
+    // 9. Return JSON พร้อมลิงก์ดาวน์โหลด
+    const downloadUrl = `/upload/${uniqueFileName}`;
+    return NextResponse.json({
+      success: true,
+      downloadUrl,
     });
 
   } catch (error) {

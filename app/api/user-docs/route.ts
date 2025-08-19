@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 // IMPORTANT: Make sure to import your own authOptions
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 
 
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
 
     // Convert the user ID to a BigInt if your database uses it
     // If your user ID is a string, you can use it directly
-    const userId = BigInt(session.user.id);
+    const userId = Number(session.user.id);
 
     // Query the database for all user files belonging to this user ID
     const userFiles = await prisma.userFile.findMany({

@@ -3,46 +3,42 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider  = "mysql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  //directUrl = env("DIRECT_URL")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 // This is your updated User model.
+// ใช้ Int แทน BigInt สำหรับ Dev/Local MySQL
 model User {
-  id                  BigInt    @id @default(autoincrement())
+  id                  Int      @id @default(autoincrement())
   name                String
-  email               String    @unique
+  email               String   @unique
   password            String
-  role                String    @default("member")
+  role                String   @default("member")
   passwordResetToken  String?
   passwordResetExpire DateTime?
 
-  created_at          DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime? @default(now()) @db.Timestamp(6)
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
 
   // Defines a one-to-many relationship: a user can have many files.
-  files               UserFile[]
+  files UserFile[]
 }
 
-// This is the new model for storing file information,
-// updated to match the User model's BigInt ID.
 model UserFile {
-  id                  BigInt    @id @default(autoincrement())
-  originalFileName    String
-  storagePath         String
-  fileExtension       String
-  
-  created_at          DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime? @default(now()) @db.Timestamp(6)
+  id               Int @id @default(autoincrement())
+  originalFileName String
+  storagePath      String
+  fileExtension    String
 
-  // Foreign key linking to the User model, now a BigInt.
-  userId              BigInt
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+
+  // Foreign key linking to the User model, now Int for local MySQL
+  userId Int
 
   // Defines the many-to-one relationship: many files belong to one user.
-  user                User      @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
-
-
-

@@ -407,7 +407,7 @@ export default function TestWordWithSignaturePage() {
                 กำลังสร้าง Word...
               </>
             ) : (
-              "สร้าง Word พร้อมลายเซ็น"
+              "สร้างเอกสาร"
             )}
           </button>
         </form>

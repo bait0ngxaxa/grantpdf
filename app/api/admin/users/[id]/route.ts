@@ -2,11 +2,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../../auth/[...nextauth]/route"; 
+import { authOptions } from "@/lib/auth"; 
 
 export async function PUT(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // Check if the user is authenticated and is an admin
@@ -40,7 +40,7 @@ export async function PUT(
 
         // Find the user to ensure they exist before updating
         const existingUser = await prisma.user.findUnique({
-            where: { id: BigInt(userId) }, // Convert string ID back to BigInt for Prisma query
+            where: { id: Number(userId) }, // Convert string ID back to BigInt for Prisma query
         });
 
         if (!existingUser) {
@@ -61,7 +61,7 @@ export async function PUT(
 
         // Update the user in the database
         const updatedUser = await prisma.user.update({
-            where: { id: BigInt(userId) }, // Convert string ID back to BigInt
+            where: { id: Number(userId) }, // Convert string ID back to BigInt
             data: {
                 name,
                 role,
@@ -76,7 +76,7 @@ export async function PUT(
             },
         });
 
-        // Convert BigInt ID to string for JSON serialization
+        
         const safeUser = {
             ...updatedUser,
             id: updatedUser.id.toString(),
@@ -100,7 +100,7 @@ export async function PUT(
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         // Check if the user is authenticated and is an admin
@@ -126,7 +126,7 @@ export async function DELETE(
 
         // Check if the user exists before deleting
         const existingUser = await prisma.user.findUnique({
-            where: { id: BigInt(userId) }, // Convert string ID back to BigInt
+            where: { id: Number(userId) }, 
         });
 
         if (!existingUser) {
@@ -138,7 +138,7 @@ export async function DELETE(
 
         // Delete the user from the database
         await prisma.user.delete({
-            where: { id: BigInt(userId) }, // Convert string ID back to BigInt
+            where: { id: Number(userId) }, 
         });
 
         return NextResponse.json(

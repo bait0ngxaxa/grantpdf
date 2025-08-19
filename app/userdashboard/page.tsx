@@ -13,6 +13,7 @@ type UserFile = {
     storagePath: string;
     created_at: string;
     updated_at: string;
+    
 };
 
 // This is the new list of departments based on your mock data,
@@ -275,7 +276,7 @@ export default function DashboardPage() {
                                                 </td>
                                                 <td className="flex space-x-2">
                                                     <button
-                                                        onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
+                                                        onClick={() =>  window.open(file.storagePath, "_blank")}
                                                         className="btn btn-sm btn-success text-white rounded-full"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -284,15 +285,7 @@ export default function DashboardPage() {
                                                         </svg>
                                                         <span className="ml-1 hidden lg:block">พรีวิว</span>
                                                     </button>
-                                                    <Link
-                                                        href={`/edit/${file.id}`}
-                                                        className="btn btn-sm btn-info text-white rounded-full"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
-                                                        <span className="ml-1 hidden lg:block">แก้ไข</span>
-                                                    </Link>
+                                                   
                                                 </td>
                                             </tr>
                                         ))

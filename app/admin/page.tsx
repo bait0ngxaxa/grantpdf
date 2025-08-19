@@ -136,6 +136,7 @@ export default function AdminDashboardPage() {
             // Remove the file from the local state
             setPdfFiles((prevFiles) => prevFiles.filter((file) => file.id !== selectedFileIdForDeletion));
             closeDeleteModal();
+            alert('Delete Successful')
         } catch (error) {
             console.error("Failed to delete PDF file:", error);
             setError('ไม่สามารถลบเอกสารได้ กรุณาลองใหม่อีกครั้ง');
