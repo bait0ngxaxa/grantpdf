@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET;
+const JWT_SECRET = process.env.PASSRESET_TOKEN_SECRET;
 
 export async function PUT(req: NextRequest) {
     try {
@@ -16,7 +16,7 @@ export async function PUT(req: NextRequest) {
         }
         
         if (!JWT_SECRET) {
-            throw new Error('NEXTAUTH_SECRET is not defined in the environment variables.');
+            throw new Error('SECRET is not defined in the environment variables.');
         }
 
         // 2. Verify the JWT token
@@ -37,7 +37,7 @@ export async function PUT(req: NextRequest) {
         // 4. Find the user by the token and check for expiry
         const user = await prisma.user.findFirst({
             where: {
-                id: decodedToken.userId,
+                id: Number(decodedToken.userId),
                 passwordResetToken: token,
                 passwordResetExpire: {
                     gt: new Date(),

@@ -4,9 +4,8 @@ import { prisma } from '@/lib/prisma';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 
-// IMPORTANT: Use the same secret key as NextAuth.js to maintain consistency.
-// The NEXTAUTH_SECRET is already defined in your .env file for NextAuth.
-const JWT_SECRET = process.env.NEXTAUTH_SECRET;
+
+const JWT_SECRET = process.env.PASSRESET_TOKEN_SECRET;
 
 // 1. **อีเมลผู้ส่ง:** ตั้งค่าข้อมูลผู้ส่งใน .env และดึงมาใช้ที่นี่
 const transporter = nodemailer.createTransport({
@@ -32,15 +31,14 @@ export async function POST(req: NextRequest) {
 
         if (!user) {
             console.log(`ไม่พบผู้ใช้ด้วยอีเมล ${email} ส่งข้อความทั่วไปเพื่อความปลอดภัย`);
-            return NextResponse.json({ message: 'หากอีเมลนี้มีอยู่ในระบบ จะมีลิงก์รีเซ็ตรหัสผ่านถูกส่งไปให้' }, { status: 200 });
+            return NextResponse.json({ message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปให้' }, { status: 200 });
         }
 
         if (!JWT_SECRET) {
-            throw new Error('NEXTAUTH_SECRET is not defined in the environment variables.');
+            throw new Error('SECRET is not defined in the environment variables.');
         }
 
-        // FIX: แก้ไขโดยการแปลง user.id ให้เป็น String ก่อนนำไปใช้ใน JWT Payload
-        // เนื่องจาก Prisma อาจส่งค่า id เป็น BigInt ซึ่งไม่สามารถแปลงเป็น JSON ได้โดยตรง
+        
         const token = jwt.sign({ userId: String(user.id) }, JWT_SECRET, { expiresIn: '1h' });
 
         await prisma.user.update({
@@ -59,16 +57,16 @@ export async function POST(req: NextRequest) {
             subject: 'คำขอรีเซ็ตรหัสผ่าน',
             html: `
                 <h1>รีเซ็ตรหัสผ่านของคุณ</h1>
-                <p>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชีของคุณแล้ว</p>
-                <a href="${resetLink}">ตั้งรหัสผ่านใหม่</a>
-                <p>ลิงก์นี้จะหมดอายุใน 1 ชั่วโมง</p>
+                <h2>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชีของคุณแล้ว</h2>
+                <h2><a href="${resetLink}">ตั้งรหัสผ่านใหม่</a></h2>
+                <h2>ลิงก์นี้จะหมดอายุใน 1 ชั่วโมง</h2>
             `,
         };
 
         await transporter.sendMail(mailOptions);
 
         console.log(`ส่งอีเมลรีเซ็ตรหัสผ่านไปยัง ${email} สำเร็จ`);
-        return NextResponse.json({ message: 'หากอีเมลนี้มีอยู่ในระบบ จะมีลิงก์รีเซ็ตรหัสผ่านถูกส่งไปให้' }, { status: 200 });
+        return NextResponse.json({ message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปให้' }, { status: 200 });
 
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในกระบวนการรีเซ็ตรหัสผ่าน:', error);

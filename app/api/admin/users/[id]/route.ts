@@ -14,7 +14,7 @@ export async function PUT(
 
         if (!session || session.user?.role !== "admin") {
             return NextResponse.json(
-                { error: "ไม่ได้รับอนุญาต" },
+                { error: "Forbidden" },
                 { status: 403 }
             );
         }
@@ -97,6 +97,7 @@ export async function PUT(
 
 // /app/api/admin/users/[id]/route.ts
 // Note: This file will contain both PUT and DELETE methods for the [id] route.
+// ลบ User ในส่วน admin panel
 
 export async function DELETE(
     req: NextRequest,
@@ -108,7 +109,7 @@ export async function DELETE(
 
         if (!session || session.user?.role !== "admin") {
             return NextResponse.json(
-                { error: "ไม่ได้รับอนุญาต" },
+                { error: "Forbidden" },
                 { status: 403 }
             );
         }

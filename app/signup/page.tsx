@@ -10,7 +10,7 @@ export default function SignupPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [showToast, setShowToast] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const router = useRouter();
@@ -33,11 +33,11 @@ export default function SignupPage() {
             });
 
             if (res.ok) {
-                setShowToast(true);
                 setShowConfirmModal(false);
+                setShowSuccessModal(true);
                 setTimeout(() => {
                     router.push("/signin");
-                }, 1500);
+                }, 3000);
             } else {
                 const data = await res.json();
                 setError(data.error || "เกิดข้อผิดพลาดในการสมัครสมาชิก");
@@ -53,18 +53,6 @@ export default function SignupPage() {
 
     return (
         <>
-            {/* Toast */}
-            {showToast && (
-                <div className="toast toast-top toast-center z-50">
-                    <div className="alert alert-success shadow-lg animate-fadeIn">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>สมัครสมาชิกสำเร็จ! กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...</span>
-                    </div>
-                </div>
-            )}
-
             {/* Main Container */}
             <div className="min-h-screen flex flex-col md:flex-row bg-base-200 text-base-content">
                 {/* Left Side */}
@@ -74,14 +62,14 @@ export default function SignupPage() {
                 >
                     <div className="absolute inset-0 flex items-center justify-center p-8">
                         <div className="text-gray-600 text-center">
-                            <h1 className="text-5xl font-extrabold mb-4 animate-fadeInDown">Welcome</h1>
+                            <h1 className="text-5xl font-extrabold mb-4 animate-bounce">Welcome</h1>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Side */}
                 <div className="flex items-center justify-center w-full md:w-1/2 p-4">
-                    <div className="card w-full max-w-lg bg-base-100 shadow-2xl rounded-2xl">
+                    <div className="card w-full max-w-lg bg-base-100 shadow-2xl rounded-2xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
                         <div className="card-body p-8">
                             <div className="flex flex-col items-center mb-6">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-primary mb-4 animate-scaleIn" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,55 +148,195 @@ export default function SignupPage() {
                 </div>
             </div>
 
-            {/* Modal Popup (DaisyUI) */}
+            {/* Confirm Modal */}
             {showConfirmModal && (
-                <dialog open className="modal modal-open">
-                    <div className="modal-box w-11/12 max-w-3xl animate-[zoomIn_0.3s_ease-out]">
-                        <h2 className="font-bold text-2xl mb-6 text-center">ยืนยันข้อมูลผู้สมัคร</h2>
-                        <div className="space-y-4 text-lg">
-                            <p><strong>ชื่อ:</strong> {name}</p>
-                            <p><strong>อีเมล:</strong> {email}</p>
-                            <p><strong>รหัสผ่าน:</strong> {password}</p>
-                        </div>
-
-                        {error && (
-                            <div className="alert alert-error text-center text-sm rounded-lg mt-4">
-                                {error}
+                <dialog open className="modal modal-open backdrop-blur-sm">
+                    <div className="modal-box w-11/12 max-w-md mx-auto animate-[modalSlideIn_0.3s_ease-out] relative overflow-hidden">
+                        {/* Background Pattern */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5"></div>
+                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
+                        <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
+                        
+                        {/* Content */}
+                        <div className="relative z-10">
+                            {/* Header */}
+                            <div className="flex flex-col items-center mb-6">
+                                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary-content" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h2 className="font-bold text-2xl text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                    ยืนยันข้อมูลผู้สมัคร
+                                </h2>
+                                <p className="text-sm opacity-70 text-center mt-1">กรุณาตรวจสอบข้อมูลก่อนยืนยัน</p>
                             </div>
-                        )}
 
-                        <div className="modal-action flex gap-4 mt-8">
-                            <button
-                                onClick={() => setShowConfirmModal(false)}
-                                className="btn btn-outline flex-1 rounded-2xl"
-                            >
-                                แก้ไข
-                            </button>
-                            <button
-                                onClick={handleSignup}
-                                className="btn btn-primary flex-1 rounded-2xl"
-                                disabled={isSubmitting}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <span className="loading loading-spinner"></span>
-                                        กำลังสมัคร...
-                                    </>
-                                ) : (
-                                    'ยืนยัน'
-                                )}
-                            </button>
+                            {/* Data Display */}
+                            <div className="space-y-4 mb-6">
+                                <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-primary">
+                                    <p className="text-sm opacity-70">ชื่อ</p>
+                                    <p className="font-semibold">{name}</p>
+                                </div>
+                                <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-secondary">
+                                    <p className="text-sm opacity-70">อีเมล</p>
+                                    <p className="font-semibold">{email}</p>
+                                </div>
+                                <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-accent">
+                                    <p className="text-sm opacity-70">รหัสผ่าน</p>
+                                    <p className="font-semibold">{"•".repeat(password.length)}</p>
+                                </div>
+                            </div>
+
+                            {error && (
+                                <div className="alert alert-error text-center text-sm rounded-lg mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>{error}</span>
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowConfirmModal(false)}
+                                    className="btn btn-outline flex-1 rounded-xl hover:scale-105 transition-transform"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                                    </svg>
+                                    แก้ไข
+                                </button>
+                                <button
+                                    onClick={handleSignup}
+                                    className="btn btn-primary flex-1 rounded-xl hover:scale-105 transition-transform shadow-lg"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                            กำลังสมัคร...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            ยืนยัน
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </dialog>
             )}
 
-            {/* Animation Keyframes */}
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <dialog open className="modal modal-open backdrop-blur-sm">
+                    <div className="modal-box w-11/12 max-w-md mx-auto animate-[modalBounceIn_0.5s_ease-out] relative overflow-hidden">
+                        {/* Background Pattern */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-primary/5"></div>
+                        <div className="absolute -top-10 -right-10 w-20 h-20 bg-success/20 rounded-full blur-2xl animate-pulse"></div>
+                        <div className="absolute -bottom-8 -left-8 w-16 h-16 bg-primary/20 rounded-full blur-xl animate-pulse delay-75"></div>
+                        
+                        {/* Content */}
+                        <div className="relative z-10 text-center">
+                            {/* Success Icon */}
+                            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-success to-success/80 rounded-full flex items-center justify-center mb-6 shadow-lg animate-[successPulse_1s_ease-in-out_infinite]">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+
+                            {/* Success Message */}
+                            <h2 className="font-bold text-3xl mb-2 bg-gradient-to-r from-success to-primary bg-clip-text text-transparent">
+                                สำเร็จ!
+                            </h2>
+                            <p className="text-lg font-medium mb-2">สมัครสมาชิกเรียบร้อยแล้ว</p>
+                            <p className="text-sm opacity-70 mb-6">กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...</p>
+
+                            {/* Progress Bar */}
+                            <div className="w-full bg-base-200 rounded-full h-2 mb-4">
+                                <div className="bg-gradient-to-r from-success to-primary h-2 rounded-full animate-[progressFill_3s_ease-in-out]"></div>
+                            </div>
+
+                            {/* User Info Card */}
+                            <div className="bg-success/5 border border-success/20 rounded-lg p-4 text-left">
+                                <p className="text-sm opacity-70 mb-1">บัญชีใหม่</p>
+                                <p className="font-semibold text-success">{name}</p>
+                                <p className="text-sm opacity-80">{email}</p>
+                            </div>
+                        </div>
+                    </div>
+                </dialog>
+            )}
+
+            {/* Enhanced Animation Keyframes */}
             <style jsx global>{`
-                @keyframes zoomIn {
+                @keyframes modalSlideIn {
                     0% {
                         opacity: 0;
+                        transform: translateY(-20px) scale(0.95);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                @keyframes modalBounceIn {
+                    0% {
+                        opacity: 0;
+                        transform: scale(0.3);
+                    }
+                    50% {
+                        opacity: 1;
+                        transform: scale(1.05);
+                    }
+                    70% {
                         transform: scale(0.9);
+                    }
+                    100% {
+                        transform: scale(1);
+                    }
+                }
+
+                @keyframes successPulse {
+                    0%, 100% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.05);
+                    }
+                }
+
+                @keyframes progressFill {
+                    0% {
+                        width: 0%;
+                    }
+                    100% {
+                        width: 100%;
+                    }
+                }
+
+                @keyframes fadeInDown {
+                    0% {
+                        opacity: 0;
+                        transform: translateY(-20px);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                @keyframes scaleIn {
+                    0% {
+                        opacity: 0;
+                        transform: scale(0.5);
                     }
                     100% {
                         opacity: 1;

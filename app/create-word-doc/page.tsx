@@ -3,6 +3,7 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 interface WordDocumentData {
   head: string;
@@ -145,7 +146,7 @@ export default function TestWordWithSignaturePage() {
     <div className="min-h-screen flex flex-col items-center bg-base-200 p-4 font-sans antialiased">
       <div className="navbar bg-base-100 rounded-box shadow-lg mb-6 w-full max-w-4xl">
         <div className="flex-1">
-          <a href="/userdashboard" className="btn btn-ghost">
+          <Link href="/createdocs" className="btn btn-primary">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -160,8 +161,8 @@ export default function TestWordWithSignaturePage() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            <span className="ml-2">กลับสู่แดชบอร์ด</span>
-          </a>
+            <span className="ml-2">กลับ</span>
+          </Link>
         </div>
       </div>
 
@@ -286,6 +287,7 @@ export default function TestWordWithSignaturePage() {
               value={formData.detail}
               onChange={handleChange}
               required
+              maxLength={1024}
             />
           </div>
 

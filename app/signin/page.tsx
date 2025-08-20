@@ -45,7 +45,7 @@ export default function LoginPage() {
                 <div className="hidden md:flex md:w-1/2 bg-cover bg-center rounded-r-[40px] overflow-hidden relative">
                     <div className="absolute inset-0 flex items-center justify-center p-8">
                         <div className="text-gray-600 text-center">
-                            <h1 className="text-5xl font-extrabold mb-4 animate-fadeInDown">
+                            <h1 className="text-5xl font-extrabold mb-4 animate-bounce">
                                 Welcome
                             </h1>
                         </div>

@@ -41,13 +41,13 @@ export default function AdminUserManagementPage() {
     setLoadingUsers(true);
     setFetchError(null);
     try {
-      const res = await fetch('/api/admin/users'); // FIX: Call your actual API endpoint
+      const res = await fetch('/api/admin/users'); 
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to fetch users');
       }
       const data = await res.json();
-      // FIX: Ensure BigInt IDs are converted to string if not already done by API
+      
       const processedUsers = data.users.map((user: any) => ({
         ...user,
         id: user.id.toString(),
@@ -184,10 +184,10 @@ export default function AdminUserManagementPage() {
             <span className="hidden sm:block font-medium text-base-content">
               สวัสดี, {session.user?.name} (Admin)
             </span>
-            <Link href="/admin" className="btn btn-primary">
+            <Link href="/admin" className="btn btn-primary rounded-2xl">
                 กลับสู่แดชบอร์ดแอดมิน
             </Link>
-            <button onClick={() => signOut()} className="btn btn-primary">
+            <button onClick={() => signOut()} className="btn btn-primary rounded-2xl">
               ออกจากระบบ
             </button>
           </div>
@@ -225,7 +225,7 @@ export default function AdminUserManagementPage() {
                     <td className="font-semibold">{user.name}</td>
                     <td>{user.email}</td>
                     <td>
-                      <span className={`badge ${user.role === 'admin' ? 'badge-primary' : 'badge-info'}`}>
+                      <span className={`badge ${user.role === 'admin' ? 'badge-secondary' : 'badge-info'}`}>
                         {user.role}
                       </span>
                     </td>
