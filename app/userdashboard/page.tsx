@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import Head from "next/head";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // API Response type for better type safety
 type UserFile = {
@@ -13,6 +15,9 @@ type UserFile = {
     storagePath: string;
     created_at: string;
     updated_at: string;
+    fileExtension: string;
+    userName:string;
+    
 };
 
 // This is the new list of departments based on your mock data,
@@ -38,7 +43,7 @@ const departmentList = [
         ),
     },
     {
-        name: "ฝ่ายว่าง",
+        name: "สัญญาจ้างทั่วไป",
         icon: (
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +62,7 @@ const departmentList = [
         ),
     },
     {
-        name: "ฝ่ายไม่ทำ",
+        name: "ขอบเขตการดำเนินงาน (TORS)",
         icon: (
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -75,25 +80,7 @@ const departmentList = [
             </svg>
         ),
     },
-    {
-        name: "ฝ่ายนอน",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M17 9v6m-4-4v4m-4-4v4m-1.5-4h-2m13 0h-2m2 0a2 2 0 012 2v8a2 2 0 01-2 2h-12a2 2 0 01-2-2v-8a2 2 0 012-2h12a2 2 0 012 2z"
-                />
-            </svg>
-        ),
-    },
+    
 ];
 
 export default function DashboardPage() {
@@ -106,6 +93,7 @@ export default function DashboardPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("createdAtDesc");
     const [selectedDepartment, setSelectedDepartment] = useState("ทั้งหมด");
+    const [count , setCount] = useState(1);
 
     // New state for profile modal
     const [showProfileModal, setShowProfileModal] = useState(false);
@@ -227,23 +215,66 @@ export default function DashboardPage() {
                                     d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
                                 />
                             </svg>
-                            <span className="ml-2 font-bold text-2xl">
+                            <span className="ml-2 font-bold text-2xl ">
                                 ระบบจัดการเอกสาร
                             </span>
                         </Link>
                     </div>
                     <div className="flex-none">
                         {session && (
+                            
+                            
                             <div className="flex items-center space-x-4">
-                                <div className="dropdown">
+                                <div className="dropdown dropdown-end">
+                                    
                                     <div
                                         tabIndex={0}
                                         role="button"
-                                        className="btn btn-soft m-1 rounded-2xl shadow-md "
+                                        className="cursor-pointer"
                                     >
-                                        <span className="font-medium">
-                                            สวัสดี , {session.user?.name}
-                                        </span>
+                                        
+                                        
+                                        <Button
+                                            variant="ghost"
+                                            className=" font-bold text-l"
+                                        >
+                                            <div className="avatar">
+                                            <div className="w-8 rounded-full">
+                                                {session.user?.image ? (
+                                                    <img 
+                                                        src={session.user.image} 
+                                                        alt="Profile"
+                                                        className="w-8 h-8 rounded-full"
+                                                    />
+                                                ) : (
+                                                    <div className="avatar placeholder justify-center mr-2">
+                                                        <div className="bg-primary text-primary-content rounded-full w-8 text-center">
+                                                            <span className="text-lg">
+                                                                {session.user?.name 
+                                                                    ? session.user.name.charAt(0).toUpperCase() 
+                                                                    : session.user?.email?.charAt(0).toUpperCase() || 'U'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                            
+                                             {session.user?.name}
+                                            <svg
+                                                className="h-4 w-4 transition-transform duration-200"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M19 9l-7 7-7-7"
+                                                />
+                                            </svg>
+                                        </Button>
                                         {/* <svg className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                         </svg> */}
@@ -297,12 +328,14 @@ export default function DashboardPage() {
                                     </ul>
                                 </div>
                                 {session.user?.role === "admin" && (
-                                    <Link
-                                        href="/admin"
-                                        className="btn btn-secondary rounded-full shadow-lg"
+                                    <Button
+                                        variant={"outline"}
+                                        className="font-bold"
                                     >
-                                        แผงควบคุมแอดมิน
-                                    </Link>
+                                        <Link href="/admin">
+                                            แผงควบคุมแอดมิน
+                                        </Link>
+                                    </Button>
                                 )}
                             </div>
                         )}
@@ -345,28 +378,32 @@ export default function DashboardPage() {
                             <h1 className="text-3xl font-bold mb-4 md:mb-0">
                                 เอกสารของฉัน ({selectedDepartment})
                             </h1>
-                            <Link
-                                href="/createdocs"
-                                className="btn btn-primary rounded-full shadow-lg"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
+                            <Button className="border-2">
+                                <Link
+                                    href="/createdocs"
+                                    className="flex flex-wrap items-center gap-2 md:flex-row"
                                 >
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
-                                <span className="ml-2">สร้างเอกสารใหม่</span>
-                            </Link>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-5 w-5"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                    <span className="ml-2 font-bold">
+                                        สร้างเอกสารใหม่
+                                    </span>
+                                </Link>
+                            </Button>
                         </div>
 
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                            <input
+                            <Input
                                 type="text"
                                 placeholder="ค้นหาชื่อไฟล์..."
                                 className="input input-bordered w-full sm:w-80 rounded-full"
@@ -374,7 +411,7 @@ export default function DashboardPage() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                             <select
-                                className="select select-bordered w-full sm:w-auto rounded-full"
+                                className="select select-bordered w-full sm:w-auto rounded-full border-2"
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
                             >
@@ -391,14 +428,16 @@ export default function DashboardPage() {
                         <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl">
                             <table className="table w-full">
                                 <thead>
-                                    <tr className="text-lg text-gray-600 dark:text-gray-300">
+                                    <tr className="text-lg text-gray-600 dark:text-gray-300 font-bold">
+                                        
                                         <th>ชื่อไฟล์</th>
+                                        <th>ประเภทเอกสาร</th>
                                         <th className="hidden md:table-cell">
                                             สร้างเมื่อ
                                         </th>
-                                        <th className="hidden md:table-cell">
-                                            แก้ไขล่าสุด
-                                        </th>
+                                        {/* <th className="hidden md:table-cell">
+                                            สร้างโดย
+                                        </th> */}
                                         <th>การกระทำ</th>
                                     </tr>
                                 </thead>
@@ -409,9 +448,11 @@ export default function DashboardPage() {
                                                 key={file.id}
                                                 className="hover:bg-gray-50 dark:hover:bg-gray-700"
                                             >
+                                                
                                                 <td className="font-semibold">
                                                     {file.originalFileName}
                                                 </td>
+                                                <td> - </td>
                                                 <td className="text-gray-500 hidden md:table-cell">
                                                     {new Date(
                                                         file.created_at
@@ -419,22 +460,19 @@ export default function DashboardPage() {
                                                         "th-TH"
                                                     )}
                                                 </td>
-                                                <td className="text-gray-500 hidden md:table-cell">
-                                                    {new Date(
-                                                        file.updated_at
-                                                    ).toLocaleDateString(
-                                                        "th-TH"
-                                                    )}
-                                                </td>
+                                                {/* <td className="text-gray-500 hidden md:table-cell">
+                                                    {
+                                                        file.userName
+                                                    }
+                                                </td> */}
                                                 <td className="flex space-x-2">
-                                                    <button
+                                                    <Button
                                                         onClick={() =>
                                                             window.open(
                                                                 file.storagePath,
                                                                 "_blank"
                                                             )
                                                         }
-                                                        className="btn btn-sm btn-success text-white rounded-full"
                                                     >
                                                         <svg
                                                             xmlns="http://www.w3.org/2000/svg"
@@ -459,7 +497,7 @@ export default function DashboardPage() {
                                                         <span className="ml-1 hidden lg:block">
                                                             พรีวิว
                                                         </span>
-                                                    </button>
+                                                    </Button>
                                                 </td>
                                             </tr>
                                         ))
@@ -469,7 +507,7 @@ export default function DashboardPage() {
                                                 colSpan={4}
                                                 className="text-center py-4 text-gray-500"
                                             >
-                                                ไม่พบเอกสาร PDF
+                                                ไม่พบเอกสาร 
                                             </td>
                                         </tr>
                                     )}
@@ -484,18 +522,18 @@ export default function DashboardPage() {
                     <dialog open className="modal modal-open backdrop-blur-sm">
                         <div className="modal-box w-11/12 max-w-md mx-auto animate-[modalSlideIn_0.3s_ease-out] relative overflow-hidden">
                             {/* Background Pattern */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5"></div>
-                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
-                            <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5"></div>
+                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+                            <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
 
                             {/* Content */}
                             <div className="relative z-10">
                                 {/* Header */}
                                 <div className="flex flex-col items-center mb-6">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
-                                            className="h-10 w-10 text-primary-content"
+                                            className="h-10 w-10 text-white"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke="currentColor"
@@ -508,21 +546,22 @@ export default function DashboardPage() {
                                             />
                                         </svg>
                                     </div>
-                                    <h2 className="font-bold text-2xl text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                    <h2 className="font-bold text-2xl text-center bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                                         ข้อมูลส่วนตัว
                                     </h2>
-                                    <p className="text-sm opacity-70 text-center mt-1">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-1">
                                         รายละเอียดบัญชีผู้ใช้
                                     </p>
                                 </div>
 
                                 {/* User Info */}
                                 <div className="space-y-4 mb-6">
-                                    <div className="bg-base-200/50 rounded-lg p-4 border-l-4 border-primary">
+                                    {/* ชื่อผู้ใช้ */}
+                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-l-4 border-blue-500">
                                         <div className="flex items-center mb-2">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 text-primary mr-2"
+                                                className="h-5 w-5 text-blue-500 mr-2"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -534,20 +573,21 @@ export default function DashboardPage() {
                                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                                 />
                                             </svg>
-                                            <p className="text-sm opacity-70">
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
                                                 ชื่อผู้ใช้
                                             </p>
                                         </div>
-                                        <p className="font-semibold text-lg">
+                                        <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
                                             {session?.user?.name || "ไม่ระบุ"}
                                         </p>
                                     </div>
 
-                                    <div className="bg-base-200/50 rounded-lg p-4 border-l-4 border-secondary">
+                                    {/* อีเมล */}
+                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-l-4 border-purple-500">
                                         <div className="flex items-center mb-2">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 text-secondary mr-2"
+                                                className="h-5 w-5 text-purple-500 mr-2"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -559,20 +599,21 @@ export default function DashboardPage() {
                                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                                                 />
                                             </svg>
-                                            <p className="text-sm opacity-70">
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
                                                 อีเมล
                                             </p>
                                         </div>
-                                        <p className="font-semibold">
+                                        <p className="font-semibold text-gray-900 dark:text-gray-100">
                                             {session?.user?.email || "ไม่ระบุ"}
                                         </p>
                                     </div>
 
-                                    <div className="bg-base-200/50 rounded-lg p-4 border-l-4 border-accent">
+                                    {/* สถานะ */}
+                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-l-4 border-amber-500">
                                         <div className="flex items-center mb-2">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 text-accent mr-2"
+                                                className="h-5 w-5 text-amber-500 mr-2"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -584,18 +625,18 @@ export default function DashboardPage() {
                                                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                                                 />
                                             </svg>
-                                            <p className="text-sm opacity-70">
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
                                                 สถานะ
                                             </p>
                                         </div>
                                         <div className="flex items-center">
                                             <span
-                                                className={`badge ${
+                                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                                                     session?.user?.role ===
                                                     "admin"
-                                                        ? "badge-secondary"
-                                                        : "badge-primary"
-                                                } badge-sm mr-2`}
+                                                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                                }`}
                                             >
                                                 {session?.user?.role === "admin"
                                                     ? "ผู้ดูแลระบบ"
@@ -604,11 +645,12 @@ export default function DashboardPage() {
                                         </div>
                                     </div>
 
-                                    <div className="bg-base-200/50 rounded-lg p-4 border-l-4 border-success">
+                                    {/* จำนวนเอกสาร */}
+                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-l-4 border-green-500">
                                         <div className="flex items-center mb-2">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 text-success mr-2"
+                                                className="h-5 w-5 text-green-500 mr-2"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -620,27 +662,27 @@ export default function DashboardPage() {
                                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                                 />
                                             </svg>
-                                            <p className="text-sm opacity-70">
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
                                                 จำนวนเอกสาร
                                             </p>
                                         </div>
-                                        <p className="font-semibold text-success text-lg">
+                                        <p className="font-semibold text-green-600 dark:text-green-400 text-lg">
                                             {userFiles.length} ไฟล์
                                         </p>
                                     </div>
                                 </div>
 
-                                {/* Close Button */}
-                                <div className="flex justify-center">
+                                {/* Actions */}
+                                <div className="flex justify-end">
                                     <button
+                                        className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
                                         onClick={() =>
                                             setShowProfileModal(false)
                                         }
-                                        className="btn btn-primary rounded-xl px-8 hover:scale-105 transition-transform shadow-lg"
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
-                                            className="h-4 w-4 mr-2"
+                                            className="h-6 w-6"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke="currentColor"
@@ -652,7 +694,6 @@ export default function DashboardPage() {
                                                 d="M6 18L18 6M6 6l12 12"
                                             />
                                         </svg>
-                                        ปิด
                                     </button>
                                 </div>
                             </div>

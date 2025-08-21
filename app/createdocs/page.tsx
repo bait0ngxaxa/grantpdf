@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 // Define the type for the form data to ensure type safety
 interface TorsData {
@@ -204,12 +205,12 @@ export default function CreateTorsPage() {
             {/* Header and Back button */}
             <div className="navbar bg-base-100 rounded-box shadow-lg mb-6">
                 <div className="flex-1">
-                    <button onClick={handleBack} className="btn btn-primary">
+                    <Button onClick={handleBack} >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         <span className="ml-2">กลับ</span>
-                    </button>
+                    </Button>
                 </div>
                 {selectedCategory && (
                     <div className="flex-none">

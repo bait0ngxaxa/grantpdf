@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -88,7 +90,7 @@ export default function LoginPage() {
                                             อีเมล
                                         </span>
                                     </label>
-                                    <input
+                                    <Input
                                         type="email"
                                         className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                         placeholder="your@email.com"
@@ -107,7 +109,7 @@ export default function LoginPage() {
                                             รหัสผ่าน
                                         </span>
                                     </label>
-                                    <input
+                                    <Input
                                         type="password"
                                         className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                         placeholder="********"
@@ -136,12 +138,12 @@ export default function LoginPage() {
                                 )}
 
                                 {/* Submit Button */}
-                                <button
+                                <Button
                                     type="submit"
-                                    className="btn btn-primary w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                                    className="w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
                                 >
                                     เข้าสู่ระบบ
-                                </button>
+                                </Button>
                             </form>
 
                             {/* Sign-up Link */}
@@ -150,7 +152,7 @@ export default function LoginPage() {
                                     ยังไม่มีบัญชี?{" "}
                                     <Link
                                         href="/signup"
-                                        className="link link-hover text-primary font-semibold transition-colors duration-200 hover:text-primary-focus"
+                                        className="link link-hover text-blue-600 font-semibold transition-colors duration-200 hover:text-primary-focus"
                                     >
                                         สมัครสมาชิก
                                     </Link>

@@ -4,6 +4,8 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, FormEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 // Define the UserData interface to match your Prisma model (after BigInt to string conversion)
 interface UserData {
@@ -181,15 +183,15 @@ export default function AdminUserManagementPage() {
         </div>
         <div className="flex-none">
           <div className="flex items-center space-x-4">
-            <span className="hidden sm:block font-medium text-base-content">
-              สวัสดี, {session.user?.name} (Admin)
+            <span className="hidden sm:block font-bold text-base-content">
+              {session.user?.name} ({session.user?.role})
             </span>
-            <Link href="/admin" className="btn btn-primary rounded-2xl">
+            <Button className='font-bold'>
+            <Link href="/admin">
                 กลับสู่แดชบอร์ดแอดมิน
             </Link>
-            <button onClick={() => signOut()} className="btn btn-primary rounded-2xl">
-              ออกจากระบบ
-            </button>
+            </Button>
+           
           </div>
         </div>
       </div>
@@ -225,7 +227,7 @@ export default function AdminUserManagementPage() {
                     <td className="font-semibold">{user.name}</td>
                     <td>{user.email}</td>
                     <td>
-                      <span className={`badge ${user.role === 'admin' ? 'badge-secondary' : 'badge-info'}`}>
+                      <span className={`badge ${user.role === 'admin' ? 'badge badge-secondary' : 'badge  badge-info text-white'} p-3`}>
                         {user.role}
                       </span>
                     </td>
@@ -264,7 +266,7 @@ export default function AdminUserManagementPage() {
             <form onSubmit={handleUpdateUser} className="py-4 space-y-4">
               <div className="form-control">
                 <label className="label"><span className="label-text">ชื่อ</span></label>
-                <input
+                <Input
                   type="text"
                   name="name"
                   className="input input-bordered w-full"
@@ -275,10 +277,10 @@ export default function AdminUserManagementPage() {
               </div>
               <div className="form-control">
                 <label className="label"><span className="label-text">อีเมล</span></label>
-                <input
+                <Input
                   type="email"
                   name="email"
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full border-2"
                   value={editFormData.email}
                   onChange={handleEditFormChange}
                   required
@@ -289,7 +291,7 @@ export default function AdminUserManagementPage() {
                 <label className="label"><span className="label-text">บทบาท (Role)</span></label>
                 <select
                   name="role"
-                  className="select select-bordered w-full"
+                  className="select select-bordered w-full border-2"
                   value={editFormData.role}
                   onChange={handleEditFormChange}
                   required
@@ -299,10 +301,10 @@ export default function AdminUserManagementPage() {
                 </select>
               </div>
               <div className="modal-action">
-                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                <Button type="submit"  disabled={isSaving}>
                   {isSaving ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
-                </button>
-                <button type="button" className="btn" onClick={closeEditModal}>ยกเลิก</button>
+                </Button>
+                <Button type="button" variant={'outline'} onClick={closeEditModal}>ยกเลิก</Button>
               </div>
             </form>
           </div>

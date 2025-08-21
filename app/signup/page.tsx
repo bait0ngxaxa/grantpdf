@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
@@ -86,7 +88,7 @@ export default function SignupPage() {
                                     <label className="label">
                                         <span className="label-text font-medium">ชื่อ</span>
                                     </label>
-                                    <input
+                                    <Input
                                         type="text"
                                         className="input input-bordered w-full rounded-full"
                                         placeholder="ชื่อ-นามสกุล"
@@ -100,7 +102,7 @@ export default function SignupPage() {
                                     <label className="label">
                                         <span className="label-text font-medium">อีเมล</span>
                                     </label>
-                                    <input
+                                    <Input
                                         type="email"
                                         className="input input-bordered w-full rounded-full"
                                         placeholder="your@email.com"
@@ -114,7 +116,7 @@ export default function SignupPage() {
                                     <label className="label">
                                         <span className="label-text font-medium">รหัสผ่าน</span>
                                     </label>
-                                    <input
+                                    <Input
                                         type="password"
                                         className="input input-bordered w-full rounded-full"
                                         placeholder="********"
@@ -130,15 +132,15 @@ export default function SignupPage() {
                                     </div>
                                 )}
 
-                                <button type="submit" className="btn btn-primary w-full rounded-full mt-4">
+                                <Button type="submit" className=" w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105">
                                     ถัดไป
-                                </button>
+                                </Button>
                             </form>
 
                             <div className="text-center mt-6">
                                 <p className="text-sm">
                                     มีบัญชีอยู่แล้ว?{" "}
-                                    <Link href="/signin" className="link link-hover text-primary font-semibold">
+                                    <Link href="/signin" className="link link-hover text-blue-600 font-semibold">
                                         เข้าสู่ระบบ
                                     </Link>
                                 </p>
@@ -199,18 +201,18 @@ export default function SignupPage() {
 
                             {/* Action Buttons */}
                             <div className="flex gap-3">
-                                <button
+                                <Button variant={"outline"}
                                     onClick={() => setShowConfirmModal(false)}
-                                    className="btn btn-outline flex-1 rounded-xl hover:scale-105 transition-transform"
+                                    className=" flex-1 rounded-xl hover:scale-105 transition-transform"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                                     </svg>
                                     แก้ไข
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={handleSignup}
-                                    className="btn btn-primary flex-1 rounded-xl hover:scale-105 transition-transform shadow-lg"
+                                    className=" flex-1 rounded-xl hover:scale-105 transition-transform shadow-lg"
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting ? (
@@ -226,7 +228,7 @@ export default function SignupPage() {
                                             ยืนยัน
                                         </>
                                     )}
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>

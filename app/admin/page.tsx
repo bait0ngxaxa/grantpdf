@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import Head from "next/head";
+import { Button } from "@/components/ui/button";
 
 // Interface for PDF file data from API
 interface PdfFile {
@@ -20,6 +21,7 @@ interface PdfFile {
     storagePath: string;
     created_at: string;
     updated_at: string;
+    fileExtension: string;
 }
 
 export default function AdminDashboardPage() {
@@ -85,6 +87,7 @@ export default function AdminDashboardPage() {
                     storagePath: file.storagePath,
                     created_at: file.created_at,
                     updated_at: file.updated_at,
+                    fileExtension:file.fileExtension,
                 }));
                 
                 setPdfFiles(transformedFiles);
@@ -204,15 +207,15 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="flex-none">
                         <div className="flex items-center space-x-4">
-                            <span className="hidden sm:block font-medium">
-                                สวัสดี, {session.user?.name}
+                            <span className="hidden sm:block font-bold">
+                                {session.user?.name} ({session.user?.role})
                             </span>
-                            <Link href="/userdashboard" className="btn btn-secondary rounded-full shadow-lg">
+                            <Button className="font-bold">
+                            <Link href="/userdashboard" >
                                 กลับสู่แดชบอร์ดผู้ใช้
                             </Link>
-                            <button onClick={() => signOut()} className="btn btn-primary rounded-full shadow-lg">
-                                ออกจากระบบ
-                            </button>
+                            </Button>
+                            
                         </div>
                     </div>
                 </div>
@@ -241,13 +244,13 @@ export default function AdminDashboardPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
                             <div className="flex items-center space-x-4">
-                                <div className="text-primary bg-primary bg-opacity-10 p-3 rounded-full">
+                                <div className="text-primary bg-secondary bg-opacity-10 p-3 rounded-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">จำนวนเอกสาร PDF</div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">จำนวนเอกสาร</div>
                                     <div className="text-3xl font-bold">{pdfFiles.length}</div>
                                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">เอกสารทั้งหมดในระบบ</div>
                                 </div>
@@ -255,7 +258,7 @@ export default function AdminDashboardPage() {
                         </div>
                         <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
                             <div className="flex items-center space-x-4">
-                                <div className="text-secondary bg-secondary bg-opacity-10 p-3 rounded-full">
+                                <div className="text-secondary bg-primary bg-opacity-10 p-3 rounded-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.972 5.972 0 01-.569-2.533v-.001c0-.246.04-.487.117-.709A5.972 5.972 0 018 12a5.972 5.972 0 01.117-.709c.077-.222.117-.463.117-.709v-.001a5.972 5.972 0 01-.569-2.533m0 0a5.972 5.972 0 015.411-.533M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22L12 18.77L5.82 22L7 14.14l-5-4.87L8.91 8.26L12 2z" />
                                     </svg>
@@ -269,7 +272,7 @@ export default function AdminDashboardPage() {
                         </div>
                         <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
                             <div className="flex items-center space-x-4">
-                                <div className="text-info bg-info bg-opacity-10 p-3 rounded-full">
+                                <div className="text-info bg-accent bg-opacity-10 p-3 rounded-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                     </svg>
@@ -288,17 +291,17 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {/* --- PDF Management Section --- */}
-                    <h2 className="text-2xl font-bold mb-4">การจัดการเอกสาร PDF</h2>
+                    <h2 className="text-2xl font-bold mb-4">การจัดการเอกสาร</h2>
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
                         <input
                             type="text"
                             placeholder="ค้นหาชื่อไฟล์ หรือ ผู้สร้าง..."
-                            className="input input-bordered w-full sm:w-80 rounded-full"
+                            className="input input-bordered w-full sm:w-80 rounded-full border-2"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         <select
-                            className="select select-bordered w-full sm:w-auto rounded-full"
+                            className="select select-bordered w-full sm:w-auto rounded-full border-2"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                         >
@@ -318,7 +321,7 @@ export default function AdminDashboardPage() {
                                     <th>ชื่อไฟล์</th>
                                     <th>ผู้สร้าง</th>
                                     <th className="hidden md:table-cell">สร้างเมื่อ</th>
-                                    <th className="hidden md:table-cell">แก้ไขล่าสุด</th>
+                                    <th className="hidden md:table-cell">ประเภทเอกสาร</th>
                                     <th>การกระทำ</th>
                                 </tr>
                             </thead>
@@ -332,7 +335,7 @@ export default function AdminDashboardPage() {
                                                 {new Date(file.createdAt).toLocaleDateString("th-TH")}
                                             </td>
                                             <td className="text-gray-500 hidden md:table-cell">
-                                                {new Date(file.lastModified).toLocaleDateString("th-TH")}
+                                                {file.fileExtension}
                                             </td>
                                             <td className="flex space-x-2">
                                                 {file.storagePath && (
@@ -382,9 +385,11 @@ export default function AdminDashboardPage() {
                     <h2 className="text-2xl font-bold mb-4">การจัดการผู้ใช้งาน</h2>
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
                         <p className="text-lg">จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ</p>
-                        <Link href="/admin/users" className="btn btn-secondary rounded-full shadow-lg">
+                        <Button className="font-bold">
+                        <Link href="/admin/users" className=" rounded-full ">
                             ไปที่หน้าจัดการผู้ใช้งาน
                         </Link>
+                        </Button>
                     </div>
                 </div>
 

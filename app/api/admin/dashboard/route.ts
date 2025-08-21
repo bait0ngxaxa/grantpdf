@@ -32,6 +32,7 @@ export async function GET(req: Request) {
         storagePath: true,
         created_at: true,
         updated_at: true,
+        fileExtension:true,
         userId: true,
         // Include user information using Prisma relation
         user: {
@@ -52,10 +53,12 @@ export async function GET(req: Request) {
       storagePath: file.storagePath,
       created_at: file.created_at,
       updated_at: file.updated_at,
+      fileExtension:file.fileExtension,
       userId: file.userId.toString(),
       // User information
       userName: file.user?.name || "Unknown User",
       userEmail: file.user?.email || "Unknown Email",
+      
     }));
     const totalUsers = await prisma.user.count();
 

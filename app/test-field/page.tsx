@@ -8,7 +8,8 @@ import Link from 'next/link';
 interface TestTorsData {
   projectName: string;
   clientName: string;
-  description: string; // Generic description field
+  description: string;
+  userId: string; // เพิ่ม userId field
 }
 
 export default function TestPdfFillPage() {
@@ -16,6 +17,7 @@ export default function TestPdfFillPage() {
     projectName: '',
     clientName: '',
     description: '',
+    userId: '1', // ค่าเริ่มต้น หรือจะดึงจาก session/auth ก็ได้
   });
   const [generatedPdfUrl, setGeneratedPdfUrl] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -38,19 +40,33 @@ export default function TestPdfFillPage() {
     setIsError(false);
 
     try {
+      // แปลง userId เป็น number ก่อนส่ง
+      const submitData = {
+        ...formData,
+        userId: parseInt(formData.userId),
+      };
+
       const response = await fetch('/api/fill-pdf-template', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (response.ok) {
         const data = await response.json();
         setGeneratedPdfUrl(data.pdfUrl);
-        setMessage('สร้างเอกสาร PDF สำเร็จแล้ว!');
+        setMessage(`สร้างเอกสาร PDF สำเร็จแล้ว! (ID: ${data.fileRecord?.id})`);
         setIsError(false);
+        
+        // Reset form หลังสร้างสำเร็จ
+        setFormData({
+          projectName: '',
+          clientName: '',
+          description: '',
+          userId: formData.userId, // เก็บ userId เดิมไว้
+        });
       } else {
         const errorData = await response.json();
         setMessage(`เกิดข้อผิดพลาด: ${errorData.error || 'ไม่สามารถสร้างเอกสาร PDF ได้'}`);
@@ -82,6 +98,25 @@ export default function TestPdfFillPage() {
         <h2 className="text-2xl font-semibold text-center mb-6">ทดสอบกรอกข้อมูลลง PDF Template</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">User ID</span>
+            </label>
+            <input
+              type="number"
+              name="userId"
+              placeholder="User ID"
+              className="input input-bordered w-full"
+              value={formData.userId}
+              onChange={handleChange}
+              required
+              min="1"
+            />
+            <div className="label">
+              <span className="label-text-alt">ระบุ ID ของผู้ใช้ (สำหรับทดสอบ)</span>
+            </div>
+          </div>
+
           <div className="form-control">
             <label className="label">
               <span className="label-text">ชื่อโครงการ</span>
@@ -151,14 +186,33 @@ export default function TestPdfFillPage() {
         {generatedPdfUrl && (
           <div className="mt-6 text-center">
             <p className="mb-2">เอกสาร PDF ของคุณพร้อมแล้ว:</p>
-            <a
-              href={generatedPdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-info mr-2"
-            >
-              พรีวิว / ดาวน์โหลด PDF
-            </a>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <a
+                href={generatedPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-info"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                พรีวิว PDF
+              </a>
+              <a
+                href={generatedPdfUrl}
+                download
+                className="btn btn-success"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                </svg>
+                ดาวน์โหลด PDF
+              </a>
+            </div>
+            <p className="text-sm text-base-content/60 mt-2">
+              ไฟล์ถูกบันทึกที่: {generatedPdfUrl}
+            </p>
           </div>
         )}
       </div>

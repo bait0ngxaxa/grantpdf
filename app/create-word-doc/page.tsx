@@ -4,6 +4,9 @@ import { useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface WordDocumentData {
   head: string;
@@ -45,6 +48,7 @@ export default function TestWordWithSignaturePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const fixedValues = {
     topic: 'รายงานผลการปฏิบัติงาน',
@@ -146,7 +150,8 @@ export default function TestWordWithSignaturePage() {
     <div className="min-h-screen flex flex-col items-center bg-base-200 p-4 font-sans antialiased">
       <div className="navbar bg-base-100 rounded-box shadow-lg mb-6 w-full max-w-4xl">
         <div className="flex-1">
-          <Link href="/createdocs" className="btn btn-primary">
+          <Button>
+          <Link href="/createdocs">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -163,12 +168,13 @@ export default function TestWordWithSignaturePage() {
             </svg>
             <span className="ml-2">กลับ</span>
           </Link>
+          </Button>
         </div>
       </div>
 
       <div className="card w-full max-w-4xl shadow-xl bg-base-100 p-6">
         <h2 className="text-2xl font-semibold text-center mb-6">
-          สร้าง Word Document
+          สร้างหนังสือขอนุมัติของมูลนิธิ
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -179,7 +185,7 @@ export default function TestWordWithSignaturePage() {
                   ชื่อโครงการ (filename)
                 </span>
               </label>
-              <input
+              <Input
                 type="text"
                 name="fileName"
                 placeholder="ชื่อไฟล์ (ไม่จำเป็นต้องมี .docx)"
@@ -195,7 +201,7 @@ export default function TestWordWithSignaturePage() {
                   เลขที่หนังสือ (head)
                 </span>
               </label>
-              <input
+              <Input
                 type="text"
                 name="head"
                 placeholder="เลขที่หนังสือ"
@@ -212,7 +218,7 @@ export default function TestWordWithSignaturePage() {
                   วันที่ (date)
                 </span>
               </label>
-              <input
+              <Input
                 type="text"
                 name="date"
                 placeholder="เช่น 14 สิงหาคม 2568"
@@ -232,7 +238,7 @@ export default function TestWordWithSignaturePage() {
                 เรื่อง (topicdetail)
               </span>
             </label>
-            <input
+            <Input
               type="text"
               name="topicdetail"
               placeholder="รายละเอียดหัวข้อ"
@@ -249,10 +255,10 @@ export default function TestWordWithSignaturePage() {
                 ผู้รับ (todetail)
               </span>
             </label>
-            <textarea
+            <Input
               name="todetail"
               placeholder="รายละเอียดผู้รับ"
-              className="textarea textarea-bordered h-24 w-full"
+              className="input input-bordered w-full"
               value={formData.todetail}
               onChange={handleChange}
               required
@@ -265,10 +271,10 @@ export default function TestWordWithSignaturePage() {
                 รายละเอียดสิ่งที่ส่งมาด้วย (attachmentdetail)
               </span>
             </label>
-            <textarea
+            <Textarea
               name="attachmentdetail"
               placeholder="รายละเอียดสิ่งที่ส่งมาด้วย"
-              className="textarea textarea-bordered h-24 w-full"
+              className="textarea textarea-bordered h-10 w-full"
               value={formData.attachmentdetail}
               onChange={handleChange}
             />
@@ -280,10 +286,10 @@ export default function TestWordWithSignaturePage() {
                 เนื้อหา (detail)
               </span>
             </label>
-            <textarea
+            <Textarea
               name="detail"
               placeholder="รายละเอียดเนื้อหา"
-              className="textarea textarea-bordered h-24 w-full"
+              className="textarea textarea-bordered h-40 w-full"
               value={formData.detail}
               onChange={handleChange}
               required
@@ -298,7 +304,7 @@ export default function TestWordWithSignaturePage() {
                   ชื่อผู้ลงนาม (name)
                 </span>
               </label>
-              <input
+              <Input
                 type="text"
                 name="name"
                 placeholder="ชื่อ-นามสกุล"
@@ -314,7 +320,7 @@ export default function TestWordWithSignaturePage() {
                   ตำแหน่ง/แผนก (depart)
                 </span>
               </label>
-              <input
+              <Input
                 type="text"
                 name="depart"
                 placeholder="ตำแหน่ง/แผนก"
@@ -333,7 +339,7 @@ export default function TestWordWithSignaturePage() {
                   ผู้ประสานงาน (coor)
                 </span>
               </label>
-              <input
+              <Input
                 type="text"
                 name="coor"
                 placeholder="ผู้ประสานงาน"
@@ -348,7 +354,7 @@ export default function TestWordWithSignaturePage() {
                   เบอร์โทรศัพท์ (tel)
                 </span>
               </label>
-              <input
+              <Input
                 type="tel"
                 name="tel"
                 placeholder="เบอร์โทรศัพท์"
@@ -363,7 +369,7 @@ export default function TestWordWithSignaturePage() {
             <label className="label">
               <span className="label-text">อีเมล (email)</span>
             </label>
-            <input
+            <Input
               type="email"
               name="email"
               placeholder="อีเมล"
@@ -379,7 +385,7 @@ export default function TestWordWithSignaturePage() {
                 อัปโหลดลายเซ็น (.png)
               </span>
             </label>
-            <input
+            <Input
               type="file"
               name="signatureFile"
               className="file-input file-input-bordered w-full"
@@ -398,9 +404,9 @@ export default function TestWordWithSignaturePage() {
             </div>
           )}
 
-          <button
+          <Button
             type="submit"
-            className="btn btn-primary w-full"
+            className=" w-full"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
@@ -411,8 +417,10 @@ export default function TestWordWithSignaturePage() {
             ) : (
               "สร้างเอกสาร"
             )}
-          </button>
+          </Button>
         </form>
+
+        
 
         {message && (
           <div

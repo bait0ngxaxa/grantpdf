@@ -33,8 +33,17 @@ export async function GET(req: Request) {
         id: true,
         originalFileName: true,
         storagePath: true,
+        fileExtension : true,
         created_at: true,
         updated_at: true,
+
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -42,6 +51,7 @@ export async function GET(req: Request) {
     const sanitizedFiles = userFiles.map((file) => ({
       ...file,
       id: file.id.toString(),
+      userName:file.user?.name
     }));
 
     return NextResponse.json(sanitizedFiles, { status: 200 });

@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { ArrowLeftCircleIcon } from '@heroicons/react/24/solid';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
@@ -82,7 +84,7 @@ export default function ForgotPasswordPage() {
                                     <label className="label">
                                         <span className="label-text font-medium text-gray-600 dark:text-gray-300">อีเมล</span>
                                     </label>
-                                    <input
+                                    <Input
                                         type="email"
                                         className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                         placeholder="your@email.com"
@@ -101,9 +103,9 @@ export default function ForgotPasswordPage() {
                                 )}
 
                                 {/* Submit Button */}
-                                <button
+                                <Button
                                     type="submit"
-                                    className="btn btn-primary w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                                    className=" w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
                                     disabled={loading}
                                 >
                                     {loading ? (
@@ -111,7 +113,7 @@ export default function ForgotPasswordPage() {
                                     ) : (
                                         "ส่งคำขอรีเซ็ตรหัสผ่าน"
                                     )}
-                                </button>
+                                </Button>
                             </form>
                         )}
 

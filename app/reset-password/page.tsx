@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from 'next/navigation';
 import Head from "next/head";
 import { ArrowLeftCircleIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import { Button } from "@/components/ui/button";
 
 export default function ResetPasswordPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
-
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -131,9 +131,9 @@ export default function ResetPasswordPage() {
                                 </div>
                                 
                                 {/* Submit Button */}
-                                <button
+                                <Button
                                     type="submit"
-                                    className="btn btn-primary w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                                    className=" w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
                                     disabled={loading || !token || newPassword !== confirmPassword || newPassword.length === 0}
                                 >
                                     {loading ? (
@@ -141,7 +141,7 @@ export default function ResetPasswordPage() {
                                     ) : (
                                         "บันทึกรหัสผ่านใหม่"
                                     )}
-                                </button>
+                                </Button>
                             </form>
                         )}
                     </div>

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!user) {
-            console.log(`ไม่พบผู้ใช้ด้วยอีเมล ${email} ส่งข้อความทั่วไปเพื่อความปลอดภัย`);
+            //console.log(`ไม่พบผู้ใช้ด้วยอีเมล ${email} ส่งข้อความทั่วไปเพื่อความปลอดภัย`);
             return NextResponse.json({ message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปให้' }, { status: 200 });
         }
 

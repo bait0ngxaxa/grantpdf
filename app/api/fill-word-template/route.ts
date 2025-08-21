@@ -12,7 +12,8 @@ import { v4 as uuidv4 } from "uuid";
 
 //Helper function to generate a unique filename
 const generateUniqueFilename = (originalName: string): string => {
-  const sanitizedName = originalName.replace(/[^a-z0-9.]/gi, "_").toLowerCase();
+  const sanitizedName = originalName.replace(/\s+/g, '_')
+      .replace(/[^\x00-\x7F]/g, '');
   const uniqueId = uuidv4()
   return `${uniqueId}_${sanitizedName}`;
 };
@@ -104,7 +105,7 @@ export async function POST(req: Request) {
 
     // 7. Save file to public/uploads
     const uniqueFileName = generateUniqueFilename(fileName + ".docx");
-    const uploadDir = path.join(process.cwd(), "public", "upload");
+    const uploadDir = path.join(process.cwd(), "public", "upload" , "docx");
 
     // สร้างโฟลเดอร์ถ้าไม่มี
     await fs.mkdir(uploadDir, { recursive: true });
@@ -116,7 +117,7 @@ export async function POST(req: Request) {
     await prisma.userFile.create({
       data: {
         originalFileName: fileName + ".docx",
-        storagePath: `/upload/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
+        storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
         fileExtension: "docx",
         userId: userId,
       },

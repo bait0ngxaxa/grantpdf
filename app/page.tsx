@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect } from "react";
 import Head from "next/head";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
     const router = useRouter();
@@ -107,18 +108,22 @@ export default function Home() {
                     ) : (
                         // แสดงเมื่อยังไม่ได้ล็อกอิน
                         <>
+                            <Button variant={"outline"} className="mr-3.5">
                             <Link
                                 href="/signup"
-                                className="btn btn-outline btn-primary rounded-full mr-2 transition-all duration-300 hover:scale-105"
+                                className=" rounded-full mr-1 transition-all duration-300 hover:scale-105"
                             >
                                 สมัครสมาชิก
                             </Link>
+                            </Button>
+                            <Button>
                             <Link
                                 href="/signin"
-                                className="btn btn-primary rounded-full transition-all duration-300 hover:scale-105"
+                                className=" rounded-full transition-all duration-300 hover:scale-105"
                             >
                                 เข้าสู่ระบบ
                             </Link>
+                            </Button>
                         </>
                     )}
                 </div>
@@ -150,12 +155,12 @@ export default function Home() {
                         </p>
 
                         {/* Action button */}
-                        <button
-                            className="btn btn-primary w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                        <Button
+                            className=" w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
                             onClick={handleClick}
                         >
                             {session ? 'Go to Dashboard' : 'Get Started'}
-                        </button>
+                        </Button>
                         
                         {session && (
                             <div className="mt-4 text-xs text-gray-400">
