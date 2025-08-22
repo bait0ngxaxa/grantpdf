@@ -168,7 +168,7 @@ export default function SignupPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h2 className="font-bold text-2xl text-center bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                <h2 className="font-bold text-2xl text-center bg-primary bg-clip-text text-transparent">
                                     ยืนยันข้อมูลผู้สมัคร
                                 </h2>
                                 <p className="text-sm opacity-70 text-center mt-1">กรุณาตรวจสอบข้อมูลก่อนยืนยัน</p>

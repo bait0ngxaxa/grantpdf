@@ -33,6 +33,8 @@ export default function AdminDashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [totalUsers , setTotalUsers] = useState(0)
+    const [activeTab, setActiveTab] = useState("dashboard");
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // State for managing the delete confirmation modal
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -189,207 +191,396 @@ export default function AdminDashboardPage() {
         return null;
     }
 
+    const menuItems = [
+        {
+            id: "dashboard",
+            name: "ภาพรวมระบบ",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+            )
+        },
+        {
+            id: "documents",
+            name: "จัดการเอกสาร",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            )
+        },
+        {
+            id: "users",
+            name: "จัดการผู้ใช้งาน",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 4.197a4 4 0 11-7.32 0l3.66 1.83z" />
+                </svg>
+            )
+        }
+    ];
+
     return (
         <>
             <Head>
                 <title>Admin Dashboard | ระบบจัดการเอกสาร</title>
             </Head>
-            <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex flex-col">
-                {/* --- Admin Navbar --- */}
-                <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-6 z-10 rounded-b-lg">
-                    <div className="flex-1">
-                        <Link href="/admin" className="btn btn-ghost text-xl text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                            </svg>
-                            <span className="ml-2 font-bold text-2xl">Admin Panel</span>
-                        </Link>
-                    </div>
-                    <div className="flex-none">
-                        <div className="flex items-center space-x-4">
-                            <span className="hidden sm:block font-bold">
-                                {session.user?.name} ({session.user?.role})
-                            </span>
-                            <Button className="font-bold">
-                            <Link href="/userdashboard" >
-                                กลับสู่แดชบอร์ดผู้ใช้
-                            </Link>
-                            </Button>
-                            
+            <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+                {/* Mobile sidebar overlay */}
+                {isSidebarOpen && (
+                    <div 
+                        className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                        onClick={() => setIsSidebarOpen(false)}
+                    ></div>
+                )}
+
+                {/* Sidebar */}
+                <div className={`fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 z-50 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-focus rounded-lg flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586 1.414A11.955 11.955 0 0112 2.036 11.955 11.955 0 010 13.938V21.5h7.5v-7.562z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-primary">Admin Panel</h2>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">ระบบจัดการ</p>
+                                </div>
+                            </div>
+                            <button 
+                                className="lg:hidden btn btn-ghost btn-sm"
+                                onClick={() => setIsSidebarOpen(false)}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
+                    </div>
+
+                    {/* Navigation Menu */}
+                    <nav className="p-4">
+                        <ul className="space-y-2">
+                            {menuItems.map((item) => (
+                                <li key={item.id}>
+                                    <button
+                                        onClick={() => {
+                                            setActiveTab(item.id);
+                                            setIsSidebarOpen(false);
+                                        }}
+                                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 text-left ${
+                                            activeTab === item.id
+                                                ? 'bg-primary text-white shadow-md'
+                                                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                        }`}
+                                    >
+                                        {item.icon}
+                                        <span className="font-medium">{item.name}</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+
+                    {/* User Info */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center space-x-3 mb-3">
+                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                <span className="text-xs font-bold text-white">
+                                    {session.user?.name?.charAt(0) || session.user?.email?.charAt(0) || 'A'}
+                                </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-m font-medium text-gray-900 dark:text-white truncate">
+                                    {session.user?.name || 'Admin'}
+                                </p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                    {session.user?.role}
+                                </p>
+                            </div>
+                        </div>
+                        <Button 
+                            size="sm" 
+                            className="w-full text-sm"
+                            onClick={() => router.push("/userdashboard")}
+                        >
+                            กลับสู่แดชบอร์ดผู้ใช้
+                        </Button>
                     </div>
                 </div>
 
-                {/* --- Main Content Area --- */}
-                <div className="container mx-auto p-6 flex-1">
-                    <h1 className="text-4xl font-bold mb-6">ภาพรวมระบบ</h1>
-
-                    {/* Error Alert */}
-                    {error && (
-                        <div className="alert alert-error mb-6 rounded-xl">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{error}</span>
-                            <button 
-                                className="btn btn-sm btn-outline"
-                                onClick={() => setError(null)}
-                            >
-                                ปิด
-                            </button>
-                        </div>
-                    )}
-
-                    {/* --- System Overview Cards --- */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                {/* Main Content */}
+                <div className="lg:ml-64 min-h-screen">
+                    {/* Top Bar */}
+                    <div className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-4">
-                                <div className="text-primary bg-secondary bg-opacity-10 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <button 
+                                    className="lg:hidden btn btn-ghost btn-sm"
+                                    onClick={() => setIsSidebarOpen(true)}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                                     </svg>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">จำนวนเอกสาร</div>
-                                    <div className="text-3xl font-bold">{pdfFiles.length}</div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">เอกสารทั้งหมดในระบบ</div>
-                                </div>
+                                </button>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    {menuItems.find(item => item.id === activeTab)?.name || 'Admin Dashboard'}
+                                </h1>
                             </div>
-                        </div>
-                        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
-                            <div className="flex items-center space-x-4">
-                                <div className="text-secondary bg-primary bg-opacity-10 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.972 5.972 0 01-.569-2.533v-.001c0-.246.04-.487.117-.709A5.972 5.972 0 018 12a5.972 5.972 0 01.117-.709c.077-.222.117-.463.117-.709v-.001a5.972 5.972 0 01-.569-2.533m0 0a5.972 5.972 0 015.411-.533M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22L12 18.77L5.82 22L7 14.14l-5-4.87L8.91 8.26L12 2z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">ผู้ใช้งานทั้งหมด</div>
-                                    <div className="text-3xl font-bold">{totalUsers}</div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">บัญชีผู้ใช้ในระบบ</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
-                            <div className="flex items-center space-x-4">
-                                <div className="text-info bg-accent bg-opacity-10 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
-                                    <div className="text-lg font-bold truncate">
-                                        {latestFile?.fileName || "ไม่มี"}
-                                    </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        {latestFile?.createdAt ? new Date(latestFile.createdAt).toLocaleDateString("th-TH") : ""}
-                                    </div>
-                                </div>
+                            <div className="hidden sm:flex items-center space-x-4">
+                                <span className="text-m font-semibold text-gray-600 dark:text-gray-400">
+                                    {session.user?.name} ({session.user?.role})
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* --- PDF Management Section --- */}
-                    <h2 className="text-2xl font-bold mb-4">การจัดการเอกสาร</h2>
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                        <input
-                            type="text"
-                            placeholder="ค้นหาชื่อไฟล์ หรือ ผู้สร้าง..."
-                            className="input input-bordered w-full sm:w-80 rounded-full border-2"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <select
-                            className="select select-bordered w-full sm:w-auto rounded-full border-2"
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                        >
-                            <option value="createdAtDesc">
-                                เรียงตามวันที่สร้าง (ใหม่สุด)
-                            </option>
-                            <option value="createdAtAsc">
-                                เรียงตามวันที่สร้าง (เก่าสุด)
-                            </option>
-                        </select>
-                    </div>
+                    {/* Content Area */}
+                    <div className="p-6">
+                        {/* Error Alert */}
+                        {error && (
+                            <div className="alert alert-error mb-6 rounded-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{error}</span>
+                                <button 
+                                    className="btn btn-sm btn-outline"
+                                    onClick={() => setError(null)}
+                                >
+                                    ปิด
+                                </button>
+                            </div>
+                        )}
 
-                    <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl mb-8">
-                        <table className="table w-full">
-                            <thead>
-                                <tr className="text-lg text-gray-600 dark:text-gray-300">
-                                    <th>ชื่อไฟล์</th>
-                                    <th>ผู้สร้าง</th>
-                                    <th className="hidden md:table-cell">สร้างเมื่อ</th>
-                                    <th className="hidden md:table-cell">ประเภทเอกสาร</th>
-                                    <th>การกระทำ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredAndSortedPdfs.length > 0 ? (
-                                    filteredAndSortedPdfs.map((file) => (
-                                        <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <td className="font-semibold">{file.fileName}</td>
-                                            <td>{file.userName || 'Unknown User'}</td>
-                                            <td className="text-gray-500 hidden md:table-cell">
-                                                {new Date(file.createdAt).toLocaleDateString("th-TH")}
-                                            </td>
-                                            <td className="text-gray-500 hidden md:table-cell">
-                                                {file.fileExtension}
-                                            </td>
-                                            <td className="flex space-x-2">
-                                                {file.storagePath && (
-                                                    <a
-                                                        href={file.storagePath}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="btn btn-sm btn-info text-white rounded-full"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                        </svg>
-                                                        <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
-                                                    </a>
-                                                )}
-                                                <button
-                                                    onClick={() => openDeleteModal(file)}
-                                                    className="btn btn-sm btn-error text-white rounded-full"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                    <span className="ml-1 hidden lg:block">ลบ</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={5} className="text-center py-8 text-gray-500">
-                                            {isLoading ? (
-                                                <div className="flex items-center justify-center space-x-2">
-                                                    <span className="loading loading-spinner loading-sm"></span>
-                                                    <span>กำลังโหลดข้อมูล...</span>
+                        {/* Dashboard Tab */}
+                        {activeTab === "dashboard" && (
+                            <div>
+                                {/* System Overview Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                    <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="text-primary bg-secondary bg-opacity-10 p-3 rounded-full">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">จำนวนเอกสาร</div>
+                                                <div className="text-3xl font-bold">{pdfFiles.length}</div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">เอกสารทั้งหมดในระบบ</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="text-secondary bg-primary bg-opacity-10 p-3 rounded-full">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.972 5.972 0 01-.569-2.533v-.001c0-.246.04-.487.117-.709A5.972 5.972 0 018 12a5.972 5.972 0 01.117-.709c.077-.222.117-.463.117-.709v-.001a5.972 5.972 0 01-.569-2.533m0 0a5.972 5.972 0 015.411-.533M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22L12 18.77L5.82 22L7 14.14l-5-4.87L8.91 8.26L12 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">ผู้ใช้งานทั้งหมด</div>
+                                                <div className="text-3xl font-bold">{totalUsers}</div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">บัญชีผู้ใช้ในระบบ</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="text-info bg-accent bg-opacity-10 p-3 rounded-full">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
+                                                <div className="text-lg font-bold truncate">
+                                                    {latestFile?.fileName || "ไม่มี"}
                                                 </div>
-                                            ) : (
-                                                "ไม่พบเอกสาร PDF"
-                                            )}
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    {latestFile?.createdAt ? new Date(latestFile.createdAt).toLocaleDateString("th-TH") : ""}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    {/* --- User Management Section --- */}
-                    <h2 className="text-2xl font-bold mb-4">การจัดการผู้ใช้งาน</h2>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <p className="text-lg">จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ</p>
-                        <Button className="font-bold">
-                        <Link href="/admin/users" className=" rounded-full ">
-                            ไปที่หน้าจัดการผู้ใช้งาน
-                        </Link>
-                        </Button>
+                                {/* Quick Actions */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
+                                        <h3 className="text-lg font-bold mb-4 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            การจัดการเอกสาร
+                                        </h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">ดู จัดการ และลบเอกสารทั้งหมดในระบบ</p>
+                                        <Button 
+                                            onClick={() => setActiveTab("documents")}
+                                            className="w-full"
+                                        >
+                                            เข้าสู่การจัดการเอกสาร
+                                        </Button>
+                                    </div>
+                                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
+                                        <h3 className="text-lg font-bold mb-4 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 4.197a4 4 0 11-7.32 0l3.66 1.83z" />
+                                            </svg>
+                                            การจัดการผู้ใช้งาน
+                                        </h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ</p>
+                                        <Button 
+                                            onClick={() => setActiveTab("users")}
+                                            className="w-full"
+                                            variant="outline"
+                                        >
+                                            เข้าสู่การจัดการผู้ใช้งาน
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Documents Tab */}
+                        {activeTab === "documents" && (
+                            <div>
+                                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                                    <input
+                                        type="text"
+                                        placeholder="ค้นหาชื่อไฟล์ หรือ ผู้สร้าง..."
+                                        className="input input-bordered w-full sm:w-80 rounded-full border-2"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    <select
+                                        className="select select-bordered w-full sm:w-auto rounded-full border-2"
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                    >
+                                        <option value="createdAtDesc">
+                                            เรียงตามวันที่สร้าง (ใหม่สุด)
+                                        </option>
+                                        <option value="createdAtAsc">
+                                            เรียงตามวันที่สร้าง (เก่าสุด)
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl">
+                                    <table className="table w-full">
+                                        <thead>
+                                            <tr className="text-lg text-gray-600 dark:text-gray-300">
+                                                <th>ชื่อไฟล์</th>
+                                                <th>ผู้สร้าง</th>
+                                                <th className="hidden md:table-cell">สร้างเมื่อ</th>
+                                                <th className="hidden md:table-cell">ประเภทเอกสาร</th>
+                                                <th>การกระทำ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredAndSortedPdfs.length > 0 ? (
+                                                filteredAndSortedPdfs.map((file) => (
+                                                    <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                        <td className="font-semibold">{file.fileName}</td>
+                                                        <td>{file.userName || 'Unknown User'}</td>
+                                                        <td className="text-gray-500 hidden md:table-cell">
+                                                            {new Date(file.createdAt).toLocaleDateString("th-TH")}
+                                                        </td>
+                                                        <td className="text-gray-500 hidden md:table-cell">
+                                                            {file.fileExtension}
+                                                        </td>
+                                                        <td className="flex space-x-2">
+                                                            {file.storagePath && (
+                                                                <a
+                                                                    href={file.storagePath}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="btn btn-sm btn-info text-white rounded-full"
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                    </svg>
+                                                                    <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
+                                                                </a>
+                                                            )}
+                                                            <button
+                                                                onClick={() => openDeleteModal(file)}
+                                                                className="btn btn-sm btn-error text-white rounded-full"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                                <span className="ml-1 hidden lg:block">ลบ</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={5} className="text-center py-8 text-gray-500">
+                                                        {isLoading ? (
+                                                            <div className="flex items-center justify-center space-x-2">
+                                                                <span className="loading loading-spinner loading-sm"></span>
+                                                                <span>กำลังโหลดข้อมูล...</span>
+                                                            </div>
+                                                        ) : (
+                                                            "ไม่พบเอกสาร"
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Users Tab */}
+                        {activeTab === "users" && (
+                            <div>
+                                <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl text-center">
+                                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 4.197a4 4 0 11-7.32 0l3.66 1.83z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">การจัดการผู้ใช้งาน</h3>
+                                    <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+                                        จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ ดู แก้ไข และจัดการสิทธิ์การเข้าถึงของผู้ใช้
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                                        <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
+                                            <div className="text-2xl font-bold text-primary">{totalUsers}</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">ผู้ใช้งานทั้งหมด</div>
+                                        </div>
+                                        <div className="bg-success/10 p-4 rounded-lg border border-success/20">
+                                            <div className="text-2xl font-bold text-success">Active</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">สถานะผู้ใช้</div>
+                                        </div>
+                                        <div className="bg-info/10 p-4 rounded-lg border border-info/20">
+                                            <div className="text-2xl font-bold text-info">{pdfFiles.length}</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">เอกสารที่สร้าง</div>
+                                        </div>
+                                    </div>
+                                    <Button 
+                                        size="lg"
+                                        className="hover:bg-secondary-focus text-white shadow-lg"
+                                        onClick={() => router.push("/admin/users")}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        เข้าสู่การจัดการผู้ใช้งานแบบละเอียด
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

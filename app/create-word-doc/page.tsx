@@ -7,6 +7,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogDescription,
+  DialogClose
+} from "@/components/ui/dialog";
 
 interface WordDocumentData {
   head: string;
@@ -49,6 +58,7 @@ export default function TestWordWithSignaturePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const fixedValues = {
     topic: 'รายงานผลการปฏิบัติงาน',
@@ -65,6 +75,10 @@ export default function TestWordWithSignaturePage() {
     }));
   };
 
+  const handleBack = () => {
+    router.push("/createdocs");
+  };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setSignatureFile(file);
@@ -77,6 +91,10 @@ export default function TestWordWithSignaturePage() {
     } else {
       setSignaturePreview(null);
     }
+  };
+
+  const openPreviewModal = () => {
+    setIsPreviewOpen(true);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -126,10 +144,7 @@ export default function TestWordWithSignaturePage() {
         setGeneratedFileUrl(url);
         setMessage("สร้างเอกสาร Word สำเร็จแล้ว!");
         setIsError(false);
-
-        setTimeout(() => {
-          router.push('/userdashboard');
-        }, 2000);
+        setIsSuccessModalOpen(true);
       } else {
         const errorText = await response.text();
         setMessage(`เกิดข้อผิดพลาด: ${errorText || "ไม่สามารถสร้างเอกสาร Word ได้"}`);
@@ -149,27 +164,14 @@ export default function TestWordWithSignaturePage() {
   return (
     <div className="min-h-screen flex flex-col items-center bg-base-200 p-4 font-sans antialiased">
       <div className="navbar bg-base-100 rounded-box shadow-lg mb-6 w-full max-w-4xl">
-        <div className="flex-1">
-          <Button>
-          <Link href="/createdocs">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            <span className="ml-2">กลับ</span>
-          </Link>
-          </Button>
-        </div>
+      <div className="flex-1">
+                    <Button onClick={handleBack} >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span className="ml-2">กลับ</span>
+                    </Button>
+                </div>
       </div>
 
       <div className="card w-full max-w-4xl shadow-xl bg-base-100 p-6">
@@ -404,48 +406,189 @@ export default function TestWordWithSignaturePage() {
             </div>
           )}
 
-          <Button
-            type="submit"
-            className=" w-full"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <span className="loading loading-spinner"></span>
-                กำลังสร้าง Word...
-              </>
-            ) : (
-              "สร้างเอกสาร"
-            )}
-          </Button>
+          <div className="flex gap-4">
+            <Button
+              type="button"
+              onClick={openPreviewModal}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              disabled={isSubmitting}
+            >
+              ดูตัวอย่างข้อมูล
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="loading loading-spinner"></span>
+                  กำลังสร้าง Word...
+                </>
+              ) : (
+                "สร้างเอกสาร"
+              )}
+            </Button>
+          </div>
         </form>
 
         
 
-        {message && (
-          <div
-            className={`alert ${
-              isError ? "alert-error" : "alert-success"
-            } mt-6`}
-          >
+        {message && isError && (
+          <div className="alert alert-error mt-6">
             <span>{message}</span>
           </div>
         )}
-
-        {generatedFileUrl && (
-          <div className="mt-6 text-center">
-            <p className="mb-2">เอกสาร Word ของคุณพร้อมแล้ว:</p>
-            <a
-              href={generatedFileUrl}
-              download={downloadFileName}
-              rel="noopener noreferrer"
-              className="btn btn-info"
-            >
-              ดาวน์โหลด Word
-            </a>
-          </div>
-        )}
       </div>
+
+      {/* Preview Modal */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>ตัวอย่างข้อมูลที่จะสร้างเอกสาร</DialogTitle>
+            <DialogDescription>
+              กรุณาตรวจสอบข้อมูลของคุณก่อนสร้างเอกสาร
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ชื่อไฟล์:</h4>
+                <p className="text-sm">{formData.fileName || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">เลขที่หนังสือ:</h4>
+                <p className="text-sm">{formData.head || '-'}</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">วันที่:</h4>
+                <p className="text-sm">{formData.date || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">เรื่อง:</h4>
+                <p className="text-sm">{formData.topicdetail || '-'}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-sm text-gray-600">ผู้รับ:</h4>
+              <p className="text-sm">{formData.todetail || '-'}</p>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-sm text-gray-600">สิ่งที่ส่งมาด้วย:</h4>
+              <p className="text-sm">{formData.attachmentdetail || '-'}</p>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-sm text-gray-600">เนื้อหา:</h4>
+              <p className="text-sm whitespace-pre-wrap">{formData.detail || '-'}</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ชื่อผู้ลงนาม:</h4>
+                <p className="text-sm">{formData.name || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ตำแหน่ง/แผนก:</h4>
+                <p className="text-sm">{formData.depart || '-'}</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ผู้ประสานงาน:</h4>
+                <p className="text-sm">{formData.coor || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">เบอร์โทรศัพท์:</h4>
+                <p className="text-sm">{formData.tel || '-'}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-sm text-gray-600">อีเมล:</h4>
+              <p className="text-sm">{formData.email || '-'}</p>
+            </div>
+            
+            {signaturePreview && (
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ลายเซ็น:</h4>
+                <img
+                  src={signaturePreview}
+                  alt="Signature Preview"
+                  className="max-w-xs h-auto object-contain mt-2 border rounded"
+                />
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">แก้ไข</Button>
+            </DialogClose>
+            <Button onClick={() => {
+              setIsPreviewOpen(false);
+              document.querySelector('form')?.requestSubmit();
+            }}>
+              ยืนยันและสร้างเอกสาร
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Modal */}
+      <Dialog open={isSuccessModalOpen} onOpenChange={setIsSuccessModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-green-600">สร้างเอกสารสำเร็จ!</DialogTitle>
+            <DialogDescription>
+              เอกสาร Word ของคุณพร้อมแล้ว
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center space-y-4 py-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-center text-gray-600">
+              ไฟล์: {downloadFileName}
+            </p>
+          </div>
+          
+          <DialogFooter className="flex-col space-y-2">
+            {generatedFileUrl && (
+              <a
+                href={generatedFileUrl}
+                download={downloadFileName}
+                rel="noopener noreferrer"
+                className="w-full"
+              >
+                <Button className="w-full bg-green-600 hover:bg-green-700">
+                  ดาวน์โหลดเอกสาร
+                </Button>
+              </a>
+            )}
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                setIsSuccessModalOpen(false);
+                router.push('/userdashboard');
+              }}
+            >
+              กลับไปหน้าหลัก
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

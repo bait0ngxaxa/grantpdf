@@ -17,71 +17,7 @@ type UserFile = {
     updated_at: string;
     fileExtension: string;
     userName:string;
-    
 };
-
-// This is the new list of departments based on your mock data,
-// but in a real app, this should probably come from a separate API or config.
-const departmentList = [
-    {
-        name: "ทั้งหมด",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                />
-            </svg>
-        ),
-    },
-    {
-        name: "สัญญาจ้างทั่วไป",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 8c1.657 0 3 .895 3 2s-1.343 2-3 2-3-.895-3-2 1.343-2 3-2zM9 14c0 1.657 1.343 3 3 3s3-1.343 3-3-1.343-3-3-3-3 1.343-3 3z"
-                />
-            </svg>
-        ),
-    },
-    {
-        name: "ขอบเขตการดำเนินงาน (TORS)",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 8v8m-4-4v4m-4-4v4m-1.5-4h-2m13 0h-2m2 0a2 2 0 012 2v8a2 2 0 01-2 2h-12a2 2 0 01-2-2v-8a2 2 0 012-2h12a2 2 0 012 2z"
-                />
-            </svg>
-        ),
-    },
-    
-];
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
@@ -93,15 +29,20 @@ export default function DashboardPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("createdAtDesc");
     const [selectedDepartment, setSelectedDepartment] = useState("ทั้งหมด");
-    const [count , setCount] = useState(1);
+    const [selectedFileType, setSelectedFileType] = useState("ทั้งหมด");
 
     // New state for profile modal
     const [showProfileModal, setShowProfileModal] = useState(false);
+    
+    // Sidebar state
+    const [activeTab, setActiveTab] = useState("dashboard");
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // New state for fetching data from the API
     const [userFiles, setUserFiles] = useState<UserFile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
     // Fetch user documents from the API
     const fetchUserFiles = async () => {
@@ -122,6 +63,35 @@ export default function DashboardPage() {
         }
     };
 
+    // Handle file deletion
+    const handleDeleteFile = async (fileId: string) => {
+        if (!confirm("คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้?")) {
+            return;
+        }
+
+        setIsDeleting(fileId);
+        try {
+            const res = await fetch(`/api/admin/dashboard/file/${fileId}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to delete file");
+            }
+
+            // Remove file from local state
+            setUserFiles(prev => prev.filter(file => file.id !== fileId));
+            
+            // Show success message (you can add a toast notification here)
+            alert("ลบไฟล์สำเร็จ");
+        } catch (err) {
+            console.error("Error deleting file:", err);
+            alert("เกิดข้อผิดพลาดในการลบไฟล์ กรุณาลองใหม่อีกครั้ง");
+        } finally {
+            setIsDeleting(null);
+        }
+    };
+
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push("/signin");
@@ -136,29 +106,18 @@ export default function DashboardPage() {
         setIsModalOpen(true);
     };
 
-    const closePreviewModal = () => {
-        setIsModalOpen(false);
-        setPreviewUrl("");
-        setPreviewTitle("");
-    };
-
-    // Filter and sort the actual data from the API
+    // Filter and sort files
     const filteredAndSortedFiles = useMemo(() => {
-        let filtered = userFiles;
-
-        // Note: The API does not provide a 'department' field.
-        // The filter by department is kept for consistency with the original code,
-        // but it will not filter any documents unless you add 'department' to your API response.
-        // if (selectedDepartment !== "ทั้งหมด") {
-        //     filtered = filtered.filter((file) => file.department === selectedDepartment);
-        // }
-
-        // Filter by search term
-        filtered = filtered.filter((file) =>
-            file.originalFileName
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
+        let filtered = userFiles.filter((file) =>
+            file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
         );
+
+        // Filter by file type
+        if (selectedFileType !== "ทั้งหมด") {
+            filtered = filtered.filter((file) =>
+                file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
+            );
+        }
 
         // Sort the files
         const sorted = [...filtered].sort((a, b) => {
@@ -171,7 +130,7 @@ export default function DashboardPage() {
         });
 
         return sorted;
-    }, [userFiles, searchTerm, sortBy]);
+    }, [userFiles, searchTerm, sortBy, selectedFileType]);
 
     if (status === "loading" || isLoading) {
         return (
@@ -189,332 +148,471 @@ export default function DashboardPage() {
         );
     }
 
+    const menuItems = [
+        {
+            id: "dashboard",
+            name: "ภาพรวม",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+            )
+        },
+        {
+            id: "documents",
+            name: "เอกสารของฉัน",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            )
+        },
+        {
+            id: "create",
+            name: "สร้างเอกสาร",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                </svg>
+            )
+        }
+    ];
+
     return (
-        <>
+        <div>
             <Head>
                 <title>Dashboard | ระบบจัดการเอกสาร</title>
             </Head>
-            <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex flex-col">
-                <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-6 z-10 rounded-b-lg">
-                    <div className="flex-1">
-                        <Link
-                            href="/userdashboard"
-                            className="btn btn-ghost text-xl text-primary"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                                />
-                            </svg>
-                            <span className="ml-2 font-bold text-2xl ">
-                                ระบบจัดการเอกสาร
-                            </span>
-                        </Link>
-                    </div>
-                    <div className="flex-none">
-                        {session && (
-                            
-                            
-                            <div className="flex items-center space-x-4">
-                                <div className="dropdown dropdown-end">
-                                    
-                                    <div
-                                        tabIndex={0}
-                                        role="button"
-                                        className="cursor-pointer"
-                                    >
-                                        
-                                        
-                                        <Button
-                                            variant="ghost"
-                                            className=" font-bold text-l"
-                                        >
-                                            <div className="avatar">
-                                            <div className="w-8 rounded-full">
-                                                {session.user?.image ? (
-                                                    <img 
-                                                        src={session.user.image} 
-                                                        alt="Profile"
-                                                        className="w-8 h-8 rounded-full"
-                                                    />
-                                                ) : (
-                                                    <div className="avatar placeholder justify-center mr-2">
-                                                        <div className="bg-primary text-primary-content rounded-full w-8 text-center">
-                                                            <span className="text-lg">
-                                                                {session.user?.name 
-                                                                    ? session.user.name.charAt(0).toUpperCase() 
-                                                                    : session.user?.email?.charAt(0).toUpperCase() || 'U'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                            
-                                             {session.user?.name}
-                                            <svg
-                                                className="h-4 w-4 transition-transform duration-200"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M19 9l-7 7-7-7"
-                                                />
-                                            </svg>
-                                        </Button>
-                                        {/* <svg className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                        </svg> */}
-                                    </div>
-                                    <ul
-                                        tabIndex={0}
-                                        className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-                                    >
-                                        <li>
-                                            <button
-                                                onClick={() =>
-                                                    setShowProfileModal(true)
-                                                }
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-4 w-4"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                    />
-                                                </svg>
-                                                ข้อมูลส่วนตัว
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button onClick={() => signOut()}>
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-4 w-4"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                                                    />
-                                                </svg>
-                                                ออกจากระบบ
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
-                                {session.user?.role === "admin" && (
-                                    <Button
-                                        variant={"outline"}
-                                        className="font-bold"
-                                    >
-                                        <Link href="/admin">
-                                            แผงควบคุมแอดมิน
-                                        </Link>
-                                    </Button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
+            <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+                {/* Mobile sidebar overlay */}
+                {isSidebarOpen && (
+                    <div 
+                        className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                        onClick={() => setIsSidebarOpen(false)}
+                    ></div>
+                )}
 
-                <div className="flex flex-1 pt-6 px-6">
-                    {/* Sidebar */}
-                    <aside className="w-64 bg-white dark:bg-gray-800 p-4 mr-6 shadow-xl rounded-box hidden md:block">
-                        <h2 className="text-xl font-bold mb-4 border-b pb-2 border-gray-200 dark:border-gray-700">
-                            หน่วยงาน
-                        </h2>
-                        <ul className="menu">
-                            {departmentList.map((department) => (
-                                <li key={department.name}>
-                                    <a
-                                        className={`font-semibold ${
-                                            selectedDepartment ===
-                                            department.name
-                                                ? "active bg-primary text-white"
-                                                : ""
+                {/* Sidebar */}
+                <div className={`fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 z-50 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-primary">Dashboard</h2>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">ระบบจัดการเอกสาร</p>
+                                </div>
+                            </div>
+                            <button 
+                                className="lg:hidden btn btn-ghost btn-sm"
+                                onClick={() => setIsSidebarOpen(false)}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Navigation Menu */}
+                    <nav className="p-4">
+                        <ul className="space-y-2">
+                            {menuItems.map((item) => (
+                                <li key={item.id}>
+                                    <button
+                                        onClick={() => {
+                                            setActiveTab(item.id);
+                                            setIsSidebarOpen(false);
+                                        }}
+                                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 text-left ${
+                                            activeTab === item.id
+                                                ? 'bg-primary text-white shadow-md'
+                                                : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                                         }`}
-                                        onClick={() =>
-                                            setSelectedDepartment(
-                                                department.name
-                                            )
-                                        }
                                     >
-                                        {department.icon}
-                                        {department.name}
-                                    </a>
+                                        {item.icon}
+                                        <span className="font-medium">{item.name}</span>
+                                    </button>
                                 </li>
                             ))}
                         </ul>
-                    </aside>
+                    </nav>
 
-                    {/* Main Content */}
-                    <main className="flex-1">
-                        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                            <h1 className="text-3xl font-bold mb-4 md:mb-0">
-                                เอกสารของฉัน ({selectedDepartment})
-                            </h1>
-                            <Button className="border-2">
-                                <Link
-                                    href="/createdocs"
-                                    className="flex flex-wrap items-center gap-2 md:flex-row"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-5 w-5"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                    <span className="ml-2 font-bold">
-                                        สร้างเอกสารใหม่
-                                    </span>
-                                </Link>
-                            </Button>
+                    {/* User Info */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center space-x-3 mb-3">
+                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                <span className="text-xs font-bold text-white">
+                                    {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || 'U'}
+                                </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-m font-medium text-gray-900 dark:text-white truncate">
+                                    {session?.user?.name || 'ผู้ใช้'}
+                                </p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                    {session?.user?.email}
+                                </p>
+                            </div>
                         </div>
-
-                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                            <Input
-                                type="text"
-                                placeholder="ค้นหาชื่อไฟล์..."
-                                className="input input-bordered w-full sm:w-80 rounded-full"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <select
-                                className="select select-bordered w-full sm:w-auto rounded-full border-2"
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={() => setShowProfileModal(true)}
+                                className="flex-1 text-xs btn btn-ghost btn-sm text-gray-600 dark:text-gray-400 hover:text-primary"
                             >
-                                <option value="createdAtDesc">
-                                    เรียงตามวันที่สร้าง (ใหม่สุด)
-                                </option>
-                                <option value="createdAtAsc">
-                                    เรียงตามวันที่สร้าง (เก่าสุด)
-                                </option>
-                            </select>
+                                ข้อมูลส่วนตัว
+                            </button>
+                            <button 
+                                onClick={() => signOut()}
+                                className="flex-1 text-xs btn btn-ghost btn-sm text-red-600 dark:text-red-400 hover:text-red-500"
+                                title="ออกจากระบบ"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span className="hidden sm:inline ml-1">ออกจากระบบ</span>
+                            </button>
                         </div>
+                    </div>
+                </div>
 
-                        {/* Document List (Table) */}
-                        <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl">
-                            <table className="table w-full">
-                                <thead>
-                                    <tr className="text-lg text-gray-600 dark:text-gray-300 font-bold">
-                                        
-                                        <th>ชื่อไฟล์</th>
-                                        <th>ประเภทเอกสาร</th>
-                                        <th className="hidden md:table-cell">
-                                            สร้างเมื่อ
-                                        </th>
-                                        {/* <th className="hidden md:table-cell">
-                                            สร้างโดย
-                                        </th> */}
-                                        <th>การกระทำ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredAndSortedFiles.length > 0 ? (
-                                        filteredAndSortedFiles.map((file) => (
-                                            <tr
-                                                key={file.id}
-                                                className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                                            >
-                                                
-                                                <td className="font-semibold">
-                                                    {file.originalFileName}
-                                                </td>
-                                                <td> - </td>
-                                                <td className="text-gray-500 hidden md:table-cell">
-                                                    {new Date(
-                                                        file.created_at
-                                                    ).toLocaleDateString(
-                                                        "th-TH"
-                                                    )}
-                                                </td>
-                                                {/* <td className="text-gray-500 hidden md:table-cell">
-                                                    {
-                                                        file.userName
-                                                    }
-                                                </td> */}
-                                                <td className="flex space-x-2">
-                                                    <Button
-                                                        onClick={() =>
-                                                            window.open(
-                                                                file.storagePath,
-                                                                "_blank"
-                                                            )
-                                                        }
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-4 w-4"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            stroke="currentColor"
-                                                        >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth="2"
-                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                            />
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth="2"
-                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                                            />
-                                                        </svg>
-                                                        <span className="ml-1 hidden lg:block">
-                                                            พรีวิว
-                                                        </span>
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan={4}
-                                                className="text-center py-4 text-gray-500"
-                                            >
-                                                ไม่พบเอกสาร 
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                {/* Main Content */}
+                <div className="lg:ml-64 min-h-screen">
+                    {/* Top Bar */}
+                    <div className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                                <button 
+                                    className="lg:hidden btn btn-ghost btn-sm"
+                                    onClick={() => setIsSidebarOpen(true)}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    {menuItems.find(item => item.id === activeTab)?.name || 'Dashboard'}
+                                </h1>
+                            </div>
+                            <div className="hidden sm:flex items-center space-x-4">
+                                <span className="text-m text-gray-600 dark:text-gray-400">
+                                    {session?.user?.name} ({session?.user?.role || 'member'})
+                                </span>
+                                {session?.user?.role === "admin" && (
+                                    <Button
+                                        variant="outline"
+                                        className="font-bold"
+                                        onClick={() => router.push("/admin")}
+                                    >
+                                        แผงควบคุมแอดมิน
+                                    </Button>
+                                )}
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                    onClick={() => signOut()}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    ออกจากระบบ
+                                </Button>
+                            </div>
                         </div>
-                    </main>
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="p-6">
+                        {/* Dashboard Tab */}
+                        {activeTab === "dashboard" && (
+                            <div>
+                                {/* Statistics Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                    <div className="card bg-white dark:bg-gray-800 shadow-xl p-6 rounded-xl transform hover:scale-105 transition-transform duration-300">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="text-primary bg-secondary bg-opacity-10 p-3 rounded-full">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารทั้งหมด</div>
+                                                <div className="text-3xl font-bold">{filteredAndSortedFiles.length}</div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">เอกสารที่คุณสร้าง</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="card bg-white dark:bg-gray-800 shadow-xl p-6 rounded-xl transform hover:scale-105 transition-transform duration-300">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="text-secondary bg-primary bg-opacity-10 p-3 rounded-full">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
+                                                <div className="text-xl font-bold">
+                                                    {filteredAndSortedFiles.length > 0 
+                                                        ? new Date(filteredAndSortedFiles[0].created_at).toLocaleDateString("th-TH")
+                                                        : "ไม่มี"}
+                                                </div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">วันที่สร้างล่าสุด</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="card bg-white dark:bg-gray-800 shadow-xl p-6 rounded-xl transform hover:scale-105 transition-transform duration-300">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="text-accent bg-info bg-opacity-10 p-3 rounded-full">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">หมวดหมู่</div>
+                                                <div className="text-lg font-bold truncate">{selectedDepartment}</div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">หมวดหมู่ที่เลือก</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Quick Actions */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
+                                        <h3 className="text-lg font-bold mb-4 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            เอกสารของฉัน
+                                        </h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">ดูและจัดการเอกสารทั้งหมดของคุณ</p>
+                                        <Button 
+                                            onClick={() => setActiveTab("documents")}
+                                            className="w-full"
+                                        >
+                                            ดูเอกสารทั้งหมด
+                                        </Button>
+                                    </div>
+                                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
+                                        <h3 className="text-lg font-bold mb-4 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            สร้างเอกสารใหม่
+                                        </h3>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">เริ่มสร้างเอกสารใหม่ประเภทต่างๆ</p>
+                                        <Button 
+                                            onClick={() => setActiveTab("create")}
+                                            className="w-full"
+                                            variant="outline"
+                                        >
+                                            สร้างเอกสาร
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Documents Tab */}
+                        {activeTab === "documents" && (
+                            <div>
+                                {/* Filter and Search Controls */}
+                                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 mb-8">
+                                    <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                                        <div className="w-full lg:w-auto">
+                                            <Input
+                                                type="text"
+                                                placeholder="ค้นหาด้วยชื่อไฟล์..."
+                                                className="input input-bordered w-full lg:w-80 rounded-full border-2"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="flex flex-col lg:flex-row gap-4 w-full lg:w-auto">
+                                            <select
+                                                className="select select-bordered w-full lg:w-auto rounded-full border-2"
+                                                value={sortBy}
+                                                onChange={(e) => setSortBy(e.target.value)}
+                                            >
+                                                <option value="createdAtDesc">วันที่สร้าง (ใหม่สุด)</option>
+                                                <option value="createdAtAsc">วันที่สร้าง (เก่าสุด)</option>
+                                            </select>
+                                            <select
+                                                className="select select-bordered w-full lg:w-auto rounded-full border-2"
+                                                value={selectedFileType}
+                                                onChange={(e) => setSelectedFileType(e.target.value)}
+                                            >
+                                                <option value="ทั้งหมด">ทั้งหมด</option>
+                                                <option value="pdf">PDF</option>
+                                                <option value="docx">Word</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Files Table */}
+                                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+                                        เอกสารของคุณ ({filteredAndSortedFiles.length} ไฟล์)
+                                    </h2>
+
+                                    {isLoading ? (
+                                        <div className="flex items-center justify-center py-12">
+                                            <span className="loading loading-spinner loading-lg text-primary"></span>
+                                            <span className="ml-2 text-gray-600 dark:text-gray-400">กำลังโหลดเอกสาร...</span>
+                                        </div>
+                                    ) : filteredAndSortedFiles.length > 0 ? (
+                                        <div className="overflow-x-auto">
+                                            <table className="table w-full">
+                                                <thead>
+                                                    <tr className="text-lg text-gray-600 dark:text-gray-300">
+                                                        <th>ชื่อไฟล์</th>
+                                                        <th className="hidden md:table-cell">ประเภท</th>
+                                                        <th className="hidden md:table-cell">วันที่สร้าง</th>
+                                                        <th className="hidden md:table-cell">วันที่แก้ไข</th>
+                                                        <th>การกระทำ</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {filteredAndSortedFiles.map((file) => (
+                                                        <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                            <td className="font-semibold">
+                                                                <div className="flex items-center space-x-3">
+                                                                    <div className="flex-shrink-0">
+                                                                        {file.fileExtension === 'pdf' ? (
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                                            </svg>
+                                                                        ) : (
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                            </svg>
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="font-bold">{file.originalFileName}</div>
+                                                                        <div className="text-sm opacity-50 md:hidden">
+                                                                            {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="text-gray-500 hidden md:table-cell">
+                                                                <span className="badge badge-outline">
+                                                                    {file.fileExtension.toUpperCase()}
+                                                                </span>
+                                                            </td>
+                                                            <td className="text-gray-500 hidden md:table-cell">
+                                                                {new Date(file.created_at).toLocaleDateString("th-TH")}
+                                                            </td>
+                                                            <td className="text-gray-500 hidden md:table-cell">
+                                                                {new Date(file.updated_at).toLocaleDateString("th-TH")}
+                                                            </td>
+                                                            <td>
+                                                                <div className="flex space-x-2">
+                                                                    {file.fileExtension === 'pdf' && (
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                openPreviewModal(file.storagePath, file.originalFileName)
+                                                                            }
+                                                                            className="btn btn-sm btn-info text-white rounded-full"
+                                                                            title="พรีวิว PDF"
+                                                                        >
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                            </svg>
+                                                                            <span className="ml-1 hidden lg:block">พรีวิว</span>
+                                                                        </button>
+                                                                    )}
+                                                                    <a
+                                                                        href={file.storagePath}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="btn btn-sm btn-success text-white rounded-full"
+                                                                        title="ดาวน์โหลด"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                        </svg>
+                                                                        <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
+                                                                    </a>
+                                                                    <button
+                                                                        onClick={() => handleDeleteFile(file.id)}
+                                                                        disabled={isDeleting === file.id}
+                                                                        className="btn btn-sm btn-error text-white rounded-full"
+                                                                        title="ลบไฟล์"
+                                                                    >
+                                                                        {isDeleting === file.id ? (
+                                                                            <span className="loading loading-spinner loading-xs"></span>
+                                                                        ) : (
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                            </svg>
+                                                                        )}
+                                                                        <span className="ml-1 hidden lg:block">
+                                                                            {isDeleting === file.id ? 'กำลังลบ...' : 'ลบ'}
+                                                                        </span>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">ไม่พบเอกสาร</h3>
+                                            <p className="mt-1 text-gray-500 dark:text-gray-400">เริ่มสร้างเอกสารแรกของคุณ</p>
+                                            <div className="mt-6">
+                                                <Button onClick={() => setActiveTab("create")}>
+                                                    สร้างเอกสารใหม่
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Create Tab */}
+                        {activeTab === "create" && (
+                            <div>
+                                <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl text-center">
+                                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">สร้างเอกสารใหม่</h3>
+                                    <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+                                        เลือกประเภทเอกสารที่คุณต้องการสร้าง เริ่มต้นจากเทมเพลตหรือสร้างจากตัวอย่าง
+                                    </p>
+                                    <Button 
+                                        size="lg"
+                                        className="bg-primary hover:bg-primary-focus text-white shadow-lg"
+                                        onClick={() => router.push("/createdocs")}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        เริ่มสร้างเอกสาร
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Profile Modal */}
@@ -530,21 +628,12 @@ export default function DashboardPage() {
                             <div className="relative z-10">
                                 {/* Header */}
                                 <div className="flex flex-col items-center mb-6">
-                                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-10 w-10 text-white"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                            />
-                                        </svg>
+                                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-4 shadow-lg">
+                                        <span className="text-white text-2xl font-bold">
+                                            {session?.user?.name 
+                                                ? session.user.name.charAt(0).toUpperCase() 
+                                                : session?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                                        </span>
                                     </div>
                                     <h2 className="font-bold text-2xl text-center bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
                                         ข้อมูลส่วนตัว
@@ -554,121 +643,48 @@ export default function DashboardPage() {
                                     </p>
                                 </div>
 
-                                {/* User Info */}
+                                {/* User Information */}
                                 <div className="space-y-4 mb-6">
-                                    {/* ชื่อผู้ใช้ */}
-                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-l-4 border-blue-500">
-                                        <div className="flex items-center mb-2">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 text-blue-500 mr-2"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                />
-                                            </svg>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                ชื่อผู้ใช้
-                                            </p>
-                                        </div>
-                                        <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-                                            {session?.user?.name || "ไม่ระบุ"}
-                                        </p>
-                                    </div>
-
-                                    {/* อีเมล */}
-                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-l-4 border-purple-500">
-                                        <div className="flex items-center mb-2">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 text-purple-500 mr-2"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                                />
-                                            </svg>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                อีเมล
-                                            </p>
-                                        </div>
-                                        <p className="font-semibold text-gray-900 dark:text-gray-100">
-                                            {session?.user?.email || "ไม่ระบุ"}
-                                        </p>
-                                    </div>
-
-                                    {/* สถานะ */}
-                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-l-4 border-amber-500">
-                                        <div className="flex items-center mb-2">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 text-amber-500 mr-2"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                                                />
-                                            </svg>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                สถานะ
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span
-                                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                                    session?.user?.role ===
-                                                    "admin"
-                                                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                                                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                                }`}
-                                            >
-                                                {session?.user?.role === "admin"
-                                                    ? "ผู้ดูแลระบบ"
-                                                    : "ผู้ใช้ทั่วไป"}
-                                            </span>
+                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="text-blue-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">ชื่อผู้ใช้</div>
+                                                <div className="font-semibold">{session?.user?.name || 'ไม่ได้ระบุ'}</div>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* จำนวนเอกสาร */}
-                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-l-4 border-green-500">
-                                        <div className="flex items-center mb-2">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-5 w-5 text-green-500 mr-2"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth="2"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                />
-                                            </svg>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                จำนวนเอกสาร
-                                            </p>
+                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="text-green-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">อีเมล</div>
+                                                <div className="font-semibold">{session?.user?.email || 'ไม่ได้ระบุ'}</div>
+                                            </div>
                                         </div>
-                                        <p className="font-semibold text-green-600 dark:text-green-400 text-lg">
-                                            {userFiles.length} ไฟล์
-                                        </p>
+                                    </div>
+
+                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="text-purple-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586 1.414A11.955 11.955 0 0112 2.036 11.955 11.955 0 010 13.938V21.5h7.5v-7.562z" />
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">บทบาท</div>
+                                                <div className="font-semibold">{session?.user?.role || 'member'}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -676,23 +692,10 @@ export default function DashboardPage() {
                                 <div className="flex justify-end">
                                     <button
                                         className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-                                        onClick={() =>
-                                            setShowProfileModal(false)
-                                        }
+                                        onClick={() => setShowProfileModal(false)}
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-6 w-6"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M6 18L18 6M6 6l12 12"
-                                            />
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     </button>
                                 </div>
@@ -714,7 +717,7 @@ export default function DashboardPage() {
                                 </h3>
                                 <button
                                     className="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white"
-                                    onClick={closePreviewModal}
+                                    onClick={() => setIsModalOpen(false)}
                                 >
                                     ✕
                                 </button>
@@ -722,35 +725,19 @@ export default function DashboardPage() {
                             <div className="h-[calc(100%-64px)]">
                                 <iframe
                                     src={previewUrl}
-                                    title={previewTitle}
                                     width="100%"
                                     height="100%"
-                                    className="border-2 border-gray-300 dark:border-gray-700 rounded-lg"
-                                >
-                                    เบราว์เซอร์ของคุณไม่รองรับการแสดงผล PDF
-                                </iframe>
+                                    style={{ border: 'none' }}
+                                    title="PDF Preview"
+                                />
                             </div>
                         </div>
                         <form method="dialog" className="modal-backdrop">
-                            <button onClick={closePreviewModal}>ปิด</button>
+                            <button onClick={() => setIsModalOpen(false)}>close</button>
                         </form>
                     </dialog>
                 )}
-
-                {/* Animation Keyframes */}
-                <style jsx global>{`
-                    @keyframes modalSlideIn {
-                        0% {
-                            opacity: 0;
-                            transform: translateY(-20px) scale(0.95);
-                        }
-                        100% {
-                            opacity: 1;
-                            transform: translateY(0) scale(1);
-                        }
-                    }
-                `}</style>
             </div>
-        </>
+        </div>
     );
 }
