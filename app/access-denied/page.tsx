@@ -113,7 +113,7 @@ export default function AccessDeniedPage() {
                 </span>
               </div>
               <div className="flex items-center justify-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-focus rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
                   <span className="text-2xl font-bold text-white">{countdown}</span>
                 </div>
                 <span className="ml-3 text-gray-600 dark:text-gray-400">วินาที</span>

@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
         });
 
         if (!user) {
-            //console.log(`ไม่พบผู้ใช้ด้วยอีเมล ${email} ส่งข้อความทั่วไปเพื่อความปลอดภัย`);
-            return NextResponse.json({ message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปให้' }, { status: 200 });
+            
+            return NextResponse.json({ message: 'ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว' }, { status: 200 });
         }
 
         if (!JWT_SECRET) {
@@ -40,14 +40,6 @@ export async function POST(req: NextRequest) {
 
         
         const token = jwt.sign({ userId: String(user.id) }, JWT_SECRET, { expiresIn: '1h' });
-
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                passwordResetToken: token,
-                passwordResetExpire: new Date(Date.now() + 3600000),
-            },
-        });
 
         const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
         
@@ -66,7 +58,7 @@ export async function POST(req: NextRequest) {
         await transporter.sendMail(mailOptions);
 
         console.log(`ส่งอีเมลรีเซ็ตรหัสผ่านไปยัง ${email} สำเร็จ`);
-        return NextResponse.json({ message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปให้' }, { status: 200 });
+        return NextResponse.json({ message: 'ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว' }, { status: 200 });
 
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในกระบวนการรีเซ็ตรหัสผ่าน:', error);

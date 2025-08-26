@@ -33,19 +33,15 @@ export async function PUT(req: NextRequest) {
             return NextResponse.json({ error: 'โทเค็นไม่ถูกต้อง' }, { status: 400 });
         }
         
-        // Find the user by the token and check for expiry
-        const user = await prisma.user.findFirst({
+        // Find the user by userId from token
+        const user = await prisma.user.findUnique({
             where: {
                 id: Number(decodedToken.userId),
-                passwordResetToken: token,
-                passwordResetExpire: {
-                    gt: new Date(),
-                },
             },
         });
 
         if (!user) {
-            return NextResponse.json({ error: 'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุแล้ว' }, { status: 400 });
+            return NextResponse.json({ error: 'ไม่พบผู้ใช้งาน' }, { status: 400 });
         }
 
         
@@ -56,8 +52,6 @@ export async function PUT(req: NextRequest) {
             where: { id: user.id },
             data: {
                 password: hashedPassword,
-                passwordResetToken: null,
-                passwordResetExpire: null,
             },
         });
 

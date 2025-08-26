@@ -30,6 +30,7 @@ export default function AdminDashboardPage() {
     const [pdfFiles, setPdfFiles] = useState<PdfFile[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("createdAtDesc");
+    const [selectedFileType, setSelectedFileType] = useState("ทั้งหมด");
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [totalUsers , setTotalUsers] = useState(0)
@@ -158,6 +159,13 @@ export default function AdminDashboardPage() {
                 (file.userName && file.userName.toLowerCase().includes(searchTerm.toLowerCase()))
         );
 
+        // Filter by file type
+        if (selectedFileType !== "ทั้งหมด") {
+            filtered = filtered.filter((file) =>
+                file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
+            );
+        }
+
         filtered.sort((a, b) => {
             const dateA = new Date(a.createdAt).getTime();
             const dateB = new Date(b.createdAt).getTime();
@@ -168,7 +176,7 @@ export default function AdminDashboardPage() {
         });
 
         return filtered;
-    }, [searchTerm, sortBy, pdfFiles]);
+    }, [searchTerm, sortBy, selectedFileType, pdfFiles]);
 
     // Derived stats for the cards
     
@@ -428,7 +436,7 @@ export default function AdminDashboardPage() {
                                     </div>
                                     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
                                         <h3 className="text-lg font-bold mb-4 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 4.197a4 4 0 11-7.32 0l3.66 1.83z" />
                                             </svg>
                                             การจัดการผู้ใช้งาน
@@ -457,18 +465,29 @@ export default function AdminDashboardPage() {
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
-                                    <select
-                                        className="select select-bordered w-full sm:w-auto rounded-full border-2"
-                                        value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value)}
-                                    >
-                                        <option value="createdAtDesc">
-                                            เรียงตามวันที่สร้าง (ใหม่สุด)
-                                        </option>
-                                        <option value="createdAtAsc">
-                                            เรียงตามวันที่สร้าง (เก่าสุด)
-                                        </option>
-                                    </select>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <select
+                                            className="select select-bordered w-full sm:w-auto rounded-full border-2"
+                                            value={sortBy}
+                                            onChange={(e) => setSortBy(e.target.value)}
+                                        >
+                                            <option value="createdAtDesc">
+                                                เรียงตามวันที่สร้าง (ใหม่สุด)
+                                            </option>
+                                            <option value="createdAtAsc">
+                                                เรียงตามวันที่สร้าง (เก่าสุด)
+                                            </option>
+                                        </select>
+                                        <select
+                                            className="select select-bordered w-full sm:w-auto rounded-full border-2"
+                                            value={selectedFileType}
+                                            onChange={(e) => setSelectedFileType(e.target.value)}
+                                        >
+                                            <option value="ทั้งหมด">ทั้งหมด</option>
+                                            <option value="pdf">PDF</option>
+                                            <option value="docx">Word</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl">
@@ -586,26 +605,32 @@ export default function AdminDashboardPage() {
 
                 {/* --- Delete PDF Confirmation Modal --- */}
                 {isDeleteModalOpen && selectedFileIdForDeletion && (
-                    <dialog id="delete_pdf_modal" className="modal modal-open bg-black bg-opacity-50">
-                        <div className="modal-box bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-                            <h3 className="font-bold text-lg text-error">
-                                ยืนยันการลบเอกสาร
-                            </h3>
-                            <p className="py-4">
-                                คุณแน่ใจหรือไม่ว่าต้องการลบเอกสาร **{selectedFileNameForDeletion}**?
-                            </p>
-                            <p className="text-sm text-warning">การกระทำนี้ไม่สามารถย้อนกลับได้</p>
-                            <div className="modal-action">
-                                <button
-                                    className="btn btn-error rounded-full"
+                    <dialog className="modal modal-open">
+                        <div className="modal-box bg-white dark:bg-gray-800 max-w-md">
+                            <h3 className="font-bold text-lg text-red-600 mb-4">ยืนยันการลบเอกสาร</h3>
+                            <div className="py-4">
+                                <p className="text-gray-700 dark:text-gray-300 mb-2">
+                                    คุณแน่ใจหรือไม่ว่าต้องการลบเอกสาร <strong className="text-gray-900 dark:text-white">{selectedFileNameForDeletion}</strong>?
+                                </p>
+                                <p className="text-sm text-red-600 dark:text-red-400">
+                                    การกระทำนี้ไม่สามารถย้อนกลับได้
+                                </p>
+                            </div>
+                            <div className="flex justify-end space-x-3">
+                                <Button
+                                    variant="outline"
+                                    onClick={closeDeleteModal}
+                                    className="px-4 py-2"
+                                >
+                                    ยกเลิก
+                                </Button>
+                                <Button
                                     onClick={handleDeleteFile}
                                     disabled={isDeleting}
+                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white"
                                 >
-                                    {isDeleting ? "กำลังลบ..." : "ลบ"}
-                                </button>
-                                <button className="btn rounded-full" onClick={closeDeleteModal}>
-                                    ยกเลิก
-                                </button>
+                                    {isDeleting ? 'กำลังลบ...' : 'ลบ'}
+                                </Button>
                             </div>
                         </div>
                         <form method="dialog" className="modal-backdrop">

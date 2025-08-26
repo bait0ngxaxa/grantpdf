@@ -10,6 +10,7 @@ export default function SignupPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -20,6 +21,19 @@ export default function SignupPage() {
     const handleOpenConfirm = (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        
+        // Validate password confirmation
+        if (password !== confirmPassword) {
+            setError("รหัสผ่านไม่ตรงกัน กรุณากรอกรหัสผ่านให้เหมือนกัน");
+            return;
+        }
+        
+        // Validate password length
+        if (password.length < 6) {
+            setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+            return;
+        }
+        
         setShowConfirmModal(true);
     };
 
@@ -126,6 +140,20 @@ export default function SignupPage() {
                                     />
                                 </div>
 
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text font-medium">ยืนยันรหัสผ่าน</span>
+                                    </label>
+                                    <Input
+                                        type="password"
+                                        className="input input-bordered w-full rounded-full"
+                                        placeholder="********"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
+
                                 {error && (
                                     <div className="alert alert-error text-center text-sm rounded-lg">
                                         {error}
@@ -187,6 +215,10 @@ export default function SignupPage() {
                                 <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-accent">
                                     <p className="text-sm opacity-70">รหัสผ่าน</p>
                                     <p className="font-semibold">{"•".repeat(password.length)}</p>
+                                </div>
+                                <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-warning">
+                                    <p className="text-sm opacity-70">ยืนยันรหัสผ่าน</p>
+                                    <p className="font-semibold">{"•".repeat(confirmPassword.length)}</p>
                                 </div>
                             </div>
 

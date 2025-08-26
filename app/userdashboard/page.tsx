@@ -7,6 +7,14 @@ import { useEffect, useState, useMemo } from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { 
+    Dialog, 
+    DialogContent, 
+    DialogDescription, 
+    DialogFooter, 
+    DialogHeader, 
+    DialogTitle 
+} from "@/components/ui/dialog";
 
 // API Response type for better type safety
 type UserFile = {
@@ -43,6 +51,12 @@ export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    
+    // Modal states for delete confirmation and success
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState("");
 
     // Fetch user documents from the API
     const fetchUserFiles = async () => {
@@ -63,15 +77,21 @@ export default function DashboardPage() {
         }
     };
 
-    // Handle file deletion
-    const handleDeleteFile = async (fileId: string) => {
-        if (!confirm("คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้?")) {
-            return;
-        }
+    // Handle file deletion - Show confirmation modal
+    const handleDeleteFile = (fileId: string) => {
+        setFileToDelete(fileId);
+        setShowDeleteModal(true);
+    };
 
-        setIsDeleting(fileId);
+    // Confirm delete file
+    const confirmDeleteFile = async () => {
+        if (!fileToDelete) return;
+
+        setIsDeleting(fileToDelete);
+        setShowDeleteModal(false);
+        
         try {
-            const res = await fetch(`/api/admin/dashboard/file/${fileId}`, {
+            const res = await fetch(`/api/admin/dashboard/file/${fileToDelete}`, {
                 method: "DELETE",
             });
 
@@ -80,16 +100,26 @@ export default function DashboardPage() {
             }
 
             // Remove file from local state
-            setUserFiles(prev => prev.filter(file => file.id !== fileId));
+            setUserFiles(prev => prev.filter(file => file.id !== fileToDelete));
             
-            // Show success message (you can add a toast notification here)
-            alert("ลบไฟล์สำเร็จ");
+            // Show success modal
+            setSuccessMessage("ลบไฟล์สำเร็จ");
+            setShowSuccessModal(true);
+            
         } catch (err) {
             console.error("Error deleting file:", err);
-            alert("เกิดข้อผิดพลาดในการลบไฟล์ กรุณาลองใหม่อีกครั้ง");
+            setSuccessMessage("เกิดข้อผิดพลาดในการลบไฟล์ กรุณาลองใหม่อีกครั้ง");
+            setShowSuccessModal(true);
         } finally {
             setIsDeleting(null);
+            setFileToDelete(null);
         }
+    };
+
+    // Cancel delete
+    const cancelDelete = () => {
+        setShowDeleteModal(false);
+        setFileToDelete(null);
     };
 
     useEffect(() => {
@@ -304,11 +334,11 @@ export default function DashboardPage() {
                                 </span>
                                 {session?.user?.role === "admin" && (
                                     <Button
-                                        variant="outline"
-                                        className="font-bold"
+                                        // variant="outline"
+                                        className="font-semibold"
                                         onClick={() => router.push("/admin")}
                                     >
-                                        แผงควบคุมแอดมิน
+                                        Admin Panel
                                     </Button>
                                 )}
                                 <Button
@@ -476,7 +506,7 @@ export default function DashboardPage() {
                                                         <th>ชื่อไฟล์</th>
                                                         <th className="hidden md:table-cell">ประเภท</th>
                                                         <th className="hidden md:table-cell">วันที่สร้าง</th>
-                                                        <th className="hidden md:table-cell">วันที่แก้ไข</th>
+                                                        
                                                         <th>การกระทำ</th>
                                                     </tr>
                                                 </thead>
@@ -512,9 +542,7 @@ export default function DashboardPage() {
                                                             <td className="text-gray-500 hidden md:table-cell">
                                                                 {new Date(file.created_at).toLocaleDateString("th-TH")}
                                                             </td>
-                                                            <td className="text-gray-500 hidden md:table-cell">
-                                                                {new Date(file.updated_at).toLocaleDateString("th-TH")}
-                                                            </td>
+                                                           
                                                             <td>
                                                                 <div className="flex space-x-2">
                                                                     {file.fileExtension === 'pdf' && (
@@ -737,6 +765,75 @@ export default function DashboardPage() {
                         </form>
                     </dialog>
                 )}
+
+                {/* Delete Confirmation Modal */}
+                <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle className="text-red-600">
+                                <div className="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                    ยืนยันการลบไฟล์
+                                </div>
+                            </DialogTitle>
+                            <DialogDescription className="text-gray-600 dark:text-gray-400">
+                                คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button 
+                                variant="outline" 
+                                onClick={cancelDelete}
+                                className="w-full sm:w-auto mr-2"
+                            >
+                                ยกเลิก
+                            </Button>
+                            <Button 
+                                onClick={confirmDeleteFile}
+                                className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white"
+                                disabled={isDeleting === fileToDelete}
+                            >
+                                {isDeleting === fileToDelete ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        กำลังลบ...
+                                    </div>
+                                ) : (
+                                    "ลบไฟล์"
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Success Modal */}
+                <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle className="text-green-600">
+                                <div className="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {successMessage.includes('ข้อผิดพลาด') ? 'เกิดข้อผิดพลาด' : 'สำเร็จ!'}
+                                </div>
+                            </DialogTitle>
+                            <DialogDescription className={`${successMessage.includes('ข้อผิดพลาด') ? 'text-red-600' : 'text-green-600'}`}>
+                                {successMessage}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button 
+                                onClick={() => setShowSuccessModal(false)}
+                                className={`w-full ${successMessage.includes('ข้อผิดพลาด') ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white`}
+                            >
+                                ตกลง
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );

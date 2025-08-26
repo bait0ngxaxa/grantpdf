@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
         setError("");
 
         try {
-            // Replace the setTimeout with this real fetch call to your API
+            
             const res = await fetch('/api/auth/forgot-password', {
                 method: 'POST',
                 headers: {
@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
             const data = await res.json();
 
             if (res.ok) {
-                setMessage(data.message || "หากอีเมลนี้มีอยู่ในระบบ จะมีลิงก์รีเซ็ตรหัสผ่านถูกส่งไปให้");
+                setMessage(data.message || "ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว");
             } else {
                 setError(data.error || "เกิดข้อผิดพลาดในการส่งคำขอ");
                 console.error("Forgot password failed:", data.error);

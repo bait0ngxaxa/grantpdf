@@ -20,6 +20,7 @@ const PROTECTED_PAGES = [
     '/upload',
     '/userdashboard',
     '/create-word-doc', // ✅ เพิ่มหน้า create-word-doc ใน protected pages
+    '/createdocs',
 ];
 
 // NEW: Array for the reset password page
@@ -84,6 +85,7 @@ export const config = {
         '/upload',
         '/create-word-doc', // ✅ เพิ่ม /create-word-doc ใน matcher
         '/reset-password', // NEW: Add the reset password page to the matcher
+        '/createdocs',
         '/' // Optional: include the homepage if you want to protect it
     ],
 };

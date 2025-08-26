@@ -372,7 +372,7 @@ export default function AdminUserManagementPage() {
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
               <div className="flex items-center space-x-4">
-                <div className="text-secondary bg-secondary/10 p-3 rounded-full">
+                <div className="text-purple-500 bg-blue-100 dark:bg-blue-900/20 p-3 rounded-full">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586 1.414A11.955 11.955 0 0112 2.036 11.955 11.955 0 010 13.938V21.5h7.5v-7.562z" />
                   </svg>

@@ -5,8 +5,6 @@ CREATE TABLE `User` (
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `role` VARCHAR(191) NOT NULL DEFAULT 'member',
-    `passwordResetToken` VARCHAR(191) NULL,
-    `passwordResetExpire` DATETIME(3) NULL,
     `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     `updated_at` TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
 

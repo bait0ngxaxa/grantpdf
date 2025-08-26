@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -17,9 +18,6 @@ model User {
   email               String   @unique
   password            String
   role                String   @default("member")
-  passwordResetToken  String?
-  passwordResetExpire DateTime?
-
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
 
