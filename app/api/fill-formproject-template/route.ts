@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import ImageModule from "docxtemplater-image-module-free";
+//import ImageModule from "docxtemplater-image-module-free";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -44,93 +44,65 @@ export async function POST(req: Request) {
 
         // 1. Get the form data from the request body
         const formData = await req.formData();
-        const head = formData.get("head") as string;
-        const fileName = formData.get("fileName") as string;
-        const date = formData.get("date") as string;
-        const topicdetail = formData.get("topicdetail") as string;
-        const todetail = formData.get("todetail") as string;
-        const attachmentdetail = formData.get("attachmentdetail") as string;
-        let attachmentdetail2 = formData.get("attachmentdetail2") as string;
-        let attachmentdetail3 = formData.get("attachmentdetail3") as string;
-        const detail = formData.get("detail") as string;
-        const name = formData.get("name") as string;
-        const depart = formData.get("depart") as string;
-        const coor = formData.get("coor") as string;
+        const project = formData.get("project") as string;
+        const person = formData.get("person") as string;
+        const address = formData.get("address") as string;
         const tel = formData.get("tel") as string;
         const email = formData.get("email") as string;
-        const signatureFile = formData.get("signatureFile") as File | null;
-        const fixedAttachment = formData.get("attachment") as string;
-        const fixedRegard = formData.get("regard") as string;
-
-        if (!signatureFile) {
-            return new NextResponse("Signature file is missing.", {
-                status: 400,
-            });
-        }
-
-        if (
-            !attachmentdetail2 ||
-            attachmentdetail2 === "undefined" ||
-            attachmentdetail2 === "null"
-        ) {
-            attachmentdetail2 = "";
-        }
-
-        if (
-            !attachmentdetail3 ||
-            attachmentdetail3 === "undefined" ||
-            attachmentdetail3 === "null"
-        ) {
-            attachmentdetail3 = "";
-        }
-
-        // 2. Read the signature image file into a buffer
-        const signatureArrayBuffer = await signatureFile.arrayBuffer();
-        const signatureImageBuffer = Buffer.from(signatureArrayBuffer);
+        const timeline = formData.get("timeline") as string;
+        const cost = formData.get("cost") as string;
+        const rationale = formData.get("rationale") as string;
+        const objective = formData.get("objective") as string;
+        const objective2 = formData.get("objective2") as string;
+        const objective3 = formData.get("objective3") as string;
+        const target = formData.get("target") as string;
+        const zone = formData.get("zone") as string;
+        const scope = formData.get("scope") as string;
+        const monitoring = formData.get("monitoring") as string;
+        const partner = formData.get("partner") as string;
+        const datestart = formData.get("datestart") as string;
+        const dateend = formData.get("dateend") as string;
+        const author = formData.get("author") as string;
+        const month = formData.get("month") as string;
 
         // 3. Read the Word template file
         const templatePath = path.join(
             process.cwd(),
             "public",
-            "blank_header.docx"
+            "formproject.docx"
         );
         const content = await fs.readFile(templatePath);
 
         // 4. Initialize Docxtemplater
         const zip = new PizZip(content);
-        const imageModule = new ImageModule({
-            getImage: (tag: string) => {
-                if (tag === "signature") {
-                    return signatureImageBuffer;
-                }
-                return null;
-            },
-            getSize: () => [150, 80],
-            centered: false,
-        });
+
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
-            modules: [imageModule],
         });
 
         // 5. Render data into the template
         doc.render({
-            head,
-            date,
-            topicdetail,
-            todetail,
-            attachment: fixedAttachment,
-            attachmentdetail,
-            attachmentdetail2,
-            detail,
-            regard: fixedRegard,
-            name,
-            depart,
-            coor,
+            project,
+            person,
+            address,
             tel,
             email,
-            signature: "signature",
+            timeline,
+            cost,
+            rationale,
+            objective,
+            objective2,
+            objective3,
+            target,
+            zone,
+            scope,
+            monitoring,
+            partner,
+            datestart,
+            dateend,
+            author,
+            month,
         });
 
         // 6. Generate Word buffer
@@ -140,7 +112,7 @@ export async function POST(req: Request) {
         });
 
         // 7. Save file to public/uploads
-        const uniqueFileName = generateUniqueFilename(fileName + ".docx");
+        const uniqueFileName = generateUniqueFilename(project + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
         // สร้างโฟลเดอร์ถ้าไม่มี
@@ -152,7 +124,7 @@ export async function POST(req: Request) {
         // 8. Save file info to Prisma
         await prisma.userFile.create({
             data: {
-                originalFileName: fileName + ".docx",
+                originalFileName: project + ".docx",
                 storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
                 fileExtension: "docx",
                 userId: userId,

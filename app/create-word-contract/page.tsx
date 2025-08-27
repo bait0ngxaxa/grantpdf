@@ -126,165 +126,259 @@ export default function CreateContractPage() {
   const downloadFileName = formData.projectname.endsWith('.docx') ? formData.projectname: `${formData.projectname}.docx`;
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-base-200 p-4 font-sans antialiased">
-      <div className="navbar bg-base-100 rounded-box shadow-lg mb-6 w-full max-w-4xl">
-      <div className="flex-1">
-                    <Button onClick={handleBack} >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        <span className="ml-2">กลับ</span>
-                    </Button>
-                </div>
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans antialiased">
+      <div className="bg-white rounded-2xl shadow-lg mb-6 w-full max-w-5xl p-4">
+        <div className="flex items-center">
+          <Button
+            onClick={handleBack}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            <span className="ml-2">กลับ</span>
+          </Button>
+        </div>
       </div>
 
-      <div className="card w-full max-w-4xl shadow-xl bg-base-100 p-6">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          สร้างหนังสือสัญญาเพื่อรับรองการลงนาม
-        </h2>
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+          <h2 className="text-3xl font-bold text-center">
+            สร้างหนังสือสัญญาเพื่อรับรองการลงนาม
+          </h2>
+          <p className="text-center mt-2 text-blue-100">
+            กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารสัญญา
+          </p>
+        </div>
+        <div className="p-8">
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  ชื่อโครงการ 
-                </span>
-              </label>
-              <Input
-                type="text"
-                name="projectname"
-                placeholder="ชื่อโครงการ(ชื่อไฟล์)"
-                className="input input-bordered w-full"
-                value={formData.projectname}
-                onChange={handleChange}
-                required
-              />
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* ข้อมูลโครงการ */}
+            <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-300">
+                📋 ข้อมูลโครงการ
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ชื่อโครงการ{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectname"
+                    placeholder="ชื่อโครงการ(ชื่อไฟล์)"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectname}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ชื่อโครงการในสัญญา
+                  </label>
+                  <Input
+                    name="projectname2"
+                    placeholder="ชื่อโครงการในรายละเอียดสัญญา"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectname2}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  ชื่อผู้ลงนาม
-                </span>
-              </label>
-              <Input
-                type="text"
-                name="name"
-                placeholder="ผู้ลงนาม"
-                className="input input-bordered w-full"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            
-            
 
-           
-            
-            
-          </div>
-
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">
-                เลขบัตรประชาชน
-              </span>
-            </label>
-            <Input
-              type="text"
-              name="citizenid"
-              placeholder="หมายเลข 13 หลัก"
-              className="input input-bordered w-full"
-              value={formData.citizenid}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">
-                วันหมดอายุ
-              </span>
-            </label>
-            <Input
-              name="citizenexpire"
-              placeholder="วันหมดอายุบัตรประชาชน"
-              className="input input-bordered w-full"
-              value={formData.citizenexpire}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">
-                ชื่อโครงการในสัญญา
-              </span>
-            </label>
-            <Input
-              name="projectname2"
-              placeholder="ชื่อโครงการในรายละเอียดสัญญา"
-              className="input input-bordered w-full"
-              value={formData.projectname2}
-              onChange={handleChange}
-            />
+            {/* ข้อมูลผู้ลงนาม */}
+            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-blue-300">
+                👤 ข้อมูลผู้ลงนาม
+              </h3>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ชื่อผู้ลงนาม{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="name"
+                    placeholder="ผู้ลงนาม"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ที่อยู่{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    name="address"
+                    placeholder="ที่อยู่ผู้ลงนาม"
+                    className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
             </div>
-            
-          </div>
-          <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  ที่อยู่
-                </span>
-              </label>
-              <Textarea
-                
-                name="address"
-                placeholder="ที่อยู่ผู้ลงนาม"
-                className="textarea textarea-bordered h-20 w-full"
-                value={formData.address}
-                onChange={handleChange}
-                required
-              />
+
+            {/* ข้อมูลบัตรประชาชน */}
+            <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-green-300">
+                🆔 ข้อมูลบัตรประชาชน
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    เลขบัตรประชาชน{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="citizenid"
+                    placeholder="หมายเลข 13 หลัก"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.citizenid}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    วันหมดอายุ{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    name="citizenexpire"
+                    placeholder="วันหมดอายุบัตรประชาชน"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.citizenexpire}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
             </div>
 
           
 
-          <div className="flex gap-4">
-            <Button
-              type="button"
-              onClick={openPreviewModal}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
-              disabled={isSubmitting}
-            >
-              ดูตัวอย่างข้อมูล
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="loading loading-spinner"></span>
-                  กำลังสร้าง Word...
-                </>
-              ) : (
-                "สร้างเอกสาร"
-              )}
-            </Button>
-          </div>
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-200">
+              <Button
+                type="button"
+                onClick={openPreviewModal}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+                ดูตัวอย่างข้อมูล
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg
+                      className="animate-spin w-5 h-5 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    กำลังสร้างเอกสาร...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    สร้างเอกสาร Word
+                  </>
+                )}
+              </Button>
+            </div>
         </form>
 
         
 
-        {message && isError && (
-          <div className="alert alert-error mt-6">
-            <span>{message}</span>
-          </div>
-        )}
+          {message && isError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-6">
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>{message}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Preview Modal */}

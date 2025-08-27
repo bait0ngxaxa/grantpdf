@@ -19,7 +19,9 @@ const PROTECTED_PAGES = [
     '/test-field',
     '/upload',
     '/userdashboard',
-    '/create-word-doc', // ✅ เพิ่มหน้า create-word-doc ใน protected pages
+    '/create-word-approval', // ✅ เพิ่มหน้า create-word-doc ใน protected pages
+    '/create-word-contract', // ✅ เพิ่มหน้า create-word-doc ใน protected pages
+    '/create-word-formproject', // ✅ เพิ่มหน้า create-word-doc ใน protected pages
     '/createdocs',
 ];
 
@@ -83,7 +85,9 @@ export const config = {
         '/test-field',
         '/userdashboard',
         '/upload',
-        '/create-word-doc', // ✅ เพิ่ม /create-word-doc ใน matcher
+        '/create-word-approval', 
+        '/create-word-contract', 
+        '/create-word-formproject', 
         '/reset-password', // NEW: Add the reset password page to the matcher
         '/createdocs',
         '/' // Optional: include the homepage if you want to protect it
