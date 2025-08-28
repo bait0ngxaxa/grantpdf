@@ -112,7 +112,7 @@ export async function POST(req: Request) {
             project = await prisma.project.create({
                 data: {
                     name: projectName,
-                    description: `โครงการ ${projectName} - สร้างจากเอกสารสัญญาจ้างปฎิบัติงาน`,
+                    description: `${projectName} - สร้างจากเอกสารสัญญาจ้างปฎิบัติงาน`,
                     userId: userId,
                 },
             });

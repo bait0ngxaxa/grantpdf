@@ -203,23 +203,7 @@ export default function CreateFormProjectPage() {
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-300">
                                 📋 ข้อมูลโครงการ
                             </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-3">
-                                <div className="lg:col-span-2">
-                                    <label className="block my-3 text-sm font-medium text-slate-700 mb-2">
-                                        ชื่อไฟล์{" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        type="text"
-                                        name="projectName"
-                                        placeholder="ชื่อโครงการ"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        value={formData.projectName}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                            </div>
+                            
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div className="lg:col-span-2">
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -228,10 +212,10 @@ export default function CreateFormProjectPage() {
                                     </label>
                                     <Input
                                         type="text"
-                                        name="project"
+                                        name="projectName"
                                         placeholder="ชื่อโครงการ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        value={formData.project}
+                                        value={formData.projectName}
                                         onChange={handleChange}
                                         required
                                     />
@@ -364,7 +348,7 @@ export default function CreateFormProjectPage() {
                                     <Textarea
                                         name="rationale"
                                         placeholder="เหตุผลความจำเป็นในการดำเนินโครงการ"
-                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.rationale}
                                         onChange={handleChange}
                                         required
@@ -378,8 +362,8 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="objective"
-                                        placeholder="1."
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        placeholder="วัตถุประสงค์ที่ 1"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective}
                                         onChange={handleChange}
                                         required
@@ -389,8 +373,8 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="objective2"
-                                        placeholder="2."
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        placeholder="วัตถุประสงค์ที่ 2"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective2}
                                         onChange={handleChange}
                                         required
@@ -400,8 +384,8 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="objective3"
-                                        placeholder="3."
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        placeholder="วัตถุประสงค์ที่ 3"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective3}
                                         onChange={handleChange}
                                         required
@@ -415,7 +399,7 @@ export default function CreateFormProjectPage() {
                                     <Textarea
                                         name="target"
                                         placeholder="เป้าหมายที่ต้องการบรรลุ"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.target}
                                         onChange={handleChange}
                                         required
@@ -429,7 +413,7 @@ export default function CreateFormProjectPage() {
                                     <Textarea
                                         name="zone"
                                         placeholder="พื้นที่ดำเนินการ"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.zone}
                                         onChange={handleChange}
                                         required
@@ -443,7 +427,7 @@ export default function CreateFormProjectPage() {
                                     <Textarea
                                         name="scope"
                                         placeholder="ขอบเขตการดำเนินงาน"
-                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.scope}
                                         onChange={handleChange}
                                         required
@@ -457,7 +441,7 @@ export default function CreateFormProjectPage() {
                                     <Textarea
                                         name="monitoring"
                                         placeholder="วิธีการติดตามและประเมินผล"
-                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.monitoring}
                                         onChange={handleChange}
                                         required
@@ -471,7 +455,7 @@ export default function CreateFormProjectPage() {
                                     <Textarea
                                         name="partner"
                                         placeholder="หน่วยงานหรือบุคคลที่เกี่ยวข้อง"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.partner}
                                         onChange={handleChange}
                                         required
@@ -485,7 +469,7 @@ export default function CreateFormProjectPage() {
                                     <Textarea
                                         name="author"
                                         placeholder=""
-                                        className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.author}
                                         onChange={handleChange}
                                         required

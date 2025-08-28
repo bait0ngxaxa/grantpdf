@@ -39,6 +39,10 @@ export default function DashboardPage() {
     const [selectedDepartment, setSelectedDepartment] = useState("ทั้งหมด");
     const [selectedFileType, setSelectedFileType] = useState("ทั้งหมด");
 
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
     // New state for profile modal
     const [showProfileModal, setShowProfileModal] = useState(false);
     
@@ -136,7 +140,7 @@ export default function DashboardPage() {
         setIsModalOpen(true);
     };
 
-    // Filter and sort files
+    // Filter and sort files with pagination
     const filteredAndSortedFiles = useMemo(() => {
         let filtered = userFiles.filter((file) =>
             file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -161,6 +165,80 @@ export default function DashboardPage() {
 
         return sorted;
     }, [userFiles, searchTerm, sortBy, selectedFileType]);
+
+    // Pagination calculations
+    const totalItems = filteredAndSortedFiles.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentPageFiles = filteredAndSortedFiles.slice(startIndex, endIndex);
+
+    // Reset to first page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedFileType, sortBy]);
+
+    // Pagination handlers
+    const goToPage = (page: number) => {
+        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    };
+
+    const goToFirstPage = () => goToPage(1);
+    const goToLastPage = () => goToPage(totalPages);
+    const goToPreviousPage = () => goToPage(currentPage - 1);
+    const goToNextPage = () => goToPage(currentPage + 1);
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pages: (number | string)[] = [];
+        const maxVisiblePages = 5;
+        
+        if (totalPages <= maxVisiblePages) {
+            // Show all pages if total pages is less than or equal to maxVisiblePages
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+            
+            // Calculate start and end of visible pages
+            let start = Math.max(2, currentPage - 1);
+            let end = Math.min(totalPages - 1, currentPage + 1);
+            
+            // Adjust if we're near the beginning
+            if (currentPage <= 3) {
+                end = Math.min(totalPages - 1, 4);
+            }
+            
+            // Adjust if we're near the end
+            if (currentPage >= totalPages - 2) {
+                start = Math.max(2, totalPages - 3);
+            }
+            
+            // Add ellipsis after first page if needed
+            if (start > 2) {
+                pages.push('...');
+            }
+            
+            // Add visible pages
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+            
+            // Add ellipsis before last page if needed
+            if (end < totalPages - 1) {
+                pages.push('...');
+            }
+            
+            // Always show last page
+            if (totalPages > 1) {
+                pages.push(totalPages);
+            }
+        }
+        
+        return pages;
+    };
 
     if (status === "loading" || isLoading) {
         return (
@@ -199,13 +277,14 @@ export default function DashboardPage() {
         },
         {
             id: "create",
-            name: "สร้างเอกสาร",
+            name: "สร้างเอกสาร/อัพโหลด",
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                 </svg>
             )
-        }
+        },
+        
     ];
 
     return (
@@ -489,113 +568,209 @@ export default function DashboardPage() {
 
                                 {/* Files Table */}
                                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
-                                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-                                        เอกสารของคุณ ({filteredAndSortedFiles.length} ไฟล์)
-                                    </h2>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                                            เอกสารของคุณ ({totalItems} ไฟล์)
+                                        </h2>
+                                        {totalItems > 0 && (
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                แสดง {startIndex + 1}-{Math.min(endIndex, totalItems)} จาก {totalItems} รายการ
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {isLoading ? (
                                         <div className="flex items-center justify-center py-12">
                                             <span className="loading loading-spinner loading-lg text-primary"></span>
                                             <span className="ml-2 text-gray-600 dark:text-gray-400">กำลังโหลดเอกสาร...</span>
                                         </div>
-                                    ) : filteredAndSortedFiles.length > 0 ? (
-                                        <div className="overflow-x-auto">
-                                            <table className="table w-full">
-                                                <thead>
-                                                    <tr className="text-lg text-gray-600 dark:text-gray-300">
-                                                        <th>ชื่อไฟล์</th>
-                                                        <th className="hidden md:table-cell">ประเภท</th>
-                                                        <th className="hidden md:table-cell">วันที่สร้าง</th>
-                                                        
-                                                        <th>การกระทำ</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {filteredAndSortedFiles.map((file) => (
-                                                        <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                            <td className="font-semibold">
-                                                                <div className="flex items-center space-x-3">
-                                                                    <div className="flex-shrink-0">
-                                                                        {file.fileExtension === 'pdf' ? (
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                            </svg>
-                                                                        ) : (
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                            </svg>
-                                                                        )}
-                                                                    </div>
-                                                                    <div>
-                                                                        <div className="font-bold">{file.originalFileName}</div>
-                                                                        <div className="text-sm opacity-50 md:hidden">
-                                                                            {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
+                                    ) : currentPageFiles.length > 0 ? (
+                                        <>
+                                            <div className="overflow-x-auto">
+                                                <table className="table w-full">
+                                                    <thead>
+                                                        <tr className="text-lg text-gray-600 dark:text-gray-300">
+                                                            <th>ชื่อไฟล์</th>
+                                                            <th className="hidden md:table-cell">ประเภท</th>
+                                                            <th className="hidden md:table-cell">วันที่สร้าง</th>
+                                                            <th>การกระทำ</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {currentPageFiles.map((file) => (
+                                                            <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                                <td className="font-semibold">
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <div className="flex-shrink-0">
+                                                                            {file.fileExtension === 'pdf' ? (
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                                                </svg>
+                                                                            ) : (
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                                </svg>
+                                                                            )}
+                                                                        </div>
+                                                                        <div>
+                                                                            <div className="font-bold">{file.originalFileName}</div>
+                                                                            <div className="text-sm opacity-50 md:hidden">
+                                                                                {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            </td>
-                                                            <td className="text-gray-500 hidden md:table-cell">
-                                                                <span className="badge badge-outline">
-                                                                    {file.fileExtension.toUpperCase()}
-                                                                </span>
-                                                            </td>
-                                                            <td className="text-gray-500 hidden md:table-cell">
-                                                                {new Date(file.created_at).toLocaleDateString("th-TH")}
-                                                            </td>
-                                                           
-                                                            <td>
-                                                                <div className="flex space-x-2">
-                                                                    {file.fileExtension === 'pdf' && (
-                                                                        <button
-                                                                            onClick={() =>
-                                                                                openPreviewModal(file.storagePath, file.originalFileName)
-                                                                            }
-                                                                            className="btn btn-sm btn-info text-white rounded-full"
-                                                                            title="พรีวิว PDF"
+                                                                </td>
+                                                                <td className="text-gray-500 hidden md:table-cell">
+                                                                    <span className="badge badge-outline">
+                                                                        {file.fileExtension.toUpperCase()}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="text-gray-500 hidden md:table-cell">
+                                                                    {new Date(file.created_at).toLocaleDateString("th-TH")}
+                                                                </td>
+                                                               
+                                                                <td>
+                                                                    <div className="flex space-x-2">
+                                                                        {file.fileExtension === 'pdf' && (
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    openPreviewModal(file.storagePath, file.originalFileName)
+                                                                                }
+                                                                                className="btn btn-sm btn-info text-white rounded-full"
+                                                                                title="พรีวิว PDF"
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                </svg>
+                                                                                <span className="ml-1 hidden lg:block">พรีวิว</span>
+                                                                            </button>
+                                                                        )}
+                                                                        <a
+                                                                            href={file.storagePath}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="btn btn-sm btn-success text-white rounded-full"
+                                                                            title="ดาวน์โหลด"
                                                                         >
                                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                                                             </svg>
-                                                                            <span className="ml-1 hidden lg:block">พรีวิว</span>
+                                                                            <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
+                                                                        </a>
+                                                                        <button
+                                                                            onClick={() => handleDeleteFile(file.id)}
+                                                                            disabled={isDeleting === file.id}
+                                                                            className="btn btn-sm btn-error text-white rounded-full"
+                                                                            title="ลบไฟล์"
+                                                                        >
+                                                                            {isDeleting === file.id ? (
+                                                                                <span className="loading loading-spinner loading-xs"></span>
+                                                                            ) : (
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                                </svg>
+                                                                            )}
+                                                                            <span className="ml-1 hidden lg:block">
+                                                                                {isDeleting === file.id ? 'กำลังลบ...' : 'ลบ'}
+                                                                            </span>
                                                                         </button>
-                                                                    )}
-                                                                    <a
-                                                                        href={file.storagePath}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="btn btn-sm btn-success text-white rounded-full"
-                                                                        title="ดาวน์โหลด"
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            {/* Pagination Controls */}
+                                            {totalPages > 1 && (
+                                                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                        หน้า {currentPage} จาก {totalPages}
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center gap-2">
+                                                        {/* First Page Button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={goToFirstPage}
+                                                            disabled={currentPage === 1}
+                                                            className="hidden sm:flex"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                                                            </svg>
+                                                        </Button>
+
+                                                        {/* Previous Page Button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={goToPreviousPage}
+                                                            disabled={currentPage === 1}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                                            </svg>
+                                                            <span className="hidden sm:inline ml-1">ก่อนหน้า</span>
+                                                        </Button>
+
+                                                        {/* Page Numbers */}
+                                                        <div className="flex items-center gap-1">
+                                                            {getPageNumbers().map((page, index) => (
+                                                                page === '...' ? (
+                                                                    <span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-500">
+                                                                        ...
+                                                                    </span>
+                                                                ) : (
+                                                                    <Button
+                                                                        key={page}
+                                                                        variant={currentPage === page ? "default" : "outline"}
+                                                                        size="sm"
+                                                                        onClick={() => goToPage(Number(page))}
+                                                                        className={`min-w-[2.5rem] ${
+                                                                            currentPage === page 
+                                                                                ? "bg-primary text-white" 
+                                                                                : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                                        }`}
                                                                     >
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                        </svg>
-                                                                        <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
-                                                                    </a>
-                                                                    <button
-                                                                        onClick={() => handleDeleteFile(file.id)}
-                                                                        disabled={isDeleting === file.id}
-                                                                        className="btn btn-sm btn-error text-white rounded-full"
-                                                                        title="ลบไฟล์"
-                                                                    >
-                                                                        {isDeleting === file.id ? (
-                                                                            <span className="loading loading-spinner loading-xs"></span>
-                                                                        ) : (
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                            </svg>
-                                                                        )}
-                                                                        <span className="ml-1 hidden lg:block">
-                                                                            {isDeleting === file.id ? 'กำลังลบ...' : 'ลบ'}
-                                                                        </span>
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                                        {page}
+                                                                    </Button>
+                                                                )
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Next Page Button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={goToNextPage}
+                                                            disabled={currentPage === totalPages}
+                                                        >
+                                                            <span className="hidden sm:inline mr-1">ถัดไป</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </Button>
+
+                                                        {/* Last Page Button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={goToLastPage}
+                                                            disabled={currentPage === totalPages}
+                                                            className="hidden sm:flex"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                                            </svg>
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     ) : (
                                         <div className="text-center py-12">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -623,9 +798,9 @@ export default function DashboardPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                                         </svg>
                                     </div>
-                                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">สร้างเอกสารใหม่</h3>
+                                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">สร้างเอกสารใหม่ | อัพโหลดไฟล์เอกสาร</h3>
                                     <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                                        เลือกประเภทเอกสารที่คุณต้องการสร้าง เริ่มต้นจากเทมเพลตหรือสร้างจากตัวอย่าง
+                                        เลือกประเภทเอกสารที่คุณต้องการสร้าง หรือต้องการอัพโหลด
                                     </p>
                                     <Button 
                                         size="lg"
@@ -636,6 +811,16 @@ export default function DashboardPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                                         </svg>
                                         เริ่มสร้างเอกสาร
+                                    </Button>
+                                    <Button 
+                                        size="lg"
+                                        className="bg-primary hover:bg-primary-focus ml-5 text-white shadow-lg"
+                                        onClick={() => router.push("/uploads-doc")}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 13l3-3m0 0l3 3m-3-3v12" />
+                                        </svg>
+                                        อัพโหลดเอกสาร
                                     </Button>
                                 </div>
                             </div>

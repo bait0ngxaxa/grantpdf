@@ -467,7 +467,7 @@ export default function CreateTORPage() {
                                     <Textarea
                                         name="plan"
                                         placeholder="แผนการดำเนินงานโครงการ"
-                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.plan}
                                         onChange={handleChange}
                                     />
@@ -479,7 +479,7 @@ export default function CreateTORPage() {
                                     <Textarea
                                         name="projectmanage"
                                         placeholder="วิธีการจัดการและบริหารโครงการ"
-                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.projectmanage}
                                         onChange={handleChange}
                                     />
@@ -491,7 +491,7 @@ export default function CreateTORPage() {
                                     <Textarea
                                         name="partner"
                                         placeholder="วิธีการจัดการและบริหารโครงการ"
-                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.partner}
                                         onChange={handleChange}
                                     />

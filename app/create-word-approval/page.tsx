@@ -179,9 +179,9 @@ export default function CreateWordDocPage() {
         }
     };
 
-    const downloadFileName = formData.fileName.endsWith(".docx")
-        ? formData.fileName
-        : `${formData.fileName}.docx`;
+    const downloadFileName = formData.projectName.endsWith(".docx")
+        ? formData.projectName
+        : `${formData.projectName}.docx`;
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans antialiased">
@@ -230,7 +230,7 @@ export default function CreateWordDocPage() {
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ชื่อโครงการ{" "}
+                                        ชื่อเอกสาร{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
@@ -243,21 +243,7 @@ export default function CreateWordDocPage() {
                                         required
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ชื่อไฟล์{" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        type="text"
-                                        name="fileName"
-                                        placeholder="ชื่อไฟล์ (ไม่จำเป็นต้องมี .docx)"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        value={formData.fileName}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
+                                
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         เลขที่หนังสือ{" "}
@@ -342,7 +328,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="attachmentdetail"
-                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย (1)"
+                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย (1) "
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.attachmentdetail}
                                         onChange={handleChange}
@@ -352,7 +338,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="attachmentdetail2"
-                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย (2)"
+                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย 2 (ถ้ามี ถ้าไม่มีว่างไว้)"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.attachmentdetail2}
                                         onChange={handleChange}
@@ -362,7 +348,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="attachmentdetail3"
-                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย (3)"
+                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย 3 (ถ้ามี ถ้าไม่มีว่างไว้)"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.attachmentdetail3}
                                         onChange={handleChange}
@@ -376,7 +362,7 @@ export default function CreateWordDocPage() {
                                     <Textarea
                                         name="detail"
                                         placeholder="รายละเอียดเนื้อหา"
-                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.detail}
                                         onChange={handleChange}
                                         required

@@ -37,6 +37,10 @@ export default function AdminDashboardPage() {
     const [activeTab, setActiveTab] = useState("dashboard");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
     // State for managing the delete confirmation modal
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedFileIdForDeletion, setSelectedFileIdForDeletion] = useState<string | null>(null);
@@ -151,7 +155,7 @@ export default function AdminDashboardPage() {
         }
     };
 
-    // --- Data Filtering and Sorting ---
+    // --- Data Filtering and Sorting with Pagination ---
     const filteredAndSortedPdfs = useMemo(() => {
         let filtered = pdfFiles.filter(
             (file) =>
@@ -177,6 +181,80 @@ export default function AdminDashboardPage() {
 
         return filtered;
     }, [searchTerm, sortBy, selectedFileType, pdfFiles]);
+
+    // Pagination calculations
+    const totalItems = filteredAndSortedPdfs.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentPageFiles = filteredAndSortedPdfs.slice(startIndex, endIndex);
+
+    // Reset to first page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedFileType, sortBy]);
+
+    // Pagination handlers
+    const goToPage = (page: number) => {
+        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    };
+
+    const goToFirstPage = () => goToPage(1);
+    const goToLastPage = () => goToPage(totalPages);
+    const goToPreviousPage = () => goToPage(currentPage - 1);
+    const goToNextPage = () => goToPage(currentPage + 1);
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pages: (number | string)[] = [];
+        const maxVisiblePages = 5;
+        
+        if (totalPages <= maxVisiblePages) {
+            // Show all pages if total pages is less than or equal to maxVisiblePages
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+            
+            // Calculate start and end of visible pages
+            let start = Math.max(2, currentPage - 1);
+            let end = Math.min(totalPages - 1, currentPage + 1);
+            
+            // Adjust if we're near the beginning
+            if (currentPage <= 3) {
+                end = Math.min(totalPages - 1, 4);
+            }
+            
+            // Adjust if we're near the end
+            if (currentPage >= totalPages - 2) {
+                start = Math.max(2, totalPages - 3);
+            }
+            
+            // Add ellipsis after first page if needed
+            if (start > 2) {
+                pages.push('...');
+            }
+            
+            // Add visible pages
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+            
+            // Add ellipsis before last page if needed
+            if (end < totalPages - 1) {
+                pages.push('...');
+            }
+            
+            // Always show last page
+            if (totalPages > 1) {
+                pages.push(totalPages);
+            }
+        }
+        
+        return pages;
+    };
 
     // Derived stats for the cards
     
@@ -490,71 +568,176 @@ export default function AdminDashboardPage() {
                                     </div>
                                 </div>
 
-                                <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-xl">
-                                    <table className="table w-full">
-                                        <thead>
-                                            <tr className="text-lg text-gray-600 dark:text-gray-300">
-                                                <th>ชื่อไฟล์</th>
-                                                <th>ผู้สร้าง</th>
-                                                <th className="hidden md:table-cell">สร้างเมื่อ</th>
-                                                <th className="hidden md:table-cell">ประเภทเอกสาร</th>
-                                                <th>การกระทำ</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {filteredAndSortedPdfs.length > 0 ? (
-                                                filteredAndSortedPdfs.map((file) => (
-                                                    <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                        <td className="font-semibold">{file.fileName}</td>
-                                                        <td>{file.userName || 'Unknown User'}</td>
-                                                        <td className="text-gray-500 hidden md:table-cell">
-                                                            {new Date(file.createdAt).toLocaleDateString("th-TH")}
-                                                        </td>
-                                                        <td className="text-gray-500 hidden md:table-cell">
-                                                            {file.fileExtension}
-                                                        </td>
-                                                        <td className="flex space-x-2">
-                                                            {file.storagePath && (
-                                                                <a
-                                                                    href={file.storagePath}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="btn btn-sm btn-info text-white rounded-full"
-                                                                >
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                    </svg>
-                                                                    <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
-                                                                </a>
-                                                            )}
-                                                            <button
-                                                                onClick={() => openDeleteModal(file)}
-                                                                className="btn btn-sm btn-error text-white rounded-full"
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
-                                                                <span className="ml-1 hidden lg:block">ลบ</span>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={5} className="text-center py-8 text-gray-500">
-                                                        {isLoading ? (
-                                                            <div className="flex items-center justify-center space-x-2">
-                                                                <span className="loading loading-spinner loading-sm"></span>
-                                                                <span>กำลังโหลดข้อมูล...</span>
-                                                            </div>
-                                                        ) : (
-                                                            "ไม่พบเอกสาร"
-                                                        )}
-                                                    </td>
-                                                </tr>
+                                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                                            เอกสารทั้งหมด ({totalItems} ไฟล์)
+                                        </h2>
+                                        {totalItems > 0 && (
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                แสดง {startIndex + 1}-{Math.min(endIndex, totalItems)} จาก {totalItems} รายการ
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {isLoading ? (
+                                        <div className="flex items-center justify-center py-12">
+                                            <span className="loading loading-spinner loading-lg text-primary"></span>
+                                            <span className="ml-2 text-gray-600 dark:text-gray-400">กำลังโหลดเอกสาร...</span>
+                                        </div>
+                                    ) : currentPageFiles.length > 0 ? (
+                                        <>
+                                            <div className="overflow-x-auto">
+                                                <table className="table w-full">
+                                                    <thead>
+                                                        <tr className="text-lg text-gray-600 dark:text-gray-300">
+                                                            <th>ชื่อไฟล์</th>
+                                                            <th>ผู้สร้าง</th>
+                                                            <th className="hidden md:table-cell">สร้างเมื่อ</th>
+                                                            <th className="hidden md:table-cell">ประเภทเอกสาร</th>
+                                                            <th>การกระทำ</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {currentPageFiles.map((file) => (
+                                                            <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                                <td className="font-semibold">{file.fileName}</td>
+                                                                <td>{file.userName || 'Unknown User'}</td>
+                                                                <td className="text-gray-500 hidden md:table-cell">
+                                                                    {new Date(file.createdAt).toLocaleDateString("th-TH")}
+                                                                </td>
+                                                                <td className="text-gray-500 hidden md:table-cell">
+                                                                    <span className="badge badge-outline">
+                                                                        {file.fileExtension.toUpperCase()}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="flex space-x-2">
+                                                                    {file.storagePath && (
+                                                                        <a
+                                                                            href={file.storagePath}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="btn btn-sm btn-info text-white rounded-full"
+                                                                        >
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                            </svg>
+                                                                            <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
+                                                                        </a>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => openDeleteModal(file)}
+                                                                        className="btn btn-sm btn-error text-white rounded-full"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                        </svg>
+                                                                        <span className="ml-1 hidden lg:block">ลบ</span>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            {/* Pagination Controls */}
+                                            {totalPages > 1 && (
+                                                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                        หน้า {currentPage} จาก {totalPages}
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center gap-2">
+                                                        {/* First Page Button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={goToFirstPage}
+                                                            disabled={currentPage === 1}
+                                                            className="hidden sm:flex"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                                                            </svg>
+                                                        </Button>
+
+                                                        {/* Previous Page Button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={goToPreviousPage}
+                                                            disabled={currentPage === 1}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                                            </svg>
+                                                            <span className="hidden sm:inline ml-1">ก่อนหน้า</span>
+                                                        </Button>
+
+                                                        {/* Page Numbers */}
+                                                        <div className="flex items-center gap-1">
+                                                            {getPageNumbers().map((page, index) => (
+                                                                page === '...' ? (
+                                                                    <span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-500">
+                                                                        ...
+                                                                    </span>
+                                                                ) : (
+                                                                    <Button
+                                                                        key={page}
+                                                                        variant={currentPage === page ? "default" : "outline"}
+                                                                        size="sm"
+                                                                        onClick={() => goToPage(Number(page))}
+                                                                        className={`min-w-[2.5rem] ${
+                                                                            currentPage === page 
+                                                                                ? "bg-primary text-white" 
+                                                                                : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                                        }`}
+                                                                    >
+                                                                        {page}
+                                                                    </Button>
+                                                                )
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Next Page Button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={goToNextPage}
+                                                            disabled={currentPage === totalPages}
+                                                        >
+                                                            <span className="hidden sm:inline mr-1">ถัดไป</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </Button>
+
+                                                        {/* Last Page Button */}
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={goToLastPage}
+                                                            disabled={currentPage === totalPages}
+                                                            className="hidden sm:flex"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                                            </svg>
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             )}
-                                        </tbody>
-                                    </table>
+                                        </>
+                                    ) : (
+                                        <div className="text-center py-12">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">ไม่พบเอกสาร</h3>
+                                            <p className="mt-1 text-gray-500 dark:text-gray-400">ไม่มีเอกสารในระบบหรือไม่พบเอกสารที่ตรงกับการค้นหา</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

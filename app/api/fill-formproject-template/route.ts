@@ -90,7 +90,7 @@ export async function POST(req: Request) {
 
         // 5. Render data into the template
         doc.render({
-            project,
+            projectName,
             person,
             address,
             tel,
@@ -119,7 +119,7 @@ export async function POST(req: Request) {
         });
 
         // 7. Save file to public/uploads
-        const uniqueFileName = generateUniqueFilename(project + ".docx");
+        const uniqueFileName = generateUniqueFilename(projectName + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
         // สร้างโฟลเดอร์ถ้าไม่มี
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
             projectRecord = await prisma.project.create({
                 data: {
                     name: projectName,
-                    description: `โครงการ ${projectName} - สร้างจากแบบฟอร์มข้อเสนอโครงการ`,
+                    description: `${projectName} - สร้างจากแบบฟอร์มข้อเสนอโครงการ`,
                     userId: userId,
                 },
             });
@@ -150,7 +150,7 @@ export async function POST(req: Request) {
         // 9. Save file info to Prisma พร้อมเชื่อมกับ Project
         await prisma.userFile.create({
             data: {
-                originalFileName: project + ".docx",
+                originalFileName: projectName + ".docx",
                 storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
                 fileExtension: "docx",
                 userId: userId,

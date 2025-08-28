@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         const date = formData.get("date") as string;
         const topicdetail = formData.get("topicdetail") as string;
         const todetail = formData.get("todetail") as string;
-        const attachmentdetail = formData.get("attachmentdetail") as string;
+        let attachmentdetail = formData.get("attachmentdetail") as string;
         let attachmentdetail2 = formData.get("attachmentdetail2") as string;
         let attachmentdetail3 = formData.get("attachmentdetail3") as string;
         const detail = formData.get("detail") as string;
@@ -73,6 +73,10 @@ export async function POST(req: Request) {
             return new NextResponse("Project name is required.", {
                 status: 400,
             });
+        }
+
+        if (!attachmentdetail || attachmentdetail === "undefined" || attachmentdetail === "null") {
+            attachmentdetail = "";
         }
 
         if (
@@ -148,7 +152,7 @@ export async function POST(req: Request) {
         });
 
         // 7. Save file to public/uploads
-        const uniqueFileName = generateUniqueFilename(fileName + ".docx");
+        const uniqueFileName = generateUniqueFilename(projectName + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
         // สร้างโฟลเดอร์ถ้าไม่มี
@@ -170,7 +174,7 @@ export async function POST(req: Request) {
             project = await prisma.project.create({
                 data: {
                     name: projectName,
-                    description: `โครงการ ${projectName} - สร้างจากเอกสารอนุมัติ`,
+                    description: `${projectName} - สร้างจากเอกสารขออนุมัติ`,
                     userId: userId,
                 },
             });
@@ -179,7 +183,7 @@ export async function POST(req: Request) {
         // 9. Save file info to Prisma พร้อมเชื่อมกับ Project
         await prisma.userFile.create({
             data: {
-                originalFileName: fileName + ".docx",
+                originalFileName: projectName + ".docx",
                 storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
                 fileExtension: "docx",
                 userId: userId,
