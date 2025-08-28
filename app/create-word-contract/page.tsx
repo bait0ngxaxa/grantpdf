@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/dialog";
 
 interface WordDocumentData {
-  projectname: string;
+  projectName: string; // เพิ่มชื่อโครงการ
+  
   projectname2: string;
   name: string;
   address: string;
@@ -31,7 +32,8 @@ export default function CreateContractPage() {
   const router = useRouter();
 
   const [formData, setFormData] = useState<WordDocumentData>({
-    projectname: "",
+    projectName: "", // เพิ่มชื่อโครงการ
+    
     projectname2: "",
     name: "",
     address: "",
@@ -123,7 +125,7 @@ export default function CreateContractPage() {
     }
   };
 
-  const downloadFileName = formData.projectname.endsWith('.docx') ? formData.projectname: `${formData.projectname}.docx`;
+  const downloadFileName = formData.projectName.endsWith('.docx') ? formData.projectName: `${formData.projectName}.docx`;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans antialiased">
@@ -177,26 +179,15 @@ export default function CreateContractPage() {
                   </label>
                   <Input
                     type="text"
-                    name="projectname"
+                    name="projectName"
                     placeholder="ชื่อโครงการ(ชื่อไฟล์)"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    value={formData.projectname}
+                    value={formData.projectName}
                     onChange={handleChange}
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    ชื่อโครงการในสัญญา
-                  </label>
-                  <Input
-                    name="projectname2"
-                    placeholder="ชื่อโครงการในรายละเอียดสัญญา"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    value={formData.projectname2}
-                    onChange={handleChange}
-                  />
-                </div>
+               
               </div>
             </div>
 
@@ -395,7 +386,7 @@ export default function CreateContractPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h4 className="font-semibold text-sm text-gray-600">ชื่อไฟล์:</h4>
-                <p className="text-sm">{formData.projectname || '-'}</p>
+                <p className="text-sm">{formData.projectName || '-'}</p>
               </div>
               <div>
                 <h4 className="font-semibold text-sm text-gray-600">ชื่อ:</h4>

@@ -44,12 +44,19 @@ export async function POST(req: Request) {
 
         // 1. Get the form data from the request body
         const formData = await req.formData();
+        const projectName = formData.get("projectName") as string; // เพิ่มชื่อโครงการ
         const projectname = formData.get("projectname") as string;
         const projectname2 = formData.get("projectname2") as string;
         const name = formData.get("name") as string;
         const address = formData.get("address") as string;
         const citizenid = formData.get("citizenid") as string;
         const citizenexpire = formData.get("citizenexpire") as string;
+
+        if (!projectName) {
+            return new NextResponse("Project name is required.", {
+                status: 400,
+            });
+        }
 
         // 3. Read the Word template file
         const templatePath = path.join(
@@ -69,8 +76,7 @@ export async function POST(req: Request) {
 
         // 5. Render data into the template
         doc.render({
-            projectname,
-            projectname2,
+            projectName,
             name,
             address,
             citizenid,
@@ -93,21 +99,46 @@ export async function POST(req: Request) {
         const filePath = path.join(uploadDir, uniqueFileName);
         await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
-        // 8. Save file info to Prisma
-        await prisma.userFile.create({
-            data: {
-                originalFileName: projectname + ".docx",
-                storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
-                fileExtension: "docx",
+        // 8. สร้างหรือหา Project
+        let project = await prisma.project.findFirst({
+            where: {
+                name: projectName,
                 userId: userId,
             },
         });
 
-        // 9. Return JSON พร้อมลิงก์ดาวน์โหลด
-        const downloadUrl = `/upload/${uniqueFileName}`;
+        // ถ้าไม่มี Project ให้สร้างใหม่
+        if (!project) {
+            project = await prisma.project.create({
+                data: {
+                    name: projectName,
+                    description: `โครงการ ${projectName} - สร้างจากเอกสารสัญญาจ้างปฎิบัติงาน`,
+                    userId: userId,
+                },
+            });
+        }
+
+        // 9. Save file info to Prisma พร้อมเชื่อมกับ Project
+        await prisma.userFile.create({
+            data: {
+                originalFileName: projectName + ".docx",
+                storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
+                fileExtension: "docx",
+                userId: userId,
+                projectId: project.id, // เชื่อมกับโครงการ
+            },
+        });
+
+        // 10. Return JSON พร้อมลิงก์ดาวน์โหลดและข้อมูลโครงการ
+        const downloadUrl = `/upload/docx/${uniqueFileName}`;
         return NextResponse.json({
             success: true,
             downloadUrl,
+            project: {
+                id: project.id.toString(),
+                name: project.name,
+                description: project.description,
+            },
         });
     } catch (error) {
         console.error("Error generating or saving document:", error);

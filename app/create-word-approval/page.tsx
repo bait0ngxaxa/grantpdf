@@ -20,6 +20,7 @@ import {
 interface WordDocumentData {
     head: string;
     fileName: string;
+    projectName: string; // เพิ่มชื่อโครงการ
     date: string;
     topicdetail: string;
     todetail: string;
@@ -41,6 +42,7 @@ export default function CreateWordDocPage() {
     const [formData, setFormData] = useState<WordDocumentData>({
         head: "", //เลขที่หนังสือ
         fileName: "", //ชื่อไฟล์
+        projectName: "", //ชื่อโครงการ
         date: "", //วันที่
         topicdetail: "", //เรื่อง
         todetail: "", //ผู้รับ
@@ -149,12 +151,16 @@ export default function CreateWordDocPage() {
             });
 
             if (response.ok) {
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                setGeneratedFileUrl(url);
-                setMessage("สร้างเอกสาร Word สำเร็จแล้ว!");
-                setIsError(false);
-                setIsSuccessModalOpen(true);
+                const result = await response.json();
+                if (result.success && result.downloadUrl) {
+                    setGeneratedFileUrl(result.downloadUrl);
+                    setMessage(`สร้างเอกสาร Word สำเร็จแล้ว! โครงการ: ${result.project?.name || 'ไม่ระบุ'}`);
+                    setIsError(false);
+                    setIsSuccessModalOpen(true);
+                } else {
+                    setMessage("ไม่สามารถสร้างเอกสาร Word ได้");
+                    setIsError(true);
+                }
             } else {
                 const errorText = await response.text();
                 setMessage(
@@ -225,6 +231,21 @@ export default function CreateWordDocPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ชื่อโครงการ{" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        name="projectName"
+                                        placeholder="ชื่อโครงการ (เช่น โครงการพัฒนาระบบ)"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        value={formData.projectName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        ชื่อไฟล์{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
@@ -591,6 +612,14 @@ export default function CreateWordDocPage() {
 
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    ชื่อโครงการ:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.projectName || "-"}
+                                </p>
+                            </div>
                             <div>
                                 <h4 className="font-semibold text-sm text-gray-600">
                                     ชื่อไฟล์:

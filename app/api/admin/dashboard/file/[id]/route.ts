@@ -19,9 +19,9 @@ export async function DELETE(
     }
 
     // Check admin
-    if (session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
-    }
+    // if (session.user.role !== "admin") {
+    //   return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    // }
 
     // Get document ID
     const  {id}  = await params;

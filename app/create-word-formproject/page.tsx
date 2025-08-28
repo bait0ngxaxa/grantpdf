@@ -19,6 +19,7 @@ import {
 
 interface WordDocumentData {
     project: string;
+    projectName: string;
     person: string;
     address: string;
     tel: string;
@@ -46,6 +47,7 @@ export default function CreateFormProjectPage() {
 
     const [formData, setFormData] = useState<WordDocumentData>({
         project: "",
+        projectName: "",
         person: "",
         address: "",
         tel: "",
@@ -154,9 +156,9 @@ export default function CreateFormProjectPage() {
         }
     };
 
-    const downloadFileName = formData.project.endsWith(".docx")
-        ? formData.project
-        : `${formData.project}.docx`;
+    const downloadFileName = formData.projectName.endsWith(".docx")
+        ? formData.projectName
+        : `${formData.projectName}.docx`;
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans antialiased">
@@ -201,6 +203,23 @@ export default function CreateFormProjectPage() {
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-300">
                                 📋 ข้อมูลโครงการ
                             </h3>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-3">
+                                <div className="lg:col-span-2">
+                                    <label className="block my-3 text-sm font-medium text-slate-700 mb-2">
+                                        ชื่อไฟล์{" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        name="projectName"
+                                        placeholder="ชื่อโครงการ"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        value={formData.projectName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div className="lg:col-span-2">
                                     <label className="block text-sm font-medium text-slate-700 mb-2">

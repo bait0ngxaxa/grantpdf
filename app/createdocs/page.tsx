@@ -63,7 +63,7 @@ export default function CreateTorsPage() {
         router.push('/create-word-formproject');
     };
 
-    const handleTorsSelection = (templateId: string, title: string) => {
+    const handleTorSelection = (templateId: string, title: string) => {
         // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-doc
         const templateData = {
             id: templateId,
@@ -124,7 +124,7 @@ export default function CreateTorsPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
                         </div>
-                        <h2 className="card-title text-2xl mb-4">ยื่นโครงการ</h2>
+                        <h2 className="card-title text-2xl mb-4">สัญญาจ้างวิชาการ</h2>
                         <p className="text-lg text-base-content/60">เอกสารสำหรับการยื่นโครงการ</p>
                         <div className="mt-4">
                             <div className="badge badge-outline badge-lg">3 เอกสาร</div>
@@ -161,7 +161,7 @@ export default function CreateTorsPage() {
                         
                         <div
                             className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
-                            onClick={() => handleContractSelection('tor-general', 'ขอบเขตของงาน (TOR)')}
+                            onClick={() => handleTorSelection('tor-general', 'ขอบเขตของงาน (TOR)')}
                         >
                             <div className="card-body items-center text-center p-6">
                                 <div className="flex items-center justify-center p-4 rounded-full bg-primary/10">
@@ -215,7 +215,7 @@ export default function CreateTorsPage() {
                         
                         <div
                             className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-secondary"
-                            onClick={() => handleTorsSelection('tor-project', 'ขอบเขตของงาน (TOR)')}
+                            onClick={() => handleTorSelection('tor-project', 'ขอบเขตของงาน (TOR)')}
                         >
                             <div className="card-body items-center text-center p-6">
                                 <div className="flex items-center justify-center p-4 rounded-full bg-pink-500">

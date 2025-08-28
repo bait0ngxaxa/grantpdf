@@ -44,6 +44,7 @@ export async function POST(req: Request) {
 
         // 1. Get the form data from the request body
         const formData = await req.formData();
+        const projectName = formData.get("projectName") as string; // เพิ่มชื่อโครงการ
         const project = formData.get("project") as string;
         const person = formData.get("person") as string;
         const address = formData.get("address") as string;
@@ -64,6 +65,12 @@ export async function POST(req: Request) {
         const dateend = formData.get("dateend") as string;
         const author = formData.get("author") as string;
         const month = formData.get("month") as string;
+
+        if (!projectName) {
+            return new NextResponse("Project name is required.", {
+                status: 400,
+            });
+        }
 
         // 3. Read the Word template file
         const templatePath = path.join(
@@ -121,21 +128,46 @@ export async function POST(req: Request) {
         const filePath = path.join(uploadDir, uniqueFileName);
         await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
-        // 8. Save file info to Prisma
+        // 8. สร้างหรือหา Project
+        let projectRecord = await prisma.project.findFirst({
+            where: {
+                name: projectName,
+                userId: userId,
+            },
+        });
+
+        // ถ้าไม่มี Project ให้สร้างใหม่
+        if (!projectRecord) {
+            projectRecord = await prisma.project.create({
+                data: {
+                    name: projectName,
+                    description: `โครงการ ${projectName} - สร้างจากแบบฟอร์มข้อเสนอโครงการ`,
+                    userId: userId,
+                },
+            });
+        }
+
+        // 9. Save file info to Prisma พร้อมเชื่อมกับ Project
         await prisma.userFile.create({
             data: {
                 originalFileName: project + ".docx",
                 storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
                 fileExtension: "docx",
                 userId: userId,
+                projectId: projectRecord.id, // เชื่อมกับโครงการ
             },
         });
 
-        // 9. Return JSON พร้อมลิงก์ดาวน์โหลด
-        const downloadUrl = `/upload/${uniqueFileName}`;
+        // 10. Return JSON พร้อมลิงก์ดาวน์โหลดและข้อมูลโครงการ
+        const downloadUrl = `/upload/docx/${uniqueFileName}`;
         return NextResponse.json({
             success: true,
             downloadUrl,
+            project: {
+                id: projectRecord.id.toString(),
+                name: projectRecord.name,
+                description: projectRecord.description,
+            },
         });
     } catch (error) {
         console.error("Error generating or saving document:", error);
