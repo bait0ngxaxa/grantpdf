@@ -3,7 +3,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import type { NextAuthOptions, User } from 'next-auth'; // <-- Import User type here
+import type { NextAuthOptions, User } from 'next-auth'; 
 
 
 // Define the NextAuth.js configuration options
@@ -51,15 +51,12 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
-  // IMPORTANT: The `PrismaAdapter` is typically used with OAuth providers (Google, GitHub)
-  // to handle user creation and linking. For a CredentialsProvider-only setup,
-  // the `authorize` function already handles the user lookup, so the adapter is not needed.
-  // It has been removed here to simplify the code and prevent potential conflicts.
+  
 
   // Use JWT strategy for session management
   session: {
     strategy: 'jwt',
-    maxAge: 60 * 60, // กำหนดอายุของ session เป็น 24 ชั่วโมง
+    maxAge: 60 * 60, // กำหนดอายุของ session เป็น 1 ชั่วโมง
   },
 
   // Callbacks to manage the JWT token and session

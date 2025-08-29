@@ -16,9 +16,10 @@ import {
     DialogDescription,
     DialogClose,
 } from "@/components/ui/dialog";
+import { useTitle } from "@/hook/useTitle";
 
 interface WordDocumentData {
-    project: string;
+    
     projectName: string;
     person: string;
     address: string;
@@ -46,7 +47,7 @@ export default function CreateFormProjectPage() {
     const router = useRouter();
 
     const [formData, setFormData] = useState<WordDocumentData>({
-        project: "",
+        
         projectName: "",
         person: "",
         address: "",
@@ -77,6 +78,8 @@ export default function CreateFormProjectPage() {
     const [isError, setIsError] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+    useTitle("สร้างหนังสือข้อเสนอโครงการ | ระบบจัดการเอกสาร");
 
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -166,7 +169,7 @@ export default function CreateFormProjectPage() {
                 <div className="flex items-center">
                     <Button
                         onClick={handleBack}
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
+                        className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -190,10 +193,10 @@ export default function CreateFormProjectPage() {
             <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
                     <h2 className="text-3xl font-bold text-center">
-                        สร้างหนังสือสัญญาเพื่อรับรองการลงนาม
+                        สร้างหนังสือข้อเสนอโครงการ
                     </h2>
                     <p className="text-center mt-2 text-blue-100">
-                        กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารสัญญา
+                        กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสาร
                     </p>
                 </div>
                 <div className="p-8">
@@ -213,7 +216,7 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="projectName"
-                                        placeholder="ชื่อโครงการ"
+                                        placeholder="ระบุชื่อโครงการ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.projectName}
                                         onChange={handleChange}
@@ -234,7 +237,7 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="person"
-                                        placeholder="ชื่อผู้รับผิดชอบโครงการ"
+                                        placeholder="ระบุชื่อผู้รับผิดชอบโครงการ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.person}
                                         onChange={handleChange}
@@ -249,7 +252,7 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="address"
-                                        placeholder="ที่อยู่ที่ติดต่อได้"
+                                        placeholder="ระบุที่อยู่ติดต่อผู้รับผิดชอบ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.address}
                                         onChange={handleChange}
@@ -264,7 +267,7 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="tel"
                                         name="tel"
-                                        placeholder="0xx-xxx-xxxx"
+                                        placeholder="ระบุเบอร์โทรศัพท์ผู้รับผิดชอบ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.tel}
                                         onChange={handleChange}
@@ -279,7 +282,7 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="email"
                                         name="email"
-                                        placeholder="example@email.com"
+                                        placeholder="ระบุอีเมลผู้รับผิดชอบ example@mail.com"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.email}
                                         onChange={handleChange}
@@ -294,7 +297,7 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="timeline"
-                                        placeholder="ระยะเวลาเริ่มต้น - ระยะเวลาสิ้นสุด"
+                                        placeholder="ตัวอย่าง 1 มกราคม 2566 - 31 ธันวาคม 2566"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.timeline}
                                         onChange={handleChange}
@@ -309,7 +312,7 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="month"
-                                        placeholder="ระยะเวลากี่เดือน"
+                                        placeholder="ระบุตัวเลขจำนวนเดือน เช่น 12"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.month}
                                         onChange={handleChange}
@@ -324,7 +327,7 @@ export default function CreateFormProjectPage() {
                                     <Input
                                         type="text"
                                         name="cost"
-                                        placeholder="ตัวเลขตัวอย่าง 1,000,000"
+                                        placeholder="ตัวอย่าง 1000000 บาท (หนึ่งล้านบาทถ้วน)"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.cost}
                                         onChange={handleChange}
@@ -482,7 +485,7 @@ export default function CreateFormProjectPage() {
                             <Button
                                 type="button"
                                 onClick={openPreviewModal}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="cursor-pointer flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting}
                             >
                                 <svg
@@ -508,7 +511,7 @@ export default function CreateFormProjectPage() {
                             </Button>
                             <Button
                                 type="submit"
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="cursor-pointer flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? (
@@ -598,7 +601,7 @@ export default function CreateFormProjectPage() {
                                     ชื่อไฟล์:
                                 </h4>
                                 <p className="text-sm">
-                                    {formData.project || "-"}
+                                    {formData.projectName || "-"}
                                 </p>
                             </div>
                             <div>
@@ -716,13 +719,14 @@ export default function CreateFormProjectPage() {
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline">แก้ไข</Button>
+                            <Button variant="outline" className="cursor-pointer rounded-lg">แก้ไข</Button>
                         </DialogClose>
                         <Button
                             onClick={() => {
                                 setIsPreviewOpen(false);
                                 document.querySelector("form")?.requestSubmit();
                             }}
+                            className="cursor-pointer rounded-lg "
                         >
                             ยืนยันและสร้างเอกสาร
                         </Button>

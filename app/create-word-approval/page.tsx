@@ -16,6 +16,7 @@ import {
     DialogDescription,
     DialogClose,
 } from "@/components/ui/dialog";
+import { useTitle } from "@/hook/useTitle";
 
 interface WordDocumentData {
     head: string;
@@ -76,6 +77,7 @@ export default function CreateWordDocPage() {
         attachment: "เอกสารแนบตามที่ระบุ",
         regard: "ขอแสดงความนับถืออย่างสูง",
     };
+    useTitle("สร้างหนังสือขอนุมัติ | ระบบจัดการเอกสาร");
 
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -189,7 +191,7 @@ export default function CreateWordDocPage() {
                 <div className="flex items-center">
                     <Button
                         onClick={handleBack}
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
+                        className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -236,7 +238,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="projectName"
-                                        placeholder="ชื่อโครงการ (เช่น โครงการพัฒนาระบบ)"
+                                        placeholder="ระบุชื่อเอกสาร"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.projectName}
                                         onChange={handleChange}
@@ -252,7 +254,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="head"
-                                        placeholder="เลขที่หนังสือ"
+                                        placeholder="ระบุเลขที่หนังสือ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.head}
                                         onChange={handleChange}
@@ -291,7 +293,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="topicdetail"
-                                        placeholder="รายละเอียดหัวข้อ"
+                                        placeholder="หัวข้อหนังสือ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.topicdetail}
                                         onChange={handleChange}
@@ -305,7 +307,7 @@ export default function CreateWordDocPage() {
                                     </label>
                                     <Input
                                         name="todetail"
-                                        placeholder="รายละเอียดผู้รับ"
+                                        placeholder="ระบุชื่อ-นามสกุลผู้รับ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.todetail}
                                         onChange={handleChange}
@@ -386,7 +388,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="name"
-                                        placeholder="ชื่อ-นามสกุล"
+                                        placeholder="ระบุชื่อ-นามสกุลผู้ลงนาม"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.name}
                                         onChange={handleChange}
@@ -401,7 +403,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="depart"
-                                        placeholder="ตำแหน่ง/แผนก"
+                                        placeholder="ระบุตำแหน่ง/แผนกผู้ลงนาม"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.depart}
                                         onChange={handleChange}
@@ -415,7 +417,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="coor"
-                                        placeholder="ผู้ประสานงาน"
+                                        placeholder="ระบุชื่อ-นามสกุลผู้ประสานงาน"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.coor}
                                         onChange={handleChange}
@@ -428,7 +430,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="tel"
                                         name="tel"
-                                        placeholder="เบอร์โทรศัพท์"
+                                        placeholder="ระบุเบอร์โทรศัพท์ผู้ประสานงาน"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.tel}
                                         onChange={handleChange}
@@ -441,7 +443,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="email"
                                         name="email"
-                                        placeholder="อีเมล"
+                                        placeholder="ระบุอีเมลผู้ประสานงาน"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.email}
                                         onChange={handleChange}
@@ -487,7 +489,7 @@ export default function CreateWordDocPage() {
                             <Button
                                 type="button"
                                 onClick={openPreviewModal}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="cursor-pointer flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting}
                             >
                                 <svg
@@ -513,7 +515,7 @@ export default function CreateWordDocPage() {
                             </Button>
                             <Button
                                 type="submit"
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="cursor-pointer flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? (
@@ -729,13 +731,14 @@ export default function CreateWordDocPage() {
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline">แก้ไข</Button>
+                            <Button variant="outline" className="cursor-pointer rounded-lg">แก้ไข</Button>
                         </DialogClose>
                         <Button
                             onClick={() => {
                                 setIsPreviewOpen(false);
                                 document.querySelector("form")?.requestSubmit();
                             }}
+                            className="cursor-pointer rounded-lg "
                         >
                             ยืนยันและสร้างเอกสาร
                         </Button>

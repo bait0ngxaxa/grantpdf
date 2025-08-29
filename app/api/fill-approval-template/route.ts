@@ -75,10 +75,6 @@ export async function POST(req: Request) {
             });
         }
 
-        if (!attachmentdetail || attachmentdetail === "undefined" || attachmentdetail === "null") {
-            attachmentdetail = "";
-        }
-
         if (
             !attachmentdetail2 ||
             attachmentdetail2 === "undefined" ||
@@ -103,7 +99,7 @@ export async function POST(req: Request) {
         const templatePath = path.join(
             process.cwd(),
             "public",
-            "blank_header.docx"
+            "approval.docx"
         );
         const content = await fs.readFile(templatePath);
 

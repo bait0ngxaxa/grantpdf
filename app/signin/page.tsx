@@ -6,12 +6,14 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTitle } from "@/hook/useTitle";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
+    useTitle("เข้าสู่ระบบ - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,7 +49,7 @@ export default function LoginPage() {
                 <div className="hidden md:flex md:w-1/2 bg-cover bg-center rounded-r-[40px] overflow-hidden relative">
                     <div className="absolute inset-0 flex items-center justify-center p-8">
                         <div className="text-gray-600 text-center">
-                            <h1 className="text-5xl font-extrabold mb-4 animate-bounce">
+                            <h1 className="text-5xl font-extrabold mb-4 animate-ping duration-3000">
                                 Welcome
                             </h1>
                         </div>
@@ -140,7 +142,7 @@ export default function LoginPage() {
                                 {/* Submit Button */}
                                 <Button
                                     type="submit"
-                                    className="w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                                    className="cursor-pointer w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
                                 >
                                     เข้าสู่ระบบ
                                 </Button>

@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         // 1. Get the form data from the request body
         const formData = await req.formData();
         const projectName = formData.get("projectName") as string; // เพิ่มชื่อโครงการ
-        const project = formData.get("project") as string;
+
         const person = formData.get("person") as string;
         const address = formData.get("address") as string;
         const tel = formData.get("tel") as string;

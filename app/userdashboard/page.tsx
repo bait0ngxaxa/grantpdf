@@ -15,6 +15,7 @@ import {
     DialogHeader, 
     DialogTitle 
 } from "@/components/ui/dialog";
+import { useTitle } from "@/hook/useTitle";
 
 // API Response type for better type safety
 type UserFile = {
@@ -61,6 +62,8 @@ export default function DashboardPage() {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState("");
+
+    useTitle("UserDashboard | ระบบจัดการเอกสาร");
 
     // Fetch user documents from the API
     const fetchUserFiles = async () => {
@@ -289,9 +292,7 @@ export default function DashboardPage() {
 
     return (
         <div>
-            <Head>
-                <title>Dashboard | ระบบจัดการเอกสาร</title>
-            </Head>
+            
             <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                 {/* Mobile sidebar overlay */}
                 {isSidebarOpen && (
@@ -369,15 +370,15 @@ export default function DashboardPage() {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            <button 
+                            <Button 
                                 onClick={() => setShowProfileModal(true)}
-                                className="flex-1 text-xs btn btn-ghost btn-sm text-gray-600 dark:text-gray-400 hover:text-primary"
+                                className="flex-1 text-xs transform hover:scale-105 transition-transform duration-300 cursor-pointer"
                             >
                                 ข้อมูลส่วนตัว
-                            </button>
+                            </Button>
                             <button 
                                 onClick={() => signOut()}
-                                className="flex-1 text-xs btn btn-ghost btn-sm text-red-600 dark:text-red-400 hover:text-red-500"
+                                className="flex-1 text-xs btn btn-ghost btn-sm text-red-600 dark:text-red-400 hover:text-red-500 transform hover:scale-105 transition-transform duration-300"
                                 title="ออกจากระบบ"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -414,7 +415,7 @@ export default function DashboardPage() {
                                 {session?.user?.role === "admin" && (
                                     <Button
                                         // variant="outline"
-                                        className="font-semibold"
+                                        className="font-semibold cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         onClick={() => router.push("/admin")}
                                     >
                                         Admin Panel
@@ -423,7 +424,7 @@ export default function DashboardPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                    className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 transform hover:scale-105 transition-transform duration-300"
                                     onClick={() => signOut()}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -464,14 +465,18 @@ export default function DashboardPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
                                             </div>
-                                            <div>
+                                            <div className="flex-1 min-w-0">
                                                 <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
-                                                <div className="text-xl font-bold">
+                                                <div className="text-lg font-bold truncate max-w-full" title={filteredAndSortedFiles.length > 0 ? filteredAndSortedFiles[0].originalFileName : ""}>
+                                                    {filteredAndSortedFiles.length > 0 
+                                                        ? filteredAndSortedFiles[0].originalFileName
+                                                        : "ไม่มีเอกสาร"}
+                                                </div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                     {filteredAndSortedFiles.length > 0 
                                                         ? new Date(filteredAndSortedFiles[0].created_at).toLocaleDateString("th-TH")
-                                                        : "ไม่มี"}
+                                                        : ""}
                                                 </div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">วันที่สร้างล่าสุด</div>
                                             </div>
                                         </div>
                                     </div>
@@ -504,7 +509,7 @@ export default function DashboardPage() {
                                         <p className="text-gray-600 dark:text-gray-400 mb-4">ดูและจัดการเอกสารทั้งหมดของคุณ</p>
                                         <Button 
                                             onClick={() => setActiveTab("documents")}
-                                            className="w-full"
+                                            className="w-full cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         >
                                             ดูเอกสารทั้งหมด
                                         </Button>
@@ -519,7 +524,7 @@ export default function DashboardPage() {
                                         <p className="text-gray-600 dark:text-gray-400 mb-4">เริ่มสร้างเอกสารใหม่ประเภทต่างๆ</p>
                                         <Button 
                                             onClick={() => setActiveTab("create")}
-                                            className="w-full"
+                                            className="w-full cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                             variant="outline"
                                         >
                                             สร้างเอกสาร
@@ -612,8 +617,8 @@ export default function DashboardPage() {
                                                                                 </svg>
                                                                             )}
                                                                         </div>
-                                                                        <div>
-                                                                            <div className="font-bold">{file.originalFileName}</div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="font-bold truncate max-w-full pr-2" title={file.originalFileName}>{file.originalFileName}</div>
                                                                             <div className="text-sm opacity-50 md:hidden">
                                                                                 {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
                                                                             </div>
@@ -804,7 +809,7 @@ export default function DashboardPage() {
                                     </p>
                                     <Button 
                                         size="lg"
-                                        className="bg-primary hover:bg-primary-focus text-white shadow-lg"
+                                        className="bg-primary hover:bg-primary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         onClick={() => router.push("/createdocs")}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -814,7 +819,7 @@ export default function DashboardPage() {
                                     </Button>
                                     <Button 
                                         size="lg"
-                                        className="bg-primary hover:bg-primary-focus ml-5 text-white shadow-lg"
+                                        className="bg-primary hover:bg-primary-focus ml-5 text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         onClick={() => router.push("/uploads-doc")}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

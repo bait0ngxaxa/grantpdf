@@ -45,12 +45,21 @@ export async function POST(req: Request) {
         // 1. Get the form data from the request body
         const formData = await req.formData();
         const projectName = formData.get("projectName") as string; // เพิ่มชื่อโครงการ
-        const projectname = formData.get("projectname") as string;
-        const projectname2 = formData.get("projectname2") as string;
+        const date = formData.get("date") as string;
         const name = formData.get("name") as string;
         const address = formData.get("address") as string;
         const citizenid = formData.get("citizenid") as string;
         const citizenexpire = formData.get("citizenexpire") as string;
+        const contractnumber = formData.get("contractnumber") as string;
+        const projectOffer = formData.get("projectOffer") as string;
+        const owner = formData.get("owner") as string;
+        const projectCo = formData.get("projectCo") as string;
+        const projectCode = formData.get("projectCode") as string;
+        const acceptNum = formData.get("acceptNum") as string;
+        const cost = formData.get("cost") as string;
+        const timelineMonth = formData.get("timelineMonth") as string;
+        const timelineText = formData.get("timelineText") as string;
+        const section = formData.get("section") as string;
 
         if (!projectName) {
             return new NextResponse("Project name is required.", {
@@ -81,6 +90,17 @@ export async function POST(req: Request) {
             address,
             citizenid,
             citizenexpire,
+            contractnumber,
+            projectOffer,
+            owner,
+            projectCo,
+            projectCode,
+            acceptNum,
+            cost,
+            timelineMonth,
+            timelineText,
+            section,
+            date,
         });
 
         // 6. Generate Word buffer
@@ -90,7 +110,7 @@ export async function POST(req: Request) {
         });
 
         // 7. Save file to public/uploads
-        const uniqueFileName = generateUniqueFilename(projectname + ".docx");
+        const uniqueFileName = generateUniqueFilename(projectName + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
         // สร้างโฟลเดอร์ถ้าไม่มี

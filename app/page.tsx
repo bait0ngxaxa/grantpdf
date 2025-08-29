@@ -2,13 +2,17 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useEffect } from "react";
-import Head from "next/head";
+
 import { Button } from "@/components/ui/button";
+import {useTitle} from "@/hook/useTitle";
 
 export default function Home() {
     const router = useRouter();
     const { data: session, status } = useSession();
+    
+    useTitle("HOMEPAGE - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
+    // Set page title
+    
 
     const handleLogout = () => {
         signOut({ callbackUrl: '/' });
@@ -22,6 +26,8 @@ export default function Home() {
             router.push("/signin");
         }
     };
+
+    
 
     // แสดง loading state
     if (status === "loading") {
@@ -45,12 +51,11 @@ export default function Home() {
         );
     }
 
+    
+
     return (
         <>
-            <Head>
-                <title>Home | Grant Online</title>
-                <meta name="description" content="ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ" />
-            </Head>
+            
             {/* Navbar */}
             <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
                 <div className="flex-1">
@@ -62,7 +67,7 @@ export default function Home() {
                     {session ? (
                         // แสดงเมื่อมี session
                         <div className="flex items-center space-x-3">
-                            <Button onClick={() => router.push("/userdashboard")} className="hidden sm:flex">
+                            <Button onClick={() => router.push("/userdashboard")} className="hidden sm:flex cursor-pointer">
                                 Dashboard
                             </Button>
                             
@@ -175,7 +180,7 @@ export default function Home() {
                                 </div>
                             </div>
                             {/* System Name */}
-                            <h1 className="text-5xl sm:text-6xl font-bold bg-primary bg-clip-text text-transparent mb-4">
+                            <h1 className="text-5xl sm:text-6xl font-bold bg-primary bg-clip-text text-transparent mb-4 animate-bounce">
                                 DEMO
                             </h1>
                             {/* Slogan or Description */}
@@ -188,7 +193,7 @@ export default function Home() {
                         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-2xl mx-auto">
                             {session 
                                 ? `ยินดีต้อนรับกลับ, ${session.user?.name || session.user?.email?.split('@')[0]}! เริ่มต้นสร้างเอกสารและแบบฟอร์มใหม่ได้เลย`
-                                : `เริ่มต้นใช้งานระบบของเราเพื่อสร้างเอกสาร TORS และแบบฟอร์มอื่นๆ ได้อย่างง่ายดายและรวดเร็ว`
+                                : ``
                             }
                         </p>
 
@@ -196,7 +201,7 @@ export default function Home() {
                         <div className="flex flex-col sm:flex-row gap-4 w-full">
                             <Button
                                 size="lg"
-                                className="flex-1 rounded-full text-lg py-4 shadow-lg bg-primary hover:from-primary-focus hover:to-primary transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                                className=" flex-1 rounded-full text-lg py-4 shadow-lg bg-primary hover:from-primary-focus hover:to-primary transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer"
                                 onClick={handleClick}
                             >
                                 {session ? 'เข้าสู่ Dashboard' : 'เริ่มต้นใช้งาน'}
@@ -206,7 +211,7 @@ export default function Home() {
                                 <Button
                                     size="lg"
                                     variant="outline"
-                                    className="flex-1 rounded-full text-lg py-4 border-2 hover:bg-primary/5 transform transition-all duration-300 hover:scale-[1.02]"
+                                    className="cursor-pointer flex-1 rounded-full text-lg py-4 border-2 hover:bg-primary/5 transform transition-all duration-300 hover:scale-[1.02]"
                                     onClick={() => router.push("/signup")}
                                 >
                                     สมัครสมาชิก

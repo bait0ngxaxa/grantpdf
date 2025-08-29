@@ -16,10 +16,11 @@ import {
     DialogDescription,
     DialogClose,
 } from "@/components/ui/dialog";
+import { useTitle } from "@/hook/useTitle";
 
 interface TORData {
     projectName: string; // เพิ่มชื่อโครงการ
-    projectTitle: string;
+    
     owner: string;
     address: string;
     email: string;
@@ -36,6 +37,7 @@ interface TORData {
     plan: string;
     projectmanage: string;
     partner: string;
+    date: string;
 }
 
 // Interface สำหรับตารางกิจกรรม
@@ -53,7 +55,7 @@ export default function CreateTORPage() {
 
     const [formData, setFormData] = useState<TORData>({
         projectName: "", // เพิ่มชื่อโครงการ
-        projectTitle: "",
+        date: "",
         owner: "",
         address: "",
         email: "",
@@ -85,6 +87,7 @@ export default function CreateTORPage() {
     const [isError, setIsError] = useState(false);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    useTitle("สร้างเอกสาร TOR | ระบบจัดการเอกสาร");
 
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -217,7 +220,7 @@ export default function CreateTORPage() {
                 <div className="flex items-center">
                     <Button
                         onClick={handleBack}
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
+                        className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -239,7 +242,7 @@ export default function CreateTORPage() {
             </div>
 
             <div className="w-full max-w-6xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-green-600 to-teal-600 p-6 text-white">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
                     <h2 className="text-3xl font-bold text-center">
                         สร้างเอกสาร Terms of Reference (TOR)
                     </h2>
@@ -263,9 +266,23 @@ export default function CreateTORPage() {
                                     <Input
                                         type="text"
                                         name="projectName"
-                                        placeholder="ชื่อโครงการ (เช่น โครงการพัฒนาระบบ)"
+                                        placeholder="ระบุชื่อโครงการ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.projectName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        วันที่  <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        name="date"
+                                        placeholder="ระบุวันที่ เช่น 1 มกราคม 2566"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        value={formData.date}
                                         onChange={handleChange}
                                         required
                                     />
@@ -278,7 +295,7 @@ export default function CreateTORPage() {
                                     <Input
                                         type="text"
                                         name="contractnumber"
-                                        placeholder="เลขที่สัญญา"
+                                        placeholder="ระบุเลขที่สัญญา"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.contractnumber}
                                         onChange={handleChange}
@@ -292,7 +309,7 @@ export default function CreateTORPage() {
                                     <Input
                                         type="text"
                                         name="owner"
-                                        placeholder="ชื่อผู้รับผิดชอบ"
+                                        placeholder="ระบุชื่อผู้รับผิดชอบ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.owner}
                                         onChange={handleChange}
@@ -305,7 +322,7 @@ export default function CreateTORPage() {
                                     <Input
                                         type="text"
                                         name="address"
-                                        placeholder="สถานที่ติดต่อ"
+                                        placeholder="ระบุสถานที่ติดต่อผู้รับผิดชอบ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.address}
                                         onChange={handleChange}
@@ -319,7 +336,7 @@ export default function CreateTORPage() {
                                     <Input
                                         type="text"
                                         name="email"
-                                        placeholder="อีเมล"
+                                        placeholder="ระบุอีเมลผู้รับผิดชอบ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.email}
                                         onChange={handleChange}
@@ -332,7 +349,7 @@ export default function CreateTORPage() {
                                     <Input
                                         type="text"
                                         name="tel"
-                                        placeholder="เบอร์โทร"
+                                        placeholder="ระบุเบอร์โทรผู้รับผิดชอบ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.tel}
                                         onChange={handleChange}
@@ -340,7 +357,7 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ระยะเวลา
+                                        ระยะเวลาโครงการ
                                     </label>
                                     <Input
                                         type="text"
@@ -358,7 +375,7 @@ export default function CreateTORPage() {
                                     <Input
                                         type="text"
                                         name="cost"
-                                        placeholder="งบประมาณ"
+                                        placeholder="เช่น 500000 บาท (ห้าแสนบาทถ้วน)"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.cost}
                                         onChange={handleChange}
@@ -393,7 +410,7 @@ export default function CreateTORPage() {
                                     <Input
                                     type="text"
                                         name="objective1"
-                                        placeholder="วัตถุประสงค์หลักของโครงการ"
+                                        placeholder=""
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective1}
                                         onChange={handleChange}
@@ -406,7 +423,7 @@ export default function CreateTORPage() {
                                     <Input
                                     type="text"
                                         name="objective2"
-                                        placeholder="วัตถุประสงค์รอง"
+                                        placeholder=""
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective2}
                                         onChange={handleChange}
@@ -419,7 +436,7 @@ export default function CreateTORPage() {
                                     <Input
                                     type="text"
                                         name="objective3"
-                                        placeholder="วัตถุประสงค์เพิ่มเติม"
+                                        placeholder=""
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective3}
                                         onChange={handleChange}
@@ -604,7 +621,7 @@ export default function CreateTORPage() {
                             <Button
                                 type="button"
                                 onClick={openPreviewModal}
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="cursor-pointer flex-1 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting}
                             >
                                 <svg
@@ -630,7 +647,7 @@ export default function CreateTORPage() {
                             </Button>
                             <Button
                                 type="submit"
-                                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="cursor-pointer flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? (
@@ -716,12 +733,12 @@ export default function CreateTORPage() {
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">ชื่อโครงการ (สำหรับจัดกลุ่ม):</h4>
+                                <h4 className="font-semibold text-sm text-gray-600">ชื่อโครงการ:</h4>
                                 <p className="text-sm">{formData.projectName || "-"}</p>
                             </div>
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">ชื่อโครงการ (ในเอกสาร):</h4>
-                                <p className="text-sm">{formData.projectTitle || "-"}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">วันที่:</h4>
+                                <p className="text-sm">{formData.date || "-"}</p>
                             </div>
                         </div>
 
@@ -843,7 +860,7 @@ export default function CreateTORPage() {
                             </div>
                         )}
 
-                        {signaturePreview && (
+                        {/* {signaturePreview && (
                             <div>
                                 <h4 className="font-semibold text-sm text-gray-600">ลายเซ็น:</h4>
                                 <img
@@ -852,18 +869,19 @@ export default function CreateTORPage() {
                                     className="max-w-xs h-auto object-contain mt-2 border rounded"
                                 />
                             </div>
-                        )}
+                        )} */}
                     </div>
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline">แก้ไข</Button>
+                            <Button variant="outline" className="cursor-pointer rounded-lg">แก้ไข</Button>
                         </DialogClose>
                         <Button
                             onClick={() => {
                                 setIsPreviewOpen(false);
                                 document.querySelector("form")?.requestSubmit();
                             }}
+                            className="cursor-pointer rounded-lg "
                         >
                             ยืนยันและสร้างเอกสาร
                         </Button>

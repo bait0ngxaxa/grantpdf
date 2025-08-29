@@ -1,6 +1,7 @@
 // /app/profile/page.tsx
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -33,33 +34,33 @@ export default function ProfilePage() {
         <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-200 text-center">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">ข้อมูลผู้ใช้</h1>
           <p className="text-gray-600 mb-2">
-            **ชื่อ:**{' '}
+            ชื่อ: | {' '}
             <span className="font-semibold text-gray-800">
               {session.user?.name || 'ไม่ได้ระบุ'}
             </span>
           </p>
           <p className="text-gray-600 mb-2">
-            **Role:**{' '}
+            Role: | {' '}
             <span className="font-semibold text-gray-800">
               {session.user?.role || 'ไม่ได้ระบุ'}
             </span>
           </p>
           <p className="text-gray-600 mb-4">
-            **สถานะ:**{' '}
+            สถานะ: | {' '}
             <span className="font-semibold text-green-600">เข้าสู่ระบบแล้ว</span>
           </p>
-          <button
+          <Button
             onClick={() => signOut({ callbackUrl: '/signin' })}
-            className="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300"
+            className="w-full  font-bold py-3 px-4 rounded-lg  focus:outline-none focus:ring-2  focus:ring-offset-2 transition duration-300"
           >
             Logout
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => router.push("/admin")}
-            className="w-full bg-red-400 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300 mt-1"
+            className="w-full  font-bold py-3 px-4 rounded-lg  focus:outline-none focus:ring-2  focus:ring-offset-2 transition duration-300 mt-1"
           >
             Admin Panel
-          </button>
+          </Button>
         </div>
       </div>
     );

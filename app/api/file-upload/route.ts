@@ -32,7 +32,10 @@ export async function POST(request: NextRequest) {
         // 1. ตรวจสอบการยืนยันตัวตน
         const session = await getServerSession(authOptions);
         if (!session || !session.user?.id) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
         }
 
         // 2. รับไฟล์จาก FormData
@@ -40,24 +43,33 @@ export async function POST(request: NextRequest) {
         const file = formData.get("file") as File;
 
         if (!file) {
-            return NextResponse.json({ error: "No file provided" }, { status: 400 });
+            return NextResponse.json(
+                { error: "No file provided" },
+                { status: 400 }
+            );
         }
 
         // 3. ตรวจสอบประเภทไฟล์ (เฉพาะ .docx)
-        if (!file.name.toLowerCase().endsWith('.docx')) {
-            return NextResponse.json({ error: "Only .docx files are allowed" }, { status: 400 });
+        if (!file.name.toLowerCase().endsWith(".docx")) {
+            return NextResponse.json(
+                { error: "Only .docx files are allowed" },
+                { status: 400 }
+            );
         }
 
         // 4. ตรวจสอบขนาดไฟล์ (จำกัดที่ 10MB)
         const maxSize = 10 * 1024 * 1024; // 10MB
         if (file.size > maxSize) {
-            return NextResponse.json({ error: "File size too large (max 10MB)" }, { status: 400 });
+            return NextResponse.json(
+                { error: "File size too large (max 10MB)" },
+                { status: 400 }
+            );
         }
 
         // 5. สร้างชื่อไฟล์ใหม่และโฟลเดอร์
         const uniqueFileName = generateUniqueFilename(file.name);
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
-        
+
         // สร้างโฟลเดอร์ถ้าไม่มี
         await mkdir(uploadDir, { recursive: true });
 
@@ -87,7 +99,6 @@ export async function POST(request: NextRequest) {
                 downloadUrl: `/upload/docx/${uniqueFileName}`,
             },
         });
-
     } catch (error) {
         console.error("File upload error:", error);
         return NextResponse.json(

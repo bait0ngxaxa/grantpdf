@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { useTitle } from "@/hook/useTitle";
 
 export default function UploadDocPage() {
     const { data: session, status } = useSession();
@@ -14,6 +15,7 @@ export default function UploadDocPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadMessage, setUploadMessage] = useState("");
     const [uploadSuccess, setUploadSuccess] = useState(false);
+    useTitle("อัพโหลดเอกสาร | ระบบจัดการเอกสาร");
 
     // Redirect to signin if not authenticated
     if (status === "loading") {
@@ -130,7 +132,7 @@ export default function UploadDocPage() {
                         </div>
                         <Button
                             onClick={() => router.push("/userdashboard")}
-                            
+                            className="cursor-pointer"
                         >
                             กลับไปยัง Dashboard
                         </Button>
@@ -223,7 +225,7 @@ export default function UploadDocPage() {
                         <Button
                             onClick={() => fileInputRef.current?.click()}
                             variant="outline"
-                            className="mt-4"
+                            className="mt-4 cursor-pointer"
                             disabled={isUploading}
                         >
                             เลือกไฟล์
@@ -236,7 +238,7 @@ export default function UploadDocPage() {
                             <Button
                                 onClick={handleUpload}
                                 disabled={isUploading}
-                                className="px-8 py-2 "
+                                className="px-8 py-2 cursor-pointer"
                                 
                             >
                                 {isUploading ? "กำลังอัพโหลด..." : "อัพโหลดไฟล์"}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useTitle } from "@/hook/useTitle";
 
 // Define the type for the form data to ensure type safety
 interface TorsData {
@@ -28,7 +29,7 @@ interface ProjectTemplate {
 export default function CreateTorsPage() {
     const router = useRouter();
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
+    useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
     // ✅ ฟังก์ชันสำหรับการ redirect ไป /create-word-doc
     const handleApprovalSelection = (templateId: string, title: string) => {
         // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-doc
@@ -90,7 +91,7 @@ export default function CreateTorsPage() {
 
     // Render main menu
     const renderMainMenu = () => (
-        <div className="container mx-auto max-w-4xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
+        <div className="container mx-auto max-w-6xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
             <h1 className="text-3xl font-bold text-center mb-8">เลือกประเภทเอกสาร</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -115,7 +116,7 @@ export default function CreateTorsPage() {
 
                 {/* ยื่นโครงการ Card */}
                 <div
-                    className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-secondary"
+                    className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
                     onClick={() => handleCategorySelection('project')}
                 >
                     <div className="card-body items-center text-center p-8">
@@ -139,7 +140,7 @@ export default function CreateTorsPage() {
     const renderCategorySubmenu = () => {
         if (selectedCategory === 'general') {
             return (
-                <div className="container mx-auto max-w-4xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
+                <div className="container mx-auto max-w-6xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
                     <h1 className="text-3xl font-bold text-center mb-2">สัญญาจ้างทั่วไป</h1>
                     <p className="text-center text-base-content/60 mb-8">เลือกเอกสารที่ต้องการสร้าง</p>
                     
@@ -184,7 +185,7 @@ export default function CreateTorsPage() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div
-                            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-secondary"
+                            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
                             onClick={() => handleFormProjectSelection('project-proposal', 'ข้อเสนอโครงการ')}
                         >
                             <div className="card-body items-center text-center p-6">
@@ -199,7 +200,7 @@ export default function CreateTorsPage() {
                         </div>
                         
                         <div
-                            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-secondary"
+                            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
                             onClick={() => handleContractSelection('academic-contract', 'สัญญาจ้างปฎิบัติงานวิชาการ')}
                         >
                             <div className="card-body items-center text-center p-6">
@@ -214,7 +215,7 @@ export default function CreateTorsPage() {
                         </div>
                         
                         <div
-                            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-secondary"
+                            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
                             onClick={() => handleTorSelection('tor-project', 'ขอบเขตของงาน (TOR)')}
                         >
                             <div className="card-body items-center text-center p-6">
@@ -234,13 +235,27 @@ export default function CreateTorsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-base-200 text-base-content p-6 flex flex-col">
+        <div className="max-w-6xl mx-auto min-h-screen bg-base-200 text-base-content p-6 flex flex-col">
             {/* Header and Back button */}
             <div className="navbar bg-base-100 rounded-box shadow-lg mb-6">
                 <div className="flex-1">
-                    <Button onClick={handleBack} >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <Button
+                        onClick={handleBack}
+                        className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                            />
                         </svg>
                         <span className="ml-2">กลับ</span>
                     </Button>

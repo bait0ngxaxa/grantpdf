@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTitle } from "@/hook/useTitle";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
@@ -17,6 +18,7 @@ export default function SignupPage() {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const router = useRouter();
+    useTitle("สมัครสมาชิก - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
     const handleOpenConfirm = (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,7 +80,7 @@ export default function SignupPage() {
                 >
                     <div className="absolute inset-0 flex items-center justify-center p-8">
                         <div className="text-gray-600 text-center">
-                            <h1 className="text-5xl font-extrabold mb-4 animate-bounce">Welcome</h1>
+                            <h1 className="text-5xl font-extrabold mb-4 animate-ping duration-75">Welcome</h1>
                         </div>
                     </div>
                 </div>
@@ -160,7 +162,7 @@ export default function SignupPage() {
                                     </div>
                                 )}
 
-                                <Button type="submit" className=" w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105">
+                                <Button type="submit" className="cursor-pointer w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105">
                                     ถัดไป
                                 </Button>
                             </form>

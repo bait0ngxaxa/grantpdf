@@ -30,6 +30,11 @@ export default function AdminUserManagementPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // State for success/error modal
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
+  const [isResultSuccess, setIsResultSuccess] = useState(true);
+
   // --- Authorization Check ---
   useEffect(() => {
     if (status === 'loading') return;
@@ -113,10 +118,18 @@ export default function AdminUserManagementPage() {
       // Refetch users to get the latest data after update
       await fetchUsers();
       closeEditModal();
-      alert('อัปเดตข้อมูลผู้ใช้สำเร็จ!');
+      
+      // Show success modal instead of alert
+      setResultMessage('อัปเดตข้อมูลผู้ใช้สำเร็จ!');
+      setIsResultSuccess(true);
+      setIsResultModalOpen(true);
     } catch (error: any) {
       console.error('Failed to update user:', error);
-      alert(error.message || 'เกิดข้อผิดพลาดในการอัปเดตผู้ใช้');
+      
+      // Show error modal instead of alert
+      setResultMessage(error.message || 'เกิดข้อผิดพลาดในการอัปเดตผู้ใช้');
+      setIsResultSuccess(false);
+      setIsResultModalOpen(true);
     } finally {
       setIsSaving(false);
     }
@@ -151,10 +164,18 @@ export default function AdminUserManagementPage() {
       // Refetch users to get the latest data after deletion
       await fetchUsers();
       closeDeleteModal();
-      alert('ลบผู้ใช้สำเร็จ!');
+      
+      // Show success modal instead of alert
+      setResultMessage('ลบผู้ใช้สำเร็จ!');
+      setIsResultSuccess(true);
+      setIsResultModalOpen(true);
     } catch (error: any) {
       console.error('Failed to delete user:', error);
-      alert(error.message || 'เกิดข้อผิดพลาดในการลบผู้ใช้');
+      
+      // Show error modal instead of alert
+      setResultMessage(error.message || 'เกิดข้อผิดพลาดในการลบผู้ใช้');
+      setIsResultSuccess(false);
+      setIsResultModalOpen(true);
     } finally {
       setIsDeleting(false);
     }
@@ -286,12 +307,12 @@ export default function AdminUserManagementPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button 
+            <Button 
               onClick={() => router.push("/userdashboard")}
-              className="flex-1 text-sm btn btn-ghost btn-sm text-gray-600 dark:text-gray-400 hover:text-primary"
+              className="flex-1  transform hover:scale-105 transition-transform duration-300 cursor-pointer"
             >
-              Dashboard
-            </button>
+              กลับ Dashboard
+            </Button>
             <button 
               onClick={() => signOut()}
               className="flex-1 text-xs btn btn-ghost btn-sm text-red-600 dark:text-red-400 hover:text-red-500"
@@ -329,7 +350,7 @@ export default function AdminUserManagementPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 transform hover:scale-105 transition-transform duration-300"
                 onClick={() => signOut()}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -354,8 +375,8 @@ export default function AdminUserManagementPage() {
           )}
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 ">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
               <div className="flex items-center space-x-4">
                 <div className="text-primary bg-primary/10 p-3 rounded-full">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -370,8 +391,8 @@ export default function AdminUserManagementPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-              <div className="flex items-center space-x-4">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+              <div className="flex items-center space-x-4 ">
                 <div className="text-purple-500 bg-blue-100 dark:bg-blue-900/20 p-3 rounded-full">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586 1.414A11.955 11.955 0 0112 2.036 11.955 11.955 0 010 13.938V21.5h7.5v-7.562z" />
@@ -387,8 +408,8 @@ export default function AdminUserManagementPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-              <div className="flex items-center space-x-4">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+              <div className="flex items-center space-x-4 ">
                 <div className="text-info bg-info/10 p-3 rounded-full">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -455,7 +476,7 @@ export default function AdminUserManagementPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => openEditModal(user)}
-                              className="text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                              className="cursor-pointer text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -466,7 +487,7 @@ export default function AdminUserManagementPage() {
                               size="sm"
                               variant="outline"
                               onClick={() => openDeleteModal(user)}
-                              className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                              className="cursor-pointer text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -545,14 +566,14 @@ export default function AdminUserManagementPage() {
                   type="button"
                   variant="outline"
                   onClick={closeEditModal}
-                  className="px-4 py-2"
+                  className="px-4 py-2 cursor-pointer"
                 >
                   ยกเลิก
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-2 bg-primary hover:bg-primary-focus text-white"
+                  className="px-4 py-2 bg-primary hover:bg-primary-focus text-white cursor-pointer"
                 >
                   {isSaving ? 'กำลังบันทึก...' : 'บันทึก'}
                 </Button>
@@ -597,6 +618,52 @@ export default function AdminUserManagementPage() {
           </div>
           <form method="dialog" className="modal-backdrop">
             <button onClick={closeDeleteModal}>ปิด</button>
+          </form>
+        </dialog>
+      )}
+
+      {/* Result Modal (Success/Error) */}
+      {isResultModalOpen && (
+        <dialog className="modal modal-open">
+          <div className="modal-box bg-white dark:bg-gray-800 max-w-md">
+            <div className="flex flex-col items-center text-center">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                isResultSuccess 
+                  ? 'bg-green-100 dark:bg-green-900/20' 
+                  : 'bg-red-100 dark:bg-red-900/20'
+              }`}>
+                {isResultSuccess ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
+              </div>
+              <h3 className={`font-bold text-lg mb-2 ${
+                isResultSuccess ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {isResultSuccess ? 'สำเร็จ!' : 'เกิดข้อผิดพลาด!'}
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
+                {resultMessage}
+              </p>
+              <Button
+                onClick={() => setIsResultModalOpen(false)}
+                className={`w-full ${
+                  isResultSuccess 
+                    ? 'bg-green-600 hover:bg-green-700' 
+                    : 'bg-red-600 hover:bg-red-700'
+                } text-white`}
+              >
+                ตกลง
+              </Button>
+            </div>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button onClick={() => setIsResultModalOpen(false)}>ปิด</button>
           </form>
         </dialog>
       )}

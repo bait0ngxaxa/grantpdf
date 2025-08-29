@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Head from "next/head";
 import { ArrowLeftCircleIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 import { Button } from "@/components/ui/button";
+import { useTitle } from "@/hook/useTitle";
 
 export default function ResetPasswordPage() {
     const router = useRouter();
@@ -16,6 +17,7 @@ export default function ResetPasswordPage() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    useTitle("ตั้งรหัสผ่านใหม่ - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
     // Effect hook to validate token when the page loads
     // In a production app, you might make a server call here to validate the token's existence
@@ -64,9 +66,7 @@ export default function ResetPasswordPage() {
 
     return (
         <>
-            <Head>
-                <title>Reset Password | ระบบจัดการเอกสาร</title>
-            </Head>
+            
             <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4">
                 <div className="card w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl rounded-2xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
                     <div className="card-body p-8">
@@ -133,7 +133,7 @@ export default function ResetPasswordPage() {
                                 {/* Submit Button */}
                                 <Button
                                     type="submit"
-                                    className=" w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                                    className=" cursor-pointer w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
                                     disabled={loading || !token || newPassword !== confirmPassword || newPassword.length === 0}
                                 >
                                     {loading ? (

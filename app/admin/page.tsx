@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import Head from "next/head";
 import { Button } from "@/components/ui/button";
+import { useTitle } from "@/hook/useTitle";
 
 // Interface for PDF file data from API
 interface PdfFile {
@@ -46,6 +47,10 @@ export default function AdminDashboardPage() {
     const [selectedFileIdForDeletion, setSelectedFileIdForDeletion] = useState<string | null>(null);
     const [selectedFileNameForDeletion, setSelectedFileNameForDeletion] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // State for success modal
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     // --- Authorization Check ---
     useEffect(() => {
@@ -146,10 +151,14 @@ export default function AdminDashboardPage() {
             // Remove the file from the local state
             setPdfFiles((prevFiles) => prevFiles.filter((file) => file.id !== selectedFileIdForDeletion));
             closeDeleteModal();
-            alert('Delete Successful')
+            
+            // Show success modal instead of alert
+            setSuccessMessage('ลบเอกสารสำเร็จแล้ว');
+            setIsSuccessModalOpen(true);
         } catch (error) {
             console.error("Failed to delete PDF file:", error);
-            setError('ไม่สามารถลบเอกสารได้ กรุณาลองใหม่อีกครั้ง');
+            setSuccessMessage('เกิดข้อผิดพลาดในการลบเอกสาร กรุณาลองใหม่อีกครั้ง');
+            setIsSuccessModalOpen(true);
         } finally {
             setIsDeleting(false);
         }
@@ -262,6 +271,23 @@ export default function AdminDashboardPage() {
         return filteredAndSortedPdfs.length > 0 ? filteredAndSortedPdfs[0] : null;
     }, [filteredAndSortedPdfs]);
 
+    // Dynamic title based on active tab
+    const getTitleByTab = (tab: string) => {
+        switch(tab) {
+            case "dashboard":
+                return "Admin Dashboard - ภาพรวมระบบ | ระบบจัดการเอกสาร";
+            case "documents":
+                return "Admin Dashboard - จัดการเอกสาร | ระบบจัดการเอกสาร";
+            case "users":
+                return "Admin Dashboard - จัดการผู้ใช้งาน | ระบบจัดการเอกสาร";
+            default:
+                return "Admin Dashboard | ระบบจัดการเอกสาร";
+        }
+    };
+
+    // Set dynamic title
+    useTitle(getTitleByTab(activeTab));
+
     if (status === "loading" || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -309,9 +335,7 @@ export default function AdminDashboardPage() {
 
     return (
         <>
-            <Head>
-                <title>Admin Dashboard | ระบบจัดการเอกสาร</title>
-            </Head>
+            {/* Remove Head component */}
             <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                 {/* Mobile sidebar overlay */}
                 {isSidebarOpen && (
@@ -390,7 +414,7 @@ export default function AdminDashboardPage() {
                         </div>
                         <Button 
                             size="sm" 
-                            className="w-full text-sm"
+                            className="w-full text-sm cursor-pointer"
                             onClick={() => router.push("/userdashboard")}
                         >
                             กลับสู่แดชบอร์ดผู้ใช้
@@ -482,9 +506,9 @@ export default function AdminDashboardPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                                 </svg>
                                             </div>
-                                            <div>
+                                            <div className="flex-1 min-w-0">
                                                 <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
-                                                <div className="text-lg font-bold truncate">
+                                                <div className="text-lg font-bold truncate max-w-full" title={latestFile?.fileName || ""}>
                                                     {latestFile?.fileName || "ไม่มี"}
                                                 </div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -507,7 +531,7 @@ export default function AdminDashboardPage() {
                                         <p className="text-gray-600 dark:text-gray-400 mb-4">ดู จัดการ และลบเอกสารทั้งหมดในระบบ</p>
                                         <Button 
                                             onClick={() => setActiveTab("documents")}
-                                            className="w-full"
+                                            className="w-full cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         >
                                             เข้าสู่การจัดการเอกสาร
                                         </Button>
@@ -522,7 +546,7 @@ export default function AdminDashboardPage() {
                                         <p className="text-gray-600 dark:text-gray-400 mb-4">จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ</p>
                                         <Button 
                                             onClick={() => setActiveTab("users")}
-                                            className="w-full"
+                                            className="w-full cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                             variant="outline"
                                         >
                                             เข้าสู่การจัดการผู้ใช้งาน
@@ -601,8 +625,16 @@ export default function AdminDashboardPage() {
                                                     <tbody>
                                                         {currentPageFiles.map((file) => (
                                                             <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                                <td className="font-semibold">{file.fileName}</td>
-                                                                <td>{file.userName || 'Unknown User'}</td>
+                                                                <td className="font-semibold">
+                                                                    <div className="truncate max-w-xs pr-2" title={file.fileName}>
+                                                                        {file.fileName}
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div className="truncate max-w-32" title={file.userName || 'Unknown User'}>
+                                                                        {file.userName || 'Unknown User'}
+                                                                    </div>
+                                                                </td>
                                                                 <td className="text-gray-500 hidden md:table-cell">
                                                                     {new Date(file.createdAt).toLocaleDateString("th-TH")}
                                                                 </td>
@@ -771,7 +803,7 @@ export default function AdminDashboardPage() {
                                     </div>
                                     <Button 
                                         size="lg"
-                                        className="hover:bg-secondary-focus text-white shadow-lg"
+                                        className="hover:bg-secondary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         onClick={() => router.push("/admin/users")}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -818,6 +850,52 @@ export default function AdminDashboardPage() {
                         </div>
                         <form method="dialog" className="modal-backdrop">
                             <button onClick={closeDeleteModal}>ปิด</button>
+                        </form>
+                    </dialog>
+                )}
+
+                {/* --- Success Modal --- */}
+                {isSuccessModalOpen && (
+                    <dialog className="modal modal-open">
+                        <div className="modal-box bg-white dark:bg-gray-800 max-w-md">
+                            <div className="flex flex-col items-center text-center">
+                                <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                                    successMessage.includes('ข้อผิดพลาด') 
+                                        ? 'bg-red-100 dark:bg-red-900/20' 
+                                        : 'bg-green-100 dark:bg-green-900/20'
+                                }`}>
+                                    {successMessage.includes('ข้อผิดพลาด') ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    )}
+                                </div>
+                                <h3 className={`font-bold text-lg mb-2 ${
+                                    successMessage.includes('ข้อผิดพลาด') ? 'text-red-600' : 'text-green-600'
+                                }`}>
+                                    {successMessage.includes('ข้อผิดพลาด') ? 'เกิดข้อผิดพลาด!' : 'สำเร็จ!'}
+                                </h3>
+                                <p className="text-gray-700 dark:text-gray-300 mb-6">
+                                    {successMessage}
+                                </p>
+                                <Button
+                                    onClick={() => setIsSuccessModalOpen(false)}
+                                    className={`w-full ${
+                                        successMessage.includes('ข้อผิดพลาด') 
+                                            ? 'bg-red-600 hover:bg-red-700' 
+                                            : 'bg-green-600 hover:bg-green-700'
+                                    } text-white`}
+                                >
+                                    ตกลง
+                                </Button>
+                            </div>
+                        </div>
+                        <form method="dialog" className="modal-backdrop">
+                            <button onClick={() => setIsSuccessModalOpen(false)}>ปิด</button>
                         </form>
                     </dialog>
                 )}

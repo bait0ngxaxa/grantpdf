@@ -16,11 +16,21 @@ import {
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog";
+import { useTitle } from "@/hook/useTitle";
 
 interface WordDocumentData {
   projectName: string; // เพิ่มชื่อโครงการ
-  
-  projectname2: string;
+  contractnumber: string;
+  projectOffer: string;
+  projectCo: string;
+  owner: string;
+  acceptNum: string;
+  projectCode: string;
+  cost: string;
+  timelineMonth: string;
+  timelineText: string;
+  section : string;
+  date: string;
   name: string;
   address: string;
   citizenid: string;
@@ -32,13 +42,22 @@ export default function CreateContractPage() {
   const router = useRouter();
 
   const [formData, setFormData] = useState<WordDocumentData>({
-    projectName: "", // เพิ่มชื่อโครงการ
-    
-    projectname2: "",
+    projectName: "",
+    contractnumber: "",
+    projectOffer: "",
+    projectCo: "",
+    owner: "",
+    acceptNum: "",
+    projectCode: "",
+    cost: "",
+    timelineMonth: "",
+    timelineText: "",
+    section: "",
     name: "",
     address: "",
     citizenid: "",
     citizenexpire: "",
+    date: "",
   });
 
   
@@ -49,7 +68,7 @@ export default function CreateContractPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  
+  useTitle("สร้างหนังสือสัญญาเพื่อรับรองการลงนาม | ระบบจัดการเอกสาร");
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -133,7 +152,7 @@ export default function CreateContractPage() {
         <div className="flex items-center">
           <Button
             onClick={handleBack}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
+            className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -180,32 +199,131 @@ export default function CreateContractPage() {
                   <Input
                     type="text"
                     name="projectName"
-                    placeholder="ชื่อโครงการ(ชื่อไฟล์)"
+                    placeholder="ระบุชื่อโครงการ"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.projectName}
                     onChange={handleChange}
                     required
                   />
                 </div>
-               
-              </div>
-            </div>
-
-            {/* ข้อมูลผู้ลงนาม */}
-            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-              <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-blue-300">
-                👤 ข้อมูลผู้ลงนาม
-              </h3>
-              <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    ชื่อผู้ลงนาม{" "}
+                    วันที่{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="date"
+                    placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2566"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.date}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    สัญญาเลขที่{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="contractnumber"
+                    placeholder="ระบุเลขที่สัญญา"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.contractnumber}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ระหว่าง{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectOffer"
+                    placeholder="ระบุชื่อผู้จ้าง"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectOffer}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    โดย{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="owner"
+                    placeholder="ระบุองค์กรที่รับดำเนินโครงการ"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.owner}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2  w-full">
+                    รับดำเนินโครงการจาก{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectCo"
+                    placeholder="ระบุองค์กรให้ดำเนินโครงการ"
+                    className=" w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectCo}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2  w-full">
+                    รหัสโครงการ{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectCode"
+                    placeholder="ระบุรหัสโครงการ"
+                    className=" w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectCode}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                
+                
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ตามข้อตกลงเลขที่{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="acceptNum"
+                    placeholder="ระบุเลขที่ข้อตกลง"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.acceptNum}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ชื่อผู้จ้าง{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <Input
                     type="text"
                     name="name"
-                    placeholder="ผู้ลงนาม"
+                    placeholder="ระบุชื่อผู้จ้าง"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.name}
                     onChange={handleChange}
@@ -217,11 +335,112 @@ export default function CreateContractPage() {
                     ที่อยู่{" "}
                     <span className="text-red-500">*</span>
                   </label>
-                  <Textarea
+                  <Input
+                    type="text"
                     name="address"
-                    placeholder="ที่อยู่ผู้ลงนาม"
-                    className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                    placeholder="ระบุที่อยู่ติดต่อผู้จ้าง"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.address}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2  w-full">
+                    บัตรประชาชนเลขที่{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="citizenid"
+                    placeholder="ระบุเลขบัตรประชาชน 13 หลักผู้จ้าง"
+                    className=" w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.citizenid}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2  w-full">
+                    วันหมดอายุ{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="citizenexpire"
+                    placeholder="ระบุวันหมดอายุ ตัวอย่าง 31 ธันวาคม 2566"
+                    className=" w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.citizenexpire}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+               
+              </div>
+            </div>
+
+            {/* ข้อมูลผู้ลงนาม */}
+            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-blue-300">
+                👤 ข้อมูลงบประมาณ ระยะเวลา จำนวนงวด
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    งบประมาณ{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="cost"
+                    placeholder="ตัวอย่าง : 500000 (ห้าแสนบาทถ้วน)"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.cost}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ระยะเวลา (เดือน){" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="timelineMonth"
+                    placeholder="ระบุตัวเลข เช่น 12"
+                    className="w-full px-4 py-3  border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                    value={formData.timelineMonth}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    เริ่มตั้งแต่{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="timelineText"
+                    placeholder="ตัวอย่าง : 1 มกราคม 2566 ถึง 31 ธันวาคม 2566"
+                    className="w-full px-4 py-3  border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                    value={formData.timelineText}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    จำนวนงวด{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    name="section"
+                    placeholder="ระบุเลขจำนวนงวด"
+                    className="w-full px-4 py-3  border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                    value={formData.section}
                     onChange={handleChange}
                     required
                   />
@@ -229,43 +448,7 @@ export default function CreateContractPage() {
               </div>
             </div>
 
-            {/* ข้อมูลบัตรประชาชน */}
-            <div className="bg-green-50 p-6 rounded-lg border border-green-200">
-              <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-green-300">
-                🆔 ข้อมูลบัตรประชาชน
-              </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    เลขบัตรประชาชน{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="text"
-                    name="citizenid"
-                    placeholder="หมายเลข 13 หลัก"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    value={formData.citizenid}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    วันหมดอายุ{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    name="citizenexpire"
-                    placeholder="วันหมดอายุบัตรประชาชน"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    value={formData.citizenexpire}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
+            
 
           
 
@@ -273,7 +456,7 @@ export default function CreateContractPage() {
               <Button
                 type="button"
                 onClick={openPreviewModal}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
                 <svg
@@ -299,7 +482,7 @@ export default function CreateContractPage() {
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -388,8 +571,36 @@ export default function CreateContractPage() {
                 <h4 className="font-semibold text-sm text-gray-600">ชื่อไฟล์:</h4>
                 <p className="text-sm">{formData.projectName || '-'}</p>
               </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-600">สัญญาเลขที่:</h4>
+                    <p className="text-sm">{formData.contractnumber || '-'}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-600">วันที่:</h4>
+                    <p className="text-sm">{formData.date || '-'}</p>
+                  </div>
               <div>
-                <h4 className="font-semibold text-sm text-gray-600">ชื่อ:</h4>
+                <h4 className="font-semibold text-sm text-gray-600">ระหว่าง:</h4>
+                <p className="text-sm">{formData.projectOffer || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">โดย:</h4>
+                <p className="text-sm">{formData.owner || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">รับดำเนินโครงการจาก:</h4>
+                <p className="text-sm">{formData.projectCo || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">รหัสโครงการ:</h4>
+                <p className="text-sm">{formData.projectCode || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ตามข้อตกลงเลขที่:</h4>
+                <p className="text-sm">{formData.acceptNum || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ชื่อผู้จ้าง:</h4>
                 <p className="text-sm">{formData.name || '-'}</p>
               </div>
             </div>
@@ -411,8 +622,20 @@ export default function CreateContractPage() {
             </div>
             
             <div>
-              <h4 className="font-semibold text-sm text-gray-600">ชื่อโครงการในสัญญา:</h4>
-              <p className="text-sm">{formData.projectname2 || '-'}</p>
+              <h4 className="font-semibold text-sm text-gray-600">งบประมาณ:</h4>
+              <p className="text-sm">{formData.cost || '-'}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-sm text-gray-600">ระยะเวลา (เดือน):</h4>
+              <p className="text-sm">{formData.timelineMonth || '-'}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-sm text-gray-600">เริ่มตั้งแต่:</h4>
+              <p className="text-sm">{formData.timelineText || '-'}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-sm text-gray-600">จำนวนงวด:</h4>
+              <p className="text-sm">{formData.section || '-'}</p>
             </div>
             </div>
             
@@ -420,12 +643,12 @@ export default function CreateContractPage() {
           
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">แก้ไข</Button>
+              <Button variant="outline" className="cursor-pointer rounded-lg">แก้ไข</Button>
             </DialogClose>
             <Button onClick={() => {
               setIsPreviewOpen(false);
               document.querySelector('form')?.requestSubmit();
-            }}>
+            }} className="cursor-pointer rounded-lg ">
               ยืนยันและสร้างเอกสาร
             </Button>
           </DialogFooter>

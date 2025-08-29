@@ -43,10 +43,10 @@ export async function POST(req: Request) {
 
         // 1. Get the form data from the request body
         const formData = await req.formData();
-        
+
         // TOR specific fields ตาม interface TORData
         const projectName = formData.get("projectName") as string; // เพิ่มชื่อโครงการ
-        const projectTitle = formData.get("projectTitle") as string;
+
         const owner = formData.get("owner") as string;
         const address = formData.get("address") as string;
         const email = formData.get("email") as string;
@@ -63,7 +63,8 @@ export async function POST(req: Request) {
         const plan = formData.get("plan") as string;
         const projectmanage = formData.get("projectmanage") as string;
         const partner = formData.get("partner") as string;
-        
+        const date = formData.get("date") as string;
+
         if (!projectName) {
             return new NextResponse("Project name is required.", {
                 status: 400,
@@ -83,17 +84,13 @@ export async function POST(req: Request) {
             }
         }
 
-        
-
-        
-
         // 3. Read the Word template file (ใช้ template เดียวกับ tor.docx หรือสร้างใหม่)
         const templatePath = path.join(
             process.cwd(),
             "public",
             "tor.docx" // สมมติว่ามี template tor.docx
         );
-        
+
         let content;
         try {
             content = await fs.readFile(templatePath);
@@ -109,11 +106,10 @@ export async function POST(req: Request) {
 
         // 4. Initialize Docxtemplater
         const zip = new PizZip(content);
-        
+
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
-            
         });
 
         // 5. Render data into the template
@@ -136,18 +132,18 @@ export async function POST(req: Request) {
             plan,
             projectmanage,
             partner,
-            
-            
+            date,
+
             // ตารางกิจกรรม
             activities: activities,
             hasActivities: activities.length > 0,
             activitiesCount: activities.length,
-            
+
             // ข้อมูลเพิ่มเติมสำหรับ template
-            currentDate: new Date().toLocaleDateString('th-TH', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+            currentDate: new Date().toLocaleDateString("th-TH", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
             }),
             documentType: "Terms of Reference (TOR)",
         });
@@ -159,7 +155,7 @@ export async function POST(req: Request) {
         });
 
         // 7. Save file to public/uploads
-        const uniqueFileName = generateUniqueFilename(projectTitle + ".docx");
+        const uniqueFileName = generateUniqueFilename(projectName + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
         // สร้างโฟลเดอร์ถ้าไม่มี
@@ -209,7 +205,6 @@ export async function POST(req: Request) {
                 description: project.description,
             },
         });
-
     } catch (error) {
         console.error("Error generating TOR document:", error);
         let errorMessage = "Internal Server Error";

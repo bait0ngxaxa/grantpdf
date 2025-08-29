@@ -6,12 +6,14 @@ import Head from "next/head";
 import { ArrowLeftCircleIcon } from '@heroicons/react/24/solid';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTitle } from "@/hook/useTitle";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    useTitle("ลืมรหัสผ่าน - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
     const handleForgotPassword = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -105,7 +107,7 @@ export default function ForgotPasswordPage() {
                                 {/* Submit Button */}
                                 <Button
                                     type="submit"
-                                    className=" w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                                    className="cursor-pointer w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
                                     disabled={loading}
                                 >
                                     {loading ? (
