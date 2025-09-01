@@ -59,7 +59,7 @@ export default function Home() {
             {/* Navbar */}
             <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
                 <div className="flex-1">
-                    <Link href="/" className="btn btn-ghost normal-case text-2xl text-primary">
+                    <Link href="/" className=" btn btn-ghost text-2xl hover:rounded-full text-primary hover:bg-white transform hover:scale-105 transition-transform duration-300">
                         DOCX Generator | HOMEPAGE
                     </Link>
                 </div>

@@ -17,6 +17,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useTitle } from "@/hook/useTitle";
+import { WordLikeTextarea } from "@/components/ui/Wtextarea";
 
 interface WordDocumentData {
     
@@ -348,13 +349,16 @@ export default function CreateFormProjectPage() {
                                         ที่มาและความสำคัญ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="rationale"
                                         placeholder="เหตุผลความจำเป็นในการดำเนินโครงการ"
-                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.rationale}
                                         onChange={handleChange}
-                                        required
+                                        rows={30}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
@@ -362,36 +366,46 @@ export default function CreateFormProjectPage() {
                                         วัตถุประสงค์{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Input
-                                        type="text"
+                                    <WordLikeTextarea
+                                        
                                         name="objective"
                                         placeholder="วัตถุประสงค์ที่ 1"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective}
                                         onChange={handleChange}
-                                        required
+                                        rows={2}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
-                                    <Input
-                                        type="text"
+                                    <WordLikeTextarea
+                                        
+                                        
                                         name="objective2"
                                         placeholder="วัตถุประสงค์ที่ 2"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective2}
                                         onChange={handleChange}
-                                        required
+                                        rows={2}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
-                                    <Input
-                                        type="text"
+                                    <WordLikeTextarea
+                                        
                                         name="objective3"
                                         placeholder="วัตถุประสงค์ที่ 3"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective3}
                                         onChange={handleChange}
-                                        required
+                                        rows={2}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
@@ -399,13 +413,16 @@ export default function CreateFormProjectPage() {
                                         กลุ่มเป้าหมาย{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="target"
-                                        placeholder="เป้าหมายที่ต้องการบรรลุ"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        placeholder="กลุ่มเป้าหมายที่ต้องการบรรลุ"
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.target}
                                         onChange={handleChange}
-                                        required
+                                        rows={3}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
@@ -413,13 +430,16 @@ export default function CreateFormProjectPage() {
                                         โซน{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="zone"
                                         placeholder="พื้นที่ดำเนินการ"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.zone}
                                         onChange={handleChange}
-                                        required
+                                        rows={3}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
@@ -427,13 +447,16 @@ export default function CreateFormProjectPage() {
                                         ขอบเขต{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="scope"
                                         placeholder="ขอบเขตการดำเนินงาน"
-                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.scope}
                                         onChange={handleChange}
-                                        required
+                                        rows={20}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
@@ -441,13 +464,16 @@ export default function CreateFormProjectPage() {
                                         การกำกับติดตามและประเมินผล{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="monitoring"
                                         placeholder="วิธีการติดตามและประเมินผล"
-                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.monitoring}
                                         onChange={handleChange}
-                                        required
+                                        rows={20}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
@@ -455,13 +481,16 @@ export default function CreateFormProjectPage() {
                                         องค์กร ภาคี ร่วมงาน{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="partner"
                                         placeholder="หน่วยงานหรือบุคคลที่เกี่ยวข้อง"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.partner}
                                         onChange={handleChange}
-                                        required
+                                        rows={5}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                                 <div>
@@ -469,13 +498,16 @@ export default function CreateFormProjectPage() {
                                         ประวัติผู้รับผิดชอบโครงการ
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="author"
                                         placeholder=""
-                                        className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.author}
                                         onChange={handleChange}
-                                        required
+                                        rows={20}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                             </div>
