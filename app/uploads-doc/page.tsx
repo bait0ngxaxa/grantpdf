@@ -30,9 +30,9 @@ export default function UploadDocPage() {
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            // ตรวจสอบประเภทไฟล์
-            if (!file.name.toLowerCase().endsWith('.docx')) {
-                setUploadMessage("กรุณาเลือกไฟล์ .docx เท่านั้น");
+            
+            if (!file.name.toLowerCase().endsWith('.docx') && !file.name.toLowerCase().endsWith('.pdf')) {
+                setUploadMessage("กรุณาเลือกไฟล์ .docx และ .pdf เท่านั้น");
                 setUploadSuccess(false);
                 return;
             }
@@ -101,12 +101,12 @@ export default function UploadDocPage() {
         const files = event.dataTransfer.files;
         if (files.length > 0) {
             const file = files[0];
-            if (file.name.toLowerCase().endsWith('.docx')) {
+            if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.pdf')) {
                 setSelectedFile(file);
                 setUploadMessage("");
                 setUploadSuccess(false);
             } else {
-                setUploadMessage("กรุณาเลือกไฟล์ .docx เท่านั้น");
+                setUploadMessage("กรุณาเลือกไฟล์ .docx และ .pdf เท่านั้น");
                 setUploadSuccess(false);
             }
         }
@@ -207,7 +207,7 @@ export default function UploadDocPage() {
                                         หรือคลิกเพื่อเลือกไฟล์
                                     </p>
                                     <p className="text-xs text-gray-500 mt-2">
-                                        รองรับเฉพาะไฟล์ .docx (สูงสุด 10MB)
+                                        รองรับไฟล์ .docx และ .pdf (สูงสุด 10MB)
                                     </p>
                                 </div>
                             </div>
@@ -216,7 +216,7 @@ export default function UploadDocPage() {
                         <input
                             ref={fileInputRef}
                             type="file"
-                            accept=".docx"
+                            accept=".docx,.pdf"
                             onChange={handleFileSelect}
                             className="hidden"
                             disabled={isUploading}
@@ -298,7 +298,7 @@ export default function UploadDocPage() {
                             คำแนะนำการใช้งาน:
                         </h4>
                         <ul className="text-sm text-blue-700 space-y-1">
-                            <li>• รองรับเฉพาะไฟล์ .docx</li>
+                            <li>• รองรับไฟล์ .docx และ .pdf</li>
                             <li>• ขนาดไฟล์สูงสุด 10MB</li>
                             
                             <li>• สามารถลากไฟล์มาวางในพื้นที่อัพโหลด</li>

@@ -50,6 +50,8 @@ model UserFile {
   originalFileName String
   storagePath      String
   fileExtension    String
+  downloadStatus   String @default("pending") // เพิ่มคอลัมน์นี้
+  downloadedAt     DateTime? // เพิ่มวันที่ที่ดาวน์โหลด (ถ้าต้องการ)
 
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)

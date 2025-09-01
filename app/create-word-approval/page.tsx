@@ -17,6 +17,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useTitle } from "@/hook/useTitle";
+import { WordLikeTextarea } from "@/components/ui/Wtextarea";
 
 interface WordDocumentData {
     head: string;
@@ -361,14 +362,17 @@ export default function CreateWordDocPage() {
                                         เนื้อหา{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="detail"
                                         placeholder="รายละเอียดเนื้อหา"
-                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.detail}
                                         onChange={handleChange}
-                                        required
-                                        maxLength={1024}
+                                        rows={30}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
+                                        
                                     />
                                 </div>
                             </div>
@@ -600,20 +604,13 @@ export default function CreateWordDocPage() {
 
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <h4 className="font-semibold text-sm text-gray-600">
-                                    ชื่อโครงการ:
-                                </h4>
-                                <p className="text-sm">
-                                    {formData.projectName || "-"}
-                                </p>
-                            </div>
+                            
                             <div>
                                 <h4 className="font-semibold text-sm text-gray-600">
                                     ชื่อไฟล์:
                                 </h4>
                                 <p className="text-sm">
-                                    {formData.fileName || "-"}
+                                    {formData.projectName || "-"}
                                 </p>
                             </div>
                             <div>

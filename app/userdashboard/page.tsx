@@ -637,11 +637,12 @@ export default function DashboardPage() {
                                                                 <td>
                                                                     <div className="flex space-x-2">
                                                                         {file.fileExtension === 'pdf' && (
-                                                                            <button
+                                                                            <Button
                                                                                 onClick={() =>
                                                                                     openPreviewModal(file.storagePath, file.originalFileName)
                                                                                 }
-                                                                                className="btn btn-sm btn-info text-white rounded-full"
+                                                                                className=" rounded-full bg-green-400 text-white cursor-pointer hover:bg-green-500 transform hover:scale-105 transition-all duration-200"
+                                                                                
                                                                                 title="พรีวิว PDF"
                                                                             >
                                                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -649,13 +650,13 @@ export default function DashboardPage() {
                                                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                                                 </svg>
                                                                                 <span className="ml-1 hidden lg:block">พรีวิว</span>
-                                                                            </button>
+                                                                            </Button>
                                                                         )}
                                                                         <a
-                                                                            href={file.storagePath}
+                                                                            href={`/api/user-docs/download/${file.id}`}
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
-                                                                            className="btn btn-sm btn-success text-white rounded-full"
+                                                                            className="btn btn-sm bg-primary hover:bg-primary-focus text-white border-none rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-all duration-200"
                                                                             title="ดาวน์โหลด"
                                                                         >
                                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -663,11 +664,12 @@ export default function DashboardPage() {
                                                                             </svg>
                                                                             <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
                                                                         </a>
-                                                                        <button
+                                                                        <Button
                                                                             onClick={() => handleDeleteFile(file.id)}
                                                                             disabled={isDeleting === file.id}
-                                                                            className="btn btn-sm btn-error text-white rounded-full"
+                                                                            className=" cursor-pointer text-white rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 hover:bg-red-700"
                                                                             title="ลบไฟล์"
+                                                                            variant="destructive"
                                                                         >
                                                                             {isDeleting === file.id ? (
                                                                                 <span className="loading loading-spinner loading-xs"></span>
@@ -679,7 +681,7 @@ export default function DashboardPage() {
                                                                             <span className="ml-1 hidden lg:block">
                                                                                 {isDeleting === file.id ? 'กำลังลบ...' : 'ลบ'}
                                                                             </span>
-                                                                        </button>
+                                                                        </Button>
                                                                     </div>
                                                                 </td>
                                                             </tr>

@@ -32,7 +32,9 @@ export async function GET(req: Request) {
         storagePath: true,
         created_at: true,
         updated_at: true,
-        fileExtension:true,
+        fileExtension: true,
+        downloadStatus: true, // เพิ่มบรรทัดนี้
+        downloadedAt: true,   // เพิ่มบรรทัดนี้
         userId: true,
         // Include user information using Prisma relation
         user: {
@@ -46,19 +48,19 @@ export async function GET(req: Request) {
     });
 
     // Convert BigInt IDs to strings and structure the data
-
     const sanitizedFiles = allUserFiles.map((file) => ({
       id: file.id.toString(),
       originalFileName: file.originalFileName,
       storagePath: file.storagePath,
       created_at: file.created_at,
       updated_at: file.updated_at,
-      fileExtension:file.fileExtension,
+      fileExtension: file.fileExtension,
+      downloadStatus: file.downloadStatus, // เพิ่มบรรทัดนี้
+      downloadedAt: file.downloadedAt,     // เพิ่มบรรทัดนี้
       userId: file.userId.toString(),
       // User information
       userName: file.user?.name || "Unknown User",
       userEmail: file.user?.email || "Unknown Email",
-      
     }));
     const totalUsers = await prisma.user.count();
 

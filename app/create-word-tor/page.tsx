@@ -17,6 +17,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useTitle } from "@/hook/useTitle";
+import { WordLikeTextarea } from "@/components/ui/Wtextarea";
 
 interface TORData {
     projectName: string; // เพิ่มชื่อโครงการ
@@ -392,67 +393,82 @@ export default function CreateTORPage() {
                             <div className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        หลักหารและเหตุผล
+                                        หลักการและเหตุผล
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         
                                         name="topic1"
-                                        placeholder="หลักหารและเหตุผล"
-                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        placeholder="หลักการและเหตุผล"
+                                        //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.topic1}
                                         onChange={handleChange}
+                                        rows={30}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 1
                                     </label>
-                                    <Input
-                                    type="text"
+                                    <WordLikeTextarea
+                                    
                                         name="objective1"
                                         placeholder=""
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective1}
                                         onChange={handleChange}
+                                        rows={2}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 2
                                     </label>
-                                    <Input
-                                    type="text"
+                                    <WordLikeTextarea
+                                    
                                         name="objective2"
                                         placeholder=""
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective2}
                                         onChange={handleChange}
+                                        rows={2}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 3
                                     </label>
-                                    <Input
-                                    type="text"
+                                    <WordLikeTextarea
+                                    
                                         name="objective3"
                                         placeholder=""
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective3}
                                         onChange={handleChange}
+                                        rows={2}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         กลุ่มเป้าหมาย
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         
                                         name="target"
                                         placeholder="กลุ่มเป้าหมายของโครงการ"
-                                        className="w-full px-4 py-3 border h-40 border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        //className="w-full px-4 py-3 border h-40 border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.target}
                                         onChange={handleChange}
+                                        rows={3}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
                                     />
                                 </div>
                             </div>
@@ -468,49 +484,62 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         พื้นที่/เขต
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         
                                         name="zone"
                                         placeholder="พื้นที่หรือเขตดำเนินการ"
-                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.zone}
                                         onChange={handleChange}
+                                        rows={3}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         แผนการดำเนินงาน
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="plan"
                                         placeholder="แผนการดำเนินงานโครงการ"
-                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
+                                        //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.plan}
                                         onChange={handleChange}
+                                        rows={30}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         การจัดการโครงการ
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="projectmanage"
                                         placeholder="วิธีการจัดการและบริหารโครงการ"
-                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
+                                        //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.projectmanage}
                                         onChange={handleChange}
+                                        rows={30}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        องค์กร ภาค ร่วมงาน
+                                        องค์กร ภาคี ร่วมงาน
                                     </label>
-                                    <Textarea
+                                    <WordLikeTextarea
                                         name="partner"
-                                        placeholder="วิธีการจัดการและบริหารโครงการ"
-                                        className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
+                                        placeholder="องค์กร ภาค ร่วมงาน"
+                                        //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.partner}
                                         onChange={handleChange}
+                                        rows={5}
+                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        wordLikeWidth={true}
+                                        thaiDistributed={true}
                                     />
                                 </div>
                             </div>

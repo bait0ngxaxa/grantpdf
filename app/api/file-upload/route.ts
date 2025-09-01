@@ -24,7 +24,7 @@ const generateUniqueFilename = (originalName: string): string => {
         .substring(0, 50); // จำกัดความยาว
 
     const uniqueId = uuidv4();
-    return `${uniqueId}_${sanitizedName}${extension}`;
+    return `${sanitizedName}_${uniqueId}${extension}`;
 };
 
 export async function POST(request: NextRequest) {
@@ -49,10 +49,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 3. ตรวจสอบประเภทไฟล์ (เฉพาะ .docx)
-        if (!file.name.toLowerCase().endsWith(".docx")) {
+        // 3. ตรวจสอบประเภทไฟล์ (เฉพาะ .docx และ .pdf)
+        const fileName = file.name.toLowerCase();
+        const isDocx = fileName.endsWith(".docx");
+        const isPdf = fileName.endsWith(".pdf");
+        
+        if (!isDocx && !isPdf) {
             return NextResponse.json(
-                { error: "Only .docx files are allowed" },
+                { error: "Only .docx and .pdf files are allowed" },
                 { status: 400 }
             );
         }
@@ -66,9 +70,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 5. สร้างชื่อไฟล์ใหม่และโฟลเดอร์
+        // 5. สร้างชื่อไฟล์ใหม่และโฟลเดอร์ตามประเภทไฟล์
         const uniqueFileName = generateUniqueFilename(file.name);
-        const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
+        const fileExtension = isPdf ? "pdf" : "docx";
+        const uploadDir = path.join(process.cwd(), "public", "upload", fileExtension);
 
         // สร้างโฟลเดอร์ถ้าไม่มี
         await mkdir(uploadDir, { recursive: true });
@@ -82,8 +87,8 @@ export async function POST(request: NextRequest) {
         const userFile = await prisma.userFile.create({
             data: {
                 originalFileName: file.name,
-                storagePath: `/upload/docx/${uniqueFileName}`,
-                fileExtension: "docx",
+                storagePath: `/upload/${fileExtension}/${uniqueFileName}`,
+                fileExtension: fileExtension,
                 userId: parseInt(session.user.id),
             },
         });
@@ -96,7 +101,7 @@ export async function POST(request: NextRequest) {
                 id: userFile.id.toString(),
                 originalFileName: userFile.originalFileName,
                 storagePath: userFile.storagePath,
-                downloadUrl: `/upload/docx/${uniqueFileName}`,
+                downloadUrl: `/upload/${fileExtension}/${uniqueFileName}`,
             },
         });
     } catch (error) {
