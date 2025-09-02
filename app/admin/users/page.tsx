@@ -605,14 +605,14 @@ export default function AdminUserManagementPage() {
               <Button
                 variant="outline"
                 onClick={closeDeleteModal}
-                className="px-4 py-2"
+                className="cursor-pointer px-4 py-2"
               >
                 ยกเลิก
               </Button>
               <Button
                 onClick={handleDeleteUser}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white"
+                className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white"
               >
                 {isDeleting ? 'กำลังลบ...' : 'ลบ'}
               </Button>

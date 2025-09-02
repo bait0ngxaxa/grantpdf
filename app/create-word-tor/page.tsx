@@ -17,7 +17,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useTitle } from "@/hook/useTitle";
-import { WordLikeTextarea } from "@/components/ui/Wtextarea";
+import { WordLikeTextareaTOR } from "@/components/ui/WtextareaTOR";
 
 interface TORData {
     projectName: string; // เพิ่มชื่อโครงการ
@@ -281,7 +281,7 @@ export default function CreateTORPage() {
                                     <Input
                                         type="text"
                                         name="date"
-                                        placeholder="ระบุวันที่ เช่น 1 มกราคม 2566"
+                                        placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2566"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.date}
                                         onChange={handleChange}
@@ -300,7 +300,7 @@ export default function CreateTORPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.contractnumber}
                                         onChange={handleChange}
-                                        // required
+                                        required
                                     />
                                 </div>
                                 <div>
@@ -314,6 +314,7 @@ export default function CreateTORPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.owner}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                                 <div>
@@ -327,6 +328,7 @@ export default function CreateTORPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.address}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                                 
@@ -341,6 +343,7 @@ export default function CreateTORPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.email}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                                 <div>
@@ -354,6 +357,7 @@ export default function CreateTORPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.tel}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                                 <div>
@@ -367,6 +371,7 @@ export default function CreateTORPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.timeline}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                                 <div>
@@ -380,6 +385,7 @@ export default function CreateTORPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.cost}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -395,7 +401,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         หลักการและเหตุผล
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                         
                                         name="topic1"
                                         placeholder="หลักการและเหตุผล"
@@ -411,7 +417,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 1
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                     
                                         name="objective1"
                                         placeholder=""
@@ -427,7 +433,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 2
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                     
                                         name="objective2"
                                         placeholder=""
@@ -443,7 +449,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 3
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                     
                                         name="objective3"
                                         placeholder=""
@@ -459,7 +465,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         กลุ่มเป้าหมาย
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                         
                                         name="target"
                                         placeholder="กลุ่มเป้าหมายของโครงการ"
@@ -484,7 +490,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         พื้นที่/เขต
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                         
                                         name="zone"
                                         placeholder="พื้นที่หรือเขตดำเนินการ"
@@ -500,7 +506,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         แผนการดำเนินงาน
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                         name="plan"
                                         placeholder="แผนการดำเนินงานโครงการ"
                                         //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
@@ -515,7 +521,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         การจัดการโครงการ
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                         name="projectmanage"
                                         placeholder="วิธีการจัดการและบริหารโครงการ"
                                         //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
@@ -530,7 +536,7 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         องค์กร ภาคี ร่วมงาน
                                     </label>
-                                    <WordLikeTextarea
+                                    <WordLikeTextareaTOR
                                         name="partner"
                                         placeholder="องค์กร ภาค ร่วมงาน"
                                         //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "

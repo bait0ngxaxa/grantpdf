@@ -161,7 +161,7 @@ model UserFile {
 - **Profile Management** - จัดการข้อมูลส่วนตัว
 
 ### 📄 Document Management  
-- **File Upload** - อัปโหลดเอกสาร (PDF, Word, Excel)
+- **File Upload** - อัปโหลดเอกสาร (PDF, Word)
 - **File Preview** - พรีวิวเอกสารออนไลน์
 - **File Download** - ดาวน์โหลดเอกสาร
 - **File Search & Filter** - ค้นหาและกรองเอกสาร
@@ -169,7 +169,7 @@ model UserFile {
 - **Download Status Tracking** - ติดตามสถานะการดาวน์โหลด
 
 ### 📝 Document Creation & Templates
-- **PDF Template Filling** - กรอกข้อมูลในเทมเพลต PDF
+- **PDF Template Filling** - กรอกข้อมูลในเทมเพลต PDF (Coming soon)
 - **Word Template Processing** - สร้างเอกสาร Word จากเทมเพลต
 - **Multiple Template Types:**
   - 📋 TOR (Terms of Reference) - ขอบเขตการดำเนินงาน  
@@ -277,32 +277,6 @@ npm run start        # เริ่ม production server
 npm run lint         # รัน ESLint
 ```
 
-## 🌐 Deployment & Environment
-
-### Environment Variables Required
-```env
-# Database
-DATABASE_URL="mysql://user:password@host:port/database"
-
-# Authentication
-NEXTAUTH_SECRET="your-nextauth-secret"
-NEXTAUTH_URL="http://localhost:3000"
-
-# Supabase (File Storage)
-NEXT_PUBLIC_SUPABASE_URL="your-supabase-url"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
-
-# Email (Optional)
-EMAIL_USER="your-email@domain.com"
-EMAIL_PASSWORD="your-email-password"
-```
-
-### Deployment Options
-- **Vercel** - Recommended (ออกแบบสำหรับ Next.js)
-- **Netlify** - Alternative option
-- **Docker** - Container deployment
-- **Traditional VPS** - Self-hosted option
-
 ## 📊 Performance & Optimization
 
 ### Built-in Optimizations
@@ -352,6 +326,5 @@ EMAIL_PASSWORD="your-email-password"
 
 สำหรับคำถามหรือการสนับสนุน กรุณาติดต่อทีมพัฒนา
 
-**โปรเจค Grant to PDF** - ระบบจัดการเอกสารที่ทันสมัย ปลอดภัย และใช้งานง่าย 🚀
 
-*อัปเดตล่าสุด: มกราคม 2025*
+*อัปเดตล่าสุด: กันยายน 2025*

@@ -28,6 +28,17 @@ type UserFile = {
     userName:string;
 };
 
+// เพิ่มฟังก์ชันตัดชื่อไฟล์ที่ด้านบนของไฟล์ (หลังจาก import statements)
+const truncateFileName = (fileName: string, maxLength: number = 30): string => {
+    if (fileName.length <= maxLength) return fileName;
+    
+    const extension = fileName.split('.').pop() || '';
+    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+    const truncatedName = nameWithoutExt.substring(0, maxLength - extension.length - 4) + '...';
+    
+    return `${truncatedName}.${extension}`;
+};
+
 export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -469,7 +480,7 @@ export default function DashboardPage() {
                                                 <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
                                                 <div className="text-lg font-bold truncate max-w-full" title={filteredAndSortedFiles.length > 0 ? filteredAndSortedFiles[0].originalFileName : ""}>
                                                     {filteredAndSortedFiles.length > 0 
-                                                        ? filteredAndSortedFiles[0].originalFileName
+                                                        ? truncateFileName(filteredAndSortedFiles[0].originalFileName, 25)
                                                         : "ไม่มีเอกสาร"}
                                                 </div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -618,7 +629,9 @@ export default function DashboardPage() {
                                                                             )}
                                                                         </div>
                                                                         <div className="flex-1 min-w-0">
-                                                                            <div className="font-bold truncate max-w-full pr-2" title={file.originalFileName}>{file.originalFileName}</div>
+                                                                            <div className="font-bold truncate max-w-full pr-2" title={file.originalFileName}>
+                                                                                {truncateFileName(file.originalFileName, 35)}
+                                                                            </div>
                                                                             <div className="text-sm opacity-50 md:hidden">
                                                                                 {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
                                                                             </div>

@@ -27,6 +27,17 @@ interface PdfFile {
     downloadedAt?: string;  // เพิ่มฟิลด์นี้ (ถ้าต้องการ)
 }
 
+// เพิ่มฟังก์ชันตัดชื่อไฟล์ที่ด้านบนของไฟล์ (หลัง import statements)
+const truncateFileName = (fileName: string, maxLength: number = 30): string => {
+    if (fileName.length <= maxLength) return fileName;
+    
+    const extension = fileName.split('.').pop() || '';
+    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+    const truncatedName = nameWithoutExt.substring(0, maxLength - extension.length - 4) + '...';
+    
+    return `${truncatedName}.${extension}`;
+};
+
 export default function AdminDashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -542,7 +553,7 @@ export default function AdminDashboardPage() {
                                             <div className="flex-1 min-w-0">
                                                 <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
                                                 <div className="text-lg font-bold truncate max-w-full" title={latestFile?.fileName || ""}>
-                                                    {latestFile?.fileName || "ไม่มี"}
+                                                    {latestFile?.fileName ? truncateFileName(latestFile.fileName, 25) : "ไม่มี"}
                                                 </div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                     {latestFile?.createdAt ? new Date(latestFile.createdAt).toLocaleDateString("th-TH") : ""}
@@ -661,7 +672,7 @@ export default function AdminDashboardPage() {
                                                             <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                 <td className="font-semibold">
                                                                     <div className="truncate max-w-xs pr-2" title={file.fileName}>
-                                                                        {file.fileName}
+                                                                        {truncateFileName(file.fileName, 30)}
                                                                     </div>
                                                                 </td>
                                                                 <td>
@@ -887,14 +898,14 @@ export default function AdminDashboardPage() {
                                 <Button
                                     variant="outline"
                                     onClick={closeDeleteModal}
-                                    className="px-4 py-2"
+                                    className="cursor-pointer px-4 py-2"
                                 >
                                     ยกเลิก
                                 </Button>
                                 <Button
                                     onClick={handleDeleteFile}
                                     disabled={isDeleting}
-                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white"
+                                    className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white"
                                 >
                                     {isDeleting ? 'กำลังลบ...' : 'ลบ'}
                                 </Button>

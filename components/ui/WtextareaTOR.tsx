@@ -2,7 +2,7 @@
 import * as React from "react";
 import { ChangeEvent, useEffect, useRef } from "react";
 
-const WordLikeTextarea = ({ 
+const WordLikeTextareaTOR = ({ 
     name, 
     value, 
     onChange, 
@@ -143,6 +143,6 @@ const WordLikeTextarea = ({
     );
 };
 
-export { WordLikeTextarea };
+export { WordLikeTextareaTOR };
 
 // ใช้ในฟอร์ม

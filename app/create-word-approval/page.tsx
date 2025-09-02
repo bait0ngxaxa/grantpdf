@@ -26,15 +26,14 @@ interface WordDocumentData {
     date: string;
     topicdetail: string;
     todetail: string;
-    attachmentdetail: string;
-    attachmentdetail2: string;
-    attachmentdetail3: string;
+    attachments: string[]; // เปลี่ยนจาก attachmentdetail, attachmentdetail2, attachmentdetail3 เป็น array
     detail: string;
     name: string;
     depart: string;
     coor: string;
     tel: string;
     email: string;
+    accept: string;
 }
 
 export default function CreateWordDocPage() {
@@ -48,15 +47,14 @@ export default function CreateWordDocPage() {
         date: "", //วันที่
         topicdetail: "", //เรื่อง
         todetail: "", //ผู้รับ
-        attachmentdetail: "", //รายละเอียดสิ่งที่ส่งมาด้วย
-        attachmentdetail2: "", //รายละเอียดสิ่งที่ส่งมาด้วย
-        attachmentdetail3: "", //รายละเอียดสิ่งที่ส่งมาด้วย
+        attachments: [], //รายการสิ่งที่ส่งมาด้วย (แบบ array)
         detail: "", //เนื้อหา
         name: "", //ชื่อผู้ลงนาม
         depart: "", //ตำแหน่ง/แผนก
         coor: "", //ผู้ประสานงาน
         tel: "", //เบอร์โทรศัพท์
         email: "", //อีเมล
+        accept: "", //ยอมรับ
     });
 
     const [signatureFile, setSignatureFile] = useState<File | null>(null);
@@ -80,12 +78,34 @@ export default function CreateWordDocPage() {
     };
     useTitle("สร้างหนังสือขอนุมัติ | ระบบจัดการเอกสาร");
 
+    // เพิ่มฟังก์ชันสำหรับจัดการ attachments
+    const addAttachment = () => {
+        setFormData(prev => ({
+            ...prev,
+            attachments: [...prev.attachments, ""]
+        }));
+    };
+
+    const removeAttachment = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            attachments: prev.attachments.filter((_, i) => i !== index)
+        }));
+    };
+
+    const updateAttachment = (index: number, value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            attachments: prev.attachments.map((item, i) => i === index ? value : item)
+        }));
+    };
+
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
+        setFormData((prev) => ({
+            ...prev,
             [name]: value,
         }));
     };
@@ -128,12 +148,20 @@ export default function CreateWordDocPage() {
 
         try {
             const data = new FormData();
+            // ส่งข้อมูลฟอร์มปกติ
             Object.keys(formData).forEach((key) => {
-                data.append(key, formData[key as keyof WordDocumentData]);
+                if (key === 'attachments') {
+                    // ส่ง attachments เป็น JSON string
+                    data.append('attachments', JSON.stringify(formData.attachments));
+                } else {
+                    data.append(key, formData[key as keyof WordDocumentData] as string);
+                }
             });
+            
             Object.keys(fixedValues).forEach((key) => {
                 data.append(key, fixedValues[key as keyof typeof fixedValues]);
             });
+            
             if (signatureFile) {
                 data.append("signatureFile", signatureFile);
             }
@@ -270,7 +298,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="date"
-                                        placeholder="เช่น 14 สิงหาคม 2568"
+                                        placeholder="ระบุวัน เดือน ปีเช่น 14 สิงหาคม 2568"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.date}
                                         onChange={handleChange}
@@ -303,12 +331,12 @@ export default function CreateWordDocPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ผู้รับ{" "}
+                                        เรียน{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         name="todetail"
-                                        placeholder="ระบุชื่อ-นามสกุลผู้รับ"
+                                        placeholder="ระบุผู้รับ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.todetail}
                                         onChange={handleChange}
@@ -318,7 +346,7 @@ export default function CreateWordDocPage() {
                             </div>
                         </div>
 
-                        {/* สิ่งที่ส่งมาด้วยและเนื้อหา */}
+                        {/* สิ่งที่ส่งมาด้วย - เปลี่ยนเป็นระบบเพิ่ม/ลด */}
                         <div className="bg-green-50 p-6 rounded-lg border border-green-200">
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-green-300">
                                 📁 สิ่งที่ส่งมาด้วยและเนื้อหา
@@ -328,35 +356,47 @@ export default function CreateWordDocPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         สิ่งที่ส่งมาด้วย
                                     </label>
-                                    <Input
-                                        type="text"
-                                        name="attachmentdetail"
-                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย (1) "
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        value={formData.attachmentdetail}
-                                        onChange={handleChange}
-                                    />
+                                    {/* แสดงรายการ attachments */}
+                                    {formData.attachments.map((attachment, index) => (
+                                        <div key={index} className="flex gap-2 mb-3">
+                                            <Input
+                                                type="text"
+                                                placeholder={`รายละเอียดสิ่งที่ส่งมาด้วย ${index + 1}`}
+                                                className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                                value={attachment}
+                                                onChange={(e) => updateAttachment(index, e.target.value)}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => removeAttachment(index)}
+                                                className="px-3 py-2 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+                                            >
+                                                ลบ
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    
+                                    {/* ปุ่มเพิ่ม attachment */}
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={addAttachment}
+                                        className="w-full py-2 border-dashed border-2 border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-slate-400"
+                                    >
+                                        + เพิ่มสิ่งที่ส่งมาด้วย
+                                    </Button>
+                                    
+                                    {/* แสดงข้อความช่วยเหลือ */}
+                                    {formData.attachments.length === 0 && (
+                                        <p className="text-sm text-slate-500 mt-2">
+                                            คลิกปุ่ม "เพิ่มสิ่งที่ส่งมาด้วย" เพื่อเพิ่มรายการ (ถ้ามี)
+                                        </p>
+                                    )}
                                 </div>
-                                <div>
-                                    <Input
-                                        type="text"
-                                        name="attachmentdetail2"
-                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย 2 (ถ้ามี ถ้าไม่มีว่างไว้)"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        value={formData.attachmentdetail2}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                                <div>
-                                    <Input
-                                        type="text"
-                                        name="attachmentdetail3"
-                                        placeholder="รายละเอียดสิ่งที่ส่งมาด้วย 3 (ถ้ามี ถ้าไม่มีว่างไว้)"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        value={formData.attachmentdetail3}
-                                        onChange={handleChange}
-                                    />
-                                </div>
+                                
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         เนื้อหา{" "}
@@ -369,10 +409,25 @@ export default function CreateWordDocPage() {
                                         value={formData.detail}
                                         onChange={handleChange}
                                         rows={30}
-                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
-                                        wordLikeWidth={true}
-                                        thaiDistributed={true}
+                                        // textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
+                                        // wordLikeWidth={true}
+                                        // thaiDistributed={true}
                                         
+                                        
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        ผู้อนุมัติ{" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        name="accept"
+                                        placeholder="ระบุชื่อ-นามสกุลผู้อนุมัติ"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        value={formData.accept}
+                                        onChange={handleChange}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -425,6 +480,7 @@ export default function CreateWordDocPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.coor}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                                 <div>
@@ -438,6 +494,7 @@ export default function CreateWordDocPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.tel}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                                 <div className="lg:col-span-2">
@@ -451,6 +508,7 @@ export default function CreateWordDocPage() {
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.email}
                                         onChange={handleChange}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -651,13 +709,22 @@ export default function CreateWordDocPage() {
                             </p>
                         </div>
 
+                        {/* ส่วนแสดงผล attachments ใน preview */}
                         <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
+                            <h4 className="font-medium text-slate-700 mb-2">
                                 สิ่งที่ส่งมาด้วย:
                             </h4>
-                            <p className="text-sm">
-                                {formData.attachmentdetail || "-"}
-                            </p>
+                            {formData.attachments.length > 0 ? (
+                                <ul className="text-sm list-disc list-inside">
+                                    {formData.attachments.map((attachment, index) => (
+                                        <li key={index} className="mb-1">
+                                            {attachment || `รายการที่ ${index + 1} (ยังไม่ได้กรอก)`}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-sm text-slate-500">ไม่มีสิ่งที่ส่งมาด้วย</p>
+                            )}
                         </div>
 
                         <div>

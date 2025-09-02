@@ -50,9 +50,16 @@ export async function POST(req: Request) {
         const date = formData.get("date") as string;
         const topicdetail = formData.get("topicdetail") as string;
         const todetail = formData.get("todetail") as string;
-        let attachmentdetail = formData.get("attachmentdetail") as string;
-        let attachmentdetail2 = formData.get("attachmentdetail2") as string;
-        let attachmentdetail3 = formData.get("attachmentdetail3") as string;
+        
+        // เปลี่ยนจากการรับ attachmentdetail แยกๆ เป็น array
+        const attachmentsJson = formData.get("attachments") as string;
+        let attachments: string[] = [];
+        try {
+            attachments = JSON.parse(attachmentsJson || "[]");
+        } catch {
+            attachments = [];
+        }
+        
         const detail = formData.get("detail") as string;
         const name = formData.get("name") as string;
         const depart = formData.get("depart") as string;
@@ -62,6 +69,7 @@ export async function POST(req: Request) {
         const signatureFile = formData.get("signatureFile") as File | null;
         const fixedAttachment = formData.get("attachment") as string;
         const fixedRegard = formData.get("regard") as string;
+        const accept = formData.get("accept") as string;
 
         if (!signatureFile) {
             return new NextResponse("Signature file is missing.", {
@@ -75,21 +83,7 @@ export async function POST(req: Request) {
             });
         }
 
-        if (
-            !attachmentdetail2 ||
-            attachmentdetail2 === "undefined" ||
-            attachmentdetail2 === "null"
-        ) {
-            attachmentdetail2 = "";
-        }
-
-        if (
-            !attachmentdetail3 ||
-            attachmentdetail3 === "undefined" ||
-            attachmentdetail3 === "null"
-        ) {
-            attachmentdetail3 = "";
-        }
+       
 
         // 2. Read the signature image file into a buffer
         const signatureArrayBuffer = await signatureFile.arrayBuffer();
@@ -122,15 +116,23 @@ export async function POST(req: Request) {
         });
 
         // 5. Render data into the template
+        // เตรียมข้อมูล attachments สำหรับ template ที่ใช้ {#attachment} {attachmentdetail} {/attachment}
+        const attachmentData = attachments
+            .filter(att => att.trim() !== "") // กรองเฉพาะรายการที่มีข้อมูล
+            .map((att, index) => ({ 
+                attachmentdetail: `${index + 1}. ${att}` 
+            }));
+
+        // เพิ่มตัวแปรสำหรับหัวข้อ "สิ่งที่แนบมาด้วย"
+        const hasAttachments = attachmentData.length > 0;
+
         doc.render({
             head,
             date,
             topicdetail,
             todetail,
-            attachment: fixedAttachment,
-            attachmentdetail,
-            attachmentdetail2,
-            attachmentdetail3,
+            attachment: attachmentData, // ส่งเป็น array สำหรับ loop ใน template
+            hasAttachments: hasAttachments, // ใช้สำหรับแสดง/ซ่อนหัวข้อ
             detail,
             regard: fixedRegard,
             name,
@@ -139,6 +141,7 @@ export async function POST(req: Request) {
             tel,
             email,
             signature: "signature",
+            accept,
         });
 
         // 6. Generate Word buffer
