@@ -1,11 +1,49 @@
-// สร้าง Component ใหม่สำหรับ Word-like textarea
 import * as React from "react";
-import { ChangeEvent, useEffect, useRef } from "react";
+import {
+  ChangeEvent,
+  ForwardedRef,
+  TextareaHTMLAttributes,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
 
-const WordLikeTextareaTOR = ({ 
-    name, 
-    value, 
-    onChange, 
+type Align = "left" | "center" | "right" | "justify";
+
+interface WordLikeTextareaProps
+  extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "onChange" | "name"> {
+  name: string;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+
+  /** ทำคอนเทนเนอร์ให้มีขนาดคล้ายหน้ากระดาษ A4 (กว้าง 21cm + margin) */
+  wordLikeWidth?: boolean;
+
+  /** ขนาดฟอนต์ เช่น '22px' */
+  fontSize?: string;
+
+  /** การจัดแนวข้อความ */
+  textAlign?: Align;
+
+  /** พยายามเลียนแบบ Thai Distributed (ต้องใช้ร่วมกับ justify) */
+  thaiDistributed?: boolean;
+
+  /** ปรับความสูงอัตโนมัติ */
+  autoResize?: boolean;
+
+  /** ความสูงต่ำสุดของกล่องข้อความ */
+  minHeight?: string;
+
+  /** ให้สามารถปรับขนาดด้วยเมาส์ (เมื่อไม่ autoResize) */
+  resizable?: boolean;
+}
+
+function _WordLikeTextareaTOR(
+  {
+    name,
+    value,
+    onChange,
     placeholder = "",
     className = "",
     rows = 5,
@@ -16,133 +54,149 @@ const WordLikeTextareaTOR = ({
     fontSize = "22px",
     textAlign = "justify",
     thaiDistributed = true,
-    
-}: {
-    name: string;
-    value: string;
-    onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-    placeholder?: string;
-    className?: string;
-    rows?: number;
-    resizable?: boolean;
-    minHeight?: string;
-    autoResize?: boolean;
-    wordLikeWidth?: boolean;
-    fontSize?: string;
-    textAlign?: "left" | "center" | "right" | "justify";
-    thaiDistributed?: boolean;
-}) => {
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    id,
+    "aria-label": ariaLabel,
+    maxLength = 1500,
+    required = true,
+    disabled = false,
+    ...rest
+  }: WordLikeTextareaProps,
+  ref: ForwardedRef<HTMLTextAreaElement>
+) {
+  const innerRef = useRef<HTMLTextAreaElement | null>(null);
 
-    // Auto-resize function
-    const adjustHeight = () => {
-        if (autoResize && textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
-        }
+  // allow both: external ref + internal ref
+  const setRefs = useCallback(
+    (el: HTMLTextAreaElement) => {
+      innerRef.current = el;
+      if (typeof ref === "function") ref(el);
+      else if (ref) (ref as React.MutableRefObject<HTMLTextAreaElement | null>).current = el;
+    },
+    [ref]
+  );
+
+  const adjustHeight = useCallback(() => {
+    if (autoResize && innerRef.current) {
+      const el = innerRef.current;
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  }, [autoResize]);
+
+  useLayoutEffect(() => {
+    adjustHeight();
+  }, [value, autoResize, adjustHeight]);
+
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    onChange(e);
+    if (autoResize) adjustHeight();
+  };
+
+  const containerClass = useMemo(() => {
+    if (!wordLikeWidth) return "";
+    // เฟรม A4: 21cm ความกว้าง + margin ซ้าย/ขวา
+    return "mx-auto";
+  }, [wordLikeWidth]);
+
+  const textAlignClass = useMemo(() => {
+    switch (textAlign) {
+      case "left":
+        return "text-left";
+      case "center":
+        return "text-center";
+      case "right":
+        return "text-right";
+      case "justify":
+      default:
+        return "text-justify";
+    }
+  }, [textAlign]);
+
+  const textareaStyle = useMemo<React.CSSProperties>(() => {
+    const style: React.CSSProperties = {
+      fontFamily: `'TH Sarabun New', Arial, sans-serif`,
+      fontSize,
+      lineHeight: 1.6,
+      minHeight,
+      maxHeight: autoResize ? "none" : "400px",
+      hyphens: "auto",
+      wordBreak: "normal",
+      overflowWrap: "break-word",
+      whiteSpace: "pre-wrap",
+      textAlign: textAlign as React.CSSProperties["textAlign"],
+      // auto-resize ไม่ให้เกิด scrollbar กระโดด
+      ...(autoResize ? { overflow: "hidden" } : {}),
+      // Thai Distributed (best-effort)
+      ...(thaiDistributed && textAlign === "justify"
+        ? {
+            // ทำงานร่วมกับ justify (รองรับบางเบราว์เซอร์)
+            // @ts-ignore - type ไม่รู้จักในบางระบบ แต่เบราว์เซอร์เข้าใจ
+            textJustify: "inter-character",
+          }
+        : {}),
+      // ให้ textarea กว้าง 100% แล้วไปคุม A4 ที่คอนเทนเนอร์
+      width: "100%",
+      boxSizing: "border-box",
+      // padding ด้านในที่ “รู้สึกเหมือนเอกสาร”
+      paddingLeft: wordLikeWidth ? "2.2cm" : undefined,
+      paddingRight: wordLikeWidth ? "2.2cm" : undefined,
+      paddingTop: "12px",
+      paddingBottom: "12px",
     };
 
-    useEffect(() => {
-        adjustHeight();
-    }, [value, autoResize]);
+    return style;
+  }, [autoResize, fontSize, minHeight, textAlign, thaiDistributed, wordLikeWidth]);
 
-    const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        onChange(e);
-        if (autoResize) {
-            adjustHeight();
-        }
+  const wrapperStyle = useMemo<React.CSSProperties>(() => {
+    if (!wordLikeWidth) return {};
+    return {
+      width: "21cm",
+      maxWidth: "21cm",
     };
+  }, [wordLikeWidth]);
 
-    // คำนวณ width สำหรับ A4 format
-    const getWidthClass = () => {
-        if (wordLikeWidth) {
-            return 'w-full max-w-[16.6cm] mx-auto'; // A4 content width (21cm - 4.4cm margin)
-        }
-        return 'w-full';
-    };
+  return (
+    <div className={containerClass} style={wrapperStyle}>
+      <textarea
+        ref={setRefs}
+        id={id ?? name}
+        name={name}
+        value={value}
+        onChange={handleChange}
+        onInput={autoResize ? adjustHeight : undefined}
+        placeholder={placeholder}
+        rows={rows}
+        //maxLength={maxLength}
+        required={required}
+        disabled={disabled}
+        className={[
+          // base
+          "w-full",
+          "leading-relaxed",
+          "border-2 border-gray-300",
+          "bg-white",
+          "rounded-none",
+          "focus:border-blue-500 focus:outline-none focus:ring-0",
+          resizable && !autoResize ? "resize-y" : "resize-none",
+          "shadow-sm",
+          "transition-all duration-200",
+          "print:border-none print:shadow-none",
+          textAlignClass,
+          // คลาสสำหรับ Thai Distributed (เผื่อไปเติมใน global.css)
+          thaiDistributed && textAlign === "justify" ? "thai-distributed" : "",
+          className,
+        ].join(" ")}
+        style={textareaStyle}
+        aria-label={ariaLabel ?? (id ? undefined : name)}
+        {...rest}
+      />
+    </div>
+  );
+}
 
-    // เพิ่มฟังก์ชันสำหรับ text alignment class
-    const getTextAlignClass = () => {
-        switch (textAlign) {
-            case 'left': return 'text-left';
-            case 'center': return 'text-center';
-            case 'right': return 'text-right';
-            case 'justify': return 'text-justify';
-            default: return 'text-justify';
-        }
-    };
-
-    // สร้าง style object สำหรับ Thai distributed
-    const getThaiDistributedStyle = (): React.CSSProperties => {
-        if (thaiDistributed && textAlign === 'justify') {
-            return {
-                textAlign: 'justify',
-                wordSpacing: '0.15em',
-                letterSpacing: '0.05em',
-                fontFeatureSettings: '"liga" 1, "kern" 1',
-                textRendering: 'optimizeLegibility' as const,
-            } as React.CSSProperties;
-        }
-        return {
-            textAlign: textAlign as React.CSSProperties['textAlign'],
-            wordSpacing: 'normal',
-            letterSpacing: 'normal',
-        };
-    };
-
-    return (
-        <div className={wordLikeWidth ? 'flex justify-center' : ''}>
-            <textarea
-                ref={textareaRef}
-                name={name}
-                value={value}
-                onChange={handleChange}
-                placeholder={placeholder}
-                rows={rows}
-                maxLength={1300}
-                required
-                className={`
-                    ${getWidthClass()}
-                    px-[2.2cm] py-3
-                    font-['TH_Sarabun_New',_Arial,_sans-serif] text-base leading-relaxed
-                    border-2 border-gray-300 
-                    rounded-none
-                    bg-white
-                    focus:border-blue-500 focus:outline-none focus:ring-0
-                    ${resizable && !autoResize ? 'resize-y' : 'resize-none'}
-                    shadow-sm
-                    print:border-none print:shadow-none 
-                    transition-all duration-200
-                    ${getTextAlignClass()}
-                    ${thaiDistributed ? 'thai-distributed' : ''}
-                    ${className}
-                `}
-                style={{
-                    fontFamily: 'TH Sarabun New, Times New Roman, serif',
-                    fontSize: fontSize,
-                    lineHeight: '1.6',
-                    minHeight: minHeight,
-                    maxHeight: autoResize ? 'none' : '400px',
-                    hyphens: 'auto',
-                    wordBreak: 'normal',
-                    overflowWrap: 'break-word',
-                    whiteSpace: 'pre-wrap',
-                    // นำ Thai distributed style มาใช้
-                    ...getThaiDistributedStyle(),
-                    // A4 specific styling
-                    ...(wordLikeWidth && {
-                        width: '21cm',
-                        maxWidth: '21cm',
-                        paddingLeft: '2.2cm',
-                        paddingRight: '2.2cm',
-                        boxSizing: 'border-box'
-                    })
-                }}
-            />
-        </div>
-    );
-};
+const WordLikeTextareaTOR = React.forwardRef<HTMLTextAreaElement, WordLikeTextareaProps>(
+  _WordLikeTextareaTOR
+);
+WordLikeTextareaTOR.displayName = "WordLikeTextareaTOR";
 
 export { WordLikeTextareaTOR };
-
-// ใช้ในฟอร์ม
