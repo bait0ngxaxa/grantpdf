@@ -408,7 +408,7 @@ export default function CreateTORPage() {
                                         //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.topic1}
                                         onChange={handleChange}
-                                        rows={30}
+                                        //rows={30}
                                         wordLikeWidth
                                         autoResize={true}
                                         textAlign="justify"
@@ -730,7 +730,7 @@ export default function CreateTORPage() {
                                                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                             />
                                         </svg>
-                                        สร้างเอกสาร TOR
+                                        ยืนยันสร้างเอกสาร 
                                     </>
                                 )}
                             </Button>

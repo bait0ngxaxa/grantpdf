@@ -464,7 +464,7 @@ export default function CreateFormProjectPage() {
                                         //className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.scope}
                                         onChange={handleChange}
-                                        rows={20}
+                                        //rows={20}
                                         wordLikeWidth
                                         autoResize={true}
                                         textAlign="justify"
@@ -483,7 +483,7 @@ export default function CreateFormProjectPage() {
                                         //className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.monitoring}
                                         onChange={handleChange}
-                                        rows={20}
+                                        //rows={20}
                                         wordLikeWidth
                                         autoResize={true}
                                         textAlign="justify"
@@ -521,7 +521,7 @@ export default function CreateFormProjectPage() {
                                         //className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.author}
                                         onChange={handleChange}
-                                        rows={20}
+                                        //rows={20}
                                         wordLikeWidth
                                         autoResize={true}
                                         textAlign="justify"
@@ -603,7 +603,7 @@ export default function CreateFormProjectPage() {
                                                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                             />
                                         </svg>
-                                        สร้างเอกสาร Word
+                                        ยืนยันสร้างเอกสาร 
                                     </>
                                 )}
                             </Button>

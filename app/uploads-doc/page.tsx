@@ -184,9 +184,9 @@ export default function UploadDocPage() {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
+                                <div className="w-16 h-16 mx-auto bg-primary rounded-full flex items-center justify-center">
                                     <svg
-                                        className="w-8 h-8 text-gray-400"
+                                        className="w-8 h-8 text-white"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"

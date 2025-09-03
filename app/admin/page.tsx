@@ -66,6 +66,11 @@ export default function AdminDashboardPage() {
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
 
+    // เพิ่ม state สำหรับ PDF preview modal
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [previewFileName, setPreviewFileName] = useState("");
+
     // --- Authorization Check ---
     useEffect(() => {
         if (status === "loading") return;
@@ -191,6 +196,19 @@ export default function AdminDashboardPage() {
         } finally {
             setIsDeleting(false);
         }
+    };
+
+    // เพิ่ม functions สำหรับ PDF preview
+    const openPreviewModal = (storagePath: string, fileName: string) => {
+        setPreviewUrl(storagePath);
+        setPreviewFileName(fileName);
+        setIsPreviewModalOpen(true);
+    };
+
+    const closePreviewModal = () => {
+        setIsPreviewModalOpen(false);
+        setPreviewUrl("");
+        setPreviewFileName("");
     };
 
     // --- Data Filtering and Sorting with Pagination ---
@@ -700,12 +718,11 @@ export default function AdminDashboardPage() {
                                                                 <td className="flex space-x-2">
                                                                     {file.storagePath && (
                                                                         <a
-                                                                            href={`/api/admin/download/${file.id}`} // เปลี่ยน URL
+                                                                            href={`/api/admin/download/${file.id}`}
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
                                                                             className="btn btn-sm bg-primary hover:bg-primary-focus hover:bg-blue-600 text-white border-none rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                                                                             onClick={() => {
-                                                                                // Refresh หน้าหลังจากดาวน์โหลดเพื่ออัพเดตสถานะ
                                                                                 setTimeout(() => {
                                                                                     window.location.reload();
                                                                                 }, 1000);
@@ -719,6 +736,22 @@ export default function AdminDashboardPage() {
                                                                             </span>
                                                                         </a>
                                                                     )}
+                                                                    
+                                                                    {/* เพิ่มปุ่มพรีวิว PDF */}
+                                                                    {file.fileExtension === 'pdf' && (
+                                                                        <Button
+                                                                            onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
+                                                                            className="btn btn-sm bg-green-500 hover:bg-green-600 text-white border-none rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                                                            title="พรีวิว PDF"
+                                                                        >
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                            </svg>
+                                                                            <span className="ml-1 hidden lg:block">พรีวิว</span>
+                                                                        </Button>
+                                                                    )}
+                                                                    
                                                                     <Button
                                                                         onClick={() => openDeleteModal(file)}
                                                                         className=" cursor-pointer text-white border-none rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
@@ -959,6 +992,37 @@ export default function AdminDashboardPage() {
                         </div>
                         <form method="dialog" className="modal-backdrop">
                             <button onClick={() => setIsSuccessModalOpen(false)}>ปิด</button>
+                        </form>
+                    </dialog>
+                )}
+
+                {/* เพิ่ม PDF Preview Modal */}
+                {isPreviewModalOpen && (
+                    <dialog className="modal modal-open">
+                        <div className="modal-box w-11/12 max-w-5xl h-[90vh] bg-white dark:bg-gray-800">
+                            <div className="flex justify-between items-center mb-4 p-4 border-b border-gray-200 dark:border-gray-700">
+                                <h3 className="font-bold text-lg text-gray-800 dark:text-white truncate">
+                                    พรีวิว: {previewFileName}
+                                </h3>
+                                <button
+                                    className="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                                    onClick={closePreviewModal}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="h-[calc(100%-80px)]">
+                                <iframe
+                                    src={previewUrl}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 'none' }}
+                                    title="PDF Preview"
+                                />
+                            </div>
+                        </div>
+                        <form method="dialog" className="modal-backdrop">
+                            <button onClick={closePreviewModal}>ปิด</button>
                         </form>
                     </dialog>
                 )}

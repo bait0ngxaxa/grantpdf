@@ -153,11 +153,12 @@ export async function POST(req: Request) {
         const fixedRegard = formData.get("regard") as string;
         const accept = formData.get("accept") as string;
 
-        if (!signatureFile) {
-            return new NextResponse("Signature file is missing.", {
-                status: 400,
-            });
-        }
+        // ลบการตรวจสอบบังคับ signature file
+        // if (!signatureFile) {
+        //     return new NextResponse("Signature file is missing.", {
+        //         status: 400,
+        //     });
+        // }
 
         if (!projectName) {
             return new NextResponse("Project name is required.", {
@@ -165,9 +166,12 @@ export async function POST(req: Request) {
             });
         }
 
-        // 2. Read the signature image file into a buffer
-        const signatureArrayBuffer = await signatureFile.arrayBuffer();
-        const signatureImageBuffer = Buffer.from(signatureArrayBuffer);
+        // 2. จัดการ signature image file (อาจจะมีหรือไม่มี)
+        let signatureImageBuffer: Buffer | null = null;
+        if (signatureFile && signatureFile.size > 0) {
+            const signatureArrayBuffer = await signatureFile.arrayBuffer();
+            signatureImageBuffer = Buffer.from(signatureArrayBuffer);
+        }
 
         // 3. Read the Word template file
         const templatePath = path.join(
@@ -179,25 +183,35 @@ export async function POST(req: Request) {
 
         // 4. Initialize Docxtemplater
         const zip = new PizZip(content);
-        const imageModule = new ImageModule({
-            getImage: (tag: string) => {
-                if (tag === "signature") {
-                    return signatureImageBuffer;
-                }
-                return null;
-            },
-            getSize: () => [150, 80],
-            centered: false,
-        });
+        
+        // สร้าง imageModule เฉพาะเมื่อมี signature
+        const modules = [];
+        if (signatureImageBuffer) {
+            const imageModule = new ImageModule({
+                getImage: (tag: string) => {
+                    if (tag === "signature") {
+                        return signatureImageBuffer;
+                    }
+                    return null;
+                },
+                getSize: () => [130, 60],
+                centered: false,
+            });
+            modules.push(imageModule);
+        }
         
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
-            modules: [imageModule],
+            modules: modules, // ใช้ modules array ที่อาจจะว่างหรือมี imageModule
             // เพิ่ม nullGetter เพื่อจัดการค่าที่เป็น null/undefined
             nullGetter: function(part) {
                 console.log('Missing or null variable:', part.value || 'unknown');
-                return ""; // คืนค่าว่างแทนที่จะ error
+                // ถ้าเป็น signature และไม่มีไฟล์ ให้คืนค่าช่องว่างสำหรับลายเซ็น
+                if (part.value === 'signature' && !signatureImageBuffer) {
+                    return "\n\n\n_________________________\n         ลายเซ็น\n\n";
+                }
+                return ""; // คืนค่าว่างสำหรับตัวแปรอื่น
             },
             // เพิ่ม custom parser สำหรับจัดการ Thai text
             parser: function(tag) {
@@ -208,10 +222,20 @@ export async function POST(req: Request) {
                         }
                         
                         const value = scope[tag];
+                        
+                        // จัดการ signature เป็นพิเศษ
+                        if (tag === 'signature') {
+                            if (signatureImageBuffer) {
+                                return "signature"; // ใช้ image module
+                            } else {
+                                return "\n\n\n_________________________\n         ลายเซ็น\n\n"; // ช่องว่างสำหรับลายเซ็น
+                            }
+                        }
+                        
                         if (typeof value === 'string') {
-                            // ตรวจสอบและแก้ไขปัญหา Word formatting
+                            // ตรวจสอบและแก้ไขปัญหา Thai Distributed
                             if (hasWordFormattingIssues(value)) {
-                                console.log(`Fixing Word formatting issues for field: ${tag}`);
+                                console.log(`Fixing Thai Distributed issue for field: ${tag}`);
                                 return fixThaiDistributed(value);
                             }
                             return value;
@@ -233,7 +257,7 @@ export async function POST(req: Request) {
         // เพิ่มตัวแปรสำหรับหัวข้อ "สิ่งที่แนบมาด้วย"
         const hasAttachments = attachmentData.length > 0;
 
-        // เตรียมข้อมูลที่แก้ไขปัญหา Word formatting แล้ว
+        // เตรียมข้อมูลที่แก้ไขปัญหา Thai Distributed แล้ว
         const processedData = {
             head: fixThaiDistributed(head || ""),
             date: date || "", // วันที่ไม่ต้องแก้
@@ -241,14 +265,14 @@ export async function POST(req: Request) {
             todetail: fixThaiDistributed(todetail || ""),
             attachment: attachmentData, // ส่งเป็น array สำหรับ loop ใน template
             hasAttachments: hasAttachments, // ใช้สำหรับแสดง/ซ่อนหัวข้อ
-            detail: fixThaiDistributed(detail || ""), // ฟิลด์สำคัญที่สุด - แก้ไข line breaks
+            detail: fixThaiDistributed(detail || ""), // ฟิลด์สำคัญที่สุด
             regard: fixThaiDistributed(fixedRegard || ""),
             name: fixThaiDistributed(name || ""),
             depart: fixThaiDistributed(depart || ""),
             coor: coor || "", // เบอร์โทรไม่ต้องแก้
             tel: tel || "",
             email: email || "", // อีเมลไม่ต้องแก้
-            signature: "signature",
+            signature: signatureImageBuffer ? "signature" : "\n\n\n_________________________\n         ลายเซ็น\n\n", // จัดการ signature
             accept: fixThaiDistributed(accept || ""),
         };
 

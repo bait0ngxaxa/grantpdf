@@ -394,11 +394,11 @@ export default function Home() {
                                     </div>
                                     {/* System Name */}
                                     <h1 className="text-5xl sm:text-6xl font-bold bg-primary bg-clip-text text-transparent mb-4 ">
-                                        DEMO
+                                        DOCX Generator
                                     </h1>
                                     {/* Slogan or Description */}
                                     <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 font-medium">
-                                        ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ
+                                        ระบบสร้างแบบฟอร์มจากเทมเพลตอัตโนมัติ
                                     </p>
                                 </div>
 
