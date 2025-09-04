@@ -59,7 +59,7 @@ export default function Home() {
             {/* Navbar */}
             <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
                 <div className="flex-1">
-                    <Link href="/" className=" btn btn-ghost text-2xl hover:rounded-full text-primary hover:bg-white transform hover:scale-105 transition-transform duration-300">
+                    <Link href="/" className=" font-semibold text-2xl hover:rounded-full text-primary hover:bg-white transform hover:scale-105 transition-transform duration-300">
                         DOCX Generator | HOMEPAGE
                     </Link>
                 </div>
@@ -240,64 +240,7 @@ export default function Home() {
                             </div>
                         )}
 
-                        {/* คุณสมบัติของระบบ
-                        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden transform transition-transform duration-300 hover:scale-[1.02]">
-                            <div className="card-body p-6">
-                                <h2 className="card-title text-lg font-bold text-primary mb-4 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    คุณสมบัติเด่น
-                                </h2>
-                                <div className="space-y-3">
-                                    <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                สร้างเอกสารอัตโนมัติ
-                                            </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                ลดเวลาการทำงานมากกว่า 80%
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                รองรับหลายรูปแบบ
-                                            </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                PDF, Word, Excel และอื่นๆ
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                ความปลอดภัยสูง
-                                            </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                เข้ารหัสข้อมูลและไฟล์
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
+                        
 
                         {/* ประเภทเอกสาร - ปรับปรุงใหม่ */}
                         <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden transform transition-transform duration-300 hover:scale-[1.02]">
@@ -308,7 +251,7 @@ export default function Home() {
                                     </svg>
                                     เทมเพลตเอกสาร
                                 </h2>
-                                <div className="space-y-2">
+                                <div className="space-y-1">
                                     <div className="flex items-center justify-between p-3 hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent rounded-lg transition-all duration-200 group cursor-pointer">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">

@@ -80,23 +80,25 @@ export default function CreateWordDocPage() {
 
     // เพิ่มฟังก์ชันสำหรับจัดการ attachments
     const addAttachment = () => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            attachments: [...prev.attachments, ""]
+            attachments: [...prev.attachments, ""],
         }));
     };
 
     const removeAttachment = (index: number) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            attachments: prev.attachments.filter((_, i) => i !== index)
+            attachments: prev.attachments.filter((_, i) => i !== index),
         }));
     };
 
     const updateAttachment = (index: number, value: string) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            attachments: prev.attachments.map((item, i) => i === index ? value : item)
+            attachments: prev.attachments.map((item, i) =>
+                i === index ? value : item
+            ),
         }));
     };
 
@@ -150,18 +152,24 @@ export default function CreateWordDocPage() {
             const data = new FormData();
             // ส่งข้อมูลฟอร์มปกติ
             Object.keys(formData).forEach((key) => {
-                if (key === 'attachments') {
+                if (key === "attachments") {
                     // ส่ง attachments เป็น JSON string
-                    data.append('attachments', JSON.stringify(formData.attachments));
+                    data.append(
+                        "attachments",
+                        JSON.stringify(formData.attachments)
+                    );
                 } else {
-                    data.append(key, formData[key as keyof WordDocumentData] as string);
+                    data.append(
+                        key,
+                        formData[key as keyof WordDocumentData] as string
+                    );
                 }
             });
-            
+
             Object.keys(fixedValues).forEach((key) => {
                 data.append(key, fixedValues[key as keyof typeof fixedValues]);
             });
-            
+
             if (signatureFile) {
                 data.append("signatureFile", signatureFile);
             }
@@ -185,7 +193,11 @@ export default function CreateWordDocPage() {
                 const result = await response.json();
                 if (result.success && result.downloadUrl) {
                     setGeneratedFileUrl(result.downloadUrl);
-                    setMessage(`สร้างเอกสาร Word สำเร็จแล้ว! โครงการ: ${result.project?.name || 'ไม่ระบุ'}`);
+                    setMessage(
+                        `สร้างเอกสาร Word สำเร็จแล้ว! โครงการ: ${
+                            result.project?.name || "ไม่ระบุ"
+                        }`
+                    );
                     setIsError(false);
                     setIsSuccessModalOpen(true);
                 } else {
@@ -251,7 +263,6 @@ export default function CreateWordDocPage() {
                     </p>
                 </div>
                 <div className="p-8">
-
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* ข้อมูลพื้นฐาน */}
                         <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
@@ -274,7 +285,7 @@ export default function CreateWordDocPage() {
                                         required
                                     />
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         เลขที่หนังสือ{" "}
@@ -357,27 +368,41 @@ export default function CreateWordDocPage() {
                                         สิ่งที่ส่งมาด้วย
                                     </label>
                                     {/* แสดงรายการ attachments */}
-                                    {formData.attachments.map((attachment, index) => (
-                                        <div key={index} className="flex gap-2 mb-3">
-                                            <Input
-                                                type="text"
-                                                placeholder={`รายละเอียดสิ่งที่ส่งมาด้วย ${index + 1}`}
-                                                className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                                value={attachment}
-                                                onChange={(e) => updateAttachment(index, e.target.value)}
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => removeAttachment(index)}
-                                                className="px-3 py-2 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+                                    {formData.attachments.map(
+                                        (attachment, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex gap-2 mb-3"
                                             >
-                                                ลบ
-                                            </Button>
-                                        </div>
-                                    ))}
-                                    
+                                                <Input
+                                                    type="text"
+                                                    placeholder={`รายละเอียดสิ่งที่ส่งมาด้วย ${
+                                                        index + 1
+                                                    }`}
+                                                    className="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                                    value={attachment}
+                                                    onChange={(e) =>
+                                                        updateAttachment(
+                                                            index,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        removeAttachment(index)
+                                                    }
+                                                    className="px-3 py-2 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+                                                >
+                                                    ลบ
+                                                </Button>
+                                            </div>
+                                        )
+                                    )}
+
                                     {/* ปุ่มเพิ่ม attachment */}
                                     <Button
                                         type="button"
@@ -388,34 +413,34 @@ export default function CreateWordDocPage() {
                                     >
                                         + เพิ่มสิ่งที่ส่งมาด้วย
                                     </Button>
-                                    
+
                                     {/* แสดงข้อความช่วยเหลือ */}
                                     {formData.attachments.length === 0 && (
                                         <p className="text-sm text-slate-500 mt-2">
-                                            คลิกปุ่ม "เพิ่มสิ่งที่ส่งมาด้วย" เพื่อเพิ่มรายการ (ถ้ามี)
+                                            คลิกปุ่ม "เพิ่มสิ่งที่ส่งมาด้วย"
+                                            เพื่อเพิ่มรายการ (ถ้ามี)
                                         </p>
                                     )}
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         เนื้อหา{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextarea
+                                    <Textarea
                                         name="detail"
                                         placeholder="รายละเอียดเนื้อหา"
-                                        //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 py-3 h-96 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.detail}
                                         onChange={handleChange}
-                                        //rows={30}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
-                                        
-                                        
+                                        //rows={50}
+                                        // wordLikeWidth
+                                        // autoResize={true}
+                                        // textAlign="justify"
+                                        // thaiDistributed={true}
+                                        // fontSize="22px"
+                                        // trailingBlankLines={1}
                                     />
                                 </div>
                                 <div>
@@ -625,7 +650,7 @@ export default function CreateWordDocPage() {
                                 )}
                             </Button>
                         </div>
-                </form>
+                    </form>
 
                     {message && isError && (
                         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-6">
@@ -664,7 +689,6 @@ export default function CreateWordDocPage() {
 
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                            
                             <div>
                                 <h4 className="font-semibold text-sm text-gray-600">
                                     ชื่อไฟล์:
@@ -718,14 +742,21 @@ export default function CreateWordDocPage() {
                             </h4>
                             {formData.attachments.length > 0 ? (
                                 <ul className="text-sm list-disc list-inside">
-                                    {formData.attachments.map((attachment, index) => (
-                                        <li key={index} className="mb-1">
-                                            {attachment || `รายการที่ ${index + 1} (ยังไม่ได้กรอก)`}
-                                        </li>
-                                    ))}
+                                    {formData.attachments.map(
+                                        (attachment, index) => (
+                                            <li key={index} className="mb-1">
+                                                {attachment ||
+                                                    `รายการที่ ${
+                                                        index + 1
+                                                    } (ยังไม่ได้กรอก)`}
+                                            </li>
+                                        )
+                                    )}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-slate-500">ไม่มีสิ่งที่ส่งมาด้วย</p>
+                                <p className="text-sm text-slate-500">
+                                    ไม่มีสิ่งที่ส่งมาด้วย
+                                </p>
                             )}
                         </div>
 
@@ -797,7 +828,12 @@ export default function CreateWordDocPage() {
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline" className="cursor-pointer rounded-lg">แก้ไข</Button>
+                            <Button
+                                variant="outline"
+                                className="cursor-pointer rounded-lg"
+                            >
+                                แก้ไข
+                            </Button>
                         </DialogClose>
                         <Button
                             onClick={() => {

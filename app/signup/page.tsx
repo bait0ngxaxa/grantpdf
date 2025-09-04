@@ -127,7 +127,7 @@ export default function SignupPage() {
                                             </svg>
                                         </div>
                                         <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">ความปลอดภัยสูง</h3>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">เข้ารหัสข้อมูลและไฟล์</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">เข้ารหัสข้อมูลของไฟล์</p>
                                     </div>
                                 </div>
 

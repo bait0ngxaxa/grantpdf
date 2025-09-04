@@ -17,27 +17,24 @@ interface WordLikeTextareaProps
   value: string;
   onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 
-  /** ทำคอนเทนเนอร์ให้มีขนาดคล้ายหน้ากระดาษ A4 (กว้าง 21cm + margin) */
   wordLikeWidth?: boolean;
-
-  /** ขนาดฟอนต์ เช่น '22px' */
   fontSize?: string;
-
-  /** การจัดแนวข้อความ */
   textAlign?: Align;
-
-  /** พยายามเลียนแบบ Thai Distributed (ต้องใช้ร่วมกับ justify) */
   thaiDistributed?: boolean;
-
-  /** ปรับความสูงอัตโนมัติ */
   autoResize?: boolean;
-
-  /** ความสูงต่ำสุดของกล่องข้อความ */
   minHeight?: string;
-
-  /** ให้สามารถปรับขนาดด้วยเมาส์ (เมื่อไม่ autoResize) */
   resizable?: boolean;
+
+  /** ใหม่: กำหนดจำนวนบรรทัดว่างท้ายที่ "ต้องการคงไว้" (เช่น 0, 1, 2) */
+  trailingBlankLines?: number; // default 0
 }
+
+/* ---------- ยูทิลเล็กๆ ---------- */
+// ลบ \r\n ท้ายให้หมดก่อน แล้วเติม \n ตามจำนวนที่ต้องการคงไว้
+const ensureTrailingNewlines = (s: string, n: number) => {
+  const withoutTrailingNewlines = s.replace(/[\r\n]+$/g, ""); // ไม่ยุ่งกับช่องว่าง/สเปซท้าย
+  return withoutTrailingNewlines + (n > 0 ? "\n".repeat(n) : "");
+};
 
 function _WordLikeTextarea(
   {
@@ -59,13 +56,13 @@ function _WordLikeTextarea(
     maxLength = 1500,
     required = true,
     disabled = false,
+    trailingBlankLines = 0, // ← ค่าเริ่มต้น: ไม่เว้นบรรทัดท้าย
     ...rest
   }: WordLikeTextareaProps,
   ref: ForwardedRef<HTMLTextAreaElement>
 ) {
   const innerRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // allow both: external ref + internal ref
   const setRefs = useCallback(
     (el: HTMLTextAreaElement) => {
       innerRef.current = el;
@@ -87,16 +84,38 @@ function _WordLikeTextarea(
     adjustHeight();
   }, [value, autoResize, adjustHeight]);
 
+  const emitChange = (next: string) => {
+    onChange({ target: { name, value: next } } as unknown as ChangeEvent<HTMLTextAreaElement>);
+  };
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e);
     if (autoResize) adjustHeight();
   };
 
-  const containerClass = useMemo(() => {
-    if (!wordLikeWidth) return "";
-    // เฟรม A4: 21cm ความกว้าง + margin ซ้าย/ขวา
-    return "mx-auto";
-  }, [wordLikeWidth]);
+  // ✅ ปล่อยให้ paste ตามปกติ แล้ว “หลังจากแปะเสร็จ 1 เฟรม” ค่อย normalize ท้ายข้อความ
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    if (trailingBlankLines == null) return;
+    requestAnimationFrame(() => {
+      const el = innerRef.current!;
+      const cleaned = ensureTrailingNewlines(el.value, trailingBlankLines);
+      if (cleaned !== el.value) {
+        emitChange(cleaned);
+        if (autoResize) adjustHeight();
+      }
+    });
+  };
+
+  // ✅ ตอน blur ก็ normalize อีกชั้น เพื่อความชัวร์
+  const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    if (trailingBlankLines == null) return;
+    const cleaned = ensureTrailingNewlines(e.currentTarget.value, trailingBlankLines);
+    if (cleaned !== e.currentTarget.value) {
+      emitChange(cleaned);
+    }
+  };
+
+  const containerClass = useMemo(() => (wordLikeWidth ? "mx-auto" : ""), [wordLikeWidth]);
 
   const textAlignClass = useMemo(() => {
     switch (textAlign) {
@@ -124,35 +143,23 @@ function _WordLikeTextarea(
       overflowWrap: "break-word",
       whiteSpace: "pre-wrap",
       textAlign: textAlign as React.CSSProperties["textAlign"],
-      // auto-resize ไม่ให้เกิด scrollbar กระโดด
       ...(autoResize ? { overflow: "hidden" } : {}),
-      // Thai Distributed (best-effort)
       ...(thaiDistributed && textAlign === "justify"
-        ? {
-            // ทำงานร่วมกับ justify (รองรับบางเบราว์เซอร์)
-            // @ts-ignore - type ไม่รู้จักในบางระบบ แต่เบราว์เซอร์เข้าใจ
-            textJustify: "inter-character",
-          }
+        ? ({ textJustify: "inter-character" } as any)
         : {}),
-      // ให้ textarea กว้าง 100% แล้วไปคุม A4 ที่คอนเทนเนอร์
       width: "100%",
       boxSizing: "border-box",
-      // padding ด้านในที่ “รู้สึกเหมือนเอกสาร”
-      paddingLeft: wordLikeWidth ? "2.2cm" : undefined,
-      paddingRight: wordLikeWidth ? "2.2cm" : undefined,
+      paddingLeft: wordLikeWidth ? "2.2cm" : "12px",
+      paddingRight: wordLikeWidth ? "2.2cm" : "12px",
       paddingTop: "12px",
       paddingBottom: "12px",
     };
-
     return style;
   }, [autoResize, fontSize, minHeight, textAlign, thaiDistributed, wordLikeWidth]);
 
   const wrapperStyle = useMemo<React.CSSProperties>(() => {
     if (!wordLikeWidth) return {};
-    return {
-      width: "21cm",
-      maxWidth: "21cm",
-    };
+    return { width: "21cm", maxWidth: "21cm" };
   }, [wordLikeWidth]);
 
   return (
@@ -164,13 +171,14 @@ function _WordLikeTextarea(
         value={value}
         onChange={handleChange}
         onInput={autoResize ? adjustHeight : undefined}
+        onPaste={handlePaste}  // ← เพิ่ม
+        onBlur={handleBlur}    // ← เพิ่ม
         placeholder={placeholder}
         rows={rows}
         maxLength={maxLength}
         required={required}
         disabled={disabled}
         className={[
-          // base
           "w-full",
           "leading-relaxed",
           "border-2 border-gray-300",
@@ -182,7 +190,6 @@ function _WordLikeTextarea(
           "transition-all duration-200",
           "print:border-none print:shadow-none",
           textAlignClass,
-          // คลาสสำหรับ Thai Distributed (เผื่อไปเติมใน global.css)
           thaiDistributed && textAlign === "justify" ? "thai-distributed" : "",
           className,
         ].join(" ")}

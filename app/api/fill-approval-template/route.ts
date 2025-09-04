@@ -1,4 +1,3 @@
-// เส้นเขียนไฟล์ Word บันทึกลง db + local storage
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
@@ -52,7 +51,7 @@ const fixThaiDistributed = (text: string): string => {
         // 3. จัดการ Thai combining characters ที่แยกออกมา
         .normalize('NFC')                       // รวม combining characters เข้าด้วยกัน
         
-        // 4. จัดการ Line breaks และ paragraph marks จาก Word (จุดสำคัญ!)
+        // 4. จัดการ Line breaks และ paragraph marks จาก Word
         .replace(/\r\n/g, '\n')                // Windows line ending
         .replace(/\r/g, '\n')                  // Mac line ending
         .replace(/\u2028/g, '\n')              // Line separator
@@ -60,9 +59,8 @@ const fixThaiDistributed = (text: string): string => {
         .replace(/\u000B/g, '\n')              // Vertical tab (จาก Word)
         .replace(/\u000C/g, '\n')              // Form feed (จาก Word)
         
-        // 5. ลบ manual line breaks ที่เกิดจาก Shift+Enter ใน Word
+        // 5. ลบ manual line breaks ที่เกิดจาก Shift+Enter ใน Word (แต่เก็บ line breaks ปกติ)
         .replace(/\u000A/g, '\n')              // Line feed
-        .replace(/\n+/g, '\n')                 // Multiple line breaks → single
         
         // 6. จัดการ spaces - สำคัญมากสำหรับ Thai Distributed!
         .replace(/[ \t]+/g, ' ')               // Multiple spaces → single space
@@ -80,20 +78,12 @@ const fixThaiDistributed = (text: string): string => {
         .replace(/\u0013[^\u0014\u0015]*\u0014([^\u0015]*)\u0015/g, '$1') // Field codes
         .replace(/[\u0013\u0014\u0015]/g, '')  // Field separators
         
-        // 9. จัดการ paragraph formatting จาก Word
-        .replace(/\n{3,}/g, '\n\n')           // ลบ empty lines เกิน
+        // 9. จัดการ paragraph formatting จาก Word (เก็บ line breaks ไว้)
+        .replace(/\n{4,}/g, '\n\n\n')         // จำกัด empty lines ไม่เกิน 3 บรรทัด
         .replace(/^\n+/, '')                   // ลบ line breaks ที่จุดเริ่มต้น
         .replace(/\n+$/, '')                   // ลบ line breaks ที่จุดสิ้นสุด
         
         // 10. Clean up edges
-        .trim()
-        
-        // 11. แทนที่ line breaks ที่เหลือด้วย space สำหรับข้อความที่ควรจะอยู่ในบรรทัดเดียว
-        .replace(/\n(?!\n)/g, ' ')            // Single line break → space (keep double for paragraphs)
-        .replace(/\n\n+/g, '\n\n')            // Multiple paragraph breaks → double
-        
-        // 12. Final cleanup
-        .replace(/\s+/g, ' ')                 // Multiple whitespaces → single space
         .trim();
 };
 

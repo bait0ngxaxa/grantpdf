@@ -20,7 +20,6 @@ import { useTitle } from "@/hook/useTitle";
 import { WordLikeTextareaTOR } from "@/components/ui/WtextareaTOR";
 
 interface WordDocumentData {
-    
     projectName: string;
     person: string;
     address: string;
@@ -48,7 +47,6 @@ export default function CreateFormProjectPage() {
     const router = useRouter();
 
     const [formData, setFormData] = useState<WordDocumentData>({
-        
         projectName: "",
         person: "",
         address: "",
@@ -207,7 +205,7 @@ export default function CreateFormProjectPage() {
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-300">
                                 📋 ข้อมูลโครงการ
                             </h3>
-                            
+
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div className="lg:col-span-2">
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -230,7 +228,7 @@ export default function CreateFormProjectPage() {
                         {/* ข้อมูลติดต่อ */}
                         <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="lg:col-span-2">
+                                <div className="lg:col-span-2">
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ผู้รับผิดชอบ{" "}
                                         <span className="text-red-500">*</span>
@@ -349,17 +347,12 @@ export default function CreateFormProjectPage() {
                                         ที่มาและความสำคัญ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="rationale"
                                         placeholder="เหตุผลความจำเป็นในการดำเนินโครงการ"
-                                        //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 py-3 h-96 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.rationale}
                                         onChange={handleChange}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
@@ -367,52 +360,30 @@ export default function CreateFormProjectPage() {
                                         วัตถุประสงค์{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextareaTOR
-                                        
+                                    <Textarea
                                         name="objective"
                                         placeholder="วัตถุประสงค์ที่ 1"
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective}
                                         onChange={handleChange}
-                                        rows={2}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
-                                    <WordLikeTextareaTOR
-                                        
-                                        
+                                    <Textarea
                                         name="objective2"
                                         placeholder="วัตถุประสงค์ที่ 2"
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective2}
                                         onChange={handleChange}
-                                        rows={2}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
-                                    <WordLikeTextareaTOR
-                                        
+                                    <Textarea
                                         name="objective3"
                                         placeholder="วัตถุประสงค์ที่ 3"
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective3}
                                         onChange={handleChange}
-                                        rows={2}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
@@ -420,18 +391,12 @@ export default function CreateFormProjectPage() {
                                         กลุ่มเป้าหมาย{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="target"
                                         placeholder="กลุ่มเป้าหมายที่ต้องการบรรลุ"
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.target}
                                         onChange={handleChange}
-                                        rows={3}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
@@ -439,18 +404,12 @@ export default function CreateFormProjectPage() {
                                         โซน{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="zone"
                                         placeholder="พื้นที่ดำเนินการ"
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.zone}
                                         onChange={handleChange}
-                                        rows={3}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
@@ -458,18 +417,12 @@ export default function CreateFormProjectPage() {
                                         ขอบเขต{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="scope"
                                         placeholder="ขอบเขตการดำเนินงาน"
-                                        //className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.scope}
                                         onChange={handleChange}
-                                        //rows={20}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
@@ -477,18 +430,12 @@ export default function CreateFormProjectPage() {
                                         การกำกับติดตามและประเมินผล{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="monitoring"
                                         placeholder="วิธีการติดตามและประเมินผล"
-                                        //className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.monitoring}
                                         onChange={handleChange}
-                                        //rows={20}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
@@ -496,18 +443,12 @@ export default function CreateFormProjectPage() {
                                         องค์กร ภาคี ร่วมงาน{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="partner"
                                         placeholder="หน่วยงานหรือบุคคลที่เกี่ยวข้อง"
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.partner}
                                         onChange={handleChange}
-                                        rows={5}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
@@ -515,18 +456,12 @@ export default function CreateFormProjectPage() {
                                         ประวัติผู้รับผิดชอบโครงการ
                                         <span className="text-red-500">*</span>
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="author"
                                         placeholder=""
-                                        //className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.author}
                                         onChange={handleChange}
-                                        //rows={20}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                             </div>
@@ -603,7 +538,7 @@ export default function CreateFormProjectPage() {
                                                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                             />
                                         </svg>
-                                        ยืนยันสร้างเอกสาร 
+                                        ยืนยันสร้างเอกสาร
                                     </>
                                 )}
                             </Button>
@@ -759,7 +694,7 @@ export default function CreateFormProjectPage() {
                                 {formData.timeline || "-"}
                             </p>
                         </div>
-                        
+
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
                                 ผู้สร้าง:
@@ -770,7 +705,12 @@ export default function CreateFormProjectPage() {
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline" className="cursor-pointer rounded-lg">แก้ไข</Button>
+                            <Button
+                                variant="outline"
+                                className="cursor-pointer rounded-lg"
+                            >
+                                แก้ไข
+                            </Button>
                         </DialogClose>
                         <Button
                             onClick={() => {

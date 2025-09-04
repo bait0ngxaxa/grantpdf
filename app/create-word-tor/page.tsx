@@ -21,7 +21,7 @@ import { WordLikeTextareaTOR } from "@/components/ui/WtextareaTOR";
 
 interface TORData {
     projectName: string; // เพิ่มชื่อโครงการ
-    
+
     owner: string;
     address: string;
     email: string;
@@ -44,7 +44,7 @@ interface TORData {
 // Interface สำหรับตารางกิจกรรม
 interface ActivityData {
     activity: string;
-   
+
     manager: string;
     evaluation2: string;
     duration: string;
@@ -77,12 +77,16 @@ export default function CreateTORPage() {
 
     // State สำหรับตารางกิจกรรม
     const [activities, setActivities] = useState<ActivityData[]>([
-        { activity: "", manager: "", evaluation2: "", duration: "" }
+        { activity: "", manager: "", evaluation2: "", duration: "" },
     ]);
 
     const [signatureFile, setSignatureFile] = useState<File | null>(null);
-    const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
-    const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(null);
+    const [signaturePreview, setSignaturePreview] = useState<string | null>(
+        null
+    );
+    const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
+        null
+    );
     const [message, setMessage] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -120,7 +124,10 @@ export default function CreateTORPage() {
 
     // ฟังก์ชันจัดการตารางกิจกรรม
     const addActivityRow = () => {
-        setActivities([...activities, { activity: "", manager: "", evaluation2: "", duration: "" }]);
+        setActivities([
+            ...activities,
+            { activity: "", manager: "", evaluation2: "", duration: "" },
+        ]);
     };
 
     const removeActivityRow = (index: number) => {
@@ -129,8 +136,12 @@ export default function CreateTORPage() {
         }
     };
 
-    const updateActivity = (index: number, field: keyof ActivityData, value: string) => {
-        const updatedActivities = activities.map((item, i) => 
+    const updateActivity = (
+        index: number,
+        field: keyof ActivityData,
+        value: string
+    ) => {
+        const updatedActivities = activities.map((item, i) =>
             i === index ? { ...item, [field]: value } : item
         );
         setActivities(updatedActivities);
@@ -161,7 +172,7 @@ export default function CreateTORPage() {
             });
 
             // เพิ่มข้อมูลตารางกิจกรรม
-            data.append('activities', JSON.stringify(activities));
+            data.append("activities", JSON.stringify(activities));
 
             if (signatureFile) {
                 data.append("signatureFile", signatureFile);
@@ -186,7 +197,11 @@ export default function CreateTORPage() {
                 const result = await response.json();
                 if (result.success && result.downloadUrl) {
                     setGeneratedFileUrl(result.downloadUrl);
-                    setMessage(`สร้างเอกสาร TOR สำเร็จแล้ว! โครงการ: ${result.project?.name || 'ไม่ระบุ'}`);
+                    setMessage(
+                        `สร้างเอกสาร TOR สำเร็จแล้ว! โครงการ: ${
+                            result.project?.name || "ไม่ระบุ"
+                        }`
+                    );
                     setIsError(false);
                     setIsSuccessModalOpen(true);
                 } else {
@@ -251,7 +266,7 @@ export default function CreateTORPage() {
                         กรุณากรอกข้อมูลโครงการและกิจกรรมให้ครบถ้วน
                     </p>
                 </div>
-                
+
                 <div className="p-8">
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* ข้อมูลพื้นฐาน */}
@@ -262,7 +277,8 @@ export default function CreateTORPage() {
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ชื่อโครงการ  <span className="text-red-500">*</span>
+                                        ชื่อโครงการ{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -276,7 +292,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วันที่  <span className="text-red-500">*</span>
+                                        วันที่{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -288,10 +305,11 @@ export default function CreateTORPage() {
                                         required
                                     />
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        เลขที่สัญญา <span className="text-red-500">*</span>
+                                        เลขที่สัญญา{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -331,7 +349,7 @@ export default function CreateTORPage() {
                                         required
                                     />
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         อีเมล
@@ -401,83 +419,64 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         หลักการและเหตุผล
                                     </label>
-                                    <WordLikeTextareaTOR
-                                        
+                                    <Textarea
                                         name="topic1"
                                         placeholder="หลักการและเหตุผล"
-                                        //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        className="w-full px-4 py-3 h-96 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.topic1}
                                         onChange={handleChange}
                                         //rows={30}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 1
                                     </label>
-                                    <WordLikeTextareaTOR
-                                    
+                                    <Textarea
                                         name="objective1"
                                         placeholder=""
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective1}
                                         onChange={handleChange}
-                                        rows={2}
-                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
-                                        wordLikeWidth={true}
+                                        //rows={30}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 2
                                     </label>
-                                    <WordLikeTextareaTOR
-                                    
+                                    <Textarea
                                         name="objective2"
                                         placeholder=""
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective2}
                                         onChange={handleChange}
-                                        rows={2}
-                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
-                                        wordLikeWidth={true}
+                                        //rows={30}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         วัตถุประสงค์ที่ 3
                                     </label>
-                                    <WordLikeTextareaTOR
-                                    
+                                    <Textarea
                                         name="objective3"
                                         placeholder=""
-                                        //className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective3}
                                         onChange={handleChange}
-                                        rows={2}
-                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
-                                        wordLikeWidth={true}
+                                        //rows={30}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         กลุ่มเป้าหมาย
                                     </label>
-                                    <WordLikeTextareaTOR
-                                        
+                                    <Textarea
                                         name="target"
                                         placeholder="กลุ่มเป้าหมายของโครงการ"
-                                        //className="w-full px-4 py-3 border h-40 border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        className="w-full px-4 py-3 border h-40 border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.target}
                                         onChange={handleChange}
-                                        rows={3}
-                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
-                                        wordLikeWidth={true}
                                     />
                                 </div>
                             </div>
@@ -493,66 +492,48 @@ export default function CreateTORPage() {
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         พื้นที่/เขต
                                     </label>
-                                    <WordLikeTextareaTOR
-                                        
+                                    <Textarea
                                         name="zone"
                                         placeholder="พื้นที่หรือเขตดำเนินการ"
-                                        //className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.zone}
                                         onChange={handleChange}
-                                        rows={3}
-                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
-                                        wordLikeWidth={true}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         แผนการดำเนินงาน
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="plan"
                                         placeholder="แผนการดำเนินงานโครงการ"
-                                        //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.plan}
                                         onChange={handleChange}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         การจัดการโครงการ
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="projectmanage"
                                         placeholder="วิธีการจัดการและบริหารโครงการ"
-                                        //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.projectmanage}
                                         onChange={handleChange}
-                                        wordLikeWidth
-                                        autoResize={true}
-                                        textAlign="justify"
-                                        thaiDistributed={true}
-                                        fontSize="22px"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         องค์กร ภาคี ร่วมงาน
                                     </label>
-                                    <WordLikeTextareaTOR
+                                    <Textarea
                                         name="partner"
                                         placeholder="องค์กร ภาค ร่วมงาน"
-                                        //className="w-full px-4 py-3 h-32 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
                                         value={formData.partner}
                                         onChange={handleChange}
-                                        rows={5}
-                                        textAlign="justify" // จัดข้อความแบบ justify เหมือน Word
-                                        wordLikeWidth={true}
-                                        thaiDistributed={true}
                                     />
                                 </div>
                             </div>
@@ -563,7 +544,7 @@ export default function CreateTORPage() {
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-indigo-300">
                                 📊 การกำกับติดตามและประเมินผล
                             </h3>
-                            
+
                             <div className="space-y-4">
                                 {/* Header */}
                                 <div className="grid grid-cols-4 gap-2 p-2 bg-indigo-100 rounded-lg font-semibold text-sm">
@@ -572,43 +553,68 @@ export default function CreateTORPage() {
                                     <div>วิธีการประเมินผล</div>
                                     <div>ระยะเวลา</div>
                                 </div>
-                                
+
                                 {/* Dynamic Rows */}
                                 {activities.map((activity, index) => (
-                                    <div key={index} className="grid grid-cols-4 gap-2 p-2 border border-slate-200 rounded-lg bg-white">
+                                    <div
+                                        key={index}
+                                        className="grid grid-cols-4 gap-2 p-2 border border-slate-200 rounded-lg bg-white"
+                                    >
                                         <Textarea
-                                            
                                             placeholder="กิจกรรม"
                                             value={activity.activity}
-                                            onChange={(e) => updateActivity(index, 'activity', e.target.value)}
+                                            onChange={(e) =>
+                                                updateActivity(
+                                                    index,
+                                                    "activity",
+                                                    e.target.value
+                                                )
+                                            }
                                             className="text-sm h-40"
                                         />
                                         <Textarea
-                                            
                                             placeholder="ผู้ติดตามโครงการ"
                                             value={activity.manager}
-                                            onChange={(e) => updateActivity(index, 'manager', e.target.value)}
+                                            onChange={(e) =>
+                                                updateActivity(
+                                                    index,
+                                                    "manager",
+                                                    e.target.value
+                                                )
+                                            }
                                             className="text-sm h-40"
                                         />
                                         <Textarea
-                                            
                                             placeholder="วิธีการประเมินผล"
                                             value={activity.evaluation2}
-                                            onChange={(e) => updateActivity(index, 'evaluation2', e.target.value)}
+                                            onChange={(e) =>
+                                                updateActivity(
+                                                    index,
+                                                    "evaluation2",
+                                                    e.target.value
+                                                )
+                                            }
                                             className="text-sm h-40"
                                         />
                                         <div className="flex gap-1">
                                             <Textarea
-                                                
                                                 placeholder="ระยะเวลา"
                                                 value={activity.duration}
-                                                onChange={(e) => updateActivity(index, 'duration', e.target.value)}
+                                                onChange={(e) =>
+                                                    updateActivity(
+                                                        index,
+                                                        "duration",
+                                                        e.target.value
+                                                    )
+                                                }
                                                 className="text-sm h-40"
                                             />
                                             {activities.length > 1 && (
                                                 <Button
                                                     type="button"
-                                                    onClick={() => removeActivityRow(index)}
+                                                    onClick={() =>
+                                                        removeActivityRow(index)
+                                                    }
                                                     className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 rounded text-xs"
                                                 >
                                                     ลบ
@@ -617,7 +623,7 @@ export default function CreateTORPage() {
                                         </div>
                                     </div>
                                 ))}
-                                
+
                                 {/* Add Row Button */}
                                 <Button
                                     type="button"
@@ -628,8 +634,6 @@ export default function CreateTORPage() {
                                 </Button>
                             </div>
                         </div>
-
-                        
 
                         {/* อัปโหลดลายเซ็น
                         <div className="bg-white p-6 rounded-lg border border-gray-200">
@@ -730,7 +734,7 @@ export default function CreateTORPage() {
                                                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                             />
                                         </svg>
-                                        ยืนยันสร้างเอกสาร 
+                                        ยืนยันสร้างเอกสาร
                                     </>
                                 )}
                             </Button>
@@ -775,130 +779,217 @@ export default function CreateTORPage() {
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">ชื่อโครงการ:</h4>
-                                <p className="text-sm">{formData.projectName || "-"}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    ชื่อโครงการ:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.projectName || "-"}
+                                </p>
                             </div>
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">วันที่:</h4>
-                                <p className="text-sm">{formData.date || "-"}</p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <h4 className="font-semibold text-sm text-gray-600">เลขที่สัญญา:</h4>
-                                <p className="text-sm">{formData.contractnumber || "-"}</p>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-sm text-gray-600">ผู้รับผิดชอบ:</h4>
-                                <p className="text-sm">{formData.owner || "-"}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    วันที่:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.date || "-"}
+                                </p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">ที่อยู่:</h4>
-                                <p className="text-sm">{formData.address || "-"}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    เลขที่สัญญา:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.contractnumber || "-"}
+                                </p>
                             </div>
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">กำหนดเวลา:</h4>
-                                <p className="text-sm">{formData.timeline || "-"}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    ผู้รับผิดชอบ:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.owner || "-"}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    ที่อยู่:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.address || "-"}
+                                </p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    กำหนดเวลา:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.timeline || "-"}
+                                </p>
                             </div>
                         </div>
 
                         <div>
-                            <h4 className="font-semibold text-sm text-gray-600">หัวข้อ/เรื่อง:</h4>
+                            <h4 className="font-semibold text-sm text-gray-600">
+                                หัวข้อ/เรื่อง:
+                            </h4>
                             <p className="text-sm">{formData.topic1 || "-"}</p>
                         </div>
 
                         <div>
-                            <h4 className="font-semibold text-sm text-gray-600">วัตถุประสงค์ที่ 1:</h4>
-                            <p className="text-sm whitespace-pre-wrap">{formData.objective1 || "-"}</p>
+                            <h4 className="font-semibold text-sm text-gray-600">
+                                วัตถุประสงค์ที่ 1:
+                            </h4>
+                            <p className="text-sm whitespace-pre-wrap">
+                                {formData.objective1 || "-"}
+                            </p>
                         </div>
 
                         {formData.objective2 && (
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">วัตถุประสงค์ที่ 2:</h4>
-                                <p className="text-sm whitespace-pre-wrap">{formData.objective2}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    วัตถุประสงค์ที่ 2:
+                                </h4>
+                                <p className="text-sm whitespace-pre-wrap">
+                                    {formData.objective2}
+                                </p>
                             </div>
                         )}
 
                         {formData.objective3 && (
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">วัตถุประสงค์ที่ 3:</h4>
-                                <p className="text-sm whitespace-pre-wrap">{formData.objective3}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    วัตถุประสงค์ที่ 3:
+                                </h4>
+                                <p className="text-sm whitespace-pre-wrap">
+                                    {formData.objective3}
+                                </p>
                             </div>
                         )}
 
                         {/* แสดงตารางกิจกรรม */}
-                        {activities.length > 0 && activities.some(a => a.activity) && (
-                            <div>
-                                <h4 className="font-semibold text-sm text-gray-600 mb-2">ตารางกิจกรรม:</h4>
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full text-xs border border-gray-200">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-2 py-1 border">กิจกรรม</th>
-                                                <th className="px-2 py-1 border">ผู้รับผิดชอบ</th>
-                                                <th className="px-2 py-1 border">ระยะเวลา</th>
-                                                <th className="px-2 py-1 border">งบประมาณ</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {activities.map((activity, index) => (
-                                                <tr key={index}>
-                                                    <td className="px-2 py-1 border">{activity.activity || "-"}</td>
-                                                    <td className="px-2 py-1 border">{activity.manager || "-"}</td>
-                                                    <td className="px-2 py-1 border">{activity.evaluation2 || "-"}</td>
-                                                    <td className="px-2 py-1 border">{activity.duration || "-"}</td>
+                        {activities.length > 0 &&
+                            activities.some((a) => a.activity) && (
+                                <div>
+                                    <h4 className="font-semibold text-sm text-gray-600 mb-2">
+                                        ตารางกิจกรรม:
+                                    </h4>
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full text-xs border border-gray-200">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-2 py-1 border">
+                                                        กิจกรรม
+                                                    </th>
+                                                    <th className="px-2 py-1 border">
+                                                        ผู้รับผิดชอบ
+                                                    </th>
+                                                    <th className="px-2 py-1 border">
+                                                        ระยะเวลา
+                                                    </th>
+                                                    <th className="px-2 py-1 border">
+                                                        งบประมาณ
+                                                    </th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {activities.map(
+                                                    (activity, index) => (
+                                                        <tr key={index}>
+                                                            <td className="px-2 py-1 border">
+                                                                {activity.activity ||
+                                                                    "-"}
+                                                            </td>
+                                                            <td className="px-2 py-1 border">
+                                                                {activity.manager ||
+                                                                    "-"}
+                                                            </td>
+                                                            <td className="px-2 py-1 border">
+                                                                {activity.evaluation2 ||
+                                                                    "-"}
+                                                            </td>
+                                                            <td className="px-2 py-1 border">
+                                                                {activity.duration ||
+                                                                    "-"}
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">เบอร์โทรศัพท์:</h4>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    เบอร์โทรศัพท์:
+                                </h4>
                                 <p className="text-sm">{formData.tel || "-"}</p>
                             </div>
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">อีเมล:</h4>
-                                <p className="text-sm">{formData.email || "-"}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    อีเมล:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.email || "-"}
+                                </p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">กลุ่มเป้าหมาย:</h4>
-                                <p className="text-sm">{formData.target || "-"}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    กลุ่มเป้าหมาย:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.target || "-"}
+                                </p>
                             </div>
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">ค่าใช้จ่าย:</h4>
-                                <p className="text-sm">{formData.cost || "-"}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    ค่าใช้จ่าย:
+                                </h4>
+                                <p className="text-sm">
+                                    {formData.cost || "-"}
+                                </p>
                             </div>
                         </div>
 
                         {formData.zone && (
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">พื้นที่/เขต:</h4>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    พื้นที่/เขต:
+                                </h4>
                                 <p className="text-sm">{formData.zone}</p>
                             </div>
                         )}
 
                         {formData.plan && (
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">แผนการดำเนินงาน:</h4>
-                                <p className="text-sm whitespace-pre-wrap">{formData.plan}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    แผนการดำเนินงาน:
+                                </h4>
+                                <p className="text-sm whitespace-pre-wrap">
+                                    {formData.plan}
+                                </p>
                             </div>
                         )}
 
                         {formData.projectmanage && (
                             <div>
-                                <h4 className="font-semibold text-sm text-gray-600">การจัดการโครงการ:</h4>
-                                <p className="text-sm whitespace-pre-wrap">{formData.projectmanage}</p>
+                                <h4 className="font-semibold text-sm text-gray-600">
+                                    การจัดการโครงการ:
+                                </h4>
+                                <p className="text-sm whitespace-pre-wrap">
+                                    {formData.projectmanage}
+                                </p>
                             </div>
                         )}
 
@@ -916,7 +1007,12 @@ export default function CreateTORPage() {
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline" className="cursor-pointer rounded-lg">แก้ไข</Button>
+                            <Button
+                                variant="outline"
+                                className="cursor-pointer rounded-lg"
+                            >
+                                แก้ไข
+                            </Button>
                         </DialogClose>
                         <Button
                             onClick={() => {
@@ -932,7 +1028,10 @@ export default function CreateTORPage() {
             </Dialog>
 
             {/* Success Modal */}
-            <Dialog open={isSuccessModalOpen} onOpenChange={setIsSuccessModalOpen}>
+            <Dialog
+                open={isSuccessModalOpen}
+                onOpenChange={setIsSuccessModalOpen}
+            >
                 <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle className="text-green-600">

@@ -44,7 +44,7 @@ export default function AdminDashboardPage() {
     const [pdfFiles, setPdfFiles] = useState<PdfFile[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("createdAtDesc");
-    const [selectedFileType, setSelectedFileType] = useState("ทั้งหมด");
+    const [selectedFileType, setSelectedFileType] = useState("ไฟล์ทั้งหมด");
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [totalUsers , setTotalUsers] = useState(0)
@@ -220,19 +220,46 @@ export default function AdminDashboardPage() {
         );
 
         // Filter by file type
-        if (selectedFileType !== "ทั้งหมด") {
+        if (selectedFileType !== "ไฟล์ทั้งหมด") {
             filtered = filtered.filter((file) =>
                 file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
             );
         }
 
         filtered.sort((a, b) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
-            if (sortBy === "createdAtAsc") {
-                return dateA - dateB;
+            if (sortBy === "statusDoneFirst") {
+                // เรียงตามสถานะ: done ก่อน, pending หลัง
+                if (a.downloadStatus === "done" && b.downloadStatus !== "done") {
+                    return -1;
+                }
+                if (a.downloadStatus !== "done" && b.downloadStatus === "done") {
+                    return 1;
+                }
+                // ถ้าสถานะเหมือนกัน เรียงตามวันที่สร้าง (ใหม่ก่อน)
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                return dateB - dateA;
+            } else if (sortBy === "statusPendingFirst") {
+                // เรียงตามสถานะ: pending ก่อน, done หลัง
+                if (a.downloadStatus !== "done" && b.downloadStatus === "done") {
+                    return -1;
+                }
+                if (a.downloadStatus === "done" && b.downloadStatus !== "done") {
+                    return 1;
+                }
+                // ถ้าสถานะเหมือนกัน เรียงตามวันที่สร้าง (ใหม่ก่อน)
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                return dateB - dateA;
+            } else {
+                // เรียงตามวันที่สร้าง
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                if (sortBy === "createdAtAsc") {
+                    return dateA - dateB;
+                }
+                return dateB - dateA;
             }
-            return dateB - dateA;
         });
 
         return filtered;
@@ -641,13 +668,19 @@ export default function AdminDashboardPage() {
                                             <option value="createdAtAsc">
                                                 เรียงตามวันที่สร้าง (เก่าสุด)
                                             </option>
+                                            <option value="statusDoneFirst">
+                                                เรียงตามสถานะ (เสร็จก่อน)
+                                            </option>
+                                            <option value="statusPendingFirst">
+                                                เรียงตามสถานะ (รอก่อน)
+                                            </option>
                                         </select>
                                         <select
                                             className="select select-bordered w-full sm:w-auto rounded-full border-2"
                                             value={selectedFileType}
                                             onChange={(e) => setSelectedFileType(e.target.value)}
                                         >
-                                            <option value="ทั้งหมด">ทั้งหมด</option>
+                                            <option value="ไฟล์ทั้งหมด">ไฟล์ทั้งหมด</option>
                                             <option value="pdf">PDF</option>
                                             <option value="docx">Word</option>
                                         </select>
@@ -681,7 +714,7 @@ export default function AdminDashboardPage() {
                                                             <th>ผู้สร้าง</th>
                                                             <th className="hidden md:table-cell">สร้างเมื่อ</th>
                                                             <th className="hidden md:table-cell">ประเภทเอกสาร</th>
-                                                            <th className="hidden lg:table-cell">สถานะ</th>
+                                                            <th className="hidden sm:table-cell">สถานะ</th>
                                                             <th>การกระทำ</th>
                                                         </tr>
                                                     </thead>
@@ -689,8 +722,34 @@ export default function AdminDashboardPage() {
                                                         {currentPageFiles.map((file) => (
                                                             <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                 <td className="font-semibold">
-                                                                    <div className="truncate max-w-xs pr-2" title={file.fileName}>
-                                                                        {truncateFileName(file.fileName, 30)}
+                                                                    <div className="flex flex-col">
+                                                                        <div className="truncate max-w-xs pr-2" title={file.fileName}>
+                                                                            {truncateFileName(file.fileName, 30)}
+                                                                        </div>
+                                                                        {/* แสดงสถานะใน mobile */}
+                                                                        <div className="sm:hidden mt-2">
+                                                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                                                file.downloadStatus === "done" 
+                                                                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
+                                                                                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                                                            }`}>
+                                                                                {file.downloadStatus === "done" ? (
+                                                                                    <>
+                                                                                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                        </svg>
+                                                                                        เสร็จ
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                                                                        </svg>
+                                                                                        รอ
+                                                                                    </>
+                                                                                )}
+                                                                            </span>
+                                                                        </div>
                                                                     </div>
                                                                 </td>
                                                                 <td>
@@ -706,62 +765,82 @@ export default function AdminDashboardPage() {
                                                                         {file.fileExtension.toUpperCase()}
                                                                     </span>
                                                                 </td>
-                                                                <td className="hidden lg:table-cell">
-                                                                    <span className={`badge ${
+                                                                <td className="hidden sm:table-cell">
+                                                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                                                         file.downloadStatus === "done" 
-                                                                            ? "badge badge-outline badge-success border border-green-500 p-2" 
-                                                                            : "badge badge-outline badge-warning border border-yellow-500 p-2"
+                                                                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border border-green-300 dark:border-green-700" 
+                                                                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 border border-yellow-300 dark:border-yellow-700"
                                                                     }`}>
-                                                                        {file.downloadStatus === "done" ? "ดำเนินการแล้ว" : "รอดำเนินการ"}
+                                                                        {file.downloadStatus === "done" ? (
+                                                                            <>
+                                                                                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                </svg>
+                                                                                <span className="hidden md:inline">เสร็จ</span>
+                                                                                <span className="md:hidden">เสร็จ</span>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                                                                </svg>
+                                                                                <span className="hidden md:inline">รอ</span>
+                                                                                <span className="md:hidden">รอ</span>
+                                                                            </>
+                                                                        )}
                                                                     </span>
                                                                 </td>
-                                                                <td className="flex space-x-2">
-                                                                    {file.storagePath && (
-                                                                        <a
-                                                                            href={`/api/admin/download/${file.id}`}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="btn btn-sm bg-primary hover:bg-primary-focus hover:bg-blue-600 text-white border-none rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                                                                            onClick={() => {
-                                                                                setTimeout(() => {
-                                                                                    window.location.reload();
-                                                                                }, 1000);
-                                                                            }}
-                                                                        >
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                            </svg>
-                                                                            <span className="ml-1 hidden lg:block">
-                                                                                {file.downloadStatus === "done" ? "ดาวน์โหลดอีกครั้ง" : "ดาวน์โหลด"}
-                                                                            </span>
-                                                                        </a>
-                                                                    )}
-                                                                    
-                                                                    {/* เพิ่มปุ่มพรีวิว PDF */}
-                                                                    {file.fileExtension === 'pdf' && (
+                                                                <td className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-2">
+                                                                    <div className="flex flex-col lg:flex-row gap-1 lg:gap-2 min-w-0">
+                                                                        {/* ปุ่มดาวน์โหลด */}
+                                                                        {file.storagePath && (
+                                                                            <a
+                                                                                href={`/api/admin/download/${file.id}`}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="btn btn-xs lg:btn-sm bg-primary hover:bg-blue-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                                                                                onClick={() => {
+                                                                                    setTimeout(() => {
+                                                                                        window.location.reload();
+                                                                                    }, 1000);
+                                                                                }}
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 lg:h-4 lg:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                                </svg>
+                                                                                <span className="ml-1 hidden xl:inline text-xs">
+                                                                                    {file.downloadStatus === "done" ? "ดาวน์โหลด" : "ดาวน์โหลด"}
+                                                                                </span>
+                                                                            </a>
+                                                                        )}
+                                                                        
+                                                                        {/* ปุ่มพรีวิว PDF */}
+                                                                        {file.fileExtension === 'pdf' && (
+                                                                            <Button
+                                                                                onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
+                                                                                className="btn btn-xs lg:btn-sm bg-green-500 hover:bg-green-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                                                                                title="พรีวิว PDF"
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 lg:h-4 lg:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                </svg>
+                                                                                <span className="ml-1 hidden xl:inline text-xs">ดู</span>
+                                                                            </Button>
+                                                                        )}
+                                                                        
+                                                                        {/* ปุ่มลบ */}
                                                                         <Button
-                                                                            onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
-                                                                            className="btn btn-sm bg-green-500 hover:bg-green-600 text-white border-none rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                                                                            title="พรีวิว PDF"
+                                                                            onClick={() => openDeleteModal(file)}
+                                                                            className="btn btn-xs lg:btn-sm cursor-pointer text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                                                                            variant="destructive"
                                                                         >
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 lg:h-4 lg:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                             </svg>
-                                                                            <span className="ml-1 hidden lg:block">พรีวิว</span>
+                                                                            <span className="ml-1 hidden xl:inline text-xs">ลบ</span>
                                                                         </Button>
-                                                                    )}
-                                                                    
-                                                                    <Button
-                                                                        onClick={() => openDeleteModal(file)}
-                                                                        className=" cursor-pointer text-white border-none rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                                                                        variant="destructive"
-                                                                    >
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                        </svg>
-                                                                        <span className="ml-1 hidden lg:block">ลบ</span>
-                                                                    </Button>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                         ))}
@@ -906,7 +985,7 @@ export default function AdminDashboardPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
-                                        เข้าสู่การจัดการผู้ใช้งานแบบละเอียด
+                                        เข้าสู่การจัดการผู้ใช้งาน
                                     </Button>
                                 </div>
                             </div>

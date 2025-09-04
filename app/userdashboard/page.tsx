@@ -4,7 +4,6 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
-import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -419,7 +418,7 @@ export default function DashboardPage() {
                                     {menuItems.find(item => item.id === activeTab)?.name || 'Dashboard'}
                                 </h1>
                             </div>
-                            <div className="hidden sm:flex items-center space-x-4">
+                            <div className=" flex gap-3 sm:flex md:gap-1 items-center space-x-4">
                                 <span className="text-m text-gray-600 dark:text-gray-400">
                                     {session?.user?.name} ({session?.user?.role || 'member'})
                                 </span>
@@ -435,7 +434,7 @@ export default function DashboardPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 transform hover:scale-105 transition-transform duration-300"
+                                    className="hidden sm:flex cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 transform hover:scale-105 transition-transform duration-300"
                                     onClick={() => signOut()}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -566,15 +565,15 @@ export default function DashboardPage() {
                                                 value={sortBy}
                                                 onChange={(e) => setSortBy(e.target.value)}
                                             >
-                                                <option value="createdAtDesc">วันที่สร้าง (ใหม่สุด)</option>
-                                                <option value="createdAtAsc">วันที่สร้าง (เก่าสุด)</option>
+                                                <option value="createdAtDesc">เรียงตามวันที่สร้าง (ใหม่สุด)</option>
+                                                <option value="createdAtAsc">เรียงตามวันที่สร้าง (เก่าสุด)</option>
                                             </select>
                                             <select
                                                 className="select select-bordered w-full lg:w-auto rounded-full border-2"
                                                 value={selectedFileType}
                                                 onChange={(e) => setSelectedFileType(e.target.value)}
                                             >
-                                                <option value="ทั้งหมด">ทั้งหมด</option>
+                                                <option value="ทั้งหมด">ไฟล์ทั้งหมด</option>
                                                 <option value="pdf">PDF</option>
                                                 <option value="docx">Word</option>
                                             </select>
@@ -649,22 +648,7 @@ export default function DashboardPage() {
                                                                
                                                                 <td>
                                                                     <div className="flex space-x-2">
-                                                                        {file.fileExtension === 'pdf' && (
-                                                                            <Button
-                                                                                onClick={() =>
-                                                                                    openPreviewModal(file.storagePath, file.originalFileName)
-                                                                                }
-                                                                                className=" rounded-full bg-green-400 text-white cursor-pointer hover:bg-green-500 transform hover:scale-105 transition-all duration-200"
-                                                                                
-                                                                                title="พรีวิว PDF"
-                                                                            >
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                                </svg>
-                                                                                <span className="ml-1 hidden lg:block">พรีวิว</span>
-                                                                            </Button>
-                                                                        )}
+                                                                        
                                                                         <a
                                                                             href={`/api/user-docs/download/${file.id}`}
                                                                             target="_blank"
@@ -677,6 +661,22 @@ export default function DashboardPage() {
                                                                             </svg>
                                                                             <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
                                                                         </a>
+                                                                        {file.fileExtension === 'pdf' && (
+                                                                            <Button
+                                                                                onClick={() =>
+                                                                                    openPreviewModal(file.storagePath, file.originalFileName)
+                                                                                }
+                                                                                className=" rounded-full bg-green-500 text-white cursor-pointer hover:bg-green-600 transform hover:scale-105 transition-all duration-200"
+                                                                                
+                                                                                title="พรีวิว PDF"
+                                                                            >
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                                </svg>
+                                                                                <span className="ml-1 hidden lg:block">ดู</span>
+                                                                            </Button>
+                                                                        )}
                                                                         <Button
                                                                             onClick={() => handleDeleteFile(file.id)}
                                                                             disabled={isDeleting === file.id}
@@ -817,11 +817,12 @@ export default function DashboardPage() {
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                                         </svg>
-                                    </div>
+                                    </div >
                                     <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">สร้างเอกสารใหม่ | อัพโหลดไฟล์เอกสาร</h3>
                                     <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
                                         เลือกประเภทเอกสารที่คุณต้องการสร้าง หรือต้องการอัพโหลด
                                     </p>
+                                    <div className="flex flex-col sm:flex-row justify-center gap-4">
                                     <Button 
                                         size="lg"
                                         className="bg-primary hover:bg-primary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
@@ -834,7 +835,7 @@ export default function DashboardPage() {
                                     </Button>
                                     <Button 
                                         size="lg"
-                                        className="bg-primary hover:bg-primary-focus ml-5 text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                        className="bg-primary hover:bg-primary-focus  text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         onClick={() => router.push("/uploads-doc")}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -842,6 +843,7 @@ export default function DashboardPage() {
                                         </svg>
                                         อัพโหลดเอกสาร
                                     </Button>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -878,7 +880,7 @@ export default function DashboardPage() {
 
                                 {/* User Information */}
                                 <div className="space-y-4 mb-6">
-                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20 shadow-lg">
                                         <div className="flex items-center space-x-3">
                                             <div className="text-blue-500">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -892,7 +894,7 @@ export default function DashboardPage() {
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20 shadow-lg">
                                         <div className="flex items-center space-x-3">
                                             <div className="text-green-500">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -906,7 +908,7 @@ export default function DashboardPage() {
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20 shadow-lg">
                                         <div className="flex items-center space-x-3">
                                             <div className="text-purple-500">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
