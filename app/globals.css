@@ -125,4 +125,16 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Global background image with overlay */
+  .bg-blue-background {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)),
+      url('/BG_blue.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
 }

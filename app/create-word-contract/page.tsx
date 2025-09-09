@@ -35,6 +35,7 @@ interface WordDocumentData {
   address: string;
   citizenid: string;
   citizenexpire: string;
+  witness: string;
 }
 
 export default function CreateContractPage() {
@@ -58,6 +59,7 @@ export default function CreateContractPage() {
     citizenid: "",
     citizenexpire: "",
     date: "",
+    witness: "",
   });
 
   
@@ -208,13 +210,13 @@ export default function CreateContractPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    วันที่{" "}
+                    วันที่จัดทำสัญญา{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <Input
                     type="text"
                     name="date"
-                    placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2566"
+                    placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2568"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.date}
                     onChange={handleChange}
@@ -245,7 +247,7 @@ export default function CreateContractPage() {
                   <Input
                     type="text"
                     name="projectOffer"
-                    placeholder="ระบุองค์กรที่ดำเนินการ"
+                    placeholder="ระบุหน่วยงานที่ดำเนินการร่วมกัน เช่น สพบ. และ สสส."
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.projectOffer}
                     onChange={handleChange}
@@ -260,7 +262,7 @@ export default function CreateContractPage() {
                   <Input
                     type="text"
                     name="owner"
-                    placeholder="ระบุชื่อผู้ว่าจ้าง"
+                    placeholder="ระบุชื่อผู้อำนวยการ ผู้จัดการโครงการ"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.owner}
                     onChange={handleChange}
@@ -275,7 +277,7 @@ export default function CreateContractPage() {
                   <Input
                     type="text"
                     name="projectCo"
-                    placeholder="ระบุองค์กรให้ดำเนินโครงการ"
+                    placeholder="ระบุองค์กรให้ทุน"
                     className=" w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.projectCo}
                     onChange={handleChange}
@@ -362,15 +364,30 @@ export default function CreateContractPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2  w-full">
-                    วันหมดอายุ{" "}
+                    วันหมดอายุบัตรประชาชน{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <Input
                     type="text"
                     name="citizenexpire"
-                    placeholder="ระบุวันหมดอายุ ตัวอย่าง 31 ธันวาคม 2566"
+                    placeholder="ระบุวันหมดอายุ ตัวอย่าง 31 ธันวาคม 2568"
                     className=" w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.citizenexpire}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ชื่อพยาน{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="witness"
+                    placeholder="ระบุชื่อพยาน"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.witness}
                     onChange={handleChange}
                     required
                   />
@@ -393,7 +410,7 @@ export default function CreateContractPage() {
                   <Input
                     type="text"
                     name="cost"
-                    placeholder="ตัวอย่าง : 500000 (ห้าแสนบาทถ้วน)"
+                    placeholder="ตัวอย่าง : 500,000 บาท (ห้าแสนบาทถ้วน)"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.cost}
                     onChange={handleChange}
@@ -406,9 +423,9 @@ export default function CreateContractPage() {
                     <span className="text-red-500">*</span>
                   </label>
                   <Input
-                    type="text"
+                    type="number"
                     name="timelineMonth"
-                    placeholder="ระบุตัวเลข เช่น 12"
+                    placeholder="ระบุตัวเลข เช่น 12 (ใส่เฉพาะตัวเลข)"
                     className="w-full px-4 py-3  border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
                     value={formData.timelineMonth}
                     onChange={handleChange}
@@ -423,7 +440,7 @@ export default function CreateContractPage() {
                   <Input
                     type="text"
                     name="timelineText"
-                    placeholder="ตัวอย่าง : 1 มกราคม 2566 ถึง 31 ธันวาคม 2566"
+                    placeholder="ตัวอย่าง : 1 มกราคม 2568 ถึง 31 ธันวาคม 2568"
                     className="w-full px-4 py-3  border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
                     value={formData.timelineText}
                     onChange={handleChange}
@@ -438,7 +455,7 @@ export default function CreateContractPage() {
                   <Input
                     type="number"
                     name="section"
-                    placeholder="ระบุเลขจำนวนงวด"
+                    placeholder="ระบุเลขจำนวนงวด เช่น 3 (ใส่เฉพาะตัวเลข)"
                     className="w-full px-4 py-3  border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
                     value={formData.section}
                     onChange={handleChange}
@@ -619,6 +636,11 @@ export default function CreateContractPage() {
             <div>
               <h4 className="font-semibold text-sm text-gray-600">วันหมดอายุ:</h4>
               <p className="text-sm">{formData.citizenexpire || '-'}</p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-sm text-gray-600">ชื่อพยาน:</h4>
+              <p className="text-sm">{formData.witness || '-'}</p>
             </div>
             
             <div>

@@ -103,7 +103,7 @@ export default function SignupPage() {
                                             </svg>
                                         </div>
                                         <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">สร้างเอกสารอัตโนมัติ</h3>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">ลดเวลาการทำงาน</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">สร้างเอกสารจากเทมเพลต</p>
                                     </div>
                                 </div>
 
@@ -138,8 +138,8 @@ export default function SignupPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                                             </svg>
                                         </div>
-                                        <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">ดาวน์โหลดง่าย</h3>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">ดาวน์โหลดได้ทันที</p>
+                                        <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">ดาวน์โหลด</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400"></p>
                                     </div>
                                 </div>
                             </div>

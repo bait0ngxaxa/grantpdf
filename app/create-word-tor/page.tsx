@@ -292,7 +292,7 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วันที่{" "}
+                                        วันที่จัดทำ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
@@ -323,7 +323,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ผู้รับผิดชอบ
+                                        ผู้รับผิดชอบ{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -337,7 +338,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        สถานที่ติดต่อ
+                                        สถานที่ติดต่อ{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -352,7 +354,8 @@ export default function CreateTORPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        อีเมล
+                                        อีเมล{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -366,7 +369,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        เบอร์โทร
+                                        เบอร์โทร{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -380,7 +384,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ระยะเวลาโครงการ
+                                        ระยะเวลาโครงการ{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -394,7 +399,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        งบประมาณ
+                                        งบประมาณ{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -417,7 +423,8 @@ export default function CreateTORPage() {
                             <div className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        หลักการและเหตุผล
+                                        หลักการและเหตุผล{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="topic1"
@@ -430,7 +437,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วัตถุประสงค์ที่ 1
+                                        วัตถุประสงค์ที่ 1{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="objective1"
@@ -443,7 +451,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วัตถุประสงค์ที่ 2
+                                        วัตถุประสงค์ที่ 2{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="objective2"
@@ -456,7 +465,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วัตถุประสงค์ที่ 3
+                                        วัตถุประสงค์ที่ 3{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="objective3"
@@ -469,7 +479,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        กลุ่มเป้าหมาย
+                                        กลุ่มเป้าหมาย{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="target"
@@ -490,7 +501,8 @@ export default function CreateTORPage() {
                             <div className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        พื้นที่/เขต
+                                        พื้นที่/เขต{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="zone"
@@ -502,7 +514,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        แผนการดำเนินงาน
+                                        แผนการดำเนินงาน{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="plan"
@@ -514,7 +527,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        การจัดการโครงการ
+                                        การจัดการโครงการ{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="projectmanage"
@@ -526,7 +540,8 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        องค์กร ภาคี ร่วมงาน
+                                        องค์กร ภาคี ร่วมงาน{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="partner"

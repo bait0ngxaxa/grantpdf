@@ -60,7 +60,7 @@ export default function Home() {
             <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
                 <div className="flex-1">
                     <Link href="/" className=" font-semibold text-2xl hover:rounded-full text-primary hover:bg-white transform hover:scale-105 transition-transform duration-300">
-                        DOCX Generator | HOMEPAGE
+                        DOCX Template | HOMEPAGE
                     </Link>
                 </div>
                 <div className="flex-none">
@@ -193,8 +193,8 @@ export default function Home() {
                                     
                                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
                                         {session 
-                                            ? 'ระบบพร้อมให้คุณสร้างเอกสารและแบบฟอร์มได้อย่างรวดเร็ว เริ่มต้นงานใหม่ได้เลยครับ!' 
-                                            : 'ระบบสร้างเอกสารอัตโนมัติที่จะช่วยประหยัดเวลาและเพิ่มประสิทธิภาพในการทำงานของคุณ'
+                                            ? 'พร้อมให้คุณสร้างเอกสารและแบบฟอร์มได้อย่างรวดเร็ว ' 
+                                            : ''
                                         }
                                     </p>
 
@@ -337,11 +337,11 @@ export default function Home() {
                                     </div>
                                     {/* System Name */}
                                     <h1 className="text-5xl sm:text-6xl font-bold bg-primary bg-clip-text text-transparent mb-4 ">
-                                        DOCX Generator
+                                        DOCX Template
                                     </h1>
                                     {/* Slogan or Description */}
                                     <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 font-medium">
-                                        ระบบสร้างแบบฟอร์มจากเทมเพลตอัตโนมัติ
+                                        สร้างแบบฟอร์มจากเทมเพลตอัตโนมัติ
                                     </p>
                                 </div>
 
@@ -349,7 +349,7 @@ export default function Home() {
                                 <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-2xl mx-auto">
                                     {session 
                                         ? `ยินดีต้อนรับกลับ, ${session.user?.name || session.user?.email?.split('@')[0]}! เริ่มต้นสร้างเอกสารและแบบฟอร์มใหม่ได้เลย`
-                                        : `DOCX Generator | เริ่มต้นสร้างเอกสารและแบบฟอร์มแบบอัตโนมัติ`
+                                        : `DOCX Template | เริ่มต้นสร้างเอกสารและแบบฟอร์มแบบอัตโนมัติ`
                                     }
                                 </p>
 

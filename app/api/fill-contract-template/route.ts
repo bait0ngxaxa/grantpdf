@@ -60,6 +60,7 @@ export async function POST(req: Request) {
         const timelineMonth = formData.get("timelineMonth") as string;
         const timelineText = formData.get("timelineText") as string;
         const section = formData.get("section") as string;
+        const witness = formData.get("witness") as string;
 
         if (!projectName) {
             return new NextResponse("Project name is required.", {
@@ -101,6 +102,7 @@ export async function POST(req: Request) {
             timelineText,
             section,
             date,
+            witness,
         });
 
         // 6. Generate Word buffer

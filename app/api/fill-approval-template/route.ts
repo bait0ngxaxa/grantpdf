@@ -9,9 +9,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 
-//Helper function to generate a unique filename
+
 const generateUniqueFilename = (originalName: string): string => {
-    // แยก name และ extension
+    
     const lastDotIndex = originalName.lastIndexOf(".");
     const nameWithoutExt =
         lastDotIndex > 0
@@ -20,7 +20,7 @@ const generateUniqueFilename = (originalName: string): string => {
     const extension =
         lastDotIndex > 0 ? originalName.substring(lastDotIndex) : "";
 
-    // ทำความสะอาดชื่อไฟล์โดยเก็บอักขระไทยไว้
+    
     const sanitizedName = nameWithoutExt
         .replace(/\s+/g, "_") // เปลี่ยนช่องว่างเป็น underscore
         .replace(/[<>:"/\\|?*]/g, "") // ลบอักขระที่ไม่อนุญาตใน filename เท่านั้น
@@ -30,7 +30,7 @@ const generateUniqueFilename = (originalName: string): string => {
     return `${uniqueId}_${sanitizedName}${extension}`;
 };
 
-// ฟังก์ชันเฉพาะสำหรับจัดการ Thai Distributed Justification และ Word formatting issues
+
 const fixThaiDistributed = (text: string): string => {
     if (!text || typeof text !== 'string') return "";
     
@@ -87,11 +87,11 @@ const fixThaiDistributed = (text: string): string => {
         .trim();
 };
 
-// เพิ่มฟังก์ชันตรวจสอบปัญหาเพิ่มเติม
+
 const hasWordFormattingIssues = (text: string): boolean => {
     if (!text || typeof text !== 'string') return false;
     
-    // ตรวจหาลักษณะที่ทำให้เกิดปัญหาจาก Word
+    
     const hasProblematicChars = /[\u200B-\u200D\u00AD\u2000-\u200A\u202F\u205F\u3000]/g.test(text);
     const hasMultipleSpaces = /[ ]{2,}/g.test(text);
     const hasTrailingSpaces = /[ \t]+\n/g.test(text);
@@ -105,16 +105,16 @@ const hasWordFormattingIssues = (text: string): boolean => {
 
 export async function POST(req: Request) {
     try {
-        // ✅ Get session from NextAuth
+        
         const session = await getServerSession(authOptions);
         if (!session || !session.user || !session.user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // แปลง user.id เป็น number เพื่อใช้กับ Prisma (ถ้า schema เป็น Int)
+        
         const userId = Number(session.user.id);
 
-        // 1. Get the form data from the request body
+        
         const formData = await req.formData();
         const head = formData.get("head") as string;
         const fileName = formData.get("fileName") as string;
@@ -123,7 +123,7 @@ export async function POST(req: Request) {
         const topicdetail = formData.get("topicdetail") as string;
         const todetail = formData.get("todetail") as string;
         
-        // เปลี่ยนจากการรับ attachmentdetail แยกๆ เป็น array
+        
         const attachmentsJson = formData.get("attachments") as string;
         let attachments: string[] = [];
         try {
@@ -156,7 +156,7 @@ export async function POST(req: Request) {
             });
         }
 
-        // 2. จัดการ signature image file (อาจจะมีหรือไม่มี)
+        
         let signatureImageBuffer: Buffer | null = null;
         if (signatureFile && signatureFile.size > 0) {
             const signatureArrayBuffer = await signatureFile.arrayBuffer();
@@ -171,10 +171,10 @@ export async function POST(req: Request) {
         );
         const content = await fs.readFile(templatePath);
 
-        // 4. Initialize Docxtemplater
+        
         const zip = new PizZip(content);
         
-        // สร้าง imageModule เฉพาะเมื่อมี signature
+        
         const modules = [];
         if (signatureImageBuffer) {
             const imageModule = new ImageModule({
@@ -193,17 +193,16 @@ export async function POST(req: Request) {
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
-            modules: modules, // ใช้ modules array ที่อาจจะว่างหรือมี imageModule
-            // เพิ่ม nullGetter เพื่อจัดการค่าที่เป็น null/undefined
+            modules: modules, 
             nullGetter: function(part) {
                 console.log('Missing or null variable:', part.value || 'unknown');
-                // ถ้าเป็น signature และไม่มีไฟล์ ให้คืนค่าช่องว่างสำหรับลายเซ็น
+                
                 if (part.value === 'signature' && !signatureImageBuffer) {
                     return "\n\n\n_________________________\n         ลายเซ็น\n\n";
                 }
-                return ""; // คืนค่าว่างสำหรับตัวแปรอื่น
+                return ""; 
             },
-            // เพิ่ม custom parser สำหรับจัดการ Thai text
+            
             parser: function(tag) {
                 return {
                     get: function(scope, context) {
@@ -213,10 +212,10 @@ export async function POST(req: Request) {
                         
                         const value = scope[tag];
                         
-                        // จัดการ signature เป็นพิเศษ
+                        
                         if (tag === 'signature') {
                             if (signatureImageBuffer) {
-                                return "signature"; // ใช้ image module
+                                return "signature"; 
                             } else {
                                 return "\n\n\n_________________________\n         ลายเซ็น\n\n"; // ช่องว่างสำหรับลายเซ็น
                             }
@@ -236,55 +235,54 @@ export async function POST(req: Request) {
             }
         });
 
-        // 5. Render data into the template
-        // เตรียมข้อมูล attachments สำหรับ template ที่ใช้ {#attachment} {attachmentdetail} {/attachment}
+        
         const attachmentData = attachments
-            .filter(att => att.trim() !== "") // กรองเฉพาะรายการที่มีข้อมูล
+            .filter(att => att.trim() !== "") 
             .map((att, index) => ({ 
-                attachmentdetail: `${index + 1}. ${fixThaiDistributed(att)}` // แก้ไขปัญหาแต่ละรายการ
+                attachmentdetail: `${index + 1}. ${fixThaiDistributed(att)}` 
             }));
 
-        // เพิ่มตัวแปรสำหรับหัวข้อ "สิ่งที่แนบมาด้วย"
+        
         const hasAttachments = attachmentData.length > 0;
 
-        // เตรียมข้อมูลที่แก้ไขปัญหา Thai Distributed แล้ว
+       
         const processedData = {
             head: fixThaiDistributed(head || ""),
-            date: date || "", // วันที่ไม่ต้องแก้
+            date: date || "", 
             topicdetail: fixThaiDistributed(topicdetail || ""),
             todetail: fixThaiDistributed(todetail || ""),
-            attachment: attachmentData, // ส่งเป็น array สำหรับ loop ใน template
-            hasAttachments: hasAttachments, // ใช้สำหรับแสดง/ซ่อนหัวข้อ
-            detail: fixThaiDistributed(detail || ""), // ฟิลด์สำคัญที่สุด
+            attachment: attachmentData, 
+            hasAttachments: hasAttachments, 
+            detail: fixThaiDistributed(detail || ""), 
             regard: fixThaiDistributed(fixedRegard || ""),
             name: fixThaiDistributed(name || ""),
             depart: fixThaiDistributed(depart || ""),
-            coor: coor || "", // เบอร์โทรไม่ต้องแก้
+            coor: coor || "", 
             tel: tel || "",
-            email: email || "", // อีเมลไม่ต้องแก้
+            email: email || "", 
             signature: signatureImageBuffer ? "signature" : "\n\n\n_________________________\n         ลายเซ็น\n\n", // จัดการ signature
             accept: fixThaiDistributed(accept || ""),
         };
 
         doc.render(processedData);
 
-        // 6. Generate Word buffer
+        
         const outputBuffer = doc.getZip().generate({
             type: "uint8array",
             compression: "DEFLATE",
         });
 
-        // 7. Save file to public/uploads
+        
         const uniqueFileName = generateUniqueFilename(projectName + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
-        // สร้างโฟลเดอร์ถ้าไม่มี
+        
         await fs.mkdir(uploadDir, { recursive: true });
 
         const filePath = path.join(uploadDir, uniqueFileName);
         await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
-        // 8. สร้างหรือหา Project
+       
         let project = await prisma.project.findFirst({
             where: {
                 name: projectName,
@@ -292,7 +290,7 @@ export async function POST(req: Request) {
             },
         });
 
-        // ถ้าไม่มี Project ให้สร้างใหม่
+        
         if (!project) {
             project = await prisma.project.create({
                 data: {
@@ -303,18 +301,18 @@ export async function POST(req: Request) {
             });
         }
 
-        // 9. Save file info to Prisma พร้อมเชื่อมกับ Project
+        
         await prisma.userFile.create({
             data: {
                 originalFileName: projectName + ".docx",
-                storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
+                storagePath: `/upload/docx/${uniqueFileName}`, 
                 fileExtension: "docx",
                 userId: userId,
-                projectId: project.id, // เชื่อมกับโครงการ
+                projectId: project.id, 
             },
         });
 
-        // 10. Return JSON พร้อมลิงก์ดาวน์โหลดและข้อมูลโครงการ
+        
         const downloadUrl = `/upload/${uniqueFileName}`;
         return NextResponse.json({
             success: true,
