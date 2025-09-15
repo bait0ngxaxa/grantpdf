@@ -4,11 +4,11 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
-import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import { useTitle } from "@/hook/useTitle";
+import { Users } from "lucide-react";
 
-// Interface for PDF file data from API
+
 interface PdfFile {
     id: string;
     fileName: string;
@@ -23,11 +23,11 @@ interface PdfFile {
     created_at: string;
     updated_at: string;
     fileExtension: string;
-    downloadStatus: string; // เพิ่มฟิลด์นี้
-    downloadedAt?: string;  // เพิ่มฟิลด์นี้ (ถ้าต้องการ)
+    downloadStatus: string; 
+    downloadedAt?: string;  
 }
 
-// เพิ่มฟังก์ชันตัดชื่อไฟล์ที่ด้านบนของไฟล์ (หลัง import statements)
+
 const truncateFileName = (fileName: string, maxLength: number = 30): string => {
     if (fileName.length <= maxLength) return fileName;
     
@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
     const [previewUrl, setPreviewUrl] = useState("");
     const [previewFileName, setPreviewFileName] = useState("");
 
-    // --- Authorization Check ---
+    
     useEffect(() => {
         if (status === "loading") return;
         if (!session || session.user?.role !== "admin") {
@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
         }
     }, [session, status, router]);
 
-    // --- Fetch PDF files from API ---
+    
     useEffect(() => {
         const fetchPdfFiles = async () => {
             if (!session) return;
@@ -400,9 +400,7 @@ export default function AdminDashboardPage() {
             id: "users",
             name: "จัดการผู้ใช้งาน",
             icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 4.197a4 4 0 11-7.32 0l3.66 1.83z" />
-                </svg>
+                                <Users className="h-5 w-5" />
             )
         }
     ];
@@ -576,9 +574,7 @@ export default function AdminDashboardPage() {
                                     <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
                                         <div className="flex items-center space-x-4">
                                             <div className="text-secondary bg-primary bg-opacity-10 p-3 rounded-full">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.972 5.972 0 01-.569-2.533v-.001c0-.246.04-.487.117-.709A5.972 5.972 0 018 12a5.972 5.972 0 01.117-.709c.077-.222.117-.463.117-.709v-.001a5.972 5.972 0 01-.569-2.533m0 0a5.972 5.972 0 015.411-.533M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22L12 18.77L5.82 22L7 14.14l-5-4.87L8.91 8.26L12 2z" />
-                                                </svg>
+                                                <Users className="h-8 w-8 stroke-current" />
                                             </div>
                                             <div>
                                                 <div className="text-sm text-gray-500 dark:text-gray-400">ผู้ใช้งานทั้งหมด</div>
@@ -954,9 +950,7 @@ export default function AdminDashboardPage() {
                             <div>
                                 <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl text-center">
                                     <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 4.197a4 4 0 11-7.32 0l3.66 1.83z" />
-                                        </svg>
+                                        <Users className="h-10 w-10 text-white" />
                                     </div>
                                     <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">การจัดการผู้ใช้งาน</h3>
                                     <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">

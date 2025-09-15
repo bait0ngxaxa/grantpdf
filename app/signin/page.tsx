@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTitle } from "@/hook/useTitle";
+import { Zap, FileText, Lock, Download, LogIn } from "lucide-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -70,9 +71,7 @@ export default function LoginPage() {
                                 <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg transform transition-all duration-300 hover:scale-105">
                                     <div className="text-center">
                                         <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                            </svg>
+                                            <Zap className="h-6 w-6 text-primary" />
                                         </div>
                                         <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">สร้างเอกสารอัตโนมัติ</h3>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">สร้างเอกสารจากเทมเพลต</p>
@@ -82,9 +81,7 @@ export default function LoginPage() {
                                 <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg transform transition-all duration-300 hover:scale-105">
                                     <div className="text-center">
                                         <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
+                                            <FileText className="h-6 w-6 text-white" />
                                         </div>
                                         <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">รูปแบบไฟล์</h3>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">รองรับ PDF, Word</p>
@@ -94,9 +91,7 @@ export default function LoginPage() {
                                 <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg transform transition-all duration-300 hover:scale-105">
                                     <div className="text-center">
                                         <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mx-auto mb-3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
+                                            <Lock className="h-6 w-6 text-green-600" />
                                         </div>
                                         <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">ความปลอดภัยสูง</h3>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">เข้ารหัสข้อมูลของไฟล์</p>
@@ -106,9 +101,7 @@ export default function LoginPage() {
                                 <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg transform transition-all duration-300 hover:scale-105">
                                     <div className="text-center">
                                         <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mx-auto mb-3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                                            </svg>
+                                            <Download className="h-6 w-6 text-blue-600" />
                                         </div>
                                         <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">ดาวน์โหลด</h3>
                                         <p className="text-xs text-gray-500 dark:text-gray-400"></p>
@@ -127,20 +120,7 @@ export default function LoginPage() {
                         <div className="card-body p-8">
                             <div className="flex flex-col items-center mb-6">
                                 {/* SVG Icon for Branding */}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-16 w-16 text-primary mb-4 animate-scaleIn"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v3h8z"
-                                    />
-                                </svg>
+                                <LogIn className="h-16 w-16 text-primary mb-4 animate-scaleIn" />
                                 <h2 className="text-3xl font-bold text-center">
                                     เข้าสู่ระบบ
                                 </h2>
