@@ -20,6 +20,7 @@ import { useTitle } from "@/hook/useTitle";
 import { WordLikeTextareaTOR } from "@/components/ui/WtextareaTOR";
 
 interface WordDocumentData {
+    fileName: string;
     projectName: string;
     person: string;
     address: string;
@@ -48,6 +49,7 @@ export default function CreateFormProjectPage() {
 
     const [formData, setFormData] = useState<WordDocumentData>({
         projectName: "",
+        fileName: "",
         person: "",
         address: "",
         tel: "",
@@ -207,7 +209,22 @@ export default function CreateFormProjectPage() {
                             </h3>
 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div className="lg:col-span-2">
+                            <div >
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        ชื่อไฟล์{" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        name="fileName"
+                                        placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
+                                        className=" px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        value={formData.fileName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div >
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ชื่อโครงการ{" "}
                                         <span className="text-red-500">*</span>
@@ -216,19 +233,13 @@ export default function CreateFormProjectPage() {
                                         type="text"
                                         name="projectName"
                                         placeholder="ระบุชื่อโครงการ"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        className=" px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.projectName}
                                         onChange={handleChange}
                                         required
                                     />
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* ข้อมูลติดต่อ */}
-                        <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div className="lg:col-span-2">
+                                <div >
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ผู้รับผิดชอบ{" "}
                                         <span className="text-red-500">*</span>
@@ -243,7 +254,7 @@ export default function CreateFormProjectPage() {
                                         required
                                     />
                                 </div>
-                                <div className="lg:col-span-2">
+                                <div >
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ที่อยู่{" "}
                                         <span className="text-red-500">*</span>
@@ -303,13 +314,14 @@ export default function CreateFormProjectPage() {
                                         required
                                     />
                                 </div>
+                                
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        จำนวน{" "}
+                                        จำนวน(เดือน){" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
-                                        type="text"
+                                        type="number"
                                         name="month"
                                         placeholder="ระบุตัวเลขจำนวนเดือน เช่น 12"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -335,6 +347,8 @@ export default function CreateFormProjectPage() {
                                 </div>
                             </div>
                         </div>
+
+                       
 
                         {/* รายละเอียดโครงการ */}
                         <div className="bg-green-50 p-6 rounded-lg border border-green-200">

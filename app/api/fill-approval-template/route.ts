@@ -30,6 +30,31 @@ const generateUniqueFilename = (originalName: string): string => {
     return `${uniqueId}_${sanitizedName}${extension}`;
 };
 
+const getMimeType = (fileExtension: string): string => {
+    const ext = fileExtension.toLowerCase();
+    switch (ext) {
+        case 'pdf':
+            return 'application/pdf';
+        case 'doc':
+            return 'application/msword';
+        case 'docx':
+            return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+        case 'png':
+            return 'image/png';
+        case 'txt':
+            return 'text/plain';
+        case 'xls':
+            return 'application/vnd.ms-excel';
+        case 'xlsx':
+            return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        default:
+            return 'application/octet-stream';
+    }
+};
+
 
 const fixThaiDistributed = (text: string): string => {
     if (!text || typeof text !== 'string') return "";
@@ -142,6 +167,18 @@ export async function POST(req: Request) {
         const fixedAttachment = formData.get("attachment") as string;
         const fixedRegard = formData.get("regard") as string;
         const accept = formData.get("accept") as string;
+
+        // รับข้อมูลไฟล์แนบ (IDs ที่อัปโหลดแล้ว)
+        const attachmentFileIdsJson = formData.get("attachmentFileIds") as string;
+        let attachmentFileIds: string[] = [];
+        console.log('Received attachmentFileIds JSON:', attachmentFileIdsJson);
+        try {
+            attachmentFileIds = JSON.parse(attachmentFileIdsJson || "[]");
+            console.log('Parsed attachment file IDs:', attachmentFileIds);
+        } catch (error) {
+            console.error('Error parsing attachment file IDs:', error);
+            attachmentFileIds = [];
+        }
 
         // ลบการตรวจสอบบังคับ signature file
         // if (!signatureFile) {
@@ -302,7 +339,7 @@ export async function POST(req: Request) {
         }
 
         
-        await prisma.userFile.create({
+        const savedFile = await prisma.userFile.create({
             data: {
                 originalFileName: projectName + ".docx",
                 storagePath: `/upload/docx/${uniqueFileName}`, 
@@ -311,6 +348,46 @@ export async function POST(req: Request) {
                 projectId: project.id, 
             },
         });
+
+        // 9. Link attachment files to the created document
+        if (attachmentFileIds.length > 0) {
+            console.log(`Linking ${attachmentFileIds.length} attachment files to document ID: ${savedFile.id}`);
+            for (const fileId of attachmentFileIds) {
+                try {
+                    console.log(`Processing attachment file ID: ${fileId}`);
+                    // ดึงข้อมูลไฟล์แนบจากตาราง UserFile
+                    const attachmentFile = await prisma.userFile.findUnique({
+                        where: { id: Number(fileId) },
+                        select: {
+                            originalFileName: true,
+                            storagePath: true,
+                            fileExtension: true,
+                        },
+                    });
+
+                    if (attachmentFile) {
+                        console.log(`Found attachment file:`, attachmentFile);
+                        // สร้างข้อมูลในตาราง AttachmentFile
+                        const createdAttachment = await prisma.attachmentFile.create({
+                            data: {
+                                fileName: attachmentFile.originalFileName,
+                                filePath: attachmentFile.storagePath,
+                                fileSize: 0, // ถ้าต้องการขนาดไฟล์จริง ต้องอ่านจากไฟล์
+                                mimeType: getMimeType(attachmentFile.fileExtension),
+                                userFileId: savedFile.id,
+                            },
+                        });
+                        console.log(`Created attachment record:`, createdAttachment);
+                    } else {
+                        console.error(`Attachment file not found with ID: ${fileId}`);
+                    }
+                } catch (error) {
+                    console.error(`Error linking attachment file ${fileId}:`, error);
+                }
+            }
+        } else {
+            console.log('No attachment files to link');
+        }
 
         
         const downloadUrl = `/upload/${uniqueFileName}`;

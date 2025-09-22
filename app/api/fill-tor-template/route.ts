@@ -3,7 +3,6 @@ import fs from "fs/promises";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import ImageModule from "docxtemplater-image-module-free";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -129,14 +128,15 @@ export async function POST(req: Request) {
         const cost = formData.get("cost") as string;
         const topic1 = formData.get("topic1") as string;
         const objective1 = formData.get("objective1") as string;
-        const objective2 = formData.get("objective2") as string;
-        const objective3 = formData.get("objective3") as string;
+        // const objective2 = formData.get("objective2") as string;
+        // const objective3 = formData.get("objective3") as string;
         const target = formData.get("target") as string;
         const zone = formData.get("zone") as string;
         const plan = formData.get("plan") as string;
         const projectmanage = formData.get("projectmanage") as string;
         const partner = formData.get("partner") as string;
         const date = formData.get("date") as string;
+        const fileName = formData.get("fileName") as string;
 
         if (!projectName) {
             return new NextResponse("Project name is required.", {
@@ -238,8 +238,8 @@ export async function POST(req: Request) {
             cost: cost || "",
             topic1: fixThaiDistributed(topic1 || ""),
             objective1: fixThaiDistributed(objective1 || ""),
-            objective2: fixThaiDistributed(objective2 || ""),
-            objective3: fixThaiDistributed(objective3 || ""),
+            // objective2: fixThaiDistributed(objective2 || ""),
+            // objective3: fixThaiDistributed(objective3 || ""),
             target: fixThaiDistributed(target || ""),
             zone: fixThaiDistributed(zone || ""),
             plan: fixThaiDistributed(plan || ""),
@@ -268,7 +268,7 @@ export async function POST(req: Request) {
         });
 
         // 7. Save file to public/uploads
-        const uniqueFileName = generateUniqueFilename(projectName + ".docx");
+        const uniqueFileName = generateUniqueFilename(fileName + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
         // สร้างโฟลเดอร์ถ้าไม่มี
@@ -299,7 +299,7 @@ export async function POST(req: Request) {
         // 9. Save file info to Prisma พร้อมเชื่อมกับ Project
         await prisma.userFile.create({
             data: {
-                originalFileName: projectName + ".docx",
+                originalFileName: fileName + ".docx",
                 storagePath: `/upload/docx/${uniqueFileName}`,
                 fileExtension: "docx",
                 userId: userId,

@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -24,7 +24,16 @@ type UserFile = {
     created_at: string;
     updated_at: string;
     fileExtension: string;
-    userName:string;
+    userName: string;
+    attachmentFiles?: AttachmentFile[]; // เพิ่มข้อมูลไฟล์แนบ
+};
+
+type AttachmentFile = {
+    id: string;
+    fileName: string;
+    filePath: string;
+    fileSize: number;
+    mimeType: string;
 };
 
 // เพิ่มฟังก์ชันตัดชื่อไฟล์ที่ด้านบนของไฟล์ (หลังจาก import statements)
@@ -72,6 +81,9 @@ export default function DashboardPage() {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState("");
+
+    // State for expandable rows (attachment files)
+    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
     useTitle("UserDashboard | ระบบจัดการเอกสาร");
 
@@ -137,6 +149,19 @@ export default function DashboardPage() {
     const cancelDelete = () => {
         setShowDeleteModal(false);
         setFileToDelete(null);
+    };
+
+    // Toggle expand/collapse for attachment files
+    const toggleRowExpansion = (fileId: string) => {
+        setExpandedRows(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(fileId)) {
+                newSet.delete(fileId);
+            } else {
+                newSet.add(fileId);
+            }
+            return newSet;
+        });
     };
 
     useEffect(() => {
@@ -608,12 +633,14 @@ export default function DashboardPage() {
                                                             <th>ชื่อไฟล์</th>
                                                             <th className="hidden md:table-cell">ประเภท</th>
                                                             <th className="hidden md:table-cell">วันที่สร้าง</th>
+                                                            <th className="hidden sm:table-cell">ไฟล์แนบ</th>
                                                             <th>การกระทำ</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {currentPageFiles.map((file) => (
-                                                            <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                            <React.Fragment key={file.id}>
+                                                                <tr className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                                 <td className="font-semibold">
                                                                     <div className="flex items-center space-x-3">
                                                                         <div className="flex-shrink-0">
@@ -644,6 +671,29 @@ export default function DashboardPage() {
                                                                 </td>
                                                                 <td className="text-gray-500 hidden md:table-cell">
                                                                     {new Date(file.created_at).toLocaleDateString("th-TH")}
+                                                                </td>
+
+                                                                {/* คอลัมน์ไฟล์แนบ */}
+                                                                <td className="hidden sm:table-cell">
+                                                                    {file.attachmentFiles && file.attachmentFiles.length > 0 ? (
+                                                                        <button
+                                                                            onClick={() => toggleRowExpansion(file.id)}
+                                                                            className="flex items-center space-x-2 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full text-sm font-medium transition-colors duration-200"
+                                                                        >
+                                                                            <svg 
+                                                                                xmlns="http://www.w3.org/2000/svg" 
+                                                                                className={`h-4 w-4 transform transition-transform duration-200 ${expandedRows.has(file.id) ? 'rotate-180' : ''}`}
+                                                                                fill="none" 
+                                                                                viewBox="0 0 24 24" 
+                                                                                stroke="currentColor"
+                                                                            >
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                                            </svg>
+                                                                            <span>{file.attachmentFiles.length} ไฟล์</span>
+                                                                        </button>
+                                                                    ) : (
+                                                                        <span className="text-gray-400 text-sm">ไม่มี</span>
+                                                                    )}
                                                                 </td>
                                                                
                                                                 <td>
@@ -697,7 +747,67 @@ export default function DashboardPage() {
                                                                         </Button>
                                                                     </div>
                                                                 </td>
-                                                            </tr>
+                                                                </tr>
+
+                                                                {/* แถวขยายสำหรับแสดงไฟล์แนบ */}
+                                                                {expandedRows.has(file.id) && file.attachmentFiles && file.attachmentFiles.length > 0 && (
+                                                                    <tr className="bg-gray-50 dark:bg-gray-800">
+                                                                        <td colSpan={5} className="px-6 py-4">
+                                                                            <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                                                                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+                                                                                    <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                                                                    </svg>
+                                                                                    ไฟล์แนบ ({file.attachmentFiles.length} ไฟล์)
+                                                                                </h4>
+                                                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                                                    {file.attachmentFiles.map((attachment, index) => (
+                                                                                        <div key={attachment.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-600 p-3 rounded-lg border">
+                                                                                            <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                                                                <div className="flex-shrink-0">
+                                                                                                    {/* ไอคอนตามประเภทไฟล์ */}
+                                                                                                    {attachment.mimeType?.includes('image') ? (
+                                                                                                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                                                        </svg>
+                                                                                                    ) : attachment.mimeType?.includes('pdf') ? (
+                                                                                                        <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                                                                        </svg>
+                                                                                                    ) : (
+                                                                                                        <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                                                        </svg>
+                                                                                                    )}
+                                                                                                </div>
+                                                                                                <div className="flex-1 min-w-0">
+                                                                                                    <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={attachment.fileName}>
+                                                                                                        {truncateFileName(attachment.fileName, 25)}
+                                                                                                    </div>
+                                                                                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                                                                        {(attachment.fileSize / 1024 / 1024).toFixed(2)} MB
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <a
+                                                                                                href={`/api/attachment/download/${attachment.id}`}
+                                                                                                target="_blank"
+                                                                                                rel="noopener noreferrer"
+                                                                                                className="flex-shrink-0 ml-2 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200"
+                                                                                                title="ดาวน์โหลด"
+                                                                                            >
+                                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                                                </svg>
+                                                                                            </a>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </React.Fragment>
                                                         ))}
                                                     </tbody>
                                                 </table>

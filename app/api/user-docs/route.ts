@@ -25,6 +25,11 @@ export async function GET(req: Request) {
     const userFiles = await prisma.userFile.findMany({
       where: {
         userId: userId,
+        NOT: {
+          storagePath: {
+            startsWith: '/upload/attachments/'
+          }
+        }
       },
       orderBy: {
         created_at: "desc",
@@ -44,6 +49,17 @@ export async function GET(req: Request) {
             email: true,
           },
         },
+        
+        // เพิ่มการดึงข้อมูลไฟล์แนบ
+        attachmentFiles: {
+          select: {
+            id: true,
+            fileName: true,
+            filePath: true,
+            fileSize: true,
+            mimeType: true,
+          },
+        },
       },
     });
 
@@ -51,7 +67,11 @@ export async function GET(req: Request) {
     const sanitizedFiles = userFiles.map((file) => ({
       ...file,
       id: file.id.toString(),
-      userName:file.user?.name
+      userName: file.user?.name,
+      attachmentFiles: file.attachmentFiles?.map((attachment) => ({
+        ...attachment,
+        id: attachment.id.toString(),
+      })) || []
     }));
 
     return NextResponse.json(sanitizedFiles, { status: 200 });

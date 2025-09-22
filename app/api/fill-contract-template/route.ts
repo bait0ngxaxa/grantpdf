@@ -44,6 +44,7 @@ export async function POST(req: Request) {
 
         // 1. Get the form data from the request body
         const formData = await req.formData();
+        const fileName = formData.get("fileName") as string; // ชื่อไฟล์ที่ต้องการบันทึก
         const projectName = formData.get("projectName") as string; // เพิ่มชื่อโครงการ
         const date = formData.get("date") as string;
         const name = formData.get("name") as string;
@@ -112,7 +113,7 @@ export async function POST(req: Request) {
         });
 
         // 7. Save file to public/uploads
-        const uniqueFileName = generateUniqueFilename(projectName + ".docx");
+        const uniqueFileName = generateUniqueFilename(fileName + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
         // สร้างโฟลเดอร์ถ้าไม่มี
@@ -143,7 +144,7 @@ export async function POST(req: Request) {
         // 9. Save file info to Prisma พร้อมเชื่อมกับ Project
         await prisma.userFile.create({
             data: {
-                originalFileName: projectName + ".docx",
+                originalFileName: fileName + ".docx",
                 storagePath: `/upload/docx/${uniqueFileName}`, // ✅ เก็บเป็น path ที่เข้าถึงได้
                 fileExtension: "docx",
                 userId: userId,

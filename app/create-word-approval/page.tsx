@@ -17,7 +17,6 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useTitle } from "@/hook/useTitle";
-import { WordLikeTextarea } from "@/components/ui/Wtextarea";
 
 interface WordDocumentData {
     head: string;
@@ -61,6 +60,7 @@ export default function CreateWordDocPage() {
     const [signaturePreview, setSignaturePreview] = useState<string | null>(
         null
     );
+    const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
     const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
         null
     );
@@ -130,6 +130,77 @@ export default function CreateWordDocPage() {
         }
     };
 
+    const handleAttachmentFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        setAttachmentFiles(files);
+    };
+
+    const removeAttachmentFile = (index: number) => {
+        setAttachmentFiles((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    // ฟังก์ชันสำหรับอัปโหลดไฟล์แนบไปยัง file-upload API
+    const uploadAttachmentFiles = async (files: File[]): Promise<string[]> => {
+        const uploadedIds: string[] = [];
+        console.log(`Starting upload of ${files.length} attachment files`);
+
+        for (const file of files) {
+            try {
+                console.log(
+                    `Uploading file: ${file.name}, size: ${file.size} bytes`
+                );
+                const formData = new FormData();
+                formData.append("file", file);
+
+                if (session?.user?.id) {
+                    formData.append("userId", session.user.id.toString());
+                }
+                if (session?.user?.email) {
+                    formData.append("userEmail", session.user.email);
+                }
+                if ((session as any)?.accessToken) {
+                    formData.append("token", (session as any).accessToken);
+                }
+
+                const response = await fetch("/api/file-upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log("Upload response:", result);
+                    if (result.success && result.file && result.file.id) {
+                        uploadedIds.push(result.file.id);
+                        console.log(
+                            `Successfully uploaded ${file.name}, ID: ${result.file.id}`
+                        );
+                    } else {
+                        console.error(
+                            "Upload succeeded but no file ID returned:",
+                            result
+                        );
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error(
+                        `Failed to upload attachment ${file.name}:`,
+                        response.status,
+                        errorText
+                    );
+                }
+            } catch (error) {
+                console.error("Error uploading attachment:", error);
+            }
+        }
+
+        console.log(
+            `Upload completed. Total uploaded IDs: ${uploadedIds.length}`,
+            uploadedIds
+        );
+        return uploadedIds;
+    };
+
     const openPreviewModal = () => {
         setIsPreviewOpen(true);
     };
@@ -172,6 +243,24 @@ export default function CreateWordDocPage() {
 
             if (signatureFile) {
                 data.append("signatureFile", signatureFile);
+            }
+
+            // เพิ่มไฟล์แนบ - ส่งไปที่ file-upload API ก่อน
+            if (attachmentFiles.length > 0) {
+                console.log("Uploading attachment files...");
+                const uploadedAttachments = await uploadAttachmentFiles(
+                    attachmentFiles
+                );
+                console.log(
+                    "Attachment file IDs to send:",
+                    uploadedAttachments
+                );
+                data.append(
+                    "attachmentFileIds",
+                    JSON.stringify(uploadedAttachments)
+                );
+            } else {
+                console.log("No attachment files to upload");
             }
 
             if (session.user?.id) {
@@ -303,7 +392,7 @@ export default function CreateWordDocPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วันที่{" "}
+                                        วันที่สร้างหนังสือ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
@@ -421,6 +510,129 @@ export default function CreateWordDocPage() {
                                             เพื่อเพิ่มรายการ (ถ้ามี)
                                         </p>
                                     )}
+
+                                    {/* อัปโหลดไฟล์แนบ - แสดงเฉพาะเมื่อมีสิ่งที่ส่งมาด้วย */}
+                                    {formData.attachments.length > 0 && (
+                                        <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                                            <h4 className="text-md font-semibold text-slate-800 mb-3 flex items-center">
+                                                <svg
+                                                    className="w-5 h-5 mr-2 text-orange-600"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                                                    />
+                                                </svg>
+                                                อัปโหลดไฟล์แนบ
+                                            </h4>
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                                        เลือกไฟล์แนบ
+                                                        (สามารถเลือกหลายไฟล์)
+                                                    </label>
+                                                    <Input
+                                                        type="file"
+                                                        multiple
+                                                        className={`border border-slate-300 rounded-lg 
+                                                                  focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                                                                  transition-colors file:mr-4 file:py-2 file:px-4 
+                                                                  file:rounded-md file:border-0 file:text-sm 
+                                                                  file:font-medium file:bg-orange-50 file:text-orange-700 
+                                                                  hover:file:bg-orange-100`}
+                                                        onChange={
+                                                            handleAttachmentFilesChange
+                                                        }
+                                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls"
+                                                    />
+                                                    <p className="text-xs text-slate-500 mt-1">
+                                                        รองรับไฟล์: PDF, Word
+                                                        
+                                                    </p>
+                                                </div>
+
+                                                {/* แสดงรายการไฟล์ที่เลือก */}
+                                                {attachmentFiles.length > 0 && (
+                                                    <div className="mt-4">
+                                                        <h5 className="text-sm font-medium text-slate-700 mb-2">
+                                                            ไฟล์ที่เลือก (
+                                                            {
+                                                                attachmentFiles.length
+                                                            }{" "}
+                                                            ไฟล์):
+                                                        </h5>
+                                                        <div className="space-y-2">
+                                                            {attachmentFiles.map(
+                                                                (
+                                                                    file,
+                                                                    index
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200"
+                                                                    >
+                                                                        <div className="flex items-center space-x-2">
+                                                                            <svg
+                                                                                className="w-4 h-4 text-slate-500"
+                                                                                fill="none"
+                                                                                stroke="currentColor"
+                                                                                viewBox="0 0 24 24"
+                                                                            >
+                                                                                <path
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    strokeWidth={
+                                                                                        2
+                                                                                    }
+                                                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                                                />
+                                                                            </svg>
+                                                                            <span className="text-sm text-slate-700">
+                                                                                {
+                                                                                    file.name
+                                                                                }
+                                                                            </span>
+                                                                            <span className="text-xs text-slate-500">
+                                                                                (
+                                                                                {(
+                                                                                    file.size /
+                                                                                    1024 /
+                                                                                    1024
+                                                                                ).toFixed(
+                                                                                    2
+                                                                                )}{" "}
+                                                                                MB)
+                                                                            </span>
+                                                                        </div>
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            onClick={() =>
+                                                                                removeAttachmentFile(
+                                                                                    index
+                                                                                )
+                                                                            }
+                                                                            className="px-2 py-1 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+                                                                        >
+                                                                            ลบ
+                                                                        </Button>
+                                                                    </div>
+                                                                )
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div>
@@ -443,38 +655,24 @@ export default function CreateWordDocPage() {
                                         // trailingBlankLines={1}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ผู้อนุมัติ{" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        name="accept"
-                                        placeholder="ระบุชื่อ-นามสกุลผู้อนุมัติ"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        value={formData.accept}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
                             </div>
                         </div>
 
                         {/* ข้อมูลผู้ลงนาม */}
                         <div className="bg-purple-50 p-6 rounded-lg border border-purple-200">
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-purple-300">
-                                ✍️ ข้อมูลผู้ลงนาม
+                                ✍️ ข้อมูลผู้ขออนุมัติ
                             </h3>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ชื่อผู้ลงนาม{" "}
+                                        ชื่อผู้ขออนุมัติ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
                                         name="name"
-                                        placeholder="ระบุชื่อ-นามสกุลผู้ลงนาม"
+                                        placeholder="ระบุชื่อ-นามสกุลผู้ขออนุมัติ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.name}
                                         onChange={handleChange}
@@ -541,10 +739,33 @@ export default function CreateWordDocPage() {
                             </div>
                         </div>
 
+                        <div className="bg-red-50 p-6 rounded-lg border border-purple-200">
+                            <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-purple-300">
+                                ✍️ ข้อมูลผู้อนุมัติ
+                            </h3>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        ชื่อผู้อนุมัติ{" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        name="accept"
+                                        placeholder="ระบุชื่อ-นามสกุลผู้อนุมัติ"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        value={formData.accept}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                         {/* อัปโหลดลายเซ็น */}
                         <div className="bg-white p-6 rounded-lg border border-yellow-200">
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-yellow-300">
-                                🖼️ อัปโหลดลายเซ็น
+                                🖼️ อัปโหลดลายเซ็นผู้ขออนุมัติ
                             </h3>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2 ">
@@ -824,6 +1045,48 @@ export default function CreateWordDocPage() {
                                 />
                             </div>
                         )}
+
+                        {/* แสดงไฟล์แนบในการพรีวิว */}
+                        {formData.attachments.length > 0 &&
+                            attachmentFiles.length > 0 && (
+                                <div>
+                                    <h4 className="font-semibold text-sm text-gray-600">
+                                        ไฟล์แนบ ({attachmentFiles.length} ไฟล์):
+                                    </h4>
+                                    <div className="mt-2 space-y-1">
+                                        {attachmentFiles.map((file, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center space-x-2 text-sm"
+                                            >
+                                                <svg
+                                                    className="w-4 h-4 text-slate-500"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
+                                                </svg>
+                                                <span>{file.name}</span>
+                                                <span className="text-xs text-slate-500">
+                                                    (
+                                                    {(
+                                                        file.size /
+                                                        1024 /
+                                                        1024
+                                                    ).toFixed(2)}{" "}
+                                                    MB)
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                     </div>
 
                     <DialogFooter>

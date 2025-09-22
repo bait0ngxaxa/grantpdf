@@ -3,10 +3,9 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
 import { 
   Dialog, 
   DialogContent, 
@@ -19,6 +18,7 @@ import {
 import { useTitle } from "@/hook/useTitle";
 
 interface WordDocumentData {
+  fileName: string; // ชื่อไฟล์ที่จะบันทึก
   projectName: string; // เพิ่มชื่อโครงการ
   contractnumber: string;
   projectOffer: string;
@@ -43,6 +43,7 @@ export default function CreateContractPage() {
   const router = useRouter();
 
   const [formData, setFormData] = useState<WordDocumentData>({
+    fileName: "",
     projectName: "",
     contractnumber: "",
     projectOffer: "",
@@ -193,6 +194,21 @@ export default function CreateContractPage() {
                 📋 ข้อมูลโครงการ
               </h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ชื่อไฟล์{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    name="fileName"
+                    placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.fileName}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     ชื่อโครงการ{" "}
@@ -353,7 +369,7 @@ export default function CreateContractPage() {
                     <span className="text-red-500">*</span>
                   </label>
                   <Input
-                    type="text"
+                    type="number"
                     name="citizenid"
                     placeholder="ระบุเลขบัตรประชาชน 13 หลักผู้จ้าง"
                     className=" w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"

@@ -49,14 +49,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 3. ตรวจสอบประเภทไฟล์ (เฉพาะ .docx และ .pdf)
+        // 3. ตรวจสอบประเภทไฟล์ (รองรับไฟล์หลายประเภท)
         const fileName = file.name.toLowerCase();
-        const isDocx = fileName.endsWith(".docx");
-        const isPdf = fileName.endsWith(".pdf");
+        const allowedExtensions = ['.docx', '.pdf', '.doc', '.jpg', '.jpeg', '.png', '.txt', '.xlsx', '.xls'];
+        const isAllowed = allowedExtensions.some(ext => fileName.endsWith(ext));
         
-        if (!isDocx && !isPdf) {
+        if (!isAllowed) {
             return NextResponse.json(
-                { error: "Only .docx and .pdf files are allowed" },
+                { error: "File type not supported. Allowed: " + allowedExtensions.join(', ') },
                 { status: 400 }
             );
         }
@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
 
         // 5. สร้างชื่อไฟล์ใหม่และโฟลเดอร์ตามประเภทไฟล์
         const uniqueFileName = generateUniqueFilename(file.name);
-        const fileExtension = isPdf ? "pdf" : "docx";
-        const uploadDir = path.join(process.cwd(), "public", "upload", fileExtension);
+        const fileExtension = path.extname(file.name).substring(1).toLowerCase(); // ลบจุดออกและแปลงเป็นตัวเล็ก
+        const uploadDir = path.join(process.cwd(), "public", "upload", "attachments");
 
         // สร้างโฟลเดอร์ถ้าไม่มี
         await mkdir(uploadDir, { recursive: true });
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         const userFile = await prisma.userFile.create({
             data: {
                 originalFileName: file.name,
-                storagePath: `/upload/${fileExtension}/${uniqueFileName}`,
+                storagePath: `/upload/attachments/${uniqueFileName}`,
                 fileExtension: fileExtension,
                 userId: parseInt(session.user.id),
             },
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
                 id: userFile.id.toString(),
                 originalFileName: userFile.originalFileName,
                 storagePath: userFile.storagePath,
-                downloadUrl: `/upload/${fileExtension}/${uniqueFileName}`,
+                downloadUrl: `/upload/attachments/${uniqueFileName}`,
             },
         });
     } catch (error) {

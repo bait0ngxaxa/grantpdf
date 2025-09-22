@@ -21,8 +21,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 
-    // Query the database for ALL user files with user information
+    // Query the database for ALL user files with user information (exclude attachment files)
     const allUserFiles = await prisma.userFile.findMany({
+      where: {
+        NOT: {
+          storagePath: {
+            startsWith: '/upload/attachments/'
+          }
+        }
+      },
       orderBy: {
         created_at: "desc",
       },
@@ -44,6 +51,16 @@ export async function GET(req: Request) {
             email: true,
           },
         },
+        // เพิ่มการดึงข้อมูลไฟล์แนบ
+        attachmentFiles: {
+          select: {
+            id: true,
+            fileName: true,
+            filePath: true,
+            fileSize: true,
+            mimeType: true,
+          },
+        },
       },
     });
 
@@ -61,6 +78,11 @@ export async function GET(req: Request) {
       // User information
       userName: file.user?.name || "Unknown User",
       userEmail: file.user?.email || "Unknown Email",
+      // Attachment files
+      attachmentFiles: file.attachmentFiles?.map((attachment) => ({
+        ...attachment,
+        id: attachment.id.toString(),
+      })) || []
     }));
     const totalUsers = await prisma.user.count();
 

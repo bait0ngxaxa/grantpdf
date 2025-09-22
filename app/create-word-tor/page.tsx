@@ -3,7 +3,6 @@
 import { useState, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,11 +16,11 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useTitle } from "@/hook/useTitle";
-import { WordLikeTextareaTOR } from "@/components/ui/WtextareaTOR";
+
 
 interface TORData {
     projectName: string; // เพิ่มชื่อโครงการ
-
+    fileName: string;
     owner: string;
     address: string;
     email: string;
@@ -55,7 +54,8 @@ export default function CreateTORPage() {
     const router = useRouter();
 
     const [formData, setFormData] = useState<TORData>({
-        projectName: "", // เพิ่มชื่อโครงการ
+        projectName: "", 
+        fileName: "",
         date: "",
         owner: "",
         address: "",
@@ -274,7 +274,22 @@ export default function CreateTORPage() {
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-300">
                                 📋 ข้อมูลพื้นฐานโครงการ
                             </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        ชื่อไฟล์{" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        name="fileName"
+                                        placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        value={formData.fileName}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ชื่อโครงการ{" "}
@@ -437,46 +452,20 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วัตถุประสงค์ที่ 1{" "}
+                                        วัตถุประสงค์ {" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="objective1"
-                                        placeholder=""
-                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        placeholder="วัตถุประสงค์โครงการ"
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         value={formData.objective1}
                                         onChange={handleChange}
                                         //rows={30}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วัตถุประสงค์ที่ 2{" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Textarea
-                                        name="objective2"
-                                        placeholder=""
-                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        value={formData.objective2}
-                                        onChange={handleChange}
-                                        //rows={30}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วัตถุประสงค์ที่ 3{" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Textarea
-                                        name="objective3"
-                                        placeholder=""
-                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                        value={formData.objective3}
-                                        onChange={handleChange}
-                                        //rows={30}
-                                    />
-                                </div>
+                                
+                                
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         กลุ่มเป้าหมาย{" "}
@@ -858,7 +847,7 @@ export default function CreateTORPage() {
 
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
-                                วัตถุประสงค์ที่ 1:
+                                วัตถุประสงค์
                             </h4>
                             <p className="text-sm whitespace-pre-wrap">
                                 {formData.objective1 || "-"}
