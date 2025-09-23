@@ -34,73 +34,41 @@ const fixThaiDistributed = (text: string): string => {
     if (!text || typeof text !== 'string') return "";
     
     return text
-        // 1. ลบ character ที่ทำให้ Thai Distributed ทำงานผิด
-        .replace(/[\u200B-\u200D]/g, '')        // Zero-width spaces
-        .replace(/[\u2060-\u206F]/g, '')        // Word joiner, invisible characters  
-        .replace(/\uFEFF/g, '')                 // Byte order mark
-        .replace(/\u00AD/g, '')                 // Soft hyphen (ตัวการสำคัญ!)
+        // 1. ลบ invisible characters ที่ทำให้ Thai Distributed ทำงานผิด
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')  // Zero-width chars + BOM
+        .replace(/[\u2060-\u206F]/g, '')        // Word joiner, invisible chars
+        .replace(/\u00AD/g, '')                 // Soft hyphen (ปัญหาหลัก!)
+        .replace(/[\u034F\u061C]/g, '')         // Combining grapheme joiner + Arabic letter mark
         
-        // 2. จัดการ Non-breaking space ที่ Word ใส่แฝง
-        .replace(/\u00A0/g, ' ')                // Non-breaking space → normal space
-        .replace(/[\u2000-\u200A]/g, ' ')       // En quad, Em quad, etc. → normal space
-        .replace(/\u202F/g, ' ')                // Narrow no-break space → normal space
-        .replace(/\u205F/g, ' ')                // Medium mathematical space → normal space
-        .replace(/\u3000/g, ' ')                // Ideographic space → normal space
+        // 2. แปลง special spaces เป็น normal space
+        .replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, ' ')
         
-        // 3. จัดการ Thai combining characters ที่แยกออกมา
-        .normalize('NFC')                       // รวม combining characters เข้าด้วยกัน
+        // 3. รวม Thai combining characters
+        .normalize('NFC')
         
-        // 4. จัดการ Line breaks และ paragraph marks จาก Word
-        .replace(/\r\n/g, '\n')                // Windows line ending
-        .replace(/\r/g, '\n')                  // Mac line ending
-        .replace(/\u2028/g, '\n')              // Line separator
+        // 4. จัดการ line breaks อย่างถูกต้อง (รักษา paragraph structure)
+        .replace(/\r\n|\r|\u2028/g, '\n')       // แปลงเป็น LF
         .replace(/\u2029/g, '\n\n')            // Paragraph separator
-        .replace(/\u000B/g, '\n')              // Vertical tab (จาก Word)
-        .replace(/\u000C/g, '\n')              // Form feed (จาก Word)
+        .replace(/[\u000B\u000C]/g, '\n')      // Vertical tab, Form feed
         
-        // 5. ลบ manual line breaks ที่เกิดจาก Shift+Enter ใน Word (แต่เก็บ line breaks ปกติ)
-        .replace(/\u000A/g, '\n')              // Line feed
+        // 5. **ปรับปรุงการจัดการ spaces สำหรับ Thai Distributed**
+        .replace(/[ \t]{2,}/g, ' ')            // แปลง multiple spaces เป็น single space
+        .replace(/^[ \t]+|[ \t]+$/gm, '')      // ลบ leading/trailing spaces ในแต่ละบรรทัด
         
-        // 6. จัดการ spaces - สำคัญมากสำหรับ Thai Distributed!
-        .replace(/[ \t]+/g, ' ')               // Multiple spaces → single space
-        .replace(/\n[ \t]+/g, '\n')            // Remove leading spaces on new lines
-        .replace(/[ \t]+\n/g, '\n')            // Remove trailing spaces before new lines
+        // 6. ลบ Word field codes และ formatting marks
+        .replace(/[\u0013-\u0015]/g, '')       // Field separators
+        .replace(/[\u200E\u200F\u202A-\u202E]/g, '') // Directional marks
         
-        // 7. จัดการ Word's hidden formatting และ field codes
-        .replace(/[\u061C]/g, '')              // Arabic letter mark
-        .replace(/[\u200E\u200F]/g, '')        // Left-to-right/Right-to-left mark
-        .replace(/[\u202A-\u202E]/g, '')       // Directional formatting
-        .replace(/\u001E/g, '')                // Record separator (จาก Word fields)
-        .replace(/\u001F/g, '')                // Unit separator (จาก Word fields)
+        // 7. **เพิ่มการจัดการ Thai-specific issues**
+        .replace(/([\u0e01-\u0e4f])\s+([\u0e01-\u0e4f])/g, '$1 $2') // รักษาช่องว่างระหว่างคำไทย
+        .replace(/\s*([.,:;!?])\s*/g, '$1 ')   // จัดการเครื่องหมายวรรคตอน
         
-        // 8. ลบ Word field codes และ hyperlink remnants
-        .replace(/\u0013[^\u0014\u0015]*\u0014([^\u0015]*)\u0015/g, '$1') // Field codes
-        .replace(/[\u0013\u0014\u0015]/g, '')  // Field separators
-        
-        // 9. จัดการ paragraph formatting จาก Word (เก็บ line breaks ไว้)
-        .replace(/\n{4,}/g, '\n\n\n')         // จำกัด empty lines ไม่เกิน 3 บรรทัด
-        .replace(/^\n+/, '')                   // ลบ line breaks ที่จุดเริ่มต้น
-        .replace(/\n+$/, '')                   // ลบ line breaks ที่จุดสิ้นสุด
-        
-        // 10. Clean up edges
+        // 8. จำกัด empty lines และ clean up
+        .replace(/\n{3,}/g, '\n\n')           // จำกัด empty lines
+        .replace(/^\n+|\n+$/g, '')             // ลบ leading/trailing newlines
         .trim();
 };
 
-// ฟังก์ชันตรวจสอบว่าข้อความมีปัญหา Word formatting หรือไม่
-const hasWordFormattingIssues = (text: string): boolean => {
-    if (!text || typeof text !== 'string') return false;
-    
-    // ตรวจหาลักษณะที่ทำให้เกิดปัญหาจาก Word
-    const hasProblematicChars = /[\u200B-\u200D\u00AD\u2000-\u200A\u202F\u205F\u3000]/g.test(text);
-    const hasMultipleSpaces = /[ ]{2,}/g.test(text);
-    const hasTrailingSpaces = /[ \t]+\n/g.test(text);
-    const hasLeadingSpaces = /\n[ \t]+/g.test(text);
-    const hasFieldCodes = /[\u0013\u0014\u0015]/g.test(text);
-    const hasManualLineBreaks = /\n(?!\n)/g.test(text); // Single line breaks
-    
-    return hasProblematicChars || hasMultipleSpaces || hasTrailingSpaces || 
-           hasLeadingSpaces || hasFieldCodes || hasManualLineBreaks;
-};
 
 export async function POST(req: Request) {
     try {
@@ -183,12 +151,16 @@ export async function POST(req: Request) {
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
-            // เพิ่ม nullGetter เพื่อจัดการค่าที่เป็น null/undefined
+            delimiters: {
+                start: '{',
+                end: '}'
+            },
+            // จัดการค่า null/undefined
             nullGetter: function(part) {
                 console.log('Missing or null variable:', part.value || 'unknown');
-                return ""; // คืนค่าว่างแทนที่จะ error
+                return ""; 
             },
-            // เพิ่ม custom parser สำหรับจัดการ Thai text
+            // **ปรับปรุง parser สำหรับ Thai Distributed**
             parser: function(tag) {
                 return {
                     get: function(scope, context) {
@@ -196,22 +168,26 @@ export async function POST(req: Request) {
                             return scope;
                         }
                         
-                        const value = scope[tag];
-                        if (typeof value === 'string') {
-                            // ตรวจสอบและแก้ไขปัญหา Word formatting
-                            if (hasWordFormattingIssues(value)) {
-                                console.log(`Fixing Word formatting issues for field: ${tag}`);
-                                return fixThaiDistributed(value);
+                        let value = scope[tag];
+                        if (typeof value === 'string' && value.trim()) {
+                            // **บังคับแก้ไข Thai formatting ทุกฟิลด์**
+                            value = fixThaiDistributed(value);
+                            
+                            // **เพิ่มการจัดการพิเศษสำหรับ textarea fields**
+                            if (['topic1', 'objective1', 'target', 'zone', 'plan', 'projectmanage', 'partner'].includes(tag)) {
+                                // แปลง line breaks เป็น format ที่ Word เข้าใจ
+                                value = value.replace(/\n/g, '\r\n');
                             }
-                            return value;
+                            
+                            console.log(`Processed Thai text for field: ${tag}`);
                         }
-                        return value;
+                        return value || '';
                     }
                 };
             }
         });
 
-        // 5. Render data into the template - แก้ไข Word formatting ทุกฟิลด์
+        // 5. Render data into the template - ประมวลผล Thai formatting ทุกฟิลด์
         const processedActivities = activities.map((activity: any) => ({
             ...activity,
             // แก้ไขทุกฟิลด์ที่เป็น string ในตาราง activities
@@ -226,7 +202,7 @@ export async function POST(req: Request) {
             }, {} as any) : activity)
         }));
 
-        doc.render({
+        const processedData = {
             // TOR specific data ตาม interface TORData - แก้ไข Word formatting
             projectName: fixThaiDistributed(projectName || ""),
             owner: fixThaiDistributed(owner || ""),
@@ -238,8 +214,6 @@ export async function POST(req: Request) {
             cost: cost || "",
             topic1: fixThaiDistributed(topic1 || ""),
             objective1: fixThaiDistributed(objective1 || ""),
-            // objective2: fixThaiDistributed(objective2 || ""),
-            // objective3: fixThaiDistributed(objective3 || ""),
             target: fixThaiDistributed(target || ""),
             zone: fixThaiDistributed(zone || ""),
             plan: fixThaiDistributed(plan || ""),
@@ -259,7 +233,10 @@ export async function POST(req: Request) {
                 day: "numeric",
             }),
             documentType: "Terms of Reference (TOR)",
-        });
+        };
+
+        console.log('Processing TOR document with Thai formatting fixes...');
+        doc.render(processedData);
 
         // 6. Generate Word buffer
         const outputBuffer = doc.getZip().generate({

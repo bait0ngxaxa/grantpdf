@@ -226,9 +226,9 @@ export default function CreateTORPage() {
         }
     };
 
-    const downloadFileName = formData.projectName.endsWith(".docx")
-        ? formData.projectName
-        : `${formData.projectName}.docx`;
+    const downloadFileName = formData.fileName.endsWith(".docx")
+        ? formData.fileName
+        : `${formData.fileName}.docx`;
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-green-50 p-4 font-sans antialiased">

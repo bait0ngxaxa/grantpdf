@@ -311,9 +311,9 @@ export default function CreateWordDocPage() {
         }
     };
 
-    const downloadFileName = formData.projectName.endsWith(".docx")
-        ? formData.projectName
-        : `${formData.projectName}.docx`;
+    const downloadFileName = formData.fileName.endsWith(".docx")
+        ? formData.fileName
+        : `${formData.fileName}.docx`;
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans antialiased">
@@ -345,10 +345,10 @@ export default function CreateWordDocPage() {
             <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
                     <h2 className="text-3xl font-bold text-center">
-                        สร้างหนังสือขอนุมัติของมูลนิธิ
+                        สร้างหนังสือขออนุมัติของมูลนิธิ
                     </h2>
                     <p className="text-center mt-2 text-blue-100">
-                        กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารขอนุมัติ
+                        กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารขออนุมัติ
                     </p>
                 </div>
                 <div className="p-8">
@@ -548,7 +548,7 @@ export default function CreateWordDocPage() {
                                                         onChange={
                                                             handleAttachmentFilesChange
                                                         }
-                                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls"
+                                                        accept=".pdf,.doc,.docx"
                                                     />
                                                     <p className="text-xs text-slate-500 mt-1">
                                                         รองรับไฟล์: PDF, Word
@@ -696,7 +696,8 @@ export default function CreateWordDocPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ผู้ประสานงาน
+                                        ผู้ประสานงาน{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="text"
@@ -710,7 +711,8 @@ export default function CreateWordDocPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        เบอร์โทรศัพท์
+                                        เบอร์โทรศัพท์{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="tel"
@@ -724,7 +726,8 @@ export default function CreateWordDocPage() {
                                 </div>
                                 <div className="lg:col-span-2">
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        อีเมล
+                                        อีเมล{" "}
+                                        <span className="text-red-500">*</span>
                                     </label>
                                     <Input
                                         type="email"
@@ -743,7 +746,7 @@ export default function CreateWordDocPage() {
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-purple-300">
                                 ✍️ ข้อมูลผู้อนุมัติ
                             </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ชื่อผู้อนุมัติ{" "}

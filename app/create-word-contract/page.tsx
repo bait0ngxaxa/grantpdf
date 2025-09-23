@@ -147,7 +147,7 @@ export default function CreateContractPage() {
     }
   };
 
-  const downloadFileName = formData.projectName.endsWith('.docx') ? formData.projectName: `${formData.projectName}.docx`;
+  const downloadFileName = formData.fileName.endsWith('.docx') ? formData.fileName: `${formData.fileName}.docx`;
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans antialiased">
@@ -401,7 +401,7 @@ export default function CreateContractPage() {
                   <Input
                     type="text"
                     name="witness"
-                    placeholder="ระบุชื่อพยาน"
+                    placeholder="ระบุชื่อ-นามสกุล พยาน"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.witness}
                     onChange={handleChange}

@@ -30,17 +30,14 @@ interface WordDocumentData {
     cost: string;
     rationale: string;
     objective: string;
-    objective2: string;
-    objective3: string;
+    goal: string;
     target: string;
-    zone: string;
+    product: string;
     scope: string;
-    monitoring: string;
-    partner: string;
-    datestart: string;
-    dateend: string;
+
+    result: string;
+
     author: string;
-    month: string;
 }
 
 export default function CreateFormProjectPage() {
@@ -58,17 +55,14 @@ export default function CreateFormProjectPage() {
         cost: "",
         rationale: "",
         objective: "",
-        objective2: "",
-        objective3: "",
+        goal: "",
         target: "",
-        zone: "",
+        product: "",
         scope: "",
-        monitoring: "",
-        partner: "",
-        datestart: "",
-        dateend: "",
+
+        result: "",
+
         author: "",
-        month: "",
     });
 
     const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
@@ -86,9 +80,25 @@ export default function CreateFormProjectPage() {
         e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
         const { name, value } = e.target;
+        
+        // ฟังก์ชันเตรียม text ก่อนส่งไปยัง backend
+        const prepareThaiText = (text: string): string => {
+            if (!text || typeof text !== 'string') return text;
+            
+            // ปรับปรุงการจัดการ Thai text input
+            return text
+                .replace(/\u00A0/g, ' ')  // Non-breaking space → normal space
+                .replace(/[\u200B-\u200D]/g, '')  // ลบ zero-width characters
+                .replace(/\s{2,}/g, ' ')  // Multiple spaces → single space
+                .trim();
+        };
+        
+        // ประมวลผล value ก่อน set state
+        const processedValue = prepareThaiText(value);
+        
         setFormData((prevData) => ({
             ...prevData,
-            [name]: value,
+            [name]: processedValue,
         }));
     };
 
@@ -133,15 +143,38 @@ export default function CreateFormProjectPage() {
             const response = await fetch("/api/fill-formproject-template", {
                 method: "POST",
                 body: data,
+                headers: {
+                    // เพิ่ม header สำหรับ Thai character support
+                    'Accept': 'application/json',
+                },
             });
 
             if (response.ok) {
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                setGeneratedFileUrl(url);
-                setMessage("สร้างเอกสาร Word สำเร็จแล้ว!");
-                setIsError(false);
-                setIsSuccessModalOpen(true);
+                // ตรวจสอบ response type
+                const contentType = response.headers.get('content-type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    // Response เป็น JSON (ใหม่ format)
+                    const result = await response.json();
+                    if (result.downloadUrl) {
+                        // สร้าง download URL สำหรับ download
+                        const fullUrl = window.location.origin + result.downloadUrl;
+                        setGeneratedFileUrl(fullUrl);
+                        setMessage("สร้างเอกสาร Word สำเร็จแล้ว!");
+                        setIsError(false);
+                        setIsSuccessModalOpen(true);
+                    } else {
+                        throw new Error('ไม่พบ download URL ใน response');
+                    }
+                } else {
+                    // Response เป็น file blob (รูปแบบเดิม)
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    setGeneratedFileUrl(url);
+                    setMessage("สร้างเอกสาร Word สำเร็จแล้ว!");
+                    setIsError(false);
+                    setIsSuccessModalOpen(true);
+                }
             } else {
                 const errorText = await response.text();
                 setMessage(
@@ -160,9 +193,9 @@ export default function CreateFormProjectPage() {
         }
     };
 
-    const downloadFileName = formData.projectName.endsWith(".docx")
-        ? formData.projectName
-        : `${formData.projectName}.docx`;
+    const downloadFileName = formData.fileName.endsWith(".docx")
+        ? formData.fileName
+        : `${formData.fileName}.docx`;
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans antialiased">
@@ -209,7 +242,7 @@ export default function CreateFormProjectPage() {
                             </h3>
 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div >
+                                <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ชื่อไฟล์{" "}
                                         <span className="text-red-500">*</span>
@@ -224,7 +257,7 @@ export default function CreateFormProjectPage() {
                                         required
                                     />
                                 </div>
-                                <div >
+                                <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ชื่อโครงการ{" "}
                                         <span className="text-red-500">*</span>
@@ -239,7 +272,7 @@ export default function CreateFormProjectPage() {
                                         required
                                     />
                                 </div>
-                                <div >
+                                <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ผู้รับผิดชอบ{" "}
                                         <span className="text-red-500">*</span>
@@ -254,9 +287,9 @@ export default function CreateFormProjectPage() {
                                         required
                                     />
                                 </div>
-                                <div >
+                                <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ที่อยู่{" "}
+                                        ที่อยู่ สถานที่ติดต่อ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
@@ -314,25 +347,10 @@ export default function CreateFormProjectPage() {
                                         required
                                     />
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        จำนวน(เดือน){" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        name="month"
-                                        placeholder="ระบุตัวเลขจำนวนเดือน เช่น 12"
-                                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        value={formData.month}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        งบประมาณทำสัญญา{" "}
+                                        งบประมาณ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
@@ -348,8 +366,6 @@ export default function CreateFormProjectPage() {
                             </div>
                         </div>
 
-                       
-
                         {/* รายละเอียดโครงการ */}
                         <div className="bg-green-50 p-6 rounded-lg border border-green-200">
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-green-300">
@@ -358,14 +374,28 @@ export default function CreateFormProjectPage() {
                             <div className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ที่มาและความสำคัญ{" "}
+                                        ความเป็นมาและแนวคิดการจัดโครงการ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="rationale"
-                                        placeholder="เหตุผลความจำเป็นในการดำเนินโครงการ"
+                                        placeholder="ระบุเหตุผลความจำเป็นในการดำเนินโครงการ"
                                         className="w-full px-4 py-3 h-96 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.rationale}
+                                        onChange={handleChange}
+                                        
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                        เป้าประสงค์{" "}
+                                        <span className="text-red-500">*</span>
+                                    </label>
+                                    <Textarea
+                                        name="goal"
+                                        placeholder="ระบุเป้าประสงค์โครงการ"
+                                        className="w-full px-4 py-3 h-30 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        value={formData.goal}
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -376,38 +406,21 @@ export default function CreateFormProjectPage() {
                                     </label>
                                     <Textarea
                                         name="objective"
-                                        placeholder="วัตถุประสงค์ที่ 1"
-                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        placeholder="ระบุวัตถุประสงค์โครงการ"
+                                        className="w-full px-4 py-3 h-30 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.objective}
                                         onChange={handleChange}
                                     />
                                 </div>
-                                <div>
-                                    <Textarea
-                                        name="objective2"
-                                        placeholder="วัตถุประสงค์ที่ 2"
-                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                        value={formData.objective2}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                                <div>
-                                    <Textarea
-                                        name="objective3"
-                                        placeholder="วัตถุประสงค์ที่ 3"
-                                        className="w-full px-4 py-3 h-20 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                        value={formData.objective3}
-                                        onChange={handleChange}
-                                    />
-                                </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        กลุ่มเป้าหมาย{" "}
+                                        เป้าหมายโครงการ{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="target"
-                                        placeholder="กลุ่มเป้าหมายที่ต้องการบรรลุ"
+                                        placeholder="ระบุเป้าหมายโครงการ"
                                         className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.target}
                                         onChange={handleChange}
@@ -415,56 +428,44 @@ export default function CreateFormProjectPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        โซน{" "}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Textarea
-                                        name="zone"
-                                        placeholder="พื้นที่ดำเนินการ"
-                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                        value={formData.zone}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ขอบเขต{" "}
+                                        กรอบการดำเนินงาน{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="scope"
-                                        placeholder="ขอบเขตการดำเนินงาน"
-                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        placeholder="ระบุกรอบการดำเนินงาน"
+                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.scope}
                                         onChange={handleChange}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        การกำกับติดตามและประเมินผล{" "}
+                                        ผลผลิต{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
-                                        name="monitoring"
-                                        placeholder="วิธีการติดตามและประเมินผล"
+                                        name="product"
+                                        placeholder="ระบุผลผลิตโครงการ"
                                         className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                        value={formData.monitoring}
+                                        value={formData.product}
                                         onChange={handleChange}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        องค์กร ภาคี ร่วมงาน{" "}
+                                        ผลลัพธ์{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
-                                        name="partner"
-                                        placeholder="หน่วยงานหรือบุคคลที่เกี่ยวข้อง"
-                                        className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                        value={formData.partner}
+                                        name="result"
+                                        placeholder="ระบุผลลัพธ์โครงการ"
+                                        className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
+                                        value={formData.result}
                                         onChange={handleChange}
                                     />
                                 </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ประวัติผู้รับผิดชอบโครงการ
@@ -472,7 +473,7 @@ export default function CreateFormProjectPage() {
                                     </label>
                                     <Textarea
                                         name="author"
-                                        placeholder=""
+                                        placeholder="กรอกประวัติส่วนตัวผู้รับผิดชอบโครงการ"
                                         className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.author}
                                         onChange={handleChange}
@@ -674,32 +675,14 @@ export default function CreateFormProjectPage() {
                             </h4>
                             <p className="text-sm">{formData.target || "-"}</p>
                         </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                โซน:
-                            </h4>
-                            <p className="text-sm">{formData.zone || "-"}</p>
-                        </div>
+
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
                                 ขอบเขต:
                             </h4>
                             <p className="text-sm">{formData.scope || "-"}</p>
                         </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                การติดตาม:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.monitoring || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                คู่ธุรกิจ:
-                            </h4>
-                            <p className="text-sm">{formData.partner || "-"}</p>
-                        </div>
+
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
                                 วันที่เริ่มต้น - วันที่สิ้นสุด
