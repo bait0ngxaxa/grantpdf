@@ -3,20 +3,25 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-// GET: ดึงโครงการทั้งหมดของ user พร้อมไฟล์
+// GET: ดึงโครงการทั้งหมดในระบบ (Admin only) พร้อมข้อมูลผู้สร้างและไฟล์
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || !session.user?.id) {
+    if (!session || !session.user?.id || session.user?.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = Number(session.user.id);
-
+    // ดึงโครงการทั้งหมดพร้อมข้อมูลผู้สร้างและไฟล์
     const projects = await prisma.project.findMany({
-      where: { userId },
       include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         files: {
           include: {
             attachmentFiles: {
@@ -38,13 +43,19 @@ export async function GET(req: Request) {
       orderBy: { created_at: 'desc' }
     });
 
-    // ดึงไฟล์ที่ไม่อยู่ในโครงการใดๆ
+    // ดึงไฟล์ที่ไม่อยู่ในโครงการใดๆ (orphan files)
     const orphanFiles = await prisma.userFile.findMany({
       where: {
-        userId,
         projectId: null
       },
       include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         attachmentFiles: {
           select: {
             id: true,
@@ -58,13 +69,19 @@ export async function GET(req: Request) {
       orderBy: { created_at: 'desc' }
     });
 
+    // แปลงข้อมูลให้เหมาะกับ frontend
     const sanitizedProjects = projects.map(project => ({
       ...project,
       id: project.id.toString(),
+      userId: project.userId.toString(),
+      userName: project.user?.name || 'Unknown User',
+      userEmail: project.user?.email || 'Unknown Email',
       files: project.files.map(file => ({
         ...file,
         id: file.id.toString(),
-        userName: '',
+        userId: file.userId.toString(),
+        userName: project.user?.name || 'Unknown User',
+        userEmail: project.user?.email || 'Unknown Email',
         attachmentFiles: file.attachmentFiles?.map(attachment => ({
           ...attachment,
           id: attachment.id.toString(),
@@ -75,7 +92,9 @@ export async function GET(req: Request) {
     const sanitizedOrphanFiles = orphanFiles.map(file => ({
       ...file,
       id: file.id.toString(),
-      userName: '',
+      userId: file.userId.toString(),
+      userName: file.user?.name || 'Unknown User',
+      userEmail: file.user?.email || 'Unknown Email',
       attachmentFiles: file.attachmentFiles?.map(attachment => ({
         ...attachment,
         id: attachment.id.toString(),
@@ -88,56 +107,9 @@ export async function GET(req: Request) {
     });
 
   } catch (error) {
-    console.error("Error fetching projects:", error);
+    console.error("Error fetching admin projects:", error);
     return NextResponse.json(
       { error: "Failed to fetch projects" },
-      { status: 500 }
-    );
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-// POST: สร้างโครงการใหม่
-export async function POST(req: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session || !session.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { name, description } = await req.json();
-    
-    if (!name) {
-      return NextResponse.json({ error: "Project name is required" }, { status: 400 });
-    }
-
-    const userId = Number(session.user.id);
-
-    const project = await prisma.project.create({
-      data: {
-        name,
-        description,
-        userId
-      },
-      include: {
-        files: true,
-        _count: {
-          select: { files: true }
-        }
-      }
-    });
-
-    return NextResponse.json({
-      ...project,
-      id: project.id.toString()
-    });
-
-  } catch (error) {
-    console.error("Error creating project:", error);
-    return NextResponse.json(
-      { error: "Failed to create project" },
       { status: 500 }
     );
   } finally {

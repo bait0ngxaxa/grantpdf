@@ -219,23 +219,44 @@ export async function POST(req: Request) {
         const filePath = path.join(uploadDir, uniqueFileName);
         await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
-        // 8. สร้างหรือหา Project
-        let projectRecord = await prisma.project.findFirst({
-            where: {
-                name: projectName,
-                userId: userId,
-            },
-        });
-
-        // ถ้าไม่มี Project ให้สร้างใหม่
-        if (!projectRecord) {
-            projectRecord = await prisma.project.create({
-                data: {
-                    name: projectName,
-                    description: `${projectName} - สร้างจากแบบฟอร์มข้อเสนอโครงการ`,
+        // 8. ใช้ Project ID ที่ส่งมาจาก frontend หรือสร้างใหม่
+        let projectRecord;
+        
+        // ถ้ามี projectId จาก frontend ให้ใช้ project นั้น
+        if (formData.get('projectId')) {
+            const projectId = formData.get('projectId') as string;
+            projectRecord = await prisma.project.findFirst({
+                where: {
+                    id: parseInt(projectId),
                     userId: userId,
                 },
             });
+            
+            // ถ้าไม่พบ project ตาม projectId ที่ระบุ ให้แสดง error
+            if (!projectRecord) {
+                return new NextResponse("Project not found. Please select a valid project.", {
+                    status: 400,
+                });
+            }
+        } else {
+            // ถ้าไม่มี projectId จาก frontend ให้ค้นหา project ตามชื่อ หรือสร้างใหม่
+            projectRecord = await prisma.project.findFirst({
+                where: {
+                    name: projectName,
+                    userId: userId,
+                },
+            });
+            
+            // ถ้าไม่มี Project ให้สร้างใหม่
+            if (!projectRecord) {
+                projectRecord = await prisma.project.create({
+                    data: {
+                        name: projectName,
+                        description: `${projectName} - สร้างจากแบบฟอร์มข้อเสนอโครงการ`,
+                        userId: userId,
+                    },
+                });
+            }
         }
 
         // 9. Save file info to Prisma พร้อมเชื่อมกับ Project

@@ -136,6 +136,13 @@ export default function CreateFormProjectPage() {
             if (session.user?.email) {
                 data.append("userEmail", session.user.email);
             }
+            
+            // Add project ID if available
+            const selectedProjectId = localStorage.getItem('selectedProjectId');
+            if (selectedProjectId) {
+                data.append("projectId", selectedProjectId);
+            }
+            
             if ((session as any)?.accessToken) {
                 data.append("token", (session as any).accessToken);
             }

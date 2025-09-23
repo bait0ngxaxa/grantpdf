@@ -272,6 +272,12 @@ export default function CreateWordDocPage() {
             if ((session as any)?.accessToken) {
                 data.append("token", (session as any).accessToken);
             }
+            
+            // Add project ID if available
+            const selectedProjectId = localStorage.getItem('selectedProjectId');
+            if (selectedProjectId) {
+                data.append("projectId", selectedProjectId);
+            }
 
             const response = await fetch("/api/fill-approval-template", {
                 method: "POST",

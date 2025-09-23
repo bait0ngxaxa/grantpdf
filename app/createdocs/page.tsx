@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useTitle } from "@/hook/useTitle";
+import { useSession } from "next-auth/react";
 
 // Define the type for the form data to ensure type safety
 interface TorsData {
@@ -28,8 +29,56 @@ interface ProjectTemplate {
 
 export default function CreateTorsPage() {
     const router = useRouter();
+    const { status } = useSession();
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [projects, setProjects] = useState<any[]>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    
     useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
+    
+    // Fetch user projects
+    useEffect(() => {
+        const fetchProjects = async () => {
+            if (status !== "authenticated") return;
+            
+            try {
+                const res = await fetch("/api/projects");
+                if (!res.ok) {
+                    throw new Error("Failed to fetch projects");
+                }
+                const data = await res.json();
+                setProjects(data.projects);
+                
+                // Check if there's a selected project from localStorage
+                const storedProjectId = localStorage.getItem('selectedProjectId');
+                if (storedProjectId && data.projects.some((p: any) => p.id === storedProjectId)) {
+                    setSelectedProjectId(storedProjectId);
+                }
+            } catch (err) {
+                console.error("Error fetching projects:", err);
+                setError("ไม่สามารถโหลดโครงการได้");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        fetchProjects();
+    }, [status]);
+    
+    // Handle project selection
+    const handleProjectSelection = (projectId: string) => {
+        setSelectedProjectId(projectId);
+        localStorage.setItem('selectedProjectId', projectId);
+    };
+    
+    // Handle back to project selection
+    const handleBackToProjects = () => {
+        setSelectedProjectId(null);
+        localStorage.removeItem('selectedProjectId');
+    };
+    
     // ✅ ฟังก์ชันสำหรับการ redirect ไป /create-word-doc
     const handleApprovalSelection = (templateId: string, title: string) => {
         // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-doc
@@ -77,7 +126,9 @@ export default function CreateTorsPage() {
     
     // Handle back button logic
     const handleBack = () => {
-        if (selectedCategory) {
+        if (selectedProjectId) {
+            handleBackToProjects();
+        } else if (selectedCategory) {
             setSelectedCategory(null);
         } else {
             router.push('/userdashboard');
@@ -88,6 +139,96 @@ export default function CreateTorsPage() {
     const handleCategorySelection = (category: string) => {
         setSelectedCategory(category);
     };
+
+    // Render project selection
+    const renderProjectSelection = () => (
+        <div className="container mx-auto max-w-6xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
+            <h1 className="text-3xl font-bold text-center mb-8">เลือกโครงการสำหรับเอกสาร</h1>
+            
+            {isLoading ? (
+                <div className="flex justify-center items-center py-12">
+                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                    <span className="ml-4">กำลังโหลดโครงการ...</span>
+                </div>
+            ) : error ? (
+                <div className="text-center py-12 text-red-500">
+                    <p>{error}</p>
+                    <Button 
+                        onClick={() => router.push('/userdashboard')} 
+                        className="mt-4"
+                    >
+                        กลับไปแดชบอร์ด
+                    </Button>
+                </div>
+            ) : projects.length === 0 ? (
+                <div className="text-center py-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">ยังไม่มีโครงการ</h3>
+                    <p className="mt-1 text-gray-500 dark:text-gray-400">กรุณาสร้างโครงการก่อนสร้างเอกสาร</p>
+                    <div className="mt-6">
+                        <Button onClick={() => router.push('/userdashboard')}>
+                            สร้างโครงการใหม่
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[60vh] overflow-y-auto p-2">
+                        {projects.map((project) => (
+                            <div
+                                key={project.id}
+                                className={`card bg-base-100 shadow-xl cursor-pointer transition-all duration-200 border-2 ${selectedProjectId === project.id ? 'border-primary bg-primary/5' : 'border-transparent hover:border-primary'} hover:bg-base-200`}
+                                onClick={() => handleProjectSelection(project.id)}
+                            >
+                                <div className="card-body items-center text-center p-6">
+                                    <div className="flex items-center justify-center p-4 rounded-full bg-primary/10 mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="card-title text-xl mb-2">{project.name}</h3>
+                                    <p className="text-sm text-base-content/60 mb-3">
+                                        {project.description || "ไม่มีคำอธิบาย"}
+                                    </p>
+                                    <div className="flex justify-between w-full text-xs text-base-content/60">
+                                        <span>{project.files.length} เอกสาร</span>
+                                        <span>สร้าง {new Date(project.created_at).toLocaleDateString("th-TH")}</span>
+                                    </div>
+                                    {selectedProjectId === project.id && (
+                                        <div className="badge badge-primary badge-outline mt-3">เลือกแล้ว</div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <div className="flex justify-center mt-8 gap-4">
+                        <Button 
+                            onClick={() => router.push('/userdashboard')}
+                            variant="outline"
+                        >
+                            กลับไปแดชบอร์ด
+                        </Button>
+                        <Button 
+                            onClick={() => router.push('/userdashboard')}
+                            className="btn-primary"
+                        >
+                            สร้างโครงการใหม่
+                        </Button>
+                        <Button 
+                            onClick={() => setSelectedCategory('general')}
+                            disabled={!selectedProjectId}
+                            className={selectedProjectId ? "btn-primary" : "btn-disabled"}
+                        >
+                            ดำเนินการต่อ
+                        </Button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
 
     // Render main menu
     const renderMainMenu = () => (
@@ -282,7 +423,11 @@ export default function CreateTorsPage() {
             </div>
 
             {/* Conditional rendering based on selected category */}
-            {selectedCategory ? renderCategorySubmenu() : renderMainMenu()}
+            {selectedProjectId ? (
+                selectedCategory ? renderCategorySubmenu() : renderMainMenu()
+            ) : (
+                renderProjectSelection()
+            )}
         </div>
     );
 }

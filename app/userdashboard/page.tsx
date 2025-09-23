@@ -36,6 +36,23 @@ type AttachmentFile = {
     mimeType: string;
 };
 
+type Project = {
+    id: string;
+    name: string;
+    description?: string;
+    created_at: string;
+    updated_at: string;
+    files: UserFile[];
+    _count: {
+        files: number;
+    };
+};
+
+type ProjectsResponse = {
+    projects: Project[];
+    orphanFiles: UserFile[];
+};
+
 // เพิ่มฟังก์ชันตัดชื่อไฟล์ที่ด้านบนของไฟล์ (หลังจาก import statements)
 const truncateFileName = (fileName: string, maxLength: number = 30): string => {
     if (fileName.length <= maxLength) return fileName;
@@ -71,10 +88,18 @@ export default function DashboardPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // New state for fetching data from the API
-    const [userFiles, setUserFiles] = useState<UserFile[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [orphanFiles, setOrphanFiles] = useState<UserFile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    
+    // Project management states
+    const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
+    const [newProjectName, setNewProjectName] = useState("");
+    const [newProjectDescription, setNewProjectDescription] = useState("");
+    const [isCreatingProject, setIsCreatingProject] = useState(false);
+    const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
     
     // Modal states for delete confirmation and success
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -82,28 +107,94 @@ export default function DashboardPage() {
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState("");
 
+    // State for project management
+    const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+    const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
+    const [editProjectName, setEditProjectName] = useState("");
+    const [editProjectDescription, setEditProjectDescription] = useState("");
+    const [showEditProjectModal, setShowEditProjectModal] = useState(false);
+    const [isUpdatingProject, setIsUpdatingProject] = useState(false);
+    const [isDeletingProject, setIsDeletingProject] = useState(false);
+
     // State for expandable rows (attachment files)
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
     useTitle("UserDashboard | ระบบจัดการเอกสาร");
 
-    // Fetch user documents from the API
-    const fetchUserFiles = async () => {
+    // Fetch user projects and documents from the API
+    const fetchUserData = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await fetch("/api/user-docs");
+            const res = await fetch("/api/projects");
             if (!res.ok) {
-                throw new Error("Failed to fetch user documents");
+                throw new Error("Failed to fetch projects");
             }
-            const data: UserFile[] = await res.json();
-            setUserFiles(data);
+            const data: ProjectsResponse = await res.json();
+            setProjects(data.projects);
+            setOrphanFiles(data.orphanFiles);
         } catch (err) {
-            console.error("Error fetching documents:", err);
-            setError("ไม่สามารถโหลดเอกสารได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
+            console.error("Error fetching projects:", err);
+            setError("ไม่สามารถโหลดข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
         } finally {
             setIsLoading(false);
         }
+    };
+
+    // Create new project
+    const handleCreateProject = async () => {
+        if (!newProjectName.trim()) return;
+        
+        setIsCreatingProject(true);
+        try {
+            const res = await fetch("/api/projects", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: newProjectName.trim(),
+                    description: newProjectDescription.trim() || null,
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to create project");
+            }
+
+            const newProject: Project = await res.json();
+            setProjects(prev => [newProject, ...prev]);
+            setNewProjectName("");
+            setNewProjectDescription("");
+            setShowCreateProjectModal(false);
+            
+            // Switch to projects tab to show the newly created project
+            setActiveTab("projects");
+            
+            // Show success message
+            setSuccessMessage("สร้างโครงการสำเร็จ");
+            setShowSuccessModal(true);
+            
+        } catch (err) {
+            console.error("Error creating project:", err);
+            setSuccessMessage("เกิดข้อผิดพลาดในการสร้างโครงการ กรุณาลองใหม่อีกครั้ง");
+            setShowSuccessModal(true);
+        } finally {
+            setIsCreatingProject(false);
+        }
+    };
+
+    // Toggle project expansion
+    const toggleProjectExpansion = (projectId: string) => {
+        setExpandedProjects(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(projectId)) {
+                newSet.delete(projectId);
+            } else {
+                newSet.add(projectId);
+            }
+            return newSet;
+        });
     };
 
     // Handle file deletion - Show confirmation modal
@@ -129,7 +220,11 @@ export default function DashboardPage() {
             }
 
             // Remove file from local state
-            setUserFiles(prev => prev.filter(file => file.id !== fileToDelete));
+            setProjects(prev => prev.map(project => ({
+                ...project,
+                files: project.files.filter(file => file.id !== fileToDelete)
+            })));
+            setOrphanFiles(prev => prev.filter(file => file.id !== fileToDelete));
             
             // Show success modal
             setSuccessMessage("ลบไฟล์สำเร็จ");
@@ -145,10 +240,106 @@ export default function DashboardPage() {
         }
     };
 
+    // Handle project deletion - Show confirmation modal
+    const handleDeleteProject = (projectId: string) => {
+        setProjectToDelete(projectId);
+        setShowDeleteModal(true);
+    };
+
+    // Confirm delete project
+    const confirmDeleteProject = async () => {
+        if (!projectToDelete) return;
+
+        setIsDeletingProject(true);
+        setShowDeleteModal(false);
+        
+        try {
+            const res = await fetch(`/api/projects/${projectToDelete}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to delete project");
+            }
+
+            // Remove project from local state
+            setProjects(prev => prev.filter(project => project.id !== projectToDelete));
+            
+            // Show success modal
+            setSuccessMessage("ลบโครงการสำเร็จ");
+            setShowSuccessModal(true);
+            
+        } catch (err) {
+            console.error("Error deleting project:", err);
+            setSuccessMessage("เกิดข้อผิดพลาดในการลบโครงการ กรุณาลองใหม่อีกครั้ง");
+            setShowSuccessModal(true);
+        } finally {
+            setIsDeletingProject(false);
+            setProjectToDelete(null);
+        }
+    };
+
+    // Handle project editing - Show edit modal
+    const handleEditProject = (project: Project) => {
+        setProjectToEdit(project);
+        setEditProjectName(project.name);
+        setEditProjectDescription(project.description || "");
+        setShowEditProjectModal(true);
+    };
+
+    // Confirm update project
+    const confirmUpdateProject = async () => {
+        if (!projectToEdit || !editProjectName.trim()) return;
+
+        setIsUpdatingProject(true);
+        
+        try {
+            const res = await fetch(`/api/projects/${projectToEdit.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: editProjectName.trim(),
+                    description: editProjectDescription.trim() || null,
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to update project");
+            }
+
+            const updatedProject: Project = await res.json();
+            
+            // Update project in local state
+            setProjects(prev => prev.map(project => 
+                project.id === updatedProject.id ? updatedProject : project
+            ));
+            
+            // Close modal and reset state
+            setShowEditProjectModal(false);
+            setProjectToEdit(null);
+            setEditProjectName("");
+            setEditProjectDescription("");
+            
+            // Show success modal
+            setSuccessMessage("อัปเดตโครงการสำเร็จ");
+            setShowSuccessModal(true);
+            
+        } catch (err) {
+            console.error("Error updating project:", err);
+            setSuccessMessage("เกิดข้อผิดพลาดในการอัปเดตโครงการ กรุณาลองใหม่อีกครั้ง");
+            setShowSuccessModal(true);
+        } finally {
+            setIsUpdatingProject(false);
+        }
+    };
+
     // Cancel delete
     const cancelDelete = () => {
         setShowDeleteModal(false);
         setFileToDelete(null);
+        setProjectToDelete(null);
     };
 
     // Toggle expand/collapse for attachment files
@@ -168,7 +359,7 @@ export default function DashboardPage() {
         if (status === "unauthenticated") {
             router.push("/signin");
         } else if (status === "authenticated") {
-            fetchUserFiles();
+            fetchUserData();
         }
     }, [status, router]);
 
@@ -178,9 +369,15 @@ export default function DashboardPage() {
         setIsModalOpen(true);
     };
 
-    // Filter and sort files with pagination
+    // Calculate total documents across all projects
+    const totalDocuments = projects.reduce((total, project) => total + project.files.length, 0) + orphanFiles.length;
+
+    // Filter and sort files with pagination - now works with projects and orphan files
     const filteredAndSortedFiles = useMemo(() => {
-        let filtered = userFiles.filter((file) =>
+        // Combine all files from projects and orphan files
+        const allFiles = [...orphanFiles, ...projects.flatMap(project => project.files)];
+        
+        let filtered = allFiles.filter((file) =>
             file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
@@ -202,7 +399,7 @@ export default function DashboardPage() {
         });
 
         return sorted;
-    }, [userFiles, searchTerm, sortBy, selectedFileType]);
+    }, [orphanFiles, projects, searchTerm, sortBy, selectedFileType]);
 
     // Pagination calculations
     const totalItems = filteredAndSortedFiles.length;
@@ -305,6 +502,24 @@ export default function DashboardPage() {
             )
         },
         {
+            id: "projects",
+            name: "โครงการของฉัน",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+            )
+        },
+        {
+            id: "create-project",
+            name: "สร้างโครงการ",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                </svg>
+            )
+        },
+        {
             id: "documents",
             name: "เอกสารของฉัน",
             icon: (
@@ -327,7 +542,6 @@ export default function DashboardPage() {
 
     return (
         <div>
-            
             <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                 {/* Mobile sidebar overlay */}
                 {isSidebarOpen && (
@@ -370,7 +584,11 @@ export default function DashboardPage() {
                                 <li key={item.id}>
                                     <button
                                         onClick={() => {
-                                            setActiveTab(item.id);
+                                            if (item.id === "create-project") {
+                                                setShowCreateProjectModal(true);
+                                            } else {
+                                                setActiveTab(item.id);
+                                            }
                                             setIsSidebarOpen(false);
                                         }}
                                         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 text-left ${
@@ -482,13 +700,13 @@ export default function DashboardPage() {
                                         <div className="flex items-center space-x-4">
                                             <div className="text-primary bg-secondary bg-opacity-10 p-3 rounded-full">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                                 </svg>
                                             </div>
                                             <div>
-                                                <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารทั้งหมด</div>
-                                                <div className="text-3xl font-bold">{filteredAndSortedFiles.length}</div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">เอกสารที่คุณสร้าง</div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">โครงการทั้งหมด</div>
+                                                <div className="text-3xl font-bold">{projects.length}</div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">โครงการที่คุณสร้าง</div>
                                             </div>
                                         </div>
                                     </div>
@@ -496,22 +714,14 @@ export default function DashboardPage() {
                                     <div className="card bg-white dark:bg-gray-800 shadow-xl p-6 rounded-xl transform hover:scale-105 transition-transform duration-300">
                                         <div className="flex items-center space-x-4">
                                             <div className="text-secondary bg-primary bg-opacity-10 p-3 rounded-full">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
-                                                <div className="text-lg font-bold truncate max-w-full" title={filteredAndSortedFiles.length > 0 ? filteredAndSortedFiles[0].originalFileName : ""}>
-                                                    {filteredAndSortedFiles.length > 0 
-                                                        ? truncateFileName(filteredAndSortedFiles[0].originalFileName, 25)
-                                                        : "ไม่มีเอกสาร"}
-                                                </div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                    {filteredAndSortedFiles.length > 0 
-                                                        ? new Date(filteredAndSortedFiles[0].created_at).toLocaleDateString("th-TH")
-                                                        : ""}
-                                                </div>
+                                            <div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารทั้งหมด</div>
+                                                <div className="text-3xl font-bold">{totalDocuments}</div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">เอกสารที่คุณสร้าง</div>
                                             </div>
                                         </div>
                                     </div>
@@ -520,13 +730,21 @@ export default function DashboardPage() {
                                         <div className="flex items-center space-x-4">
                                             <div className="text-accent bg-info bg-opacity-10 p-3 rounded-full">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
                                             </div>
                                             <div>
-                                                <div className="text-sm text-gray-500 dark:text-gray-400">หมวดหมู่</div>
-                                                <div className="text-lg font-bold truncate">{selectedDepartment}</div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">หมวดหมู่ที่เลือก</div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">โครงการล่าสุด</div>
+                                                <div className="text-lg font-bold truncate">
+                                                    {projects.length > 0 
+                                                        ? truncateFileName(projects[0].name, 25)
+                                                        : "ยังไม่มีโครงการ"}
+                                                </div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    {projects.length > 0 
+                                                        ? new Date(projects[0].created_at).toLocaleDateString("th-TH")
+                                                        : ""}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -537,16 +755,16 @@ export default function DashboardPage() {
                                     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
                                         <h3 className="text-lg font-bold mb-4 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
-                                            เอกสารของฉัน
+                                            โครงการของฉัน
                                         </h3>
-                                        <p className="text-gray-600 dark:text-gray-400 mb-4">ดูและจัดการเอกสารทั้งหมดของคุณ</p>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">ดูและจัดการโครงการทั้งหมดของคุณ</p>
                                         <Button 
-                                            onClick={() => setActiveTab("documents")}
+                                            onClick={() => setActiveTab("projects")}
                                             className="w-full cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         >
-                                            ดูเอกสารทั้งหมด
+                                            ดูโครงการทั้งหมด
                                         </Button>
                                     </div>
                                     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
@@ -554,22 +772,357 @@ export default function DashboardPage() {
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                                             </svg>
-                                            สร้างเอกสารใหม่
+                                            สร้างโครงการใหม่
                                         </h3>
-                                        <p className="text-gray-600 dark:text-gray-400 mb-4">เริ่มสร้างเอกสารใหม่ประเภทต่างๆ</p>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-4">สร้างโครงการใหม่และเริ่มต้นจัดการเอกสาร</p>
                                         <Button 
                                             onClick={() => setActiveTab("create")}
                                             className="w-full cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                             variant="outline"
                                         >
-                                            สร้างเอกสาร
+                                            สร้างโครงการ
                                         </Button>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* Documents Tab */}
+                        {/* Projects Tab */}
+                        {activeTab === "projects" && (
+                            <div>
+                                {/* Header with Create Project Button */}
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                                        โครงการของฉัน ({projects.length} โครงการ)
+                                    </h2>
+                                    <Button
+                                        onClick={() => setShowCreateProjectModal(true)}
+                                        className="cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        สร้างโครงการใหม่
+                                    </Button>
+                                </div>
+
+                                {/* Projects List */}
+                                <div className="space-y-4">
+                                    {projects.length > 0 ? (
+                                        projects.map((project) => (
+                                            <div key={project.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
+                                                {/* Project Header */}
+                                                <div 
+                                                    className="flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-4 rounded-lg transition-colors duration-200"
+                                                    onClick={() => toggleProjectExpansion(project.id)}
+                                                >
+                                                    <div className="flex items-center space-x-4">
+                                                        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                                                                {project.name}
+                                                            </h3>
+                                                            <p className="text-gray-600 dark:text-gray-400">
+                                                                {project.description || "ไม่มีคำอธิบาย"}
+                                                            </p>
+                                                            <div className="flex items-center space-x-4 mt-2">
+                                                                <span className="text-sm text-gray-500">
+                                                                    {project.files.length} เอกสาร
+                                                                </span>
+                                                                <span className="text-sm text-gray-500">
+                                                                    สร้างเมื่อ {new Date(project.created_at).toLocaleDateString("th-TH")}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <Button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                // Navigate to create document within this project
+                                                                localStorage.setItem('selectedProjectId', project.id);
+                                                                router.push('/createdocs');
+                                                            }}
+                                                            size="sm"
+                                                            className="cursor-pointer"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                                            </svg>
+                                                            เพิ่มเอกสาร
+                                                        </Button>
+                                                        <div className="flex space-x-1">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleEditProject(project);
+                                                                }}
+                                                                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                                                                title="แก้ไขโครงการ"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteProject(project.id);
+                                                                }}
+                                                                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 text-red-500 hover:text-red-700 transition-colors duration-200"
+                                                                title="ลบโครงการ"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                        <svg 
+                                                            xmlns="http://www.w3.org/2000/svg" 
+                                                            className={`h-5 w-5 text-gray-400 transform transition-transform duration-200 ${
+                                                                expandedProjects.has(project.id) ? 'rotate-180' : ''
+                                                            }`}
+                                                            fill="none" 
+                                                            viewBox="0 0 24 24" 
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+
+                                                {/* Project Documents - Expandable */}
+                                                {expandedProjects.has(project.id) && (
+                                                    <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-4">
+                                                        {project.files.length > 0 ? (
+                                                            <div className="grid grid-cols-1 gap-4">
+                                                                {project.files.map((file) => (
+                                                                    <React.Fragment key={file.id}>
+                                                                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                                                            <div className="flex items-center space-x-3">
+                                                                                <div className="flex-shrink-0">
+                                                                                    {file.fileExtension === 'pdf' ? (
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                                                        </svg>
+                                                                                    ) : (
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                                        </svg>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="flex-1">
+                                                                                    <p className="font-medium text-gray-900 dark:text-white">
+                                                                                        {truncateFileName(file.originalFileName, 40)}
+                                                                                    </p>
+                                                                                    <div className="flex items-center space-x-2">
+                                                                                        <p className="text-sm text-gray-500">
+                                                                                            {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
+                                                                                        </p>
+                                                                                        {file.attachmentFiles && file.attachmentFiles.length > 0 && (
+                                                                                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                                                                                {file.attachmentFiles.length} ไฟล์แนบ
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex space-x-2">
+                                                                                <a
+                                                                                    href={`/api/user-docs/download/${file.id}`}
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    className="btn btn-sm bg-primary hover:bg-primary-focus text-white border-none rounded-full"
+                                                                                    title="ดาวน์โหลด"
+                                                                                >
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                                    </svg>
+                                                                                </a>
+                                                                                {file.fileExtension === 'pdf' && (
+                                                                                    <Button
+                                                                                        onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
+                                                                                        size="sm"
+                                                                                        className="rounded-full bg-green-500 text-white cursor-pointer hover:bg-green-600"
+                                                                                        title="พรีวิว PDF"
+                                                                                    >
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                                        </svg>
+                                                                                    </Button>
+                                                                                )}
+                                                                                <Button
+                                                                                    onClick={() => handleDeleteFile(file.id)}
+                                                                                    size="sm"
+                                                                                    variant="destructive"
+                                                                                    className="cursor-pointer rounded-full"
+                                                                                    title="ลบไฟล์"
+                                                                                >
+                                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                                    </svg>
+                                                                                </Button>
+                                                                            </div>
+                                                                        </div>
+                                                                                                                        
+                                                                        {/* แสดงไฟล์แนบ */}
+                                                                        {file.attachmentFiles && file.attachmentFiles.length > 0 && (
+                                                                            <div className="ml-12 mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                                                                <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center">
+                                                                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                                                                    </svg>
+                                                                                    ไฟล์แนบ ({file.attachmentFiles.length} ไฟล์)
+                                                                                </h5>
+                                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                                    {file.attachmentFiles.map((attachment) => (
+                                                                                        <div key={attachment.id} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border">
+                                                                                            <div className="flex items-center space-x-2 flex-1 min-w-0">
+                                                                                                <div className="flex-shrink-0">
+                                                                                                    {attachment.mimeType?.includes('image') ? (
+                                                                                                        <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                                                        </svg>
+                                                                                                    ) : attachment.mimeType?.includes('pdf') ? (
+                                                                                                        <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                                                                        </svg>
+                                                                                                    ) : (
+                                                                                                        <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                                                        </svg>
+                                                                                                    )}
+                                                                                                </div>
+                                                                                                <div className="flex-1 min-w-0">
+                                                                                                    <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={attachment.fileName}>
+                                                                                                        {truncateFileName(attachment.fileName, 20)} (ไฟล์แนบ)
+                                                                                                    </div>
+                                                                                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                                                                        {(attachment.fileSize / 1024 / 1024).toFixed(2)} MB
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <a
+                                                                                                href={`/api/attachment/download/${attachment.id}`}
+                                                                                                target="_blank"
+                                                                                                rel="noopener noreferrer"
+                                                                                                className="flex-shrink-0 ml-1 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200"
+                                                                                                title="ดาวน์โหลด"
+                                                                                            >
+                                                                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                                                </svg>
+                                                                                            </a>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </React.Fragment>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-center py-8">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                </svg>
+                                                                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">ยังไม่มีเอกสาร</h3>
+                                                                <p className="mt-1 text-sm text-gray-500">เริ่มสร้างเอกสารแรกในโครงการนี้</p>
+                                                                <div className="mt-4">
+                                                                    <Button 
+                                                                        onClick={() => {
+                                                                            localStorage.setItem('selectedProjectId', project.id);
+                                                                            router.push('/createdocs');
+                                                                        }}
+                                                                        size="sm"
+                                                                    >
+                                                                        เพิ่มเอกสารแรก
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-12">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">ยังไม่มีโครงการ</h3>
+                                            <p className="mt-1 text-gray-500 dark:text-gray-400">เริ่มสร้างโครงการแรกของคุณ</p>
+                                            <div className="mt-6">
+                                                <Button onClick={() => setShowCreateProjectModal(true)}>
+                                                    สร้างโครงการใหม่
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Orphan Files Section */}
+                                    {orphanFiles.length > 0 && (
+                                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
+                                            <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-4">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                </svg>
+                                                เอกสารที่ยังไม่ได้จัดกลุ่ม ({orphanFiles.length} ไฟล์)
+                                            </h3>
+                                            <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-4">
+                                                เอกสารเหล่านี้ยังไม่ได้อยู่ในโครงการใดๆ คุณสามารถย้ายไปยังโครงการที่ต้องการได้
+                                            </p>
+                                            <div className="grid grid-cols-1 gap-2">
+                                                {orphanFiles.map((file) => (
+                                                    <div key={file.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
+                                                        <div className="flex items-center space-x-3">
+                                                            <div className="flex-shrink-0">
+                                                                {file.fileExtension === 'pdf' ? (
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                                    </svg>
+                                                                ) : (
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                    </svg>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                                    {truncateFileName(file.originalFileName, 40)}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500">
+                                                                    {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex space-x-2">
+                                                            <a
+                                                                href={`/api/user-docs/download/${file.id}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="btn btn-xs bg-primary hover:bg-primary-focus text-white border-none rounded-full"
+                                                                title="ดาวน์โหลด"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                                </svg>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Documents Tab - Legacy view for backward compatibility */}
                         {activeTab === "documents" && (
                             <div>
                                 {/* Filter and Search Controls */}
@@ -927,32 +1480,51 @@ export default function DashboardPage() {
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                                         </svg>
-                                    </div >
-                                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">สร้างเอกสารใหม่ | อัพโหลดไฟล์เอกสาร</h3>
+                                    </div>
+                                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">สร้างโครงการใหม่ | สร้างเอกสาร</h3>
                                     <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-                                        เลือกประเภทเอกสารที่คุณต้องการสร้าง หรือต้องการอัพโหลด
+                                        เริ่มต้นด้วยการสร้างโครงการใหม่ หรือเลือกโครงการที่มีอยู่แล้วเพื่อเพิ่มเอกสาร
                                     </p>
                                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                    <Button 
-                                        size="lg"
-                                        className="bg-primary hover:bg-primary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
-                                        onClick={() => router.push("/createdocs")}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        เริ่มสร้างเอกสาร
-                                    </Button>
-                                    <Button 
-                                        size="lg"
-                                        className="bg-primary hover:bg-primary-focus  text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
-                                        onClick={() => router.push("/uploads-doc")}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 13l3-3m0 0l3 3m-3-3v12" />
-                                        </svg>
-                                        อัพโหลดเอกสาร
-                                    </Button>
+                                        <Button 
+                                            size="lg"
+                                            className="bg-primary hover:bg-primary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                            onClick={() => setShowCreateProjectModal(true)}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                            สร้างโครงการใหม่
+                                        </Button>
+                                        <Button 
+                                            size="lg"
+                                            className="bg-secondary hover:bg-secondary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                            onClick={() => {
+                                                if (projects.length === 0) {
+                                                    setSuccessMessage("กรุณาสร้างโครงการก่อนเพื่อเริ่มสร้างเอกสาร");
+                                                    setShowSuccessModal(true);
+                                                    return;
+                                                }
+                                                router.push('/createdocs');
+                                            }}
+                                            variant="outline"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            สร้างเอกสารในโครงการ
+                                        </Button>
+                                        <Button 
+                                            size="lg"
+                                            className="bg-info hover:bg-info-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                            onClick={() => router.push('/uploads-doc')}
+                                            variant="outline"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 13l3-3m0 0l3 3m-3-3v12" />
+                                            </svg>
+                                            อัพโหลดเอกสาร
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -1058,7 +1630,7 @@ export default function DashboardPage() {
                         <div className="modal-box w-11/12 max-w-5xl h-[90vh] bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
                             <div className="flex items-center justify-between mb-4 border-b pb-2 border-gray-200 dark:border-gray-700">
                                 <h3 className="font-bold text-lg">
-                                    {previewTitle}
+                                    {previewTitle || "Preview"}
                                 </h3>
                                 <button
                                     className="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white"
@@ -1084,7 +1656,14 @@ export default function DashboardPage() {
                 )}
 
                 {/* Delete Confirmation Modal */}
-                <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+                <Dialog open={showDeleteModal} onOpenChange={(open) => {
+                    setShowDeleteModal(open);
+                    // Reset states when closing modal
+                    if (!open) {
+                        setFileToDelete(null);
+                        setProjectToDelete(null);
+                    }
+                }}>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle className="text-red-600">
@@ -1092,11 +1671,15 @@ export default function DashboardPage() {
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
                                     </svg>
-                                    ยืนยันการลบไฟล์
+                                    {fileToDelete ? "ยืนยันการลบไฟล์" : projectToDelete ? "ยืนยันการลบโครงการ" : "ยืนยันการลบ"}
                                 </div>
                             </DialogTitle>
                             <DialogDescription className="text-gray-600 dark:text-gray-400">
-                                คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                {fileToDelete 
+                                    ? "คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้" 
+                                    : projectToDelete 
+                                    ? "คุณแน่ใจหรือไม่ที่จะลบโครงการนี้? การดำเนินการนี้จะลบโครงการและเอกสารทั้งหมดที่เกี่ยวข้อง และไม่สามารถย้อนกลับได้"
+                                    : "คุณแน่ใจหรือไม่ที่จะลบรายการนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้"}
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="gap-2 sm:gap-0">
@@ -1108,17 +1691,17 @@ export default function DashboardPage() {
                                 ยกเลิก
                             </Button>
                             <Button 
-                                onClick={confirmDeleteFile}
+                                onClick={fileToDelete ? confirmDeleteFile : projectToDelete ? confirmDeleteProject : cancelDelete}
                                 className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white"
-                                disabled={isDeleting === fileToDelete}
+                                disabled={Boolean((fileToDelete && isDeleting === fileToDelete) || (projectToDelete && isDeletingProject))}
                             >
-                                {isDeleting === fileToDelete ? (
+                                {(fileToDelete && isDeleting === fileToDelete) || (projectToDelete && isDeletingProject) ? (
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        กำลังลบ...
+                                        {fileToDelete ? "กำลังลบไฟล์..." : projectToDelete ? "กำลังลบโครงการ..." : "กำลังลบ..."}
                                     </div>
                                 ) : (
-                                    "ลบไฟล์"
+                                    (fileToDelete ? "ลบไฟล์" : projectToDelete ? "ลบโครงการ" : "ลบ")
                                 )}
                             </Button>
                         </DialogFooter>
@@ -1147,6 +1730,137 @@ export default function DashboardPage() {
                                 className={`w-full ${successMessage.includes('ข้อผิดพลาด') ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white`}
                             >
                                 ตกลง
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Create Project Modal */}
+                <Dialog open={showCreateProjectModal} onOpenChange={setShowCreateProjectModal}>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>สร้างโครงการใหม่</DialogTitle>
+                            <DialogDescription>
+                                ป้อนข้อมูลโครงการใหม่ของคุณด้านล่าง
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="projectName" className="text-right text-sm font-medium">
+                                    ชื่อโครงการ <span className="text-red-500">*</span>
+                                </label>
+                                <Input
+                                    id="projectName"
+                                    value={newProjectName}
+                                    onChange={(e) => setNewProjectName(e.target.value)}
+                                    className="col-span-3"
+                                    placeholder="ระบุชื่อโครงการ"
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="projectDescription" className="text-right text-sm font-medium">
+                                    คำอธิบาย
+                                </label>
+                                <textarea
+                                    id="projectDescription"
+                                    value={newProjectDescription}
+                                    onChange={(e) => setNewProjectDescription(e.target.value)}
+                                    className="col-span-3 textarea textarea-bordered min-h-[100px]"
+                                    placeholder="ระบุคำอธิบายโครงการ (ไม่บังคับ)"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                    setShowCreateProjectModal(false);
+                                    setNewProjectName("");
+                                    setNewProjectDescription("");
+                                }}
+                                className="w-full sm:w-auto mr-2"
+                            >
+                                ยกเลิก
+                            </Button>
+                            <Button 
+                                onClick={handleCreateProject}
+                                className="w-full sm:w-auto"
+                                disabled={!newProjectName.trim() || isCreatingProject}
+                            >
+                                {isCreatingProject ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        กำลังสร้าง...
+                                    </div>
+                                ) : (
+                                    "สร้างโครงการ"
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Edit Project Modal */}
+                <Dialog open={showEditProjectModal} onOpenChange={setShowEditProjectModal}>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>แก้ไขโครงการ</DialogTitle>
+                            <DialogDescription>
+                                แก้ไขข้อมูลโครงการของคุณด้านล่าง
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="editProjectName" className="text-right text-sm font-medium">
+                                    ชื่อโครงการ <span className="text-red-500">*</span>
+                                </label>
+                                <Input
+                                    id="editProjectName"
+                                    value={editProjectName}
+                                    onChange={(e) => setEditProjectName(e.target.value)}
+                                    className="col-span-3"
+                                    placeholder="ระบุชื่อโครงการ"
+                                />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="editProjectDescription" className="text-right text-sm font-medium">
+                                    คำอธิบาย
+                                </label>
+                                <textarea
+                                    id="editProjectDescription"
+                                    value={editProjectDescription}
+                                    onChange={(e) => setEditProjectDescription(e.target.value)}
+                                    className="col-span-3 textarea textarea-bordered min-h-[100px]"
+                                    placeholder="ระบุคำอธิบายโครงการ (ไม่บังคับ)"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                    setShowEditProjectModal(false);
+                                    setProjectToEdit(null);
+                                    setEditProjectName("");
+                                    setEditProjectDescription("");
+                                }}
+                                className="w-full sm:w-auto mr-2"
+                            >
+                                ยกเลิก
+                            </Button>
+                            <Button 
+                                onClick={confirmUpdateProject}
+                                className="w-full sm:w-auto"
+                                disabled={!editProjectName.trim() || isUpdatingProject}
+                            >
+                                {isUpdatingProject ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        กำลังอัปเดต...
+                                    </div>
+                                ) : (
+                                    "อัปเดตโครงการ"
+                                )}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

@@ -298,22 +298,44 @@ export async function POST(req: Request) {
         await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
        
-        let project = await prisma.project.findFirst({
-            where: {
-                name: projectName,
-                userId: userId,
-            },
-        });
-
+        // 8. ใช้ Project ID ที่ส่งมาจาก frontend หรือสร้างใหม่
+        let project;
         
-        if (!project) {
-            project = await prisma.project.create({
-                data: {
-                    name: projectName,
-                    description: `${projectName} - สร้างจากเอกสารขออนุมัติ`,
+        // ถ้ามี projectId จาก frontend ให้ใช้ project นั้น
+        if (formData.get('projectId')) {
+            const projectId = formData.get('projectId') as string;
+            project = await prisma.project.findFirst({
+                where: {
+                    id: parseInt(projectId),
                     userId: userId,
                 },
             });
+            
+            // ถ้าไม่พบ project ตาม projectId ที่ระบุ ให้แสดง error
+            if (!project) {
+                return new NextResponse("Project not found. Please select a valid project.", {
+                    status: 400,
+                });
+            }
+        } else {
+            // ถ้าไม่มี projectId จาก frontend ให้ค้นหา project ตามชื่อ หรือสร้างใหม่
+            project = await prisma.project.findFirst({
+                where: {
+                    name: projectName,
+                    userId: userId,
+                },
+            });
+            
+            // ถ้าไม่มี Project ให้สร้างใหม่
+            if (!project) {
+                project = await prisma.project.create({
+                    data: {
+                        name: projectName,
+                        description: `${projectName} - สร้างจากเอกสารขออนุมัติ`,
+                        userId: userId,
+                    },
+                });
+            }
         }
 
         
