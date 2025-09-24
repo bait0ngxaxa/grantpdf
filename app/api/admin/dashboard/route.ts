@@ -23,13 +23,6 @@ export async function GET(req: Request) {
 
     // Query the database for ALL user files with user information (exclude attachment files)
     const allUserFiles = await prisma.userFile.findMany({
-      where: {
-        NOT: {
-          storagePath: {
-            startsWith: '/upload/attachments/'
-          }
-        }
-      },
       orderBy: {
         created_at: "desc",
       },

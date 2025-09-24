@@ -15,6 +15,7 @@ import {
     DialogTitle 
 } from "@/components/ui/dialog";
 import { useTitle } from "@/hook/useTitle";
+import FileItem from "./components/FileItem";
 
 // API Response type for better type safety
 type UserFile = {
@@ -989,130 +990,17 @@ export default function DashboardPage() {
                                                 {expandedProjects.has(project.id) && (
                                                     <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-4">
                                                         {project.files.length > 0 ? (
-                                                            <div className="grid grid-cols-1 gap-4">
+                                                            <div className="space-y-3">
+                                                                <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                                                                    📁 ไฟล์ในโครงการ ({project.files.length} ไฟล์)
+                                                                </div>
                                                                 {project.files.map((file) => (
-                                                                    <React.Fragment key={file.id}>
-                                                                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                                                            <div className="flex items-center space-x-3">
-                                                                                <div className="flex-shrink-0">
-                                                                                    {file.fileExtension === 'pdf' ? (
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                                        </svg>
-                                                                                    ) : (
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                        </svg>
-                                                                                    )}
-                                                                                </div>
-                                                                                <div className="flex-1">
-                                                                                    <p className="font-medium text-gray-900 dark:text-white">
-                                                                                        {truncateFileName(file.originalFileName, 40)}
-                                                                                    </p>
-                                                                                    <div className="flex items-center space-x-2">
-                                                                                        <p className="text-sm text-gray-500">
-                                                                                            {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
-                                                                                        </p>
-                                                                                        {file.attachmentFiles && file.attachmentFiles.length > 0 && (
-                                                                                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                                                                                {file.attachmentFiles.length} ไฟล์แนบ
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="flex space-x-2">
-                                                                                <a
-                                                                                    href={`/api/user-docs/download/${file.id}`}
-                                                                                    target="_blank"
-                                                                                    rel="noopener noreferrer"
-                                                                                    className="btn btn-sm bg-primary hover:bg-primary-focus text-white border-none rounded-full"
-                                                                                    title="ดาวน์โหลด"
-                                                                                >
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                                    </svg>
-                                                                                </a>
-                                                                                {file.fileExtension === 'pdf' && (
-                                                                                    <Button
-                                                                                        onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
-                                                                                        size="sm"
-                                                                                        className="rounded-full bg-green-500 text-white cursor-pointer hover:bg-green-600"
-                                                                                        title="พรีวิว PDF"
-                                                                                    >
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                        </svg>
-                                                                                    </Button>
-                                                                                )}
-                                                                                <Button
-                                                                                    onClick={() => handleDeleteFile(file.id)}
-                                                                                    size="sm"
-                                                                                    variant="destructive"
-                                                                                    className="cursor-pointer rounded-full"
-                                                                                    title="ลบไฟล์"
-                                                                                >
-                                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                    </svg>
-                                                                                </Button>
-                                                                            </div>
-                                                                        </div>
-                                                                                                                        
-                                                                        {/* แสดงไฟล์แนบ */}
-                                                                        {file.attachmentFiles && file.attachmentFiles.length > 0 && (
-                                                                            <div className="ml-12 mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                                                                                <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center">
-                                                                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                                                                    </svg>
-                                                                                    ไฟล์แนบ ({file.attachmentFiles.length} ไฟล์)
-                                                                                </h5>
-                                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                                    {file.attachmentFiles.map((attachment) => (
-                                                                                        <div key={attachment.id} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border">
-                                                                                            <div className="flex items-center space-x-2 flex-1 min-w-0">
-                                                                                                <div className="flex-shrink-0">
-                                                                                                    {attachment.mimeType?.includes('image') ? (
-                                                                                                        <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                                                        </svg>
-                                                                                                    ) : attachment.mimeType?.includes('pdf') ? (
-                                                                                                        <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                                                        </svg>
-                                                                                                    ) : (
-                                                                                                        <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                                        </svg>
-                                                                                                    )}
-                                                                                                </div>
-                                                                                                <div className="flex-1 min-w-0">
-                                                                                                    <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={attachment.fileName}>
-                                                                                                        {truncateFileName(attachment.fileName, 20)} (ไฟล์แนบ)
-                                                                                                    </div>
-                                                                                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                                                                        {(attachment.fileSize / 1024 / 1024).toFixed(2)} MB
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <a
-                                                                                                href={`/api/attachment/download/${attachment.id}`}
-                                                                                                target="_blank"
-                                                                                                rel="noopener noreferrer"
-                                                                                                className="flex-shrink-0 ml-1 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200"
-                                                                                                title="ดาวน์โหลด"
-                                                                                            >
-                                                                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                                                </svg>
-                                                                                            </a>
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </React.Fragment>
+                                                                    <FileItem
+                                                                        key={file.id}
+                                                                        file={file}
+                                                                        onPreviewFile={openPreviewModal}
+                                                                        onDeleteFile={handleDeleteFile}
+                                                                    />
                                                                 ))}
                                                             </div>
                                                         ) : (
@@ -1154,58 +1042,6 @@ export default function DashboardPage() {
                                         </div>
                                     )}
 
-                                    {/* Orphan Files Section */}
-                                    {orphanFiles.length > 0 && (
-                                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
-                                            <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-4">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                                </svg>
-                                                เอกสารที่แนบหรืออัพโหลด ({orphanFiles.length} ไฟล์)
-                                            </h3>
-                                            
-                                            <div className="grid grid-cols-1 gap-2">
-                                                {orphanFiles.map((file) => (
-                                                    <div key={file.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
-                                                        <div className="flex items-center space-x-3">
-                                                            <div className="flex-shrink-0">
-                                                                {file.fileExtension === 'pdf' ? (
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                    </svg>
-                                                                ) : (
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                    </svg>
-                                                                )}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                                    {truncateFileName(file.originalFileName, 40)}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex space-x-2">
-                                                            <a
-                                                                href={`/api/user-docs/download/${file.id}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="btn btn-xs bg-primary hover:bg-primary-focus text-white border-none rounded-full"
-                                                                title="ดาวน์โหลด"
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                </svg>
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         )}

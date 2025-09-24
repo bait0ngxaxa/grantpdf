@@ -52,6 +52,7 @@ interface ProjectsListProps {
     projects: Project[];
     isLoading: boolean;
     expandedProjects: Set<string>;
+    viewedProjects: Set<string>;
     totalItems: number;
     startIndex: number;
     endIndex: number;
@@ -65,6 +66,7 @@ export default function ProjectsList({
     projects,
     isLoading,
     expandedProjects,
+    viewedProjects,
     totalItems,
     startIndex,
     endIndex,
@@ -106,6 +108,7 @@ export default function ProjectsList({
                         key={project.id}
                         project={project}
                         isExpanded={expandedProjects.has(project.id)}
+                        showNewBadge={!viewedProjects.has(project.id)}
                         onToggleExpansion={onToggleProjectExpansion}
                         onPreviewPdf={onPreviewPdf}
                         onDeleteFile={onDeleteFile}

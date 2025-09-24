@@ -316,46 +316,56 @@ export default function SignupPage() {
                 </dialog>
             )}
 
-            {/* Success Modal - คงเดิม */}
+            {/* Success Modal - ปรับปรุงใหม่ */}
             {showSuccessModal && (
                 <dialog open className="modal modal-open backdrop-blur-sm">
-                    <div className="modal-box w-11/12 max-w-md mx-auto animate-[modalBounceIn_0.5s_ease-out] relative overflow-hidden">
-                        {/* Background Pattern */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-primary/5"></div>
-                        <div className="absolute -top-10 -right-10 w-20 h-20 bg-success/20 rounded-full blur-2xl animate-pulse"></div>
-                        <div className="absolute -bottom-8 -left-8 w-16 h-16 bg-primary/20 rounded-full blur-xl animate-pulse delay-75"></div>
+                    <div className="modal-box w-11/12 max-w-md mx-auto animate-[modalSlideIn_0.3s_ease-out] relative overflow-hidden bg-white dark:bg-gray-800 shadow-2xl rounded-2xl">
+                        {/* Background Pattern สอดคล้องกับ theme */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-blue-50/30 to-secondary/5 dark:from-primary/10 dark:via-gray-700/30 dark:to-secondary/10"></div>
+                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
+                        <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
                         
                         {/* Content */}
                         <div className="relative z-10 text-center">
-                            {/* Success Icon */}
-                            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-success to-success/80 rounded-full flex items-center justify-center mb-6 shadow-lg animate-[successPulse_1s_ease-in-out_infinite]">
-                                <Check className="h-10 w-10 text-white" />
+                            {/* Success Icon ปรับให้เข้ากับ theme */}
+                            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mb-6 shadow-lg transform transition-transform duration-300 hover:scale-105">
+                                <CheckCircle2 className="h-10 w-10 text-primary-content" />
                             </div>
 
                             {/* Success Message */}
-                            <h2 className="font-bold text-3xl mb-2 bg-gradient-to-r from-success to-primary bg-clip-text text-transparent">
-                                สำเร็จ!
+                            <h2 className="font-bold text-3xl mb-2 bg-primary bg-clip-text text-transparent">
+                                สมัครสมาชิกสำเร็จ!
                             </h2>
-                            <p className="text-lg font-medium mb-2">สมัครสมาชิกเรียบร้อยแล้ว</p>
-                            <p className="text-sm opacity-70 mb-6">กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...</p>
+                            <p className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">ยินดีต้อนรับเข้าสู่ระบบ</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...</p>
 
-                            {/* Progress Bar */}
-                            <div className="w-full bg-base-200 rounded-full h-2 mb-4">
-                                <div className="bg-gradient-to-r from-success to-primary h-2 rounded-full animate-[progressFill_3s_ease-in-out]"></div>
+                            {/* Progress Bar ปรับสีให้เข้ากับ theme */}
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
+                                <div className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full animate-[progressFill_3s_ease-in-out]"></div>
                             </div>
 
-                            {/* User Info Card */}
-                            <div className="bg-success/5 border border-success/20 rounded-lg p-4 text-left">
-                                <p className="text-sm opacity-70 mb-1">บัญชีใหม่</p>
-                                <p className="font-semibold text-success">{name}</p>
-                                <p className="text-sm opacity-80">{email}</p>
+                            {/* User Info Card ปรับให้สอดคล้องกับ theme */}
+                            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-600/20 shadow-lg text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                        <UserPlus className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">บัญชีใหม่</p>
+                                        <p className="font-semibold text-gray-800 dark:text-gray-200">{name}</p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">{email}</p>
+                                    </div>
+                                    <div className="text-primary">
+                                        <Check className="h-6 w-6" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </dialog>
             )}
 
-            {/* Enhanced Animation Keyframes */}
+            {/* Enhanced Animation Keyframes - ปรับ animation ให้เข้ากับ theme */}
             <style jsx global>{`
                 @keyframes modalSlideIn {
                     0% {
@@ -365,32 +375,6 @@ export default function SignupPage() {
                     100% {
                         opacity: 1;
                         transform: translateY(0) scale(1);
-                    }
-                }
-
-                @keyframes modalBounceIn {
-                    0% {
-                        opacity: 0;
-                        transform: scale(0.3);
-                    }
-                    50% {
-                        opacity: 1;
-                        transform: scale(1.05);
-                    }
-                    70% {
-                        transform: scale(0.9);
-                    }
-                    100% {
-                        transform: scale(1);
-                    }
-                }
-
-                @keyframes successPulse {
-                    0%, 100% {
-                        transform: scale(1);
-                    }
-                    50% {
-                        transform: scale(1.05);
                     }
                 }
 

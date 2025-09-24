@@ -24,12 +24,7 @@ export async function GET(req: Request) {
     // Query the database for all user files belonging to this user ID
     const userFiles = await prisma.userFile.findMany({
       where: {
-        userId: userId,
-        NOT: {
-          storagePath: {
-            startsWith: '/upload/attachments/'
-          }
-        }
+        userId: userId
       },
       orderBy: {
         created_at: "desc",

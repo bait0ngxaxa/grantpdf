@@ -101,6 +101,7 @@ export default function AdminDashboardPage() {
     
     // State for expandable projects
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+    const [viewedProjects, setViewedProjects] = useState<Set<string>>(new Set());
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
     // State for tracking project statistics
     const [todayProjects, setTodayProjects] = useState(0);
@@ -138,6 +139,17 @@ export default function AdminDashboardPage() {
         if (status === "loading") return;
         if (!session || session.user?.role !== "admin") {
             router.push("/access-denied");
+        }
+        
+        // Load viewed projects from localStorage on component mount
+        const storedViewedProjects = localStorage.getItem('viewedProjects');
+        if (storedViewedProjects) {
+            try {
+                const viewedProjectIds = JSON.parse(storedViewedProjects);
+                setViewedProjects(new Set(viewedProjectIds));
+            } catch (error) {
+                console.error('Error loading viewed projects:', error);
+            }
         }
     }, [session, status, router]);
 
@@ -260,8 +272,19 @@ export default function AdminDashboardPage() {
 
     // --- PDF Preview Functions ---
     const openPreviewModal = (storagePath: string, fileName: string) => {
-        // Extract filename from storagePath if needed
-        const filename = storagePath.split('/').pop() || storagePath;
+        // Extract filename from storagePath - handle different path formats
+        let filename = storagePath;
+        
+        // Remove leading slash if present
+        if (filename.startsWith('/')) {
+            filename = filename.substring(1);
+        }
+        
+        // If it's a full path like '/upload/docx/filename.pdf', extract just the filename
+        if (filename.includes('/')) {
+            filename = filename.split('/').pop() || filename;
+        }
+        
         setPreviewUrl(`/api/admin/preview/${filename}`);
         setPreviewFileName(fileName);
         setIsPreviewModalOpen(true);
@@ -402,13 +425,13 @@ export default function AdminDashboardPage() {
         return [...orphanFiles, ...projects.flatMap(p => p.files)];
     }, [orphanFiles, projects]);
 
-    // Calculate latest file
-    const latestFile = useMemo(() => {
-        const sortedFiles = allFiles.sort((a, b) => 
+    // Calculate latest project
+    const latestProject = useMemo(() => {
+        const sortedProjects = projects.sort((a, b) => 
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
-        return sortedFiles.length > 0 ? sortedFiles[0] : null;
-    }, [allFiles]);
+        return sortedProjects.length > 0 ? sortedProjects[0] : null;
+    }, [projects]);
 
     // Pagination
     const totalItems = filteredAndSortedProjects.projects.length;
@@ -424,6 +447,14 @@ export default function AdminDashboardPage() {
                 newSet.delete(projectId);
             } else {
                 newSet.add(projectId);
+                // Mark project as viewed when expanded
+                setViewedProjects(prevViewed => {
+                    const newViewedSet = new Set(prevViewed);
+                    newViewedSet.add(projectId);
+                    // Store in localStorage to persist across sessions
+                    localStorage.setItem('viewedProjects', JSON.stringify([...newViewedSet]));
+                    return newViewedSet;
+                });
             }
             return newSet;
         });
@@ -738,21 +769,21 @@ export default function AdminDashboardPage() {
                                         </div>
                                     </div>
                                     
-                                    {/* Latest File Card */}
+                                    {/* Latest Project Card */}
                                     <div className="card col-span-1 md:col-span-2 bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
                                         <div className="flex items-center space-x-4">
                                             <div className="text-teal-600 bg-teal-100 dark:bg-teal-900/20 p-3 rounded-full">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-8 h-8 stroke-current">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                                 </svg>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-sm text-gray-500 dark:text-gray-400">เอกสารล่าสุด</div>
-                                                <div className="text-lg font-bold truncate max-w-full text-teal-600" title={latestFile?.originalFileName || ""}>
-                                                    {latestFile?.originalFileName ? truncateFileName(latestFile.originalFileName, 35) : "ไม่มี"}
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">โครงการล่าสุด</div>
+                                                <div className="text-lg font-bold truncate max-w-full text-teal-600" title={latestProject?.name || ""}>
+                                                    {latestProject?.name || "ไม่มี"}
                                                 </div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                    {latestFile?.created_at ? new Date(latestFile.created_at).toLocaleDateString("th-TH") : ""}
+                                                    {latestProject?.created_at ? new Date(latestProject.created_at).toLocaleDateString("th-TH") : ""}
                                                 </div>
                                             </div>
                                         </div>
@@ -814,6 +845,7 @@ export default function AdminDashboardPage() {
                                     projects={paginatedProjects}
                                     isLoading={isLoading}
                                     expandedProjects={expandedProjects}
+                                    viewedProjects={viewedProjects}
                                     totalItems={totalItems}
                                     startIndex={startIndex}
                                     endIndex={endIndex}

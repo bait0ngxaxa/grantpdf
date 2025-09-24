@@ -50,6 +50,7 @@ interface Project {
 interface ProjectCardProps {
     project: Project;
     isExpanded: boolean;
+    showNewBadge?: boolean;
     onToggleExpansion: (projectId: string) => void;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
     onDeleteFile: (file: any) => void;
@@ -59,6 +60,7 @@ interface ProjectCardProps {
 export default function ProjectCard({
     project,
     isExpanded,
+    showNewBadge = false,
     onToggleExpansion,
     onPreviewPdf,
     onDeleteFile,
@@ -94,9 +96,19 @@ export default function ProjectCard({
                             </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                                {project.name}
-                            </h3>
+                            <div className="flex items-center space-x-2">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                    {project.name}
+                                </h3>
+                                {showNewBadge && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-md animate-pulse">
+                                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                        NEW
+                                    </span>
+                                )}
+                            </div>
                             <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600 dark:text-gray-300">
                                 <span className="flex items-center">
                                     
