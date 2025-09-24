@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 // PUT: อัพเดตโครงการ
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -12,7 +12,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const projectId = params.id;
+    const resolvedParams = await params;
+    const projectId = resolvedParams.id;
     const { name, description } = await req.json();
     
     if (!name) {
@@ -66,7 +67,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 // DELETE: ลบโครงการ
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -74,7 +75,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const projectId = params.id;
+    const resolvedParams = await params;
+    const projectId = resolvedParams.id;
     const userId = Number(session.user.id);
 
     // ตรวจสอบว่าโครงการเป็นของผู้ใช้หรือไม่
