@@ -38,14 +38,38 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 2. รับไฟล์จาก FormData
+        // 2. รับไฟล์และ projectId จาก FormData
         const formData = await request.formData();
         const file = formData.get("file") as File;
+        const projectId = formData.get("projectId") as string;
 
         if (!file) {
             return NextResponse.json(
                 { error: "No file provided" },
                 { status: 400 }
+            );
+        }
+
+        // ตรวจสอบว่ามี projectId หรือไม่
+        if (!projectId) {
+            return NextResponse.json(
+                { error: "Project ID is required" },
+                { status: 400 }
+            );
+        }
+
+        // ตรวจสอบว่า project ที่ระบุเป็นของผู้ใช้หรือไม่
+        const project = await prisma.project.findFirst({
+            where: {
+                id: parseInt(projectId),
+                userId: parseInt(session.user.id),
+            },
+        });
+
+        if (!project) {
+            return NextResponse.json(
+                { error: "Project not found or you don't have permission" },
+                { status: 404 }
             );
         }
 
@@ -83,17 +107,18 @@ export async function POST(request: NextRequest) {
         const buffer = Buffer.from(await file.arrayBuffer());
         await writeFile(filePath, buffer);
 
-        // 7. บันทึกข้อมูลไฟล์ลงฐานข้อมูล
+        // 7. บันทึกข้อมูลไฟล์ลงฐานข้อมูลพร้อมเชื่อมโยงกับโครงการ
         const userFile = await prisma.userFile.create({
             data: {
                 originalFileName: file.name,
                 storagePath: `/upload/attachments/${uniqueFileName}`,
                 fileExtension: fileExtension,
                 userId: parseInt(session.user.id),
+                projectId: parseInt(projectId), // เชื่อมโยงกับโครงการ
             },
         });
 
-        // 8. ส่งผลลัพธ์กลับ
+        // 8. ส่งผลลัพธ์กลับพร้อมข้อมูลโครงการ
         return NextResponse.json({
             success: true,
             message: "File uploaded successfully",
@@ -102,6 +127,11 @@ export async function POST(request: NextRequest) {
                 originalFileName: userFile.originalFileName,
                 storagePath: userFile.storagePath,
                 downloadUrl: `/upload/attachments/${uniqueFileName}`,
+            },
+            project: {
+                id: project.id.toString(),
+                name: project.name,
+                description: project.description,
             },
         });
     } catch (error) {

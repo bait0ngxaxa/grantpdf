@@ -1,6 +1,4 @@
-"use client";
-
-
+'use client';
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -9,6 +7,12 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useTitle } from "@/hook/useTitle";
 import { Users } from "lucide-react";
+
+// Import components
+import SearchAndFilter from './components/SearchAndFilter';
+import ProjectsList from './components/ProjectsList';
+import LoadingSpinner from './components/LoadingSpinner';
+import EmptyState from './components/EmptyState';
 
 
 interface PdfFile {
@@ -121,7 +125,7 @@ export default function AdminDashboardPage() {
     const [previewUrl, setPreviewUrl] = useState("");
     const [previewFileName, setPreviewFileName] = useState("");
 
-    
+
     useEffect(() => {
         if (status === "loading") return;
         if (!session || session.user?.role !== "admin") {
@@ -246,9 +250,11 @@ export default function AdminDashboardPage() {
         }
     };
 
-    // เพิ่ม functions สำหรับ PDF preview
+    // --- PDF Preview Functions ---
     const openPreviewModal = (storagePath: string, fileName: string) => {
-        setPreviewUrl(storagePath);
+        // Extract filename from storagePath if needed
+        const filename = storagePath.split('/').pop() || storagePath;
+        setPreviewUrl(`/api/admin/preview/${filename}`);
         setPreviewFileName(fileName);
         setIsPreviewModalOpen(true);
     };
@@ -259,7 +265,66 @@ export default function AdminDashboardPage() {
         setPreviewFileName("");
     };
 
-    // Toggle expand/collapse for projects
+// Filter and sort data
+    const filteredAndSortedProjects = useMemo(() => {
+        let filteredProjects = projects.filter(project => {
+            const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                project.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                project.files.some(file => 
+                                    file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
+                                );
+            
+            if (selectedFileType === "ไฟล์ทั้งหมด") return matchesSearch;
+            
+            const hasMatchingFileType = project.files.some(file => 
+                file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
+            );
+            
+            return matchesSearch && hasMatchingFileType;
+        });
+
+        // Sort projects
+        filteredProjects.sort((a, b) => {
+            switch (sortBy) {
+                case "createdAtAsc":
+                    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                case "createdAtDesc":
+                default:
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                case "statusDoneFirst":
+                    const aDoneCount = a.files.filter(f => f.downloadStatus === "done").length;
+                    const bDoneCount = b.files.filter(f => f.downloadStatus === "done").length;
+                    return bDoneCount - aDoneCount;
+                case "statusPendingFirst":
+                    const aPendingCount = a.files.filter(f => f.downloadStatus !== "done").length;
+                    const bPendingCount = b.files.filter(f => f.downloadStatus !== "done").length;
+                    return bPendingCount - aPendingCount;
+            }
+        });
+
+        return { projects: filteredProjects, orphanFiles };
+    }, [projects, orphanFiles, searchTerm, selectedFileType, sortBy]);
+
+    // Calculate all files for stats
+    const allFiles = useMemo(() => {
+        return [...orphanFiles, ...projects.flatMap(p => p.files)];
+    }, [orphanFiles, projects]);
+
+    // Calculate latest file
+    const latestFile = useMemo(() => {
+        const sortedFiles = allFiles.sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        return sortedFiles.length > 0 ? sortedFiles[0] : null;
+    }, [allFiles]);
+
+    // Pagination
+    const totalItems = filteredAndSortedProjects.projects.length;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedProjects = filteredAndSortedProjects.projects.slice(startIndex, endIndex);
+
+    // Toggle functions
     const toggleProjectExpansion = (projectId: string) => {
         setExpandedProjects(prev => {
             const newSet = new Set(prev);
@@ -272,7 +337,6 @@ export default function AdminDashboardPage() {
         });
     };
 
-    // Toggle expand/collapse for attachment files
     const toggleRowExpansion = (fileId: string) => {
         setExpandedRows(prev => {
             const newSet = new Set(prev);
@@ -285,174 +349,39 @@ export default function AdminDashboardPage() {
         });
     };
 
-    // --- Data Filtering and Sorting for Projects ---
-    const filteredAndSortedProjects = useMemo(() => {
-        // Filter projects by search term
-        let filteredProjects = projects.filter((project) =>
-            project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            project.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            project.files.some(file => 
-                file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
+    // Menu items
+    const menuItems = [
+        {
+            id: "dashboard",
+            name: "ภาพรวมระบบ",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
             )
-        );
-
-        // Filter orphan files
-        let filteredOrphanFiles = orphanFiles.filter((file) =>
-            file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (file.userName && file.userName.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-
-        // Filter by file type for orphan files
-        if (selectedFileType !== "ไฟล์ทั้งหมด") {
-            filteredOrphanFiles = filteredOrphanFiles.filter((file) =>
-                file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
-            );
-            
-            // Filter projects that have matching file types
-            filteredProjects = filteredProjects.filter(project =>
-                project.files.some(file => 
-                    file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
-                )
-            );
+        },
+        {
+            id: "documents",
+            name: "จัดการโครงการและเอกสาร",
+            icon: (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+            )
+        },
+        {
+            id: "users",
+            name: "จัดการผู้ใช้งาน",
+            icon: <Users className="h-5 w-5" />
         }
-
-        // Sort projects
-        filteredProjects.sort((a, b) => {
-            const dateA = new Date(a.created_at).getTime();
-            const dateB = new Date(b.created_at).getTime();
-            if (sortBy === "createdAtAsc") {
-                return dateA - dateB;
-            }
-            return dateB - dateA;
-        });
-
-        // Sort orphan files
-        filteredOrphanFiles.sort((a, b) => {
-            if (sortBy === "statusDoneFirst") {
-                if (a.downloadStatus === "done" && b.downloadStatus !== "done") {
-                    return -1;
-                }
-                if (a.downloadStatus !== "done" && b.downloadStatus === "done") {
-                    return 1;
-                }
-                const dateA = new Date(a.created_at).getTime();
-                const dateB = new Date(b.created_at).getTime();
-                return dateB - dateA;
-            } else if (sortBy === "statusPendingFirst") {
-                if (a.downloadStatus !== "done" && b.downloadStatus === "done") {
-                    return -1;
-                }
-                if (a.downloadStatus === "done" && b.downloadStatus !== "done") {
-                    return 1;
-                }
-                const dateA = new Date(a.created_at).getTime();
-                const dateB = new Date(b.created_at).getTime();
-                return dateB - dateA;
-            } else {
-                const dateA = new Date(a.created_at).getTime();
-                const dateB = new Date(b.created_at).getTime();
-                if (sortBy === "createdAtAsc") {
-                    return dateA - dateB;
-                }
-                return dateB - dateA;
-            }
-        });
-
-        return { projects: filteredProjects, orphanFiles: filteredOrphanFiles };
-    }, [searchTerm, sortBy, selectedFileType, projects, orphanFiles]);
-
-    // Pagination calculations
-    const totalItems = filteredAndSortedProjects.projects.length + filteredAndSortedProjects.orphanFiles.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    
-    // Combine projects and orphan files for pagination
-    const allItems = [...filteredAndSortedProjects.projects, ...filteredAndSortedProjects.orphanFiles];
-    const currentPageItems = allItems.slice(startIndex, endIndex);
-
-    // Reset to first page when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, selectedFileType, sortBy]);
-
-    // Pagination handlers
-    const goToPage = (page: number) => {
-        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-    };
-
-    const goToFirstPage = () => goToPage(1);
-    const goToLastPage = () => goToPage(totalPages);
-    const goToPreviousPage = () => goToPage(currentPage - 1);
-    const goToNextPage = () => goToPage(currentPage + 1);
-
-    // Generate page numbers for pagination
-    const getPageNumbers = () => {
-        const pages: (number | string)[] = [];
-        const maxVisiblePages = 5;
-        
-        if (totalPages <= maxVisiblePages) {
-            // Show all pages if total pages is less than or equal to maxVisiblePages
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            // Always show first page
-            pages.push(1);
-            
-            // Calculate start and end of visible pages
-            let start = Math.max(2, currentPage - 1);
-            let end = Math.min(totalPages - 1, currentPage + 1);
-            
-            // Adjust if we're near the beginning
-            if (currentPage <= 3) {
-                end = Math.min(totalPages - 1, 4);
-            }
-            
-            // Adjust if we're near the end
-            if (currentPage >= totalPages - 2) {
-                start = Math.max(2, totalPages - 3);
-            }
-            
-            // Add ellipsis after first page if needed
-            if (start > 2) {
-                pages.push('...');
-            }
-            
-            // Add visible pages
-            for (let i = start; i <= end; i++) {
-                pages.push(i);
-            }
-            
-            // Add ellipsis before last page if needed
-            if (end < totalPages - 1) {
-                pages.push('...');
-            }
-            
-            // Always show last page
-            if (totalPages > 1) {
-                pages.push(totalPages);
-            }
-        }
-        
-        return pages;
-    };
-
-    // Derived stats for the cards
-    const allFiles = [...orphanFiles, ...projects.flatMap(p => p.files)];
-    const latestFile = useMemo(() => {
-        const sortedFiles = allFiles.sort((a, b) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        return sortedFiles.length > 0 ? sortedFiles[0] : null;
-    }, [allFiles]);
+    ];
 
     // Dynamic title based on active tab
     const getTitleByTab = (tab: string) => {
         switch(tab) {
             case "dashboard":
                 return "Admin Dashboard - ภาพรวมระบบ | ระบบจัดการเอกสาร";
-            case "projects":
+            case "documents":
                 return "Admin Dashboard - จัดการโครงการและเอกสาร | ระบบจัดการเอกสาร";
             case "users":
                 return "Admin Dashboard - จัดการผู้ใช้งาน | ระบบจัดการเอกสาร";
@@ -479,37 +408,8 @@ export default function AdminDashboardPage() {
         return null;
     }
 
-    const menuItems = [
-        {
-            id: "dashboard",
-            name: "ภาพรวมระบบ",
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                </svg>
-            )
-        },
-        {
-            id: "projects",
-            name: "จัดการโครงการและเอกสาร",
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-            )
-        },
-        {
-            id: "users",
-            name: "จัดการผู้ใช้งาน",
-            icon: (
-                                <Users className="h-5 w-5" />
-            )
-        }
-    ];
-
     return (
         <>
-            {/* Remove Head component */}
             <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                 {/* Mobile sidebar overlay */}
                 {isSidebarOpen && (
@@ -645,39 +545,28 @@ export default function AdminDashboardPage() {
                                     {menuItems.find(item => item.id === activeTab)?.name || 'Admin Dashboard'}
                                 </h1>
                             </div>
-                            <div className="hidden sm:flex items-center space-x-4">
-                                <span className="text-m font-semibold text-gray-600 dark:text-gray-400">
-                                    {session.user?.name} ({session.user?.role})
-                                </span>
+                            <div className="flex items-center space-x-4">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => signOut()}
+                                    className="cursor-pointer"
+                                >
+                                    ออกจากระบบ
+                                </Button>
                             </div>
                         </div>
                     </div>
 
                     {/* Content Area */}
                     <div className="p-6">
-                        {/* Error Alert */}
-                        {error && (
-                            <div className="alert alert-error mb-6 rounded-xl">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>{error}</span>
-                                <button 
-                                    className="btn btn-sm btn-outline"
-                                    onClick={() => setError(null)}
-                                >
-                                    ปิด
-                                </button>
-                            </div>
-                        )}
-
                         {/* Dashboard Tab */}
                         {activeTab === "dashboard" && (
                             <div>
                                 {/* System Overview Cards */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                                     {/* Total Projects Card */}
-                                    <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300 cursor-pointer" onClick={() => setActiveTab("projects")}>
+                                    <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300 cursor-pointer">
                                         <div className="flex items-center space-x-4">
                                             <div className="text-blue-600 bg-blue-100 dark:bg-blue-900/20 p-3 rounded-full">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -771,7 +660,7 @@ export default function AdminDashboardPage() {
                                                     {latestFile?.originalFileName ? truncateFileName(latestFile.originalFileName, 35) : "ไม่มี"}
                                                 </div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                    {latestFile?.createdAt ? new Date(latestFile.createdAt).toLocaleDateString("th-TH") : ""}
+                                                    {latestFile?.created_at ? new Date(latestFile.created_at).toLocaleDateString("th-TH") : ""}
                                                 </div>
                                             </div>
                                         </div>
@@ -815,725 +704,46 @@ export default function AdminDashboardPage() {
                             </div>
                         )}
 
-                        {/* Projects Tab */}
-                        {activeTab === "projects" && (
-                            <div>
-                                {/* Search and Filter Controls */}
-                                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                                    <input
-                                        type="text"
-                                        placeholder="ค้นหาชื่อโครงการ, ไฟล์ หรือ ผู้สร้าง..."
-                                        className="input input-bordered w-full sm:w-80 rounded-full border-2"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                    <div className="flex flex-col sm:flex-row gap-2">
-                                        <select
-                                            className="select select-bordered w-full sm:w-auto rounded-full border-2"
-                                            value={sortBy}
-                                            onChange={(e) => setSortBy(e.target.value)}
-                                        >
-                                            <option value="createdAtDesc">
-                                                เรียงตามวันที่สร้าง (ใหม่สุด)
-                                            </option>
-                                            <option value="createdAtAsc">
-                                                เรียงตามวันที่สร้าง (เก่าสุด)
-                                            </option>
-                                            <option value="statusDoneFirst">
-                                                เรียงตามสถานะ (เสร็จก่อน)
-                                            </option>
-                                            <option value="statusPendingFirst">
-                                                เรียงตามสถานะ (รอก่อน)
-                                            </option>
-                                        </select>
-                                        <select
-                                            className="select select-bordered w-full sm:w-auto rounded-full border-2"
-                                            value={selectedFileType}
-                                            onChange={(e) => setSelectedFileType(e.target.value)}
-                                        >
-                                            <option value="ไฟล์ทั้งหมด">ไฟล์ทั้งหมด</option>
-                                            <option value="pdf">PDF</option>
-                                            <option value="docx">Word</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                            </svg>
-                                            จัดการโครงการและเอกสาร
-                                        </h2>
-                                        <div className="flex items-center space-x-4">
-                                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                โครงการใหม่วันนี้: <span className="font-semibold text-green-600">{todayProjects}</span>
-                                            </div>
-                                            {totalItems > 0 && (
-                                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                    แสดง {startIndex + 1}-{Math.min(endIndex, totalItems)} จาก {totalItems} รายการ
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {isLoading ? (
-                                        <div className="flex items-center justify-center py-12">
-                                            <span className="loading loading-spinner loading-lg text-primary"></span>
-                                            <span className="ml-2 text-gray-600 dark:text-gray-400">กำลังโหลดโครงการ...</span>
-                                        </div>
-                                    ) : filteredAndSortedProjects.projects.length > 0 ? (
-                                        <>
-                                            {/* Projects with Files Section */}
-                                            {filteredAndSortedProjects.projects.map((project) => (
-                                                <div key={project.id} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                                                    <div 
-                                                        className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 p-6 cursor-pointer hover:from-blue-100 hover:to-blue-200 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-300"
-                                                        onClick={() => toggleProjectExpansion(project.id)}
-                                                    >
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center space-x-4">
-                                                                <div className="flex-shrink-0">
-                                                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                                                        </svg>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                                                                        {project.name}
-                                                                    </h3>
-                                                                    <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-300">
-                                                                        <span className="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                                            </svg>
-                                                                            {project.userName}
-                                                                        </span>
-                                                                        <span className="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                            </svg>
-                                                                            {project._count.files} ไฟล์
-                                                                        </span>
-                                                                        <span className="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6m2 0h4a2 2 0 002-2V9a2 2 0 00-2-2h-4m-6-3h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
-                                                                            </svg>
-                                                                            {new Date(project.created_at).toLocaleDateString("th-TH")}
-                                                                        </span>
-                                                                    </div>
-                                                                    {project.description && (
-                                                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 line-clamp-2">
-                                                                            {project.description}
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center space-x-3">
-                                                                <div className="text-right">
-                                                                    <div className="text-2xl font-bold text-blue-600">{project._count.files}</div>
-                                                                    <div className="text-xs text-gray-500">ไฟล์</div>
-                                                                </div>
-                                                                <svg 
-                                                                    xmlns="http://www.w3.org/2000/svg" 
-                                                                    className={`h-6 w-6 text-gray-400 transform transition-transform duration-300 ${
-                                                                        expandedProjects.has(project.id) ? 'rotate-180' : ''
-                                                                    }`}
-                                                                    fill="none" 
-                                                                    viewBox="0 0 24 24" 
-                                                                    stroke="currentColor"
-                                                                >
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Expanded Files Section */}
-                                                    {expandedProjects.has(project.id) && project.files.length > 0 && (
-                                                        <div className="border-t border-gray-200 dark:border-gray-600">
-                                                            <div className="p-6 bg-white dark:bg-gray-800">
-                                                                <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                    </svg>
-                                                                    ไฟล์ในโครงการ ({project.files.length} ไฟล์)
-                                                                </h4>
-                                                                <div className="grid gap-4">
-                                                                    {project.files.map((file) => (
-                                                                        <React.Fragment key={file.id}>
-                                                                            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
-                                                                                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                                                                    <div className="flex-shrink-0">
-                                                                                        {file.fileExtension === 'pdf' ? (
-                                                                                            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                                            </svg>
-                                                                                        ) : (
-                                                                                            <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                            </svg>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div className="flex-1 min-w-0">
-                                                                                        <div className="font-medium text-gray-900 dark:text-white truncate">
-                                                                                            {truncateFileName(file.originalFileName, 50)}
-                                                                                        </div>
-                                                                                        <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                                                            <span className="badge badge-outline text-xs">
-                                                                                                {file.fileExtension.toUpperCase()}
-                                                                                            </span>
-                                                                                            <span>{new Date(file.created_at).toLocaleDateString("th-TH")}</span>
-                                                                                            {file.attachmentFiles && file.attachmentFiles.length > 0 && (
-                                                                                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                                                                                    {file.attachmentFiles.length} ไฟล์แนบ
-                                                                                                </span>
-                                                                                            )}
-                                                                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                                                                file.downloadStatus === "done" 
-                                                                                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
-                                                                                                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                                                                                            }`}>
-                                                                                                {file.downloadStatus === "done" ? "เสร็จ" : "ใหม่"}
-                                                                                            </span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div className="flex items-center space-x-2 flex-shrink-0">
-                                                                                    {/* Download Button */}
-                                                                                    {file.storagePath && (
-                                                                                        <a
-                                                                                            href={`/api/admin/download/${file.id}`}
-                                                                                            target="_blank"
-                                                                                            rel="noopener noreferrer"
-                                                                                            className="btn btn-sm bg-primary hover:bg-blue-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
-                                                                                            title="ดาวน์โหลด"
-                                                                                        >
-                                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                                            </svg>
-                                                                                        </a>
-                                                                                    )}
-                                                                                    
-                                                                                    {/* Preview Button */}
-                                                                                    {file.fileExtension === 'pdf' && (
-                                                                                        <Button
-                                                                                            onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
-                                                                                            className="btn btn-sm bg-green-500 hover:bg-green-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
-                                                                                            title="พรีวิว PDF"
-                                                                                        >
-                                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                            </svg>
-                                                                                        </Button>
-                                                                                    )}
-                                                                                    
-                                                                                    {/* Delete Button */}
-                                                                                    <Button
-                                                                                        onClick={() => openDeleteModal(file)}
-                                                                                        className="btn btn-sm cursor-pointer text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
-                                                                                        variant="destructive"
-                                                                                        title="ลบไฟล์"
-                                                                                    >
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                        </svg>
-                                                                                    </Button>
-                                                                                </div>
-                                                                            </div>
-                                                                            
-                                                                            {/* แสดงไฟล์แนบ */}
-                                                                            {file.attachmentFiles && file.attachmentFiles.length > 0 && (
-                                                                                <div className="ml-12 mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                                                                                    <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center">
-                                                                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                                                                        </svg>
-                                                                                        ไฟล์แนบ ({file.attachmentFiles.length} ไฟล์)
-                                                                                    </h5>
-                                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                                        {file.attachmentFiles.map((attachment) => (
-                                                                                            <div key={attachment.id} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border">
-                                                                                                <div className="flex items-center space-x-2 flex-1 min-w-0">
-                                                                                                    <div className="flex-shrink-0">
-                                                                                                        {attachment.mimeType?.includes('image') ? (
-                                                                                                            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                                                            </svg>
-                                                                                                        ) : attachment.mimeType?.includes('pdf') ? (
-                                                                                                            <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                                                            </svg>
-                                                                                                        ) : (
-                                                                                                            <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                                            </svg>
-                                                                                                        )}
-                                                                                                    </div>
-                                                                                                    <div className="flex-1 min-w-0">
-                                                                                                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={attachment.fileName}>
-                                                                                                            {truncateFileName(attachment.fileName, 25)}
-                                                                                                        </div>
-                                                                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                                                                            {attachment.fileSize > 0 ? (attachment.fileSize / 1024 / 1024).toFixed(2) + ' MB' : 'ไม่ทราบขนาด'}
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <a
-                                                                                                    href={`/api/attachment/download/${attachment.id}`}
-                                                                                                    target="_blank"
-                                                                                                    rel="noopener noreferrer"
-                                                                                                    className="flex-shrink-0 ml-2 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200"
-                                                                                                    title="ดาวน์โหลด"
-                                                                                                >
-                                                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                                                    </svg>
-                                                                                                </a>
-                                                                                            </div>
-                                                                                        ))}
-                                                                                    </div>
-                                                                                </div>
-                                                                            )}
-                                                                        </React.Fragment>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-
-
-                                        </>
-                                    ) : (
-                                        <div className="text-center py-12">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                            </svg>
-                                            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">ไม่พบโครงการ</h3>
-                                            <p className="mt-1 text-gray-500 dark:text-gray-400">ไม่มีโครงการในระบบหรือไม่พบโครงการที่ตรงกับการค้นหา</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
                         {/* Documents Tab */}
                         {activeTab === "documents" && (
                             <div>
-                                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                                    <input
-                                        type="text"
-                                        placeholder="ค้นหาชื่อโครงการ, ไฟล์ หรือ ผู้สร้าง..."
-                                        className="input input-bordered w-full sm:w-80 rounded-full border-2"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                    <div className="flex flex-col sm:flex-row gap-2">
-                                        <select
-                                            className="select select-bordered w-full sm:w-auto rounded-full border-2"
-                                            value={sortBy}
-                                            onChange={(e) => setSortBy(e.target.value)}
-                                        >
-                                            <option value="createdAtDesc">
-                                                เรียงตามวันที่สร้าง (ใหม่สุด)
-                                            </option>
-                                            <option value="createdAtAsc">
-                                                เรียงตามวันที่สร้าง (เก่าสุด)
-                                            </option>
-                                            <option value="statusDoneFirst">
-                                                เรียงตามสถานะ (เสร็จก่อน)
-                                            </option>
-                                            <option value="statusPendingFirst">
-                                                เรียงตามสถานะ (รอก่อน)
-                                            </option>
-                                        </select>
-                                        <select
-                                            className="select select-bordered w-full sm:w-auto rounded-full border-2"
-                                            value={selectedFileType}
-                                            onChange={(e) => setSelectedFileType(e.target.value)}
-                                        >
-                                            <option value="ไฟล์ทั้งหมด">ไฟล์ทั้งหมด</option>
-                                            <option value="pdf">PDF</option>
-                                            <option value="docx">Word</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                <SearchAndFilter
+                                    searchTerm={searchTerm}
+                                    setSearchTerm={setSearchTerm}
+                                    sortBy={sortBy}
+                                    setSortBy={setSortBy}
+                                    selectedFileType={selectedFileType}
+                                    setSelectedFileType={setSelectedFileType}
+                                />
 
-                                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                                            โครงการทั้งหมด ({filteredAndSortedProjects.projects.length} โครงการ)
-                                        </h2>
-                                        {totalItems > 0 && (
-                                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                แสดง {startIndex + 1}-{Math.min(endIndex, totalItems)} จาก {totalItems} รายการ
-                                            </div>
-                                        )}
-                                    </div>
+                                <ProjectsList
+                                    projects={paginatedProjects}
+                                    isLoading={isLoading}
+                                    expandedProjects={expandedProjects}
+                                    totalItems={totalItems}
+                                    startIndex={startIndex}
+                                    endIndex={endIndex}
+                                    onToggleProjectExpansion={toggleProjectExpansion}
+                                    onPreviewPdf={openPreviewModal}
+                                    onDeleteFile={openDeleteModal}
+                                />
 
-                                    {isLoading ? (
-                                        <div className="flex items-center justify-center py-12">
-                                            <span className="loading loading-spinner loading-lg text-primary"></span>
-                                            <span className="ml-2 text-gray-600 dark:text-gray-400">กำลังโหลดโครงการ...</span>
-                                        </div>
-                                    ) : filteredAndSortedProjects.projects.length > 0 ? (
-                                        <>
-                                            {/* Projects Section */}
-                                            {filteredAndSortedProjects.projects.map((project) => (
-                                                <div key={project.id} className="border border-gray-200 dark:border-gray-700 rounded-xl mb-6 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                                                    {/* Project Header */}
-                                                    <div 
-                                                        className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 p-4 cursor-pointer hover:from-blue-100 hover:to-blue-200 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-300"
-                                                        onClick={() => toggleProjectExpansion(project.id)}
-                                                    >
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center space-x-4">
-                                                                <div className="flex-shrink-0">
-                                                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                                                        </svg>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                                                                        {project.name}
-                                                                    </h3>
-                                                                    <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600 dark:text-gray-300">
-                                                                        <span className="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                                            </svg>
-                                                                            {project.userName}
-                                                                        </span>
-                                                                        <span className="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6m2 0h4a2 2 0 002-2V9a2 2 0 00-2-2h-4m-6-3h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
-                                                                            </svg>
-                                                                            {project._count.files} ไฟล์
-                                                                        </span>
-                                                                        <span className="flex items-center">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6m2 0h4a2 2 0 002-2V9a2 2 0 00-2-2h-4m-6-3h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
-                                                                            </svg>
-                                                                            {new Date(project.created_at).toLocaleDateString("th-TH")}
-                                                                        </span>
-                                                                    </div>
-                                                                    {project.description && (
-                                                                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 truncate">
-                                                                            {project.description}
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center space-x-2">
-                                                                <svg 
-                                                                    xmlns="http://www.w3.org/2000/svg" 
-                                                                    className={`h-5 w-5 text-gray-400 transform transition-transform duration-300 ${
-                                                                        expandedProjects.has(project.id) ? 'rotate-180' : ''
-                                                                    }`}
-                                                                    fill="none" 
-                                                                    viewBox="0 0 24 24" 
-                                                                    stroke="currentColor"
-                                                                >
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Expanded Files Section */}
-                                                    {expandedProjects.has(project.id) && (
-                                                        <div className="border-t border-gray-200 dark:border-gray-600">
-                                                            <div className="p-4 bg-white dark:bg-gray-800">
-                                                                <div className="space-y-3">
-                                                                    {project.files.map((file) => (
-                                                                        <React.Fragment key={file.id}>
-                                                                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
-                                                                                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                                                                    {/* File Icon */}
-                                                                                    <div className="flex-shrink-0">
-                                                                                        {file.fileExtension === 'pdf' ? (
-                                                                                            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                                            </svg>
-                                                                                        ) : (
-                                                                                            <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                            </svg>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    
-                                                                                    {/* File Info */}
-                                                                                    <div className="flex-1 min-w-0">
-                                                                                        <div className="flex items-center space-x-2">
-                                                                                            <span className="font-medium text-gray-900 dark:text-white truncate">
-                                                                                                {file.attachmentFiles && file.attachmentFiles.length > 0 ? 
-                                                                                                    `${truncateFileName(file.originalFileName, 40)}` : 
-                                                                                                    truncateFileName(file.originalFileName, 40)
-                                                                                                }
-                                                                                            </span>
-                                                                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                                                                file.downloadStatus === "done" 
-                                                                                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
-                                                                                                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                                                                                            }`}>
-                                                                                                {file.downloadStatus === "done" ? "เสร็จ" : "ใหม่"}
-                                                                                            </span>
-                                                                                        </div>
-                                                                                        <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                                                            <span className="flex items-center">
-                                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6m2 0h4a2 2 0 002-2V9a2 2 0 00-2-2h-4m-6-3h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
-                                                                                                </svg>
-                                                                                                {new Date(file.created_at).toLocaleDateString("th-TH")}
-                                                                                            </span>
-                                                                                            <span className="badge badge-outline text-xs">
-                                                                                                {file.fileExtension.toUpperCase()}
-                                                                                            </span>
-                                                                                            {file.attachmentFiles && file.attachmentFiles.length > 0 && (
-                                                                                                <button
-                                                                                                    onClick={(e) => {
-                                                                                                        e.stopPropagation();
-                                                                                                        toggleRowExpansion(file.id);
-                                                                                                    }}
-                                                                                                    className="flex items-center space-x-1 px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full text-xs font-medium transition-colors duration-200"
-                                                                                                >
-                                                                                                    <svg 
-                                                                                                        xmlns="http://www.w3.org/2000/svg" 
-                                                                                                        className={`h-3 w-3 transform transition-transform duration-200 ${
-                                                                                                            expandedRows.has(file.id) ? 'rotate-180' : ''
-                                                                                                        }`}
-                                                                                                        fill="none" 
-                                                                                                        viewBox="0 0 24 24" 
-                                                                                                        stroke="currentColor"
-                                                                                                    >
-                                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                                                                    </svg>
-                                                                                                    <span>{file.attachmentFiles.length} ไฟล์แนบ</span>
-                                                                                                </button>
-                                                                                            )}
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                                
-                                                                                {/* Action Buttons */}
-                                                                                <div className="flex items-center space-x-2 flex-shrink-0">
-                                                                                    {/* Download Button */}
-                                                                                    {file.storagePath && (
-                                                                                        <a
-                                                                                            href={`/api/admin/download/${file.id}`}
-                                                                                            target="_blank"
-                                                                                            rel="noopener noreferrer"
-                                                                                            className="btn btn-sm bg-primary hover:bg-blue-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
-                                                                                            onClick={() => {
-                                                                                                setTimeout(() => {
-                                                                                                    window.location.reload();
-                                                                                                }, 1000);
-                                                                                            }}
-                                                                                            title="ดาวน์โหลด"
-                                                                                        >
-                                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                                            </svg>
-                                                                                        </a>
-                                                                                    )}
-                                                                                    
-                                                                                    {/* Preview Button */}
-                                                                                    {file.fileExtension === 'pdf' && (
-                                                                                        <Button
-                                                                                            onClick={() => openPreviewModal(file.storagePath, file.originalFileName)}
-                                                                                            className="btn btn-sm bg-green-500 hover:bg-green-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
-                                                                                            title="พรีวิว PDF"
-                                                                                        >
-                                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                                            </svg>
-                                                                                        </Button>
-                                                                                    )}
-                                                                                    
-                                                                                    {/* Delete Button */}
-                                                                                    <Button
-                                                                                        onClick={() => openDeleteModal(file)}
-                                                                                        className="btn btn-sm cursor-pointer text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
-                                                                                        variant="destructive"
-                                                                                        title="ลบไฟล์"
-                                                                                    >
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                        </svg>
-                                                                                    </Button>
-                                                                                </div>
-                                                                            </div>
-                                                                            
-                                                                            {/* Attachment Files Section */}
-                                                                            {expandedRows.has(file.id) && file.attachmentFiles && file.attachmentFiles.length > 0 && (
-                                                                                <div className="ml-12 mt-2 p-3 bg-gray-100 dark:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-500">
-                                                                                    <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-                                                                                        <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                                                                        </svg>
-                                                                                        ไฟล์แนบ ({file.attachmentFiles.length} ไฟล์)
-                                                                                    </h5>
-                                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                                        {file.attachmentFiles.map((attachment) => (
-                                                                                            <div key={attachment.id} className="flex items-center justify-between bg-white dark:bg-gray-700 p-2 rounded border">
-                                                                                                <div className="flex items-center space-x-2 flex-1 min-w-0">
-                                                                                                    <div className="flex-shrink-0">
-                                                                                                        {attachment.mimeType?.includes('image') ? (
-                                                                                                            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                                                            </svg>
-                                                                                                        ) : attachment.mimeType?.includes('pdf') ? (
-                                                                                                            <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                                                            </svg>
-                                                                                                        ) : (
-                                                                                                            <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                                            </svg>
-                                                                                                        )}
-                                                                                                    </div>
-                                                                                                    <div className="flex-1 min-w-0">
-                                                                                                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={`${attachment.fileName} (ไฟล์แนบ)`}>
-                                                                                                            {truncateFileName(attachment.fileName, 20)} (ไฟล์แนบ)
-                                                                                                        </div>
-                                                                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                                                                            {(attachment.fileSize / 1024 / 1024).toFixed(2)} MB
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <a
-                                                                                                    href={`/api/attachment/download/${attachment.id}`}
-                                                                                                    target="_blank"
-                                                                                                    rel="noopener noreferrer"
-                                                                                                    className="flex-shrink-0 ml-2 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200"
-                                                                                                    title="ดาวน์โหลดไฟล์แนบ"
-                                                                                                >
-                                                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                                                    </svg>
-                                                                                                </a>
-                                                                                            </div>
-                                                                                        ))}
-                                                                                    </div>
-                                                                                </div>
-                                                                            )}
-                                                                        </React.Fragment>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                {/* Pagination */}
+                                {totalItems > itemsPerPage && (
+                                    <div className="flex justify-center mt-8">
+                                        <div className="btn-group">
+                                            {Array.from({ length: Math.ceil(totalItems / itemsPerPage) }, (_, i) => (
+                                                <button
+                                                    key={i + 1}
+                                                    className={`btn ${currentPage === i + 1 ? 'btn-active' : ''}`}
+                                                    onClick={() => setCurrentPage(i + 1)}
+                                                >
+                                                    {i + 1}
+                                                </button>
                                             ))}
-
-                                           
-
-                                            {/* Pagination Controls */}
-                                            {totalPages > 1 && (
-                                                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                                                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                        หน้า {currentPage} จาก {totalPages}
-                                                    </div>
-                                                    
-                                                    <div className="flex items-center gap-2">
-                                                        {/* First Page Button */}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={goToFirstPage}
-                                                            disabled={currentPage === 1}
-                                                            className="hidden sm:flex"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                                                            </svg>
-                                                        </Button>
-
-                                                        {/* Previous Page Button */}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={goToPreviousPage}
-                                                            disabled={currentPage === 1}
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                                                            </svg>
-                                                            <span className="hidden sm:inline ml-1">ก่อนหน้า</span>
-                                                        </Button>
-
-                                                        {/* Page Numbers */}
-                                                        <div className="flex items-center gap-1">
-                                                            {getPageNumbers().map((page, index) => (
-                                                                page === '...' ? (
-                                                                    <span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-500">
-                                                                        ...
-                                                                    </span>
-                                                                ) : (
-                                                                    <Button
-                                                                        key={page}
-                                                                        variant={currentPage === page ? "default" : "outline"}
-                                                                        size="sm"
-                                                                        onClick={() => goToPage(Number(page))}
-                                                                        className={`min-w-[2.5rem] ${
-                                                                            currentPage === page 
-                                                                                ? "bg-primary text-white" 
-                                                                                : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                                        }`}
-                                                                    >
-                                                                        {page}
-                                                                    </Button>
-                                                                )
-                                                            ))}
-                                                        </div>
-
-                                                        {/* Next Page Button */}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={goToNextPage}
-                                                            disabled={currentPage === totalPages}
-                                                        >
-                                                            <span className="hidden sm:inline mr-1">ถัดไป</span>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                                            </svg>
-                                                        </Button>
-
-                                                        {/* Last Page Button */}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={goToLastPage}
-                                                            disabled={currentPage === totalPages}
-                                                            className="hidden sm:flex"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                                                            </svg>
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <div className="text-center py-12">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                            </svg>
-                                            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">ไม่พบโครงการ</h3>
-                                            <p className="mt-1 text-gray-500 dark:text-gray-400">ไม่มีโครงการในระบบหรือไม่พบโครงการที่ตรงกับการค้นหา</p>
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 

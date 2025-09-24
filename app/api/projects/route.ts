@@ -18,6 +18,15 @@ export async function GET(req: Request) {
       where: { userId },
       include: {
         files: {
+          where: {
+            // Exclude files that are stored in the attachments directory
+            // These are typically uploaded as standalone attachments
+            NOT: {
+              storagePath: {
+                startsWith: '/upload/attachments/'
+              }
+            }
+          },
           include: {
             attachmentFiles: {
               select: {
@@ -38,11 +47,17 @@ export async function GET(req: Request) {
       orderBy: { created_at: 'desc' }
     });
 
-    // ดึงไฟล์ที่ไม่อยู่ในโครงการใดๆ
+    // ดึงไฟล์ที่ไม่อยู่ในโครงการใดๆ และไม่ใช่ไฟล์แนบ
     const orphanFiles = await prisma.userFile.findMany({
       where: {
         userId,
-        projectId: null
+        projectId: null,
+        // Exclude attachment files from orphan files as well
+        NOT: {
+          storagePath: {
+            startsWith: '/upload/attachments/'
+          }
+        }
       },
       include: {
         attachmentFiles: {

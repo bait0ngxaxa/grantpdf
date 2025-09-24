@@ -144,6 +144,13 @@ export default function CreateWordDocPage() {
         const uploadedIds: string[] = [];
         console.log(`Starting upload of ${files.length} attachment files`);
 
+        // Get project ID from localStorage
+        const selectedProjectId = localStorage.getItem('selectedProjectId');
+        if (!selectedProjectId) {
+            console.error('No project selected for file upload');
+            throw new Error('กรุณาเลือกโครงการก่อนอัปโหลดไฟล์');
+        }
+
         for (const file of files) {
             try {
                 console.log(
@@ -151,6 +158,7 @@ export default function CreateWordDocPage() {
                 );
                 const formData = new FormData();
                 formData.append("file", file);
+                formData.append("projectId", selectedProjectId); // Add required projectId
 
                 if (session?.user?.id) {
                     formData.append("userId", session.user.id.toString());

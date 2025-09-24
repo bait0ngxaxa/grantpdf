@@ -2,9 +2,16 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useTitle } from "@/hook/useTitle";
+
+interface Project {
+    id: string;
+    name: string;
+    description?: string;
+    created_at: string;
+}
 
 export default function UploadDocPage() {
     const { data: session, status } = useSession();
@@ -15,7 +22,49 @@ export default function UploadDocPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadMessage, setUploadMessage] = useState("");
     const [uploadSuccess, setUploadSuccess] = useState(false);
+    
+    // เพิ่ม state สำหรับการจัดการโครงการ
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const [isLoadingProjects, setIsLoadingProjects] = useState(true);
+    const [projectError, setProjectError] = useState<string | null>(null);
+    
     useTitle("อัพโหลดเอกสาร | ระบบจัดการเอกสาร");
+
+    // โหลดรายการโครงการ
+    useEffect(() => {
+        const fetchProjects = async () => {
+            if (!session) return;
+            
+            try {
+                setIsLoadingProjects(true);
+                setProjectError(null);
+                
+                const response = await fetch('/api/projects');
+                if (!response.ok) {
+                    throw new Error('ไม่สามารถโหลดรายการโครงการได้');
+                }
+                
+                const data = await response.json();
+                setProjects(data.projects || []);
+                
+                // ตรวจสอบ projectId ที่เก็บไว้ใน localStorage
+                const storedProjectId = localStorage.getItem('selectedProjectId');
+                if (storedProjectId && data.projects?.some((p: Project) => p.id === storedProjectId)) {
+                    setSelectedProjectId(storedProjectId);
+                }
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+                setProjectError('เกิดข้อผิดพลาดในการโหลดรายการโครงการ');
+            } finally {
+                setIsLoadingProjects(false);
+            }
+        };
+
+        if (session) {
+            fetchProjects();
+        }
+    }, [session]);
 
     // Redirect to signin if not authenticated
     if (status === "loading") {
@@ -57,6 +106,12 @@ export default function UploadDocPage() {
             setUploadSuccess(false);
             return;
         }
+        
+        if (!selectedProjectId) {
+            setUploadMessage("กรุณาเลือกโครงการก่อน");
+            setUploadSuccess(false);
+            return;
+        }
 
         setIsUploading(true);
         setUploadMessage("");
@@ -64,6 +119,7 @@ export default function UploadDocPage() {
         try {
             const formData = new FormData();
             formData.append("file", selectedFile);
+            formData.append("projectId", selectedProjectId);
 
             const response = await fetch("/api/file-upload", {
                 method: "POST",
@@ -143,6 +199,87 @@ export default function UploadDocPage() {
             {/* Main Content */}
             <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div className="bg-white rounded-lg shadow-md p-8">
+                    {/* Project Selection */}
+                    <div className="mb-8">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">เลือกโครงการ</h3>
+                        
+                        {isLoadingProjects ? (
+                            <div className="flex justify-center py-4">
+                                <div className="text-gray-500">กำลังโหลดโครงการ...</div>
+                            </div>
+                        ) : projectError ? (
+                            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                                <p className="text-red-800 text-sm">{projectError}</p>
+                            </div>
+                        ) : projects.length === 0 ? (
+                            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                                <p className="text-yellow-800 text-sm">ไม่พบโครงการ กรุณาสร้างโครงการก่อน</p>
+                                <Button 
+                                    onClick={() => router.push("/createproject")}
+                                    className="mt-2 cursor-pointer"
+                                    size="sm"
+                                >
+                                    สร้างโครงการใหม่
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {projects.map((project) => (
+                                    <div
+                                        key={project.id}
+                                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                                            selectedProjectId === project.id
+                                                ? "border-primary bg-primary/5 shadow-md"
+                                                : "border-gray-200 hover:border-primary hover:shadow-sm"
+                                        }`}
+                                        onClick={() => {
+                                            setSelectedProjectId(project.id);
+                                            localStorage.setItem('selectedProjectId', project.id);
+                                        }}
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <h4 className="font-semibold text-gray-900 mb-1">
+                                                    {project.name}
+                                                </h4>
+                                                {project.description && (
+                                                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                                        {project.description}
+                                                    </p>
+                                                )}
+                                                <p className="text-xs text-gray-500">
+                                                    สร้างเมื่อ: {new Date(project.created_at).toLocaleDateString('th-TH')}
+                                                </p>
+                                            </div>
+                                            {selectedProjectId === project.id && (
+                                                <div className="flex-shrink-0 ml-2">
+                                                    <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        
+                        {projects.length > 0 && (
+                            <div className="mt-4 flex justify-between items-center text-sm text-gray-600">
+                                <span>เลือกโครงการที่ต้องการอัพโหลดไฟล์เข้าไป</span>
+                                <Button
+                                    onClick={() => router.push("/createproject")}
+                                    variant="outline"
+                                    size="sm"
+                                    className="cursor-pointer"
+                                >
+                                    สร้างโครงการใหม่
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                     {/* Upload Area */}
                     <div
                         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -233,7 +370,7 @@ export default function UploadDocPage() {
                     </div>
 
                     {/* Upload Button */}
-                    {selectedFile && (
+                    {selectedFile && selectedProjectId && (
                         <div className="mt-6 flex justify-center">
                             <Button
                                 onClick={handleUpload}
@@ -243,6 +380,15 @@ export default function UploadDocPage() {
                             >
                                 {isUploading ? "กำลังอัพโหลด..." : "อัพโหลดไฟล์"}
                             </Button>
+                        </div>
+                    )}
+                    
+                    {/* Status Message for Missing Requirements */}
+                    {(selectedFile && !selectedProjectId) && (
+                        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                            <p className="text-yellow-800 text-sm text-center">
+                                กรุณาเลือกโครงการก่อนอัพโหลดไฟล์
+                            </p>
                         </div>
                     )}
 
@@ -298,10 +444,11 @@ export default function UploadDocPage() {
                             คำแนะนำการใช้งาน:
                         </h4>
                         <ul className="text-sm text-blue-700 space-y-1">
+                            <li>• เลือกโครงการที่ต้องการอัพโหลดไฟล์เข้าไป</li>
                             <li>• รองรับไฟล์ .docx และ .pdf</li>
                             <li>• ขนาดไฟล์สูงสุด 10MB</li>
-                            
                             <li>• สามารถลากไฟล์มาวางในพื้นที่อัพโหลด</li>
+                            <li>• ไฟล์ที่อัพโหลดจะถูกเชื่อมโยงกับโครงการที่เลือก</li>
                         </ul>
                     </div>
                 </div>
