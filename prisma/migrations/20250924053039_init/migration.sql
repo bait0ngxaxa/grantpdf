@@ -17,6 +17,7 @@ CREATE TABLE `Project` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'กำลังดำเนินการ',
     `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     `updated_at` TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
     `userId` INTEGER NOT NULL,
@@ -31,6 +32,8 @@ CREATE TABLE `UserFile` (
     `originalFileName` VARCHAR(191) NOT NULL,
     `storagePath` VARCHAR(191) NOT NULL,
     `fileExtension` VARCHAR(191) NOT NULL,
+    `downloadStatus` VARCHAR(191) NOT NULL DEFAULT 'pending',
+    `downloadedAt` DATETIME(3) NULL,
     `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     `updated_at` TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
     `userId` INTEGER NOT NULL,
@@ -38,6 +41,21 @@ CREATE TABLE `UserFile` (
 
     INDEX `UserFile_userId_idx`(`userId`),
     INDEX `UserFile_projectId_idx`(`projectId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AttachmentFile` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `fileName` VARCHAR(191) NOT NULL,
+    `filePath` VARCHAR(191) NOT NULL,
+    `fileSize` INTEGER NOT NULL,
+    `mimeType` VARCHAR(191) NOT NULL,
+    `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `updated_at` TIMESTAMP(6) NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `userFileId` INTEGER NOT NULL,
+
+    INDEX `AttachmentFile_userFileId_idx`(`userFileId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -49,3 +67,6 @@ ALTER TABLE `UserFile` ADD CONSTRAINT `UserFile_userId_fkey` FOREIGN KEY (`userI
 
 -- AddForeignKey
 ALTER TABLE `UserFile` ADD CONSTRAINT `UserFile_projectId_fkey` FOREIGN KEY (`projectId`) REFERENCES `Project`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AttachmentFile` ADD CONSTRAINT `AttachmentFile_userFileId_fkey` FOREIGN KEY (`userFileId`) REFERENCES `UserFile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
