@@ -8,17 +8,27 @@ import EmptyState from './EmptyState';
 interface AttachmentFile {
     id: string;
     fileName: string;
+    filePath: string;
     fileSize: number;
-    mimeType: string | null;
+    mimeType: string;
 }
 
-interface ProjectFile {
+interface PdfFile {
     id: string;
+    fileName: string;
+    createdAt: string;
+    lastModified: string;
+    userId: string;
+    userName?: string;
+    userEmail?: string;
+    pdfUrl?: string;
     originalFileName: string;
-    fileExtension: string;
-    downloadStatus: string;
+    storagePath: string;
     created_at: string;
-    storagePath: string | null;
+    updated_at: string;
+    fileExtension: string;
+    downloadStatus: string; 
+    downloadedAt?: string;
     attachmentFiles?: AttachmentFile[];
 }
 
@@ -26,12 +36,16 @@ interface Project {
     id: string;
     name: string;
     description?: string;
-    userName: string;
+    status: string;
     created_at: string;
+    updated_at: string;
+    userId: string;
+    userName: string;
+    userEmail: string;
+    files: PdfFile[];
     _count: {
         files: number;
     };
-    files: ProjectFile[];
 }
 
 interface ProjectsListProps {
@@ -44,6 +58,7 @@ interface ProjectsListProps {
     onToggleProjectExpansion: (projectId: string) => void;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
     onDeleteFile: (file: any) => void;
+    onEditProjectStatus: (project: Project) => void;
 }
 
 export default function ProjectsList({
@@ -55,7 +70,8 @@ export default function ProjectsList({
     endIndex,
     onToggleProjectExpansion,
     onPreviewPdf,
-    onDeleteFile
+    onDeleteFile,
+    onEditProjectStatus
 }: ProjectsListProps) {
     if (isLoading) {
         return <LoadingSpinner message="กำลังโหลดโครงการ..." />;
@@ -93,6 +109,7 @@ export default function ProjectsList({
                         onToggleExpansion={onToggleProjectExpansion}
                         onPreviewPdf={onPreviewPdf}
                         onDeleteFile={onDeleteFile}
+                        onEditProjectStatus={onEditProjectStatus}
                     />
                 ))}
             </div>

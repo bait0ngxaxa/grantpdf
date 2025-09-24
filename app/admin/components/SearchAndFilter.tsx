@@ -7,6 +7,8 @@ interface SearchAndFilterProps {
     setSortBy: (value: string) => void;
     selectedFileType: string;
     setSelectedFileType: (value: string) => void;
+    selectedStatus: string;
+    setSelectedStatus: (value: string) => void;
 }
 
 export default function SearchAndFilter({
@@ -15,7 +17,9 @@ export default function SearchAndFilter({
     sortBy,
     setSortBy,
     selectedFileType,
-    setSelectedFileType
+    setSelectedFileType,
+    selectedStatus,
+    setSelectedStatus
 }: SearchAndFilterProps) {
     return (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
@@ -36,6 +40,9 @@ export default function SearchAndFilter({
                     <option value="createdAtAsc">เรียงตามวันที่สร้าง (เก่าสุด)</option>
                     <option value="statusDoneFirst">เรียงตามสถานะ (เสร็จก่อน)</option>
                     <option value="statusPendingFirst">เรียงตามสถานะ (รอก่อน)</option>
+                    <option value="statusApproved">เรียงตามสถานะ (อนุมัติก่อน)</option>
+                    <option value="statusPending">เรียงตามสถานะ (รอดำเนินการก่อน)</option>
+                    <option value="statusRejected">เรียงตามสถานะ (ไม่อนุมัติก่อน)</option>
                 </select>
                 <select
                     className="select select-bordered w-full sm:w-auto rounded-full border-2"
@@ -45,6 +52,16 @@ export default function SearchAndFilter({
                     <option value="ไฟล์ทั้งหมด">ไฟล์ทั้งหมด</option>
                     <option value="pdf">PDF</option>
                     <option value="docx">Word</option>
+                </select>
+                <select
+                    className="select select-bordered w-full sm:w-auto rounded-full border-2"
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                >
+                    <option value="สถานะทั้งหมด">สถานะทั้งหมด</option>
+                    <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                    <option value="อนุมัติ">อนุมัติ</option>
+                    <option value="ไม่อนุมัติ">ไม่อนุมัติ</option>
                 </select>
             </div>
         </div>

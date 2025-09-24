@@ -46,6 +46,7 @@ interface Project {
     id: string;
     name: string;
     description?: string;
+    status: string;
     created_at: string;
     updated_at: string;
     userId: string;
@@ -93,6 +94,7 @@ export default function AdminDashboardPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("createdAtDesc");
     const [selectedFileType, setSelectedFileType] = useState("ไฟล์ทั้งหมด");
+    const [selectedStatus, setSelectedStatus] = useState("สถานะทั้งหมด"); // เพิ่ม filter สำหรับสถานะ
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [totalUsers, setTotalUsers] = useState(0);
@@ -124,6 +126,12 @@ export default function AdminDashboardPage() {
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [previewUrl, setPreviewUrl] = useState("");
     const [previewFileName, setPreviewFileName] = useState("");
+
+    // State สำหรับการจัดการสถานะโครงการ
+    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+    const [selectedProjectForStatus, setSelectedProjectForStatus] = useState<Project | null>(null);
+    const [newStatus, setNewStatus] = useState("");
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
 
     useEffect(() => {
@@ -265,6 +273,76 @@ export default function AdminDashboardPage() {
         setPreviewFileName("");
     };
 
+    // --- Project Status Management Functions ---
+    const openStatusModal = (project: Project) => {
+        setSelectedProjectForStatus(project);
+        setNewStatus(project.status);
+        setIsStatusModalOpen(true);
+    };
+
+    const closeStatusModal = () => {
+        setIsStatusModalOpen(false);
+        setSelectedProjectForStatus(null);
+        setNewStatus("");
+    };
+
+    const handleUpdateProjectStatus = async () => {
+        if (!selectedProjectForStatus || !newStatus) return;
+
+        setIsUpdatingStatus(true);
+        try {
+            const response = await fetch('/api/admin/projects', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    projectId: selectedProjectForStatus.id,
+                    status: newStatus
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('ไม่สามารถอัปเดตสถานะโครงการได้');
+            }
+
+            const result = await response.json();
+
+            // อัปเดตสถานะใน state
+            setProjects(prev => prev.map(project => 
+                project.id === selectedProjectForStatus.id 
+                    ? { ...project, status: newStatus, updated_at: new Date().toISOString() }
+                    : project
+            ));
+            
+            closeStatusModal();
+            
+            // แสดงข้อความสำเร็จ
+            setSuccessMessage(result.message || 'อัปเดตสถานะโครงการสำเร็จแล้ว');
+            setIsSuccessModalOpen(true);
+        } catch (error) {
+            console.error("Failed to update project status:", error);
+            setSuccessMessage('เกิดข้อผิดพลาดในการอัปเดตสถานะโครงการ กรุณาลองใหม่อีกครั้ง');
+            setIsSuccessModalOpen(true);
+        } finally {
+            setIsUpdatingStatus(false);
+        }
+    };
+
+    // ฟังก์ชั่นให้ได้สีตามสถานะ
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'กำลังดำเนินการ':
+                return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'อนุมัติ':
+                return 'bg-green-100 text-green-800 border-green-200';
+            case 'ไม่อนุมัติ':
+                return 'bg-red-100 text-red-800 border-red-200';
+            default:
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
 // Filter and sort data
     const filteredAndSortedProjects = useMemo(() => {
         let filteredProjects = projects.filter(project => {
@@ -274,13 +352,21 @@ export default function AdminDashboardPage() {
                                     file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
                                 );
             
-            if (selectedFileType === "ไฟล์ทั้งหมด") return matchesSearch;
+            // กรองตามประเภทไฟล์
+            let matchesFileType = true;
+            if (selectedFileType !== "ไฟล์ทั้งหมด") {
+                matchesFileType = project.files.some(file => 
+                    file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
+                );
+            }
             
-            const hasMatchingFileType = project.files.some(file => 
-                file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
-            );
+            // กรองตามสถานะโครงการ
+            let matchesStatus = true;
+            if (selectedStatus !== "สถานะทั้งหมด") {
+                matchesStatus = project.status === selectedStatus;
+            }
             
-            return matchesSearch && hasMatchingFileType;
+            return matchesSearch && matchesFileType && matchesStatus;
         });
 
         // Sort projects
@@ -299,11 +385,17 @@ export default function AdminDashboardPage() {
                     const aPendingCount = a.files.filter(f => f.downloadStatus !== "done").length;
                     const bPendingCount = b.files.filter(f => f.downloadStatus !== "done").length;
                     return bPendingCount - aPendingCount;
+                case "statusApproved":
+                    return (b.status === "อนุมัติ" ? 1 : 0) - (a.status === "อนุมัติ" ? 1 : 0);
+                case "statusPending":
+                    return (b.status === "กำลังดำเนินการ" ? 1 : 0) - (a.status === "กำลังดำเนินการ" ? 1 : 0);
+                case "statusRejected":
+                    return (b.status === "ไม่อนุมัติ" ? 1 : 0) - (a.status === "ไม่อนุมัติ" ? 1 : 0);
             }
         });
 
         return { projects: filteredProjects, orphanFiles };
-    }, [projects, orphanFiles, searchTerm, selectedFileType, sortBy]);
+    }, [projects, orphanFiles, searchTerm, selectedFileType, selectedStatus, sortBy]);
 
     // Calculate all files for stats
     const allFiles = useMemo(() => {
@@ -714,6 +806,8 @@ export default function AdminDashboardPage() {
                                     setSortBy={setSortBy}
                                     selectedFileType={selectedFileType}
                                     setSelectedFileType={setSelectedFileType}
+                                    selectedStatus={selectedStatus}
+                                    setSelectedStatus={setSelectedStatus}
                                 />
 
                                 <ProjectsList
@@ -726,6 +820,7 @@ export default function AdminDashboardPage() {
                                     onToggleProjectExpansion={toggleProjectExpansion}
                                     onPreviewPdf={openPreviewModal}
                                     onDeleteFile={openDeleteModal}
+                                    onEditProjectStatus={openStatusModal}
                                 />
 
                                 {/* Pagination */}
@@ -898,6 +993,56 @@ export default function AdminDashboardPage() {
                         </div>
                         <form method="dialog" className="modal-backdrop">
                             <button onClick={closePreviewModal}>ปิด</button>
+                        </form>
+                    </dialog>
+                )}
+
+                {/* --- Project Status Management Modal --- */}
+                {isStatusModalOpen && selectedProjectForStatus && (
+                    <dialog className="modal modal-open">
+                        <div className="modal-box bg-white dark:bg-gray-800 max-w-md">
+                            <h3 className="font-bold text-lg text-primary mb-4">จัดการสถานะโครงการ</h3>
+                            <div className="py-4">
+                                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                                    โครงการ: <strong className="text-gray-900 dark:text-white">{selectedProjectForStatus.name}</strong>
+                                </p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    สถานะปัจจุบัน: <span className={`px-2 py-1 rounded text-xs ${getStatusColor(selectedProjectForStatus.status)}`}>{selectedProjectForStatus.status}</span>
+                                </p>
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text">สถานะใหม่:</span>
+                                    </label>
+                                    <select
+                                        className="select select-bordered w-full"
+                                        value={newStatus}
+                                        onChange={(e) => setNewStatus(e.target.value)}
+                                    >
+                                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                                        <option value="อนุมัติ">อนุมัติ</option>
+                                        <option value="ไม่อนุมัติ">ไม่อนุมัติ</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex justify-end space-x-3">
+                                <Button
+                                    variant="outline"
+                                    onClick={closeStatusModal}
+                                    className="cursor-pointer px-4 py-2"
+                                >
+                                    ยกเลิก
+                                </Button>
+                                <Button
+                                    onClick={handleUpdateProjectStatus}
+                                    disabled={isUpdatingStatus || newStatus === selectedProjectForStatus.status}
+                                    className={`cursor-pointer px-4 py-2 ${newStatus === selectedProjectForStatus.status ? 'opacity-50' : ''}`}
+                                >
+                                    {isUpdatingStatus ? 'กำลังอัปเดต...' : 'อัปเดตสถานะ'}
+                                </Button>
+                            </div>
+                        </div>
+                        <form method="dialog" className="modal-backdrop">
+                            <button onClick={closeStatusModal}>ปิด</button>
                         </form>
                     </dialog>
                 )}

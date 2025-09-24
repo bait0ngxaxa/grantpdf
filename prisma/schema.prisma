@@ -31,6 +31,7 @@ model Project {
   id          Int      @id @default(autoincrement())
   name        String   // ชื่อโครงการ
   description String?  // คำอธิบายโครงการ (ไม่บังคับ)
+  status      String   @default("กำลังดำเนินการ") // สถานะโครงการ: กำลังดำเนินการ, อนุมัติ, ไม่อนุมัติ
   
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
