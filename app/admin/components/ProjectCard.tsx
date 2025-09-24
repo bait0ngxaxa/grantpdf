@@ -75,6 +75,8 @@ export default function ProjectCard({
                 return 'bg-green-100 text-green-800 border-green-200';
             case 'ไม่อนุมัติ':
                 return 'bg-red-100 text-red-800 border-red-200';
+            case 'แก้ไข':
+                return 'bg-orange-100 text-orange-800 border-orange-200';
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200';
         }
@@ -141,6 +143,11 @@ export default function ProjectCard({
                                     {project.status === 'ไม่อนุมัติ' && (
                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    )}
+                                    {project.status === 'แก้ไข' && (
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     )}
                                     {project.status === 'กำลังดำเนินการ' && (

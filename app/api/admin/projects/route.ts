@@ -129,7 +129,7 @@ export async function PUT(req: Request) {
     const { projectId, status } = await req.json();
 
     // ตรวจสอบว่าสถานะที่ส่งมาถูกต้อง
-    const validStatuses = ["กำลังดำเนินการ", "อนุมัติ", "ไม่อนุมัติ"];
+    const validStatuses = ["กำลังดำเนินการ", "อนุมัติ", "ไม่อนุมัติ", "แก้ไข"];
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
         { error: "Invalid status. Must be one of: " + validStatuses.join(", ") },

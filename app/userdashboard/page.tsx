@@ -26,7 +26,7 @@ type UserFile = {
     updated_at: string;
     fileExtension: string;
     userName: string;
-    attachmentFiles?: AttachmentFile[]; // เพิ่มข้อมูลไฟล์แนบ
+    attachmentFiles?: AttachmentFile[];
 };
 
 type AttachmentFile = {
@@ -55,7 +55,6 @@ type ProjectsResponse = {
     orphanFiles: UserFile[];
 };
 
-// เพิ่มฟังก์ชันตัดชื่อไฟล์ที่ด้านบนของไฟล์ (หลังจาก import statements)
 const truncateFileName = (fileName: string, maxLength: number = 30): string => {
     if (fileName.length <= maxLength) return fileName;
     
@@ -66,7 +65,6 @@ const truncateFileName = (fileName: string, maxLength: number = 30): string => {
     return `${truncatedName}.${extension}`;
 };
 
-// ฟังก์ชันให้สีตามสถานะโครงการ
 const getStatusColor = (status: string) => {
     switch (status) {
         case 'กำลังดำเนินการ':
@@ -75,6 +73,8 @@ const getStatusColor = (status: string) => {
             return 'bg-green-100 text-green-800 border-green-200';
         case 'ไม่อนุมัติ':
             return 'bg-red-100 text-red-800 border-red-200';
+        case 'แก้ไข':
+            return 'bg-orange-100 text-orange-800 border-orange-200';
         default:
             return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -393,7 +393,8 @@ export default function DashboardPage() {
         const counts = {
             pending: 0,
             approved: 0,
-            rejected: 0
+            rejected: 0,
+            editing: 0
         };
         
         projects.forEach(project => {
@@ -408,114 +409,14 @@ export default function DashboardPage() {
                 case 'ไม่อนุมัติ':
                     counts.rejected++;
                     break;
+                case 'แก้ไข':
+                    counts.editing++;
+                    break;
             }
         });
         
         return counts;
     }, [projects]);
-
-    // Filter and sort files with pagination - now works with projects and orphan files
-    const filteredAndSortedFiles = useMemo(() => {
-        // Combine all files from projects and orphan files
-        const allFiles = [...orphanFiles, ...projects.flatMap(project => project.files)];
-        
-        let filtered = allFiles.filter((file) =>
-            file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-        // Filter by file type
-        if (selectedFileType !== "ทั้งหมด") {
-            filtered = filtered.filter((file) =>
-                file.fileExtension.toLowerCase() === selectedFileType.toLowerCase()
-            );
-        }
-
-        // Sort the files
-        const sorted = [...filtered].sort((a, b) => {
-            const dateA = new Date(a.created_at).getTime();
-            const dateB = new Date(b.created_at).getTime();
-            if (sortBy === "createdAtAsc") {
-                return dateA - dateB;
-            }
-            return dateB - dateA;
-        });
-
-        return sorted;
-    }, [orphanFiles, projects, searchTerm, sortBy, selectedFileType]);
-
-    // Pagination calculations
-    const totalItems = filteredAndSortedFiles.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentPageFiles = filteredAndSortedFiles.slice(startIndex, endIndex);
-
-    // Reset to first page when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, selectedFileType, sortBy]);
-
-    // Pagination handlers
-    const goToPage = (page: number) => {
-        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-    };
-
-    const goToFirstPage = () => goToPage(1);
-    const goToLastPage = () => goToPage(totalPages);
-    const goToPreviousPage = () => goToPage(currentPage - 1);
-    const goToNextPage = () => goToPage(currentPage + 1);
-
-    // Generate page numbers for pagination
-    const getPageNumbers = () => {
-        const pages: (number | string)[] = [];
-        const maxVisiblePages = 5;
-        
-        if (totalPages <= maxVisiblePages) {
-            // Show all pages if total pages is less than or equal to maxVisiblePages
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            // Always show first page
-            pages.push(1);
-            
-            // Calculate start and end of visible pages
-            let start = Math.max(2, currentPage - 1);
-            let end = Math.min(totalPages - 1, currentPage + 1);
-            
-            // Adjust if we're near the beginning
-            if (currentPage <= 3) {
-                end = Math.min(totalPages - 1, 4);
-            }
-            
-            // Adjust if we're near the end
-            if (currentPage >= totalPages - 2) {
-                start = Math.max(2, totalPages - 3);
-            }
-            
-            // Add ellipsis after first page if needed
-            if (start > 2) {
-                pages.push('...');
-            }
-            
-            // Add visible pages
-            for (let i = start; i <= end; i++) {
-                pages.push(i);
-            }
-            
-            // Add ellipsis before last page if needed
-            if (end < totalPages - 1) {
-                pages.push('...');
-            }
-            
-            // Always show last page
-            if (totalPages > 1) {
-                pages.push(totalPages);
-            }
-        }
-        
-        return pages;
-    };
 
     if (status === "loading" || isLoading) {
         return (
@@ -562,15 +463,6 @@ export default function DashboardPage() {
             )
         },
         {
-            id: "documents",
-            name: "เอกสารของฉัน",
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-            )
-        },
-        {
             id: "create",
             name: "สร้างเอกสาร/อัพโหลด",
             icon: (
@@ -579,7 +471,6 @@ export default function DashboardPage() {
                 </svg>
             )
         },
-        
     ];
 
     return (
@@ -709,7 +600,6 @@ export default function DashboardPage() {
                                 </span>
                                 {session?.user?.role === "admin" && (
                                     <Button
-                                        // variant="outline"
                                         className="font-semibold cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                         onClick={() => router.push("/admin")}
                                     >
@@ -773,6 +663,13 @@ export default function DashboardPage() {
                                                                 <span className="text-xs text-gray-600 dark:text-gray-400">ไม่อนุมัติ</span>
                                                             </div>
                                                             <span className="text-sm font-semibold text-red-600">{projectStatusCounts.rejected}</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center">
+                                                                <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
+                                                                <span className="text-xs text-gray-600 dark:text-gray-400">ต้องแก้ไข</span>
+                                                            </div>
+                                                            <span className="text-sm font-semibold text-orange-600">{projectStatusCounts.editing}</span>
                                                         </div>
                                                     </div>
                                                 )}
@@ -859,7 +756,6 @@ export default function DashboardPage() {
                         {/* Projects Tab */}
                         {activeTab === "projects" && (
                             <div>
-                                {/* Header with Create Project Button */}
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                                         โครงการของฉัน ({projects.length} โครงการ)
@@ -874,17 +770,11 @@ export default function DashboardPage() {
                                         สร้างโครงการใหม่
                                     </Button>
                                 </div>
-
-                                {/* Projects List */}
                                 <div className="space-y-4">
                                     {projects.length > 0 ? (
                                         projects.map((project) => (
                                             <div key={project.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
-                                                {/* Project Header */}
-                                                <div 
-                                                    className="flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-4 rounded-lg transition-colors duration-200"
-                                                    onClick={() => toggleProjectExpansion(project.id)}
-                                                >
+                                                <div className="flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-4 rounded-lg transition-colors duration-200" onClick={() => toggleProjectExpansion(project.id)}>
                                                     <div className="flex items-center space-x-4">
                                                         <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -892,12 +782,8 @@ export default function DashboardPage() {
                                                             </svg>
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-                                                                {project.name}
-                                                            </h3>
-                                                            <p className="text-gray-600 dark:text-gray-400">
-                                                                {project.description || "ไม่มีคำอธิบาย"}
-                                                            </p>
+                                                            <h3 className="text-xl font-bold text-gray-800 dark:text-white">{project.name}</h3>
+                                                            <p className="text-gray-600 dark:text-gray-400">{project.description || "ไม่มีคำอธิบาย"}</p>
                                                             <div className="flex items-center space-x-4 mt-2">
                                                                 <span className="text-sm text-gray-500">
                                                                     {project.files.length} เอกสาร
@@ -906,7 +792,6 @@ export default function DashboardPage() {
                                                                     สร้างเมื่อ {new Date(project.created_at).toLocaleDateString("th-TH")}
                                                                 </span>
                                                             </div>
-                                                            {/* Project Status Badge */}
                                                             <div className="flex items-center mt-3">
                                                                 <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border-2 shadow-md ${getStatusColor(project.status || 'กำลังดำเนินการ')}`}>
                                                                     {/* Status Icon */}
@@ -918,6 +803,11 @@ export default function DashboardPage() {
                                                                     {(project.status || 'กำลังดำเนินการ') === 'ไม่อนุมัติ' && (
                                                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                                                        </svg>
+                                                                    )}
+                                                                    {(project.status || 'กำลังดำเนินการ') === 'แก้ไข' && (
+                                                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                                         </svg>
                                                                     )}
                                                                     {(project.status || 'กำลังดำเนินการ') === 'กำลังดำเนินการ' && (
@@ -934,7 +824,6 @@ export default function DashboardPage() {
                                                         <Button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                // Navigate to create document within this project
                                                                 localStorage.setItem('selectedProjectId', project.id);
                                                                 router.push('/createdocs');
                                                             }}
@@ -946,6 +835,7 @@ export default function DashboardPage() {
                                                             </svg>
                                                             เพิ่มเอกสาร
                                                         </Button>
+                                                        
                                                         <div className="flex space-x-1">
                                                             <button
                                                                 onClick={(e) => {
@@ -985,8 +875,6 @@ export default function DashboardPage() {
                                                         </svg>
                                                     </div>
                                                 </div>
-
-                                                {/* Project Documents - Expandable */}
                                                 {expandedProjects.has(project.id) && (
                                                     <div className="mt-4 border-t border-gray-200 dark:border-gray-600 pt-4">
                                                         {project.files.length > 0 ? (
@@ -1017,7 +905,11 @@ export default function DashboardPage() {
                                                                             router.push('/createdocs');
                                                                         }}
                                                                         size="sm"
+                                                                        className="cursor-pointer"
                                                                     >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                                                        </svg>
                                                                         เพิ่มเอกสารแรก
                                                                     </Button>
                                                                 </div>
@@ -1035,359 +927,14 @@ export default function DashboardPage() {
                                             <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">ยังไม่มีโครงการ</h3>
                                             <p className="mt-1 text-gray-500 dark:text-gray-400">เริ่มสร้างโครงการแรกของคุณ</p>
                                             <div className="mt-6">
-                                                <Button onClick={() => setShowCreateProjectModal(true)}>
+                                                <Button
+                                                    onClick={() => setShowCreateProjectModal(true)}
+                                                    className="cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                                    </svg>
                                                     สร้างโครงการใหม่
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Documents Tab - Legacy view for backward compatibility */}
-                        {activeTab === "documents" && (
-                            <div>
-                                {/* Filter and Search Controls */}
-                                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 mb-8">
-                                    <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-                                        <div className="w-full lg:w-auto">
-                                            <Input
-                                                type="text"
-                                                placeholder="ค้นหาด้วยชื่อไฟล์..."
-                                                className="input input-bordered w-full lg:w-80 rounded-full border-2"
-                                                value={searchTerm}
-                                                onChange={(e) => setSearchTerm(e.target.value)}
-                                            />
-                                        </div>
-                                        <div className="flex flex-col lg:flex-row gap-4 w-full lg:w-auto">
-                                            <select
-                                                className="select select-bordered w-full lg:w-auto rounded-full border-2"
-                                                value={sortBy}
-                                                onChange={(e) => setSortBy(e.target.value)}
-                                            >
-                                                <option value="createdAtDesc">เรียงตามวันที่สร้าง (ใหม่สุด)</option>
-                                                <option value="createdAtAsc">เรียงตามวันที่สร้าง (เก่าสุด)</option>
-                                            </select>
-                                            <select
-                                                className="select select-bordered w-full lg:w-auto rounded-full border-2"
-                                                value={selectedFileType}
-                                                onChange={(e) => setSelectedFileType(e.target.value)}
-                                            >
-                                                <option value="ทั้งหมด">ไฟล์ทั้งหมด</option>
-                                                <option value="pdf">PDF</option>
-                                                <option value="docx">Word</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Files Table */}
-                                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                                            เอกสารของคุณ ({totalItems} ไฟล์)
-                                        </h2>
-                                        {totalItems > 0 && (
-                                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                แสดง {startIndex + 1}-{Math.min(endIndex, totalItems)} จาก {totalItems} รายการ
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {isLoading ? (
-                                        <div className="flex items-center justify-center py-12">
-                                            <span className="loading loading-spinner loading-lg text-primary"></span>
-                                            <span className="ml-2 text-gray-600 dark:text-gray-400">กำลังโหลดเอกสาร...</span>
-                                        </div>
-                                    ) : currentPageFiles.length > 0 ? (
-                                        <>
-                                            <div className="overflow-x-auto">
-                                                <table className="table w-full">
-                                                    <thead>
-                                                        <tr className="text-lg text-gray-600 dark:text-gray-300">
-                                                            <th>ชื่อไฟล์</th>
-                                                            <th className="hidden md:table-cell">ประเภท</th>
-                                                            <th className="hidden md:table-cell">วันที่สร้าง</th>
-                                                            <th className="hidden sm:table-cell">ไฟล์แนบ</th>
-                                                            <th>การกระทำ</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {currentPageFiles.map((file) => (
-                                                            <React.Fragment key={file.id}>
-                                                                <tr className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                                <td className="font-semibold">
-                                                                    <div className="flex items-center space-x-3">
-                                                                        <div className="flex-shrink-0">
-                                                                            {file.fileExtension === 'pdf' ? (
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                                </svg>
-                                                                            ) : (
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                </svg>
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <div className="font-bold truncate max-w-full pr-2" title={file.originalFileName}>
-                                                                                {truncateFileName(file.originalFileName, 35)}
-                                                                            </div>
-                                                                            <div className="text-sm opacity-50 md:hidden">
-                                                                                {file.fileExtension.toUpperCase()} • {new Date(file.created_at).toLocaleDateString("th-TH")}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="text-gray-500 hidden md:table-cell">
-                                                                    <span className="badge badge-outline">
-                                                                        {file.fileExtension.toUpperCase()}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="text-gray-500 hidden md:table-cell">
-                                                                    {new Date(file.created_at).toLocaleDateString("th-TH")}
-                                                                </td>
-
-                                                                {/* คอลัมน์ไฟล์แนบ */}
-                                                                <td className="hidden sm:table-cell">
-                                                                    {file.attachmentFiles && file.attachmentFiles.length > 0 ? (
-                                                                        <button
-                                                                            onClick={() => toggleRowExpansion(file.id)}
-                                                                            className="flex items-center space-x-2 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full text-sm font-medium transition-colors duration-200"
-                                                                        >
-                                                                            <svg 
-                                                                                xmlns="http://www.w3.org/2000/svg" 
-                                                                                className={`h-4 w-4 transform transition-transform duration-200 ${expandedRows.has(file.id) ? 'rotate-180' : ''}`}
-                                                                                fill="none" 
-                                                                                viewBox="0 0 24 24" 
-                                                                                stroke="currentColor"
-                                                                            >
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                                            </svg>
-                                                                            <span>{file.attachmentFiles.length} ไฟล์</span>
-                                                                        </button>
-                                                                    ) : (
-                                                                        <span className="text-gray-400 text-sm">ไม่มี</span>
-                                                                    )}
-                                                                </td>
-                                                               
-                                                                <td>
-                                                                    <div className="flex space-x-2">
-                                                                        
-                                                                        <a
-                                                                            href={`/api/user-docs/download/${file.id}`}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="btn btn-sm bg-primary hover:bg-primary-focus text-white border-none rounded-full shadow-md hover:shadow-lg hover:bg-blue-600 transform hover:scale-105 transition-all duration-200"
-                                                                            title="ดาวน์โหลด"
-                                                                        >
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                            </svg>
-                                                                            <span className="ml-1 hidden lg:block">ดาวน์โหลด</span>
-                                                                        </a>
-                                                                        {file.fileExtension === 'pdf' && (
-                                                                            <Button
-                                                                                onClick={() =>
-                                                                                    openPreviewModal(file.storagePath, file.originalFileName)
-                                                                                }
-                                                                                className=" rounded-full bg-green-500 text-white cursor-pointer hover:bg-green-600 transform hover:scale-105 transition-all duration-200"
-                                                                                
-                                                                                title="พรีวิว PDF"
-                                                                            >
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                                </svg>
-                                                                                <span className="ml-1 hidden lg:block">ดู</span>
-                                                                            </Button>
-                                                                        )}
-                                                                        <Button
-                                                                            onClick={() => handleDeleteFile(file.id)}
-                                                                            disabled={isDeleting === file.id}
-                                                                            className=" cursor-pointer text-white rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 hover:bg-red-700"
-                                                                            title="ลบไฟล์"
-                                                                            variant="destructive"
-                                                                        >
-                                                                            {isDeleting === file.id ? (
-                                                                                <span className="loading loading-spinner loading-xs"></span>
-                                                                            ) : (
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                </svg>
-                                                                            )}
-                                                                            <span className="ml-1 hidden lg:block">
-                                                                                {isDeleting === file.id ? 'กำลังลบ...' : 'ลบ'}
-                                                                            </span>
-                                                                        </Button>
-                                                                    </div>
-                                                                </td>
-                                                                </tr>
-
-                                                                {/* แถวขยายสำหรับแสดงไฟล์แนบ */}
-                                                                {expandedRows.has(file.id) && file.attachmentFiles && file.attachmentFiles.length > 0 && (
-                                                                    <tr className="bg-gray-50 dark:bg-gray-800">
-                                                                        <td colSpan={5} className="px-6 py-4">
-                                                                            <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                                                                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                                                                                    <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                                                                    </svg>
-                                                                                    ไฟล์แนบ ({file.attachmentFiles.length} ไฟล์)
-                                                                                </h4>
-                                                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                                                                    {file.attachmentFiles.map((attachment, index) => (
-                                                                                        <div key={attachment.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-600 p-3 rounded-lg border">
-                                                                                            <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                                                                                <div className="flex-shrink-0">
-                                                                                                    {/* ไอคอนตามประเภทไฟล์ */}
-                                                                                                    {attachment.mimeType?.includes('image') ? (
-                                                                                                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                                                        </svg>
-                                                                                                    ) : attachment.mimeType?.includes('pdf') ? (
-                                                                                                        <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                                                        </svg>
-                                                                                                    ) : (
-                                                                                                        <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                                        </svg>
-                                                                                                    )}
-                                                                                                </div>
-                                                                                                <div className="flex-1 min-w-0">
-                                                                                                    <div className="text-sm font-medium text-gray-900 dark:text-white truncate" title={attachment.fileName}>
-                                                                                                        {truncateFileName(attachment.fileName, 25)}
-                                                                                                    </div>
-                                                                                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                                                                        {(attachment.fileSize / 1024 / 1024).toFixed(2)} MB
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <a
-                                                                                                href={`/api/attachment/download/${attachment.id}`}
-                                                                                                target="_blank"
-                                                                                                rel="noopener noreferrer"
-                                                                                                className="flex-shrink-0 ml-2 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200"
-                                                                                                title="ดาวน์โหลด"
-                                                                                            >
-                                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                                                                </svg>
-                                                                                            </a>
-                                                                                        </div>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                )}
-                                                            </React.Fragment>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                            {/* Pagination Controls */}
-                                            {totalPages > 1 && (
-                                                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                                                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                        หน้า {currentPage} จาก {totalPages}
-                                                    </div>
-                                                    
-                                                    <div className="flex items-center gap-2">
-                                                        {/* First Page Button */}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={goToFirstPage}
-                                                            disabled={currentPage === 1}
-                                                            className="hidden sm:flex"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                                                            </svg>
-                                                        </Button>
-
-                                                        {/* Previous Page Button */}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={goToPreviousPage}
-                                                            disabled={currentPage === 1}
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                                                            </svg>
-                                                            <span className="hidden sm:inline ml-1">ก่อนหน้า</span>
-                                                        </Button>
-
-                                                        {/* Page Numbers */}
-                                                        <div className="flex items-center gap-1">
-                                                            {getPageNumbers().map((page, index) => (
-                                                                page === '...' ? (
-                                                                    <span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-500">
-                                                                        ...
-                                                                    </span>
-                                                                ) : (
-                                                                    <Button
-                                                                        key={page}
-                                                                        variant={currentPage === page ? "default" : "outline"}
-                                                                        size="sm"
-                                                                        onClick={() => goToPage(Number(page))}
-                                                                        className={`min-w-[2.5rem] ${
-                                                                            currentPage === page 
-                                                                                ? "bg-primary text-white" 
-                                                                                : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                                        }`}
-                                                                    >
-                                                                        {page}
-                                                                    </Button>
-                                                                )
-                                                            ))}
-                                                        </div>
-
-                                                        {/* Next Page Button */}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={goToNextPage}
-                                                            disabled={currentPage === totalPages}
-                                                        >
-                                                            <span className="hidden sm:inline mr-1">ถัดไป</span>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                                            </svg>
-                                                        </Button>
-
-                                                        {/* Last Page Button */}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={goToLastPage}
-                                                            disabled={currentPage === totalPages}
-                                                            className="hidden sm:flex"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                                                            </svg>
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <div className="text-center py-12">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
-                                            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">ไม่พบเอกสาร</h3>
-                                            <p className="mt-1 text-gray-500 dark:text-gray-400">เริ่มสร้างเอกสารแรกของคุณ</p>
-                                            <div className="mt-6">
-                                                <Button onClick={() => setActiveTab("create")}>
-                                                    สร้างเอกสารใหม่
                                                 </Button>
                                             </div>
                                         </div>
@@ -1425,13 +972,12 @@ export default function DashboardPage() {
                                             className="bg-green-500 hover:bg-green-600 text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                             onClick={() => {
                                                 if (projects.length === 0) {
-                                                    setSuccessMessage("กรุณาสร้างโครงการก่อนเพื่อเริ่มสร้างเอกสาร");
+                                                    setSuccessMessage('กรุณาสร้างโครงการก่อนเพื่อเริ่มสร้างเอกสาร');
                                                     setShowSuccessModal(true);
                                                     return;
                                                 }
                                                 router.push('/createdocs');
                                             }}
-                                            
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1458,333 +1004,192 @@ export default function DashboardPage() {
 
                 {/* Profile Modal */}
                 {showProfileModal && (
-                    <dialog open className="modal modal-open backdrop-blur-sm">
-                        <div className="modal-box w-11/12 max-w-md mx-auto animate-[modalSlideIn_0.3s_ease-out] relative overflow-hidden">
+                    <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+                        <DialogContent className="w-11/12 max-w-lg mx-auto bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 shadow-2xl">
                             {/* Background Pattern */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5"></div>
-                            <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
-                            <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-lg"></div>
+                            <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+                            <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-purple-500/10 rounded-full blur-xl"></div>
 
                             {/* Content */}
-                            <div className="relative z-10">
-                                {/* Header */}
+                            <div className="relative z-10 p-2">
+                                {/* Header with User Avatar */}
                                 <div className="flex flex-col items-center mb-6">
-                                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-4 shadow-lg">
+                                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-4 shadow-lg ring-4 ring-blue-100 dark:ring-blue-900">
                                         <span className="text-white text-2xl font-bold">
-                                            {session?.user?.name 
-                                                ? session.user.name.charAt(0).toUpperCase() 
-                                                : session?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                                            {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
                                         </span>
                                     </div>
-                                    <h2 className="font-bold text-2xl text-center bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                                    <DialogTitle className="font-bold text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
                                         ข้อมูลส่วนตัว
-                                    </h2>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-1">
-                                        รายละเอียดบัญชีผู้ใช้
+                                    </DialogTitle>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        รายละเอียดบัญชีผู้ใช้งาน
                                     </p>
                                 </div>
 
-                                {/* User Information */}
+                                {/* User Information Cards */}
                                 <div className="space-y-4 mb-6">
-                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20 shadow-lg">
+                                    {/* Name Card */}
+                                    <div className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                                         <div className="flex items-center space-x-3">
-                                            <div className="text-blue-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <div className="text-sm text-gray-500 dark:text-gray-400">ชื่อผู้ใช้</div>
-                                                <div className="font-semibold">{session?.user?.name || 'ไม่ได้ระบุ'}</div>
+                                                <div className="text-sm font-medium text-gray-500 dark:text-gray-400">ชื่อผู้ใช้</div>
+                                                <div className="font-bold text-lg text-gray-800 dark:text-white">{session?.user?.name || 'ไม่ได้ระบุ'}</div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20 shadow-lg">
+                                    {/* Email Card */}
+                                    <div className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                                         <div className="flex items-center space-x-3">
-                                            <div className="text-green-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="text-sm text-gray-500 dark:text-gray-400">อีเมล</div>
-                                                <div className="font-semibold">{session?.user?.email || 'ไม่ได้ระบุ'}</div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-sm font-medium text-gray-500 dark:text-gray-400">อีเมล</div>
+                                                <div className="font-bold text-lg text-gray-800 dark:text-white truncate">{session?.user?.email || 'ไม่ได้ระบุ'}</div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-lg p-4 border border-white/20 shadow-lg">
+                                    {/* Role Card */}
+                                    <div className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                                         <div className="flex items-center space-x-3">
-                                            <div className="text-purple-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586 1.414A11.955 11.955 0 0112 2.036 11.955 11.955 0 010 13.938V21.5h7.5v-7.562z" />
+                                            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586-5 1.586-1.586a2 2 0 112.828 2.828L11.414 20H6v-5.414z" />
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <div className="text-sm text-gray-500 dark:text-gray-400">บทบาท</div>
-                                                <div className="font-semibold">{session?.user?.role || 'member'}</div>
+                                                <div className="text-sm font-medium text-gray-500 dark:text-gray-400">สถานะผู้ใช้</div>
+                                                <div className="flex items-center mt-1">
+                                                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border-2 shadow-md ${session?.user?.role === 'admin' ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700' : 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700'}`}>
+                                                        {session?.user?.role === 'admin' && (
+                                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.586-5 1.586-1.586a2 2 0 112.828 2.828L11.414 20H6v-5.414z" />
+                                                            </svg>
+                                                        )}
+                                                        {(session?.user?.role !== 'admin') && (
+                                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                            </svg>
+                                                        )}
+                                                        {session?.user?.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิกทั่วไป'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Actions */}
-                                <div className="flex justify-end">
-                                    <button
-                                        className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                                {/* Action Buttons */}
+                                <div className="flex justify-center space-x-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                    <Button
                                         onClick={() => setShowProfileModal(false)}
+                                        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-bold px-6 py-2 rounded-full shadow-lg cursor-pointer transform hover:scale-105 transition-all duration-300"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                         </svg>
-                                    </button>
+                                        ตกลง
+                                    </Button>
                                 </div>
                             </div>
-                        </div>
-                    </dialog>
+                        </DialogContent>
+                    </Dialog>
                 )}
 
-                {/* PDF Preview Modal */}
                 {isModalOpen && (
-                    <dialog
-                        id="pdf_preview_modal"
-                        className="modal modal-open bg-black bg-opacity-50"
-                    >
-                        <div className="modal-box w-11/12 max-w-5xl h-[90vh] bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-                            <div className="flex items-center justify-between mb-4 border-b pb-2 border-gray-200 dark:border-gray-700">
-                                <h3 className="font-bold text-lg">
-                                    {previewTitle || "Preview"}
-                                </h3>
-                                <button
-                                    className="btn btn-sm btn-circle btn-ghost text-gray-400 hover:text-white"
-                                    onClick={() => setIsModalOpen(false)}
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                            <div className="h-[calc(100%-64px)]">
-                                <iframe
-                                    src={previewUrl}
-                                    width="100%"
-                                    height="100%"
-                                    style={{ border: 'none' }}
-                                    title="PDF Preview"
-                                />
-                            </div>
-                        </div>
-                        <form method="dialog" className="modal-backdrop">
-                            <button onClick={() => setIsModalOpen(false)}>close</button>
-                        </form>
-                    </dialog>
+                    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                        <DialogContent className="max-w-5xl h-[90vh]">
+                            <DialogHeader>
+                                <DialogTitle>{previewTitle}</DialogTitle>
+                            </DialogHeader>
+                            <iframe src={previewUrl} width="100%" height="100%" style={{border: 'none'}} />
+                        </DialogContent>
+                    </Dialog>
                 )}
 
-                {/* Delete Confirmation Modal */}
-                <Dialog open={showDeleteModal} onOpenChange={(open) => {
-                    setShowDeleteModal(open);
-                    // Reset states when closing modal
-                    if (!open) {
-                        setFileToDelete(null);
-                        setProjectToDelete(null);
-                    }
-                }}>
-                    <DialogContent className="sm:max-w-md">
+                <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+                    <DialogContent>
                         <DialogHeader>
-                            <DialogTitle className="text-red-600">
-                                <div className="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
-                                    </svg>
-                                    {fileToDelete ? "ยืนยันการลบไฟล์" : projectToDelete ? "ยืนยันการลบโครงการ" : "ยืนยันการลบ"}
-                                </div>
-                            </DialogTitle>
-                            <DialogDescription className="text-gray-600 dark:text-gray-400">
-                                {fileToDelete 
-                                    ? "คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้" 
-                                    : projectToDelete 
-                                    ? "คุณแน่ใจหรือไม่ที่จะลบโครงการนี้? การดำเนินการนี้จะลบโครงการและเอกสารทั้งหมดที่เกี่ยวข้อง และไม่สามารถย้อนกลับได้"
-                                    : "คุณแน่ใจหรือไม่ที่จะลบรายการนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้"}
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter className="gap-2 sm:gap-0">
-                            <Button 
-                                variant="outline" 
-                                onClick={cancelDelete}
-                                className="w-full sm:w-auto mr-2"
-                            >
-                                ยกเลิก
-                            </Button>
-                            <Button 
-                                onClick={fileToDelete ? confirmDeleteFile : projectToDelete ? confirmDeleteProject : cancelDelete}
-                                className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white"
-                                disabled={Boolean((fileToDelete && isDeleting === fileToDelete) || (projectToDelete && isDeletingProject))}
-                            >
-                                {(fileToDelete && isDeleting === fileToDelete) || (projectToDelete && isDeletingProject) ? (
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        {fileToDelete ? "กำลังลบไฟล์..." : projectToDelete ? "กำลังลบโครงการ..." : "กำลังลบ..."}
-                                    </div>
-                                ) : (
-                                    (fileToDelete ? "ลบไฟล์" : projectToDelete ? "ลบโครงการ" : "ลบ")
-                                )}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-
-                {/* Success Modal */}
-                <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle className="text-green-600">
-                                <div className="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {successMessage.includes('ข้อผิดพลาด') ? 'เกิดข้อผิดพลาด' : 'สำเร็จ!'}
-                                </div>
-                            </DialogTitle>
-                            <DialogDescription className={`${successMessage.includes('ข้อผิดพลาด') ? 'text-red-600' : 'text-green-600'}`}>
-                                {successMessage}
+                            <DialogTitle>ยืนยันการลบ</DialogTitle>
+                            <DialogDescription>
+                                {fileToDelete ? 'คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้?' : 'คุณแน่ใจหรือไม่ที่จะลบโครงการนี้?'}
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
-                            <Button 
-                                onClick={() => setShowSuccessModal(false)}
-                                className={`w-full ${successMessage.includes('ข้อผิดพลาด') ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white`}
-                            >
-                                ตกลง
+                            <Button variant="outline" onClick={cancelDelete}>ยกเลิก</Button>
+                            <Button onClick={fileToDelete ? confirmDeleteFile : confirmDeleteProject} className="bg-red-600 hover:bg-red-700">
+                                {fileToDelete ? 'ลบไฟล์' : 'ลบโครงการ'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
 
-                {/* Create Project Modal */}
+                <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>{successMessage.includes('ข้อผิดพลาด') ? 'เกิดข้อผิดพลาด' : 'สำเร็จ!'}</DialogTitle>
+                            <DialogDescription>{successMessage}</DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button onClick={() => setShowSuccessModal(false)}>ตกลง</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
                 <Dialog open={showCreateProjectModal} onOpenChange={setShowCreateProjectModal}>
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent>
                         <DialogHeader>
                             <DialogTitle>สร้างโครงการใหม่</DialogTitle>
-                            <DialogDescription>
-                                ป้อนข้อมูลโครงการใหม่ของคุณด้านล่าง
-                            </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <label htmlFor="projectName" className="text-right text-sm font-medium">
-                                    ชื่อโครงการ <span className="text-red-500">*</span>
-                                </label>
-                                <Input
-                                    id="projectName"
-                                    value={newProjectName}
-                                    onChange={(e) => setNewProjectName(e.target.value)}
-                                    className="col-span-3"
-                                    placeholder="ระบุชื่อโครงการ"
-                                />
+                        <div className="space-y-4">
+                            <div>
+                                <label>ชื่อโครงการ</label>
+                                <Input value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} placeholder="ระบุชื่อโครงการ" />
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <label htmlFor="projectDescription" className="text-right text-sm font-medium">
-                                    คำอธิบาย
-                                </label>
-                                <textarea
-                                    id="projectDescription"
-                                    value={newProjectDescription}
-                                    onChange={(e) => setNewProjectDescription(e.target.value)}
-                                    className="col-span-3 textarea textarea-bordered min-h-[100px]"
-                                    placeholder="ระบุคำอธิบายโครงการ (ไม่บังคับ)"
-                                />
+                            <div>
+                                <label>คำอธิบาย</label>
+                                <textarea value={newProjectDescription} onChange={(e) => setNewProjectDescription(e.target.value)} className="w-full p-2 border rounded" placeholder="ระบุคำอธิบาย (ไม่บังคับ)" />
                             </div>
                         </div>
-                        <DialogFooter className="gap-2 sm:gap-0">
-                            <Button 
-                                variant="outline" 
-                                onClick={() => {
-                                    setShowCreateProjectModal(false);
-                                    setNewProjectName("");
-                                    setNewProjectDescription("");
-                                }}
-                                className="w-full sm:w-auto mr-2"
-                            >
-                                ยกเลิก
-                            </Button>
-                            <Button 
-                                onClick={handleCreateProject}
-                                className="w-full sm:w-auto"
-                                disabled={!newProjectName.trim() || isCreatingProject}
-                            >
-                                {isCreatingProject ? (
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        กำลังสร้าง...
-                                    </div>
-                                ) : (
-                                    "สร้างโครงการ"
-                                )}
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => {setShowCreateProjectModal(false); setNewProjectName(''); setNewProjectDescription('');}}>ยกเลิก</Button>
+                            <Button onClick={handleCreateProject} disabled={!newProjectName.trim() || isCreatingProject}>
+                                {isCreatingProject ? 'กำลังสร้าง...' : 'สร้างโครงการ'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
 
-                {/* Edit Project Modal */}
                 <Dialog open={showEditProjectModal} onOpenChange={setShowEditProjectModal}>
-                    <DialogContent className="sm:max-w-md">
+                    <DialogContent>
                         <DialogHeader>
                             <DialogTitle>แก้ไขโครงการ</DialogTitle>
-                            <DialogDescription>
-                                แก้ไขข้อมูลโครงการของคุณด้านล่าง
-                            </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <label htmlFor="editProjectName" className="text-right text-sm font-medium">
-                                    ชื่อโครงการ <span className="text-red-500">*</span>
-                                </label>
-                                <Input
-                                    id="editProjectName"
-                                    value={editProjectName}
-                                    onChange={(e) => setEditProjectName(e.target.value)}
-                                    className="col-span-3"
-                                    placeholder="ระบุชื่อโครงการ"
-                                />
+                        <div className="space-y-4">
+                            <div>
+                                <label>ชื่อโครงการ</label>
+                                <Input value={editProjectName} onChange={(e) => setEditProjectName(e.target.value)} />
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <label htmlFor="editProjectDescription" className="text-right text-sm font-medium">
-                                    คำอธิบาย
-                                </label>
-                                <textarea
-                                    id="editProjectDescription"
-                                    value={editProjectDescription}
-                                    onChange={(e) => setEditProjectDescription(e.target.value)}
-                                    className="col-span-3 textarea textarea-bordered min-h-[100px]"
-                                    placeholder="ระบุคำอธิบายโครงการ (ไม่บังคับ)"
-                                />
+                            <div>
+                                <label>คำอธิบาย</label>
+                                <textarea value={editProjectDescription} onChange={(e) => setEditProjectDescription(e.target.value)} className="w-full p-2 border rounded" />
                             </div>
                         </div>
-                        <DialogFooter className="gap-2 sm:gap-0">
-                            <Button 
-                                variant="outline" 
-                                onClick={() => {
-                                    setShowEditProjectModal(false);
-                                    setProjectToEdit(null);
-                                    setEditProjectName("");
-                                    setEditProjectDescription("");
-                                }}
-                                className="w-full sm:w-auto mr-2"
-                            >
-                                ยกเลิก
-                            </Button>
-                            <Button 
-                                onClick={confirmUpdateProject}
-                                className="w-full sm:w-auto"
-                                disabled={!editProjectName.trim() || isUpdatingProject}
-                            >
-                                {isUpdatingProject ? (
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        กำลังอัปเดต...
-                                    </div>
-                                ) : (
-                                    "อัปเดตโครงการ"
-                                )}
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => {setShowEditProjectModal(false); setProjectToEdit(null); setEditProjectName(''); setEditProjectDescription('');}}>ยกเลิก</Button>
+                            <Button onClick={confirmUpdateProject} disabled={!editProjectName.trim() || isUpdatingProject}>
+                                {isUpdatingProject ? 'กำลังอัปเดต...' : 'อัปเดตโครงการ'}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
