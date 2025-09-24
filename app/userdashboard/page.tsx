@@ -1071,11 +1071,9 @@ export default function DashboardPage() {
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                                 </svg>
-                                                เอกสารที่ยังไม่ได้จัดกลุ่ม ({orphanFiles.length} ไฟล์)
+                                                เอกสารที่แนบหรืออัพโหลด ({orphanFiles.length} ไฟล์)
                                             </h3>
-                                            <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-4">
-                                                เอกสารเหล่านี้ยังไม่ได้อยู่ในโครงการใดๆ คุณสามารถย้ายไปยังโครงการที่ต้องการได้
-                                            </p>
+                                            
                                             <div className="grid grid-cols-1 gap-2">
                                                 {orphanFiles.map((file) => (
                                                     <div key={file.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
@@ -1498,7 +1496,7 @@ export default function DashboardPage() {
                                         </Button>
                                         <Button 
                                             size="lg"
-                                            className="bg-secondary hover:bg-secondary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                            className="bg-green-500 hover:bg-green-600 text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
                                             onClick={() => {
                                                 if (projects.length === 0) {
                                                     setSuccessMessage("กรุณาสร้างโครงการก่อนเพื่อเริ่มสร้างเอกสาร");
@@ -1507,7 +1505,7 @@ export default function DashboardPage() {
                                                 }
                                                 router.push('/createdocs');
                                             }}
-                                            variant="outline"
+                                            
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

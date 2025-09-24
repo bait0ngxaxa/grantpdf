@@ -367,12 +367,26 @@ export async function POST(req: Request) {
 
                     if (attachmentFile) {
                         console.log(`Found attachment file:`, attachmentFile);
+                        
+                        // อ่านขนาดไฟล์จริงจากระบบไฟล์
+                        let actualFileSize = 0;
+                        try {
+                            const fullFilePath = path.join(process.cwd(), "public", attachmentFile.storagePath);
+                            const fileStats = await fs.stat(fullFilePath);
+                            actualFileSize = fileStats.size;
+                            console.log(`File size for ${attachmentFile.originalFileName}: ${actualFileSize} bytes`);
+                        } catch (sizeError) {
+                            console.error(`Error reading file size for ${attachmentFile.originalFileName}:`, sizeError);
+                            // ใช้ขนาดไฟล์เป็น 0 หากไม่สามารถอ่านได้
+                            actualFileSize = 0;
+                        }
+                        
                         // สร้างข้อมูลในตาราง AttachmentFile
                         const createdAttachment = await prisma.attachmentFile.create({
                             data: {
                                 fileName: attachmentFile.originalFileName,
                                 filePath: attachmentFile.storagePath,
-                                fileSize: 0, // ถ้าต้องการขนาดไฟล์จริง ต้องอ่านจากไฟล์
+                                fileSize: actualFileSize, // ใช้ขนาดไฟล์จริง
                                 mimeType: getMimeType(attachmentFile.fileExtension),
                                 userFileId: savedFile.id,
                             },
