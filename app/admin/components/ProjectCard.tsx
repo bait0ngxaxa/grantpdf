@@ -77,6 +77,8 @@ export default function ProjectCard({
                 return 'bg-red-100 text-red-800 border-red-200';
             case 'แก้ไข':
                 return 'bg-orange-100 text-orange-800 border-orange-200';
+            case 'ปิดโครงการ':
+                return 'bg-gray-100 text-gray-800 border-gray-200';
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200';
         }
@@ -153,6 +155,11 @@ export default function ProjectCard({
                                     {project.status === 'กำลังดำเนินการ' && (
                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    )}
+                                    {project.status === 'ปิดโครงการ' && (
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     )}
                                     สถานะ: {project.status}

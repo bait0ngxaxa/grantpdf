@@ -93,7 +93,7 @@ export default function ProjectsList({
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    โครงการทั้งหมด ({projects.length} โครงการ)
+                    โครงการทั้งหมด 
                 </h2>
                 {totalItems > 0 && (
                     <div className="text-sm text-gray-600 dark:text-gray-400">

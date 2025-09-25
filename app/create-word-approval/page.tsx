@@ -701,7 +701,7 @@ export default function CreateWordDocPage() {
                                     <Input
                                         type="text"
                                         name="depart"
-                                        placeholder="ระบุตำแหน่ง/แผนกผู้ลงนาม"
+                                        placeholder="ระบุตำแหน่ง/แผนกผู้ขออนุมัติ"
                                         className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         value={formData.depart}
                                         onChange={handleChange}
@@ -758,7 +758,7 @@ export default function CreateWordDocPage() {
 
                         <div className="bg-red-50 p-6 rounded-lg border border-purple-200">
                             <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-purple-300">
-                                ✍️ ข้อมูลผู้อนุมัติ
+                                ✍️ ข้อมูลผู้ลงนามอนุมัติ
                             </h3>
                             <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                                 <div>

@@ -60,10 +60,10 @@ export default function LoginPage() {
                                 ยินดีต้อนรับ
                             </h1>
                             <p className="text-lg text-gray-600 dark:text-gray-300 font-medium mb-6">
-                                ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ
+                                ระบบสร้างเอกสารและแบบฟอร์มยื่นโครงการ
                             </p>
                             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
-                                เข้าสู่ระบบเพื่อเริ่มต้นสร้างเอกสารและแบบฟอร์มอัตโนมัติ 
+                                เข้าสู่ระบบเพื่อเริ่มต้นใช้งาน
                             </p>
 
                             {/* Features Preview */}

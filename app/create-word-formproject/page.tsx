@@ -17,7 +17,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useTitle } from "@/hook/useTitle";
-import { WordLikeTextareaTOR } from "@/components/ui/WtextareaTOR";
+
 
 interface WordDocumentData {
     fileName: string;
@@ -475,12 +475,12 @@ export default function CreateFormProjectPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        ประวัติผู้รับผิดชอบโครงการ
+                                        ประวัติผู้ช่วยวิทยากรกระบวนการถอดบทเรียน
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
                                         name="author"
-                                        placeholder="กรอกประวัติส่วนตัวผู้รับผิดชอบโครงการ"
+                                        placeholder="กรอกประวัติส่วนตัว"
                                         className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.author}
                                         onChange={handleChange}
@@ -614,7 +614,7 @@ export default function CreateFormProjectPage() {
                             </div>
                             <div>
                                 <h4 className="font-semibold text-sm text-gray-600">
-                                    ชื่อผู้สั่งการ:
+                                    ชื่อผู้รับผิดชอบ:
                                 </h4>
                                 <p className="text-sm">
                                     {formData.person || "-"}
@@ -662,10 +662,18 @@ export default function CreateFormProjectPage() {
                         </div>
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
-                                เหตุผล:
+                                ความเป็นมาและแนวคิด:
                             </h4>
                             <p className="text-sm">
                                 {formData.rationale || "-"}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold text-sm text-gray-600">
+                                เป้าประสงค์:
+                            </h4>
+                            <p className="text-sm">
+                                {formData.goal || "-"}
                             </p>
                         </div>
                         <div>
@@ -678,21 +686,33 @@ export default function CreateFormProjectPage() {
                         </div>
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
-                                เป้าหมาย:
+                                เป้าหมายโครงการ:
                             </h4>
                             <p className="text-sm">{formData.target || "-"}</p>
                         </div>
 
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
-                                ขอบเขต:
+                                กรอบการดำเนินงาน:
                             </h4>
                             <p className="text-sm">{formData.scope || "-"}</p>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold text-sm text-gray-600">
+                                ผลผลิต:
+                            </h4>
+                            <p className="text-sm">{formData.product || "-"}</p>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold text-sm text-gray-600">
+                                ผลลัพธ์:
+                            </h4>
+                            <p className="text-sm">{formData.result || "-"}</p>
                         </div>
 
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
-                                วันที่เริ่มต้น - วันที่สิ้นสุด
+                                ระยะเวลาดำเนินการ
                             </h4>
                             <p className="text-sm">
                                 {formData.timeline || "-"}
@@ -701,7 +721,7 @@ export default function CreateFormProjectPage() {
 
                         <div>
                             <h4 className="font-semibold text-sm text-gray-600">
-                                ผู้สร้าง:
+                                ประวัติผู้ช่วยวิทยากรกระบวรการถอดบทเรียน:
                             </h4>
                             <p className="text-sm">{formData.author || "-"}</p>
                         </div>

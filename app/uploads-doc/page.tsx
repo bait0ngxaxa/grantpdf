@@ -135,6 +135,7 @@ export default function UploadDocPage() {
                 if (fileInputRef.current) {
                     fileInputRef.current.value = "";
                 }
+                
             } else {
                 setUploadMessage(result.error || "เกิดข้อผิดพลาดในการอัพโหลด");
                 setUploadSuccess(false);
@@ -197,7 +198,7 @@ export default function UploadDocPage() {
             </div>
 
             {/* Main Content */}
-            <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div className="bg-white rounded-lg shadow-md p-8">
                     {/* Project Selection */}
                     <div className="mb-8">
@@ -223,43 +224,51 @@ export default function UploadDocPage() {
                                 </Button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-4 max-h-[60vh] overflow-y-auto p-2">
                                 {projects.map((project) => (
                                     <div
                                         key={project.id}
-                                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                                        className={`card bg-base-100 shadow-md cursor-pointer transition-all duration-200 border-2 ${
                                             selectedProjectId === project.id
-                                                ? "border-primary bg-primary/5 shadow-md"
-                                                : "border-gray-200 hover:border-primary hover:shadow-sm"
+                                                ? "border-primary bg-primary/5 shadow-lg"
+                                                : "border-gray-200 hover:border-primary hover:shadow-lg"
                                         }`}
                                         onClick={() => {
                                             setSelectedProjectId(project.id);
                                             localStorage.setItem('selectedProjectId', project.id);
                                         }}
                                     >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <h4 className="font-semibold text-gray-900 mb-1">
-                                                    {project.name}
-                                                </h4>
-                                                {project.description && (
-                                                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                                                        {project.description}
-                                                    </p>
-                                                )}
-                                                <p className="text-xs text-gray-500">
-                                                    สร้างเมื่อ: {new Date(project.created_at).toLocaleDateString('th-TH')}
-                                                </p>
-                                            </div>
-                                            {selectedProjectId === project.id && (
-                                                <div className="flex-shrink-0 ml-2">
-                                                    <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        <div className="card-body p-6">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="flex items-center justify-center p-3 rounded-full bg-primary/10 flex-shrink-0">
+                                                    <svg className="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="text-xl font-bold mb-2 line-clamp-1">{project.name}</h3>
+                                                    {project.description && (
+                                                        <p className="text-sm text-base-content/60 mb-3 line-clamp-2 overflow-hidden text-ellipsis break-words">
+                                                            {project.description}
+                                                        </p>
+                                                    )}
+                                                    <div className="flex items-center text-xs text-base-content/50">
+                                                        <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                         </svg>
+                                                        สร้างเมื่อ: {new Date(project.created_at).toLocaleDateString('th-TH')}
                                                     </div>
                                                 </div>
-                                            )}
+                                                {selectedProjectId === project.id && (
+                                                    <div className="flex-shrink-0">
+                                                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

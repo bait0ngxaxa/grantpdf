@@ -36,6 +36,16 @@ export default function CreateTorsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [projectsPerPage] = useState(5); // Show 5 projects per page
+    
+    // Calculate pagination
+    const indexOfLastProject = currentPage * projectsPerPage;
+    const indexOfFirstProject = indexOfLastProject - projectsPerPage;
+    const currentProjects = projects.slice(indexOfFirstProject, indexOfLastProject);
+    const totalPages = Math.ceil(projects.length / projectsPerPage);
+    
     useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
     
     // Fetch user projects
@@ -175,34 +185,117 @@ export default function CreateTorsPage() {
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[60vh] overflow-y-auto p-2">
-                        {projects.map((project) => (
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto p-2">
+                        {currentProjects.map((project) => (
                             <div
                                 key={project.id}
-                                className={`card bg-base-100 shadow-xl cursor-pointer transition-all duration-200 border-2 ${selectedProjectId === project.id ? 'border-primary bg-primary/5' : 'border-transparent hover:border-primary'} hover:bg-base-200`}
+                                className={`card bg-base-100 shadow-md cursor-pointer transition-all duration-200 border-2 ${selectedProjectId === project.id ? 'border-primary bg-primary/5' : 'border-transparent hover:border-primary'} hover:bg-base-200`}
                                 onClick={() => handleProjectSelection(project.id)}
                             >
-                                <div className="card-body items-center text-center p-6">
-                                    <div className="flex items-center justify-center p-4 rounded-full bg-primary/10 mb-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
+                                <div className="card-body p-6">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex items-center justify-center p-3 rounded-full bg-primary/10 flex-shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-bold mb-2 line-clamp-1">{project.name}</h3>
+                                            <p className="text-sm text-base-content/60 mb-3 line-clamp-2 overflow-hidden text-ellipsis break-words">
+                                                {project.description || "ไม่มีคำอธิบาย"}
+                                            </p>
+                                            <div className="flex items-center space-x-4 text-xs text-base-content/60">
+                                                <span className="flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                    {project.files.length} เอกสาร
+                                                </span>
+                                                <span className="flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-6 6h6m-6 4h6m-7-6h1m-1 4h1m5-10V3a1 1 0 00-1-1H9a1 1 0 00-1 1v4H7a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V8a1 1 0 00-1-1h-1z" />
+                                                    </svg>
+                                                    สร้าง {new Date(project.created_at).toLocaleDateString("th-TH")}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex-shrink-0 flex items-center space-x-3">
+                                            {selectedProjectId === project.id && (
+                                                <div className="badge badge-primary badge-lg">เลือกแล้ว</div>
+                                            )}
+                                            <svg 
+                                                xmlns="http://www.w3.org/2000/svg" 
+                                                className="h-6 w-6 text-gray-400" 
+                                                fill="none" 
+                                                viewBox="0 0 24 24" 
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <h3 className="card-title text-xl mb-2">{project.name}</h3>
-                                    <p className="text-sm text-base-content/60 mb-3">
-                                        {project.description || "ไม่มีคำอธิบาย"}
-                                    </p>
-                                    <div className="flex justify-between w-full text-xs text-base-content/60">
-                                        <span>{project.files.length} เอกสาร</span>
-                                        <span>สร้าง {new Date(project.created_at).toLocaleDateString("th-TH")}</span>
-                                    </div>
-                                    {selectedProjectId === project.id && (
-                                        <div className="badge badge-primary badge-outline mt-3">เลือกแล้ว</div>
-                                    )}
                                 </div>
                             </div>
                         ))}
                     </div>
+                    
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center mt-6 space-x-2">
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                className={`btn btn-sm ${
+                                    currentPage === 1 
+                                        ? 'btn-disabled' 
+                                        : 'btn-outline hover:btn-primary'
+                                }`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                ก่อนหน้า
+                            </button>
+                            
+                            <div className="flex items-center space-x-1">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`btn btn-sm ${
+                                            currentPage === page
+                                                ? 'btn-primary'
+                                                : 'btn-outline hover:btn-primary'
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                            </div>
+                            
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                                className={`btn btn-sm ${
+                                    currentPage === totalPages 
+                                        ? 'btn-disabled' 
+                                        : 'btn-outline hover:btn-primary'
+                                }`}
+                            >
+                                ถัดไป
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
+                    
+                    {/* Project Info */}
+                    {projects.length > 0 && (
+                        <div className="text-center mt-4 text-sm text-base-content/60">
+                            แสดง {indexOfFirstProject + 1}-{Math.min(indexOfLastProject, projects.length)} จาก {projects.length} โครงการ
+                        </div>
+                    )}
                     
                     <div className="flex justify-center mt-8 gap-4">
                         <Button 
@@ -213,17 +306,11 @@ export default function CreateTorsPage() {
                         </Button>
                         <Button 
                             onClick={() => router.push('/userdashboard')}
-                            className="btn-primary"
+                            variant="outline"
                         >
                             สร้างโครงการใหม่
                         </Button>
-                        <Button 
-                            onClick={() => setSelectedCategory('general')}
-                            disabled={!selectedProjectId}
-                            className={selectedProjectId ? "btn-primary" : "btn-disabled"}
-                        >
-                            ดำเนินการต่อ
-                        </Button>
+                        
                     </div>
                 </>
             )}
@@ -273,6 +360,24 @@ export default function CreateTorsPage() {
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            {/* Upload Option */}
+            <div className="text-center mt-8">
+                <p className="text-lg text-base-content/70">
+                    หรือ 
+                    <button 
+                        onClick={() => {
+                            if (selectedProjectId) {
+                                localStorage.setItem('selectedProjectId', selectedProjectId);
+                                router.push('/uploads-doc');
+                            }
+                        }}
+                        className="text-primary hover:text-primary-focus underline cursor-pointer font-semibold transition-colors"
+                    >
+                        อัพโหลดเอกสาร
+                    </button>
+                </p>
             </div>
         </div>
     );

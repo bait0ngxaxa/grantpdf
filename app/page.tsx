@@ -58,7 +58,7 @@ export default function Home() {
                         href="/"
                         className=" font-semibold text-2xl hover:rounded-full text-primary hover:bg-white transform hover:scale-105 transition-transform duration-300"
                     >
-                        DOCX Template | HOMEPAGE
+                        GRANT ONLINE | HOMEPAGE
                     </Link>
                 </div>
                 <div className="flex-none">
@@ -183,18 +183,18 @@ export default function Home() {
                     ) : (
                         // แสดงเมื่อยังไม่ได้ล็อกอิน
                         <>
-                            <Button variant={"outline"} className="mr-3.5">
+                            <Button variant={"outline"} className="mr-3.5 cursor-pointer">
                                 <Link
                                     href="/signup"
-                                    className=" rounded-full mr-1 transition-all duration-300 hover:scale-105"
+                                    className="  rounded-full mr-1 transition-all duration-300 hover:scale-105"
                                 >
                                     สมัครสมาชิก
                                 </Link>
                             </Button>
-                            <Button>
+                            <Button className="cursor-pointer ">
                                 <Link
                                     href="/signin"
-                                    className=" rounded-full transition-all duration-300 hover:scale-105"
+                                    className="  rounded-full transition-all duration-300 hover:scale-105"
                                 >
                                     เข้าสู่ระบบ
                                 </Link>
@@ -221,23 +221,23 @@ export default function Home() {
                                 </div>
 
                                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent mb-4">
-                                    DOCX Template System
+                                    GRANT ONLINE
                                 </h1>
 
                                 <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 font-medium mb-6">
-                                    ระบบสร้างและกรอกแบบฟอร์มเอกสารอัตโนมัติ
+                                    ระบบสร้างเอกสารและยื่นโครงการ
                                 </p>
 
                                 <div className="bg-gradient-to-r from-primary/5 via-blue-50/50 to-secondary/5 dark:from-primary/10 dark:via-gray-700/30 dark:to-secondary/10 rounded-2xl p-6 mb-8">
                                     <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 leading-relaxed">
                                         {session
                                             ? `ยินดีต้อนรับกลับ, ${session.user?.name || session.user?.email?.split("@")[0]}! 🎉`
-                                            : "ยินดีต้อนรับสู่ระบบสร้างเอกสารอัตโนมัติ"}
+                                            : "ยินดีต้อนรับสู่ระบบสร้างเอกสารและยื่นโครงการ"}
                                     </p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                                         {session
                                             ? "เริ่มต้นสร้างเอกสารและแบบฟอร์มใหม่ได้เลย"
-                                            : "สร้างเอกสารจากเทมเพลตได้อย่างง่ายดายและรวดเร็ว"}
+                                            : "สร้างเอกสารจากเทมเพลตพร้อมยื่นเสนอโครงการ"}
                                     </p>
                                 </div>
                             </div>
@@ -294,7 +294,7 @@ export default function Home() {
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
-                                        การดำเนินการ
+                                        Get Started
                                     </h3>
 
                                     {session ? (
@@ -342,13 +342,13 @@ export default function Home() {
                                                 <div className="flex flex-col sm:flex-row gap-3">
                                                     <Button
                                                         variant="outline"
-                                                        className="flex-1"
+                                                        className="flex-1 cursor-pointer"
                                                         onClick={() => router.push("/signup")}
                                                     >
                                                         สมัครสมาชิก
                                                     </Button>
                                                     <Button
-                                                        className="flex-1"
+                                                        className="flex-1 cursor-pointer"
                                                         onClick={() => router.push("/signin")}
                                                     >
                                                         เข้าสู่ระบบ

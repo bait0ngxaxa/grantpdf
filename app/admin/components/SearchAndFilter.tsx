@@ -38,13 +38,13 @@ export default function SearchAndFilter({
                 >
                     <option value="createdAtDesc">เรียงตามวันที่สร้าง (ใหม่สุด)</option>
                     <option value="createdAtAsc">เรียงตามวันที่สร้าง (เก่าสุด)</option>
-                    <option value="statusDoneFirst">เรียงตามสถานะ (เสร็จก่อน)</option>
-                    <option value="statusPendingFirst">เรียงตามสถานะ (รอก่อน)</option>
+                    <option value="statusEdit">เรียงตามสถานะ (แก้ไขก่อน)</option>
                     <option value="statusApproved">เรียงตามสถานะ (อนุมัติก่อน)</option>
                     <option value="statusPending">เรียงตามสถานะ (รอดำเนินการก่อน)</option>
                     <option value="statusRejected">เรียงตามสถานะ (ไม่อนุมัติก่อน)</option>
+                    <option value="statusClosed">เรียงตามสถานะ (ปิดโครงการก่อน)</option>
                 </select>
-                <select
+                {/* <select
                     className="select select-bordered w-full sm:w-auto rounded-full border-2"
                     value={selectedFileType}
                     onChange={(e) => setSelectedFileType(e.target.value)}
@@ -52,7 +52,7 @@ export default function SearchAndFilter({
                     <option value="ไฟล์ทั้งหมด">ไฟล์ทั้งหมด</option>
                     <option value="pdf">PDF</option>
                     <option value="docx">Word</option>
-                </select>
+                </select> */}
                 <select
                     className="select select-bordered w-full sm:w-auto rounded-full border-2"
                     value={selectedStatus}
@@ -62,6 +62,8 @@ export default function SearchAndFilter({
                     <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
                     <option value="อนุมัติ">อนุมัติ</option>
                     <option value="ไม่อนุมัติ">ไม่อนุมัติ</option>
+                    <option value="แก้ไข">แก้ไข</option>
+                    <option value="ปิดโครงการ">ปิดโครงการ</option>
                 </select>
             </div>
         </div>

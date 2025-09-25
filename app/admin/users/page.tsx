@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTitle } from "@/hook/useTitle";
@@ -20,6 +20,10 @@ import {
     Trash2,
     CheckCircle2,
     XCircle,
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
 } from "lucide-react";
 
 interface UserData {
@@ -51,6 +55,12 @@ export default function AdminUserManagementPage() {
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [resultMessage, setResultMessage] = useState("");
     const [isResultSuccess, setIsResultSuccess] = useState(true);
+    
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const usersPerPage = 10;
+    
     useTitle("จัดการผู้ใช้งาน | ระบบจัดการเอกสาร");
 
     useEffect(() => {
@@ -196,6 +206,71 @@ export default function AdminUserManagementPage() {
         } finally {
             setIsDeleting(false);
         }
+    };
+
+    // Filtered and paginated users
+    const filteredUsers = useMemo(() => {
+        return users.filter(
+            (user) =>
+                user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [users, searchTerm]);
+    
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+    
+    const paginatedUsers = useMemo(() => {
+        const startIndex = (currentPage - 1) * usersPerPage;
+        const endIndex = startIndex + usersPerPage;
+        return filteredUsers.slice(startIndex, endIndex);
+    }, [filteredUsers, currentPage, usersPerPage]);
+    
+    // Reset to first page when search term changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+    
+    // Pagination handlers
+    const goToFirstPage = () => setCurrentPage(1);
+    const goToLastPage = () => setCurrentPage(totalPages);
+    const goToPreviousPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
+    const goToNextPage = () => setCurrentPage(prev => Math.min(totalPages, prev + 1));
+    const goToPage = (page: number) => setCurrentPage(page);
+    
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisiblePages = 5;
+        
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbers.push(i);
+            }
+        } else {
+            if (currentPage <= 3) {
+                for (let i = 1; i <= 4; i++) {
+                    pageNumbers.push(i);
+                }
+                pageNumbers.push('...');
+                pageNumbers.push(totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pageNumbers.push(1);
+                pageNumbers.push('...');
+                for (let i = totalPages - 3; i <= totalPages; i++) {
+                    pageNumbers.push(i);
+                }
+            } else {
+                pageNumbers.push(1);
+                pageNumbers.push('...');
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    pageNumbers.push(i);
+                }
+                pageNumbers.push('...');
+                pageNumbers.push(totalPages);
+            }
+        }
+        
+        return pageNumbers;
     };
 
     // Menu items for admin sidebar
@@ -477,12 +552,41 @@ export default function AdminUserManagementPage() {
                     {/* Users Table */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
                         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                                รายการผู้ใช้งาน
-                            </h2>
-                            <p className="text-gray-600 dark:text-gray-400 mt-1">
-                                จัดการบัญชีผู้ใช้และสิทธิ์การเข้าถึง
-                            </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                                        รายการผู้ใช้งาน
+                                    </h2>
+                                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                                        จัดการบัญชีผู้ใช้และสิทธิ์การเข้าถึง ({filteredUsers.length} คน)
+                                    </p>
+                                </div>
+                                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                                    <div className="relative">
+                                        <Input
+                                            type="text"
+                                            placeholder="ค้นหาผู้ใช้งาน..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="pl-10 pr-4 py-2 w-full sm:w-64 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+                                        />
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="overflow-x-auto">
@@ -510,8 +614,8 @@ export default function AdminUserManagementPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.length > 0 ? (
-                                        users.map((user) => (
+                                    {paginatedUsers.length > 0 ? (
+                                        paginatedUsers.map((user) => (
                                             <tr
                                                 key={user.id}
                                                 className="hover:bg-gray-50 dark:hover:bg-gray-700 border-b dark:border-gray-600"
@@ -599,10 +703,10 @@ export default function AdminUserManagementPage() {
                                                         />
                                                     </svg>
                                                     <p className="text-lg font-medium">
-                                                        ไม่พบผู้ใช้งาน
+                                                        {searchTerm ? "ไม่พบผู้ใช้งานที่ค้นหา" : "ไม่พบผู้ใช้งาน"}
                                                     </p>
                                                     <p className="text-sm">
-                                                        ยังไม่มีผู้ใช้งานในระบบ
+                                                        {searchTerm ? `ไม่พบผู้ใช้งานที่ตรงกับ "${searchTerm}"` : "ยังไม่มีผู้ใช้งานในระบบ"}
                                                     </p>
                                                 </div>
                                             </td>
@@ -611,6 +715,86 @@ export default function AdminUserManagementPage() {
                                 </tbody>
                             </table>
                         </div>
+                        
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                                <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+                                    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                                        <span>
+                                            แสดง {((currentPage - 1) * usersPerPage) + 1} - {Math.min(currentPage * usersPerPage, filteredUsers.length)} จาก {filteredUsers.length} รายการ
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                        {/* First page */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={goToFirstPage}
+                                            disabled={currentPage === 1}
+                                            className="p-2"
+                                        >
+                                            <ChevronsLeft className="h-4 w-4" />
+                                        </Button>
+                                        
+                                        {/* Previous page */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={goToPreviousPage}
+                                            disabled={currentPage === 1}
+                                            className="p-2"
+                                        >
+                                            <ChevronLeft className="h-4 w-4" />
+                                        </Button>
+                                        
+                                        {/* Page numbers */}
+                                        <div className="flex items-center space-x-1">
+                                            {getPageNumbers().map((pageNum, index) => (
+                                                pageNum === '...' ? (
+                                                    <span key={index} className="px-2 py-1 text-gray-500 dark:text-gray-400">
+                                                        ...
+                                                    </span>
+                                                ) : (
+                                                    <Button
+                                                        key={index}
+                                                        size="sm"
+                                                        variant={currentPage === pageNum ? "default" : "outline"}
+                                                        onClick={() => goToPage(pageNum as number)}
+                                                        className="min-w-[40px] h-10 text-sm"
+                                                    >
+                                                        {pageNum}
+                                                    </Button>
+                                                )
+                                            ))}
+                                        </div>
+                                        
+                                        {/* Next page */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={goToNextPage}
+                                            disabled={currentPage === totalPages}
+                                            className="p-2"
+                                        >
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                        
+                                        {/* Last page */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={goToLastPage}
+                                            disabled={currentPage === totalPages}
+                                            className="p-2"
+                                        >
+                                            <ChevronsRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
