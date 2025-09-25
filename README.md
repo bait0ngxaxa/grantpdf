@@ -2,10 +2,11 @@
 
 ## 📋 ข้อมูลทั่วไป
 
-- **ชื่อโปรเจกต์:** DOCX Generator
+- **ชื่อโปรเจกต์:** GRANT ONLINE
 - **เวอร์ชัน:** 0.1.0 
-- **ประเภท:** ระบบจัดการเอกสารออนไลน์ (Document Management System)
-- **วันที่สร้าง:** 1/8/2025
+- **ประเภท:** ระบบจัดการโครงการและเอกสารออนไลน์ (Document Management System)
+- **วันที่สร้าง:** August 2025
+- **วันที่อัปเดตล่าสุด:** September 25, 2025
 - **สถานะ:** Production Ready ✅
 
 ## 🛠️ Tech Stack
@@ -32,7 +33,9 @@
 - **UI Components:** [DaisyUI](https://daisyui.com/) v5.0.50
 - **Icons:** @heroicons/react v2.2.0, lucide-react v0.540.0
 - **Dialogs:** @radix-ui/react-dialog v1.1.15
+- **Slots:** @radix-ui/react-slot v1.2.3
 - **Animations:** tw-animate-css v1.3.7
+- **React:** v19.1.0
 
 ### Document Processing
 - **PDF Processing:** [pdf-lib](https://pdf-lib.js.org/) v1.17.1
@@ -54,47 +57,63 @@
 
 ### 📁 Directory Structure
 ```
-grant_to_pdf/
+docxTemplate/
 ├── 📁 app/                         # Next.js App Router
 │   ├── 📄 layout.tsx              # Root layout
 │   ├── 📄 page.tsx                # Homepage
 │   ├── 📄 globals.css             # Global styles
-│   ├── 📁 api/                    # API Routes (18 endpoints)
-│   │   ├── 📁 auth/               # Authentication APIs
-│   │   ├── 📁 admin/              # Admin management APIs
-│   │   ├── 📁 user-docs/          # User document APIs
-│   │   ├── 📁 fill-*-template/    # Template filling APIs
-│   │   └── 📁 projects/           # Project management APIs
+│   ├── 📁 api/                    # API Routes (10 main endpoints)
+│   │   ├── 📁 auth/               # Authentication APIs (4 endpoints)
+│   │   ├── 📁 admin/              # Admin management APIs (5 endpoints)
+│   │   ├── 📁 user-docs/          # User document APIs (2 endpoints)
+│   │   ├── 📁 fill-*-template/    # Template filling APIs (4 endpoints)
+│   │   ├── 📁 projects/           # Project management APIs (2 endpoints)
+│   │   ├── 📁 attachment/         # Attachment APIs (1 endpoint)
+│   │   └── 📁 file-upload/        # File upload API (1 endpoint)
 │   ├── 📁 admin/                  # Admin pages (2 pages)
+│   │   ├── 📄 page.tsx            # Admin dashboard
+│   │   ├── 📁 users/              # User management
+│   │   └── 📁 components/         # Admin-specific components (8 components)
 │   ├── 📁 create-word-*/          # Document creation pages (4 pages)
-│   └── 📁 [other-pages]/          # Other application pages (11 pages)
+│   ├── 📁 userdashboard/          # User dashboard
+│   │   ├── 📄 page.tsx            # User dashboard page
+│   │   └── 📁 components/         # User dashboard components
+│   ├── 📁 component/              # Session provider
+│   └── 📁 [other-pages]/          # Other application pages (9 pages)
 ├── 📁 components/                 # Reusable UI components
-│   └── 📁 ui/                     # Custom UI components (5 components)
+│   ├── 📁 ui/                     # Custom UI components (7 components)
+│   └── 📁 home/                   # Home page components
 ├── 📁 lib/                        # Utility libraries & configurations
 │   ├── 📄 auth.ts                 # Authentication configuration
 │   ├── 📄 prisma.ts               # Database client
 │   ├── 📄 supabase.ts             # Supabase client
 │   ├── 📄 ratelimit.ts            # Rate limiting
-│   └── 📁 generated/              # Prisma generated files
+│   ├── 📄 fixParagraph.ts         # Text processing utilities
+│   ├── 📄 text.ts                 # Text utilities
+│   └── 📄 utils.ts                # General utilities
 ├── 📁 prisma/                     # Database schema & migrations
 │   ├── 📄 schema.prisma           # Database schema
-│   └── 📁 migrations/             # Database migrations (2 migrations)
+│   └── 📁 migrations/             # Database migrations (1 migration)
 ├── 📁 public/                     # Static assets
 │   ├── 📁 font/                   # Thai fonts (2 fonts)
-│   ├── 📁 upload/                 # File uploads storage
-│   └── 📁 *.docx                  # Document templates (4 templates)
-├── 📁 hook/                       # Custom React hooks
-├── 📁 type/                       # TypeScript type definitions
-└── 📄 middleware.ts               # Route protection middleware
+│   ├── 📄 *.docx                  # Document templates (4 templates)
+│   └── 📄 *.png, *.jpg, *.svg     # Images and icons
+├── 📁 hook/                       # Custom React hooks (1 hook)
+├── 📁 type/                       # TypeScript type definitions (2 files)
+├── 📄 middleware.ts               # Route protection middleware
+├── 📄 server.js                   # Custom server configuration
+└── 📄 components.json             # shadcn/ui configuration
 ```
 
 ### 📈 Project Statistics
 - **Total Pages:** 17 pages (page.tsx files)
-- **API Endpoints:** 18 routes (route.ts files)
-- **UI Components:** 5 custom components
-- **Database Models:** 3 models (User, Project, UserFile)
+- **API Endpoints:** 16+ routes (route.ts files)
+- **UI Components:** 15+ custom components
+- **Database Models:** 4 models (User, Project, UserFile, AttachmentFile)
 - **Template Types:** 4 document templates
 - **Languages Supported:** Thai & English
+- **Admin Components:** 8 specialized admin components
+- **Utility Libraries:** 7 utility files
 
 ## 🔐 Database Schema
 
@@ -106,13 +125,14 @@ model User {
   email      String    @unique
   password   String
   role       String    @default("member")
-  created_at DateTime  @default(now())
-  updated_at DateTime? @default(now())
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
   
   // Relations
   files      UserFile[]
   projects   Project[]
 }
+```
 ```
 
 ### Project Model  
@@ -121,14 +141,18 @@ model Project {
   id          Int       @id @default(autoincrement())
   name        String
   description String?
-  created_at  DateTime  @default(now())
-  updated_at  DateTime? @default(now())
+  status      String    @default("กำลังดำเนินการ")
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
   userId      Int
   
   // Relations
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   files       UserFile[]
+  
+  @@index([userId])
 }
+```
 ```
 
 ### UserFile Model
@@ -140,14 +164,37 @@ model UserFile {
   fileExtension    String
   downloadStatus   String    @default("pending")
   downloadedAt     DateTime?
-  created_at       DateTime  @default(now())
-  updated_at       DateTime? @default(now())
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime? @default(now()) @db.Timestamp(6)
   userId           Int
   projectId        Int?
   
   // Relations  
-  user             User      @relation(fields: [userId], references: [id])
-  project          Project?  @relation(fields: [projectId], references: [id])
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project          Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  attachmentFiles  AttachmentFile[]
+  
+  @@index([userId])
+  @@index([projectId])
+}
+```
+
+### AttachmentFile Model
+```prisma
+model AttachmentFile {
+  id       Int    @id @default(autoincrement())
+  fileName String
+  filePath String
+  fileSize Int
+  mimeType String
+  
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  
+  userFileId Int
+  userFile   UserFile @relation(fields: [userFileId], references: [id], onDelete: Cascade)
+  
+  @@index([userFileId])
 }
 ```
 
@@ -189,7 +236,7 @@ model UserFile {
 ### ⚙️ Admin Panel
 - **User Management** - จัดการผู้ใช้ทั้งหมด
 - **System Overview** - ภาพรวมระบบ
-- **File Management** - จัดการไฟล์ทั้งหมด
+- **File Management** - จัดการโครงการและไฟล์ทั้งหมดในระบบ
 - **Download Monitoring** - ติดตามการดาวน์โหลด
 - **System Statistics** - สถิติระบบ
 
@@ -207,7 +254,6 @@ model UserFile {
 - `GET /api/user-docs/download/[id]` - ดาวน์โหลดเอกสาร
 
 ### Template Processing APIs
-- `POST /api/fill-pdf-template` - กรอกเทมเพลต PDF
 - `POST /api/fill-tor-template` - สร้างเอกสาร TOR
 - `POST /api/fill-contract-template` - สร้างสัญญาจ้าง
 - `POST /api/fill-approval-template` - สร้างเอกสารอนุมัติ
@@ -217,11 +263,17 @@ model UserFile {
 - `GET /api/admin/dashboard` - ข้อมูลแดชบอร์ด
 - `DELETE /api/admin/dashboard/file/[id]` - ลบไฟล์
 - `GET /api/admin/download/[id]` - ดาวน์โหลดไฟล์ (Admin)
+- `GET /api/admin/preview/[filename]` - พรีวิวไฟล์
+- `GET /api/admin/projects` - จัดการโครงการ (Admin)
 - `GET /api/admin/users` - รายการผู้ใช้
 - `PUT /api/admin/users/[id]` - อัปเดตผู้ใช้
 
 ### Project Management APIs
 - `GET/POST /api/projects` - จัดการโครงการ
+- `PUT/DELETE /api/projects/[id]` - อัปเดต/ลบโครงการ
+
+### Attachment APIs
+- `GET /api/attachment/download/[id]` - ดาวน์โหลดไฟล์แนบ
 
 ### File Upload API
 - `POST /api/file-upload` - อัปโหลดไฟล์
@@ -231,16 +283,21 @@ model UserFile {
 ### Design System
 - **Modern UI** - ดีไซน์ทันสมัยด้วย Tailwind CSS + DaisyUI
 - **Responsive Design** - รองรับทุกขนาดหน้าจอ
-- **Thai Typography** - ฟอนต์ภาษาไทยที่สวยงาม (Noto Sans Thai, TH Sarabun)
+- **Thai Typography** - ฟอนต์ภาษาไทยที่สวยงาม (fonts ในโฟลเดอร์ public/font/)
+- **Component System** - ระบบคอมโพเนนต์ที่ยืดหยุ่นด้วย shadcn/ui
+- **Card-based Layout** - เลย์เอาต์แบบการ์ดสำหรับการจัดการโครงการ
 <!-- - **Dark/Light Mode** - รองรับธีมมืด/สว่าง
 - **Accessibility** - รองรับการเข้าถึงสำหรับผู้พิการ -->
 
 ### Interactive Components
-- **Modal Dialogs** - กล่องโต้ตอบแบบโมดอล
+- **Modal Dialogs** - กล่องโต้ตอบแบบโมดอลด้วย Radix UI
 - **File Drag & Drop** - ลากและวางไฟล์
-- **Real-time Search** - ค้นหาแบบ real-time
-- **Pagination** - แบ่งหน้าข้อมูล
-- **Loading States** - สถานะการโหลดข้อมูล
+- **Real-time Search** - ค้นหาและกรองแบบ real-time
+- **Project Cards** - การ์ดโครงการที่ขยายได้
+- **Attachment Lists** - รายการไฟล์แนบที่จัดการได้
+- **Loading Spinners** - สถานะการโหลดข้อมูล
+- **Empty States** - สถานะเมื่อไม่มีข้อมูล
+- **Search and Filter** - ระบบค้นหาและกรองขั้นสูง
 - **Error Handling** - จัดการข้อผิดพลาด
 
 ## 🔒 Security Features
@@ -324,7 +381,7 @@ npm run lint         # รัน ESLint
 
 ## 📞 Support & Contact
 
-สำหรับคำถามหรือการสนับสนุน กรุณาติดต่อทีมพัฒนา
+สำหรับคำถามหรือการสนับสนุน กรุณาติดต่อทีมพัฒนา IT NHF
 
 
-*อัปเดตล่าสุด: กันยายน 2025*
+*อัปเดตล่าสุด: 25 กันยายน 2025*
