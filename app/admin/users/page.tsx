@@ -727,70 +727,78 @@ export default function AdminUserManagementPage() {
                                     </div>
                                     
                                     <div className="flex items-center space-x-2">
-                                        {/* First page */}
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={goToFirstPage}
-                                            disabled={currentPage === 1}
-                                            className="p-2"
-                                        >
-                                            <ChevronsLeft className="h-4 w-4" />
-                                        </Button>
-                                        
-                                        {/* Previous page */}
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
+                                        {/* Previous Button */}
+                                        <button
                                             onClick={goToPreviousPage}
                                             disabled={currentPage === 1}
-                                            className="p-2"
+                                            className={`px-3 py-2 rounded-lg border transition-colors ${
+                                                currentPage === 1
+                                                    ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                                                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 cursor-pointer"
+                                            }`}
                                         >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-                                        
-                                        {/* Page numbers */}
-                                        <div className="flex items-center space-x-1">
-                                            {getPageNumbers().map((pageNum, index) => (
-                                                pageNum === '...' ? (
-                                                    <span key={index} className="px-2 py-1 text-gray-500 dark:text-gray-400">
-                                                        ...
-                                                    </span>
-                                                ) : (
-                                                    <Button
-                                                        key={index}
-                                                        size="sm"
-                                                        variant={currentPage === pageNum ? "default" : "outline"}
-                                                        onClick={() => goToPage(pageNum as number)}
-                                                        className="min-w-[40px] h-10 text-sm"
-                                                    >
-                                                        {pageNum}
-                                                    </Button>
-                                                )
-                                            ))}
-                                        </div>
-                                        
-                                        {/* Next page */}
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-4 w-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M15 19l-7-7 7-7"
+                                                />
+                                            </svg>
+                                        </button>
+
+                                        {/* Page Numbers */}
+                                        {getPageNumbers().map((pageNum, index) => (
+                                            pageNum === '...' ? (
+                                                <span key={index} className="px-3 py-2 text-gray-500 dark:text-gray-400">
+                                                    ...
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => goToPage(pageNum as number)}
+                                                    className={`px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
+                                                        currentPage === pageNum
+                                                            ? "bg-primary text-white border-primary"
+                                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                                                    }`}
+                                                >
+                                                    {pageNum}
+                                                </button>
+                                            )
+                                        ))}
+
+                                        {/* Next Button */}
+                                        <button
                                             onClick={goToNextPage}
                                             disabled={currentPage === totalPages}
-                                            className="p-2"
+                                            className={`px-3 py-2 rounded-lg border transition-colors ${
+                                                currentPage === totalPages
+                                                    ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                                                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 cursor-pointer"
+                                            }`}
                                         >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                        
-                                        {/* Last page */}
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={goToLastPage}
-                                            disabled={currentPage === totalPages}
-                                            className="p-2"
-                                        >
-                                            <ChevronsRight className="h-4 w-4" />
-                                        </Button>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-4 w-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M9 5l7 7-7 7"
+                                                />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
