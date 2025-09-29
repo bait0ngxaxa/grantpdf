@@ -107,7 +107,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-yellow-400 rounded-full mr-2"></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
                         รอดำเนินการ
                       </span>
                     </div>
@@ -118,7 +118,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
                         อนุมัติแล้ว
                       </span>
                     </div>
@@ -129,7 +129,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-red-400 rounded-full mr-2"></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
                         ไม่อนุมัติ
                       </span>
                     </div>
@@ -140,12 +140,23 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-orange-400 rounded-full mr-2"></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
                         ต้องแก้ไข
                       </span>
                     </div>
                     <span className="text-sm font-semibold text-orange-600">
                       {projectStatusCounts.editing}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        ปิดโครงการ
+                      </span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600">
+                      {projectStatusCounts.closed}
                     </span>
                   </div>
                 </div>
@@ -180,7 +191,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 {totalDocuments}
               </div>
               <div className="text-l text-gray-500 dark:text-gray-400">
-                เอกสารที่คุณสร้าง
+                เอกสารของฉัน
               </div>
             </div>
           </div>

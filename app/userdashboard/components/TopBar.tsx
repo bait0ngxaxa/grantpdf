@@ -61,7 +61,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               className="font-semibold cursor-pointer transform hover:scale-105 transition-transform duration-300"
               onClick={() => router.push("/admin")}
             >
-              Admin Panel
+              ระบบแอดมิน
             </Button>
           )}
           <Button

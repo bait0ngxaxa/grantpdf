@@ -20,10 +20,7 @@ import {
     Trash2,
     CheckCircle2,
     XCircle,
-    ChevronLeft,
-    ChevronRight,
-    ChevronsLeft,
-    ChevronsRight,
+    
 } from "lucide-react";
 
 interface UserData {
@@ -283,7 +280,7 @@ export default function AdminUserManagementPage() {
         },
         {
             id: "documents",
-            name: "จัดการเอกสาร",
+            name: "จัดการโครงการและเอกสาร",
             href: "/admin",
             icon: <FileText className="h-5 w-5" />,
         },
