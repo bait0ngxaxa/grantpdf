@@ -336,7 +336,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* Latest Project Card */}
       <div className="grid grid-cols-1 gap-6 mb-8">
-        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+        <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-100 transition-transform duration-300">
           <div className="flex items-center space-x-4">
             <div className="text-teal-600 bg-teal-100 dark:bg-teal-900/20 p-3 rounded-full">
               <svg
@@ -419,7 +419,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m3 4.197a4 4 0 11-7.32 0l3.66 1.83z"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
             การจัดการผู้ใช้งาน

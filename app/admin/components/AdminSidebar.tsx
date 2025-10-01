@@ -161,18 +161,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     {item.icon}
                     <span className="font-medium">{item.name}</span>
                   </div>
-                  {/* Add counters for relevant items */}
-                  {item.id === "users" && totalUsers > 0 && (
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        activeTab === item.id
-                          ? "bg-white/20 text-white"
-                          : "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400"
-                      }`}
-                    >
-                      {totalUsers}
-                    </span>
-                  )}
+                 
                 </button>
               </li>
             ))}
@@ -236,7 +225,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             className="w-full text-sm cursor-pointer"
             onClick={() => router.push("/userdashboard")}
           >
-            กลับสู่แดชบอร์ดผู้ใช้
+            กลับ Dashboard ผู้ใช้
           </Button>
         </div>
       </div>

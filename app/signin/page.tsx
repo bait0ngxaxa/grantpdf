@@ -13,12 +13,14 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     useTitle("เข้าสู่ระบบ - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setIsLoading(true);
 
         try {
             const result = await signIn("credentials", {
@@ -37,6 +39,8 @@ export default function LoginPage() {
         } catch (err) {
             console.error("An unexpected error occurred:", err);
             setError("เกิดข้อผิดพลาดบางอย่าง กรุณาลองใหม่อีกครั้ง");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -187,9 +191,36 @@ export default function LoginPage() {
                                 {/* Submit Button */}
                                 <Button
                                     type="submit"
-                                    className="cursor-pointer w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
+                                    disabled={isLoading}
+                                    className="cursor-pointer w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                                 >
-                                    เข้าสู่ระบบ
+                                    {isLoading ? (
+                                        <div className="flex items-center justify-center space-x-2">
+                                            <svg
+                                                className="animate-spin h-5 w-5 text-white"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                ></circle>
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                ></path>
+                                            </svg>
+                                            <span>กำลังเข้าสู่ระบบ...</span>
+                                        </div>
+                                    ) : (
+                                        "เข้าสู่ระบบ"
+                                    )}
                                 </Button>
                             </form>
 

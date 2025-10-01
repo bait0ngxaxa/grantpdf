@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { ChartBarBig, UserStar } from 'lucide-react';
 
 interface TopBarProps {
   isSidebarOpen: boolean;
@@ -47,6 +48,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               />
             </svg>
           </button>
+          <ChartBarBig/>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {menuItems.find((item) => item.id === activeTab)?.name ||
               "Dashboard"}
@@ -61,6 +63,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               className="font-semibold cursor-pointer transform hover:scale-105 transition-transform duration-300"
               onClick={() => router.push("/admin")}
             >
+              <UserStar  />
               ระบบแอดมิน
             </Button>
           )}

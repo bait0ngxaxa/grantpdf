@@ -205,24 +205,55 @@ export default function ProjectCard({
             {isExpanded && (
                 <div className="border-t border-gray-200 dark:border-gray-600">
                     <div className="p-4 bg-white dark:bg-gray-800">
-                        <div className="space-y-3">
-                            {project.files.map((file) => (
-                                <FileItem
-                                    key={file.id}
-                                    file={{
-                                        id: file.id,
-                                        originalFileName: file.originalFileName,
-                                        fileExtension: file.fileExtension,
-                                        downloadStatus: file.downloadStatus,
-                                        created_at: file.created_at,
-                                        storagePath: file.storagePath,
-                                        attachmentFiles: file.attachmentFiles
-                                    }}
-                                    onPreviewPdf={onPreviewPdf}
-                                    onDeleteFile={onDeleteFile}
-                                />
-                            ))}
-                        </div>
+                        {project.files.length > 0 ? (
+                            <div className="space-y-3">
+                                {project.files.map((file) => (
+                                    <FileItem
+                                        key={file.id}
+                                        file={{
+                                            id: file.id,
+                                            originalFileName: file.originalFileName,
+                                            fileExtension: file.fileExtension,
+                                            downloadStatus: file.downloadStatus,
+                                            created_at: file.created_at,
+                                            storagePath: file.storagePath,
+                                            attachmentFiles: file.attachmentFiles
+                                        }}
+                                        onPreviewPdf={onPreviewPdf}
+                                        onDeleteFile={onDeleteFile}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <div className="flex flex-col items-center space-y-3">
+                                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                        <svg 
+                                            xmlns="http://www.w3.org/2000/svg" 
+                                            className="h-8 w-8 text-gray-400 dark:text-gray-500" 
+                                            fill="none" 
+                                            viewBox="0 0 24 24" 
+                                            stroke="currentColor"
+                                        >
+                                            <path 
+                                                strokeLinecap="round" 
+                                                strokeLinejoin="round" 
+                                                strokeWidth="2" 
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div className="text-center">
+                                        <h4 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                            ยังไม่มีไฟล์ในโครงการ
+                                        </h4>
+                                        <p className="text-sm text-gray-400 dark:text-gray-500">
+                                            โครงการนี้ยังไม่มีการสร้าง/อัปโหลดไฟล์เอกสารใดๆ
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

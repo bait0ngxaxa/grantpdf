@@ -250,7 +250,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                       router.push("/createdocs");
                     }}
                     size="sm"
-                    className="cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                    className="cursor-pointer transform hover:scale-105 transition-transform duration-300 p-4"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { ChartBarBig } from 'lucide-react';
 
 interface AdminTopBarProps {
   isSidebarOpen: boolean;
@@ -43,6 +44,7 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
               />
             </svg>
           </button>
+          <ChartBarBig/>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {menuItems.find((item) => item.id === activeTab)?.name ||
               "Admin Dashboard"}
