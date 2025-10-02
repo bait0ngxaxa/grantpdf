@@ -15,6 +15,7 @@ import {
     DialogDescription,
     DialogClose,
 } from "@/components/ui/dialog";
+import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
 
 
@@ -232,10 +233,6 @@ export default function CreateTORPage() {
             setIsSubmitting(false);
         }
     };
-
-    const downloadFileName = formData.fileName.endsWith(".docx")
-        ? formData.fileName
-        : `${formData.fileName}.docx`;
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-green-50 p-4 font-sans antialiased">
@@ -1039,67 +1036,13 @@ export default function CreateTORPage() {
             </Dialog>
 
             {/* Success Modal */}
-            <Dialog
-                open={isSuccessModalOpen}
-                onOpenChange={setIsSuccessModalOpen}
-            >
-                <DialogContent className="max-w-md">
-                    <DialogHeader>
-                        <DialogTitle className="text-green-600">
-                            สร้างเอกสาร TOR สำเร็จ!
-                        </DialogTitle>
-                        <DialogDescription>
-                            เอกสาร TOR ของคุณพร้อมแล้ว
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="flex flex-col items-center space-y-4 py-4">
-                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                            <svg
-                                className="w-8 h-8 text-green-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                        </div>
-                        <p className="text-center text-gray-600">
-                            ไฟล์: {downloadFileName}
-                        </p>
-                    </div>
-
-                    <DialogFooter className="flex-col space-y-2">
-                        {generatedFileUrl && (
-                            <a
-                                href={generatedFileUrl}
-                                download={downloadFileName}
-                                rel="noopener noreferrer"
-                                className="w-full"
-                            >
-                                <Button className="w-full bg-green-600 hover:bg-green-700">
-                                    ดาวน์โหลดเอกสาร
-                                </Button>
-                            </a>
-                        )}
-                        <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => {
-                                setIsSuccessModalOpen(false);
-                                router.push("/userdashboard");
-                            }}
-                        >
-                            กลับไปหน้าหลัก
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <CreateDocSuccessModal
+                isOpen={isSuccessModalOpen}
+                onClose={() => setIsSuccessModalOpen(false)}
+                fileName={formData.fileName}
+                downloadUrl={generatedFileUrl}
+                documentType="เอกสาร TOR "
+            />
         </div>
     );
 }
