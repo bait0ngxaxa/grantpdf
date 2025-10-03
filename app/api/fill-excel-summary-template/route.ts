@@ -41,8 +41,19 @@ export async function POST(req: NextRequest) {
         const organize = formData.get("organize") as string;
         const projectOwner = formData.get("projectOwner") as string;
         const projectReview = formData.get("projectReview") as string;
-        const inspector = formData.get("inspector") as string;
+        
         const coordinator = formData.get("coordinator") as string;
+        const projectCode = formData.get("projectCode") as string;
+        const projectActivity = formData.get("projectActivity") as string;
+        const projectNhf = formData.get("projectNhf") as string;
+        const projectCo = formData.get("projectCo") as string;
+        const month = formData.get("month") as string;
+        const timeline = formData.get("timeline") as string;
+        const sec1 = formData.get("sec1") as string;
+        const sec2 = formData.get("sec2") as string;
+        const sec3 = formData.get("sec3") as string;
+        const sum = formData.get("sum") as string;
+        const funds = formData.get("funds") as string;
 
         if (!projectName) {
             return new NextResponse("Project name is required", { status: 400 });
@@ -85,8 +96,19 @@ export async function POST(req: NextRequest) {
             organize: organize || "",
             projectOwner: projectOwner || "",
             projectReview: projectReview || "",
-            inspector: inspector || "",
+            
             coordinator: coordinator || "",
+            projectCode: projectCode || "",
+            projectActivity: projectActivity || "",
+            projectNhf: projectNhf || "",
+            projectCo: projectCo || "",
+            month: month || "",
+            timeline: timeline || "",
+            sec1: sec1 || "",
+            sec2: sec2 || "",
+            sec3: sec3 || "",
+            sum: sum || "",
+            funds: funds || "",
             currentDate: currentDate,
             currentYear: new Date().getFullYear() + 543, // Convert to Buddhist year
         };
