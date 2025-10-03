@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { LoginSuccessModal } from "@/components/ui/LoginSuccessModal";
 import { useTitle } from "@/hook/useTitle";
 import { Zap, FileText, Lock, Download, LogIn } from "lucide-react";
 
@@ -14,6 +15,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const router = useRouter();
     useTitle("เข้าสู่ระบบ - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
@@ -33,8 +35,11 @@ export default function LoginPage() {
                 setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
                 console.error("Login failed:", result.error);
             } else {
-                console.log("Login success, redirecting to /userdashboard...");
-                router.push("/userdashboard");
+                console.log("Login success, showing success modal...");
+                // เพิ่ม delay เล็กน้อยเพื่อให้รู้สึกว่าระบบประมวลผลอยู่
+                setTimeout(() => {
+                    setShowSuccessModal(true);
+                }, 500);
             }
         } catch (err) {
             console.error("An unexpected error occurred:", err);
@@ -240,6 +245,13 @@ export default function LoginPage() {
                     </div>
                 </div>
             </div>
+            
+            {/* Login Success Modal */}
+            <LoginSuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                email={email}
+            />
         </>
     );
 }
