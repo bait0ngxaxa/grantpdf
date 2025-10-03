@@ -72,6 +72,7 @@ const fixThaiDistributed = (text: string): string => {
 };
 
 export async function POST(req: Request) {
+    console.log('=== API called ==='); // Debug log
     try {
         // ✅ Get session from NextAuth
         const session = await getServerSession(authOptions);
@@ -84,6 +85,10 @@ export async function POST(req: Request) {
 
         // 1. Get the form data from the request body
         const formData = await req.formData();
+        console.log('FormData received, checking all entries:');
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
         const fileName = formData.get("fileName") as string; // ชื่อไฟล์ที่ต้องการบันทึก
         const projectName = formData.get("projectName") as string; // เพิ่มชื่อโครงการ
         const date = formData.get("date") as string;
@@ -91,7 +96,15 @@ export async function POST(req: Request) {
         const address = formData.get("address") as string;
         const citizenid = formData.get("citizenid") as string;
         const citizenexpire = formData.get("citizenexpire") as string;
-        const contractnumber = formData.get("contractnumber") as string;
+        const contractnumber = (() => {
+            const allContractNumbers = formData.getAll("contractnumber") as string[];
+            // หาค่าที่ไม่เป็นค่าว่าง
+            const validContractNumber = allContractNumbers.find(num => num && num.trim());
+            return validContractNumber || "";
+        })();
+        
+        console.log('All contract numbers:', formData.getAll("contractnumber"));
+        console.log('Selected contractnumber:', contractnumber); // Debug log
         const projectOffer = formData.get("projectOffer") as string;
         const owner = formData.get("owner") as string;
         const projectCo = formData.get("projectCo") as string;
@@ -107,6 +120,45 @@ export async function POST(req: Request) {
             return new NextResponse("Project name is required.", {
                 status: 400,
             });
+        }
+
+        // ✅ Generate contract number with auto-increment
+        let finalContractNumber = contractnumber;
+        console.log('Starting contract number generation with:', contractnumber);
+        
+        if (contractnumber && ['ABS', 'DMR', 'SIP'].includes(contractnumber)) {
+            console.log('Valid contract type detected:', contractnumber);
+            
+            // หาหรือสร้าง counter สำหรับประเภทสัญญานี้
+            const counter = await prisma.contractCounter.upsert({
+                where: { contractType: contractnumber },
+                update: {
+                    currentNumber: {
+                        increment: 1
+                    }
+                },
+                create: {
+                    contractType: contractnumber,
+                    currentNumber: 1
+                }
+            });
+            
+            console.log('Upsert result:', counter);
+            
+            // ดึงค่าล่าสุดหลังจาก increment แล้ว
+            const updatedCounter = await prisma.contractCounter.findUnique({
+                where: { contractType: contractnumber }
+            });
+            
+            console.log('Updated counter:', updatedCounter);
+            
+            // สร้างเลขสัญญาในรูปแบบ ABS01, DMR01, SIP01 เป็นต้น
+            const paddedNumber = updatedCounter!.currentNumber.toString().padStart(2, '0');
+            finalContractNumber = `${contractnumber}${paddedNumber}`;
+            
+            console.log(`Generated contract number: ${finalContractNumber}`);
+        } else {
+            console.log('Contract number not valid for auto-increment:', contractnumber);
         }
 
         // 3. Read the Word template file
@@ -166,7 +218,7 @@ export async function POST(req: Request) {
             address: fixThaiDistributed(address || ""),
             citizenid: citizenid || "", // ID ไม่ต้องแก้
             citizenexpire: citizenexpire || "", // วันที่ไม่ต้องแก้
-            contractnumber: contractnumber || "",
+            contractnumber: finalContractNumber || "", // ใช้เลขสัญญาที่สร้างใหม่
             projectOffer: fixThaiDistributed(projectOffer || ""),
             owner: fixThaiDistributed(owner || ""),
             projectCo: fixThaiDistributed(projectCo || ""),

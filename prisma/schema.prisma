@@ -89,3 +89,13 @@ model AttachmentFile {
 
   @@index([userFileId])
 }
+
+// ตารางสำหรับจัดการหมายเลขสัญญา
+model ContractCounter {
+  id            Int      @id @default(autoincrement())
+  contractType  String   @unique // ประเภทสัญญา: ABS, DMR, SIP
+  currentNumber Int      @default(1) // หมายเลขปัจจุบัน
+  
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+}

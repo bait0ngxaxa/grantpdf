@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,9 @@ export default function CreateContractPage() {
   const { data: session } = useSession();
   const router = useRouter();
 
+  // Get contract code from localStorage
+  const [contractCode, setContractCode] = useState<string>("");
+
   const [formData, setFormData] = useState<WordDocumentData>({
     fileName: "",
     projectName: "",
@@ -73,6 +76,24 @@ export default function CreateContractPage() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   useTitle("สร้างหนังสือสัญญาเพื่อรับรองการลงนาม | ระบบจัดการเอกสาร");
+
+  // Load contract code from localStorage on component mount
+  useEffect(() => {
+    const selectedTemplate = localStorage.getItem('selectedTorsTemplate');
+    console.log('Raw localStorage data:', selectedTemplate); // Debug log
+    if (selectedTemplate) {
+      try {
+        const templateData = JSON.parse(selectedTemplate);
+        console.log('Parsed template data:', templateData); // Debug log
+        if (templateData.contractCode) {
+          console.log('Setting contract code:', templateData.contractCode); // Debug log
+          setContractCode(templateData.contractCode);
+        }
+      } catch (error) {
+        console.error('Error parsing template data:', error);
+      }
+    }
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -107,10 +128,24 @@ export default function CreateContractPage() {
     setIsError(false);
 
     try {
+      console.log('Current contractCode state:', contractCode); // Debug log
+      
       const data = new FormData();
+      
+      // เพิ่มข้อมูลฟอร์มทั้งหมด ยกเว้น contractnumber เนื่องจากจะใช้ contractCode แทน
       Object.keys(formData).forEach((key) => {
-        data.append(key, formData[key as keyof WordDocumentData]);
+        if (key !== 'contractnumber') { // ไม่ส่ง contractnumber ที่ว่างเปล่า
+          data.append(key, formData[key as keyof WordDocumentData]);
+        }
       });
+      
+      // Add contract code from menu selection
+      if (contractCode) {
+        data.append("contractnumber", contractCode);
+        console.log('Sending contract code:', contractCode); // เพิ่ม log เพื่อ debug
+      } else {
+        console.warn('No contract code available to send!'); // Warning log
+      }
       
       if (session.user?.id) {
         data.append("userId", session.user.id.toString());
@@ -186,6 +221,7 @@ export default function CreateContractPage() {
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
           <h2 className="text-3xl font-bold text-center">
             สร้างหนังสือสัญญาเพื่อรับรองการลงนาม
+            {contractCode && <span className="block text-xl mt-2 text-blue-100">ประเภท: {contractCode}</span>}
           </h2>
           <p className="text-center mt-2 text-blue-100">
             กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารสัญญา
@@ -246,21 +282,19 @@ export default function CreateContractPage() {
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    สัญญาเลขที่{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="text"
-                    name="contractnumber"
-                    placeholder="ระบุเลขที่สัญญา"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    value={formData.contractnumber}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                {contractCode && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      รหัสสัญญา
+                    </label>
+                    <div className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-slate-100 text-slate-600">
+                      {contractCode}
+                    </div>
+                    <p className="text-sm text-slate-500 mt-1">
+                      รหัสนี้จะใช้เป็นเลขที่สัญญาโดยอัตโนมัติ
+                    </p>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     ระหว่าง{" "}
@@ -608,16 +642,22 @@ export default function CreateContractPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h4 className="font-semibold text-sm text-gray-600">ชื่อไฟล์:</h4>
+                <p className="text-sm">{formData.fileName || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ชื่อโครงการ:</h4>
                 <p className="text-sm">{formData.projectName || '-'}</p>
               </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-600">สัญญาเลขที่:</h4>
-                    <p className="text-sm">{formData.contractnumber || '-'}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-gray-600">วันที่:</h4>
-                    <p className="text-sm">{formData.date || '-'}</p>
-                  </div>
+              {contractCode && (
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-600">รหัสสัญญา:</h4>
+                  <p className="text-sm">{contractCode}</p>
+                </div>
+              )}
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">วันที่:</h4>
+                <p className="text-sm">{formData.date || '-'}</p>
+              </div>
               <div>
                 <h4 className="font-semibold text-sm text-gray-600">ระหว่าง:</h4>
                 <p className="text-sm">{formData.projectOffer || '-'}</p>

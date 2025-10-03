@@ -31,6 +31,7 @@ export default function CreateTorsPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedContractType, setSelectedContractType] = useState<string | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null
@@ -112,14 +113,15 @@ export default function CreateTorsPage() {
     router.push("/create-word-approval");
   };
 
-  const handleContractSelection = (templateId: string, title: string) => {
-    // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-doc
+  const handleContractSelection = (templateId: string, title: string, contractCode?: string) => {
+    // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-contract
     const templateData = {
       id: templateId,
       title: title,
+      contractCode: contractCode || '', // เพิ่ม contractCode สำหรับ ABS, DMR, SIP
     };
     localStorage.setItem("selectedTorsTemplate", JSON.stringify(templateData));
-    // redirect ไปหน้า create-word-doc
+    // redirect ไปหน้า create-word-contract
     router.push("/create-word-contract");
   };
 
@@ -158,7 +160,9 @@ export default function CreateTorsPage() {
 
   // Handle back button logic
   const handleBack = () => {
-    if (selectedProjectId) {
+    if (selectedContractType) {
+      setSelectedContractType(null);
+    } else if (selectedProjectId) {
       handleBackToProjects();
     } else if (selectedCategory) {
       setSelectedCategory(null);
@@ -576,7 +580,130 @@ export default function CreateTorsPage() {
     </div>
   );
 
-  // Render category submenu with role-based content
+  // Render contract type submenu
+  const renderContractTypeSubmenu = () => {
+    return (
+      <div className="container mx-auto max-w-6xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
+        <h1 className="text-3xl font-bold text-center mb-2">สัญญาจ้างปฏิบัติงานวิชาการ</h1>
+        <p className="text-center text-base-content/60 mb-8">
+          เลือกประเภทสัญญาที่ต้องการสร้าง
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
+            onClick={() =>
+              handleContractSelection(
+                "academic-contract-abs",
+                "สัญญาจ้างปฏิบัติงานวิชาการ - ABS",
+                "ABS"
+              )
+            }
+          >
+            <div className="card-body items-center text-center p-6">
+              <div className="flex items-center justify-center p-4 rounded-full bg-blue-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="card-title mt-4 text-xl text-blue-600">ABS</h3>
+              <p className="text-sm text-base-content/60">
+                สัญญาจ้างประเภท ABS
+              </p>
+              <div className="mt-2">
+                <div className="badge badge-primary badge-outline">รหัส: ABS</div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
+            onClick={() =>
+              handleContractSelection(
+                "academic-contract-dmr",
+                "สัญญาจ้างปฏิบัติงานวิชาการ - DMR",
+                "DMR"
+              )
+            }
+          >
+            <div className="card-body items-center text-center p-6">
+              <div className="flex items-center justify-center p-4 rounded-full bg-green-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="card-title mt-4 text-xl text-green-600">DMR</h3>
+              <p className="text-sm text-base-content/60">
+                สัญญาจ้างประเภท DMR
+              </p>
+              <div className="mt-2">
+                <div className="badge badge-success badge-outline">รหัส: DMR</div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
+            onClick={() =>
+              handleContractSelection(
+                "academic-contract-sip",
+                "สัญญาจ้างปฏิบัติงานวิชาการ - SIP",
+                "SIP"
+              )
+            }
+          >
+            <div className="card-body items-center text-center p-6">
+              <div className="flex items-center justify-center p-4 rounded-full bg-purple-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="card-title mt-4 text-xl text-purple-600">SIP</h3>
+              <p className="text-sm text-base-content/60">
+                สัญญาจ้างประเภท SIP
+              </p>
+              <div className="mt-2">
+                <div className="badge badge-secondary badge-outline">รหัส: SIP</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
   const renderCategorySubmenu = () => {
     if (selectedCategory === "general") {
       // เฉพาะแอดมินเท่านั้นที่เข้าถึงได้
@@ -706,12 +833,7 @@ export default function CreateTorsPage() {
 
             <div
               className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-transparent hover:border-primary"
-              onClick={() =>
-                handleContractSelection(
-                  "academic-contract",
-                  "สัญญาจ้างปฎิบัติงานวิชาการ"
-                )
-              }
+              onClick={() => setSelectedContractType("academic")}
             >
               <div className="card-body items-center text-center p-6">
                 <div className="flex items-center justify-center p-4 rounded-full bg-pink-500">
@@ -824,7 +946,35 @@ export default function CreateTorsPage() {
               </Button>
             </div>
             <div className="flex-none flex items-center space-x-4">
-              {selectedCategory && (
+              {selectedContractType && (
+                <div className="breadcrumbs text-sm">
+                  <ul>
+                    <li>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory(null);
+                          setSelectedContractType(null);
+                        }}
+                        className="link link-hover"
+                      >
+                        หน้าหลัก
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => setSelectedContractType(null)}
+                        className="link link-hover"
+                      >
+                        ยื่นโครงการ
+                      </button>
+                    </li>
+                    <li className="text-base-content/60">
+                      สัญญาจ้างปฏิบัติงานวิชาการ
+                    </li>
+                  </ul>
+                </div>
+              )} 
+              {selectedCategory && !selectedContractType && (
                 <div className="breadcrumbs text-sm">
                   <ul>
                     <li>
@@ -848,7 +998,9 @@ export default function CreateTorsPage() {
 
           {/* Conditional rendering based on selected category */}
           {selectedProjectId
-            ? selectedCategory
+            ? selectedContractType
+              ? renderContractTypeSubmenu()
+              : selectedCategory
               ? renderCategorySubmenu()
               : renderMainMenu()
             : renderProjectSelection()}
