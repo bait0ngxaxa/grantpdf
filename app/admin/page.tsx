@@ -5,30 +5,25 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import { useTitle } from "@/hook/useTitle";
 
-// Import hooks
 import { useAdminData } from "./hooks/useAdminData";
 import { useFileActions } from "./hooks/useFileActions";
 import { useProjectStatusActions } from "./hooks/useProjectStatusActions";
 import { usePreviewModal, useSuccessModal } from "./hooks/useModalStates";
 import { useUIStates } from "./hooks/useUIStates";
 
-// Import components
 import { AdminSidebar } from "./components/AdminSidebar";
 import { AdminTopBar } from "./components/AdminTopBar";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { UsersTab } from "./components/UsersTab";
 
-// Import existing components
 import SearchAndFilter from "./components/SearchAndFilter";
 import ProjectsList from "./components/ProjectsList";
 
-// Import modals
 import { DeleteFileModal } from "./components/modals/DeleteFileModal";
 import { SuccessModal } from "./components/modals/SuccessModal";
 import { PreviewModal } from "./components/modals/PreviewModal";
 import { ProjectStatusModal } from "./components/modals/ProjectStatusModal";
 
-// Types
 interface PdfFile {
   id: string;
   fileName: string;
@@ -91,7 +86,6 @@ const getStatusColor = (status: string) => {
   }
 };
 
-// Dynamic title based on active tab
 const getTitleByTab = (tab: string) => {
   switch (tab) {
     case "dashboard":
@@ -109,7 +103,6 @@ export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Custom hooks
   const {
     projects,
     setProjects,
@@ -169,7 +162,12 @@ export default function AdminDashboardPage() {
     openDeleteModal,
     closeDeleteModal,
     handleDeleteFile,
-  } = useFileActions(setProjects, setOrphanFiles, setSuccessMessage, setIsSuccessModalOpen);
+  } = useFileActions(
+    setProjects,
+    setOrphanFiles,
+    setSuccessMessage,
+    setIsSuccessModalOpen
+  );
 
   const {
     isStatusModalOpen,
@@ -180,12 +178,14 @@ export default function AdminDashboardPage() {
     openStatusModal,
     closeStatusModal,
     handleUpdateProjectStatus,
-  } = useProjectStatusActions(setProjects, setSuccessMessage, setIsSuccessModalOpen);
+  } = useProjectStatusActions(
+    setProjects,
+    setSuccessMessage,
+    setIsSuccessModalOpen
+  );
 
-  // Set dynamic title
   useTitle(getTitleByTab(activeTab));
 
-  // Effects
   useEffect(() => {
     if (status === "loading") return;
     if (!session || session.user?.role !== "admin") {
@@ -199,7 +199,6 @@ export default function AdminDashboardPage() {
     }
   }, [session]);
 
-  // Filter and sort data
   const filteredAndSortedProjects = useMemo(() => {
     let filteredProjects = projects.filter((project) => {
       const matchesSearch =
@@ -209,7 +208,6 @@ export default function AdminDashboardPage() {
           file.originalFileName.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-      // Filter by file type
       let matchesFileType = true;
       if (selectedFileType !== "ไฟล์ทั้งหมด") {
         matchesFileType = project.files.some(
@@ -218,7 +216,6 @@ export default function AdminDashboardPage() {
         );
       }
 
-      // Filter by project status
       let matchesStatus = true;
       if (selectedStatus !== "สถานะทั้งหมด") {
         matchesStatus = project.status === selectedStatus;
@@ -227,7 +224,6 @@ export default function AdminDashboardPage() {
       return matchesSearch && matchesFileType && matchesStatus;
     });
 
-    // Sort projects
     filteredProjects.sort((a, b) => {
       switch (sortBy) {
         case "createdAtAsc":
@@ -275,7 +271,8 @@ export default function AdminDashboardPage() {
           );
         case "statusClosed":
           return (
-            (b.status === "ปิดโครงการ" ? 1 : 0) - (a.status === "ปิดโครงการ" ? 1 : 0)
+            (b.status === "ปิดโครงการ" ? 1 : 0) -
+            (a.status === "ปิดโครงการ" ? 1 : 0)
           );
       }
     });
@@ -290,7 +287,6 @@ export default function AdminDashboardPage() {
     sortBy,
   ]);
 
-  // Calculate all files for stats
   const allFiles = useMemo(() => {
     return [...orphanFiles, ...projects.flatMap((p) => p.files)];
   }, [orphanFiles, projects]);
@@ -394,7 +390,9 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center space-x-2">
                       {/* Previous Button */}
                       <button
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        onClick={() =>
+                          setCurrentPage(Math.max(1, currentPage - 1))
+                        }
                         disabled={currentPage === 1}
                         className={`px-3 py-2 rounded-lg border transition-colors ${
                           currentPage === 1
@@ -438,8 +436,17 @@ export default function AdminDashboardPage() {
 
                       {/* Next Button */}
                       <button
-                        onClick={() => setCurrentPage(Math.min(Math.ceil(totalItems / itemsPerPage), currentPage + 1))}
-                        disabled={currentPage === Math.ceil(totalItems / itemsPerPage)}
+                        onClick={() =>
+                          setCurrentPage(
+                            Math.min(
+                              Math.ceil(totalItems / itemsPerPage),
+                              currentPage + 1
+                            )
+                          )
+                        }
+                        disabled={
+                          currentPage === Math.ceil(totalItems / itemsPerPage)
+                        }
                         className={`px-3 py-2 rounded-lg border transition-colors ${
                           currentPage === Math.ceil(totalItems / itemsPerPage)
                             ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"

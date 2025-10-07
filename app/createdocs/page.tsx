@@ -4,20 +4,17 @@ import { Button } from "@/components/ui/button";
 import { useTitle } from "@/hook/useTitle";
 import { useSession } from "next-auth/react";
 
-// Import custom hooks
 import { useCreateDocsState } from "./hooks/useCreateDocsState";
 import { useProjectData } from "./hooks/useProjectData";
 import { useNavigation } from "./hooks/useNavigation";
 import { usePagination } from "./hooks/usePagination";
 
-// Import components
 import { ProjectSelection } from "./components/ProjectSelection";
 import { MainMenu } from "./components/MainMenu";
 import { ContractTypeSubmenu } from "./components/ContractTypeSubmenu";
 import { CategorySubmenu } from "./components/CategorySubmenu";
 import { NavBar } from "./components/NavBar";
 
-// Define the type for the form data to ensure type safety
 interface TorsData {
   projectName: string;
   clientName: string;
@@ -29,7 +26,6 @@ interface TorsData {
   contactPerson: string;
 }
 
-// Define the type for project templates
 interface ProjectTemplate {
   id: string;
   title: string;
@@ -40,8 +36,7 @@ interface ProjectTemplate {
 
 export default function CreateTorsPage() {
   const { data: session, status } = useSession();
-  
-  // Custom hooks for state management
+
   const {
     selectedCategory,
     setSelectedCategory,
@@ -61,10 +56,8 @@ export default function CreateTorsPage() {
     isAdmin,
   } = useCreateDocsState();
 
-  // Project data management
   useProjectData(setProjects, setIsLoading, setError, setSelectedProjectId);
 
-  // Navigation handlers
   const {
     handleProjectSelection: handleProjectSelectionBase,
     handleBackToProjects,
@@ -77,16 +70,15 @@ export default function CreateTorsPage() {
     handleTorSelection,
   } = useNavigation();
 
-  // Pagination logic
-  const { currentProjects, totalPages, indexOfFirstProject, indexOfLastProject } = usePagination(
-    projects,
-    currentPage,
-    projectsPerPage
-  );
+  const {
+    currentProjects,
+    totalPages,
+    indexOfFirstProject,
+    indexOfLastProject,
+  } = usePagination(projects, currentPage, projectsPerPage);
 
   useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
 
-  // Wrapper functions to integrate with state
   const handleProjectSelection = (projectId: string) => {
     setSelectedProjectId(projectId);
     handleProjectSelectionBase(projectId);
@@ -109,7 +101,6 @@ export default function CreateTorsPage() {
 
   return (
     <div className="max-w-6xl mx-auto min-h-screen bg-base-200 text-base-content p-6 flex flex-col">
-      {/* Loading state */}
       {status === "loading" && (
         <div className="flex justify-center items-center min-h-[50vh]">
           <div className="text-center">
@@ -124,7 +115,9 @@ export default function CreateTorsPage() {
         <div className="flex justify-center items-center min-h-[50vh]">
           <div className="text-center">
             <p className="text-lg text-red-500 mb-4">กรุณาเข้าสู่ระบบก่อน</p>
-            <Button onClick={() => window.location.href = "/signin"}>เข้าสู่ระบบ</Button>
+            <Button onClick={() => (window.location.href = "/signin")}>
+              เข้าสู่ระบบ
+            </Button>
           </div>
         </div>
       )}
@@ -157,9 +150,7 @@ export default function CreateTorsPage() {
               onPageChange={setCurrentPage}
             />
           ) : selectedContractType ? (
-            <ContractTypeSubmenu
-              onContractSelect={handleContractSelection}
-            />
+            <ContractTypeSubmenu onContractSelect={handleContractSelection} />
           ) : selectedCategory ? (
             <CategorySubmenu
               selectedCategory={selectedCategory}

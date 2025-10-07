@@ -5,21 +5,18 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useTitle } from "@/hook/useTitle";
 
-// Import hooks
 import { useUserData } from "./hooks/useUserData";
 import { useProjectActions } from "./hooks/useProjectActions";
 import { useFileActions } from "./hooks/useFileActions";
 import { useModalStates } from "./hooks/useModalStates";
 import { useUIStates } from "./hooks/useUIStates";
 
-// Import components
 import { Sidebar } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { ProjectsList } from "./components/ProjectsList";
 import { CreateProjectTab } from "./components/CreateProjectTab";
 
-// Import modals
 import { CreateProjectModal } from "./components/modals/CreateProjectModal";
 import { EditProjectModal } from "./components/modals/EditProjectModal";
 import { DeleteConfirmModal } from "./components/modals/DeleteConfirmModal";
@@ -27,7 +24,6 @@ import { SuccessModal } from "./components/modals/SuccessModal";
 import { PreviewModal } from "./components/modals/PreviewModal";
 import { ProfileModal } from "./components/modals/ProfileModal";
 
-// Types
 type UserFile = {
   id: string;
   originalFileName: string;
@@ -64,10 +60,8 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Title hook
   useTitle("UserDashboard | ระบบจัดการเอกสาร");
 
-  // Custom hooks
   const {
     projects,
     setProjects,
@@ -107,7 +101,6 @@ export default function DashboardPage() {
     setCurrentProjectPage,
   } = useUIStates();
 
-  // Local states for project management
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -117,7 +110,6 @@ export default function DashboardPage() {
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
 
-  // Project actions hook
   const {
     isCreatingProject,
     isDeletingProject,
@@ -127,7 +119,6 @@ export default function DashboardPage() {
     confirmUpdateProject,
   } = useProjectActions(setProjects, setSuccessMessage, setShowSuccessModal);
 
-  // File actions hook
   const { isDeleting, confirmDeleteFile } = useFileActions(
     setProjects,
     setOrphanFiles,
@@ -151,7 +142,6 @@ export default function DashboardPage() {
     setCurrentProjectPage(page);
   };
 
-  // Event handlers
   const handleDeleteFile = (fileId: string) => {
     setFileToDelete(fileId);
     setShowDeleteModal(true);
@@ -191,9 +181,13 @@ export default function DashboardPage() {
 
   const onConfirmUpdateProject = async () => {
     if (!projectToEdit || !editProjectName.trim()) return;
-    
-    await confirmUpdateProject(projectToEdit.id, editProjectName, editProjectDescription);
-    
+
+    await confirmUpdateProject(
+      projectToEdit.id,
+      editProjectName,
+      editProjectDescription
+    );
+
     // Close modal and reset state
     setShowEditProjectModal(false);
     setProjectToEdit(null);

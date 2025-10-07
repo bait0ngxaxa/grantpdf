@@ -225,6 +225,32 @@ export default function CreateWordSummaryPage() {
                     required
                   />
                 </div>
+                  <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    รหัสชุดโครงการ
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectCode"
+                    placeholder="ระบุรหัสชุดโครงการ"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectCode}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    รหัสภายใต้กิจกรรม
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectActivity"
+                    placeholder="ระบุรหัสภายใต้กิจกรรม"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectActivity}
+                    onChange={handleChange}
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     เลขที่สัญญา
@@ -251,32 +277,7 @@ export default function CreateWordSummaryPage() {
                     onChange={handleChange}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    รหัสชุดโครงการ
-                  </label>
-                  <Input
-                    type="text"
-                    name="projectCode"
-                    placeholder="ระบุรหัสชุดโครงการ"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    value={formData.projectCode}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    รหัสภายใต้กิจกรรม
-                  </label>
-                  <Input
-                    type="text"
-                    name="projectActivity"
-                    placeholder="ระบุรหัสภายใต้กิจกรรม"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    value={formData.projectActivity}
-                    onChange={handleChange}
-                  />
-                </div>
+              
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     เลขที่ มสช น.

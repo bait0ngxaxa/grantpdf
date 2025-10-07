@@ -3,11 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-// GET: ดึงโครงการทั้งหมดของ user พร้อมไฟล์
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -29,20 +28,19 @@ export async function GET(req: Request) {
               },
             },
           },
-          orderBy: { created_at: 'desc' }
+          orderBy: { created_at: "desc" },
         },
         _count: {
-          select: { files: true }
-        }
+          select: { files: true },
+        },
       },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: "desc" },
     });
 
-    // ดึงไฟล์ที่ไม่อยู่ในโครงการใดๆ และไม่ใช่ไฟล์แนบ standalone
     const orphanFiles = await prisma.userFile.findMany({
       where: {
         userId,
-        projectId: null
+        projectId: null,
       },
       include: {
         attachmentFiles: {
@@ -55,38 +53,39 @@ export async function GET(req: Request) {
           },
         },
       },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: "desc" },
     });
 
-    const sanitizedProjects = projects.map(project => ({
+    const sanitizedProjects = projects.map((project) => ({
       ...project,
       id: project.id.toString(),
-      files: project.files.map(file => ({
+      files: project.files.map((file) => ({
         ...file,
         id: file.id.toString(),
-        userName: '',
-        attachmentFiles: file.attachmentFiles?.map(attachment => ({
-          ...attachment,
-          id: attachment.id.toString(),
-        })) || []
-      }))
+        userName: "",
+        attachmentFiles:
+          file.attachmentFiles?.map((attachment) => ({
+            ...attachment,
+            id: attachment.id.toString(),
+          })) || [],
+      })),
     }));
 
-    const sanitizedOrphanFiles = orphanFiles.map(file => ({
+    const sanitizedOrphanFiles = orphanFiles.map((file) => ({
       ...file,
       id: file.id.toString(),
-      userName: '',
-      attachmentFiles: file.attachmentFiles?.map(attachment => ({
-        ...attachment,
-        id: attachment.id.toString(),
-      })) || []
+      userName: "",
+      attachmentFiles:
+        file.attachmentFiles?.map((attachment) => ({
+          ...attachment,
+          id: attachment.id.toString(),
+        })) || [],
     }));
 
     return NextResponse.json({
       projects: sanitizedProjects,
-      orphanFiles: sanitizedOrphanFiles
+      orphanFiles: sanitizedOrphanFiles,
     });
-
   } catch (error) {
     console.error("Error fetching projects:", error);
     return NextResponse.json(
@@ -102,15 +101,18 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { name, description } = await req.json();
-    
+
     if (!name) {
-      return NextResponse.json({ error: "Project name is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Project name is required" },
+        { status: 400 }
+      );
     }
 
     const userId = Number(session.user.id);
@@ -119,21 +121,20 @@ export async function POST(req: Request) {
       data: {
         name,
         description,
-        userId
+        userId,
       },
       include: {
         files: true,
         _count: {
-          select: { files: true }
-        }
-      }
+          select: { files: true },
+        },
+      },
     });
 
     return NextResponse.json({
       ...project,
-      id: project.id.toString()
+      id: project.id.toString(),
     });
-
   } catch (error) {
     console.error("Error creating project:", error);
     return NextResponse.json(
