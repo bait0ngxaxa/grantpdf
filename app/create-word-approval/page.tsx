@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent } from "react";
+import { useState, FormEvent, ChangeEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
+import SignatureCanvasComponent, { SignatureCanvasRef } from "@/components/ui/SignatureCanvas";
 
 interface WordDocumentData {
     head: string;
@@ -39,6 +40,7 @@ interface WordDocumentData {
 export default function CreateWordDocPage() {
     const { data: session } = useSession();
     const router = useRouter();
+    const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
 
     const [formData, setFormData] = useState<WordDocumentData>({
         head: "", //เลขที่หนังสือ
@@ -61,6 +63,7 @@ export default function CreateWordDocPage() {
     const [signaturePreview, setSignaturePreview] = useState<string | null>(
         null
     );
+    const [signatureCanvasData, setSignatureCanvasData] = useState<string | null>(null);
     const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
     const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
         null
@@ -129,6 +132,10 @@ export default function CreateWordDocPage() {
         } else {
             setSignaturePreview(null);
         }
+    };
+
+    const handleSignatureCanvasChange = (signatureDataURL: string | null) => {
+        setSignatureCanvasData(signatureDataURL);
     };
 
     const handleAttachmentFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -252,6 +259,20 @@ export default function CreateWordDocPage() {
 
             if (signatureFile) {
                 data.append("signatureFile", signatureFile);
+            }
+
+            // เพิ่มข้อมูลจาก signature canvas
+            if (signatureCanvasData) {
+                // แปลง data URL เป็น File object
+                const byteString = atob(signatureCanvasData.split(',')[1]);
+                const mimeString = signatureCanvasData.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const canvasSignatureFile = new File([ab], 'canvas-signature.png', { type: mimeString });
+                data.append("canvasSignatureFile", canvasSignatureFile);
             }
 
             // เพิ่มไฟล์แนบ - ส่งไปที่ file-upload API ก่อน
@@ -809,6 +830,40 @@ export default function CreateWordDocPage() {
                             </div>
                         </div>
 
+                        {/* วาดลายเซ็นออนไลน์ */}
+                        <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
+                            <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-indigo-300">
+                                ✍️ วาดลายเซ็นออนไลน์
+                            </h3>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    วาดลายเซ็นของคุณ
+                                </label>
+                                <SignatureCanvasComponent
+                                    ref={signatureCanvasRef}
+                                    onSignatureChange={handleSignatureCanvasChange}
+                                    canvasProps={{
+                                        width: 400,
+                                        height: 200,
+                                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                                        penColor: 'black'
+                                    }}
+                                />
+                                {signatureCanvasData && (
+                                    <div className="mt-4">
+                                        <p className="text-sm font-medium text-slate-700 mb-2">ตัวอย่างลายเซ็นที่วาด:</p>
+                                        <div className="flex justify-center p-4 border border-dashed rounded-lg bg-slate-50">
+                                            <img
+                                                src={signatureCanvasData}
+                                                alt="Canvas Signature Preview"
+                                                className="max-w-xs h-auto object-contain border rounded-lg shadow-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-200">
                             <Button
                                 type="button"
@@ -1047,16 +1102,31 @@ export default function CreateWordDocPage() {
                             <p className="text-sm">{formData.email || "-"}</p>
                         </div>
 
-                        {signaturePreview && (
+                        {(signaturePreview || signatureCanvasData) && (
                             <div>
                                 <h4 className="font-semibold text-sm text-gray-600">
                                     ลายเซ็น:
                                 </h4>
-                                <img
-                                    src={signaturePreview}
-                                    alt="Signature Preview"
-                                    className="max-w-xs h-auto object-contain mt-2 border rounded"
-                                />
+                                {signaturePreview && (
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-2">จากการอัปโหลดไฟล์:</p>
+                                        <img
+                                            src={signaturePreview}
+                                            alt="Signature Preview"
+                                            className="max-w-xs h-auto object-contain mt-2 border rounded"
+                                        />
+                                    </div>
+                                )}
+                                {signatureCanvasData && (
+                                    <div className={signaturePreview ? "mt-4" : ""}>
+                                        <p className="text-xs text-gray-500 mb-2">จากการวาดออนไลน์:</p>
+                                        <img
+                                            src={signatureCanvasData}
+                                            alt="Canvas Signature Preview"
+                                            className="max-w-xs h-auto object-contain mt-2 border rounded"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
 

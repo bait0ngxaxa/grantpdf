@@ -124,7 +124,10 @@ export async function POST(req: Request) {
     const tel = formData.get("tel") as string;
     const email = formData.get("email") as string;
     const signatureFile = formData.get("signatureFile") as File | null;
-    const fixedAttachment = formData.get("attachment") as string;
+    const canvasSignatureFile = formData.get(
+      "canvasSignatureFile"
+    ) as File | null;
+
     const fixedRegard = formData.get("regard") as string;
     const accept = formData.get("accept") as string;
 
@@ -146,9 +149,27 @@ export async function POST(req: Request) {
     }
 
     let signatureImageBuffer: Buffer | null = null;
-    if (signatureFile && signatureFile.size > 0) {
+
+    // จัดการลายเซ็นจาก canvas ก่อน (ให้ priority สูงกว่า)
+    if (canvasSignatureFile && canvasSignatureFile.size > 0) {
+      console.log("Processing canvas signature...");
+      const canvasSignatureArrayBuffer =
+        await canvasSignatureFile.arrayBuffer();
+      signatureImageBuffer = Buffer.from(canvasSignatureArrayBuffer);
+    }
+    // ถ้าไม่มีลายเซ็นจาก canvas ให้ใช้จากการอัปโหลดไฟล์
+    else if (signatureFile && signatureFile.size > 0) {
+      console.log("Processing uploaded signature file...");
       const signatureArrayBuffer = await signatureFile.arrayBuffer();
       signatureImageBuffer = Buffer.from(signatureArrayBuffer);
+    }
+
+    if (signatureImageBuffer) {
+      console.log(
+        `Signature buffer size: ${signatureImageBuffer.length} bytes`
+      );
+    } else {
+      console.log("No signature provided - will use placeholder");
     }
 
     const templatePath = path.join(process.cwd(), "public", "approval.docx");
@@ -259,6 +280,15 @@ export async function POST(req: Request) {
     };
 
     console.log("Processing approval document with Thai formatting fixes...");
+    console.log(
+      `Using signature: ${
+        signatureImageBuffer
+          ? "Yes (from " +
+            (canvasSignatureFile ? "canvas" : "uploaded file") +
+            ")"
+          : "No - using placeholder"
+      }`
+    );
     doc.render(processedData);
 
     const outputBuffer = doc.getZip().generate({
@@ -329,7 +359,7 @@ export async function POST(req: Request) {
       for (const fileId of attachmentFileIds) {
         try {
           console.log(`Processing attachment file ID: ${fileId}`);
-          // ดึงข้อมูลไฟล์แนบจากตาราง UserFile
+
           const attachmentFile = await prisma.userFile.findUnique({
             where: { id: Number(fileId) },
             select: {
