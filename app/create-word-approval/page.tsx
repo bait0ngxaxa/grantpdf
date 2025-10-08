@@ -20,13 +20,13 @@ import {
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
 
-// Dynamic import สำหรับ SignatureCanvas เพื่อหลีกเลี่ยง SSR issues
+// Dynamic import สำหรับ SignatureCanvas
 const SignatureCanvasComponent = dynamic(
   () => import("@/components/ui/SignatureCanvas"),
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+      <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
         <p className="text-gray-500">กำลังโหลดพื้นที่วาดลายเซ็น...</p>
       </div>
     )
@@ -58,7 +58,7 @@ export default function CreateWordDocPage() {
   const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
   const [isClient, setIsClient] = useState(false);
 
-  // ตรวจสอบว่าอยู่ใน client-side หรือไม่
+  
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -101,7 +101,7 @@ export default function CreateWordDocPage() {
   };
   useTitle("สร้างหนังสือขอนุมัติ | ระบบจัดการเอกสาร");
 
-  // เพิ่มฟังก์ชันสำหรับจัดการ attachments
+  
   const addAttachment = () => {
     setFormData((prev) => ({
       ...prev,
@@ -166,7 +166,7 @@ export default function CreateWordDocPage() {
     setAttachmentFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ฟังก์ชันสำหรับอัปโหลดไฟล์แนบไปยัง file-upload API
+  
   const uploadAttachmentFiles = async (files: File[]): Promise<string[]> => {
     const uploadedIds: string[] = [];
 
@@ -247,10 +247,9 @@ export default function CreateWordDocPage() {
         data.append("signatureFile", signatureFile);
       }
 
-      // เพิ่มการตรวจสอบและประมวลผลลายเซ็นจาก canvas อย่างละเอียด
+      
       if (signatureCanvasData) {
         try {
-          // ตรวจสอบรูปแบบข้อมูล
           if (!signatureCanvasData.startsWith('data:image/')) {
             throw new Error('Invalid signature data format');
           }
@@ -276,7 +275,6 @@ export default function CreateWordDocPage() {
             type: mimeString,
           });
           
-          // ตรวจสอบขนาดไฟล์
           if (canvasSignatureFile.size === 0) {
             throw new Error('Generated signature file is empty');
           }
@@ -347,6 +345,17 @@ export default function CreateWordDocPage() {
       setIsSubmitting(false);
     }
   };
+
+  
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-gray-500">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans antialiased">
