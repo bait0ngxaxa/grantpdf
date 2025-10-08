@@ -19,8 +19,8 @@ import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
 
 interface WordDocumentData {
-  fileName: string; // ชื่อไฟล์ที่จะบันทึก
-  projectName: string; // เพิ่มชื่อโครงการ
+  fileName: string; 
+  projectName: string; 
   contractnumber: string;
   projectOffer: string;
   projectCo: string;
@@ -43,7 +43,7 @@ export default function CreateContractPage() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  // Get contract code from localStorage
+
   const [contractCode, setContractCode] = useState<string>("");
 
   const [formData, setFormData] = useState<WordDocumentData>({
@@ -80,13 +80,13 @@ export default function CreateContractPage() {
   // Load contract code from localStorage on component mount
   useEffect(() => {
     const selectedTemplate = localStorage.getItem('selectedTorsTemplate');
-    console.log('Raw localStorage data:', selectedTemplate); // Debug log
+    console.log('Raw localStorage data:', selectedTemplate); 
     if (selectedTemplate) {
       try {
         const templateData = JSON.parse(selectedTemplate);
-        console.log('Parsed template data:', templateData); // Debug log
+        console.log('Parsed template data:', templateData); 
         if (templateData.contractCode) {
-          console.log('Setting contract code:', templateData.contractCode); // Debug log
+          console.log('Setting contract code:', templateData.contractCode); 
           setContractCode(templateData.contractCode);
         }
       } catch (error) {
@@ -128,23 +128,23 @@ export default function CreateContractPage() {
     setIsError(false);
 
     try {
-      console.log('Current contractCode state:', contractCode); // Debug log
+      console.log('Current contractCode state:', contractCode); 
       
       const data = new FormData();
       
-      // เพิ่มข้อมูลฟอร์มทั้งหมด ยกเว้น contractnumber เนื่องจากจะใช้ contractCode แทน
+      
       Object.keys(formData).forEach((key) => {
-        if (key !== 'contractnumber') { // ไม่ส่ง contractnumber ที่ว่างเปล่า
+        if (key !== 'contractnumber') { 
           data.append(key, formData[key as keyof WordDocumentData]);
         }
       });
       
-      // Add contract code from menu selection
+      
       if (contractCode) {
         data.append("contractnumber", contractCode);
-        console.log('Sending contract code:', contractCode); // เพิ่ม log เพื่อ debug
+        console.log('Sending contract code:', contractCode); 
       } else {
-        console.warn('No contract code available to send!'); // Warning log
+        console.warn('No contract code available to send!'); 
       }
       
       if (session.user?.id) {
@@ -154,7 +154,7 @@ export default function CreateContractPage() {
         data.append("userEmail", session.user.email);
       }
       
-      // Add project ID if available
+      
       const selectedProjectId = localStorage.getItem('selectedProjectId');
       if (selectedProjectId) {
         data.append("projectId", selectedProjectId);

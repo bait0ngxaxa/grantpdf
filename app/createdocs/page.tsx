@@ -15,25 +15,6 @@ import { ContractTypeSubmenu } from "./components/ContractTypeSubmenu";
 import { CategorySubmenu } from "./components/CategorySubmenu";
 import { NavBar } from "./components/NavBar";
 
-interface TorsData {
-  projectName: string;
-  clientName: string;
-  projectDescription: string;
-  scopeOfWork: string;
-  startDate: string;
-  endDate: string;
-  budget: number;
-  contactPerson: string;
-}
-
-interface ProjectTemplate {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  initialData: TorsData;
-}
-
 export default function CreateTorsPage() {
   const { data: session, status } = useSession();
 

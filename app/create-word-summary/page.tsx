@@ -118,7 +118,7 @@ export default function CreateWordSummaryPage() {
         data.append("userEmail", session.user.email);
       }
       
-      // Add project ID if available
+      
       const selectedProjectId = localStorage.getItem('selectedProjectId');
       if (selectedProjectId) {
         data.append("projectId", selectedProjectId);
