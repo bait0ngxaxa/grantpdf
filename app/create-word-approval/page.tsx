@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent, useRef } from "react";
+import { useState, FormEvent, ChangeEvent, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,9 +19,21 @@ import {
 } from "@/components/ui/dialog";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
-import SignatureCanvasComponent, {
-  SignatureCanvasRef,
-} from "@/components/ui/SignatureCanvas";
+
+// Dynamic import สำหรับ SignatureCanvas เพื่อหลีกเลี่ยง SSR issues
+const SignatureCanvasComponent = dynamic(
+  () => import("@/components/ui/SignatureCanvas"),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+        <p className="text-gray-500">กำลังโหลดพื้นที่วาดลายเซ็น...</p>
+      </div>
+    )
+  }
+);
+
+import type { SignatureCanvasRef } from "@/components/ui/SignatureCanvas";
 
 interface WordDocumentData {
   head: string;
@@ -43,6 +56,12 @@ export default function CreateWordDocPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // ตรวจสอบว่าอยู่ใน client-side หรือไม่
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const [formData, setFormData] = useState<WordDocumentData>({
     head: "",
@@ -135,6 +154,10 @@ export default function CreateWordDocPage() {
   };
 
   const handleSignatureCanvasChange = (signatureDataURL: string | null) => {
+    console.log('Signature canvas changed:', signatureDataURL ? 'Data received' : 'No data');
+    console.log('Signature data length:', signatureDataURL ? signatureDataURL.length : 0);
+    console.log('Is client-side:', isClient);
+    console.log('Canvas ref exists:', !!signatureCanvasRef.current);
     setSignatureCanvasData(signatureDataURL);
   };
 
@@ -250,20 +273,53 @@ export default function CreateWordDocPage() {
       }
 
       if (signatureCanvasData) {
-        const byteString = atob(signatureCanvasData.split(",")[1]);
-        const mimeString = signatureCanvasData
-          .split(",")[0]
-          .split(":")[1]
-          .split(";")[0];
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
+        console.log('Processing canvas signature data...');
+        console.log('Canvas signature data length:', signatureCanvasData.length);
+        
+        try {
+          // ตรวจสอบรูปแบบข้อมูล
+          if (!signatureCanvasData.startsWith('data:image/')) {
+            throw new Error('Invalid signature data format');
+          }
+          
+          const parts = signatureCanvasData.split(",");
+          if (parts.length !== 2) {
+            throw new Error('Invalid base64 data structure');
+          }
+          
+          const byteString = atob(parts[1]);
+          const mimeString = signatureCanvasData
+            .split(",")[0]
+            .split(":")[1]
+            .split(";")[0];
+            
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          
+          const canvasSignatureFile = new File([ab], "canvas-signature.png", {
+            type: mimeString,
+          });
+          
+          // ตรวจสอบขนาดไฟล์
+          if (canvasSignatureFile.size === 0) {
+            throw new Error('Generated signature file is empty');
+          }
+          
+          data.append("canvasSignatureFile", canvasSignatureFile);
+          console.log('Canvas signature file created:', canvasSignatureFile.size, 'bytes');
+        } catch (error: unknown) {
+          console.error('Error processing canvas signature:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          setMessage(`เกิดข้อผิดพลาดในการประมวลผลลายเซ็น: ${errorMessage}`);
+          setIsError(true);
+          setIsSubmitting(false);
+          return;
         }
-        const canvasSignatureFile = new File([ab], "canvas-signature.png", {
-          type: mimeString,
-        });
-        data.append("canvasSignatureFile", canvasSignatureFile);
+      } else {
+        console.log('No canvas signature data available');
       }
 
       if (attachmentFiles.length > 0) {
@@ -759,22 +815,41 @@ export default function CreateWordDocPage() {
             {/* วาดลายเซ็นออนไลน์ */}
             <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
               <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-indigo-300">
-                ✍️ วาดลายเซ็นออนไลน์
+                ✍️ วาดลายเซ็นผู้ขออนุมัติ
               </h3>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  วาดลายเซ็นของคุณ
+                  วาดลายเซ็นของผู้ขออนุมัติ
                 </label>
-                <SignatureCanvasComponent
-                  ref={signatureCanvasRef}
-                  onSignatureChange={handleSignatureCanvasChange}
-                  canvasProps={{
-                    width: 400,
-                    height: 200,
-                    backgroundColor: "rgba(255, 255, 255, 1)",
-                    penColor: "black",
-                  }}
-                />
+                {isClient ? (
+                  <SignatureCanvasComponent
+                    ref={signatureCanvasRef}
+                    onSignatureChange={handleSignatureCanvasChange}
+                    canvasProps={{
+                      width: 400,
+                      height: 200,
+                      backgroundColor: "rgba(255, 255, 255, 1)",
+                      penColor: "black",
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <p className="text-gray-500">กำลังโหลดพื้นที่วาดลายเซ็น...</p>
+                  </div>
+                )}
+                {/* Debug information */}
+                {(process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEBUG === 'true') && (
+                  <div className="mt-2 p-2 bg-yellow-100 rounded text-xs">
+                    <p>Debug: Signature data exists: {signatureCanvasData ? 'Yes' : 'No'}</p>
+                    {signatureCanvasData && (
+                      <>
+                        <p>Data length: {signatureCanvasData.length} characters</p>
+                        <p>Data type: {signatureCanvasData.split(',')[0]}</p>
+                        <p>Is client: {isClient ? 'Yes' : 'No'}</p>
+                      </>
+                    )}
+                  </div>
+                )}
                 {signatureCanvasData && (
                   <div className="mt-4">
                     <p className="text-sm font-medium text-slate-700 mb-2">
@@ -785,6 +860,13 @@ export default function CreateWordDocPage() {
                         src={signatureCanvasData}
                         alt="Canvas Signature Preview"
                         className="max-w-xs h-auto object-contain border rounded-lg shadow-sm"
+                        onError={(e) => {
+                          console.error('Failed to load signature image:', e);
+                          console.log('Image src:', signatureCanvasData?.substring(0, 100) + '...');
+                        }}
+                        onLoad={() => {
+                          console.log('Signature image loaded successfully');
+                        }}
                       />
                     </div>
                   </div>
@@ -1017,10 +1099,22 @@ export default function CreateWordDocPage() {
                     <p className="text-xs text-gray-500 mb-2">
                       จากการวาดออนไลน์:
                     </p>
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="mb-2 p-2 bg-yellow-100 rounded text-xs">
+                        <p>Canvas Data Length: {signatureCanvasData.length}</p>
+                        <p>Canvas Data Type: {signatureCanvasData.split(',')[0]}</p>
+                      </div>
+                    )}
                     <img
                       src={signatureCanvasData}
                       alt="Canvas Signature Preview"
                       className="max-w-xs h-auto object-contain mt-2 border rounded"
+                      onError={(e) => {
+                        console.error('Preview modal - Failed to load signature image:', e);
+                      }}
+                      onLoad={() => {
+                        console.log('Preview modal - Signature image loaded successfully');
+                      }}
                     />
                   </div>
                 )}
