@@ -154,10 +154,6 @@ export default function CreateWordDocPage() {
   };
 
   const handleSignatureCanvasChange = (signatureDataURL: string | null) => {
-    console.log('Signature canvas changed:', signatureDataURL ? 'Data received' : 'No data');
-    console.log('Signature data length:', signatureDataURL ? signatureDataURL.length : 0);
-    console.log('Is client-side:', isClient);
-    console.log('Canvas ref exists:', !!signatureCanvasRef.current);
     setSignatureCanvasData(signatureDataURL);
   };
 
@@ -173,18 +169,15 @@ export default function CreateWordDocPage() {
   // ฟังก์ชันสำหรับอัปโหลดไฟล์แนบไปยัง file-upload API
   const uploadAttachmentFiles = async (files: File[]): Promise<string[]> => {
     const uploadedIds: string[] = [];
-    console.log(`Starting upload of ${files.length} attachment files`);
 
     // Get project ID from localStorage
     const selectedProjectId = localStorage.getItem("selectedProjectId");
     if (!selectedProjectId) {
-      console.error("No project selected for file upload");
       throw new Error("กรุณาเลือกโครงการก่อนอัปโหลดไฟล์");
     }
 
     for (const file of files) {
       try {
-        console.log(`Uploading file: ${file.name}, size: ${file.size} bytes`);
         const formData = new FormData();
         formData.append("file", file);
         formData.append("projectId", selectedProjectId); // Add required projectId
@@ -206,32 +199,14 @@ export default function CreateWordDocPage() {
 
         if (response.ok) {
           const result = await response.json();
-          console.log("Upload response:", result);
           if (result.success && result.file && result.file.id) {
             uploadedIds.push(result.file.id);
-            console.log(
-              `Successfully uploaded ${file.name}, ID: ${result.file.id}`
-            );
-          } else {
-            console.error("Upload succeeded but no file ID returned:", result);
           }
-        } else {
-          const errorText = await response.text();
-          console.error(
-            `Failed to upload attachment ${file.name}:`,
-            response.status,
-            errorText
-          );
         }
       } catch (error) {
-        console.error("Error uploading attachment:", error);
       }
     }
 
-    console.log(
-      `Upload completed. Total uploaded IDs: ${uploadedIds.length}`,
-      uploadedIds
-    );
     return uploadedIds;
   };
 
@@ -272,10 +247,8 @@ export default function CreateWordDocPage() {
         data.append("signatureFile", signatureFile);
       }
 
+      // เพิ่มการตรวจสอบและประมวลผลลายเซ็นจาก canvas อย่างละเอียด
       if (signatureCanvasData) {
-        console.log('Processing canvas signature data...');
-        console.log('Canvas signature data length:', signatureCanvasData.length);
-        
         try {
           // ตรวจสอบรูปแบบข้อมูล
           if (!signatureCanvasData.startsWith('data:image/')) {
@@ -309,28 +282,20 @@ export default function CreateWordDocPage() {
           }
           
           data.append("canvasSignatureFile", canvasSignatureFile);
-          console.log('Canvas signature file created:', canvasSignatureFile.size, 'bytes');
         } catch (error: unknown) {
-          console.error('Error processing canvas signature:', error);
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           setMessage(`เกิดข้อผิดพลาดในการประมวลผลลายเซ็น: ${errorMessage}`);
           setIsError(true);
           setIsSubmitting(false);
           return;
         }
-      } else {
-        console.log('No canvas signature data available');
       }
 
       if (attachmentFiles.length > 0) {
-        console.log("Uploading attachment files...");
         const uploadedAttachments = await uploadAttachmentFiles(
           attachmentFiles
         );
-        console.log("Attachment file IDs to send:", uploadedAttachments);
         data.append("attachmentFileIds", JSON.stringify(uploadedAttachments));
-      } else {
-        console.log("No attachment files to upload");
       }
 
       if (session.user?.id) {
@@ -376,7 +341,6 @@ export default function CreateWordDocPage() {
         setIsError(true);
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
       setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ");
       setIsError(true);
     } finally {
@@ -837,19 +801,6 @@ export default function CreateWordDocPage() {
                     <p className="text-gray-500">กำลังโหลดพื้นที่วาดลายเซ็น...</p>
                   </div>
                 )}
-                {/* Debug information */}
-                {(process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEBUG === 'true') && (
-                  <div className="mt-2 p-2 bg-yellow-100 rounded text-xs">
-                    <p>Debug: Signature data exists: {signatureCanvasData ? 'Yes' : 'No'}</p>
-                    {signatureCanvasData && (
-                      <>
-                        <p>Data length: {signatureCanvasData.length} characters</p>
-                        <p>Data type: {signatureCanvasData.split(',')[0]}</p>
-                        <p>Is client: {isClient ? 'Yes' : 'No'}</p>
-                      </>
-                    )}
-                  </div>
-                )}
                 {signatureCanvasData && (
                   <div className="mt-4">
                     <p className="text-sm font-medium text-slate-700 mb-2">
@@ -860,13 +811,6 @@ export default function CreateWordDocPage() {
                         src={signatureCanvasData}
                         alt="Canvas Signature Preview"
                         className="max-w-xs h-auto object-contain border rounded-lg shadow-sm"
-                        onError={(e) => {
-                          console.error('Failed to load signature image:', e);
-                          console.log('Image src:', signatureCanvasData?.substring(0, 100) + '...');
-                        }}
-                        onLoad={() => {
-                          console.log('Signature image loaded successfully');
-                        }}
                       />
                     </div>
                   </div>
@@ -1099,22 +1043,10 @@ export default function CreateWordDocPage() {
                     <p className="text-xs text-gray-500 mb-2">
                       จากการวาดออนไลน์:
                     </p>
-                    {process.env.NODE_ENV === 'development' && (
-                      <div className="mb-2 p-2 bg-yellow-100 rounded text-xs">
-                        <p>Canvas Data Length: {signatureCanvasData.length}</p>
-                        <p>Canvas Data Type: {signatureCanvasData.split(',')[0]}</p>
-                      </div>
-                    )}
                     <img
                       src={signatureCanvasData}
                       alt="Canvas Signature Preview"
                       className="max-w-xs h-auto object-contain mt-2 border rounded"
-                      onError={(e) => {
-                        console.error('Preview modal - Failed to load signature image:', e);
-                      }}
-                      onLoad={() => {
-                        console.log('Preview modal - Signature image loaded successfully');
-                      }}
                     />
                   </div>
                 )}

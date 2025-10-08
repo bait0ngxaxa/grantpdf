@@ -36,6 +36,12 @@ const SignatureCanvasComponent = forwardRef<SignatureCanvasRef, SignatureCanvasC
     // ตรวจสอบว่า component ถูก mount แล้ว
     useEffect(() => {
       setIsMounted(true);
+      return () => {
+        // Cleanup
+        if (sigCanvas.current) {
+          sigCanvas.current.clear();
+        }
+      };
     }, []);
 
     useImperativeHandle(ref, () => ({
@@ -53,10 +59,8 @@ const SignatureCanvasComponent = forwardRef<SignatureCanvasRef, SignatureCanvasC
         if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
           try {
             const dataURL = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
-            console.log('Manual getSignatureDataURL called:', dataURL ? 'Success' : 'Failed');
             return dataURL;
           } catch (error) {
-            console.error('Error in getSignatureDataURL:', error);
             return null;
           }
         }
@@ -65,8 +69,8 @@ const SignatureCanvasComponent = forwardRef<SignatureCanvasRef, SignatureCanvasC
     }));
 
     const handleSignatureEnd = () => {
+      // เพิ่มการตรวจสอบแบบเข้มงวดเพื่อให้แน่ใจว่าทุกอย่างพร้อม
       if (!isMounted || !sigCanvas.current) {
-        console.log('Canvas not ready for signature processing');
         return;
       }
       
@@ -77,34 +81,33 @@ const SignatureCanvasComponent = forwardRef<SignatureCanvasRef, SignatureCanvasC
         if (!isCanvasEmpty) {
           // ใช้ setTimeout เพื่อให้แน่ใจว่า canvas ถูกอัปเดตแล้ว
           setTimeout(() => {
+            // ตรวจสอบอีกครั้งหลัง timeout
             if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
               try {
                 const trimmedCanvas = sigCanvas.current.getTrimmedCanvas();
                 if (!trimmedCanvas) {
-                  throw new Error('Failed to get trimmed canvas');
+                  onSignatureChange?.(null);
+                  return;
                 }
                 
                 const dataURL = trimmedCanvas.toDataURL('image/png', 1.0);
-                if (!dataURL || dataURL === 'data:,') {
-                  throw new Error('Failed to generate valid dataURL');
+                // ตรวจสอบว่า dataURL ถูกต้อง
+                if (!dataURL || dataURL === 'data:,' || !dataURL.startsWith('data:image/png')) {
+                  onSignatureChange?.(null);
+                  return;
                 }
                 
-                console.log('Generated signature dataURL:', dataURL ? 'Success' : 'Failed');
-                console.log('DataURL length:', dataURL ? dataURL.length : 0);
-                console.log('DataURL starts with:', dataURL ? dataURL.substring(0, 50) : 'null');
-                
+                // ส่งค่ากลับเฉพาะเมื่อ dataURL ถูกต้อง
                 onSignatureChange?.(dataURL);
               } catch (error) {
-                console.error('Error in delayed signature processing:', error);
                 onSignatureChange?.(null);
               }
             }
-          }, 150); // เพิ่มเวลาอีกนิด
+          }, 200); // เพิ่มเวลาเป็น 200ms
         } else {
           onSignatureChange?.(null);
         }
       } catch (error) {
-        console.error('Error in handleSignatureEnd:', error);
         onSignatureChange?.(null);
       }
     };
@@ -114,24 +117,6 @@ const SignatureCanvasComponent = forwardRef<SignatureCanvasRef, SignatureCanvasC
         sigCanvas.current.clear();
         setIsEmpty(true);
         onSignatureChange?.(null);
-        console.log('Signature cleared');
-      }
-    };
-
-    const testSignature = () => {
-      if (sigCanvas.current) {
-        const isCanvasEmpty = sigCanvas.current.isEmpty();
-        console.log('Test - Canvas empty:', isCanvasEmpty);
-        if (!isCanvasEmpty) {
-          try {
-            const dataURL = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
-            console.log('Test - Generated dataURL length:', dataURL.length);
-            console.log('Test - DataURL preview:', dataURL.substring(0, 100) + '...');
-            onSignatureChange?.(dataURL);
-          } catch (error) {
-            console.error('Test - Error:', error);
-          }
-        }
       }
     };
 
@@ -151,6 +136,7 @@ const SignatureCanvasComponent = forwardRef<SignatureCanvasRef, SignatureCanvasC
                   backgroundColor={backgroundColor}
                   penColor={penColor}
                   onEnd={handleSignatureEnd}
+                  clearOnResize={false}
                 />
               ) : (
                 <div 
@@ -173,29 +159,11 @@ const SignatureCanvasComponent = forwardRef<SignatureCanvasRef, SignatureCanvasC
             >
               ลบลายเซ็น
             </Button>
-            {process.env.NODE_ENV === 'development' && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={testSignature}
-                disabled={isEmpty || !isMounted}
-                className="px-4 py-2 text-sm bg-yellow-50 border-yellow-300"
-              >
-                ทดสอบลายเซ็น
-              </Button>
-            )}
           </div>
           
           <p className="text-xs text-gray-500 text-center mt-2">
             ลากเมาส์หรือนิ้วเพื่อวาดลายเซ็นในกรอบข้างต้น
           </p>
-          
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
-              <p>Debug: Mounted: {isMounted ? 'Yes' : 'No'}</p>
-              <p>Canvas Empty: {isEmpty ? 'Yes' : 'No'}</p>
-            </div>
-          )}
         </div>
       </div>
     );
