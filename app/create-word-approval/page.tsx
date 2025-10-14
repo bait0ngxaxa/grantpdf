@@ -223,6 +223,20 @@ export default function CreateWordDocPage() {
       return;
     }
 
+    // ตรวจสอบว่ามีลายเซ็นทั้งสองแบบพร้อมกันหรือไม่
+    if (signatureFile && signatureCanvasData) {
+      setMessage("กรุณาเลือกเพียงวิธีการหนึ่งในการเพิ่มลายเซ็น (อัปโหลดไฟล์ หรือ วาดลายเซ็นเอง)");
+      setIsError(true);
+      return;
+    }
+
+    // ตรวจสอบว่ามีลายเซ็นอย่างน้อยหนึ่งอย่าง
+    if (!signatureFile && !signatureCanvasData) {
+      setMessage("กรุณาเพิ่มลายเซ็นโดยการอัปโหลดไฟล์ หรือ วาดลายเซ็นบนหน้าจอ");
+      setIsError(true);
+      return;
+    }
+
     setIsSubmitting(true);
     setMessage(null);
     setGeneratedFileUrl(null);
@@ -782,6 +796,50 @@ export default function CreateWordDocPage() {
                     />
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Divider ระหว่างอัปโหลดกับวาดลายเซ็น - Enhanced UX */}
+            <div className="relative my-8">
+              {/* Background gradient line */}
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t-2 border-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+              </div>
+              
+              {/* Center content with better visual design */}
+              <div className="relative flex justify-center">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-3 rounded-full border-2 border-blue-200 shadow-md">
+                  <div className="flex items-center gap-3">
+                    {/* Upload icon */}
+                    <div className="flex items-center gap-2 text-yellow-600">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <span className="text-sm font-medium">อัปโหลด</span>
+                    </div>
+                    
+                    {/* OR text with styling */}
+                    <div className="flex flex-col items-center">
+                      <span className="text-lg font-bold text-blue-600 uppercase tracking-wider">หรือ</span>
+                      <span className="text-xs text-slate-600 font-medium whitespace-nowrap">เลือกอย่างใดอย่างหนึ่ง</span>
+                    </div>
+                    
+                    {/* Draw icon */}
+                    <div className="flex items-center gap-2 text-indigo-600">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      <span className="text-sm font-medium">วาดลายเซ็น</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Subtle helper text */}
+              <div className="text-center mt-3">
+                <p className="text-xs text-slate-500 italic">
+                  💡คุณสามารถอัปโหลดไฟล์ลายเซ็นที่มีอยู่แล้ว หรือ วาดลายเซ็นใหม่บนหน้าจอได้
+                </p>
               </div>
             </div>
 

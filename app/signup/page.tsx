@@ -9,7 +9,7 @@ import { useTitle } from "@/hook/useTitle";
 import {
   Zap,
   FileText,
-  Lock,
+  Activity,
   Download,
   UserPlus,
   CheckCircle2,
@@ -81,80 +81,103 @@ export default function SignupPage() {
     <>
       {/* Main Container */}
       <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-        <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-primary/10 via-blue-50 to-secondary/10 dark:from-primary/20 dark:via-gray-800 dark:to-secondary/20 rounded-r-[40px] overflow-hidden relative">
-          {/* Background Decorations */}
-          <div className="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-xl"></div>
-          <div className="absolute bottom-20 right-16 w-24 h-24 bg-secondary/10 rounded-full blur-lg"></div>
-          <div className="absolute top-1/3 right-20 w-16 h-16 bg-accent/10 rounded-full blur-md"></div>
+        <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-800 rounded-r-[40px] overflow-hidden relative">
+          {/* Professional Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <svg className="w-full h-full" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="document-pattern-signup" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+                  <rect x="2" y="2" width="76" height="76" rx="4" fill="transparent" stroke="currentColor" strokeWidth="1"/>
+                  <line x1="8" y1="12" x2="32" y2="12" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="8" y1="18" x2="28" y2="18" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="8" y1="24" x2="35" y2="24" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="60" cy="60" r="8" fill="currentColor"/>
+                  <path d="M56 60l2 2 6-6" stroke="white" strokeWidth="2" fill="none"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#document-pattern-signup)"/>
+            </svg>
+          </div>
+
+          {/* Accent Elements */}
+          <div className="absolute top-12 left-12 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-24 right-20 w-16 h-16 bg-green-500/10 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 right-16 w-12 h-12 bg-orange-500/10 rounded-full blur-lg"></div>
 
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8 z-10">
             <div className="text-center max-w-md">
-              {/* Welcome Text */}
-              <h1 className="text-4xl font-bold bg-primary bg-clip-text text-transparent mb-4">
-                เริ่มต้นใช้งาน
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 font-medium mb-6">
-                ระบบสร้างเอกสารและแบบฟอร์มยื่นโครงการ
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
-                สมัครสมาชิกเพื่อเข้าสู่ระบบและเริ่มต้นใช้งาน
-              </p>
-
-              {/* Features Preview */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg transform transition-all duration-300 hover:scale-105">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
-                      <Zap className="h-6 w-6 text-primary" />
-                    </div>
-                    <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">
-                      สร้างเอกสารอัตโนมัติ
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      สร้างเอกสารจากเทมเพลต
-                    </p>
-                  </div>
+              <div className="mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <FileText className="h-8 w-8 text-white" />
                 </div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  GrantOnline
+                </h1>
+                <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mx-auto mb-4"></div>
+              </div>
 
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg transform transition-all duration-300 hover:scale-105">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-3">
+              <p className="text-lg text-gray-700 dark:text-gray-200 font-medium mb-3">
+              ระบบเอกสารสัญญาและโครงการ
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
+              แพลตฟอร์มสำหรับการยื่นขอโครงการ สร้างเอกสาร และติดตามความก้าวหน้าโครงการ
+              </p>
+
+              {/* Grant Features */}
+              <div className="space-y-4">
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
                       <FileText className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">
-                      รูปแบบไฟล์
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      รองรับ PDF, Word
-                    </p>
+                    <div className="text-left">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
+                      เทมเพลตแบบฟอร์มอัตโนมัติ
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                      แบบฟอร์มพร้อมกรอกสำหรับทุกประเภท
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg transform transition-all duration-300 hover:scale-105">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mx-auto mb-3">
-                      <Lock className="h-6 w-6 text-green-600" />
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Zap className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">
-                      ความปลอดภัยสูง
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      เข้ารหัสข้อมูลของไฟล์
-                    </p>
+                    <div className="text-left">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
+                        สร้างเอกสารอัตโนมัติ
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                      เอกสาร TOR, สัญญา, และเอกสารอื่นๆในโครงการ
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg transform transition-all duration-300 hover:scale-105">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mx-auto mb-3">
-                      <Download className="h-6 w-6 text-blue-600" />
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Activity className="h-6 w-6 text-white" />
                     </div>
-                    <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-1">
-                      ดาวน์โหลด
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400"></p>
+                    <div className="text-left">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
+                        ติดตามสถานะ
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                      ตรวจสอบความคืบหน้าและผลการพิจารณาโครงการ
+                      </p>
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  สมัครสมาชิกเพื่อเริ่มใช้งานระบบ
+                </p>
               </div>
             </div>
           </div>
@@ -208,7 +231,7 @@ export default function SignupPage() {
                 <div className="form-control">
                   <label className="label">
                     <span className="label-text font-medium text-gray-600 dark:text-gray-300">
-                      รหัสผ่าน
+                      รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)
                     </span>
                   </label>
                   <Input

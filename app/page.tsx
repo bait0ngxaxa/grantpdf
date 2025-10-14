@@ -227,7 +227,7 @@ export default function Home() {
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent mb-4">
-                  GRANT ONLINE
+                  GrantOnline
                 </h1>
 
                 <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 font-medium mb-6">
