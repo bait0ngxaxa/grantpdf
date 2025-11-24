@@ -66,11 +66,10 @@ export async function POST(req: NextRequest) {
 
         console.log("User created successfully:", newUser);
 
-        // FIX: Convert BigInt 'id' to string before sending in JSON response.
-        // This is necessary because JSON.stringify (used by NextResponse.json) cannot serialize BigInt.
+        
         const userResponse = {
             ...newUser,
-            id: newUser.id.toString(), // Convert BigInt to string
+            id: newUser.id.toString(), 
         };
 
         return NextResponse.json(

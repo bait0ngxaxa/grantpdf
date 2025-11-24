@@ -144,7 +144,6 @@ export async function POST(req: Request) {
       },
 
       nullGetter: function (part) {
-        console.log("Missing or null variable:", part.value || "unknown");
         return "";
       },
 
@@ -175,8 +174,6 @@ export async function POST(req: Request) {
                 // แปลง line breaks เป็น format ที่ Word เข้าใจ
                 value = value.replace(/\n/g, "\r\n");
               }
-
-              console.log(`Processed Thai text for field: ${tag}`);
             }
             return value || "";
           },
@@ -230,7 +227,6 @@ export async function POST(req: Request) {
       documentType: "Terms of Reference (TOR)",
     };
 
-    console.log("Processing TOR document with Thai formatting fixes...");
     doc.render(processedData);
 
     const outputBuffer = doc.getZip().generate({
