@@ -1,55 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
-import ProjectCard from './ProjectCard';
-import LoadingSpinner from './LoadingSpinner';
-import EmptyState from './EmptyState';
-
-interface AttachmentFile {
-    id: string;
-    fileName: string;
-    filePath: string;
-    fileSize: number;
-    mimeType: string;
-}
-
-interface PdfFile {
-    id: string;
-    fileName: string;
-    createdAt: string;
-    lastModified: string;
-    userId: string;
-    userName?: string;
-    userEmail?: string;
-    pdfUrl?: string;
-    originalFileName: string;
-    storagePath: string;
-    created_at: string;
-    updated_at: string;
-    fileExtension: string;
-    downloadStatus: string; 
-    downloadedAt?: string;
-    attachmentFiles?: AttachmentFile[];
-}
-
-interface Project {
-    id: string;
-    name: string;
-    description?: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-    userId: string;
-    userName: string;
-    userEmail: string;
-    files: PdfFile[];
-    _count: {
-        files: number;
-    };
-}
+import React from "react";
+import ProjectCard from "./ProjectCard";
+import LoadingSpinner from "./LoadingSpinner";
+import EmptyState from "./EmptyState";
+import type { AdminProject, AdminPdfFile } from "@/type/models";
 
 interface ProjectsListProps {
-    projects: Project[];
+    projects: AdminProject[];
     isLoading: boolean;
     expandedProjects: Set<string>;
     viewedProjects: Set<string>;
@@ -59,7 +17,7 @@ interface ProjectsListProps {
     onToggleProjectExpansion: (projectId: string) => void;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
     onDeleteFile: (file: any) => void;
-    onEditProjectStatus: (project: Project) => void;
+    onEditProjectStatus: (project: AdminProject) => void;
 }
 
 export default function ProjectsList({
@@ -73,7 +31,7 @@ export default function ProjectsList({
     onToggleProjectExpansion,
     onPreviewPdf,
     onDeleteFile,
-    onEditProjectStatus
+    onEditProjectStatus,
 }: ProjectsListProps) {
     if (isLoading) {
         return <LoadingSpinner message="กำลังโหลดโครงการ..." />;
@@ -93,11 +51,12 @@ export default function ProjectsList({
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                    โครงการทั้งหมด 
+                    โครงการทั้งหมด
                 </h2>
                 {totalItems > 0 && (
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                        แสดง {startIndex + 1}-{Math.min(endIndex, totalItems)} จาก {totalItems} รายการ
+                        แสดง {startIndex + 1}-{Math.min(endIndex, totalItems)}{" "}
+                        จาก {totalItems} รายการ
                     </div>
                 )}
             </div>

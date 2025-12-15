@@ -1,25 +1,22 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function AccessDeniedPage() {
   const router = useRouter();
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
-    // Start the countdown timer
     const countdownInterval = setInterval(() => {
       setCountdown((prev) => prev - 1);
     }, 1000);
 
-    // Redirect after 6 seconds
     const redirectTimer = setTimeout(() => {
-      router.push('/');
+      router.push("/");
     }, 6000);
 
-    // Cleanup timers on component unmount
     return () => {
       clearInterval(countdownInterval);
       clearTimeout(redirectTimer);
@@ -30,7 +27,7 @@ export default function AccessDeniedPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4 py-8">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-gray-900/[0.04] bg-[size:60px_60px]"></div>
-      
+
       {/* Main Content */}
       <div className="relative w-full max-w-2xl">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-all duration-500 hover:scale-[1.02]">
@@ -54,7 +51,9 @@ export default function AccessDeniedPage() {
                 </svg>
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-center mb-2">การเข้าถึงถูกปฏิเสธ</h1>
+            <h1 className="text-3xl font-bold text-center mb-2">
+              การเข้าถึงถูกปฏิเสธ
+            </h1>
             <p className="text-red-100 text-center text-lg">Access Denied</p>
           </div>
 
@@ -84,7 +83,8 @@ export default function AccessDeniedPage() {
                 คุณไม่มีสิทธิ์เข้าถึงหน้านี้
               </h2>
               <p className="text-red-700 dark:text-red-300 leading-relaxed">
-                หน้านี้เป็นพื้นที่สำหรับผู้ดูแลระบบเท่านั้น<br />
+                หน้านี้เป็นพื้นที่สำหรับผู้ดูแลระบบเท่านั้น
+                <br />
                 กรุณาติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์การเข้าถึง
               </p>
             </div>
@@ -114,16 +114,20 @@ export default function AccessDeniedPage() {
               </div>
               <div className="flex items-center justify-center">
                 <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-2xl font-bold text-white">{countdown}</span>
+                  <span className="text-2xl font-bold text-white">
+                    {countdown}
+                  </span>
                 </div>
-                <span className="ml-3 text-gray-600 dark:text-gray-400">วินาที</span>
+                <span className="ml-3 text-gray-600 dark:text-gray-400">
+                  วินาที
+                </span>
               </div>
             </div>
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
-                onClick={() => router.push('/')}
+                onClick={() => router.push("/")}
                 className="bg-primary hover:bg-primary-focus text-white px-8 py-3 rounded-full text-lg font-medium shadow-lg transform transition-all duration-200 hover:scale-105"
               >
                 <svg
@@ -144,7 +148,7 @@ export default function AccessDeniedPage() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => router.push('/signin')}
+                onClick={() => router.push("/signin")}
                 className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-8 py-3 rounded-full text-lg font-medium"
               >
                 <svg
@@ -168,7 +172,8 @@ export default function AccessDeniedPage() {
             {/* Help Text */}
             <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                💡 <strong>คำแนะนำ:</strong> หากคุณเป็นผู้ดูแลระบบ กรุณาลงชื่อเข้าใช้ด้วยบัญชีที่มีสิทธิ์ admin
+                💡 <strong>คำแนะนำ:</strong> หากคุณเป็นผู้ดูแลระบบ
+                กรุณาลงชื่อเข้าใช้ด้วยบัญชีที่มีสิทธิ์ admin
               </p>
             </div>
           </div>

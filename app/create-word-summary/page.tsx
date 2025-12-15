@@ -27,6 +27,17 @@ interface SummaryData {
   projectReview: string;
   inspector: string;
   coordinator: string;
+  projectCode: string;
+  projectActivity: string;
+  projectNhf: string;
+  projectCo: string;
+  month: string;
+  timeline: string;
+  sec1: string;
+  sec2: string;
+  sec3: string;
+  sum: string;
+  funds: string;
 }
 
 export default function CreateWordSummaryPage() {
@@ -42,6 +53,17 @@ export default function CreateWordSummaryPage() {
     projectReview: "",
     inspector: "",
     coordinator: "",
+    projectCode: "",
+    projectActivity: "",
+    projectNhf: "",
+    projectCo: "",
+    month: "",
+    timeline: "",
+    sec1: "",
+    sec2: "",
+    sec3: "",
+    sum: "",
+    funds: "",
   });
 
   const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(null);
@@ -96,7 +118,7 @@ export default function CreateWordSummaryPage() {
         data.append("userEmail", session.user.email);
       }
       
-      // Add project ID if available
+      
       const selectedProjectId = localStorage.getItem('selectedProjectId');
       if (selectedProjectId) {
         data.append("projectId", selectedProjectId);
@@ -203,6 +225,32 @@ export default function CreateWordSummaryPage() {
                     required
                   />
                 </div>
+                  <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    รหัสชุดโครงการ
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectCode"
+                    placeholder="ระบุรหัสชุดโครงการ"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectCode}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    รหัสภายใต้กิจกรรม
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectActivity"
+                    placeholder="ระบุรหัสภายใต้กิจกรรม"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectActivity}
+                    onChange={handleChange}
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     เลขที่สัญญา
@@ -218,14 +266,67 @@ export default function CreateWordSummaryPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    หน่วยงาน
+                    หน่วยงานที่เสนอโครงการ
                   </label>
                   <Input
                     type="text"
                     name="organize"
-                    placeholder="ระบุหน่วยงาน"
+                    placeholder="ระบุหน่วยงานที่เสนอโครงการ"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.organize}
+                    onChange={handleChange}
+                  />
+                </div>
+              
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    เลขที่ มสช น.
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectNhf"
+                    placeholder="ระบุเลขที่ มสช น."
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectNhf}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ชุดโครงการ
+                  </label>
+                  <Input
+                    type="text"
+                    name="projectCo"
+                    placeholder="ระบุชุดโครงการ"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.projectCo}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ระยะเวลาดำเนินการ (เดือน)
+                  </label>
+                  <Input
+                    type="number"
+                    name="month"
+                    placeholder="ระบุจำนวนเดือน"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.month}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    ระยะเวลา
+                  </label>
+                  <Input
+                    type="text"
+                    name="timeline"
+                    placeholder="ระบุระยะเวลา เช่น 1มกราคม 2568 - 31กันยายน 2568"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.timeline}
                     onChange={handleChange}
                   />
                 </div>
@@ -240,12 +341,12 @@ export default function CreateWordSummaryPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    เจ้าของโครงการ
+                    ผู้เสนอโครงการ
                   </label>
                   <Input
                     type="text"
                     name="projectOwner"
-                    placeholder="ระบุเจ้าของโครงการ"
+                    placeholder="ระบุผู้เสนอโครงการ"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.projectOwner}
                     onChange={handleChange}
@@ -253,30 +354,18 @@ export default function CreateWordSummaryPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    ผู้ตรวจสอบโครงการ
+                    ผู้ทบทวนโครงการ
                   </label>
                   <Input
                     type="text"
                     name="projectReview"
-                    placeholder="ระบุผู้ตรวจสอบโครงการ"
+                    placeholder="ระบุผู้ทบทวนโครงการ"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.projectReview}
                     onChange={handleChange}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    ผู้ตรวจการ
-                  </label>
-                  <Input
-                    type="text"
-                    name="inspector"
-                    placeholder="ระบุผู้ตรวจการ"
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    value={formData.inspector}
-                    onChange={handleChange}
-                  />
-                </div>
+                
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     ผู้ประสานงาน
@@ -287,6 +376,80 @@ export default function CreateWordSummaryPage() {
                     placeholder="ระบุผู้ประสานงาน"
                     className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     value={formData.coordinator}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ข้อมูลงบประมาณ */}
+            <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4 pb-2 border-b border-green-300">
+                💰 ข้อมูลงบประมาณ
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    งวด 1
+                  </label>
+                  <Input
+                    type="number"
+                    name="sec1"
+                    placeholder="ระบุจำนวนเงินงวด 1 (ตัวเลข)"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.sec1}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    งวด 2
+                  </label>
+                  <Input
+                    type="number"
+                    name="sec2"
+                    placeholder="ระบุจำนวนเงินงวด 2 (ตัวเลข)"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.sec2}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    งวด 3
+                  </label>
+                  <Input
+                    type="number"
+                    name="sec3"
+                    placeholder="ระบุจำนวนเงินงวด 3 (ตัวเลข)"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.sec3}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    รวม
+                  </label>
+                  <Input
+                    type="number"
+                    name="sum"
+                    placeholder="ระบุจำนวนเงินรวม (ตัวเลข)"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.sum}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    แหล่งทุน
+                  </label>
+                  <Input
+                    type="text"
+                    name="funds"
+                    placeholder="ระบุแหล่งทุน"
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={formData.funds}
                     onChange={handleChange}
                   />
                 </div>
@@ -423,6 +586,30 @@ export default function CreateWordSummaryPage() {
                 <p className="text-sm">{formData.organize || '-'}</p>
               </div>
               <div>
+                <h4 className="font-semibold text-sm text-gray-600">รหัสชุดโครงการ:</h4>
+                <p className="text-sm">{formData.projectCode || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">รหัสกิจกรรม:</h4>
+                <p className="text-sm">{formData.projectActivity || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">เลขที่ มสช:</h4>
+                <p className="text-sm">{formData.projectNhf || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ชุดโครงการ:</h4>
+                <p className="text-sm">{formData.projectCo || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">จำนวนเดือน:</h4>
+                <p className="text-sm">{formData.month || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">ระยะเวลา:</h4>
+                <p className="text-sm">{formData.timeline || '-'}</p>
+              </div>
+              <div>
                 <h4 className="font-semibold text-sm text-gray-600">เจ้าของโครงการ:</h4>
                 <p className="text-sm">{formData.projectOwner || '-'}</p>
               </div>
@@ -430,13 +617,30 @@ export default function CreateWordSummaryPage() {
                 <h4 className="font-semibold text-sm text-gray-600">ผู้ตรวจสอบโครงการ:</h4>
                 <p className="text-sm">{formData.projectReview || '-'}</p>
               </div>
-              <div>
-                <h4 className="font-semibold text-sm text-gray-600">ผู้ตรวจการ:</h4>
-                <p className="text-sm">{formData.inspector || '-'}</p>
-              </div>
+            
               <div>
                 <h4 className="font-semibold text-sm text-gray-600">ผู้ประสานงาน:</h4>
                 <p className="text-sm">{formData.coordinator || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">งวด 1:</h4>
+                <p className="text-sm">{formData.sec1 || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">งวด 2:</h4>
+                <p className="text-sm">{formData.sec2 || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">งวด 3:</h4>
+                <p className="text-sm">{formData.sec3 || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">รวม:</h4>
+                <p className="text-sm">{formData.sum || '-'}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-600">แหล่งทุน:</h4>
+                <p className="text-sm">{formData.funds || '-'}</p>
               </div>
             </div>
           </div>

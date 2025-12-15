@@ -20,7 +20,7 @@ import { useTitle } from "@/hook/useTitle";
 
 
 interface TORData {
-    projectName: string; // เพิ่มชื่อโครงการ
+    projectName: string; 
     fileName: string;
     owner: string;
     address: string;
@@ -41,7 +41,7 @@ interface TORData {
     date: string;
 }
 
-// Interface สำหรับตารางกิจกรรม
+
 interface ActivityData {
     activity: string;
 
@@ -76,7 +76,7 @@ export default function CreateTORPage() {
         partner: "",
     });
 
-    // State สำหรับตารางกิจกรรม
+    
     const [activities, setActivities] = useState<ActivityData[]>([
         { activity: "", manager: "", evaluation2: "", duration: "" },
     ]);
@@ -123,7 +123,7 @@ export default function CreateTORPage() {
         }
     };
 
-    // ฟังก์ชันจัดการตารางกิจกรรม
+    
     const addActivityRow = () => {
         setActivities([
             ...activities,
@@ -172,7 +172,7 @@ export default function CreateTORPage() {
                 data.append(key, formData[key as keyof TORData]);
             });
 
-            // เพิ่มข้อมูลตารางกิจกรรม
+            
             data.append("activities", JSON.stringify(activities));
 
             if (signatureFile) {
@@ -186,7 +186,7 @@ export default function CreateTORPage() {
                 data.append("userEmail", session.user.email);
             }
             
-            // Add project ID if available
+            
             const selectedProjectId = localStorage.getItem('selectedProjectId');
             if (selectedProjectId) {
                 data.append("projectId", selectedProjectId);

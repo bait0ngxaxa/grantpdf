@@ -31,61 +31,58 @@ const generateUniqueFilename = (originalName: string): string => {
 
 // ฟังก์ชันเฉพาะสำหรับจัดการ Thai Distributed Justification และ Word formatting issues
 const fixThaiDistributed = (text: string): string => {
-    if (!text || typeof text !== 'string') return "";
-    
-    return text
-        // 1. ลบ invisible characters ที่ทำให้ Thai Distributed ทำงานผิด
-        .replace(/[\u200B-\u200D\uFEFF]/g, '')  // Zero-width chars + BOM
-        .replace(/[\u2060-\u206F]/g, '')        // Word joiner, invisible chars
-        .replace(/\u00AD/g, '')                 // Soft hyphen (ปัญหาหลัก!)
-        .replace(/[\u034F\u061C]/g, '')         // Combining grapheme joiner + Arabic letter mark
-        
-        // 2. แปลง special spaces เป็น normal space
-        .replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, ' ')
-        
-        // 3. รวม Thai combining characters
-        .normalize('NFC')
-        
-        // 4. จัดการ line breaks อย่างถูกต้อง (รักษา paragraph structure)
-        .replace(/\r\n|\r|\u2028/g, '\n')       // แปลงเป็น LF
-        .replace(/\u2029/g, '\n\n')            // Paragraph separator
-        .replace(/[\u000B\u000C]/g, '\n')      // Vertical tab, Form feed
-        
-        // 5. **ปรับปรุงการจัดการ spaces สำหรับ Thai Distributed**
-        .replace(/[ \t]{2,}/g, ' ')            // แปลง multiple spaces เป็น single space
-        .replace(/^[ \t]+|[ \t]+$/gm, '')      // ลบ leading/trailing spaces ในแต่ละบรรทัด
-        
-        // 6. ลบ Word field codes และ formatting marks
-        .replace(/[\u0013-\u0015]/g, '')       // Field separators
-        .replace(/[\u200E\u200F\u202A-\u202E]/g, '') // Directional marks
-        
-        // 7. **เพิ่มการจัดการ Thai-specific issues**
-        .replace(/([\u0e01-\u0e4f])\s+([\u0e01-\u0e4f])/g, '$1 $2') // รักษาช่องว่างระหว่างคำไทย
-        .replace(/\s*([.,:;!?])\s*/g, '$1 ')   // จัดการเครื่องหมายวรรคตอน
-        
-        // 8. จำกัด empty lines และ clean up
-        .replace(/\n{3,}/g, '\n\n')           // จำกัด empty lines
-        .replace(/^\n+|\n+$/g, '')             // ลบ leading/trailing newlines
-        .trim();
-};
+    if (!text || typeof text !== "string") return "";
 
+    return (
+        text
+            // 1. ลบ invisible characters ที่ทำให้ Thai Distributed ทำงานผิด
+            .replace(/[\u200B-\u200D\uFEFF]/g, "") // Zero-width chars + BOM
+            .replace(/[\u2060-\u206F]/g, "") // Word joiner, invisible chars
+            .replace(/\u00AD/g, "") // Soft hyphen (ปัญหาหลัก!)
+            .replace(/[\u034F\u061C]/g, "") // Combining grapheme joiner + Arabic letter mark
+
+            // 2. แปลง special spaces เป็น normal space
+            .replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, " ")
+
+            // 3. รวม Thai combining characters
+            .normalize("NFC")
+
+            // 4. จัดการ line breaks อย่างถูกต้อง (รักษา paragraph structure)
+            .replace(/\r\n|\r|\u2028/g, "\n") // แปลงเป็น LF
+            .replace(/\u2029/g, "\n\n") // Paragraph separator
+            .replace(/[\u000B\u000C]/g, "\n") // Vertical tab, Form feed
+
+            // 5. **ปรับปรุงการจัดการ spaces สำหรับ Thai Distributed**
+            .replace(/[ \t]{2,}/g, " ") // แปลง multiple spaces เป็น single space
+            .replace(/^[ \t]+|[ \t]+$/gm, "") // ลบ leading/trailing spaces ในแต่ละบรรทัด
+
+            // 6. ลบ Word field codes และ formatting marks
+            .replace(/[\u0013-\u0015]/g, "") // Field separators
+            .replace(/[\u200E\u200F\u202A-\u202E]/g, "") // Directional marks
+
+            // 7. **เพิ่มการจัดการ Thai-specific issues**
+            .replace(/([\u0e01-\u0e4f])\s+([\u0e01-\u0e4f])/g, "$1 $2") // รักษาช่องว่างระหว่างคำไทย
+            .replace(/\s*([.,:;!?])\s*/g, "$1 ") // จัดการเครื่องหมายวรรคตอน
+
+            // 8. จำกัด empty lines และ clean up
+            .replace(/\n{3,}/g, "\n\n") // จำกัด empty lines
+            .replace(/^\n+|\n+$/g, "") // ลบ leading/trailing newlines
+            .trim()
+    );
+};
 
 export async function POST(req: Request) {
     try {
-        // ✅ Get session from NextAuth
         const session = await getServerSession(authOptions);
         if (!session || !session.user || !session.user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // แปลง user.id เป็น number เพื่อใช้กับ Prisma (ถ้า schema เป็น Int)
         const userId = Number(session.user.id);
 
-        // 1. Get the form data from the request body
         const formData = await req.formData();
 
-        // TOR specific fields ตาม interface TORData
-        const projectName = formData.get("projectName") as string; // เพิ่มชื่อโครงการ
+        const projectName = formData.get("projectName") as string;
 
         const owner = formData.get("owner") as string;
         const address = formData.get("address") as string;
@@ -96,8 +93,7 @@ export async function POST(req: Request) {
         const cost = formData.get("cost") as string;
         const topic1 = formData.get("topic1") as string;
         const objective1 = formData.get("objective1") as string;
-        // const objective2 = formData.get("objective2") as string;
-        // const objective3 = formData.get("objective3") as string;
+
         const target = formData.get("target") as string;
         const zone = formData.get("zone") as string;
         const plan = formData.get("plan") as string;
@@ -125,18 +121,12 @@ export async function POST(req: Request) {
             }
         }
 
-        // 3. Read the Word template file (ใช้ template เดียวกับ tor.docx หรือสร้างใหม่)
-        const templatePath = path.join(
-            process.cwd(),
-            "public",
-            "tor.docx" // สมมติว่ามี template tor.docx
-        );
+        const templatePath = path.join(process.cwd(), "public", "tor.docx");
 
         let content;
         try {
             content = await fs.readFile(templatePath);
         } catch (error) {
-            // ถ้าไม่มี tor.docx ใช้ blank_header.docx แทน
             const fallbackTemplatePath = path.join(
                 process.cwd(),
                 "public",
@@ -145,70 +135,76 @@ export async function POST(req: Request) {
             content = await fs.readFile(fallbackTemplatePath);
         }
 
-        // 4. Initialize Docxtemplater
         const zip = new PizZip(content);
 
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
             delimiters: {
-                start: '{',
-                end: '}'
+                start: "{",
+                end: "}",
             },
-            // จัดการค่า null/undefined
-            nullGetter: function(part) {
-                console.log('Missing or null variable:', part.value || 'unknown');
-                return ""; 
+
+            nullGetter: function (part) {
+                return "";
             },
-            // **ปรับปรุง parser สำหรับ Thai Distributed**
-            parser: function(tag) {
+
+            parser: function (tag) {
                 return {
-                    get: function(scope, context) {
-                        if (tag === '.') {
+                    get: function (scope, context) {
+                        if (tag === ".") {
                             return scope;
                         }
-                        
+
                         let value = scope[tag];
-                        if (typeof value === 'string' && value.trim()) {
+                        if (typeof value === "string" && value.trim()) {
                             // **บังคับแก้ไข Thai formatting ทุกฟิลด์**
                             value = fixThaiDistributed(value);
-                            
+
                             // **เพิ่มการจัดการพิเศษสำหรับ textarea fields**
-                            if (['topic1', 'objective1', 'target', 'zone', 'plan', 'projectmanage', 'partner'].includes(tag)) {
+                            if (
+                                [
+                                    "topic1",
+                                    "objective1",
+                                    "target",
+                                    "zone",
+                                    "plan",
+                                    "projectmanage",
+                                    "partner",
+                                ].includes(tag)
+                            ) {
                                 // แปลง line breaks เป็น format ที่ Word เข้าใจ
-                                value = value.replace(/\n/g, '\r\n');
+                                value = value.replace(/\n/g, "\r\n");
                             }
-                            
-                            console.log(`Processed Thai text for field: ${tag}`);
                         }
-                        return value || '';
-                    }
+                        return value || "";
+                    },
                 };
-            }
+            },
         });
 
-        // 5. Render data into the template - ประมวลผล Thai formatting ทุกฟิลด์
         const processedActivities = activities.map((activity: any) => ({
             ...activity,
-            // แก้ไขทุกฟิลด์ที่เป็น string ในตาราง activities
-            ...(typeof activity === 'object' ? Object.keys(activity).reduce((acc, key) => {
-                const value = activity[key];
-                if (typeof value === 'string') {
-                    acc[key] = fixThaiDistributed(value);
-                } else {
-                    acc[key] = value;
-                }
-                return acc;
-            }, {} as any) : activity)
+
+            ...(typeof activity === "object"
+                ? Object.keys(activity).reduce((acc, key) => {
+                      const value = activity[key];
+                      if (typeof value === "string") {
+                          acc[key] = fixThaiDistributed(value);
+                      } else {
+                          acc[key] = value;
+                      }
+                      return acc;
+                  }, {} as any)
+                : activity),
         }));
 
         const processedData = {
-            // TOR specific data ตาม interface TORData - แก้ไข Word formatting
             projectName: fixThaiDistributed(projectName || ""),
             owner: fixThaiDistributed(owner || ""),
             address: fixThaiDistributed(address || ""),
-            email: email || "", // อีเมลไม่ต้องแก้
-            tel: tel || "", // เบอร์โทรไม่ต้องแก้
+            email: email || "",
+            tel: tel || "",
             timeline: fixThaiDistributed(timeline || ""),
             contractnumber: contractnumber || "",
             cost: cost || "",
@@ -221,12 +217,10 @@ export async function POST(req: Request) {
             partner: fixThaiDistributed(partner || ""),
             date: date || "",
 
-            // ตารางกิจกรรม - แก้ไขแล้ว
             activities: processedActivities,
             hasActivities: processedActivities.length > 0,
             activitiesCount: processedActivities.length,
 
-            // ข้อมูลเพิ่มเติมสำหรับ template
             currentDate: new Date().toLocaleDateString("th-TH", {
                 year: "numeric",
                 month: "long",
@@ -235,54 +229,48 @@ export async function POST(req: Request) {
             documentType: "Terms of Reference (TOR)",
         };
 
-        console.log('Processing TOR document with Thai formatting fixes...');
         doc.render(processedData);
 
-        // 6. Generate Word buffer
         const outputBuffer = doc.getZip().generate({
             type: "uint8array",
             compression: "DEFLATE",
         });
 
-        // 7. Save file to public/uploads
         const uniqueFileName = generateUniqueFilename(fileName + ".docx");
         const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
-        // สร้างโฟลเดอร์ถ้าไม่มี
         await fs.mkdir(uploadDir, { recursive: true });
 
         const filePath = path.join(uploadDir, uniqueFileName);
         await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
-        // 8. ใช้ Project ID ที่ส่งมาจาก frontend หรือสร้างใหม่
         let project;
-        
-        // ถ้ามี projectId จาก frontend ให้ใช้ project นั้น
-        if (formData.get('projectId')) {
-            const projectId = formData.get('projectId') as string;
+
+        if (formData.get("projectId")) {
+            const projectId = formData.get("projectId") as string;
             project = await prisma.project.findFirst({
                 where: {
                     id: parseInt(projectId),
                     userId: userId,
                 },
             });
-            
-            // ถ้าไม่พบ project ตาม projectId ที่ระบุ ให้แสดง error
+
             if (!project) {
-                return new NextResponse("Project not found. Please select a valid project.", {
-                    status: 400,
-                });
+                return new NextResponse(
+                    "Project not found. Please select a valid project.",
+                    {
+                        status: 400,
+                    }
+                );
             }
         } else {
-            // ถ้าไม่มี projectId จาก frontend ให้ค้นหา project ตามชื่อ หรือสร้างใหม่
             project = await prisma.project.findFirst({
                 where: {
                     name: projectName,
                     userId: userId,
                 },
             });
-            
-            // ถ้าไม่มี Project ให้สร้างใหม่
+
             if (!project) {
                 project = await prisma.project.create({
                     data: {
@@ -294,18 +282,16 @@ export async function POST(req: Request) {
             }
         }
 
-        // 9. Save file info to Prisma พร้อมเชื่อมกับ Project
         await prisma.userFile.create({
             data: {
                 originalFileName: fileName + ".docx",
                 storagePath: `/upload/docx/${uniqueFileName}`,
                 fileExtension: "docx",
                 userId: userId,
-                projectId: project.id, // เชื่อมกับโครงการ
+                projectId: project.id,
             },
         });
 
-        // 10. Return JSON พร้อมลิงก์ดาวน์โหลดและข้อมูลโครงการ
         const downloadUrl = `/upload/docx/${uniqueFileName}`;
         return NextResponse.json({
             success: true,
@@ -324,7 +310,5 @@ export async function POST(req: Request) {
                 "Docxtemplater template error. Please check your template file placeholders.";
         }
         return new NextResponse(errorMessage, { status: 500 });
-    } finally {
-        await prisma.$disconnect();
     }
 }

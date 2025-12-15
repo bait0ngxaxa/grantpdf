@@ -6,7 +6,7 @@
 - **เวอร์ชัน:** 0.1.0 
 - **ประเภท:** ระบบจัดการโครงการและเอกสารออนไลน์ (Document Management System)
 - **วันที่สร้าง:** August 2025
-- **วันที่อัปเดตล่าสุด:** September 25, 2025
+- **วันที่อัปเดตล่าสุด:** October 3, 2025
 - **สถานะ:** Production Ready ✅
 
 ## 🛠️ Tech Stack
@@ -38,14 +38,11 @@
 - **React:** v19.1.0
 
 ### Document Processing
-- **PDF Processing:** [pdf-lib](https://pdf-lib.js.org/) v1.17.1
-- **PDF Fonts:** @pdf-lib/fontkit v1.1.1, fontkit v2.0.4
 - **Word Processing:** docxtemplater v3.65.3
 - **Image Processing:** docxtemplater-image-module v3.1.0, docxtemplater-image-module-free v1.1.1
 - **ZIP Handling:** pizzip v3.2.0
 
 ### Cloud Services
-- **File Storage:** [Supabase](https://supabase.com/) v2.53.0
 - **Email Service:** nodemailer v6.10.1
 
 ### Utilities
@@ -57,27 +54,27 @@
 
 ### 📁 Directory Structure
 ```
-docxTemplate/
+grantpdf/
 ├── 📁 app/                         # Next.js App Router
 │   ├── 📄 layout.tsx              # Root layout
 │   ├── 📄 page.tsx                # Homepage
 │   ├── 📄 globals.css             # Global styles
-│   ├── 📁 api/                    # API Routes (10 main endpoints)
+│   ├── 📁 api/                    # API Routes (18 main endpoints)
 │   │   ├── 📁 auth/               # Authentication APIs (4 endpoints)
-│   │   ├── 📁 admin/              # Admin management APIs (5 endpoints)
+│   │   ├── 📁 admin/              # Admin management APIs (6 endpoints)
 │   │   ├── 📁 user-docs/          # User document APIs (2 endpoints)
-│   │   ├── 📁 fill-*-template/    # Template filling APIs (4 endpoints)
+│   │   ├── 📁 fill-*-template/    # Template filling APIs (5 endpoints)
 │   │   ├── 📁 projects/           # Project management APIs (2 endpoints)
 │   │   ├── 📁 attachment/         # Attachment APIs (1 endpoint)
 │   │   └── 📁 file-upload/        # File upload API (1 endpoint)
 │   ├── 📁 admin/                  # Admin pages (2 pages)
 │   │   ├── 📄 page.tsx            # Admin dashboard
 │   │   ├── 📁 users/              # User management
-│   │   └── 📁 components/         # Admin-specific components (8 components)
-│   ├── 📁 create-word-*/          # Document creation pages (4 pages)
+│   │   └── 📁 components/         # Admin-specific components (12 components)
+│   ├── 📁 create-word-*/          # Document creation pages (5 pages)
 │   ├── 📁 userdashboard/          # User dashboard
 │   │   ├── 📄 page.tsx            # User dashboard page
-│   │   └── 📁 components/         # User dashboard components
+│   │   └── 📁 components/         # User dashboard components (7 components)
 │   ├── 📁 component/              # Session provider
 │   └── 📁 [other-pages]/          # Other application pages (9 pages)
 ├── 📁 components/                 # Reusable UI components
@@ -93,10 +90,12 @@ docxTemplate/
 │   └── 📄 utils.ts                # General utilities
 ├── 📁 prisma/                     # Database schema & migrations
 │   ├── 📄 schema.prisma           # Database schema
-│   └── 📁 migrations/             # Database migrations (1 migration)
+│   └── 📁 migrations/             # Database migrations (2 migrations)
 ├── 📁 public/                     # Static assets
 │   ├── 📁 font/                   # Thai fonts (2 fonts)
+│   ├── 📁 upload/                 # File uploads storage
 │   ├── 📄 *.docx                  # Document templates (4 templates)
+│   ├── 📄 *.xlsx                  # Excel template (1 template)
 │   └── 📄 *.png, *.jpg, *.svg     # Images and icons
 ├── 📁 hook/                       # Custom React hooks (1 hook)
 ├── 📁 type/                       # TypeScript type definitions (2 files)
@@ -106,13 +105,13 @@ docxTemplate/
 ```
 
 ### 📈 Project Statistics
-- **Total Pages:** 17 pages (page.tsx files)
-- **API Endpoints:** 16+ routes (route.ts files)
-- **UI Components:** 15+ custom components
-- **Database Models:** 4 models (User, Project, UserFile, AttachmentFile)
-- **Template Types:** 4 document templates
+- **Total Pages:** 18 pages (page.tsx files)
+- **API Endpoints:** 19 routes (route.ts files)
+- **UI Components:** 19 custom components
+- **Database Models:** 5 models (User, Project, UserFile, AttachmentFile, ContractCounter)
+- **Template Types:** 5 document templates (4 Word + 1 Excel)
 - **Languages Supported:** Thai & English
-- **Admin Components:** 8 specialized admin components
+- **Admin Components:** 12 specialized admin components
 - **Utility Libraries:** 7 utility files
 
 ## 🔐 Database Schema
@@ -198,6 +197,18 @@ model AttachmentFile {
 }
 ```
 
+### ContractCounter Model
+```prisma
+model ContractCounter {
+  id            Int      @id @default(autoincrement())
+  contractType  String   @unique // ประเภทสัญญา: ABS, DMR, SIP
+  currentNumber Int      @default(1) // หมายเลขปัจจุบัน
+  
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+}
+```
+
 ## 🚀 ฟีเจอร์หลัก
 
 ### 🔑 Authentication & User Management
@@ -209,22 +220,24 @@ model AttachmentFile {
 
 ### 📄 Document Management  
 - **File Upload** - อัปโหลดเอกสาร (PDF, Word)
-- **File Preview** - พรีวิวเอกสารออนไลน์
+- **File Preview** - พรีวิวเอกสาร PDF ออนไลน์
 - **File Download** - ดาวน์โหลดเอกสาร
 - **File Search & Filter** - ค้นหาและกรองเอกสาร
 - **File Organization** - จัดกลุ่มเอกสารตามโครงการ
 - **Download Status Tracking** - ติดตามสถานะการดาวน์โหลด
 
 ### 📝 Document Creation & Templates
-- **PDF Template Filling** - กรอกข้อมูลในเทมเพลต PDF (Coming soon)
 - **Word Template Processing** - สร้างเอกสาร Word จากเทมเพลต
+- **Excel Template Processing** - สร้างเอกสาร Excel จากเทมเพลต
 - **Multiple Template Types:**
   - 📋 TOR (Terms of Reference) - ขอบเขตการดำเนินงาน  
   - 📋 Contract - สัญญาจ้าง
   - 📋 Approval - เอกสารอนุมัติ
   - 📋 Form Project - แบบฟอร์มโครงการ
+  - 📋 Summary - แบบสรุปโครงการ
 - **Thai Language Support** - รองรับภาษาไทยเต็มรูปแบบ
 - **Dynamic Data Injection** - แทรกข้อมูลแบบไดนามิก
+- **Auto-increment Contract Numbers** - ระบบจัดการเลขที่สัญญาอัตโนมัติ (ABS, DMR, SIP)
 
 ### 👤 User Dashboard
 - **Personal File Management** - จัดการไฟล์ส่วนตัว
@@ -258,6 +271,7 @@ model AttachmentFile {
 - `POST /api/fill-contract-template` - สร้างสัญญาจ้าง
 - `POST /api/fill-approval-template` - สร้างเอกสารอนุมัติ
 - `POST /api/fill-formproject-template` - สร้างฟอร์มโครงการ
+- `POST /api/fill-excel-summary-template` - สร้างเอกสาร Excel สรุปโครงการ
 
 ### Admin APIs
 - `GET /api/admin/dashboard` - ข้อมูลแดชบอร์ด
@@ -265,8 +279,10 @@ model AttachmentFile {
 - `GET /api/admin/download/[id]` - ดาวน์โหลดไฟล์ (Admin)
 - `GET /api/admin/preview/[filename]` - พรีวิวไฟล์
 - `GET /api/admin/projects` - จัดการโครงการ (Admin)
+- `PUT /api/admin/projects` - อัปเดตสถานะโครงการ (Admin)
 - `GET /api/admin/users` - รายการผู้ใช้
 - `PUT /api/admin/users/[id]` - อัปเดตผู้ใช้
+- `DELETE /api/admin/users/[id]` - ลบผู้ใช้
 
 ### Project Management APIs
 - `GET/POST /api/projects` - จัดการโครงการ
@@ -366,16 +382,8 @@ npm run lint         # รัน ESLint
 ### Phase 2 (Planned)
 - 📧 **Email Notifications** - ระบบแจ้งเตือนทางอีเมล
 - 🔄 **File Versioning** - จัดการเวอร์ชันเอกสาร
-- 👥 **File Sharing** - แชร์ไฟล์ระหว่างผู้ใช้
 - 📊 **Advanced Analytics** - รายงานและสถิติขั้นสูง
-- 🔍 **Full-text Search** - ค้นหาเนื้อหาในเอกสาร
-
-### Phase 3 (Future)
 - 🤖 **AI Integration** - ระบบ AI ช่วยจัดการเอกสาร
-- 🔗 **API Integration** - เชื่อมต่อระบบภายนอก
-- 📱 **Mobile App** - แอปพลิเคชันมือถือ
-- ☁️ **Multi-cloud Support** - รองรับ cloud หลายตัว
-- 🌍 **Multi-language** - รองรับหลายภาษา
 
 ---
 
@@ -384,4 +392,4 @@ npm run lint         # รัน ESLint
 สำหรับคำถามหรือการสนับสนุน กรุณาติดต่อทีมพัฒนา IT NHF
 
 
-*อัปเดตล่าสุด: 25 กันยายน 2025*
+*อัปเดตล่าสุด: 3 ตุลาคม 2025*

@@ -9,22 +9,26 @@ export async function POST(req: NextRequest) {
     try {
         const { name, email, password } = await req.json();
         const ip = getClientIP(req);
-        const rateLimitResult = rateLimit(ip, 5, 60_000); // 5 requests per minute
+        const rateLimitResult = rateLimit(ip, 5, 60_000);
 
         if (!rateLimitResult.success) {
             return NextResponse.json(
-                { 
+                {
                     error: "Too many requests. Please try again later.",
-                    retryAfter: rateLimitResult.retryAfter
+                    retryAfter: rateLimitResult.retryAfter,
                 },
-                { 
+                {
                     status: 429,
                     headers: {
-                        'X-RateLimit-Limit': '5',
-                        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-                        'X-RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString(),
-                        'Retry-After': rateLimitResult.retryAfter?.toString() || '60'
-                    }
+                        "X-RateLimit-Limit": "5",
+                        "X-RateLimit-Remaining":
+                            rateLimitResult.remaining.toString(),
+                        "X-RateLimit-Reset": new Date(
+                            rateLimitResult.resetTime
+                        ).toISOString(),
+                        "Retry-After":
+                            rateLimitResult.retryAfter?.toString() || "60",
+                    },
                 }
             );
         }
@@ -36,8 +40,19 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        const trimmedName = name.trim();
+        const trimmedEmail = email.trim();
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(trimmedEmail)) {
+            return NextResponse.json(
+                { error: "รูปแบบอีเมลไม่ถูกต้อง" },
+                { status: 400 }
+            );
+        }
+
         const existingUser = await prisma.user.findUnique({
-            where: { email },
+            where: { email: trimmedEmail },
         });
 
         if (existingUser) {
@@ -48,29 +63,27 @@ export async function POST(req: NextRequest) {
         }
 
         if (password.length < 6) {
-          return NextResponse.json(
-              { error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" },
-              { status: 400 }
-          );
+            return NextResponse.json(
+                { error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" },
+                { status: 400 }
+            );
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await prisma.user.create({
             data: {
-                name,
-                email,
+                name: trimmedName,
+                email: trimmedEmail,
                 password: hashedPassword,
             },
         });
 
         console.log("User created successfully:", newUser);
 
-        // FIX: Convert BigInt 'id' to string before sending in JSON response.
-        // This is necessary because JSON.stringify (used by NextResponse.json) cannot serialize BigInt.
         const userResponse = {
             ...newUser,
-            id: newUser.id.toString(), // Convert BigInt to string
+            id: newUser.id.toString(),
         };
 
         return NextResponse.json(
@@ -78,19 +91,22 @@ export async function POST(req: NextRequest) {
                 message: "สมัครสมาชิกสำเร็จ",
                 data: {
                     user: {
-                      id: newUser.id.toString(),
-                      name: newUser.name,
-                      email: newUser.email,
-                    }
+                        id: newUser.id.toString(),
+                        name: newUser.name,
+                        email: newUser.email,
+                    },
                 },
             },
-            { 
+            {
                 status: 201,
                 headers: {
-                    'X-RateLimit-Limit': '5',
-                    'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-                    'X-RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString()
-                }
+                    "X-RateLimit-Limit": "5",
+                    "X-RateLimit-Remaining":
+                        rateLimitResult.remaining.toString(),
+                    "X-RateLimit-Reset": new Date(
+                        rateLimitResult.resetTime
+                    ).toISOString(),
+                },
             }
         );
     } catch (e) {
