@@ -295,7 +295,5 @@ export async function POST(req: Request) {
                 "Docxtemplater template error. Please check your template file placeholders.";
         }
         return new NextResponse(errorMessage, { status: 500 });
-    } finally {
-        await prisma.$disconnect();
     }
 }

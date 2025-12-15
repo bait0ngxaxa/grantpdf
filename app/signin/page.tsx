@@ -35,8 +35,6 @@ export default function LoginPage() {
                 setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
                 console.error("Login failed:", result.error);
             } else {
-                console.log("Login success, showing success modal...");
-
                 setTimeout(() => {
                     setShowSuccessModal(true);
                 }, 500);
