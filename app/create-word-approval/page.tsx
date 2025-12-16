@@ -730,13 +730,6 @@ export default function CreateWordDocPage() {
                                         className="w-full px-4 py-3 h-96 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
                                         value={formData.detail}
                                         onChange={handleChange}
-                                        //rows={50}
-                                        // wordLikeWidth
-                                        // autoResize={true}
-                                        // textAlign="justify"
-                                        // thaiDistributed={true}
-                                        // fontSize="22px"
-                                        // trailingBlankLines={1}
                                     />
                                 </div>
                             </div>

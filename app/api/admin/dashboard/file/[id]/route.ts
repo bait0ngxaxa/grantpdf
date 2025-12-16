@@ -55,7 +55,6 @@ export async function DELETE(
             );
             if (fs.existsSync(fullPath)) {
                 fs.unlinkSync(fullPath);
-                console.log(`File deleted: ${fullPath}`);
             } else {
                 console.warn(`File not found: ${fullPath}`);
             }

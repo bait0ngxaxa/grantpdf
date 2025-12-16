@@ -391,7 +391,7 @@ export async function POST(req: Request) {
                 }
             }
         } else {
-            console.log("No attachment files to link");
+            // No attachment files to link
         }
 
         const downloadUrl = `/upload/${uniqueFileName}`;

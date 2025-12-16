@@ -79,8 +79,6 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        console.log("User created successfully:", newUser);
-
         return NextResponse.json(
             {
                 message: "สมัครสมาชิกสำเร็จ",
