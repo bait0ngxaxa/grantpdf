@@ -32,12 +32,7 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
     >(null);
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-        () => {
-            if (typeof window !== "undefined") {
-                return localStorage.getItem("selectedProjectId");
-            }
-            return null;
-        }
+        null
     );
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

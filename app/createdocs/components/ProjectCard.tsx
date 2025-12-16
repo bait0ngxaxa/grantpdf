@@ -19,8 +19,8 @@ export const ProjectCard = ({
         <div
             className={`card bg-base-100 shadow-md cursor-pointer transition-all duration-200 border-2 ${
                 isSelected
-                    ? "border-primary bg-primary/5"
-                    : "border-transparent hover:border-primary"
+                    ? "border-primary bg-primary/5 shadow-lg"
+                    : "border-slate-200 hover:border-primary hover:shadow-lg"
             } hover:bg-base-200`}
             onClick={() => onProjectSelect(project.id)}
         >
