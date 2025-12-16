@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoginSuccessModal } from "@/components/ui/LoginSuccessModal";
 import { useTitle } from "@/hook/useTitle";
-import { Zap, FileText, Activity, LogIn } from "lucide-react";
+import { FileText, Activity } from "lucide-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -46,285 +46,155 @@ export default function LoginPage() {
     };
 
     return (
-        <>
-            {/* Main Container */}
-            <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-                <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-800 rounded-r-[40px] overflow-hidden relative">
-                    {/* Professional Background Pattern */}
-                    <div className="absolute inset-0 opacity-5">
-                        <svg
-                            className="w-full h-full"
-                            viewBox="0 0 400 400"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <defs>
-                                <pattern
-                                    id="document-pattern"
-                                    x="0"
-                                    y="0"
-                                    width="80"
-                                    height="80"
-                                    patternUnits="userSpaceOnUse"
-                                >
-                                    <rect
-                                        x="2"
-                                        y="2"
-                                        width="76"
-                                        height="76"
-                                        rx="4"
-                                        fill="transparent"
-                                        stroke="currentColor"
-                                        strokeWidth="1"
-                                    />
-                                    <line
-                                        x1="8"
-                                        y1="12"
-                                        x2="32"
-                                        y2="12"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    />
-                                    <line
-                                        x1="8"
-                                        y1="18"
-                                        x2="28"
-                                        y2="18"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    />
-                                    <line
-                                        x1="8"
-                                        y1="24"
-                                        x2="35"
-                                        y2="24"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    />
-                                    <circle
-                                        cx="60"
-                                        cy="60"
-                                        r="8"
-                                        fill="currentColor"
-                                    />
-                                    <path
-                                        d="M56 60l2 2 6-6"
-                                        stroke="white"
-                                        strokeWidth="2"
-                                        fill="none"
-                                    />
-                                </pattern>
-                            </defs>
-                            <rect
-                                width="100%"
-                                height="100%"
-                                fill="url(#document-pattern)"
-                            />
-                        </svg>
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-blue-50">
+            <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                {/* Left Side - Hero Content */}
+                <div className="hidden md:flex flex-col space-y-8 p-8">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm self-start animate-fade-in-up">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        GRANT ONLINE
                     </div>
 
-                    {/* Accent Elements */}
-                    <div className="absolute top-12 left-12 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
-                    <div className="absolute bottom-24 right-20 w-16 h-16 bg-green-500/10 rounded-full blur-xl"></div>
-                    <div className="absolute top-1/2 right-16 w-12 h-12 bg-orange-500/10 rounded-full blur-lg"></div>
+                    <h1 className="text-5xl font-bold text-slate-900 leading-tight">
+                        ยินดีต้อนรับสู่ <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600">
+                            ระบบจัดการเอกสาร
+                        </span>
+                    </h1>
 
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 z-10">
-                        <div className="text-center max-w-md">
-                            <div className="mb-6">
-                                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                                    <FileText className="h-8 w-8 text-white" />
-                                </div>
-                                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                                    GrantOnline
-                                </h1>
-                                <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mx-auto mb-4"></div>
+                    <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
+                        เข้าสู่ระบบเพื่อสร้างและจัดการ ใบอนุมัติ, สัญญา, TOR
+                        และติดตามสถานะโครงการของคุณได้อย่างง่ายดาย
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-4 max-w-lg">
+                        <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
+                            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-3">
+                                <FileText className="w-5 h-5" />
                             </div>
-
-                            <p className="text-lg text-gray-700 dark:text-gray-200 font-medium mb-3">
-                                ระบบเอกสารสัญญาและโครงการ
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
-                                แพลตฟอร์มสำหรับการยื่นขอโครงการ สร้างเอกสาร
-                                และติดตามความก้าวหน้าโครงการ
-                            </p>
-
-                            {/* Grant Features */}
-                            <div className="space-y-4">
-                                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
-                                    <div className="flex items-start space-x-4">
-                                        <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                            <FileText className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
-                                                เทมเพลตแบบฟอร์มอัตโนมัติ
-                                            </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                แบบฟอร์มพร้อมกรอกสำหรับทุกประเภท
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
-                                    <div className="flex items-start space-x-4">
-                                        <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                            <Zap className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
-                                                สร้างเอกสารอัตโนมัติ
-                                            </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                เอกสาร TOR, สัญญา,
-                                                และเอกสารอื่นๆในโครงการ
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
-                                    <div className="flex items-start space-x-4">
-                                        <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                            <Activity className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
-                                                ติดตามสถานะ
-                                            </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                ตรวจสอบความคืบหน้าและผลการพิจารณาโครงการ
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="font-semibold text-slate-800">
+                                สร้างเอกสาร
                             </div>
-
-                            <div className="mt-6 text-center">
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    เข้าสู่ระบบเพื่อเริ่มใช้งานระบบ
-                                </p>
+                            <div className="text-sm text-slate-400">
+                                รวดเร็ว ทันใจ
+                            </div>
+                        </div>
+                        <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
+                            <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600 mb-3">
+                                <Activity className="w-5 h-5" />
+                            </div>
+                            <div className="font-semibold text-slate-800">
+                                ติดตามสถานะ
+                            </div>
+                            <div className="text-sm text-slate-400">
+                                Real-time
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Side:  */}
-                <div className="flex items-center justify-center w-full md:w-1/2 p-4">
-                    <div className="card w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl rounded-2xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
-                        <div className="card-body p-8">
-                            <div className="flex flex-col items-center mb-6">
-                                <LogIn className="h-16 w-16 text-primary mb-4 animate-scaleIn" />
-                                <h2 className="text-3xl font-bold text-center">
-                                    เข้าสู่ระบบ
-                                </h2>
-                                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                    กรอกข้อมูลเพื่อเข้าสู่ระบบ
-                                </p>
+                {/* Right Side - Login Form */}
+                <div className="w-full max-w-md mx-auto">
+                    <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 p-8 md:p-10 border border-slate-100 relative overflow-hidden">
+                        {/* Decorative background blob */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+
+                        <div className="mb-8 relative z-10">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                                เข้าสู่ระบบ
+                            </h2>
+                            <p className="text-slate-500">
+                                กรอกข้อมูลเพื่อเข้าใช้งานระบบ
+                            </p>
+                        </div>
+
+                        <form
+                            onSubmit={handleLogin}
+                            className="space-y-5 relative z-10"
+                        >
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    อีเมล
+                                </label>
+                                <Input
+                                    type="email"
+                                    className="h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    placeholder="name@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
                             </div>
 
-                            <form onSubmit={handleLogin} className="space-y-6">
-                                {/* Email Input */}
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium text-gray-600 dark:text-gray-300">
-                                            อีเมล
-                                        </span>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-slate-700">
+                                        รหัสผ่าน
                                     </label>
-                                    <Input
-                                        type="email"
-                                        className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="your@email.com"
-                                        value={email}
-                                        onChange={(e) =>
-                                            setEmail(e.target.value)
-                                        }
-                                        required
-                                    />
-                                </div>
-
-                                {/* Password Input */}
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium text-gray-600 dark:text-gray-300">
-                                            รหัสผ่าน
-                                        </span>
-                                    </label>
-                                    <Input
-                                        type="password"
-                                        className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="********"
-                                        value={password}
-                                        onChange={(e) =>
-                                            setPassword(e.target.value)
-                                        }
-                                        required
-                                    />
-                                    {/* Forgot password link */}
-                                    <div className="text-right mt-2">
-                                        <Link
-                                            href="/forgot-password"
-                                            className="text-sm link link-hover text-gray-500 dark:text-gray-400"
-                                        >
-                                            ลืมรหัสผ่าน?
-                                        </Link>
-                                    </div>
-                                </div>
-
-                                {/* Error Message */}
-                                {error && (
-                                    <div className="alert alert-error text-center text-sm rounded-lg shadow-md transition-all duration-300 animate-fadeIn">
-                                        {error}
-                                    </div>
-                                )}
-
-                                {/* Submit Button */}
-                                <Button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="cursor-pointer w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-                                >
-                                    {isLoading ? (
-                                        <div className="flex items-center justify-center space-x-2">
-                                            <svg
-                                                className="animate-spin h-5 w-5 text-white"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <circle
-                                                    className="opacity-25"
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                    stroke="currentColor"
-                                                    strokeWidth="4"
-                                                ></circle>
-                                                <path
-                                                    className="opacity-75"
-                                                    fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                ></path>
-                                            </svg>
-                                            <span>กำลังเข้าสู่ระบบ...</span>
-                                        </div>
-                                    ) : (
-                                        "เข้าสู่ระบบ"
-                                    )}
-                                </Button>
-                            </form>
-
-                            {/* Sign-up Link */}
-                            <div className="text-center mt-6">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    ยังไม่มีบัญชี?{" "}
                                     <Link
-                                        href="/signup"
-                                        className="link link-hover text-blue-600 font-semibold transition-colors duration-200 hover:text-primary-focus"
+                                        href="/forgot-password"
+                                        className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                                     >
-                                        สมัครสมาชิก
+                                        ลืมรหัสผ่าน?
                                     </Link>
-                                </p>
+                                </div>
+                                <Input
+                                    type="password"
+                                    className="h-12 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                    required
+                                />
                             </div>
+
+                            {error && (
+                                <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className="w-5 h-5 shrink-0"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                    {error}
+                                </div>
+                            )}
+
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300"
+                            >
+                                {isLoading ? (
+                                    <div className="flex items-center gap-2">
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                        กำลังเข้าสู่ระบบ...
+                                    </div>
+                                ) : (
+                                    "เข้าสู่ระบบ"
+                                )}
+                            </Button>
+                        </form>
+
+                        <div className="mt-8 text-center text-sm text-slate-500 relative z-10">
+                            ยังไม่มีบัญชี?{" "}
+                            <Link
+                                href="/signup"
+                                className="font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                            >
+                                สมัครสมาชิก
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -336,6 +206,6 @@ export default function LoginPage() {
                 onClose={() => setShowSuccessModal(false)}
                 email={email}
             />
-        </>
+        </div>
     );
 }

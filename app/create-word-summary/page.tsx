@@ -2,13 +2,17 @@
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Input } from "@/components/ui/input";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
 import { PreviewModal } from "@/components/document-form/PreviewModal";
+import { FormField } from "@/components/document-form/FormField";
+import {
+    PreviewField,
+    PreviewGrid,
+} from "@/components/document-form/PreviewField";
 import { ClipboardList, Users, Calculator } from "lucide-react";
 
 interface SummaryData {
@@ -74,16 +78,14 @@ export default function CreateWordSummaryPage() {
 
     useTitle("สร้างแบบสรุปโครงการ | ระบบจัดการเอกสาร");
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
             ...prevData,
             [name]: value,
         }));
-    };
-
-    const openPreviewModal = () => {
-        setIsPreviewOpen(true);
     };
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -174,140 +176,79 @@ export default function CreateWordSummaryPage() {
                     icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
                 >
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ชื่อไฟล์ <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="fileName"
-                                placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.fileName}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ชื่อโครงการ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectName"
-                                placeholder="ระบุชื่อโครงการ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.projectName}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                รหัสชุดโครงการ
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectCode"
-                                placeholder="ระบุรหัสชุดโครงการ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.projectCode}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                รหัสภายใต้กิจกรรม
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectActivity"
-                                placeholder="ระบุรหัสภายใต้กิจกรรม"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.projectActivity}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                เลขที่สัญญา
-                            </label>
-                            <Input
-                                type="text"
-                                name="contractNumber"
-                                placeholder="ระบุเลขที่สัญญา"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.contractNumber}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                หน่วยงานที่เสนอโครงการ
-                            </label>
-                            <Input
-                                type="text"
-                                name="organize"
-                                placeholder="ระบุหน่วยงานที่เสนอโครงการ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.organize}
-                                onChange={handleChange}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                เลขที่ มสช น.
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectNhf"
-                                placeholder="ระบุเลขที่ มสช น."
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.projectNhf}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ชุดโครงการ
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectCo"
-                                placeholder="ระบุชุดโครงการ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.projectCo}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ระยะเวลาดำเนินการ (เดือน)
-                            </label>
-                            <Input
-                                type="number"
-                                name="month"
-                                placeholder="ระบุจำนวนเดือน"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.month}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ระยะเวลา
-                            </label>
-                            <Input
-                                type="text"
-                                name="timeline"
-                                placeholder="ระบุระยะเวลา เช่น 1มกราคม 2568 - 31กันยายน 2568"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.timeline}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <FormField
+                            label="ชื่อไฟล์"
+                            name="fileName"
+                            placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
+                            value={formData.fileName}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="ชื่อโครงการ"
+                            name="projectName"
+                            placeholder="ระบุชื่อโครงการ"
+                            value={formData.projectName}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="รหัสชุดโครงการ"
+                            name="projectCode"
+                            placeholder="ระบุรหัสชุดโครงการ"
+                            value={formData.projectCode}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="รหัสภายใต้กิจกรรม"
+                            name="projectActivity"
+                            placeholder="ระบุรหัสภายใต้กิจกรรม"
+                            value={formData.projectActivity}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="เลขที่สัญญา"
+                            name="contractNumber"
+                            placeholder="ระบุเลขที่สัญญา"
+                            value={formData.contractNumber}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="หน่วยงานที่เสนอโครงการ"
+                            name="organize"
+                            placeholder="ระบุหน่วยงานที่เสนอโครงการ"
+                            value={formData.organize}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="เลขที่ มสช น."
+                            name="projectNhf"
+                            placeholder="ระบุเลขที่ มสช น."
+                            value={formData.projectNhf}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="ชุดโครงการ"
+                            name="projectCo"
+                            placeholder="ระบุชุดโครงการ"
+                            value={formData.projectCo}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="ระยะเวลาดำเนินการ (เดือน)"
+                            name="month"
+                            type="number"
+                            placeholder="ระบุจำนวนเดือน"
+                            value={formData.month}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="ระยะเวลา"
+                            name="timeline"
+                            placeholder="ระบุระยะเวลา เช่น 1มกราคม 2568 - 31กันยายน 2568"
+                            value={formData.timeline}
+                            onChange={handleChange}
+                        />
                     </div>
                 </FormSection>
 
@@ -320,46 +261,27 @@ export default function CreateWordSummaryPage() {
                     icon={<Users className="w-5 h-5 text-blue-600" />}
                 >
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ผู้เสนอโครงการ
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectOwner"
-                                placeholder="ระบุผู้เสนอโครงการ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.projectOwner}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ผู้ทบทวนโครงการ
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectReview"
-                                placeholder="ระบุผู้ทบทวนโครงการ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.projectReview}
-                                onChange={handleChange}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ผู้ประสานงาน
-                            </label>
-                            <Input
-                                type="text"
-                                name="coordinator"
-                                placeholder="ระบุผู้ประสานงาน"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.coordinator}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <FormField
+                            label="ผู้เสนอโครงการ"
+                            name="projectOwner"
+                            placeholder="ระบุผู้เสนอโครงการ"
+                            value={formData.projectOwner}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="ผู้ทบทวนโครงการ"
+                            name="projectReview"
+                            placeholder="ระบุผู้ทบทวนโครงการ"
+                            value={formData.projectReview}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="ผู้ประสานงาน"
+                            name="coordinator"
+                            placeholder="ระบุผู้ประสานงาน"
+                            value={formData.coordinator}
+                            onChange={handleChange}
+                        />
                     </div>
                 </FormSection>
 
@@ -372,76 +294,50 @@ export default function CreateWordSummaryPage() {
                     icon={<Calculator className="w-5 h-5 text-green-600" />}
                 >
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                งวด 1
-                            </label>
-                            <Input
-                                type="number"
-                                name="sec1"
-                                placeholder="ระบุจำนวนเงินงวด 1 (ตัวเลข)"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.sec1}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                งวด 2
-                            </label>
-                            <Input
-                                type="number"
-                                name="sec2"
-                                placeholder="ระบุจำนวนเงินงวด 2 (ตัวเลข)"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.sec2}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                งวด 3
-                            </label>
-                            <Input
-                                type="number"
-                                name="sec3"
-                                placeholder="ระบุจำนวนเงินงวด 3 (ตัวเลข)"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.sec3}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                รวม
-                            </label>
-                            <Input
-                                type="number"
-                                name="sum"
-                                placeholder="ระบุจำนวนเงินรวม (ตัวเลข)"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.sum}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                แหล่งทุน
-                            </label>
-                            <Input
-                                type="text"
-                                name="funds"
-                                placeholder="ระบุแหล่งทุน"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.funds}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <FormField
+                            label="งวด 1"
+                            name="sec1"
+                            type="number"
+                            placeholder="ระบุจำนวนเงินงวด 1 (ตัวเลข)"
+                            value={formData.sec1}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="งวด 2"
+                            name="sec2"
+                            type="number"
+                            placeholder="ระบุจำนวนเงินงวด 2 (ตัวเลข)"
+                            value={formData.sec2}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="งวด 3"
+                            name="sec3"
+                            type="number"
+                            placeholder="ระบุจำนวนเงินงวด 3 (ตัวเลข)"
+                            value={formData.sec3}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="รวม"
+                            name="sum"
+                            type="number"
+                            placeholder="ระบุจำนวนเงินรวม (ตัวเลข)"
+                            value={formData.sum}
+                            onChange={handleChange}
+                        />
+                        <FormField
+                            label="แหล่งทุน"
+                            name="funds"
+                            placeholder="ระบุแหล่งทุน"
+                            value={formData.funds}
+                            onChange={handleChange}
+                        />
                     </div>
                 </FormSection>
 
                 <FormActions
-                    onPreview={openPreviewModal}
+                    onPreview={() => setIsPreviewOpen(true)}
                     isSubmitting={isSubmitting}
                 />
             </form>
@@ -478,143 +374,76 @@ export default function CreateWordSummaryPage() {
                     if (form) form.requestSubmit();
                 }}
             >
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ชื่อไฟล์:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.fileName || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ชื่อโครงการ:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectName || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                เลขที่สัญญา:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.contractNumber || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                หน่วยงาน:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.organize || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                รหัสชุดโครงการ:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectCode || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                รหัสกิจกรรม:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectActivity || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                เลขที่ มสช:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectNhf || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ชุดโครงการ:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectCo || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                จำนวนเดือน:
-                            </h4>
-                            <p className="text-sm">{formData.month || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ระยะเวลา:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.timeline || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                เจ้าของโครงการ:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectOwner || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ผู้ตรวจสอบโครงการ:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectReview || "-"}
-                            </p>
-                        </div>
+                <PreviewGrid>
+                    <PreviewField label="ชื่อไฟล์" value={formData.fileName} />
+                    <PreviewField
+                        label="ชื่อโครงการ"
+                        value={formData.projectName}
+                    />
+                </PreviewGrid>
 
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ผู้ประสานงาน:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.coordinator || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                งวด 1:
-                            </h4>
-                            <p className="text-sm">{formData.sec1 || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                งวด 2:
-                            </h4>
-                            <p className="text-sm">{formData.sec2 || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                งวด 3:
-                            </h4>
-                            <p className="text-sm">{formData.sec3 || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                รวม:
-                            </h4>
-                            <p className="text-sm">{formData.sum || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                แหล่งทุน:
-                            </h4>
-                            <p className="text-sm">{formData.funds || "-"}</p>
-                        </div>
-                    </div>
-                </div>
+                <PreviewGrid>
+                    <PreviewField
+                        label="เลขที่สัญญา"
+                        value={formData.contractNumber}
+                    />
+                    <PreviewField label="หน่วยงาน" value={formData.organize} />
+                </PreviewGrid>
+
+                <PreviewGrid>
+                    <PreviewField
+                        label="รหัสชุดโครงการ"
+                        value={formData.projectCode}
+                    />
+                    <PreviewField
+                        label="รหัสกิจกรรม"
+                        value={formData.projectActivity}
+                    />
+                </PreviewGrid>
+
+                <PreviewGrid>
+                    <PreviewField
+                        label="เลขที่ มสช"
+                        value={formData.projectNhf}
+                    />
+                    <PreviewField
+                        label="ชุดโครงการ"
+                        value={formData.projectCo}
+                    />
+                </PreviewGrid>
+
+                <PreviewGrid>
+                    <PreviewField label="จำนวนเดือน" value={formData.month} />
+                    <PreviewField label="ระยะเวลา" value={formData.timeline} />
+                </PreviewGrid>
+
+                <PreviewGrid>
+                    <PreviewField
+                        label="เจ้าของโครงการ"
+                        value={formData.projectOwner}
+                    />
+                    <PreviewField
+                        label="ผู้ตรวจสอบโครงการ"
+                        value={formData.projectReview}
+                    />
+                </PreviewGrid>
+
+                <PreviewField
+                    label="ผู้ประสานงาน"
+                    value={formData.coordinator}
+                />
+
+                <PreviewGrid>
+                    <PreviewField label="งวด 1" value={formData.sec1} />
+                    <PreviewField label="งวด 2" value={formData.sec2} />
+                </PreviewGrid>
+
+                <PreviewGrid>
+                    <PreviewField label="งวด 3" value={formData.sec3} />
+                    <PreviewField label="รวม" value={formData.sum} />
+                </PreviewGrid>
+
+                <PreviewField label="แหล่งทุน" value={formData.funds} />
             </PreviewModal>
 
             {/* Success Modal */}

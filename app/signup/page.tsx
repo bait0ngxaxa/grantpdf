@@ -6,15 +6,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useTitle } from "@/hook/useTitle";
-import {
-    Zap,
-    FileText,
-    Activity,
-    UserPlus,
-    CheckCircle2,
-    ArrowLeft,
-    Check,
-} from "lucide-react";
+import { Zap, FileText, CheckCircle2 } from "lucide-react";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
@@ -77,283 +69,173 @@ export default function SignupPage() {
     };
 
     return (
-        <>
-            {/* Main Container */}
-            <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-                <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-800 rounded-r-[40px] overflow-hidden relative">
-                    {/* Professional Background Pattern */}
-                    <div className="absolute inset-0 opacity-5">
-                        <svg
-                            className="w-full h-full"
-                            viewBox="0 0 400 400"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <defs>
-                                <pattern
-                                    id="document-pattern-signup"
-                                    x="0"
-                                    y="0"
-                                    width="80"
-                                    height="80"
-                                    patternUnits="userSpaceOnUse"
-                                >
-                                    <rect
-                                        x="2"
-                                        y="2"
-                                        width="76"
-                                        height="76"
-                                        rx="4"
-                                        fill="transparent"
-                                        stroke="currentColor"
-                                        strokeWidth="1"
-                                    />
-                                    <line
-                                        x1="8"
-                                        y1="12"
-                                        x2="32"
-                                        y2="12"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    />
-                                    <line
-                                        x1="8"
-                                        y1="18"
-                                        x2="28"
-                                        y2="18"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    />
-                                    <line
-                                        x1="8"
-                                        y1="24"
-                                        x2="35"
-                                        y2="24"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    />
-                                    <circle
-                                        cx="60"
-                                        cy="60"
-                                        r="8"
-                                        fill="currentColor"
-                                    />
-                                    <path
-                                        d="M56 60l2 2 6-6"
-                                        stroke="white"
-                                        strokeWidth="2"
-                                        fill="none"
-                                    />
-                                </pattern>
-                            </defs>
-                            <rect
-                                width="100%"
-                                height="100%"
-                                fill="url(#document-pattern-signup)"
-                            />
-                        </svg>
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-blue-50">
+            <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                {/* Left Side - Hero Content */}
+                <div className="hidden md:flex flex-col space-y-8 p-8">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm self-start animate-fade-in-up">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        GRANT ONLINE
                     </div>
 
-                    {/* Accent Elements */}
-                    <div className="absolute top-12 left-12 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
-                    <div className="absolute bottom-24 right-20 w-16 h-16 bg-green-500/10 rounded-full blur-xl"></div>
-                    <div className="absolute top-1/2 right-16 w-12 h-12 bg-orange-500/10 rounded-full blur-lg"></div>
+                    <h1 className="text-5xl font-bold text-slate-900 leading-tight">
+                        เริ่มต้นใช้งาน <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600">
+                            สร้างบัญชีใหม่
+                        </span>
+                    </h1>
 
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 z-10">
-                        <div className="text-center max-w-md">
-                            <div className="mb-6">
-                                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                                    <FileText className="h-8 w-8 text-white" />
-                                </div>
-                                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                                    GrantOnline
-                                </h1>
-                                <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-full mx-auto mb-4"></div>
+                    <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
+                        สมัครสมาชิกวันนี้เพื่อเข้าถึงฟีเจอร์ทั้งหมด
+                        สร้างเอกสารสัญญา TOR และติดตามสถานะโครงการได้ทันที
+                    </p>
+
+                    <div className="space-y-4 max-w-lg">
+                        <div className="flex items-center gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
+                            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
+                                <FileText className="w-6 h-6" />
                             </div>
-
-                            <p className="text-lg text-gray-700 dark:text-gray-200 font-medium mb-3">
-                                ระบบเอกสารสัญญาและโครงการ
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
-                                แพลตฟอร์มสำหรับการยื่นขอโครงการ สร้างเอกสาร
-                                และติดตามความก้าวหน้าโครงการ
-                            </p>
-
-                            {/* Grant Features */}
-                            <div className="space-y-4">
-                                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
-                                    <div className="flex items-start space-x-4">
-                                        <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                            <FileText className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
-                                                เทมเพลตแบบฟอร์มอัตโนมัติ
-                                            </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                แบบฟอร์มพร้อมกรอกสำหรับทุกประเภท
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
-                                    <div className="flex items-start space-x-4">
-                                        <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                            <Zap className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
-                                                สร้างเอกสารอัตโนมัติ
-                                            </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                เอกสาร TOR, สัญญา,
-                                                และเอกสารอื่นๆในโครงการ
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 border border-gray-200/50 dark:border-gray-600/50 shadow-xl">
-                                    <div className="flex items-start space-x-4">
-                                        <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                                            <Activity className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div className="text-left">
-                                            <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">
-                                                ติดตามสถานะ
-                                            </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                                                ตรวจสอบความคืบหน้าและผลการพิจารณาโครงการ
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div>
+                                <h3 className="font-semibold text-slate-800">
+                                    จัดการเอกสารง่าย
+                                </h3>
+                                <p className="text-sm text-slate-500">
+                                    สร้างและแก้ไขเอกสาร
+                                </p>
                             </div>
-
-                            <div className="mt-6 text-center">
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    สมัครสมาชิกเพื่อเริ่มใช้งานระบบ
+                        </div>
+                        <div className="flex items-center gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
+                            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 shrink-0">
+                                <Zap className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-slate-800">
+                                    ระบบอัตโนมัติ
+                                </h3>
+                                <p className="text-sm text-slate-500">
+                                    ลดเวลาการทำงาน
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Side - ฟอร์มสมัครสมาชิก */}
-                <div className="flex items-center justify-center w-full md:w-1/2 p-4">
-                    <div className="card w-full max-w-lg bg-white dark:bg-gray-800 shadow-2xl rounded-2xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
-                        <div className="card-body p-8">
-                            <div className="flex flex-col items-center mb-6">
-                                <UserPlus className="h-16 w-16 text-primary mb-4 animate-scaleIn" />
-                                <h2 className="text-3xl font-bold text-center">
-                                    สมัครสมาชิก
-                                </h2>
-                                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
-                                    กรุณากรอกข้อมูลเพื่อสร้างบัญชีใหม่
-                                </p>
+                {/* Right Side - Signup Form */}
+                <div className="w-full max-w-md mx-auto">
+                    <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 p-8 border border-slate-100 relative overflow-hidden">
+                        {/* Decorative background blob */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+
+                        <div className="mb-8 relative z-10">
+                            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                                สมัครสมาชิก
+                            </h2>
+                            <p className="text-slate-500">
+                                กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้ใหม่
+                            </p>
+                        </div>
+
+                        <form
+                            onSubmit={handleOpenConfirm}
+                            className="space-y-4 relative z-10"
+                        >
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    ชื่อ-นามสกุล
+                                </label>
+                                <Input
+                                    type="text"
+                                    className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    placeholder="ชื่อ-นามสกุล"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
                             </div>
 
-                            <form
-                                onSubmit={handleOpenConfirm}
-                                className="space-y-6"
-                            >
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium text-gray-600 dark:text-gray-300">
-                                            ชื่อ
-                                        </span>
-                                    </label>
-                                    <Input
-                                        type="text"
-                                        className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="ชื่อ-นามสกุล"
-                                        value={name}
-                                        onChange={(e) =>
-                                            setName(e.target.value)
-                                        }
-                                        required
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    อีเมล
+                                </label>
+                                <Input
+                                    type="email"
+                                    className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    placeholder="name@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
 
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium text-gray-600 dark:text-gray-300">
-                                            อีเมล
-                                        </span>
-                                    </label>
-                                    <Input
-                                        type="email"
-                                        className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="your@email.com"
-                                        value={email}
-                                        onChange={(e) =>
-                                            setEmail(e.target.value)
-                                        }
-                                        required
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    รหัสผ่าน
+                                </label>
+                                <Input
+                                    type="password"
+                                    className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    placeholder="อย่างน้อย 6 ตัวอักษร"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                    required
+                                />
+                            </div>
 
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium text-gray-600 dark:text-gray-300">
-                                            รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)
-                                        </span>
-                                    </label>
-                                    <Input
-                                        type="password"
-                                        className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="********"
-                                        value={password}
-                                        onChange={(e) =>
-                                            setPassword(e.target.value)
-                                        }
-                                        required
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    ยืนยันรหัสผ่าน
+                                </label>
+                                <Input
+                                    type="password"
+                                    className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    placeholder="กรอกรหัสผ่านอีกครั้ง"
+                                    value={confirmPassword}
+                                    onChange={(e) =>
+                                        setConfirmPassword(e.target.value)
+                                    }
+                                    required
+                                />
+                            </div>
 
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium text-gray-600 dark:text-gray-300">
-                                            ยืนยันรหัสผ่าน
-                                        </span>
-                                    </label>
-                                    <Input
-                                        type="password"
-                                        className="input input-bordered w-full rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        placeholder="********"
-                                        value={confirmPassword}
-                                        onChange={(e) =>
-                                            setConfirmPassword(e.target.value)
-                                        }
-                                        required
-                                    />
-                                </div>
-
-                                {error && (
-                                    <div className="alert alert-error text-center text-sm rounded-lg shadow-md transition-all duration-300 animate-fadeIn">
-                                        {error}
-                                    </div>
-                                )}
-
-                                <Button
-                                    type="submit"
-                                    className="cursor-pointer w-full rounded-full mt-4 shadow-lg transform transition-transform duration-300 hover:scale-105"
-                                >
-                                    ถัดไป
-                                </Button>
-                            </form>
-
-                            <div className="text-center mt-6">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    มีบัญชีอยู่แล้ว?{" "}
-                                    <Link
-                                        href="/signin"
-                                        className="link link-hover text-blue-600 font-semibold transition-colors duration-200 hover:text-primary-focus"
+                            {error && (
+                                <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className="w-5 h-5 shrink-0"
                                     >
-                                        เข้าสู่ระบบ
-                                    </Link>
-                                </p>
-                            </div>
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                    {error}
+                                </div>
+                            )}
+
+                            <Button
+                                type="submit"
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 mt-2"
+                            >
+                                ดำเนินการต่อ
+                            </Button>
+                        </form>
+
+                        <div className="mt-6 text-center text-sm text-slate-500 relative z-10">
+                            มีบัญชีอยู่แล้ว?{" "}
+                            <Link
+                                href="/signin"
+                                className="font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                            >
+                                เข้าสู่ระบบ
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -361,176 +243,120 @@ export default function SignupPage() {
 
             {/* Confirm Modal */}
             {showConfirmModal && (
-                <dialog open className="modal modal-open backdrop-blur-sm">
-                    <div className="modal-box w-11/12 max-w-md mx-auto animate-[modalSlideIn_0.3s_ease-out] relative overflow-hidden">
-                        {/* Background Pattern */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5"></div>
-                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
-                        <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
-
-                        {/* Content */}
-                        <div className="relative z-10">
-                            {/* Header */}
-                            <div className="flex flex-col items-center mb-6">
-                                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mb-4 shadow-lg">
-                                    <CheckCircle2 className="h-8 w-8 text-primary-content" />
-                                </div>
-                                <h2 className="font-bold text-2xl text-center bg-primary bg-clip-text text-transparent">
-                                    ยืนยันข้อมูลผู้สมัคร
-                                </h2>
-                                <p className="text-sm opacity-70 text-center mt-1">
-                                    กรุณาตรวจสอบข้อมูลก่อนยืนยัน
-                                </p>
+                <dialog
+                    open
+                    className="modal modal-open bg-slate-900/50 backdrop-blur-sm"
+                >
+                    <div className="modal-box bg-white p-0 rounded-3xl overflow-hidden shadow-2xl w-11/12 max-w-md">
+                        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white text-center">
+                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+                                <CheckCircle2 className="w-8 h-8 text-white" />
                             </div>
+                            <h3 className="text-xl font-bold">
+                                ยืนยันข้อมูลการสมัคร
+                            </h3>
+                            <p className="text-blue-100 text-sm">
+                                กรุณาตรวจสอบข้อมูลก่อนยืนยัน
+                            </p>
+                        </div>
 
-                            {/* Data Display */}
-                            <div className="space-y-4 mb-6">
-                                <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-primary">
-                                    <p className="text-sm opacity-70">ชื่อ</p>
-                                    <p className="font-semibold">{name}</p>
+                        <div className="p-6 space-y-4">
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                                    <span className="text-sm text-slate-500">
+                                        ชื่อ
+                                    </span>
+                                    <span className="text-sm font-semibold text-slate-800">
+                                        {name}
+                                    </span>
                                 </div>
-                                <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-secondary">
-                                    <p className="text-sm opacity-70">อีเมล</p>
-                                    <p className="font-semibold">{email}</p>
+                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                                    <span className="text-sm text-slate-500">
+                                        อีเมล
+                                    </span>
+                                    <span className="text-sm font-semibold text-slate-800">
+                                        {email}
+                                    </span>
                                 </div>
-                                <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-accent">
-                                    <p className="text-sm opacity-70">
+                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                                    <span className="text-sm text-slate-500">
                                         รหัสผ่าน
-                                    </p>
-                                    <p className="font-semibold">
+                                    </span>
+                                    <span className="text-sm font-semibold text-slate-800">
                                         {"•".repeat(password.length)}
-                                    </p>
-                                </div>
-                                <div className="bg-base-200/50 rounded-lg p-3 border-l-4 border-warning">
-                                    <p className="text-sm opacity-70">
-                                        ยืนยันรหัสผ่าน
-                                    </p>
-                                    <p className="font-semibold">
-                                        {"•".repeat(confirmPassword.length)}
-                                    </p>
+                                    </span>
                                 </div>
                             </div>
 
-                            {error && (
-                                <div className="alert alert-error text-center text-sm rounded-lg mb-4">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="stroke-current flex-shrink-0 h-6 w-6"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                    </svg>
-                                    <span>{error}</span>
-                                </div>
-                            )}
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 pt-2">
                                 <Button
-                                    variant={"outline"}
+                                    variant="outline"
                                     onClick={() => setShowConfirmModal(false)}
-                                    className=" flex-1 rounded-xl hover:scale-105 transition-transform"
+                                    className="flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                 >
-                                    <ArrowLeft className="h-4 w-4 mr-1" />
                                     แก้ไข
                                 </Button>
                                 <Button
                                     onClick={handleSignup}
-                                    className=" flex-1 rounded-xl hover:scale-105 transition-transform shadow-lg"
                                     disabled={isSubmitting}
+                                    className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/20"
                                 >
                                     {isSubmitting ? (
-                                        <>
-                                            <span className="loading loading-spinner loading-sm"></span>
-                                            กำลังสมัคร...
-                                        </>
+                                        <div className="flex items-center gap-2">
+                                            <span className="loading loading-spinner loading-xs"></span>
+                                            <span>กำลังยืนยัน...</span>
+                                        </div>
                                     ) : (
-                                        <>
-                                            <Check className="h-4 w-4 mr-1" />
-                                            ยืนยัน
-                                        </>
+                                        "ยืนยันการสมัคร"
                                     )}
                                 </Button>
                             </div>
                         </div>
                     </div>
+                    <form method="dialog" className="modal-backdrop">
+                        <button onClick={() => setShowConfirmModal(false)}>
+                            close
+                        </button>
+                    </form>
                 </dialog>
             )}
 
-            {/* Success Modal */}
+            {/* Success Modal - Simplified for brevity but keeping styling */}
             {showSuccessModal && (
-                <dialog open className="modal modal-open backdrop-blur-sm">
-                    <div className="modal-box w-11/12 max-w-md mx-auto animate-[modalSlideIn_0.3s_ease-out] relative overflow-hidden bg-white dark:bg-gray-800 shadow-2xl rounded-2xl">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-blue-50/30 to-secondary/5 dark:from-primary/10 dark:via-gray-700/30 dark:to-secondary/10"></div>
-                        <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
-                        <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
-
-                        {/* Content */}
-                        <div className="relative z-10 text-center">
-                            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mb-6 shadow-lg transform transition-transform duration-300 hover:scale-105">
-                                <CheckCircle2 className="h-10 w-10 text-primary-content" />
-                            </div>
-
-                            {/* Success Message */}
-                            <h2 className="font-bold text-3xl mb-2 bg-primary bg-clip-text text-transparent">
-                                สมัครสมาชิกสำเร็จ!
-                            </h2>
-                            <p className="text-lg font-medium mb-2 text-gray-700 dark:text-gray-200">
-                                ยินดีต้อนรับเข้าสู่ระบบ
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                                กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...
-                            </p>
-
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
-                                <div className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full animate-[progressFill_3s_ease-in-out]"></div>
-                            </div>
-
-                            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-600/20 shadow-lg text-left">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                                        <UserPlus className="h-5 w-5 text-primary" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                                            บัญชีใหม่
-                                        </p>
-                                        <p className="font-semibold text-gray-800 dark:text-gray-200">
-                                            {name}
-                                        </p>
-                                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                                            {email}
-                                        </p>
-                                    </div>
-                                    <div className="text-primary">
-                                        <Check className="h-6 w-6" />
-                                    </div>
-                                </div>
-                            </div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center animate-bounce-in">
+                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <CheckCircle2 className="w-10 h-10 text-green-500" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                            สำเร็จ!
+                        </h2>
+                        <p className="text-slate-500 mb-6">
+                            สร้างบัญชีผู้ใช้เรียบร้อยแล้ว
+                            <br />
+                            กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...
+                        </p>
+                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div className="bg-green-500 h-full w-full animate-[progressFill_3s_ease-in-out]"></div>
                         </div>
                     </div>
-                </dialog>
+                </div>
             )}
 
-            {/* Enhanced Animation Keyframes */}
             <style jsx global>{`
-                @keyframes modalSlideIn {
+                @keyframes bounce-in {
                     0% {
+                        transform: scale(0.8);
                         opacity: 0;
-                        transform: translateY(-20px) scale(0.95);
+                    }
+                    50% {
+                        transform: scale(1.05);
+                        opacity: 1;
                     }
                     100% {
-                        opacity: 1;
-                        transform: translateY(0) scale(1);
+                        transform: scale(1);
                     }
                 }
-
                 @keyframes progressFill {
                     0% {
                         width: 0%;
@@ -539,29 +365,7 @@ export default function SignupPage() {
                         width: 100%;
                     }
                 }
-
-                @keyframes fadeInDown {
-                    0% {
-                        opacity: 0;
-                        transform: translateY(-20px);
-                    }
-                    100% {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-
-                @keyframes scaleIn {
-                    0% {
-                        opacity: 0;
-                        transform: scale(0.5);
-                    }
-                    100% {
-                        opacity: 1;
-                        transform: scale(1);
-                    }
-                }
             `}</style>
-        </>
+        </div>
     );
 }

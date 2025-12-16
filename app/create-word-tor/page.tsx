@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
@@ -12,6 +10,11 @@ import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
 import { PreviewModal } from "@/components/document-form/PreviewModal";
+import { FormField } from "@/components/document-form/FormField";
+import {
+    PreviewField,
+    PreviewGrid,
+} from "@/components/document-form/PreviewField";
 import {
     ClipboardList,
     FileText,
@@ -52,8 +55,6 @@ interface ActivityData {
 
 export default function CreateTORPage() {
     const { data: session } = useSession();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const router = useRouter();
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -85,9 +86,6 @@ export default function CreateTORPage() {
     const [activities, setActivities] = useState<ActivityData[]>([
         { activity: "", manager: "", evaluation2: "", duration: "" },
     ]);
-
-    // Signature unused in this form based on original code
-    // const [signatureFile, setSignatureFile] = useState<File | null>(null);
 
     const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
         null
@@ -134,10 +132,6 @@ export default function CreateTORPage() {
         setActivities(updatedActivities);
     };
 
-    const openPreviewModal = () => {
-        setIsPreviewOpen(true);
-    };
-
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -159,8 +153,6 @@ export default function CreateTORPage() {
             });
 
             data.append("activities", JSON.stringify(activities));
-
-            // Signature upload logic was commented out in original file, keeping it removed here.
 
             if (session.user?.id) {
                 data.append("userId", session.user.id.toString());
@@ -219,16 +211,6 @@ export default function CreateTORPage() {
         }
     };
 
-    if (!isClient) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <p className="text-gray-500">กำลังโหลด...</p>
-                </div>
-            </div>
-        );
-    }
-
     const isDirty =
         Object.values(formData).some((value) => value !== "") ||
         activities.some(
@@ -238,6 +220,16 @@ export default function CreateTORPage() {
                 row.evaluation2 !== "" ||
                 row.duration !== ""
         );
+
+    if (!isClient) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <p className="text-gray-500">กำลังโหลด...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <PageLayout
@@ -252,154 +244,86 @@ export default function CreateTORPage() {
                     icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
                 >
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ชื่อไฟล์ <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="fileName"
-                                placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.fileName}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ชื่อโครงการ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectName"
-                                placeholder="ระบุชื่อโครงการ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.projectName}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                วันที่จัดทำ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="date"
-                                placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2566"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.date}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                เลขที่สัญญา{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="contractnumber"
-                                placeholder="ระบุเลขที่สัญญา"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.contractnumber}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ผู้รับผิดชอบ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="owner"
-                                placeholder="ระบุชื่อผู้รับผิดชอบ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.owner}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                สถานที่ติดต่อ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="address"
-                                placeholder="ระบุสถานที่ติดต่อผู้รับผิดชอบ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.address}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                อีเมล <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="email"
-                                placeholder="ระบุอีเมลผู้รับผิดชอบ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                เบอร์โทร <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="tel"
-                                placeholder="ระบุเบอร์โทรผู้รับผิดชอบ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.tel}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ระยะเวลาโครงการ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="timeline"
-                                placeholder="เช่น 1 มกราคม 2566 - 31 ธันวาคม 2566"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.timeline}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                งบประมาณ <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="cost"
-                                placeholder="เช่น 500000 บาท (ห้าแสนบาทถ้วน)"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.cost}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
+                        <FormField
+                            label="ชื่อไฟล์"
+                            name="fileName"
+                            placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
+                            value={formData.fileName}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="ชื่อโครงการ"
+                            name="projectName"
+                            placeholder="ระบุชื่อโครงการ"
+                            value={formData.projectName}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="วันที่จัดทำ"
+                            name="date"
+                            placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2566"
+                            value={formData.date}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="เลขที่สัญญา"
+                            name="contractnumber"
+                            placeholder="ระบุเลขที่สัญญา"
+                            value={formData.contractnumber}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="ผู้รับผิดชอบ"
+                            name="owner"
+                            placeholder="ระบุชื่อผู้รับผิดชอบ"
+                            value={formData.owner}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="สถานที่ติดต่อ"
+                            name="address"
+                            placeholder="ระบุสถานที่ติดต่อผู้รับผิดชอบ"
+                            value={formData.address}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="อีเมล"
+                            name="email"
+                            placeholder="ระบุอีเมลผู้รับผิดชอบ"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="เบอร์โทร"
+                            name="tel"
+                            placeholder="ระบุเบอร์โทรผู้รับผิดชอบ"
+                            value={formData.tel}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="ระยะเวลาโครงการ"
+                            name="timeline"
+                            placeholder="เช่น 1 มกราคม 2566 - 31 ธันวาคม 2566"
+                            value={formData.timeline}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="งบประมาณ"
+                            name="cost"
+                            placeholder="เช่น 500000 บาท (ห้าแสนบาทถ้วน)"
+                            value={formData.cost}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
                 </FormSection>
 
@@ -412,45 +336,36 @@ export default function CreateTORPage() {
                     icon={<FileText className="w-5 h-5 text-blue-600" />}
                 >
                     <div className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                หลักการและเหตุผล{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="topic1"
-                                placeholder="หลักการและเหตุผล"
-                                className="w-full px-4 py-3 h-96 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.topic1}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                วัตถุประสงค์{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="objective1"
-                                placeholder="วัตถุประสงค์โครงการ"
-                                className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.objective1}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                กลุ่มเป้าหมาย{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="target"
-                                placeholder="กลุ่มเป้าหมายของโครงการ"
-                                className="w-full px-4 py-3 border h-40 border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.target}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <FormField
+                            label="หลักการและเหตุผล"
+                            name="topic1"
+                            type="textarea"
+                            placeholder="หลักการและเหตุผล"
+                            value={formData.topic1}
+                            onChange={handleChange}
+                            rows={12}
+                            className="h-96"
+                        />
+                        <FormField
+                            label="วัตถุประสงค์"
+                            name="objective1"
+                            type="textarea"
+                            placeholder="วัตถุประสงค์โครงการ"
+                            value={formData.objective1}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
+                        <FormField
+                            label="กลุ่มเป้าหมาย"
+                            name="target"
+                            type="textarea"
+                            placeholder="กลุ่มเป้าหมายของโครงการ"
+                            value={formData.target}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
                     </div>
                 </FormSection>
 
@@ -463,58 +378,46 @@ export default function CreateTORPage() {
                     icon={<Target className="w-5 h-5 text-yellow-600" />}
                 >
                     <div className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                พื้นที่/เขต{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="zone"
-                                placeholder="พื้นที่หรือเขตดำเนินการ"
-                                className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                                value={formData.zone}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                แผนการดำเนินงาน{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="plan"
-                                placeholder="แผนการดำเนินงานโครงการ"
-                                className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
-                                value={formData.plan}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                การจัดการโครงการ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="projectmanage"
-                                placeholder="วิธีการจัดการและบริหารโครงการ"
-                                className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
-                                value={formData.projectmanage}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                องค์กร ภาคี ร่วมงาน{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="partner"
-                                placeholder="องค์กร ภาค ร่วมงาน"
-                                className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors "
-                                value={formData.partner}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <FormField
+                            label="พื้นที่/เขต"
+                            name="zone"
+                            type="textarea"
+                            placeholder="พื้นที่หรือเขตดำเนินการ"
+                            value={formData.zone}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
+                        <FormField
+                            label="แผนการดำเนินงาน"
+                            name="plan"
+                            type="textarea"
+                            placeholder="แผนการดำเนินงานโครงการ"
+                            value={formData.plan}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
+                        <FormField
+                            label="การจัดการโครงการ"
+                            name="projectmanage"
+                            type="textarea"
+                            placeholder="วิธีการจัดการและบริหารโครงการ"
+                            value={formData.projectmanage}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
+                        <FormField
+                            label="องค์กร ภาคี ร่วมงาน"
+                            name="partner"
+                            type="textarea"
+                            placeholder="องค์กร ภาค ร่วมงาน"
+                            value={formData.partner}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
                     </div>
                 </FormSection>
 
@@ -642,7 +545,7 @@ export default function CreateTORPage() {
                 </FormSection>
 
                 <FormActions
-                    onPreview={openPreviewModal}
+                    onPreview={() => setIsPreviewOpen(true)}
                     isSubmitting={isSubmitting}
                 />
             </form>
@@ -679,211 +582,84 @@ export default function CreateTORPage() {
                     if (form) form.requestSubmit();
                 }}
             >
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ชื่อโครงการ:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectName || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                วันที่:
-                            </h4>
-                            <p className="text-sm">{formData.date || "-"}</p>
-                        </div>
-                    </div>
+                <PreviewGrid>
+                    <PreviewField
+                        label="ชื่อโครงการ"
+                        value={formData.projectName}
+                    />
+                    <PreviewField label="วันที่" value={formData.date} />
+                </PreviewGrid>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                เลขที่สัญญา:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.contractnumber || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ผู้รับผิดชอบ:
-                            </h4>
-                            <p className="text-sm">{formData.owner || "-"}</p>
-                        </div>
-                    </div>
+                <PreviewGrid>
+                    <PreviewField
+                        label="เลขที่สัญญา"
+                        value={formData.contractnumber}
+                    />
+                    <PreviewField label="ผู้รับผิดชอบ" value={formData.owner} />
+                </PreviewGrid>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ที่อยู่:
-                            </h4>
-                            <p className="text-sm">{formData.address || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                กำหนดเวลา:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.timeline || "-"}
-                            </p>
-                        </div>
-                    </div>
+                <PreviewGrid>
+                    <PreviewField label="ที่อยู่" value={formData.address} />
+                    <PreviewField label="กำหนดเวลา" value={formData.timeline} />
+                </PreviewGrid>
 
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            หัวข้อ/เรื่อง:
-                        </h4>
-                        <p className="text-sm">{formData.topic1 || "-"}</p>
-                    </div>
+                <PreviewField label="หัวข้อ/เรื่อง">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.topic1 || "-"}
+                    </p>
+                </PreviewField>
 
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            วัตถุประสงค์
-                        </h4>
-                        <p className="text-sm whitespace-pre-wrap">
-                            {formData.objective1 || "-"}
-                        </p>
-                    </div>
+                <PreviewField label="วัตถุประสงค์">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.objective1 || "-"}
+                    </p>
+                </PreviewField>
 
-                    {formData.objective2 && (
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                วัตถุประสงค์ที่ 2:
-                            </h4>
-                            <p className="text-sm whitespace-pre-wrap">
-                                {formData.objective2}
-                            </p>
-                        </div>
-                    )}
-
-                    {formData.objective3 && (
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                วัตถุประสงค์ที่ 3:
-                            </h4>
-                            <p className="text-sm whitespace-pre-wrap">
-                                {formData.objective3}
-                            </p>
-                        </div>
-                    )}
-
-                    {/* แสดงตารางกิจกรรม */}
-                    {activities.length > 0 &&
-                        activities.some((a) => a.activity) && (
-                            <div>
-                                <h4 className="font-semibold text-sm text-gray-600 mb-2">
-                                    ตารางกิจกรรม:
-                                </h4>
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full text-xs border border-gray-200">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-2 py-1 border">
-                                                    กิจกรรม
-                                                </th>
-                                                <th className="px-2 py-1 border">
-                                                    ผู้รับผิดชอบ
-                                                </th>
-                                                <th className="px-2 py-1 border">
-                                                    ระยะเวลา
-                                                </th>
-                                                <th className="px-2 py-1 border">
-                                                    งบประมาณ
-                                                </th>
+                {/* แสดงตารางกิจกรรม */}
+                {activities.length > 0 &&
+                    activities.some((a) => a.activity) && (
+                        <PreviewField label="ตารางกิจกรรม">
+                            <div className="overflow-x-auto mt-2">
+                                <table className="min-w-full text-xs border border-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-2 py-1 border">
+                                                กิจกรรม
+                                            </th>
+                                            <th className="px-2 py-1 border">
+                                                ผู้รับผิดชอบ
+                                            </th>
+                                            <th className="px-2 py-1 border">
+                                                วิธีการประเมิน
+                                            </th>
+                                            <th className="px-2 py-1 border">
+                                                ระยะเวลา
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {activities.map((activity, index) => (
+                                            <tr key={index}>
+                                                <td className="px-2 py-1 border">
+                                                    {activity.activity || "-"}
+                                                </td>
+                                                <td className="px-2 py-1 border">
+                                                    {activity.manager || "-"}
+                                                </td>
+                                                <td className="px-2 py-1 border">
+                                                    {activity.evaluation2 ||
+                                                        "-"}
+                                                </td>
+                                                <td className="px-2 py-1 border">
+                                                    {activity.duration || "-"}
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {activities.map(
-                                                (activity, index) => (
-                                                    <tr key={index}>
-                                                        <td className="px-2 py-1 border">
-                                                            {activity.activity ||
-                                                                "-"}
-                                                        </td>
-                                                        <td className="px-2 py-1 border">
-                                                            {activity.manager ||
-                                                                "-"}
-                                                        </td>
-                                                        <td className="px-2 py-1 border">
-                                                            {activity.evaluation2 ||
-                                                                "-"}
-                                                        </td>
-                                                        <td className="px-2 py-1 border">
-                                                            {activity.duration ||
-                                                                "-"}
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
-                        )}
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                เบอร์โทรศัพท์:
-                            </h4>
-                            <p className="text-sm">{formData.tel || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                อีเมล:
-                            </h4>
-                            <p className="text-sm">{formData.email || "-"}</p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                กลุ่มเป้าหมาย:
-                            </h4>
-                            <p className="text-sm">{formData.target || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ค่าใช้จ่าย:
-                            </h4>
-                            <p className="text-sm">{formData.cost || "-"}</p>
-                        </div>
-                    </div>
-
-                    {formData.zone && (
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                พื้นที่/เขต:
-                            </h4>
-                            <p className="text-sm">{formData.zone}</p>
-                        </div>
+                        </PreviewField>
                     )}
-
-                    {formData.plan && (
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                แผนการดำเนินงาน:
-                            </h4>
-                            <p className="text-sm whitespace-pre-wrap">
-                                {formData.plan}
-                            </p>
-                        </div>
-                    )}
-
-                    {formData.projectmanage && (
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                การจัดการโครงการ:
-                            </h4>
-                            <p className="text-sm whitespace-pre-wrap">
-                                {formData.projectmanage}
-                            </p>
-                        </div>
-                    )}
-                </div>
             </PreviewModal>
 
             {/* Success Modal */}

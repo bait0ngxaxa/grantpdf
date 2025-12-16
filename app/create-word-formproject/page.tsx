@@ -2,14 +2,17 @@
 
 import { useState, FormEvent, ChangeEvent, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
 import { PreviewModal } from "@/components/document-form/PreviewModal";
+import { FormField } from "@/components/document-form/FormField";
+import {
+    PreviewField,
+    PreviewGrid,
+} from "@/components/document-form/PreviewField";
 import { ClipboardList, FileText } from "lucide-react";
 
 interface WordDocumentData {
@@ -74,15 +77,12 @@ export default function CreateFormProjectPage() {
     ) => {
         const { name, value } = e.target;
 
-        // ฟังก์ชันเตรียม text ก่อนส่งไปยัง backend
         const prepareThaiText = (text: string): string => {
             if (!text || typeof text !== "string") return text;
-
-            // ปรับปรุงการจัดการ Thai text input
             return text
-                .replace(/\u00A0/g, " ") // Non-breaking space → normal space
-                .replace(/[\u200B-\u200D]/g, "") // ลบ zero-width characters
-                .replace(/\s{2,}/g, " ") // Multiple spaces → single space
+                .replace(/\u00A0/g, " ")
+                .replace(/[\u200B-\u200D]/g, "")
+                .replace(/\s{2,}/g, " ")
                 .trim();
         };
 
@@ -92,10 +92,6 @@ export default function CreateFormProjectPage() {
             ...prevData,
             [name]: processedValue,
         }));
-    };
-
-    const openPreviewModal = () => {
-        setIsPreviewOpen(true);
     };
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -186,6 +182,8 @@ export default function CreateFormProjectPage() {
         }
     };
 
+    const isDirty = Object.values(formData).some((value) => value !== "");
+
     if (!isClient) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -195,8 +193,6 @@ export default function CreateFormProjectPage() {
             </div>
         );
     }
-
-    const isDirty = Object.values(formData).some((value) => value !== "");
 
     return (
         <PageLayout
@@ -211,124 +207,72 @@ export default function CreateFormProjectPage() {
                     icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
                 >
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ชื่อไฟล์ <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="fileName"
-                                placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
-                                className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.fileName}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ชื่อโครงการ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="projectName"
-                                placeholder="ระบุชื่อโครงการ"
-                                className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.projectName}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ผู้รับผิดชอบ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="person"
-                                placeholder="ระบุชื่อผู้รับผิดชอบโครงการ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.person}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ที่อยู่ สถานที่ติดต่อ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="address"
-                                placeholder="ระบุที่อยู่ติดต่อผู้รับผิดชอบ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.address}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                เบอร์โทรศัพท์{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="tel"
-                                name="tel"
-                                placeholder="ระบุเบอร์โทรศัพท์ผู้รับผิดชอบ"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.tel}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                อีเมล <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="email"
-                                name="email"
-                                placeholder="ระบุอีเมลผู้รับผิดชอบ example@mail.com"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ระยะเวลาดำเนินการ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="timeline"
-                                placeholder="ตัวอย่าง 1 มกราคม 2566 - 31 ธันวาคม 2566"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.timeline}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                งบประมาณ <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                type="text"
-                                name="cost"
-                                placeholder="ตัวอย่าง 1000000 บาท (หนึ่งล้านบาทถ้วน)"
-                                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                value={formData.cost}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
+                        <FormField
+                            label="ชื่อไฟล์"
+                            name="fileName"
+                            placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
+                            value={formData.fileName}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="ชื่อโครงการ"
+                            name="projectName"
+                            placeholder="ระบุชื่อโครงการ"
+                            value={formData.projectName}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="ผู้รับผิดชอบ"
+                            name="person"
+                            placeholder="ระบุชื่อผู้รับผิดชอบโครงการ"
+                            value={formData.person}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="ที่อยู่ สถานที่ติดต่อ"
+                            name="address"
+                            placeholder="ระบุที่อยู่ติดต่อผู้รับผิดชอบ"
+                            value={formData.address}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="เบอร์โทรศัพท์"
+                            name="tel"
+                            type="tel"
+                            placeholder="ระบุเบอร์โทรศัพท์ผู้รับผิดชอบ"
+                            value={formData.tel}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="อีเมล"
+                            name="email"
+                            type="email"
+                            placeholder="ระบุอีเมลผู้รับผิดชอบ example@mail.com"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="ระยะเวลาดำเนินการ"
+                            name="timeline"
+                            placeholder="ตัวอย่าง 1 มกราคม 2566 - 31 ธันวาคม 2566"
+                            value={formData.timeline}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="งบประมาณ"
+                            name="cost"
+                            placeholder="ตัวอย่าง 1000000 บาท (หนึ่งล้านบาทถ้วน)"
+                            value={formData.cost}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
                 </FormSection>
 
@@ -341,115 +285,91 @@ export default function CreateFormProjectPage() {
                     icon={<FileText className="w-5 h-5 text-green-600" />}
                 >
                     <div className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ความเป็นมาและแนวคิดการจัดโครงการ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="rationale"
-                                placeholder="ระบุเหตุผลความจำเป็นในการดำเนินโครงการ"
-                                className="w-full px-4 py-3 h-96 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                value={formData.rationale}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                เป้าประสงค์{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="goal"
-                                placeholder="ระบุเป้าประสงค์โครงการ"
-                                className="w-full px-4 py-3 h-30 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                value={formData.goal}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                วัตถุประสงค์{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="objective"
-                                placeholder="ระบุวัตถุประสงค์โครงการ"
-                                className="w-full px-4 py-3 h-30 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                value={formData.objective}
-                                onChange={handleChange}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                เป้าหมายโครงการ{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="target"
-                                placeholder="ระบุเป้าหมายโครงการ"
-                                className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                value={formData.target}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                กรอบการดำเนินงาน{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="scope"
-                                placeholder="ระบุกรอบการดำเนินงาน"
-                                className="w-full px-4 py-3 h-40 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                value={formData.scope}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ผลผลิต <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="product"
-                                placeholder="ระบุผลผลิตโครงการ"
-                                className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                value={formData.product}
-                                onChange={handleChange}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ผลลัพธ์ <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="result"
-                                placeholder="ระบุผลลัพธ์โครงการ"
-                                className="w-full h-40 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                value={formData.result}
-                                onChange={handleChange}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                ประวัติผู้ช่วยวิทยากรกระบวนการถอดบทเรียน
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Textarea
-                                name="author"
-                                placeholder="กรอกประวัติส่วนตัว"
-                                className="w-full px-4 h-40 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors "
-                                value={formData.author}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <FormField
+                            label="ความเป็นมาและแนวคิดการจัดโครงการ"
+                            name="rationale"
+                            type="textarea"
+                            placeholder="ระบุเหตุผลความจำเป็นในการดำเนินโครงการ"
+                            value={formData.rationale}
+                            onChange={handleChange}
+                            rows={12}
+                            className="h-96"
+                        />
+                        <FormField
+                            label="เป้าประสงค์"
+                            name="goal"
+                            type="textarea"
+                            placeholder="ระบุเป้าประสงค์โครงการ"
+                            value={formData.goal}
+                            onChange={handleChange}
+                            rows={4}
+                            className="h-30"
+                        />
+                        <FormField
+                            label="วัตถุประสงค์"
+                            name="objective"
+                            type="textarea"
+                            placeholder="ระบุวัตถุประสงค์โครงการ"
+                            value={formData.objective}
+                            onChange={handleChange}
+                            rows={4}
+                            className="h-30"
+                        />
+                        <FormField
+                            label="เป้าหมายโครงการ"
+                            name="target"
+                            type="textarea"
+                            placeholder="ระบุเป้าหมายโครงการ"
+                            value={formData.target}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
+                        <FormField
+                            label="กรอบการดำเนินงาน"
+                            name="scope"
+                            type="textarea"
+                            placeholder="ระบุกรอบการดำเนินงาน"
+                            value={formData.scope}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
+                        <FormField
+                            label="ผลผลิต"
+                            name="product"
+                            type="textarea"
+                            placeholder="ระบุผลผลิตโครงการ"
+                            value={formData.product}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
+                        <FormField
+                            label="ผลลัพธ์"
+                            name="result"
+                            type="textarea"
+                            placeholder="ระบุผลลัพธ์โครงการ"
+                            value={formData.result}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
+                        <FormField
+                            label="ประวัติผู้ช่วยวิทยากรกระบวนการถอดบทเรียน"
+                            name="author"
+                            type="textarea"
+                            placeholder="กรอกประวัติส่วนตัว"
+                            value={formData.author}
+                            onChange={handleChange}
+                            rows={6}
+                            className="h-40"
+                        />
                     </div>
                 </FormSection>
 
                 <FormActions
-                    onPreview={openPreviewModal}
+                    onPreview={() => setIsPreviewOpen(true)}
                     isSubmitting={isSubmitting}
                 />
             </form>
@@ -486,116 +406,79 @@ export default function CreateFormProjectPage() {
                     if (form) form.requestSubmit();
                 }}
             >
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ชื่อไฟล์:
-                            </h4>
-                            <p className="text-sm">
-                                {formData.projectName || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ชื่อผู้รับผิดชอบ:
-                            </h4>
-                            <p className="text-sm">{formData.person || "-"}</p>
-                        </div>
-                    </div>
+                <PreviewGrid>
+                    <PreviewField label="ชื่อไฟล์" value={formData.fileName} />
+                    <PreviewField
+                        label="ชื่อโครงการ"
+                        value={formData.projectName}
+                    />
+                </PreviewGrid>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                ที่อยู่:
-                            </h4>
-                            <p className="text-sm">{formData.address || "-"}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-sm text-gray-600">
-                                เบอร์โทรศัพท์:
-                            </h4>
-                            <p className="text-sm">{formData.tel || "-"}</p>
-                        </div>
-                    </div>
+                <PreviewGrid>
+                    <PreviewField
+                        label="ผู้รับผิดชอบ"
+                        value={formData.person}
+                    />
+                    <PreviewField label="ที่อยู่" value={formData.address} />
+                </PreviewGrid>
 
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            อีเมล:
-                        </h4>
-                        <p className="text-sm">{formData.email || "-"}</p>
-                    </div>
+                <PreviewGrid>
+                    <PreviewField label="เบอร์โทรศัพท์" value={formData.tel} />
+                    <PreviewField label="อีเมล" value={formData.email} />
+                </PreviewGrid>
 
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            ระยะเวลา:
-                        </h4>
-                        <p className="text-sm">{formData.timeline || "-"}</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            ค่าใช้จ่าย:
-                        </h4>
-                        <p className="text-sm">{formData.cost || "-"}</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            ความเป็นมาและแนวคิด:
-                        </h4>
-                        <p className="text-sm">{formData.rationale || "-"}</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            เป้าประสงค์:
-                        </h4>
-                        <p className="text-sm">{formData.goal || "-"}</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            วัตถุประสงค์:
-                        </h4>
-                        <p className="text-sm">{formData.objective || "-"}</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            เป้าหมายโครงการ:
-                        </h4>
-                        <p className="text-sm">{formData.target || "-"}</p>
-                    </div>
+                <PreviewGrid>
+                    <PreviewField label="ระยะเวลา" value={formData.timeline} />
+                    <PreviewField label="งบประมาณ" value={formData.cost} />
+                </PreviewGrid>
 
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            กรอบการดำเนินงาน:
-                        </h4>
-                        <p className="text-sm">{formData.scope || "-"}</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            ผลผลิต:
-                        </h4>
-                        <p className="text-sm">{formData.product || "-"}</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            ผลลัพธ์:
-                        </h4>
-                        <p className="text-sm">{formData.result || "-"}</p>
-                    </div>
+                <PreviewField label="ความเป็นมาและแนวคิด">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.rationale || "-"}
+                    </p>
+                </PreviewField>
 
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            ระยะเวลาดำเนินการ
-                        </h4>
-                        <p className="text-sm">{formData.timeline || "-"}</p>
-                    </div>
+                <PreviewField label="เป้าประสงค์">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.goal || "-"}
+                    </p>
+                </PreviewField>
 
-                    <div>
-                        <h4 className="font-semibold text-sm text-gray-600">
-                            ประวัติผู้ช่วยวิทยากรกระบวรการถอดบทเรียน:
-                        </h4>
-                        <p className="text-sm">{formData.author || "-"}</p>
-                    </div>
-                </div>
+                <PreviewField label="วัตถุประสงค์">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.objective || "-"}
+                    </p>
+                </PreviewField>
+
+                <PreviewField label="เป้าหมายโครงการ">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.target || "-"}
+                    </p>
+                </PreviewField>
+
+                <PreviewField label="กรอบการดำเนินงาน">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.scope || "-"}
+                    </p>
+                </PreviewField>
+
+                <PreviewField label="ผลผลิต">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.product || "-"}
+                    </p>
+                </PreviewField>
+
+                <PreviewField label="ผลลัพธ์">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.result || "-"}
+                    </p>
+                </PreviewField>
+
+                <PreviewField label="ประวัติผู้ช่วยวิทยากร">
+                    <p className="text-sm whitespace-pre-wrap">
+                        {formData.author || "-"}
+                    </p>
+                </PreviewField>
             </PreviewModal>
 
             {/* Success Modal */}
