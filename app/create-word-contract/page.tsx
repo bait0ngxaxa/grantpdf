@@ -149,8 +149,11 @@ export default function CreateContractPage() {
                 data.append("projectId", selectedProjectId);
             }
 
-            if ((session as any)?.accessToken) {
-                data.append("token", (session as any).accessToken);
+            if ((session as { accessToken?: string })?.accessToken) {
+                data.append(
+                    "token",
+                    (session as { accessToken?: string }).accessToken!
+                );
             }
 
             const response = await fetch("/api/fill-contract-template", {

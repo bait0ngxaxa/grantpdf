@@ -140,8 +140,8 @@ export async function POST(req: NextRequest) {
         };
 
         // Iterate through all cells and replace placeholders
-        worksheet.eachRow((row, rowNumber) => {
-            row.eachCell((cell, colNumber) => {
+        worksheet.eachRow((_row, _rowNumber) => {
+            _row.eachCell((cell, _colNumber) => {
                 if (cell.value && typeof cell.value === "string") {
                     // Simple string cell
                     const originalValue = cell.value;
@@ -158,14 +158,16 @@ export async function POST(req: NextRequest) {
                         "richText" in cell.value &&
                         Array.isArray(cell.value.richText)
                     ) {
-                        cell.value.richText.forEach((textRun: any) => {
-                            if (textRun.text) {
-                                textRun.text = replacePlaceholders(
-                                    textRun.text,
-                                    templateData
-                                );
+                        cell.value.richText.forEach(
+                            (textRun: { text?: string }) => {
+                                if (textRun.text) {
+                                    textRun.text = replacePlaceholders(
+                                        textRun.text,
+                                        templateData
+                                    );
+                                }
                             }
-                        });
+                        );
                     }
                     // Handle formula cells
                     if (

@@ -119,7 +119,7 @@ export async function POST(req: Request) {
         let finalContractNumber = contractnumber;
 
         if (contractnumber && ["ABS", "DMR", "SIP"].includes(contractnumber)) {
-            const counter = await prisma.contractCounter.upsert({
+            const _counter = await prisma.contractCounter.upsert({
                 where: { contractType: contractnumber },
                 update: {
                     currentNumber: {
@@ -159,13 +159,13 @@ export async function POST(req: Request) {
                 end: "}",
             },
 
-            nullGetter: function (part) {
+            nullGetter: function (_part) {
                 return "";
             },
 
             parser: function (tag) {
                 return {
-                    get: function (scope, context) {
+                    get: function (scope, _context) {
                         if (tag === ".") {
                             return scope;
                         }

@@ -122,13 +122,13 @@ export async function POST(req: Request) {
                 end: "}",
             },
 
-            nullGetter: function (part) {
+            nullGetter: function (_part) {
                 return "";
             },
 
             parser: function (tag) {
                 return {
-                    get: function (scope, context) {
+                    get: function (scope, _context) {
                         if (tag === ".") {
                             return scope;
                         }

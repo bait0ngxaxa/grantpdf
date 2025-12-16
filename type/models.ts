@@ -1,9 +1,9 @@
 export interface AttachmentFile {
     id: string;
     fileName: string;
-    filePath: string;
+    filePath?: string;
     fileSize: number;
-    mimeType: string;
+    mimeType: string | null;
 }
 
 export interface UserFile {

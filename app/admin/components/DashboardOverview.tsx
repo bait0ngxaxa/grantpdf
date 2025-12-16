@@ -1,53 +1,25 @@
 import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
-import type { AdminProject, LatestUser } from "@/type/models";
+import type { AdminProject, AdminPdfFile } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
 
 interface DashboardOverviewProps {
     projects: AdminProject[];
-    allFiles: any[];
+    allFiles: AdminPdfFile[];
     totalUsers: number;
-    latestUser: LatestUser | null;
     todayProjects: number;
     todayFiles: number;
     setActiveTab: (tab: string) => void;
-    router: any;
 }
-
-const truncateFileName = (
-    fileName: string | null | undefined,
-    maxLength: number = 30
-): string => {
-    if (!fileName || typeof fileName !== "string") {
-        return "ไม่มีชื่อไฟล์";
-    }
-
-    if (fileName.length <= maxLength) return fileName;
-
-    const extension = fileName.split(".").pop() || "";
-    const lastDotIndex = fileName.lastIndexOf(".");
-
-    if (lastDotIndex === -1) {
-        return fileName.substring(0, maxLength - 3) + "...";
-    }
-
-    const nameWithoutExt = fileName.substring(0, lastDotIndex);
-    const truncatedName =
-        nameWithoutExt.substring(0, maxLength - extension.length - 4) + "...";
-
-    return `${truncatedName}.${extension}`;
-};
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     projects,
     allFiles,
     totalUsers,
-    latestUser,
     todayProjects,
     todayFiles,
     setActiveTab,
-    router,
 }) => {
     // Calculate latest project
     const latestProject = useMemo(() => {

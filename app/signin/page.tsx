@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoginSuccessModal } from "@/components/ui/LoginSuccessModal";
 import { useTitle } from "@/hook/useTitle";
-import { Zap, FileText, Activity, Download, LogIn } from "lucide-react";
+import { Zap, FileText, Activity, LogIn } from "lucide-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -16,7 +15,6 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const router = useRouter();
     useTitle("เข้าสู่ระบบ - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
     const handleLogin = async (e: React.FormEvent) => {

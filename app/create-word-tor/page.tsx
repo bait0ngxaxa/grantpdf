@@ -18,9 +18,8 @@ import {
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hook/useTitle";
 
-
 interface TORData {
-    projectName: string; 
+    projectName: string;
     fileName: string;
     owner: string;
     address: string;
@@ -41,7 +40,6 @@ interface TORData {
     date: string;
 }
 
-
 interface ActivityData {
     activity: string;
 
@@ -55,7 +53,7 @@ export default function CreateTORPage() {
     const router = useRouter();
 
     const [formData, setFormData] = useState<TORData>({
-        projectName: "", 
+        projectName: "",
         fileName: "",
         date: "",
         owner: "",
@@ -76,13 +74,12 @@ export default function CreateTORPage() {
         partner: "",
     });
 
-    
     const [activities, setActivities] = useState<ActivityData[]>([
         { activity: "", manager: "", evaluation2: "", duration: "" },
     ]);
 
     const [signatureFile, setSignatureFile] = useState<File | null>(null);
-    const [signaturePreview, setSignaturePreview] = useState<string | null>(
+    const [_signaturePreview, setSignaturePreview] = useState<string | null>(
         null
     );
     const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
@@ -109,7 +106,7 @@ export default function CreateTORPage() {
         router.push("/createdocs");
     };
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const _handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         setSignatureFile(file);
         if (file) {
@@ -123,7 +120,6 @@ export default function CreateTORPage() {
         }
     };
 
-    
     const addActivityRow = () => {
         setActivities([
             ...activities,
@@ -172,7 +168,6 @@ export default function CreateTORPage() {
                 data.append(key, formData[key as keyof TORData]);
             });
 
-            
             data.append("activities", JSON.stringify(activities));
 
             if (signatureFile) {
@@ -185,15 +180,17 @@ export default function CreateTORPage() {
             if (session.user?.email) {
                 data.append("userEmail", session.user.email);
             }
-            
-            
-            const selectedProjectId = localStorage.getItem('selectedProjectId');
+
+            const selectedProjectId = localStorage.getItem("selectedProjectId");
             if (selectedProjectId) {
                 data.append("projectId", selectedProjectId);
             }
-            
-            if ((session as any)?.accessToken) {
-                data.append("token", (session as any).accessToken);
+
+            if ((session as { accessToken?: string })?.accessToken) {
+                data.append(
+                    "token",
+                    (session as { accessToken?: string }).accessToken!
+                );
             }
 
             const response = await fetch("/api/fill-tor-template", {
@@ -279,7 +276,7 @@ export default function CreateTORPage() {
                                 📋 ข้อมูลพื้นฐานโครงการ
                             </h3>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div>
+                                <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         ชื่อไฟล์{" "}
                                         <span className="text-red-500">*</span>
@@ -456,7 +453,7 @@ export default function CreateTORPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                                        วัตถุประสงค์ {" "}
+                                        วัตถุประสงค์{" "}
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Textarea
@@ -468,8 +465,7 @@ export default function CreateTORPage() {
                                         //rows={30}
                                     />
                                 </div>
-                                
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-2">
                                         กลุ่มเป้าหมาย{" "}

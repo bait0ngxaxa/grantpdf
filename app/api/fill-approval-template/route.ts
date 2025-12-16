@@ -105,7 +105,7 @@ export async function POST(req: Request) {
 
         const formData = await req.formData();
         const head = formData.get("head") as string;
-        const fileName = formData.get("fileName") as string;
+        const _fileName = formData.get("fileName") as string;
         const projectName = formData.get("projectName") as string;
         const date = formData.get("date") as string;
         const topicdetail = formData.get("topicdetail") as string;
@@ -207,7 +207,7 @@ export async function POST(req: Request) {
 
             parser: function (tag) {
                 return {
-                    get: function (scope, context) {
+                    get: function (scope, _context) {
                         if (tag === ".") {
                             return scope;
                         }
@@ -366,7 +366,7 @@ export async function POST(req: Request) {
                             actualFileSize = 0;
                         }
 
-                        const createdAttachment =
+                        const _createdAttachment =
                             await prisma.attachmentFile.create({
                                 data: {
                                     fileName: attachmentFile.originalFileName,

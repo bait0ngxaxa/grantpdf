@@ -126,7 +126,7 @@ export async function POST(req: Request) {
         let content;
         try {
             content = await fs.readFile(templatePath);
-        } catch (error) {
+        } catch (_error) {
             const fallbackTemplatePath = path.join(
                 process.cwd(),
                 "public",
@@ -145,13 +145,13 @@ export async function POST(req: Request) {
                 end: "}",
             },
 
-            nullGetter: function (part) {
+            nullGetter: function (_part) {
                 return "";
             },
 
             parser: function (tag) {
                 return {
-                    get: function (scope, context) {
+                    get: function (scope, _context) {
                         if (tag === ".") {
                             return scope;
                         }
@@ -183,21 +183,23 @@ export async function POST(req: Request) {
             },
         });
 
-        const processedActivities = activities.map((activity: any) => ({
-            ...activity,
+        const processedActivities = activities.map(
+            (activity: Record<string, unknown>) => ({
+                ...activity,
 
-            ...(typeof activity === "object"
-                ? Object.keys(activity).reduce((acc, key) => {
-                      const value = activity[key];
-                      if (typeof value === "string") {
-                          acc[key] = fixThaiDistributed(value);
-                      } else {
-                          acc[key] = value;
-                      }
-                      return acc;
-                  }, {} as any)
-                : activity),
-        }));
+                ...(typeof activity === "object"
+                    ? Object.keys(activity).reduce((acc, key) => {
+                          const value = activity[key];
+                          if (typeof value === "string") {
+                              acc[key] = fixThaiDistributed(value);
+                          } else {
+                              acc[key] = value;
+                          }
+                          return acc;
+                      }, {} as Record<string, unknown>)
+                    : activity),
+            })
+        );
 
         const processedData = {
             projectName: fixThaiDistributed(projectName || ""),

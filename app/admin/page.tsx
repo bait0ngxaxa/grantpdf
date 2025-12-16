@@ -26,26 +26,10 @@ import { ProjectStatusModal } from "./components/modals/ProjectStatusModal";
 
 // Import shared types and constants
 import { PROJECT_STATUS } from "@/type/models";
-import { PAGINATION } from "@/lib/constants";
+import { PAGINATION, FILE_TYPES, STATUS_FILTER } from "@/lib/constants";
+import { getStatusColor } from "@/lib/utils";
 
 const itemsPerPage = PAGINATION.ITEMS_PER_PAGE;
-
-const getStatusColor = (status: string) => {
-    switch (status) {
-        case PROJECT_STATUS.IN_PROGRESS:
-            return "bg-yellow-100 text-yellow-800 border-yellow-200";
-        case PROJECT_STATUS.APPROVED:
-            return "bg-green-100 text-green-800 border-green-200";
-        case PROJECT_STATUS.REJECTED:
-            return "bg-red-100 text-red-800 border-red-200";
-        case PROJECT_STATUS.EDIT:
-            return "bg-orange-100 text-orange-800 border-orange-200";
-        case PROJECT_STATUS.CLOSED:
-            return "bg-gray-100 text-gray-800 border-gray-200";
-        default:
-            return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-};
 
 const getTitleByTab = (tab: string) => {
     switch (tab) {
@@ -70,7 +54,6 @@ export default function AdminDashboardPage() {
         orphanFiles,
         setOrphanFiles,
         isLoading,
-        error,
         totalUsers,
         latestUser,
         todayProjects,
@@ -85,7 +68,6 @@ export default function AdminDashboardPage() {
         setIsSidebarOpen,
         expandedProjects,
         viewedProjects,
-        expandedRows,
         currentPage,
         setCurrentPage,
         searchTerm,
@@ -93,11 +75,9 @@ export default function AdminDashboardPage() {
         sortBy,
         setSortBy,
         selectedFileType,
-        setSelectedFileType,
         selectedStatus,
         setSelectedStatus,
         toggleProjectExpansion,
-        toggleRowExpansion,
     } = useUIStates();
 
     const {
@@ -158,10 +138,11 @@ export default function AdminDashboardPage() {
         if (session && session.user?.role === "admin") {
             fetchProjects(session);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session]);
 
     const filteredAndSortedProjects = useMemo(() => {
-        let filteredProjects = projects.filter((project) => {
+        const filteredProjects = projects.filter((project) => {
             const matchesSearch =
                 project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 project.userName
@@ -174,7 +155,7 @@ export default function AdminDashboardPage() {
                 );
 
             let matchesFileType = true;
-            if (selectedFileType !== "ไฟล์ทั้งหมด") {
+            if (selectedFileType !== FILE_TYPES.ALL) {
                 matchesFileType = project.files.some(
                     (file) =>
                         file.fileExtension.toLowerCase() ===
@@ -183,7 +164,7 @@ export default function AdminDashboardPage() {
             }
 
             let matchesStatus = true;
-            if (selectedStatus !== "สถานะทั้งหมด") {
+            if (selectedStatus !== STATUS_FILTER.ALL) {
                 matchesStatus = project.status === selectedStatus;
             }
 
@@ -297,7 +278,6 @@ export default function AdminDashboardPage() {
                     setActiveTab={setActiveTab}
                     session={session}
                     router={router}
-                    totalUsers={totalUsers}
                     todayProjects={todayProjects}
                     todayFiles={todayFiles}
                     totalProjects={projects.length}
@@ -306,7 +286,6 @@ export default function AdminDashboardPage() {
                 {/* Main Content */}
                 <div className="lg:ml-64 min-h-screen">
                     <AdminTopBar
-                        isSidebarOpen={isSidebarOpen}
                         setIsSidebarOpen={setIsSidebarOpen}
                         activeTab={activeTab}
                         signOut={signOut}
@@ -320,11 +299,9 @@ export default function AdminDashboardPage() {
                                 projects={projects}
                                 allFiles={allFiles}
                                 totalUsers={totalUsers}
-                                latestUser={latestUser}
                                 todayProjects={todayProjects}
                                 todayFiles={todayFiles}
                                 setActiveTab={setActiveTab}
-                                router={router}
                             />
                         )}
 
@@ -336,8 +313,6 @@ export default function AdminDashboardPage() {
                                     setSearchTerm={setSearchTerm}
                                     sortBy={sortBy}
                                     setSortBy={setSortBy}
-                                    selectedFileType={selectedFileType}
-                                    setSelectedFileType={setSelectedFileType}
                                     selectedStatus={selectedStatus}
                                     setSelectedStatus={setSelectedStatus}
                                 />

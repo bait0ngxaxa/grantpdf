@@ -16,7 +16,7 @@ interface ProjectsListProps {
     endIndex: number;
     onToggleProjectExpansion: (projectId: string) => void;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
-    onDeleteFile: (file: any) => void;
+    onDeleteFile: (file: AdminPdfFile) => void;
     onEditProjectStatus: (project: AdminProject) => void;
 }
 
