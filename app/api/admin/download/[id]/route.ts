@@ -83,7 +83,7 @@ export async function GET(
                 "Content-Length": fileBuffer.length.toString(),
             },
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error downloading file:", error);
         return NextResponse.json(
             { error: "Failed to download file" },

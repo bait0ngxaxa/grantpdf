@@ -55,7 +55,6 @@ export async function DELETE(
             );
             if (fs.existsSync(fullPath)) {
                 fs.unlinkSync(fullPath);
-                console.log(`File deleted: ${fullPath}`);
             } else {
                 console.warn(`File not found: ${fullPath}`);
             }
@@ -74,10 +73,15 @@ export async function DELETE(
             },
             { status: 200 }
         );
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error deleting document:", error);
 
-        if (error?.code === "P2025") {
+        if (
+            error &&
+            typeof error === "object" &&
+            "code" in error &&
+            error.code === "P2025"
+        ) {
             return NextResponse.json(
                 { error: "Document not found" },
                 { status: 404 }

@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 
 import { useUserData } from "./hooks/useUserData";
 import { useProjectActions } from "./hooks/useProjectActions";
@@ -24,9 +24,9 @@ import { SuccessModal } from "./components/modals/SuccessModal";
 import { PreviewModal } from "./components/modals/PreviewModal";
 import { ProfileModal } from "./components/modals/ProfileModal";
 
-// Import shared types and constants
-import type { UserFile, Project } from "@/type/models";
+// Import shared constants and local types
 import { PAGINATION } from "@/lib/constants";
+import type { Project } from "./hooks/useUserData";
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
@@ -84,14 +84,13 @@ export default function DashboardPage() {
 
     const {
         isCreatingProject,
-        isDeletingProject,
         isUpdatingProject,
         handleCreateProject,
         confirmDeleteProject,
         confirmUpdateProject,
     } = useProjectActions(setProjects, setSuccessMessage, setShowSuccessModal);
 
-    const { isDeleting, confirmDeleteFile } = useFileActions(
+    const { confirmDeleteFile } = useFileActions(
         setProjects,
         setOrphanFiles,
         setSuccessMessage,
@@ -177,6 +176,7 @@ export default function DashboardPage() {
         } else if (status === "authenticated") {
             fetchUserData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, router]);
 
     if (status === "loading" || isLoading) {
@@ -206,13 +206,11 @@ export default function DashboardPage() {
                     setShowCreateProjectModal={setShowCreateProjectModal}
                     setShowProfileModal={setShowProfileModal}
                     session={session}
-                    signOut={signOut}
                 />
 
                 {/* Main Content */}
                 <div className="lg:ml-64 min-h-screen">
                     <TopBar
-                        isSidebarOpen={isSidebarOpen}
                         setIsSidebarOpen={setIsSidebarOpen}
                         activeTab={activeTab}
                         session={session}

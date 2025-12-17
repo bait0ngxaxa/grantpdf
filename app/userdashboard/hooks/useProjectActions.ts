@@ -1,145 +1,143 @@
-import { useState } from 'react';
-
-type Project = {
-  id: string;
-  name: string;
-  description?: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  files: any[];
-  _count: {
-    files: number;
-  };
-};
+import { useState } from "react";
+import type { Project } from "./useUserData";
 
 export const useProjectActions = (
-  setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
-  setSuccessMessage: (message: string) => void,
-  setShowSuccessModal: (show: boolean) => void
+    setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
+    setSuccessMessage: (message: string) => void,
+    setShowSuccessModal: (show: boolean) => void
 ) => {
-  const [isCreatingProject, setIsCreatingProject] = useState(false);
-  const [isDeletingProject, setIsDeletingProject] = useState(false);
-  const [isUpdatingProject, setIsUpdatingProject] = useState(false);
+    const [isCreatingProject, setIsCreatingProject] = useState(false);
+    const [isDeletingProject, setIsDeletingProject] = useState(false);
+    const [isUpdatingProject, setIsUpdatingProject] = useState(false);
 
-  // Create new project
-  const handleCreateProject = async (name: string, description: string) => {
-    if (!name.trim()) return;
+    // Create new project
+    const handleCreateProject = async (name: string, description: string) => {
+        if (!name.trim()) return;
 
-    setIsCreatingProject(true);
-    try {
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim() || null,
-        }),
-      });
+        setIsCreatingProject(true);
+        try {
+            const res = await fetch("/api/projects", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: name.trim(),
+                    description: description.trim() || null,
+                }),
+            });
 
-      if (!res.ok) {
-        throw new Error("Failed to create project");
-      }
+            if (!res.ok) {
+                throw new Error("Failed to create project");
+            }
 
-      const newProject: Project = await res.json();
-      setProjects((prev) => [newProject, ...prev]);
+            const newProject: Project = await res.json();
+            setProjects((prev) => [newProject, ...prev]);
 
-      setSuccessMessage("สร้างโครงการสำเร็จ");
-      setShowSuccessModal(true);
-    } catch (err) {
-      console.error("Error creating project:", err);
-      setSuccessMessage("เกิดข้อผิดพลาดในการสร้างโครงการ กรุณาลองใหม่อีกครั้ง");
-      setShowSuccessModal(true);
-    } finally {
-      setIsCreatingProject(false);
-    }
-  };
+            setSuccessMessage("สร้างโครงการสำเร็จ");
+            setShowSuccessModal(true);
+        } catch (err) {
+            console.error("Error creating project:", err);
+            setSuccessMessage(
+                "เกิดข้อผิดพลาดในการสร้างโครงการ กรุณาลองใหม่อีกครั้ง"
+            );
+            setShowSuccessModal(true);
+        } finally {
+            setIsCreatingProject(false);
+        }
+    };
 
-  // Delete project
-  const confirmDeleteProject = async (projectId: string) => {
-    setIsDeletingProject(true);
+    // Delete project
+    const confirmDeleteProject = async (projectId: string) => {
+        setIsDeletingProject(true);
 
-    try {
-      const res = await fetch(`/api/projects/${projectId}`, {
-        method: "DELETE",
-      });
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, {
+                method: "DELETE",
+            });
 
-      if (!res.ok) {
-        throw new Error("Failed to delete project");
-      }
+            if (!res.ok) {
+                throw new Error("Failed to delete project");
+            }
 
-      // Remove project from local state
-      setProjects((prev) => prev.filter((project) => project.id !== projectId));
+            // Remove project from local state
+            setProjects((prev) =>
+                prev.filter((project) => project.id !== projectId)
+            );
 
-      setSuccessMessage("ลบโครงการสำเร็จ");
-      setShowSuccessModal(true);
-      
-      return true;
-    } catch (err) {
-      console.error("Error deleting project:", err);
-      setSuccessMessage("เกิดข้อผิดพลาดในการลบโครงการ กรุณาลองใหม่อีกครั้ง");
-      setShowSuccessModal(true);
-      return false;
-    } finally {
-      setIsDeletingProject(false);
-    }
-  };
+            setSuccessMessage("ลบโครงการสำเร็จ");
+            setShowSuccessModal(true);
 
-  // Update project
-  const confirmUpdateProject = async (projectId: string, name: string, description: string) => {
-    if (!name.trim()) return false;
+            return true;
+        } catch (err) {
+            console.error("Error deleting project:", err);
+            setSuccessMessage(
+                "เกิดข้อผิดพลาดในการลบโครงการ กรุณาลองใหม่อีกครั้ง"
+            );
+            setShowSuccessModal(true);
+            return false;
+        } finally {
+            setIsDeletingProject(false);
+        }
+    };
 
-    setIsUpdatingProject(true);
+    // Update project
+    const confirmUpdateProject = async (
+        projectId: string,
+        name: string,
+        description: string
+    ) => {
+        if (!name.trim()) return false;
 
-    try {
-      const res = await fetch(`/api/projects/${projectId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim() || null,
-        }),
-      });
+        setIsUpdatingProject(true);
 
-      if (!res.ok) {
-        throw new Error("Failed to update project");
-      }
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: name.trim(),
+                    description: description.trim() || null,
+                }),
+            });
 
-      const updatedProject: Project = await res.json();
+            if (!res.ok) {
+                throw new Error("Failed to update project");
+            }
 
-      // Update project in local state
-      setProjects((prev) =>
-        prev.map((project) =>
-          project.id === updatedProject.id ? updatedProject : project
-        )
-      );
+            const updatedProject: Project = await res.json();
 
-      setSuccessMessage("อัปเดตโครงการสำเร็จ");
-      setShowSuccessModal(true);
-      
-      return true;
-    } catch (err) {
-      console.error("Error updating project:", err);
-      setSuccessMessage(
-        "เกิดข้อผิดพลาดในการอัปเดตโครงการ กรุณาลองใหม่อีกครั้ง"
-      );
-      setShowSuccessModal(true);
-      return false;
-    } finally {
-      setIsUpdatingProject(false);
-    }
-  };
+            // Update project in local state
+            setProjects((prev) =>
+                prev.map((project) =>
+                    project.id === updatedProject.id ? updatedProject : project
+                )
+            );
 
-  return {
-    isCreatingProject,
-    isDeletingProject,
-    isUpdatingProject,
-    handleCreateProject,
-    confirmDeleteProject,
-    confirmUpdateProject,
-  };
+            setSuccessMessage("อัปเดตโครงการสำเร็จ");
+            setShowSuccessModal(true);
+
+            return true;
+        } catch (err) {
+            console.error("Error updating project:", err);
+            setSuccessMessage(
+                "เกิดข้อผิดพลาดในการอัปเดตโครงการ กรุณาลองใหม่อีกครั้ง"
+            );
+            setShowSuccessModal(true);
+            return false;
+        } finally {
+            setIsUpdatingProject(false);
+        }
+    };
+
+    return {
+        isCreatingProject,
+        isDeletingProject,
+        isUpdatingProject,
+        handleCreateProject,
+        confirmDeleteProject,
+        confirmUpdateProject,
+    };
 };

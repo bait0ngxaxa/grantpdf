@@ -1,477 +1,375 @@
 "use client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 
 export default function Home() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
+    const router = useRouter();
+    const { data: session, status } = useSession();
 
-  useTitle("HOMEPAGE - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
+    useTitle("HOMEPAGE - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: "/" });
-  };
+    const handleLogout = () => {
+        signOut({ callbackUrl: "/" });
+    };
 
-  if (status === "loading") {
-    return (
-      <>
-        <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
-          <div className="flex-1">
-            <Link
-              href="/"
-              className="btn btn-ghost normal-case text-xl text-primary"
-            >
-              HOMEPAGE
-            </Link>
-          </div>
-          <div className="flex-none">
-            <div className="skeleton w-24 h-8 rounded-full mr-2"></div>
-            <div className="skeleton w-24 h-8 rounded-full"></div>
-          </div>
-        </div>
-        <main className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-          <div className="loading loading-spinner loading-lg text-primary"></div>
-        </main>
-      </>
-    );
-  }
-
-  return (
-    <>
-      {/* Navbar */}
-      <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
-        <div className="flex-1">
-          <Link
-            href="/"
-            className=" font-semibold text-2xl hover:rounded-full text-primary hover:bg-white transform hover:scale-105 transition-transform duration-300"
-          >
-            GRANT ONLINE | HOMEPAGE
-          </Link>
-        </div>
-        <div className="flex-none">
-          {session ? (
-            <div className="flex items-center space-x-3">
-              <Button
-                onClick={() => router.push("/userdashboard")}
-                className="hidden sm:flex cursor-pointer"
-              >
-                Dashboard
-              </Button>
-
-              <div className="dropdown dropdown-end">
-                <div
-                  tabIndex={0}
-                  role="button"
-                  className="btn btn-ghost btn-circle avatar hover:bg-primary/10 transition-all duration-300 hover:scale-105 border-2 border-transparent hover:border-primary/20"
-                >
-                  {session.user?.image ? (
-                    <div className="w-12 h-12 rounded-full ring-2 ring-primary/30 ring-offset-2 ring-offset-white dark:ring-offset-gray-800 shadow-md hover:shadow-lg transition-all duration-300">
-                      <img
-                        src={session.user.image}
-                        alt="Profile"
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="avatar placeholder">
-                      <div className="bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-content rounded-full w-12 h-12 ring-2 ring-primary/30 ring-offset-2 ring-offset-white dark:ring-offset-gray-800 shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                        <span className="text-xl font-bold">
-                          {session.user?.name
-                            ? session.user.name.charAt(0).toUpperCase()
-                            : session.user?.email?.charAt(0).toUpperCase() ||
-                              "U"}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <ul
-                  tabIndex={0}
-                  className="menu dropdown-content z-[1] p-3 shadow-xl bg-white dark:bg-gray-800 rounded-2xl w-56 mt-3 border border-gray-200 dark:border-gray-600 backdrop-blur-sm"
-                >
-                  <li className="menu-title px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-sm">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 text-white"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                      </div>
-                      <span className="font-semibold text-gray-800 dark:text-gray-200">
-                        บัญชีผู้ใช้
-                      </span>
-                    </div>
-                  </li>
-                  <div className="divider my-2 opacity-30"></div>
-                  <li>
-                    <button
-                      onClick={() => router.push("/userdashboard")}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-primary/5 hover:text-primary transition-all duration-200 rounded-xl group"
-                    >
-                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 text-primary"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
-                          />
-                        </svg>
-                      </div>
-                      <span className="font-medium">Dashboard</span>
-                    </button>
-                  </li>
-                  <div className="divider my-2 opacity-30"></div>
-                  <li>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 rounded-xl group"
-                    >
-                      <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center group-hover:bg-red-200 dark:group-hover:bg-red-900/50 transition-colors">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 text-red-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
-                      </div>
-                      <span className="font-medium">ออกจากระบบ</span>
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          ) : (
-            // แสดงเมื่อยังไม่ได้ล็อกอิน
+    if (status === "loading") {
+        return (
             <>
-              <Button variant={"outline"} className="mr-3.5 cursor-pointer">
-                <Link
-                  href="/signup"
-                  className="  rounded-full mr-1 transition-all duration-300 hover:scale-105"
-                >
-                  สมัครสมาชิก
-                </Link>
-              </Button>
-              <Button className="cursor-pointer ">
-                <Link
-                  href="/signin"
-                  className="  rounded-full transition-all duration-300 hover:scale-105"
-                >
-                  เข้าสู่ระบบ
-                </Link>
-              </Button>
+                <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
+                    <div className="flex-1">
+                        <Link
+                            href="/"
+                            className="btn btn-ghost normal-case text-xl text-primary"
+                        >
+                            HOMEPAGE
+                        </Link>
+                    </div>
+                    <div className="flex-none">
+                        <div className="skeleton w-24 h-8 rounded-full mr-2"></div>
+                        <div className="skeleton w-24 h-8 rounded-full"></div>
+                    </div>
+                </div>
+                <main className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+                    <div className="loading loading-spinner loading-lg text-primary"></div>
+                </main>
             </>
-          )}
-        </div>
-      </div>
+        );
+    }
 
-      <main className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4">
-        <div className="container mx-auto max-w-4xl flex items-center justify-center pt-8">
-          {/* Single Large Card Design */}
-          <div className="card w-full bg-white dark:bg-gray-800 shadow-2xl rounded-3xl transform transition-transform duration-300 hover:scale-[1.01] overflow-hidden">
-            <div className="card-body p-8 sm:p-12">
-              {/* Header Section */}
-              <div className="text-center mb-8">
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-xl transform scale-110"></div>
-                  <div className="relative bg-gradient-to-br from-primary to-primary/80 p-6 rounded-full shadow-xl mx-auto w-fit">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-12 w-12 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent mb-4">
-                  GrantOnline
-                </h1>
-
-                <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 font-medium mb-6">
-                  ระบบสร้างเอกสารและยื่นโครงการ
-                </p>
-
-                <div className="bg-gradient-to-r from-primary/5 via-blue-50/50 to-secondary/5 dark:from-primary/10 dark:via-gray-700/30 dark:to-secondary/10 rounded-2xl p-6 mb-8">
-                  <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 leading-relaxed">
-                    {session
-                      ? `ยินดีต้อนรับกลับ, ${
-                          session.user?.name ||
-                          session.user?.email?.split("@")[0]
-                        }! 🎉`
-                      : "ยินดีต้อนรับสู่ระบบสร้างเอกสารและยื่นโครงการ"}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                    {session
-                      ? "เริ่มต้นสร้างเอกสารและแบบฟอร์มใหม่ได้เลย"
-                      : "สร้างเอกสารจากเทมเพลตพร้อมยื่นเสนอโครงการ"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {/* Left Column - Document Templates */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2 mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-primary"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      />
-                    </svg>
-                    เทมเพลตเอกสาร
-                  </h3>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 rounded-xl border border-blue-200/50 dark:border-blue-700/30 hover:shadow-md transition-all duration-200 group cursor-pointer">
-                      <div className="text-center">
-                        <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">
-                          📋
-                        </div>
-                        <h4 className="font-semibold text-blue-800 dark:text-blue-200 text-sm">
-                          ใบอนุมัติ
-                        </h4>
-                        <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                          Approval Form
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 rounded-xl border border-green-200/50 dark:border-green-700/30 hover:shadow-md transition-all duration-200 group cursor-pointer">
-                      <div className="text-center">
-                        <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">
-                          📄
-                        </div>
-                        <h4 className="font-semibold text-green-800 dark:text-green-200 text-sm">
-                          สัญญา
-                        </h4>
-                        <p className="text-xs text-green-600 dark:text-green-300 mt-1">
-                          Contract
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 rounded-xl border border-purple-200/50 dark:border-purple-700/30 hover:shadow-md transition-all duration-200 group cursor-pointer">
-                      <div className="text-center">
-                        <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">
-                          📊
-                        </div>
-                        <h4 className="font-semibold text-purple-800 dark:text-purple-200 text-sm">
-                          โครงการ
-                        </h4>
-                        <p className="text-xs text-purple-600 dark:text-purple-300 mt-1">
-                          Project
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 rounded-xl border border-orange-200/50 dark:border-orange-700/30 hover:shadow-md transition-all duration-200 group cursor-pointer">
-                      <div className="text-center">
-                        <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">
-                          📝
-                        </div>
-                        <h4 className="font-semibold text-orange-800 dark:text-orange-200 text-sm">
-                          TOR
-                        </h4>
-                        <p className="text-xs text-orange-600 dark:text-orange-300 mt-1">
-                          Terms of Reference
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column - Quick Actions */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2 mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-primary"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
-                    Get Started
-                  </h3>
-
-                  {session ? (
-                    <div className="space-y-3">
-                      <button
-                        onClick={() => router.push("/createdocs")}
-                        className="w-full p-4 bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 rounded-xl border border-primary/20 hover:border-primary/30 transition-all duration-200 group text-left"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
+            {/* Navbar */}
+            <nav className="navbar sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-slate-200/50 px-4 md:px-8 h-20 transition-all duration-300">
+                <div className="flex-1">
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                             <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6 text-primary"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
                                 strokeWidth={2}
-                                d="M12 4v16m8-8H4"
-                              />
+                                stroke="currentColor"
+                                className="w-6 h-6"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                                />
                             </svg>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-200">
-                              สร้างเอกสารใหม่
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              เลือกเทมเพลตและสร้างเอกสาร
-                            </p>
-                          </div>
                         </div>
-                      </button>
+                        <div className="flex flex-col">
+                            <span className="font-bold text-xl tracking-tight text-slate-800">
+                                GRANT ONLINE
+                            </span>
+                            <span className="text-[10px] font-semibold tracking-wider text-blue-600 uppercase">
+                                System
+                            </span>
+                        </div>
+                    </Link>
+                </div>
+                <div className="flex-none gap-2">
+                    {session ? (
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            <Button
+                                onClick={() => router.push("/userdashboard")}
+                                className="hidden sm:flex bg-white/50 hover:bg-white text-slate-600 hover:text-blue-600 border border-slate-200 shadow-sm hover:shadow active:scale-95 transition-all duration-200"
+                                variant="ghost"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="w-4 h-4 mr-2"
+                                >
+                                    <path d="M10 2a.75.75 0 01.75.75v5.59l2.68-2.68a.75.75 0 111.06 1.06l-4 4a.75.75 0 01-1.06 0l-4-4a.75.75 0 011.06-1.06l2.68 2.68V2.75A.75.75 0 0110 2z" />
+                                </svg>
+                                Dashboard
+                            </Button>
 
-                      <button
-                        onClick={() => router.push("/userdashboard")}
-                        className="w-full p-4 bg-gradient-to-r from-accent/10 to-accent/5 hover:from-accent/20 hover:to-accent/10 rounded-xl border border-accent/20 hover:border-accent/30 transition-all duration-200 group text-left"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-6 w-6 text-accent"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-200">
-                              จัดการโครงการ
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              ดูและจัดการโครงการของคุณ
-                            </p>
-                          </div>
+                            <div className="dropdown dropdown-end">
+                                <div
+                                    tabIndex={0}
+                                    role="button"
+                                    className="btn btn-ghost btn-circle avatar ring-2 ring-slate-100 hover:ring-blue-100 transition-all duration-300"
+                                >
+                                    {session.user?.image ? (
+                                        <div className="w-10 h-10 rounded-full overflow-hidden">
+                                            <Image
+                                                src={session.user.image}
+                                                alt="Profile"
+                                                width={40}
+                                                height={40}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-slate-100 flex items-center justify-center text-blue-600 font-bold border border-white shadow-inner">
+                                            {session.user?.name
+                                                ? session.user.name
+                                                      .charAt(0)
+                                                      .toUpperCase()
+                                                : session.user?.email
+                                                      ?.charAt(0)
+                                                      .toUpperCase() || "U"}
+                                        </div>
+                                    )}
+                                </div>
+                                <ul
+                                    tabIndex={0}
+                                    className="menu dropdown-content z-[1] p-2 shadow-xl bg-white/90 backdrop-blur-xl rounded-2xl w-60 mt-4 border border-slate-100"
+                                >
+                                    <li className="p-2 pb-3 border-b border-slate-100">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="font-semibold text-sm text-slate-800 break-words">
+                                                {session.user?.name || "User"}
+                                            </span>
+                                            <span className="text-xs text-slate-500 break-words">
+                                                {session.user?.email}
+                                            </span>
+                                        </div>
+                                    </li>
+                                    <li className="mt-2">
+                                        <button
+                                            onClick={() =>
+                                                router.push("/userdashboard")
+                                            }
+                                            className="flex items-center gap-3 px-3 py-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 rounded-xl transition-all"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                strokeWidth={1.5}
+                                                stroke="currentColor"
+                                                className="w-4 h-4"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+                                                />
+                                            </svg>
+                                            Dashboard
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex items-center gap-3 px-3 py-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                strokeWidth={1.5}
+                                                stroke="currentColor"
+                                                className="w-4 h-4"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                                                />
+                                            </svg>
+                                            Sign Out
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="text-center p-6 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
-                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
-                          เริ่มต้นใช้งาน
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                          ลงทะเบียนหรือเข้าสู่ระบบเพื่อใช้งานฟีเจอร์ทั้งหมด
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Link href="/signin">
+                                <Button
+                                    variant="ghost"
+                                    className="hidden sm:flex text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full px-6"
+                                >
+                                    เข้าสู่ระบบ
+                                </Button>
+                            </Link>
+                            <Link href="/signup">
+                                <Button className="bg-slate-900 text-white hover:bg-slate-800 rounded-full px-6 shadow-lg shadow-slate-900/20 transition-all hover:scale-105 active:scale-95">
+                                    เริ่มต้นใช้งาน
+                                </Button>
+                            </Link>
+                        </div>
+                    )}
+                </div>
+            </nav>
+
+            <main className="container mx-auto max-w-7xl px-4 md:px-6 py-12 md:py-20">
+                {/* Hero Section */}
+                <div className="text-center max-w-5xl mx-auto mb-20 bg-white rounded-3xl shadow-xl p-10 md:p-16 border border-slate-100 relative overflow-hidden">
+                    {/* Background Pattern */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none opacity-50"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none opacity-50"></div>
+
+                    <div className="relative z-10">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm mb-8 animate-fade-in-up">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            </span>
+                            GRANT ONLINE
+                        </div>
+
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
+                            สร้างและจัดการเอกสาร <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 animate-gradient-x">
+                                GRANT ONLINE
+                            </span>
+                        </h1>
+
+                        <p className="text-lg md:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+                            สำหรับการสร้าง ใบอนุมัติ, สัญญา, TOR
+                            และเอกสารโครงการต่างๆ <br />
+                            พร้อมติดตามสถานะ
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <Button
-                            variant="outline"
-                            className="flex-1 cursor-pointer"
-                            onClick={() => router.push("/signup")}
-                          >
-                            สมัครสมาชิก
-                          </Button>
-                          <Button
-                            className="flex-1 cursor-pointer"
-                            onClick={() => router.push("/signin")}
-                          >
-                            เข้าสู่ระบบ
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Footer Section */}
-              {session && (
-                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-600">
-                  <div className="flex items-center justify-center gap-2 text-sm">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      ล็อกอินเป็น:
-                    </span>
-                    <span className="font-medium text-primary">
-                      {session.user?.email}
-                    </span>
-                  </div>
+                        {!session && (
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <Link href="/signup">
+                                    <button className="h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 w-full sm:w-auto">
+                                        ลงทะบียน
+                                    </button>
+                                </Link>
+                                <Link href="/signin">
+                                    <button className="h-12 px-8 rounded-full bg-slate-50 text-slate-600 border border-slate-200 font-semibold hover:bg-slate-100 hover:border-slate-300 transition-all duration-300 w-full sm:w-auto">
+                                        เข้าสู่ระบบ
+                                    </button>
+                                </Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
-              )}
-            </div>
-          </div>
+
+                {/* Templates Grid */}
+                <div className="w-full">
+                    <div className="w-full space-y-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5 text-blue-500"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                                </svg>
+                                เทมเพลตเอกสาร
+                            </h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="group relative bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-blue-100/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                                <div className="relative">
+                                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                                        📋
+                                    </div>
+                                    <h3 className="font-bold text-slate-800 mb-1">
+                                        ใบอนุมัติ
+                                    </h3>
+                                    <p className="text-sm text-slate-500 mb-4">
+                                        Approval Form
+                                    </p>
+                                    <div className="flex items-center text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+                                        สร้างเลย <span className="ml-1">→</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="group relative bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-green-100/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-green-50/50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                                <div className="relative">
+                                    <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
+                                        📄
+                                    </div>
+                                    <h3 className="font-bold text-slate-800 mb-1">
+                                        สัญญา
+                                    </h3>
+                                    <p className="text-sm text-slate-500 mb-4">
+                                        Contract
+                                    </p>
+                                    <div className="flex items-center text-green-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+                                        สร้างเลย <span className="ml-1">→</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="group relative bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-purple-100/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-purple-50/50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                                <div className="relative">
+                                    <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                                        📊
+                                    </div>
+                                    <h3 className="font-bold text-slate-800 mb-1">
+                                        โครงการ
+                                    </h3>
+                                    <p className="text-sm text-slate-500 mb-4">
+                                        Project
+                                    </p>
+                                    <div className="flex items-center text-purple-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+                                        สร้างเลย <span className="ml-1">→</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="group relative bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-orange-100/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-orange-50/50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                                <div className="relative">
+                                    <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300">
+                                        📝
+                                    </div>
+                                    <h3 className="font-bold text-slate-800 mb-1">
+                                        TOR
+                                    </h3>
+                                    <p className="text-sm text-slate-500 mb-4">
+                                        Terms of Reference
+                                    </p>
+                                    <div className="flex items-center text-orange-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+                                        สร้างเลย <span className="ml-1">→</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity or Info Section could go here */}
+                        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl p-8 md:p-10 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                                <div>
+                                    <h3 className="text-2xl font-bold mb-2">
+                                        พร้อมเริ่มต้นสร้างเอกสาร?
+                                    </h3>
+                                    <p className="text-blue-100">
+                                        ระบบช่วยจัดการข้อมูลให้อัตโนมัติ
+                                        ลดเวลาการทำงาน
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() =>
+                                        router.push(
+                                            session ? "/createdocs" : "/signup"
+                                        )
+                                    }
+                                    className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg"
+                                >
+                                    {session
+                                        ? "เริ่มสร้างเอกสารใหม่"
+                                        : "สมัครใช้งานฟรี"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-      </main>
-    </>
-  );
+    );
 }

@@ -1,12 +1,10 @@
-'use client';
+"use client";
 
 interface SearchAndFilterProps {
     searchTerm: string;
     setSearchTerm: (value: string) => void;
     sortBy: string;
     setSortBy: (value: string) => void;
-    selectedFileType: string;
-    setSelectedFileType: (value: string) => void;
     selectedStatus: string;
     setSelectedStatus: (value: string) => void;
 }
@@ -16,10 +14,8 @@ export default function SearchAndFilter({
     setSearchTerm,
     sortBy,
     setSortBy,
-    selectedFileType,
-    setSelectedFileType,
     selectedStatus,
-    setSelectedStatus
+    setSelectedStatus,
 }: SearchAndFilterProps) {
     return (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
@@ -36,13 +32,27 @@ export default function SearchAndFilter({
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                 >
-                    <option value="createdAtDesc">เรียงตามวันที่สร้าง (ใหม่สุด)</option>
-                    <option value="createdAtAsc">เรียงตามวันที่สร้าง (เก่าสุด)</option>
-                    <option value="statusEdit">เรียงตามสถานะ (แก้ไขก่อน)</option>
-                    <option value="statusApproved">เรียงตามสถานะ (อนุมัติก่อน)</option>
-                    <option value="statusPending">เรียงตามสถานะ (รอดำเนินการก่อน)</option>
-                    <option value="statusRejected">เรียงตามสถานะ (ไม่อนุมัติก่อน)</option>
-                    <option value="statusClosed">เรียงตามสถานะ (ปิดโครงการก่อน)</option>
+                    <option value="createdAtDesc">
+                        เรียงตามวันที่สร้าง (ใหม่สุด)
+                    </option>
+                    <option value="createdAtAsc">
+                        เรียงตามวันที่สร้าง (เก่าสุด)
+                    </option>
+                    <option value="statusEdit">
+                        เรียงตามสถานะ (แก้ไขก่อน)
+                    </option>
+                    <option value="statusApproved">
+                        เรียงตามสถานะ (อนุมัติก่อน)
+                    </option>
+                    <option value="statusPending">
+                        เรียงตามสถานะ (รอดำเนินการก่อน)
+                    </option>
+                    <option value="statusRejected">
+                        เรียงตามสถานะ (ไม่อนุมัติก่อน)
+                    </option>
+                    <option value="statusClosed">
+                        เรียงตามสถานะ (ปิดโครงการก่อน)
+                    </option>
                 </select>
                 {/* <select
                     className="select select-bordered w-full sm:w-auto rounded-full border-2"

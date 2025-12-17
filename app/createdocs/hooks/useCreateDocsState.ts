@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { PAGINATION } from "@/lib/constants";
+import type { Project } from "@/type/models";
 
 export interface UseCreateDocsStateReturn {
     selectedCategory: string | null;
@@ -9,8 +10,8 @@ export interface UseCreateDocsStateReturn {
     setSelectedContractType: (type: string | null) => void;
     selectedProjectId: string | null;
     setSelectedProjectId: (id: string | null) => void;
-    projects: any[];
-    setProjects: (projects: any[]) => void;
+    projects: Project[];
+    setProjects: (projects: Project[]) => void;
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
     error: string | null;
@@ -29,7 +30,7 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
     const [selectedContractType, setSelectedContractType] = useState<
         string | null
     >(null);
-    const [projects, setProjects] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
         null
     );
@@ -40,14 +41,6 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
 
     // Check if user is admin
     const isAdmin = session?.user?.role === "admin";
-
-    // Check localStorage for selected project on mount
-    useEffect(() => {
-        const storedProjectId = localStorage.getItem("selectedProjectId");
-        if (storedProjectId) {
-            setSelectedProjectId(storedProjectId);
-        }
-    }, []);
 
     return {
         selectedCategory,

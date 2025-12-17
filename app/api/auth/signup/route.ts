@@ -79,13 +79,6 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        console.log("User created successfully:", newUser);
-
-        const userResponse = {
-            ...newUser,
-            id: newUser.id.toString(),
-        };
-
         return NextResponse.json(
             {
                 message: "สมัครสมาชิกสำเร็จ",

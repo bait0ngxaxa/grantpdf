@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import FileItem from "./FileItem";
 import type { AdminProject, AdminPdfFile } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
+import { getStatusColor } from "@/lib/utils";
 
 interface ProjectCardProps {
     project: AdminProject;
@@ -12,7 +13,7 @@ interface ProjectCardProps {
     showNewBadge?: boolean;
     onToggleExpansion: (projectId: string) => void;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
-    onDeleteFile: (file: any) => void;
+    onDeleteFile: (file: AdminPdfFile) => void;
     onEditProjectStatus: (project: AdminProject) => void;
 }
 
@@ -25,23 +26,6 @@ export default function ProjectCard({
     onDeleteFile,
     onEditProjectStatus,
 }: ProjectCardProps) {
-    // ฟังก์ชั่นให้ได้สีตามสถานะ
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case PROJECT_STATUS.IN_PROGRESS:
-                return "bg-yellow-100 text-yellow-800 border-yellow-200";
-            case PROJECT_STATUS.APPROVED:
-                return "bg-green-100 text-green-800 border-green-200";
-            case PROJECT_STATUS.REJECTED:
-                return "bg-red-100 text-red-800 border-red-200";
-            case PROJECT_STATUS.EDIT:
-                return "bg-orange-100 text-orange-800 border-orange-200";
-            case PROJECT_STATUS.CLOSED:
-                return "bg-gray-100 text-gray-800 border-gray-200";
-            default:
-                return "bg-gray-100 text-gray-800 border-gray-200";
-        }
-    };
     return (
         <div className="border border-gray-200 dark:border-gray-700 rounded-xl mb-6 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
             {/* Project Header */}
@@ -153,7 +137,8 @@ export default function ProjectCard({
                                     )}`}
                                 >
                                     {/* Status Icon */}
-                                    {project.status === "อนุมัติ" && (
+                                    {project.status ===
+                                        PROJECT_STATUS.APPROVED && (
                                         <svg
                                             className="w-4 h-4 mr-2"
                                             fill="none"
@@ -168,7 +153,8 @@ export default function ProjectCard({
                                             />
                                         </svg>
                                     )}
-                                    {project.status === "ไม่อนุมัติ" && (
+                                    {project.status ===
+                                        PROJECT_STATUS.REJECTED && (
                                         <svg
                                             className="w-4 h-4 mr-2"
                                             fill="none"
@@ -183,7 +169,7 @@ export default function ProjectCard({
                                             />
                                         </svg>
                                     )}
-                                    {project.status === "แก้ไข" && (
+                                    {project.status === PROJECT_STATUS.EDIT && (
                                         <svg
                                             className="w-4 h-4 mr-2"
                                             fill="none"
@@ -198,7 +184,8 @@ export default function ProjectCard({
                                             />
                                         </svg>
                                     )}
-                                    {project.status === "กำลังดำเนินการ" && (
+                                    {project.status ===
+                                        PROJECT_STATUS.IN_PROGRESS && (
                                         <svg
                                             className="w-4 h-4 mr-2"
                                             fill="none"
@@ -213,7 +200,8 @@ export default function ProjectCard({
                                             />
                                         </svg>
                                     )}
-                                    {project.status === "ปิดโครงการ" && (
+                                    {project.status ===
+                                        PROJECT_STATUS.CLOSED && (
                                         <svg
                                             className="w-4 h-4 mr-2"
                                             fill="none"
@@ -292,17 +280,7 @@ export default function ProjectCard({
                                 {project.files.map((file) => (
                                     <FileItem
                                         key={file.id}
-                                        file={{
-                                            id: file.id,
-                                            originalFileName:
-                                                file.originalFileName,
-                                            fileExtension: file.fileExtension,
-                                            downloadStatus: file.downloadStatus,
-                                            created_at: file.created_at,
-                                            storagePath: file.storagePath,
-                                            attachmentFiles:
-                                                file.attachmentFiles,
-                                        }}
+                                        file={file}
                                         onPreviewPdf={onPreviewPdf}
                                         onDeleteFile={onDeleteFile}
                                     />

@@ -9,9 +9,7 @@ datasource db {
   //directUrl = env("DIRECT_URL")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-// This is your updated User model.
-// ใช้ Int แทน BigInt สำหรับ Dev/Local MySQL
+
 model User {
   id                  Int      @id @default(autoincrement())
   name                String
@@ -20,13 +18,11 @@ model User {
   role                String   @default("member")
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
-
-  // Defines a one-to-many relationship: a user can have many files and projects.
-  files UserFile[]
-  projects Project[]
+files UserFile[]
+projects Project[]
 }
 
-// เพิ่ม Project model สำหรับจัดกลุ่มไฟล์
+
 model Project {
   id          Int      @id @default(autoincrement())
   name        String   // ชื่อโครงการ
@@ -36,10 +32,10 @@ model Project {
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
 
-  // Foreign key linking to the User model
+ 
   userId Int
 
-  // Relationships
+ 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   files UserFile[]
 
@@ -51,15 +47,15 @@ model UserFile {
   originalFileName String
   storagePath      String
   fileExtension    String
-  downloadStatus   String @default("pending") // เพิ่มคอลัมน์นี้
-  downloadedAt     DateTime? // เพิ่มวันที่ที่ดาวน์โหลด (ถ้าต้องการ)
+  downloadStatus   String @default("pending") 
+  downloadedAt     DateTime? 
 
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
 
   // Foreign keys
   userId Int
-  projectId Int?  // ทำให้เป็น optional เพื่อรองรับไฟล์เก่าที่ยังไม่ได้จัดกลุ่ม
+  projectId Int?  
 
   // Relationships
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -70,7 +66,7 @@ model UserFile {
   @@index([projectId])
 }
 
-// ตารางสำหรับไฟล์แนบ
+
 model AttachmentFile {
   id       Int    @id @default(autoincrement())
   fileName String
@@ -90,11 +86,11 @@ model AttachmentFile {
   @@index([userFileId])
 }
 
-// ตารางสำหรับจัดการหมายเลขสัญญา
+
 model ContractCounter {
   id            Int      @id @default(autoincrement())
-  contractType  String   @unique // ประเภทสัญญา: ABS, DMR, SIP
-  currentNumber Int      @default(1) // หมายเลขปัจจุบัน
+  contractType  String   @unique 
+  currentNumber Int      @default(1) 
   
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
