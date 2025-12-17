@@ -35,17 +35,21 @@ export function PreviewModal({
 }: PreviewModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent
-                className={`${maxWidth} max-h-[80vh] overflow-y-auto`}
-            >
-                <DialogHeader>
+            <DialogContent className={`${maxWidth} max-h-[85vh] flex flex-col`}>
+                <DialogHeader className="flex-shrink-0">
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>{description}</DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4">{children}</div>
+                {/* Scrollable content area with word break */}
+                <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-0">
+                    <div className="break-words overflow-hidden">
+                        {children}
+                    </div>
+                </div>
 
-                <DialogFooter>
+                {/* Sticky footer */}
+                <DialogFooter className="flex-shrink-0 pt-4 border-t mt-4">
                     <DialogClose asChild>
                         <Button
                             variant="outline"

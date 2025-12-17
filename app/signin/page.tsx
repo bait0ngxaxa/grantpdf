@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoginSuccessModal } from "@/components/ui/LoginSuccessModal";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 import { FileText, Activity } from "lucide-react";
 
 export default function LoginPage() {

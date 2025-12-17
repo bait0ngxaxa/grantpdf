@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 import { useSession } from "next-auth/react";
 
 import { useCreateDocsState } from "./hooks/useCreateDocsState";

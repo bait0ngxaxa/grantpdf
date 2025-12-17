@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChartBarBig, UserStar } from "lucide-react";
+import { ChartBarBig, UserStar, LogOut } from "lucide-react"; // Updated import
+
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { Session } from "next-auth";
 
@@ -69,26 +70,13 @@ export const TopBar: React.FC<TopBarProps> = ({
                         </Button>
                     )}
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        className="hidden sm:flex cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 transform hover:scale-105 transition-transform duration-300"
+                        className="hidden sm:flex items-center gap-2 px-4 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 hover:shadow-sm transition-all duration-300 group"
                         onClick={() => signOut()}
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 mr-1"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                            />
-                        </svg>
-                        ออกจากระบบ
+                        <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        <span className="font-medium">ออกจากระบบ</span>
                     </Button>
                 </div>
             </div>

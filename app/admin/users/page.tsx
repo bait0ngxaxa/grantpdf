@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState, FormEvent, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 import {
     Users,
     Folder,

@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 
 interface Project {
     id: string;

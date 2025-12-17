@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 import { Lock } from "lucide-react";
 import { ForgotPasswordSuccessModal } from "@/components/ui/ForgotPasswordSuccessModal";
 

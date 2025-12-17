@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 
 export default function Home() {
     const router = useRouter();
@@ -220,9 +220,9 @@ export default function Home() {
                         </div>
 
                         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
-                            สร้างและจัดการ <br />
+                            สร้างและจัดการเอกสาร <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 animate-gradient-x">
-                                เอกสารโครงการ
+                                GRANT ONLINE
                             </span>
                         </h1>
 

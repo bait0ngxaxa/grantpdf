@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 
 import { useAdminData } from "./hooks/useAdminData";
 import { useFileActions } from "./hooks/useFileActions";

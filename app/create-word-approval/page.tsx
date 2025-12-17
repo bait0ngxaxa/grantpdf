@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent, useRef } from "react";
+import { useState, ChangeEvent, useRef, FormEvent } from "react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
@@ -13,53 +13,31 @@ import { FormField } from "@/components/document-form/FormField";
 import { AttachmentList } from "@/components/document-form/AttachmentList";
 import { AttachmentUpload } from "@/components/document-form/AttachmentUpload";
 import { SignatureSection } from "@/components/document-form/SignatureSection";
+import { ErrorAlert } from "@/components/document-form/ErrorAlert";
+import { LoadingState } from "@/components/document-form/LoadingState";
+import { useDocumentForm } from "@/components/document-form/useDocumentForm";
+import { usePreviewModal } from "@/components/document-form/usePreviewModal";
 import {
     PreviewField,
     PreviewGrid,
     PreviewList,
 } from "@/components/document-form/PreviewField";
 import { ClipboardList, FileText, Folder, UserPen } from "lucide-react";
+import {
+    type ApprovalData,
+    initialApprovalData,
+    approvalFixedValues,
+} from "@/config/initialData";
 
 import type { SignatureCanvasRef } from "@/components/ui/SignatureCanvas";
-
-interface WordDocumentData {
-    head: string;
-    fileName: string;
-    projectName: string;
-    date: string;
-    topicdetail: string;
-    todetail: string;
-    attachments: string[];
-    detail: string;
-    name: string;
-    depart: string;
-    coor: string;
-    tel: string;
-    email: string;
-    accept: string;
-}
 
 export default function CreateWordDocPage() {
     const { data: session } = useSession();
     const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
 
-    const [formData, setFormData] = useState<WordDocumentData>({
-        head: "",
-        fileName: "",
-        projectName: "",
-        date: "",
-        topicdetail: "",
-        todetail: "",
-        attachments: [],
-        detail: "",
-        name: "",
-        depart: "",
-        coor: "",
-        tel: "",
-        email: "",
-        accept: "",
-    });
+    useTitle("สร้างหนังสือขอนุมัติ | ระบบจัดการเอกสาร");
 
+    // Signature states
     const [signatureFile, setSignatureFile] = useState<File | null>(null);
     const [signaturePreview, setSignaturePreview] = useState<string | null>(
         null
@@ -68,23 +46,28 @@ export default function CreateWordDocPage() {
         string | null
     >(null);
     const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
-    const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
-        null
-    );
-    const [message, setMessage] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isError, setIsError] = useState(false);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-    const fixedValues = {
-        topic: "รายงานผลการปฏิบัติงาน",
-        to: "ผู้จัดการฝ่ายบริหาร",
-        attachment: "เอกสารแนบตามที่ระบุ",
-        regard: "ขอแสดงความนับถืออย่างสูง",
-    };
+    const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
+        usePreviewModal();
 
-    useTitle("สร้างหนังสือขอนุมัติ | ระบบจัดการเอกสาร");
+    const {
+        formData,
+        setFormData,
+        handleChange,
+        isSubmitting,
+        message,
+        isError,
+        isSuccessModalOpen,
+        setIsSuccessModalOpen,
+        generatedFileUrl,
+        isClient,
+        setMessage,
+        setIsError,
+    } = useDocumentForm<ApprovalData>({
+        initialData: initialApprovalData,
+        apiEndpoint: "/api/fill-approval-template",
+        documentType: "Word",
+    });
 
     // Attachment handlers
     const addAttachment = () => {
@@ -110,17 +93,7 @@ export default function CreateWordDocPage() {
         }));
     };
 
-    // Form handlers
-    const handleChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
+    // Signature handlers
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         setSignatureFile(file);
@@ -158,26 +131,20 @@ export default function CreateWordDocPage() {
 
         for (const file of files) {
             try {
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("projectId", selectedProjectId);
+                const uploadFormData = new FormData();
+                uploadFormData.append("file", file);
+                uploadFormData.append("projectId", selectedProjectId);
 
                 if (session?.user?.id) {
-                    formData.append("userId", session.user.id.toString());
+                    uploadFormData.append("userId", session.user.id.toString());
                 }
                 if (session?.user?.email) {
-                    formData.append("userEmail", session.user.email);
-                }
-                if ((session as { accessToken?: string })?.accessToken) {
-                    formData.append(
-                        "token",
-                        (session as { accessToken?: string }).accessToken!
-                    );
+                    uploadFormData.append("userEmail", session.user.email);
                 }
 
                 const response = await fetch("/api/file-upload", {
                     method: "POST",
-                    body: formData,
+                    body: uploadFormData,
                 });
 
                 if (response.ok) {
@@ -186,7 +153,7 @@ export default function CreateWordDocPage() {
                         uploadedIds.push(result.file.id);
                     }
                 }
-            } catch (_error) {
+            } catch {
                 // Silent fail for individual files
             }
         }
@@ -194,7 +161,7 @@ export default function CreateWordDocPage() {
         return uploadedIds;
     };
 
-    // Submit handler
+    // Custom submit handler for approval (more complex due to signature)
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -220,114 +187,100 @@ export default function CreateWordDocPage() {
             return;
         }
 
-        setIsSubmitting(true);
-        setMessage(null);
-        setGeneratedFileUrl(null);
-        setIsError(false);
+        const data = new FormData();
+
+        Object.keys(formData).forEach((key) => {
+            if (key === "attachments") {
+                data.append(
+                    "attachments",
+                    JSON.stringify(formData.attachments)
+                );
+            } else {
+                data.append(key, formData[key as keyof ApprovalData] as string);
+            }
+        });
+
+        Object.keys(approvalFixedValues).forEach((key) => {
+            data.append(
+                key,
+                approvalFixedValues[key as keyof typeof approvalFixedValues]
+            );
+        });
+
+        if (signatureFile) {
+            data.append("signatureFile", signatureFile);
+        }
+
+        if (signatureCanvasData) {
+            try {
+                if (!signatureCanvasData.startsWith("data:image/")) {
+                    throw new Error("Invalid signature data format");
+                }
+
+                const parts = signatureCanvasData.split(",");
+                if (parts.length !== 2) {
+                    throw new Error("Invalid base64 data structure");
+                }
+
+                const byteString = atob(parts[1]);
+                const mimeString = signatureCanvasData
+                    .split(",")[0]
+                    .split(":")[1]
+                    .split(";")[0];
+
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+
+                const canvasSignatureFile = new File(
+                    [ab],
+                    "canvas-signature.png",
+                    {
+                        type: mimeString,
+                    }
+                );
+
+                if (canvasSignatureFile.size === 0) {
+                    throw new Error("Generated signature file is empty");
+                }
+
+                data.append("canvasSignatureFile", canvasSignatureFile);
+            } catch (error: unknown) {
+                const errorMessage =
+                    error instanceof Error ? error.message : "Unknown error";
+                setMessage(
+                    `เกิดข้อผิดพลาดในการประมวลผลลายเซ็น: ${errorMessage}`
+                );
+                setIsError(true);
+                return;
+            }
+        }
+
+        if (attachmentFiles.length > 0) {
+            const uploadedAttachments = await uploadAttachmentFiles(
+                attachmentFiles
+            );
+            data.append(
+                "attachmentFileIds",
+                JSON.stringify(uploadedAttachments)
+            );
+        }
+
+        if (session.user?.id) {
+            data.append("userId", session.user.id.toString());
+        }
+        if (session.user?.email) {
+            data.append("userEmail", session.user.email);
+        }
+
+        const selectedProjectId = localStorage.getItem("selectedProjectId");
+        if (selectedProjectId) {
+            data.append("projectId", selectedProjectId);
+        }
 
         try {
-            const data = new FormData();
-
-            Object.keys(formData).forEach((key) => {
-                if (key === "attachments") {
-                    data.append(
-                        "attachments",
-                        JSON.stringify(formData.attachments)
-                    );
-                } else {
-                    data.append(
-                        key,
-                        formData[key as keyof WordDocumentData] as string
-                    );
-                }
-            });
-
-            Object.keys(fixedValues).forEach((key) => {
-                data.append(key, fixedValues[key as keyof typeof fixedValues]);
-            });
-
-            if (signatureFile) {
-                data.append("signatureFile", signatureFile);
-            }
-
-            if (signatureCanvasData) {
-                try {
-                    if (!signatureCanvasData.startsWith("data:image/")) {
-                        throw new Error("Invalid signature data format");
-                    }
-
-                    const parts = signatureCanvasData.split(",");
-                    if (parts.length !== 2) {
-                        throw new Error("Invalid base64 data structure");
-                    }
-
-                    const byteString = atob(parts[1]);
-                    const mimeString = signatureCanvasData
-                        .split(",")[0]
-                        .split(":")[1]
-                        .split(";")[0];
-
-                    const ab = new ArrayBuffer(byteString.length);
-                    const ia = new Uint8Array(ab);
-                    for (let i = 0; i < byteString.length; i++) {
-                        ia[i] = byteString.charCodeAt(i);
-                    }
-
-                    const canvasSignatureFile = new File(
-                        [ab],
-                        "canvas-signature.png",
-                        {
-                            type: mimeString,
-                        }
-                    );
-
-                    if (canvasSignatureFile.size === 0) {
-                        throw new Error("Generated signature file is empty");
-                    }
-
-                    data.append("canvasSignatureFile", canvasSignatureFile);
-                } catch (error: unknown) {
-                    const errorMessage =
-                        error instanceof Error
-                            ? error.message
-                            : "Unknown error";
-                    setMessage(
-                        `เกิดข้อผิดพลาดในการประมวลผลลายเซ็น: ${errorMessage}`
-                    );
-                    setIsError(true);
-                    setIsSubmitting(false);
-                    return;
-                }
-            }
-
-            if (attachmentFiles.length > 0) {
-                const uploadedAttachments = await uploadAttachmentFiles(
-                    attachmentFiles
-                );
-                data.append(
-                    "attachmentFileIds",
-                    JSON.stringify(uploadedAttachments)
-                );
-            }
-
-            if (session.user?.id) {
-                data.append("userId", session.user.id.toString());
-            }
-            if (session.user?.email) {
-                data.append("userEmail", session.user.email);
-            }
-            if ((session as { accessToken?: string })?.accessToken) {
-                data.append(
-                    "token",
-                    (session as { accessToken?: string }).accessToken!
-                );
-            }
-
-            const selectedProjectId = localStorage.getItem("selectedProjectId");
-            if (selectedProjectId) {
-                data.append("projectId", selectedProjectId);
-            }
-
             const response = await fetch("/api/fill-approval-template", {
                 method: "POST",
                 body: data,
@@ -336,13 +289,6 @@ export default function CreateWordDocPage() {
             if (response.ok) {
                 const result = await response.json();
                 if (result.success && result.downloadUrl) {
-                    setGeneratedFileUrl(result.downloadUrl);
-                    setMessage(
-                        `สร้างเอกสาร Word สำเร็จแล้ว! โครงการ: ${
-                            result.project?.name || "ไม่ระบุ"
-                        }`
-                    );
-                    setIsError(false);
                     setIsSuccessModalOpen(true);
                 } else {
                     setMessage("ไม่สามารถสร้างเอกสาร Word ได้");
@@ -357,11 +303,9 @@ export default function CreateWordDocPage() {
                 );
                 setIsError(true);
             }
-        } catch (_error) {
+        } catch {
             setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ");
             setIsError(true);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -373,6 +317,10 @@ export default function CreateWordDocPage() {
         attachmentFiles.length > 0 ||
         !!signatureFile ||
         !!signatureCanvasData;
+
+    if (!isClient) {
+        return <LoadingState />;
+    }
 
     return (
         <PageLayout
@@ -565,42 +513,18 @@ export default function CreateWordDocPage() {
                 />
 
                 <FormActions
-                    onPreview={() => setIsPreviewOpen(true)}
+                    onPreview={openPreview}
                     isSubmitting={isSubmitting}
                 />
             </form>
 
-            {/* Error Message */}
-            {message && isError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-6">
-                    <div className="flex items-center">
-                        <svg
-                            className="w-5 h-5 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        <span>{message}</span>
-                    </div>
-                </div>
-            )}
+            <ErrorAlert message={message} isError={isError} />
 
             {/* Preview Modal */}
             <PreviewModal
                 isOpen={isPreviewOpen}
-                onClose={() => setIsPreviewOpen(false)}
-                onConfirm={() => {
-                    setIsPreviewOpen(false);
-                    const form = document.querySelector("form");
-                    if (form) form.requestSubmit();
-                }}
+                onClose={closePreview}
+                onConfirm={confirmPreview}
             >
                 <PreviewGrid>
                     <PreviewField

@@ -1,189 +1,71 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
 import { PreviewModal } from "@/components/document-form/PreviewModal";
 import { FormField } from "@/components/document-form/FormField";
+import { ErrorAlert } from "@/components/document-form/ErrorAlert";
+import { LoadingState } from "@/components/document-form/LoadingState";
+import { useDocumentForm } from "@/components/document-form/useDocumentForm";
+import { usePreviewModal } from "@/components/document-form/usePreviewModal";
 import {
     PreviewField,
     PreviewGrid,
 } from "@/components/document-form/PreviewField";
 import { ClipboardList, User } from "lucide-react";
-
-interface WordDocumentData {
-    fileName: string;
-    projectName: string;
-    contractnumber: string;
-    projectOffer: string;
-    projectCo: string;
-    owner: string;
-    acceptNum: string;
-    projectCode: string;
-    cost: string;
-    timelineMonth: string;
-    timelineText: string;
-    section: string;
-    date: string;
-    name: string;
-    address: string;
-    citizenid: string;
-    citizenexpire: string;
-    witness: string;
-}
+import { type ContractData, initialContractData } from "@/config/initialData";
 
 export default function CreateContractPage() {
-    const { data: session } = useSession();
-    const [isClient, setIsClient] = useState(false);
-    const [contractCode, setContractCode] = useState<string>("");
-
-    useEffect(() => {
-        setIsClient(true);
+    // Use lazy initialization to get contractCode from localStorage
+    const [contractCode] = useState<string>(() => {
+        if (typeof window === "undefined") return "";
         const selectedTemplate = localStorage.getItem("selectedTorsTemplate");
         if (selectedTemplate) {
             try {
                 const templateData = JSON.parse(selectedTemplate);
-                if (templateData.contractCode) {
-                    setContractCode(templateData.contractCode);
-                }
+                return templateData.contractCode || "";
             } catch {
-                // Ignore parsing errors
+                return "";
             }
         }
-    }, []);
-
-    const [formData, setFormData] = useState<WordDocumentData>({
-        fileName: "",
-        projectName: "",
-        contractnumber: "",
-        projectOffer: "",
-        projectCo: "",
-        owner: "",
-        acceptNum: "",
-        projectCode: "",
-        cost: "",
-        timelineMonth: "",
-        timelineText: "",
-        section: "",
-        name: "",
-        address: "",
-        citizenid: "",
-        citizenexpire: "",
-        date: "",
-        witness: "",
+        return "";
     });
-
-    const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
-        null
-    );
-    const [message, setMessage] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isError, setIsError] = useState(false);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
     useTitle("สร้างหนังสือสัญญาเพื่อรับรองการลงนาม | ระบบจัดการเอกสาร");
 
-    const handleChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+    const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
+        usePreviewModal();
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        if (!session) {
-            setMessage("คุณต้องเข้าสู่ระบบก่อน");
-            setIsError(true);
-            return;
-        }
-
-        setIsSubmitting(true);
-        setMessage(null);
-        setGeneratedFileUrl(null);
-        setIsError(false);
-
-        try {
-            const data = new FormData();
-
-            Object.keys(formData).forEach((key) => {
-                if (key !== "contractnumber") {
-                    data.append(key, formData[key as keyof WordDocumentData]);
-                }
-            });
-
+    const {
+        formData,
+        handleChange,
+        handleSubmit,
+        isSubmitting,
+        message,
+        isError,
+        isSuccessModalOpen,
+        setIsSuccessModalOpen,
+        generatedFileUrl,
+        isDirty,
+        isClient,
+    } = useDocumentForm<ContractData>({
+        initialData: initialContractData,
+        apiEndpoint: "/api/fill-contract-template",
+        documentType: "Word",
+        prepareFormData: (_data, formDataObj) => {
+            // Override contractnumber with contractCode if available
             if (contractCode) {
-                data.append("contractnumber", contractCode);
+                formDataObj.set("contractnumber", contractCode);
             }
-
-            if (session.user?.id) {
-                data.append("userId", session.user.id.toString());
-            }
-            if (session.user?.email) {
-                data.append("userEmail", session.user.email);
-            }
-
-            const selectedProjectId = localStorage.getItem("selectedProjectId");
-            if (selectedProjectId) {
-                data.append("projectId", selectedProjectId);
-            }
-
-            if ((session as { accessToken?: string })?.accessToken) {
-                data.append(
-                    "token",
-                    (session as { accessToken?: string }).accessToken!
-                );
-            }
-
-            const response = await fetch("/api/fill-contract-template", {
-                method: "POST",
-                body: data,
-            });
-
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                setGeneratedFileUrl(url);
-                setMessage("สร้างเอกสาร Word สำเร็จแล้ว!");
-                setIsError(false);
-                setIsSuccessModalOpen(true);
-            } else {
-                const errorText = await response.text();
-                setMessage(
-                    `เกิดข้อผิดพลาด: ${
-                        errorText || "ไม่สามารถสร้างเอกสาร Word ได้"
-                    }`
-                );
-                setIsError(true);
-            }
-        } catch (error) {
-            console.error("Error submitting form:", error);
-            setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            setIsError(true);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const isDirty = Object.values(formData).some((value) => value !== "");
+        },
+    });
 
     if (!isClient) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <p className="text-gray-500">กำลังโหลด...</p>
-                </div>
-            </div>
-        );
+        return <LoadingState />;
     }
 
     return (
@@ -373,42 +255,18 @@ export default function CreateContractPage() {
                 </FormSection>
 
                 <FormActions
-                    onPreview={() => setIsPreviewOpen(true)}
+                    onPreview={openPreview}
                     isSubmitting={isSubmitting}
                 />
             </form>
 
-            {/* Error Message */}
-            {message && isError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-6">
-                    <div className="flex items-center">
-                        <svg
-                            className="w-5 h-5 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        <span>{message}</span>
-                    </div>
-                </div>
-            )}
+            <ErrorAlert message={message} isError={isError} />
 
             {/* Preview Modal */}
             <PreviewModal
                 isOpen={isPreviewOpen}
-                onClose={() => setIsPreviewOpen(false)}
-                onConfirm={() => {
-                    setIsPreviewOpen(false);
-                    const form = document.querySelector("form");
-                    if (form) form.requestSubmit();
-                }}
+                onClose={closePreview}
+                onConfirm={confirmPreview}
             >
                 <PreviewGrid>
                     <PreviewField label="ชื่อไฟล์" value={formData.fileName} />

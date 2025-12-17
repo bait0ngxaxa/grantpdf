@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, FormEvent, ChangeEvent, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
-import { useTitle } from "@/hook/useTitle";
+import { useTitle } from "@/hooks/useTitle";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
 import { PreviewModal } from "@/components/document-form/PreviewModal";
 import { FormField } from "@/components/document-form/FormField";
+import { ErrorAlert } from "@/components/document-form/ErrorAlert";
+import { LoadingState } from "@/components/document-form/LoadingState";
+import { useDocumentForm } from "@/components/document-form/useDocumentForm";
+import { usePreviewModal } from "@/components/document-form/usePreviewModal";
 import {
     PreviewField,
     PreviewGrid,
@@ -23,96 +26,46 @@ import {
     Plus,
     Trash2,
 } from "lucide-react";
-
-interface TORData {
-    projectName: string;
-    fileName: string;
-    owner: string;
-    address: string;
-    email: string;
-    tel: string;
-    timeline: string;
-    contractnumber: string;
-    cost: string;
-    topic1: string;
-    objective1: string;
-    objective2: string;
-    objective3: string;
-    target: string;
-    zone: string;
-    plan: string;
-    projectmanage: string;
-    partner: string;
-    date: string;
-}
-
-interface ActivityData {
-    activity: string;
-    manager: string;
-    evaluation2: string;
-    duration: string;
-}
+import {
+    type TORData,
+    type ActivityData,
+    initialTORData,
+    initialActivity,
+} from "@/config/initialData";
 
 export default function CreateTORPage() {
-    const { data: session } = useSession();
-    const [isClient, setIsClient] = useState(false);
-
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
-
-    const [formData, setFormData] = useState<TORData>({
-        projectName: "",
-        fileName: "",
-        date: "",
-        owner: "",
-        address: "",
-        email: "",
-        tel: "",
-        timeline: "",
-        contractnumber: "",
-        cost: "",
-        topic1: "",
-        objective1: "",
-        objective2: "",
-        objective3: "",
-        target: "",
-        zone: "",
-        plan: "",
-        projectmanage: "",
-        partner: "",
-    });
-
-    const [activities, setActivities] = useState<ActivityData[]>([
-        { activity: "", manager: "", evaluation2: "", duration: "" },
-    ]);
-
-    const [generatedFileUrl, setGeneratedFileUrl] = useState<string | null>(
-        null
-    );
-    const [message, setMessage] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isError, setIsError] = useState(false);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-
     useTitle("สร้างเอกสาร TOR | ระบบจัดการเอกสาร");
 
-    const handleChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+    const [activities, setActivities] = useState<ActivityData[]>([
+        { ...initialActivity },
+    ]);
 
+    const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
+        usePreviewModal();
+
+    const {
+        formData,
+        handleChange,
+        handleSubmit,
+        isSubmitting,
+        message,
+        isError,
+        isSuccessModalOpen,
+        setIsSuccessModalOpen,
+        generatedFileUrl,
+        isClient,
+    } = useDocumentForm<TORData>({
+        initialData: initialTORData,
+        apiEndpoint: "/api/fill-tor-template",
+        documentType: "TOR",
+        prepareFormData: (_data, formDataObj) => {
+            formDataObj.append("activities", JSON.stringify(activities));
+        },
+    });
+
+    // Activity handlers
     const addActivityRow = () => {
-        setActivities([
-            ...activities,
-            { activity: "", manager: "", evaluation2: "", duration: "" },
-        ]);
+        setActivities([...activities, { ...initialActivity }]);
     };
 
     const removeActivityRow = (index: number) => {
@@ -132,85 +85,7 @@ export default function CreateTORPage() {
         setActivities(updatedActivities);
     };
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        if (!session) {
-            setMessage("คุณต้องเข้าสู่ระบบก่อน");
-            setIsError(true);
-            return;
-        }
-
-        setIsSubmitting(true);
-        setMessage(null);
-        setGeneratedFileUrl(null);
-        setIsError(false);
-
-        try {
-            const data = new FormData();
-            Object.keys(formData).forEach((key) => {
-                data.append(key, formData[key as keyof TORData]);
-            });
-
-            data.append("activities", JSON.stringify(activities));
-
-            if (session.user?.id) {
-                data.append("userId", session.user.id.toString());
-            }
-            if (session.user?.email) {
-                data.append("userEmail", session.user.email);
-            }
-
-            const selectedProjectId = localStorage.getItem("selectedProjectId");
-            if (selectedProjectId) {
-                data.append("projectId", selectedProjectId);
-            }
-
-            if ((session as { accessToken?: string })?.accessToken) {
-                data.append(
-                    "token",
-                    (session as { accessToken?: string }).accessToken!
-                );
-            }
-
-            const response = await fetch("/api/fill-tor-template", {
-                method: "POST",
-                body: data,
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                if (result.success && result.downloadUrl) {
-                    setGeneratedFileUrl(result.downloadUrl);
-                    setMessage(
-                        `สร้างเอกสาร TOR สำเร็จแล้ว! โครงการ: ${
-                            result.project?.name || "ไม่ระบุ"
-                        }`
-                    );
-                    setIsError(false);
-                    setIsSuccessModalOpen(true);
-                } else {
-                    setMessage("ไม่สามารถสร้างเอกสาร TOR ได้");
-                    setIsError(true);
-                }
-            } else {
-                const errorText = await response.text();
-                setMessage(
-                    `เกิดข้อผิดพลาด: ${
-                        errorText || "ไม่สามารถสร้างเอกสาร TOR ได้"
-                    }`
-                );
-                setIsError(true);
-            }
-        } catch (error) {
-            console.error("Error submitting form:", error);
-            setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            setIsError(true);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
+    // Custom isDirty check including activities
     const isDirty =
         Object.values(formData).some((value) => value !== "") ||
         activities.some(
@@ -222,13 +97,7 @@ export default function CreateTORPage() {
         );
 
     if (!isClient) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <p className="text-gray-500">กำลังโหลด...</p>
-                </div>
-            </div>
-        );
+        return <LoadingState />;
     }
 
     return (
@@ -545,42 +414,18 @@ export default function CreateTORPage() {
                 </FormSection>
 
                 <FormActions
-                    onPreview={() => setIsPreviewOpen(true)}
+                    onPreview={openPreview}
                     isSubmitting={isSubmitting}
                 />
             </form>
 
-            {/* Error Message */}
-            {message && isError && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mt-6">
-                    <div className="flex items-center">
-                        <svg
-                            className="w-5 h-5 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        <span>{message}</span>
-                    </div>
-                </div>
-            )}
+            <ErrorAlert message={message} isError={isError} />
 
             {/* Preview Modal */}
             <PreviewModal
                 isOpen={isPreviewOpen}
-                onClose={() => setIsPreviewOpen(false)}
-                onConfirm={() => {
-                    setIsPreviewOpen(false);
-                    const form = document.querySelector("form");
-                    if (form) form.requestSubmit();
-                }}
+                onClose={closePreview}
+                onConfirm={confirmPreview}
             >
                 <PreviewGrid>
                     <PreviewField
