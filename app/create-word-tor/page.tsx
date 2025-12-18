@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
+import { usePreventNavigation } from "@/hooks/usePreventNavigation";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
@@ -85,7 +86,6 @@ export default function CreateTORPage() {
         setActivities(updatedActivities);
     };
 
-    // Custom isDirty check including activities
     const isDirty =
         Object.values(formData).some((value) => value !== "") ||
         activities.some(
@@ -96,6 +96,17 @@ export default function CreateTORPage() {
                 row.duration !== ""
         );
 
+    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+    const { allowNavigation } = usePreventNavigation({
+        isDirty,
+        onNavigationAttempt: () => setIsExitModalOpen(true),
+    });
+
+    const handleConfirmExit = () => {
+        allowNavigation();
+        window.history.back();
+    };
+
     if (!isClient) {
         return <LoadingState />;
     }
@@ -105,6 +116,9 @@ export default function CreateTORPage() {
             title="สร้างเอกสาร Terms of Reference (TOR)"
             subtitle="กรุณากรอกข้อมูลโครงการและกิจกรรมให้ครบถ้วน"
             isDirty={isDirty}
+            isExitModalOpen={isExitModalOpen}
+            setIsExitModalOpen={setIsExitModalOpen}
+            onConfirmExit={handleConfirmExit}
         >
             <form onSubmit={handleSubmit} className="space-y-8">
                 {/* ข้อมูลพื้นฐาน */}

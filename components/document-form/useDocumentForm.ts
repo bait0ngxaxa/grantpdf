@@ -10,15 +10,14 @@ import {
 import { useSession } from "next-auth/react";
 
 interface UseDocumentFormOptions<T> {
-    /** Initial form data */
     initialData: T;
-    /** API endpoint for form submission */
+
     apiEndpoint: string;
-    /** Document type name (e.g., "TOR", "Word") */
+
     documentType: string;
-    /** Function to prepare form data before submission (optional) */
+
     prepareFormData?: (data: T, formData: FormData) => void;
-    /** Function to handle successful response (optional) */
+
     onSuccess?: (result: unknown) => void;
 }
 
@@ -117,7 +116,6 @@ export function useDocumentForm<T extends object>({
             try {
                 const data = new FormData();
 
-                // Add all form fields to FormData
                 Object.entries(formData).forEach(([key, value]) => {
                     if (Array.isArray(value)) {
                         data.append(key, JSON.stringify(value));
@@ -126,7 +124,6 @@ export function useDocumentForm<T extends object>({
                     }
                 });
 
-                // Add user info
                 if (session.user?.id) {
                     data.append("userId", session.user.id.toString());
                 }
@@ -134,7 +131,6 @@ export function useDocumentForm<T extends object>({
                     data.append("userEmail", session.user.email);
                 }
 
-                // Add project ID from localStorage
                 const selectedProjectId =
                     localStorage.getItem("selectedProjectId");
                 if (selectedProjectId) {
@@ -149,7 +145,6 @@ export function useDocumentForm<T extends object>({
                     );
                 }
 
-                // Allow custom form data preparation
                 if (prepareFormData) {
                     prepareFormData(formData, data);
                 }

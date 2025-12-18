@@ -15,7 +15,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     totalDocuments,
     setActiveTab,
 }) => {
-    // Calculate project status counts
     const projectStatusCounts = useMemo(() => {
         const counts = {
             pending: 0,

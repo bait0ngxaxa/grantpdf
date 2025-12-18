@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
+import { usePreventNavigation } from "@/hooks/usePreventNavigation";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
@@ -318,6 +319,17 @@ export default function CreateWordDocPage() {
         !!signatureFile ||
         !!signatureCanvasData;
 
+    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+    const { allowNavigation } = usePreventNavigation({
+        isDirty,
+        onNavigationAttempt: () => setIsExitModalOpen(true),
+    });
+
+    const handleConfirmExit = () => {
+        allowNavigation();
+        window.history.back();
+    };
+
     if (!isClient) {
         return <LoadingState />;
     }
@@ -327,6 +339,9 @@ export default function CreateWordDocPage() {
             title="สร้างหนังสือขออนุมัติของมูลนิธิ"
             subtitle="กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารขออนุมัติ"
             isDirty={isDirty}
+            isExitModalOpen={isExitModalOpen}
+            setIsExitModalOpen={setIsExitModalOpen}
+            onConfirmExit={handleConfirmExit}
         >
             <form onSubmit={handleSubmit} className="space-y-8">
                 {/* ข้อมูลพื้นฐาน */}

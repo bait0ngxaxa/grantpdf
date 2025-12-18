@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChartBarBig, UserStar, LogOut } from "lucide-react"; // Updated import
+import { ChartBarBig, UserStar, LogOut } from "lucide-react";
 
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { Session } from "next-auth";
