@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
+import { usePreventNavigation } from "@/hooks/usePreventNavigation";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
@@ -64,6 +65,17 @@ export default function CreateContractPage() {
         },
     });
 
+    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+    const { allowNavigation } = usePreventNavigation({
+        isDirty,
+        onNavigationAttempt: () => setIsExitModalOpen(true),
+    });
+
+    const handleConfirmExit = () => {
+        allowNavigation();
+        window.history.back();
+    };
+
     if (!isClient) {
         return <LoadingState />;
     }
@@ -77,6 +89,9 @@ export default function CreateContractPage() {
                     : "กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารสัญญา"
             }
             isDirty={isDirty}
+            isExitModalOpen={isExitModalOpen}
+            setIsExitModalOpen={setIsExitModalOpen}
+            onConfirmExit={handleConfirmExit}
         >
             <form onSubmit={handleSubmit} className="space-y-8">
                 {/* ข้อมูลโครงการ */}

@@ -23,6 +23,9 @@ interface PageLayoutProps {
     headerGradientTo?: string;
     headerTextColor?: string;
     isDirty?: boolean;
+    isExitModalOpen?: boolean;
+    setIsExitModalOpen?: (open: boolean) => void;
+    onConfirmExit?: () => void;
 }
 
 export function PageLayout({
@@ -36,9 +39,18 @@ export function PageLayout({
     headerGradientTo = "to-purple-600",
     headerTextColor = "text-blue-100",
     isDirty = false,
+    isExitModalOpen: externalIsExitModalOpen,
+    setIsExitModalOpen: externalSetIsExitModalOpen,
+    onConfirmExit,
 }: PageLayoutProps) {
     const router = useRouter();
-    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
+    const [internalIsExitModalOpen, setInternalIsExitModalOpen] =
+        useState(false);
+
+    // Use external state if provided, otherwise use internal
+    const isExitModalOpen = externalIsExitModalOpen ?? internalIsExitModalOpen;
+    const setIsExitModalOpen =
+        externalSetIsExitModalOpen ?? setInternalIsExitModalOpen;
 
     const handleBack = () => {
         if (isDirty) {
@@ -50,7 +62,11 @@ export function PageLayout({
 
     const confirmExit = () => {
         setIsExitModalOpen(false);
-        router.push(backPath);
+        if (onConfirmExit) {
+            onConfirmExit();
+        } else {
+            router.push(backPath);
+        }
     };
 
     return (
