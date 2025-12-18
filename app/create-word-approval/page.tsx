@@ -2,6 +2,7 @@
 
 import { useState, ChangeEvent, useRef, FormEvent } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
@@ -319,6 +320,7 @@ export default function CreateWordDocPage() {
         !!signatureFile ||
         !!signatureCanvasData;
 
+    const router = useRouter();
     const [isExitModalOpen, setIsExitModalOpen] = useState(false);
     const { allowNavigation } = usePreventNavigation({
         isDirty,
@@ -327,7 +329,10 @@ export default function CreateWordDocPage() {
 
     const handleConfirmExit = () => {
         allowNavigation();
-        window.history.back();
+        setIsExitModalOpen(false);
+        setTimeout(() => {
+            router.push("/createdocs");
+        }, 100);
     };
 
     if (!isClient) {

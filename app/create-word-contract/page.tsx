@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
 import { usePreventNavigation } from "@/hooks/usePreventNavigation";
@@ -65,6 +66,7 @@ export default function CreateContractPage() {
         },
     });
 
+    const router = useRouter();
     const [isExitModalOpen, setIsExitModalOpen] = useState(false);
     const { allowNavigation } = usePreventNavigation({
         isDirty,
@@ -73,7 +75,10 @@ export default function CreateContractPage() {
 
     const handleConfirmExit = () => {
         allowNavigation();
-        window.history.back();
+        setIsExitModalOpen(false);
+        setTimeout(() => {
+            router.push("/createdocs");
+        }, 100);
     };
 
     if (!isClient) {

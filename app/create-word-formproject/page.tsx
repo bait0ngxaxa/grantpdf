@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
@@ -48,6 +49,7 @@ export default function CreateFormProjectPage() {
         documentType: "Word",
     });
 
+    const router = useRouter();
     const [isExitModalOpen, setIsExitModalOpen] = useState(false);
     const { allowNavigation } = usePreventNavigation({
         isDirty,
@@ -56,7 +58,10 @@ export default function CreateFormProjectPage() {
 
     const handleConfirmExit = () => {
         allowNavigation();
-        window.history.back();
+        setIsExitModalOpen(false);
+        setTimeout(() => {
+            router.push("/createdocs");
+        }, 100);
     };
 
     if (!isClient) {
