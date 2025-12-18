@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
@@ -96,6 +97,7 @@ export default function CreateTORPage() {
                 row.duration !== ""
         );
 
+    const router = useRouter();
     const [isExitModalOpen, setIsExitModalOpen] = useState(false);
     const { allowNavigation } = usePreventNavigation({
         isDirty,
@@ -104,7 +106,10 @@ export default function CreateTORPage() {
 
     const handleConfirmExit = () => {
         allowNavigation();
-        window.history.back();
+        setIsExitModalOpen(false);
+        setTimeout(() => {
+            router.push("/createdocs");
+        }, 100);
     };
 
     if (!isClient) {
