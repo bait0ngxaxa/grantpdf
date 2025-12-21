@@ -334,6 +334,7 @@ export default function CreateWordSummaryPage() {
                 fileName={formData.fileName}
                 downloadUrl={generatedFileUrl}
                 documentType="เอกสาร Excel"
+                onRedirect={allowNavigation}
             />
         </PageLayout>
     );

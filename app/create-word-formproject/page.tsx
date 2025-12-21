@@ -341,6 +341,7 @@ export default function CreateFormProjectPage() {
                 fileName={formData.fileName}
                 downloadUrl={generatedFileUrl}
                 documentType="เอกสาร Word"
+                onRedirect={allowNavigation}
             />
         </PageLayout>
     );

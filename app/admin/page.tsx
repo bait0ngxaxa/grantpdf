@@ -270,7 +270,7 @@ export default function AdminDashboardPage() {
 
     return (
         <>
-            <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
                 <AdminSidebar
                     isSidebarOpen={isSidebarOpen}
                     setIsSidebarOpen={setIsSidebarOpen}
@@ -284,7 +284,7 @@ export default function AdminDashboardPage() {
                 />
 
                 {/* Main Content */}
-                <div className="lg:ml-64 min-h-screen">
+                <div className="lg:ml-72 min-h-screen">
                     <AdminTopBar
                         setIsSidebarOpen={setIsSidebarOpen}
                         activeTab={activeTab}

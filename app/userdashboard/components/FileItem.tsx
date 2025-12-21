@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import type { AttachmentFile } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
 
@@ -148,12 +147,12 @@ export default function FileItem({
                         href={`/api/user-docs/download/${file.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn btn-sm bg-primary hover:bg-blue-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="ดาวน์โหลด"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
+                            className="h-5 w-5"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -167,19 +166,19 @@ export default function FileItem({
                         </svg>
                     </a>
                     {file.fileExtension === "pdf" && (
-                        <Button
+                        <button
                             onClick={() =>
                                 onPreviewFile(
                                     file.storagePath,
                                     file.originalFileName
                                 )
                             }
-                            className="btn btn-sm bg-green-500 hover:bg-green-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                            className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                             title="พรีวิว PDF"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
+                                className="h-5 w-5"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -197,17 +196,16 @@ export default function FileItem({
                                     d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                                 />
                             </svg>
-                        </Button>
+                        </button>
                     )}
-                    <Button
+                    <button
                         onClick={() => onDeleteFile(file.id)}
-                        className="btn btn-sm cursor-pointer text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
-                        variant="destructive"
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                         title="ลบไฟล์"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
+                            className="h-5 w-5"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -219,7 +217,7 @@ export default function FileItem({
                                 d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                             />
                         </svg>
-                    </Button>
+                    </button>
                 </div>
             </div>
 

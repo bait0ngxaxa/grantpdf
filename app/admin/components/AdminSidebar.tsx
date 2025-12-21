@@ -80,21 +80,21 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             {/* Mobile sidebar overlay */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
                     onClick={() => setIsSidebarOpen(false)}
                 ></div>
             )}
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 z-50 ${
+                className={`fixed left-0 top-0 h-full w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 shadow-2xl lg:shadow-none transform transition-all duration-300 ease-in-out z-50 ${
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 } lg:translate-x-0`}
             >
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
+                <div className="p-6">
+                    <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-focus rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     className="h-6 w-6 text-white"
@@ -111,21 +111,21 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-primary">
+                                <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                                     Admin Panel
                                 </h2>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    ระบบจัดการสำหรับผู้ดูแลระบบ
+                                <p className="text-xs text-slate-400 font-medium">
+                                    ส่วนของผู้ดูแลระบบ
                                 </p>
                             </div>
                         </div>
                         <button
-                            className="lg:hidden btn btn-ghost btn-sm"
+                            className="lg:hidden p-2 hover:bg-slate-100 rounded-full transition-colors"
                             onClick={() => setIsSidebarOpen(false)}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
+                                className="h-5 w-5 text-slate-500"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -139,94 +139,111 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                             </svg>
                         </button>
                     </div>
-                </div>
 
-                {/* Navigation Menu */}
-                <nav className="p-4 flex-1">
-                    <ul className="space-y-2">
+                    {/* Navigation Menu */}
+                    <nav className="space-y-1">
                         {menuItems.map((item) => (
-                            <li key={item.id}>
-                                <button
-                                    onClick={() => {
-                                        setActiveTab(item.id);
-                                        setIsSidebarOpen(false);
-                                    }}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors duration-200 text-left ${
+                            <button
+                                key={item.id}
+                                onClick={() => {
+                                    setActiveTab(item.id);
+                                    setIsSidebarOpen(false);
+                                }}
+                                className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 group text-sm font-medium ${
+                                    activeTab === item.id
+                                        ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
+                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                }`}
+                            >
+                                <span
+                                    className={`${
                                         activeTab === item.id
-                                            ? "bg-primary text-white shadow-md"
-                                            : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                                    }`}
+                                            ? "text-white"
+                                            : "text-slate-400 group-hover:text-blue-500"
+                                    } transition-colors duration-200`}
                                 >
-                                    <div className="flex items-center space-x-3">
-                                        {item.icon}
-                                        <span className="font-medium">
-                                            {item.name}
-                                        </span>
-                                    </div>
-                                </button>
-                            </li>
+                                    {item.icon}
+                                </span>
+                                <span>{item.name}</span>
+                            </button>
                         ))}
-                    </ul>
+                    </nav>
 
                     {/* Quick Stats Section */}
-                    <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    <div className="mt-8 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
                             สถิติวันนี้
                         </h4>
-                        <div className="space-y-2 text-xs">
+                        <div className="space-y-3 text-sm">
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-600 dark:text-gray-400">
-                                    โครงการใหม่:
+                                <span className="text-slate-600 flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                                    โครงการใหม่
                                 </span>
-                                <span className="font-semibold text-green-600">
+                                <span className="font-bold text-slate-800">
                                     {todayProjects}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-600 dark:text-gray-400">
-                                    ไฟล์ใหม่:
+                                <span className="text-slate-600 flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                                    ไฟล์ใหม่
                                 </span>
-                                <span className="font-semibold text-orange-600">
+                                <span className="font-bold text-slate-800">
                                     {todayFiles}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-600 dark:text-gray-400">
-                                    รวมโครงการ:
+                                <span className="text-slate-600 flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                    รวมโครงการ
                                 </span>
-                                <span className="font-semibold text-blue-600">
+                                <span className="font-bold text-slate-800">
                                     {totalProjects}
                                 </span>
                             </div>
                         </div>
                     </div>
-                </nav>
+                </div>
 
                 {/* User Info */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                            <span className="text-xs font-bold text-white">
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100 bg-white/50 backdrop-blur-sm">
+                    <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
+                            <span className="text-sm font-bold text-slate-600">
                                 {session.user?.name?.charAt(0) ||
                                     session.user?.email?.charAt(0) ||
                                     "A"}
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-m font-medium text-gray-900 dark:text-white truncate">
+                            <p className="text-sm font-bold text-slate-900 truncate">
                                 {session.user?.name || "Admin"}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100">
                                 {session.user?.role}
-                            </p>
+                            </span>
                         </div>
                     </div>
                     <Button
-                        size="sm"
-                        className="w-full text-sm cursor-pointer"
+                        variant="outline"
+                        className="w-full justify-center rounded-xl border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all duration-200"
                         onClick={() => router.push("/userdashboard")}
                     >
-                        กลับ Dashboard ผู้ใช้
+                        <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M11 17l-5-5m0 0l5-5m-5 5h12"
+                            />
+                        </svg>
+                        กลับ User Dashboard
                     </Button>
                 </div>
             </div>

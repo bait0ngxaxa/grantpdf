@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface LoginSuccessModalProps {
     isOpen: boolean;
@@ -24,7 +25,7 @@ export const LoginSuccessModal: React.FC<LoginSuccessModalProps> = ({
         router.push("/userdashboard");
     };
 
-    // Auto-close modal หลังจากเวลาที่กำหนด
+    // Auto-close modal
     useEffect(() => {
         if (isOpen && autoCloseDelay > 0) {
             const timer = setTimeout(() => {
@@ -36,17 +37,15 @@ export const LoginSuccessModal: React.FC<LoginSuccessModalProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, autoCloseDelay]);
 
-    if (!isOpen) return null;
-
     return (
-        <dialog className="modal modal-open">
-            <div className="modal-box bg-white dark:bg-gray-800 max-w-md transform transition-all duration-300 scale-100 animate-in fade-in-0 zoom-in-95">
-                <div className="flex flex-col items-center text-center">
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border-0 shadow-2xl focus:outline-none">
+                <div className="flex flex-col items-center text-center p-4">
                     {/* Success Icon */}
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-green-100 dark:bg-green-900/20 animate-pulse">
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg bg-green-50 text-green-500 ring-4 ring-green-50">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-8 w-8 text-green-600 animate-bounce"
+                            className="h-10 w-10 animate-[bounce_1s_infinite]"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -54,42 +53,36 @@ export const LoginSuccessModal: React.FC<LoginSuccessModalProps> = ({
                             <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                strokeWidth="2"
+                                strokeWidth="2.5"
                                 d="M5 13l4 4L19 7"
                             />
                         </svg>
                     </div>
 
-                    {/* Success Message */}
-                    <h3 className="font-bold text-lg mb-2 text-green-600">
+                    <DialogTitle className="font-bold text-2xl mb-3 text-center text-slate-800">
                         เข้าสู่ระบบสำเร็จ!
-                    </h3>
-                    <p className="text-gray-700 dark:text-gray-300 mb-2">
-                        ยินดีต้อนรับเข้าสู่ระบบ
-                    </p>
-                    {email && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            {email}
-                        </p>
-                    )}
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
-                        กำลังนำทางไปยังหน้าหลักอัตโนมัติ...
-                    </p>
+                    </DialogTitle>
 
-                    {/* Action Button */}
-                    <div className="flex flex-col space-y-2 w-full">
-                        <Button
-                            onClick={handleGoToDashboard}
-                            className="w-full bg-primary hover:bg-primary/90 text-white transform transition-all duration-200 hover:scale-105"
-                        >
-                            ไปยังหน้าหลัก
-                        </Button>
+                    <div className="text-slate-500 mb-8 leading-relaxed space-y-1">
+                        <p>ยินดีต้อนรับเข้าสู่ระบบ</p>
+                        {email && (
+                            <p className="font-medium text-slate-700">
+                                {email}
+                            </p>
+                        )}
+                        <p className="text-xs text-slate-400 mt-4 pt-4">
+                            กำลังนำทางไปยังหน้าหลักอัตโนมัติ...
+                        </p>
                     </div>
+
+                    <Button
+                        onClick={handleGoToDashboard}
+                        className="w-full rounded-xl bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 h-12 text-lg font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
+                    >
+                        ไปยังหน้าหลัก
+                    </Button>
                 </div>
-            </div>
-            <form method="dialog" className="modal-backdrop">
-                <button onClick={onClose}>ปิด</button>
-            </form>
-        </dialog>
+            </DialogContent>
+        </Dialog>
     );
 };

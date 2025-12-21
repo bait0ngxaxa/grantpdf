@@ -95,21 +95,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Mobile sidebar overlay */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
                     onClick={() => setIsSidebarOpen(false)}
                 ></div>
             )}
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 z-50 ${
+                className={`fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200/50 shadow-2xl lg:shadow-none transform transition-transform duration-300 z-50 ${
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 } lg:translate-x-0`}
             >
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="p-6 border-b border-slate-100/50">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     className="h-6 w-6 text-white"
@@ -126,21 +126,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 </svg>
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-primary">
+                                <h2 className="text-lg font-bold text-slate-800 tracking-tight">
                                     Dashboard
                                 </h2>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    ระบบจัดการโครงการและเอกสาร
+                                <p className="text-[10px] uppercase font-semibold text-blue-600 tracking-wider">
+                                    Management System
                                 </p>
                             </div>
                         </div>
                         <button
-                            className="lg:hidden btn btn-ghost btn-sm"
+                            className="lg:hidden btn btn-ghost btn-sm btn-circle text-slate-500"
                             onClick={() => setIsSidebarOpen(false)}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
+                                className="h-5 w-5"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -157,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 {/* Navigation Menu */}
-                <nav className="p-4">
+                <nav className="p-4 mt-2">
                     <ul className="space-y-2">
                         {menuItems.map((item) => (
                             <li key={item.id}>
@@ -170,16 +170,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                         }
                                         setIsSidebarOpen(false);
                                     }}
-                                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 text-left ${
+                                    className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 text-left font-medium group ${
                                         activeTab === item.id
-                                            ? "bg-primary text-white shadow-md"
-                                            : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                                            ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30"
+                                            : "text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm"
                                     }`}
                                 >
-                                    {item.icon}
-                                    <span className="font-medium">
-                                        {item.name}
+                                    <span
+                                        className={`${
+                                            activeTab === item.id
+                                                ? "text-white"
+                                                : "text-slate-400 group-hover:text-blue-500"
+                                        } transition-colors`}
+                                    >
+                                        {item.icon}
                                     </span>
+                                    <span>{item.name}</span>
+                                    {activeTab === item.id && (
+                                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/50 animate-pulse" />
+                                    )}
                                 </button>
                             </li>
                         ))}
@@ -187,20 +196,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </nav>
 
                 {/* User Info */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                            <span className="text-xs font-bold text-white">
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100/50 bg-slate-50/50 backdrop-blur-sm">
+                    <div className="flex items-center space-x-3 mb-3 p-2 rounded-xl bg-white border border-slate-100 shadow-sm">
+                        <div className="w-9 h-9 bg-gradient-to-br from-blue-100 to-slate-100 rounded-lg flex items-center justify-center border border-white shadow-inner">
+                            <span className="text-sm font-bold text-blue-600">
                                 {session?.user?.name?.charAt(0) ||
                                     session?.user?.email?.charAt(0) ||
                                     "U"}
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-m font-medium text-gray-900 dark:text-white truncate">
+                            <p className="text-sm font-bold text-slate-800 truncate">
                                 {session?.user?.name || "ผู้ใช้"}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            <p className="text-xs text-slate-500 truncate font-medium">
                                 {session?.user?.email}
                             </p>
                         </div>
@@ -208,7 +217,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <div className="flex gap-2">
                         <Button
                             onClick={() => setShowProfileModal(true)}
-                            className="flex-1 text-sm  transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+                            variant="outline"
+                            className="w-full text-xs font-semibold h-9 rounded-lg border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-100 transition-all shadow-sm"
                         >
                             ข้อมูลส่วนตัว
                         </Button>

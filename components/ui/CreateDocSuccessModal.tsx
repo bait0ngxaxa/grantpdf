@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { FileText, CheckCircle2 } from "lucide-react";
 
 interface CreateDocSuccessModalProps {
     isOpen: boolean;
@@ -10,6 +11,7 @@ interface CreateDocSuccessModalProps {
     fileName: string;
     downloadUrl: string | null;
     documentType?: string;
+    onRedirect?: () => void; // Optional callback to run BEFORE redirect (e.g., allowNavigation)
 }
 
 export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
@@ -18,11 +20,18 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
     fileName,
     downloadUrl: _downloadUrl,
     documentType = "เอกสาร",
+    onRedirect,
 }) => {
-    const router = useRouter();
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const isRedirectingRef = useRef(false);
+    const onRedirectRef = useRef(onRedirect);
+
+    // Update ref when onRedirect changes
+    useEffect(() => {
+        onRedirectRef.current = onRedirect;
+    }, [onRedirect]);
 
     const downloadFileName = (() => {
-        // ถ้า fileName เป็นค่าว่าง ให้ใช้ชื่อ default
         if (!fileName || fileName.trim() === "") {
             if (documentType?.includes("Excel")) {
                 return "document.xlsx";
@@ -32,67 +41,108 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
         }
 
         if (fileName.includes(".")) {
-            return fileName; // ถ้ามี extension อยู่แล้ว ใช้ตามที่ระบุ
+            return fileName;
         }
 
-        // ถ้าไม่มี extension ให้ใส่ตามประเภทเอกสาร
         if (documentType?.includes("Excel")) {
             return `${fileName}.xlsx`;
         } else {
-            return `${fileName}.docx`; // default เป็น .docx สำหรับ Word documents
+            return `${fileName}.docx`;
         }
     })();
 
-    const handleBackToDashboard = () => {
+    const handleRedirect = () => {
+        if (isRedirectingRef.current) return;
+        isRedirectingRef.current = true;
+
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+
         onClose();
-        router.push("/userdashboard");
+
+        // Call onRedirect callback first (e.g., to call allowNavigation)
+        if (onRedirectRef.current) {
+            onRedirectRef.current();
+        }
+
+        // Always use window.location for guaranteed redirect
+        window.location.href = "/userdashboard";
     };
 
-    if (!isOpen) return null;
+    // Auto-redirect after 3 seconds
+    useEffect(() => {
+        if (isOpen && !isRedirectingRef.current) {
+            timerRef.current = setTimeout(() => {
+                handleRedirect();
+            }, 3000);
+        }
+
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
+
+    // Reset when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            isRedirectingRef.current = false;
+        }
+    }, [isOpen]);
 
     return (
-        <dialog className="modal modal-open">
-            <div className="modal-box bg-white dark:bg-gray-800 max-w-md">
-                <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-green-100 dark:bg-green-900/20">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-8 w-8 text-green-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border-0 shadow-2xl focus:outline-none">
+                <div className="flex flex-col items-center text-center p-2">
+                    {/* Success Icon with Animation */}
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg bg-green-50 text-green-600 ring-4 ring-green-50 animate-in zoom-in-50 duration-300">
+                        <CheckCircle2 className="w-10 h-10" />
                     </div>
-                    <h3 className="font-bold text-lg mb-2 text-green-600">
-                        สร้าง{documentType}สำเร็จ!
-                    </h3>
-                    <p className="text-gray-700 dark:text-gray-300 mb-4">
-                        {documentType}ของคุณพร้อมแล้ว
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                        ไฟล์: {downloadFileName}
-                    </p>
 
-                    <div className="flex flex-col space-y-2 w-full">
+                    <DialogTitle className="font-bold text-2xl mb-3 text-center text-slate-800">
+                        สร้าง{documentType}สำเร็จ!
+                    </DialogTitle>
+
+                    <div className="text-slate-500 mb-8 leading-relaxed w-full">
+                        <p className="mb-4">
+                            {documentType}ของคุณถูกสร้างเรียบร้อยแล้ว
+                        </p>
+
+                        {/* File Card info */}
+                        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center gap-3 text-left w-full shadow-sm mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                                <FileText className="w-5 h-5" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold text-slate-700 truncate">
+                                    {downloadFileName}
+                                </p>
+                                <p className="text-xs text-slate-400">
+                                    พร้อมดาวน์โหลด
+                                </p>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-slate-400 animate-pulse">
+                            กำลังนำทางไปยังหน้าหลักอัตโนมัติภายใน 3 วินาที...
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col space-y-3 w-full">
                         <Button
-                            onClick={handleBackToDashboard}
-                            className="w-full bg-gray-500 hover:bg-gray-600 text-white"
+                            onClick={handleRedirect}
+                            className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200 h-12 text-base font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
                         >
                             กลับไปหน้าหลัก
                         </Button>
                     </div>
                 </div>
-            </div>
-            <form method="dialog" className="modal-backdrop">
-                <button onClick={onClose}>ปิด</button>
-            </form>
-        </dialog>
+            </DialogContent>
+        </Dialog>
     );
 };

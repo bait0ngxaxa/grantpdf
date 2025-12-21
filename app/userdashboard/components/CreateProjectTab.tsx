@@ -15,12 +15,12 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
     router,
 }) => {
     return (
-        <div>
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-xl text-center">
-                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <div className="animate-fade-in-up">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-10 text-center">
+                <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-10 w-10 text-white"
+                        className="h-12 w-12 text-blue-500"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -38,17 +38,17 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
                 {projects.length === 0 ? (
                     // กรณียังไม่มีโครงการ - แสดงเฉพาะปุ่มสร้างโครงการ
                     <>
-                        <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
+                        <h3 className="text-2xl font-bold mb-3 text-slate-800">
                             เริ่มต้นสร้างโครงการแรก
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+                        <p className="text-slate-500 mb-8 max-w-xl mx-auto leading-relaxed">
                             ยินดีต้อนรับ!
                             เริ่มต้นด้วยการสร้างโครงการแรกของคุณเพื่อจัดการเอกสารอย่างเป็นระบบ
                         </p>
                         <div className="flex justify-center">
                             <Button
                                 size="lg"
-                                className="bg-primary hover:bg-primary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300 px-8 py-4"
+                                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-500/30 cursor-pointer transform hover:scale-105 transition-all duration-300 px-8 py-6 h-auto text-lg rounded-xl border-0"
                                 onClick={() => setShowCreateProjectModal(true)}
                             >
                                 <svg
@@ -72,17 +72,17 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
                 ) : (
                     // กรณีมีโครงการแล้ว - แสดงปุ่มทั้งสาม
                     <>
-                        <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">
-                            สร้างโครงการใหม่ | สร้างเอกสาร
+                        <h3 className="text-3xl font-bold mb-4 text-slate-800">
+                            จัดการโครงการและเอกสาร
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+                        <p className="text-slate-500 mb-10 max-w-2xl mx-auto text-lg">
                             เริ่มต้นด้วยการสร้างโครงการใหม่
                             หรือเลือกโครงการที่มีอยู่แล้วเพื่อเพิ่มเอกสาร
                         </p>
-                        <div className="flex flex-col sm:flex-row justify-center gap-4">
+                        <div className="flex flex-col sm:flex-row justify-center gap-6">
                             <Button
                                 size="lg"
-                                className="bg-primary hover:bg-primary-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 cursor-pointer transform hover:scale-105 transition-all duration-300 h-14 rounded-xl px-8"
                                 onClick={() => setShowCreateProjectModal(true)}
                             >
                                 <svg
@@ -103,7 +103,7 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
                             </Button>
                             <Button
                                 size="lg"
-                                className="bg-green-500 hover:bg-green-600 text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 cursor-pointer transform hover:scale-105 transition-all duration-300 h-14 rounded-xl px-8"
                                 onClick={() => router.push("/createdocs")}
                             >
                                 <svg
@@ -124,9 +124,8 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
                             </Button>
                             <Button
                                 size="lg"
-                                className="bg-info hover:bg-info-focus text-white shadow-lg cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                                className="bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 shadow-sm cursor-pointer transform hover:scale-105 transition-all duration-300 h-14 rounded-xl px-8"
                                 onClick={() => router.push("/uploads-doc")}
-                                variant="outline"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"

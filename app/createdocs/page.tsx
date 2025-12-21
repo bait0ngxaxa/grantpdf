@@ -80,12 +80,14 @@ export default function CreateTorsPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto min-h-screen bg-base-200 text-base-content p-6 flex flex-col">
+        <div className="max-w-6xl mx-auto min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900 p-6 flex flex-col">
             {status === "loading" && (
                 <div className="flex justify-center items-center min-h-[50vh]">
                     <div className="text-center">
                         <span className="loading loading-spinner loading-lg text-primary"></span>
-                        <p className="mt-4 text-lg">กำลังโหลด...</p>
+                        <p className="mt-4 text-lg text-slate-500">
+                            กำลังโหลด...
+                        </p>
                     </div>
                 </div>
             )}
@@ -99,6 +101,7 @@ export default function CreateTorsPage() {
                         </p>
                         <Button
                             onClick={() => (window.location.href = "/signin")}
+                            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all"
                         >
                             เข้าสู่ระบบ
                         </Button>

@@ -71,17 +71,18 @@ export function PageLayout({
 
     return (
         <div
-            className={`min-h-screen flex flex-col items-center bg-gradient-to-br ${gradientFrom} ${gradientTo} p-4 font-sans antialiased`}
+            className={`min-h-screen flex flex-col items-center bg-gradient-to-br ${gradientFrom} ${gradientTo} p-4 sm:p-6 lg:p-8 font-sans antialiased`}
         >
-            <div className="bg-white rounded-2xl shadow-lg mb-6 w-full max-w-5xl p-4">
-                <div className="flex items-center">
-                    <Button
-                        onClick={handleBack}
-                        className="group flex items-center gap-2 px-6 py-4 bg-white border border-slate-200 text-slate-600 shadow-sm hover:shadow-md hover:border-slate-300 hover:text-slate-900 transition-all duration-300 rounded-full"
-                    >
+            <div className="w-full max-w-5xl mb-6">
+                <Button
+                    onClick={handleBack}
+                    variant="ghost"
+                    className="group bg-white/80 backdrop-blur-sm hover:bg-white border border-slate-200 text-slate-600 shadow-sm hover:shadow-md hover:border-slate-300 hover:text-slate-900 transition-all duration-300 rounded-2xl px-5 py-6"
+                >
+                    <div className="p-1 rounded-lg bg-slate-100 group-hover:bg-slate-50 border border-slate-200 group-hover:border-slate-300 transition-colors mr-3">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 transition-transform group-hover:-translate-x-1"
+                            className="h-5 w-5 transition-transform group-hover:-translate-x-0.5"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -93,23 +94,32 @@ export function PageLayout({
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
                             />
                         </svg>
-                        <span className="font-medium">ย้อนกลับ</span>
-                    </Button>
-                </div>
+                    </div>
+                    <span className="font-semibold text-base">ย้อนกลับ</span>
+                </Button>
             </div>
 
-            <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-white/50 overflow-hidden ring-1 ring-slate-900/5">
                 <div
-                    className={`bg-gradient-to-r ${headerGradientFrom} ${headerGradientTo} p-6 text-white`}
+                    className={`bg-gradient-to-r ${headerGradientFrom} ${headerGradientTo} p-8 text-white relative overflow-hidden`}
                 >
-                    <h2 className="text-3xl font-bold text-center">{title}</h2>
-                    {subtitle && (
-                        <p className={`text-center mt-2 ${headerTextColor}`}>
-                            {subtitle}
-                        </p>
-                    )}
+                    <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+                    <div className="relative z-10">
+                        <h2 className="text-3xl md:text-4xl font-bold text-center tracking-tight text-white drop-shadow-sm">
+                            {title}
+                        </h2>
+                        {subtitle && (
+                            <div className="flex justify-center mt-3">
+                                <span
+                                    className={`inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-sm font-medium tracking-wide ${headerTextColor}`}
+                                >
+                                    {subtitle}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className="p-8">{children}</div>
+                <div className="p-6 md:p-10 bg-slate-50/30">{children}</div>
             </div>
 
             <Dialog open={isExitModalOpen} onOpenChange={setIsExitModalOpen}>

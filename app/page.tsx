@@ -236,7 +236,7 @@ export default function Home() {
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <Link href="/signup">
                                     <button className="h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 w-full sm:w-auto">
-                                        ลงทะบียน
+                                        ลงทะเบียน
                                     </button>
                                 </Link>
                                 <Link href="/signin">

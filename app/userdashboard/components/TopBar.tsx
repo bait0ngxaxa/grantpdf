@@ -27,11 +27,11 @@ export const TopBar: React.FC<TopBarProps> = ({
     signOut,
 }) => {
     return (
-        <div className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white/70 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-white shadow-sm">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <button
-                        className="lg:hidden btn btn-ghost btn-sm"
+                        className="lg:hidden btn btn-ghost btn-sm btn-circle"
                         onClick={() => setIsSidebarOpen(true)}
                     >
                         <svg
@@ -49,30 +49,37 @@ export const TopBar: React.FC<TopBarProps> = ({
                             />
                         </svg>
                     </button>
-                    <ChartBarBig />
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {menuItems.find((item) => item.id === activeTab)
-                            ?.name || "Dashboard"}
-                    </h1>
+                    <div className="flex items-center gap-2 text-slate-800">
+                        <ChartBarBig className="w-6 h-6 text-blue-600" />
+                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">
+                            {menuItems.find((item) => item.id === activeTab)
+                                ?.name || "Dashboard"}
+                        </h1>
+                    </div>
                 </div>
-                <div className=" flex gap-3 sm:flex md:gap-1 items-center space-x-4">
-                    <span className="text-m text-gray-600 dark:text-gray-400">
-                        {session?.user?.name} ({session?.user?.role || "member"}
-                        )
-                    </span>
+                <div className="flex gap-3 sm:flex md:gap-4 items-center">
+                    <div className="hidden md:flex flex-col items-end mr-2">
+                        <span className="text-sm font-bold text-slate-700">
+                            {session?.user?.name}
+                        </span>
+                        <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
+                            {session?.user?.role || "member"}
+                        </span>
+                    </div>
+
                     {session?.user?.role === "admin" && (
                         <Button
-                            className="font-semibold cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                            className="font-semibold cursor-pointer transform hover:scale-105 transition-all duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 border-0"
                             onClick={() => router.push("/admin")}
                         >
-                            <UserStar />
+                            <UserStar className="w-4 h-4 mr-2" />
                             ระบบแอดมิน
                         </Button>
                     )}
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="hidden sm:flex items-center gap-2 px-4 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 hover:shadow-sm transition-all duration-300 group"
+                        className="hidden sm:flex items-center gap-2 px-4 rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 hover:shadow-sm transition-all duration-300 group border border-transparent hover:border-red-100"
                         onClick={() => signOut()}
                     >
                         <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />

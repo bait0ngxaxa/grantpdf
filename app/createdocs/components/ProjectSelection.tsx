@@ -37,8 +37,8 @@ export const ProjectSelection = ({
     const router = useRouter();
 
     return (
-        <div className="container mx-auto max-w-6xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
-            <h1 className="text-3xl font-bold text-center mb-8">
+        <div className="flex-1 flex flex-col items-center justify-center p-4">
+            <h1 className="text-3xl font-bold text-center mb-8 text-slate-800">
                 เลือกโครงการสำหรับเอกสาร
             </h1>
 
@@ -52,7 +52,7 @@ export const ProjectSelection = ({
 
             {!isLoading && !error && projects.length > 0 && (
                 <>
-                    <div className="space-y-4 max-h-[60vh] overflow-y-auto p-2">
+                    <div className="w-full max-w-4xl space-y-4 max-h-[60vh] overflow-y-auto px-2 py-2">
                         {currentProjects.map((project) => (
                             <ProjectCard
                                 key={project.id}
@@ -63,15 +63,17 @@ export const ProjectSelection = ({
                         ))}
                     </div>
 
-                    <PaginationControls
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={onPageChange}
-                    />
+                    <div className="w-full max-w-4xl mt-6">
+                        <PaginationControls
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={onPageChange}
+                        />
+                    </div>
 
                     {/* Project Info */}
                     {projects.length > 0 && (
-                        <div className="text-center mt-4 text-sm text-base-content/60">
+                        <div className="text-center mt-4 text-sm text-slate-500">
                             แสดง {indexOfFirstProject + 1}-
                             {Math.min(indexOfLastProject, projects.length)} จาก{" "}
                             {projects.length} โครงการ
@@ -82,12 +84,13 @@ export const ProjectSelection = ({
                         <Button
                             onClick={() => router.push("/userdashboard")}
                             variant="outline"
+                            className="bg-white hover:bg-slate-50 rounded-xl"
                         >
                             กลับไปแดชบอร์ด
                         </Button>
                         <Button
                             onClick={() => router.push("/userdashboard")}
-                            variant="outline"
+                            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all"
                         >
                             สร้างโครงการใหม่
                         </Button>
