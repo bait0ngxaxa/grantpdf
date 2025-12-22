@@ -372,6 +372,7 @@ export default function CreateContractPage() {
                 fileName={formData.fileName}
                 downloadUrl={generatedFileUrl}
                 documentType="เอกสาร Word"
+                onRedirect={allowNavigation}
             />
         </PageLayout>
     );

@@ -25,84 +25,90 @@ export default function FileItem({
 
     return (
         <React.Fragment>
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
+            <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-blue-100 hover:shadow-sm transition-all duration-200 group">
+                <div className="flex items-center space-x-4 flex-1 min-w-0">
                     {/* File Icon */}
                     <div className="flex-shrink-0">
                         {file.fileExtension === "pdf" ? (
-                            <svg
-                                className="w-8 h-8 text-red-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                />
-                            </svg>
+                            <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-500">
+                                <svg
+                                    className="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                    />
+                                </svg>
+                            </div>
                         ) : file.fileExtension === "xlsx" ? (
-                            <svg
-                                className="w-8 h-8 text-green-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 2a1 1 0 000 2h6a1 1 0 100-2H9zM4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"
-                                />
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M10 10l4 4m0-4l-4 4"
-                                />
-                            </svg>
+                            <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-600">
+                                <svg
+                                    className="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 2a1 1 0 000 2h6a1 1 0 100-2H9zM4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"
+                                    />
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M10 10l4 4m0-4l-4 4"
+                                    />
+                                </svg>
+                            </div>
                         ) : (
-                            <svg
-                                className="w-8 h-8 text-blue-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
+                            <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500">
+                                <svg
+                                    className="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    />
+                                </svg>
+                            </div>
                         )}
                     </div>
 
                     {/* File Info */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">
-                            <span className="font-medium text-gray-900 dark:text-white truncate">
+                            <span className="text-base font-semibold text-slate-800 truncate">
                                 {truncateFileName(file.originalFileName, 40)}
                             </span>
                             <span
-                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
                                     file.downloadStatus === "done"
-                                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-amber-100 text-amber-700"
                                 }`}
                             >
                                 {file.downloadStatus === "done"
-                                    ? "เสร็จ"
+                                    ? "เสร็จสิ้น"
                                     : "ใหม่"}
                             </span>
                         </div>
-                        <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center space-x-4 mt-1 text-sm text-slate-500">
                             <span className="flex items-center">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    className="h-3 w-3 mr-1"
+                                    className="h-3.5 w-3.5 mr-1.5 text-slate-400"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -118,17 +124,17 @@ export default function FileItem({
                                     "th-TH"
                                 )}
                             </span>
-                            <span className="badge badge-outline text-xs">
-                                {file.fileExtension.toUpperCase()}
+                            <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded border border-slate-200 uppercase font-medium">
+                                {file.fileExtension}
                             </span>
                             {file.attachmentFiles &&
                                 file.attachmentFiles.length > 0 && (
                                     <button
                                         onClick={toggleAttachmentExpansion}
-                                        className="flex items-center text-xs text-blue-600 font-medium hover:text-blue-800 transition-colors duration-200"
+                                        className="flex items-center text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors duration-200 bg-blue-50 px-2 py-0.5 rounded-full"
                                     >
                                         <svg
-                                            className="w-3 h-3 mr-1"
+                                            className="w-3.5 h-3.5 mr-1"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -142,7 +148,7 @@ export default function FileItem({
                                         </svg>
                                         {file.attachmentFiles.length} ไฟล์แนบ
                                         <svg
-                                            className={`w-3 h-3 ml-1 transform transition-transform duration-200 ${
+                                            className={`w-3.5 h-3.5 ml-1 transform transition-transform duration-200 ${
                                                 isAttachmentExpanded
                                                     ? "rotate-180"
                                                     : ""
@@ -165,13 +171,13 @@ export default function FileItem({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center space-x-2 flex-shrink-0">
+                <div className="flex items-center space-x-2 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                     {file.storagePath && (
                         <a
                             href={`/api/admin/download/${file.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn btn-sm bg-primary hover:bg-blue-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                            className="inline-flex items-center justify-center p-2 rounded-xl text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 transition-colors"
                             title="ดาวน์โหลด"
                         >
                             <svg
@@ -198,7 +204,8 @@ export default function FileItem({
                                     file.originalFileName
                                 )
                             }
-                            className="btn btn-sm bg-green-500 hover:bg-green-600 text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                            size="sm"
+                            className="h-8 w-8 p-0 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 border-none shadow-none"
                             title="พรีวิว PDF"
                         >
                             <svg
@@ -225,7 +232,8 @@ export default function FileItem({
                     )}
                     <Button
                         onClick={() => onDeleteFile(file)}
-                        className="btn btn-sm cursor-pointer text-white border-none rounded-full shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                        size="sm"
+                        className="h-8 w-8 p-0 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-none shadow-none"
                         variant="destructive"
                         title="ลบไฟล์"
                     >

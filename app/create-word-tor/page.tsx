@@ -533,6 +533,7 @@ export default function CreateTORPage() {
                 fileName={formData.fileName}
                 downloadUrl={generatedFileUrl}
                 documentType="เอกสาร TOR"
+                onRedirect={allowNavigation}
             />
         </PageLayout>
     );

@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Edit, Trash2, Search, Users } from "lucide-react";
 import { Pagination } from "./Pagination";
 
@@ -39,29 +38,29 @@ export const UsersTable: React.FC<UsersTableProps> = ({
     onPageChange,
 }) => {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
             {/* Header */}
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="p-6 border-b border-slate-100">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                        <h2 className="text-xl font-bold text-slate-800">
                             รายการผู้ใช้งาน
                         </h2>
-                        <p className="text-gray-600 dark:text-gray-400 mt-1">
+                        <p className="text-slate-500 text-sm mt-1">
                             จัดการบัญชีผู้ใช้และสิทธิ์การเข้าถึง (
                             {filteredCount} คน)
                         </p>
                     </div>
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                        <div className="relative">
-                            <Input
+                        <div className="relative w-full sm:w-80">
+                            <input
                                 type="text"
                                 placeholder="ค้นหาผู้ใช้งาน..."
                                 value={searchTerm}
                                 onChange={(e) => onSearchChange(e.target.value)}
-                                className="pl-10 pr-4 py-2 w-full sm:w-64 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+                                className="pl-10 pr-4 py-2.5 w-full bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                             />
-                            <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                            <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                         </div>
                     </div>
                 </div>
@@ -70,8 +69,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({
             {/* Table */}
             <div className="overflow-x-auto">
                 <table className="table w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr className="text-lg text-gray-700 dark:text-gray-300">
+                    <thead className="bg-slate-50/50">
+                        <tr className="text-sm font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-100">
                             <th className="px-6 py-4 text-left">ID</th>
                             <th className="px-6 py-4 text-left">ชื่อ</th>
                             <th className="px-6 py-4 text-left">อีเมล</th>
@@ -80,36 +79,43 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                             <th className="px-6 py-4 text-center">จัดการ</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-slate-100">
                         {users.length > 0 ? (
                             users.map((user) => (
                                 <tr
                                     key={user.id}
-                                    className="hover:bg-gray-50 dark:hover:bg-gray-700 border-b dark:border-gray-600"
+                                    className="hover:bg-slate-50/50 transition-colors duration-150"
                                 >
-                                    <td className="px-6 py-4 font-mono text-sm text-gray-600 dark:text-gray-400">
+                                    <td className="px-6 py-4 font-mono text-sm text-slate-400">
                                         {user.id}
                                     </td>
-                                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                                        {user.name}
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-xs">
+                                                {user.name.charAt(0)}
+                                            </div>
+                                            <span className="font-semibold text-slate-800">
+                                                {user.name}
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                                    <td className="px-6 py-4 text-slate-600">
                                         {user.email}
                                     </td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide ${
                                                 user.role === "admin"
-                                                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                                                    : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                                    ? "bg-purple-100 text-purple-700"
+                                                    : "bg-blue-100 text-blue-700"
                                             }`}
                                         >
                                             {user.role === "admin"
-                                                ? "ผู้ดูแลระบบ"
-                                                : "สมาชิก"}
+                                                ? "Admin"
+                                                : "Member"}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                                    <td className="px-6 py-4 text-slate-500 text-sm">
                                         {new Date(
                                             user.created_at
                                         ).toLocaleDateString("th-TH")}
@@ -119,19 +125,16 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                                             <Button
                                                 size="sm"
                                                 onClick={() => onEdit(user)}
-                                                className="cursor-pointer rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                                className="h-8 w-8 p-0 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 shadow-sm"
                                             >
-                                                <Edit className="h-4 w-4 mr-1" />
-                                                แก้ไข
+                                                <Edit className="h-4 w-4" />
                                             </Button>
                                             <Button
                                                 size="sm"
-                                                variant="destructive"
                                                 onClick={() => onDelete(user)}
-                                                className="cursor-pointer rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                                className="h-8 w-8 p-0 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 shadow-sm"
                                             >
-                                                <Trash2 className="h-4 w-4 mr-1" />
-                                                ลบ
+                                                <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
                                     </td>
@@ -141,16 +144,18 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                             <tr>
                                 <td
                                     colSpan={6}
-                                    className="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
+                                    className="px-6 py-12 text-center text-slate-500"
                                 >
                                     <div className="flex flex-col items-center">
-                                        <Users className="h-12 w-12 mb-4 text-gray-400" />
-                                        <p className="text-lg font-medium">
+                                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                                            <Users className="h-8 w-8 text-slate-300" />
+                                        </div>
+                                        <p className="text-lg font-medium text-slate-800">
                                             {searchTerm
                                                 ? "ไม่พบผู้ใช้งานที่ค้นหา"
                                                 : "ไม่พบผู้ใช้งาน"}
                                         </p>
-                                        <p className="text-sm">
+                                        <p className="text-sm mt-1 text-slate-400">
                                             {searchTerm
                                                 ? `ไม่พบผู้ใช้งานที่ตรงกับ "${searchTerm}"`
                                                 : "ยังไม่มีผู้ใช้งานในระบบ"}
@@ -164,13 +169,15 @@ export const UsersTable: React.FC<UsersTableProps> = ({
             </div>
 
             {/* Pagination */}
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={filteredCount}
-                itemsPerPage={itemsPerPage}
-                onPageChange={onPageChange}
-            />
+            <div className="bg-white border-t border-slate-100 p-4">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={filteredCount}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={onPageChange}
+                />
+            </div>
         </div>
     );
 };

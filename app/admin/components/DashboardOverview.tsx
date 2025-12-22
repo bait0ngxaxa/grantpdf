@@ -66,16 +66,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     }, [projects]);
 
     return (
-        <div>
+        <div className="space-y-6">
             {/* System Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Projects Card */}
-                <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                     <div className="flex items-center space-x-4">
-                        <div className="text-blue-600 bg-blue-100 dark:bg-blue-900/20 p-3 rounded-full">
+                        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8 stroke-current"
+                                className="h-6 w-6"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -89,13 +89,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             </svg>
                         </div>
                         <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-sm font-medium text-slate-500">
                                 โครงการทั้งหมด
                             </div>
-                            <div className="text-3xl font-bold text-blue-600">
+                            <div className="text-2xl font-bold text-slate-800">
                                 {projects.length}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <div className="text-xs text-slate-400 mt-0.5">
                                 โครงการในระบบ
                             </div>
                         </div>
@@ -103,12 +103,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
 
                 {/* Today's New Projects Card */}
-                <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                     <div className="flex items-center space-x-4">
-                        <div className="text-green-600 bg-green-100 dark:bg-green-900/20 p-3 rounded-full">
+                        <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8 stroke-current"
+                                className="h-6 w-6"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -122,13 +122,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             </svg>
                         </div>
                         <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-sm font-medium text-slate-500">
                                 โครงการใหม่วันนี้
                             </div>
-                            <div className="text-3xl font-bold text-green-600">
+                            <div className="text-2xl font-bold text-green-600">
                                 {todayProjects}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <div className="text-xs text-slate-400 mt-0.5">
                                 โครงการที่สร้างวันนี้
                             </div>
                         </div>
@@ -137,14 +137,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 {/* Total Documents Card */}
                 <div
-                    className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group"
                     onClick={() => setActiveTab("documents")}
                 >
                     <div className="flex items-center space-x-4">
-                        <div className="text-purple-600 bg-purple-100 dark:bg-purple-900/20 p-3 rounded-full">
+                        <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8 stroke-current"
+                                className="h-6 w-6"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -158,13 +158,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             </svg>
                         </div>
                         <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-sm font-medium text-slate-500">
                                 จำนวนเอกสาร
                             </div>
-                            <div className="text-3xl font-bold text-purple-600">
+                            <div className="text-2xl font-bold text-purple-600">
                                 {allFiles.length}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <div className="text-xs text-slate-400 mt-0.5">
                                 เอกสารทั้งหมดในระบบ
                             </div>
                         </div>
@@ -172,12 +172,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
 
                 {/* Today's New Files Card */}
-                <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                     <div className="flex items-center space-x-4">
-                        <div className="text-orange-600 bg-orange-100 dark:bg-orange-900/20 p-3 rounded-full">
+                        <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8 stroke-current"
+                                className="h-6 w-6"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -191,13 +191,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             </svg>
                         </div>
                         <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-sm font-medium text-slate-500">
                                 ไฟล์ใหม่วันนี้
                             </div>
-                            <div className="text-3xl font-bold text-orange-600">
+                            <div className="text-2xl font-bold text-orange-600">
                                 {todayFiles}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <div className="text-xs text-slate-400 mt-0.5">
                                 ไฟล์ที่เข้ามาวันนี้
                             </div>
                         </div>
@@ -206,14 +206,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Secondary Stats Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Project Status Statistics Card */}
-                <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
-                    <div className="flex items-center space-x-4 mb-4">
-                        <div className="text-purple-600 bg-purple-100 dark:bg-purple-900/20 p-3 rounded-full">
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center space-x-4 mb-6">
+                        <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8 stroke-current"
+                                className="h-6 w-6"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -227,111 +227,166 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             </svg>
                         </div>
                         <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                                สถิติสถานะโครงการ
+                            <div className="text-base font-bold text-slate-800">
+                                รายละเอียดสถานะโครงการ
                             </div>
-                            <div className="text-lg font-bold text-purple-600">
-                                รายละเอียดสถานะ
+                            <div className="text-sm text-slate-500">
+                                ภาพรวมสถานะทั้งหมด
                             </div>
                         </div>
                     </div>
 
                     {/* Status Breakdown */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-sm shadow-yellow-200"></div>
+                                <span className="text-sm font-medium text-slate-600">
                                     กำลังดำเนินการ
                                 </span>
                             </div>
-                            <span className="font-bold text-yellow-600">
+                            <span className="font-bold text-slate-800">
                                 {projectStatusStats.pending}
                             </span>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                <span className="text-sm text-gray-600 dark:text-gray-300">
-                                    อนุมัติ
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-sm shadow-green-200"></div>
+                                <span className="text-sm font-medium text-slate-600">
+                                    อนุมัติแล้ว
                                 </span>
                             </div>
-                            <span className="font-bold text-green-600">
+                            <span className="font-bold text-slate-800">
                                 {projectStatusStats.approved}
                             </span>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm shadow-red-200"></div>
+                                <span className="text-sm font-medium text-slate-600">
                                     ไม่อนุมัติ
                                 </span>
                             </div>
-                            <span className="font-bold text-red-600">
+                            <span className="font-bold text-slate-800">
                                 {projectStatusStats.rejected}
                             </span>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-2.5 h-2.5 bg-orange-500 rounded-full shadow-sm shadow-orange-200"></div>
+                                <span className="text-sm font-medium text-slate-600">
                                     แก้ไข
                                 </span>
                             </div>
-                            <span className="font-bold text-orange-600">
+                            <span className="font-bold text-slate-800">
                                 {projectStatusStats.editing}
                             </span>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-2.5 h-2.5 bg-slate-500 rounded-full shadow-sm shadow-slate-200"></div>
+                                <span className="text-sm font-medium text-slate-600">
                                     ปิดโครงการ
                                 </span>
                             </div>
-                            <span className="font-bold text-gray-600">
+                            <span className="font-bold text-slate-800">
                                 {projectStatusStats.closed}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Users Card */}
-                <div
-                    className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-105 transition-transform duration-300 cursor-pointer"
-                    onClick={() => setActiveTab("users")}
-                >
-                    <div className="flex items-center space-x-4">
-                        <div className="text-indigo-600 bg-indigo-100 dark:bg-indigo-900/20 p-3 rounded-full">
-                            <Users className="h-8 w-8 stroke-current" />
+                <div className="space-y-6">
+                    {/* Users Card */}
+                    <div
+                        className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group h-fit"
+                        onClick={() => setActiveTab("users")}
+                    >
+                        <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                                <Users className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <div className="text-sm font-medium text-slate-500">
+                                    ผู้ใช้งานทั้งหมด
+                                </div>
+                                <div className="text-2xl font-bold text-indigo-600">
+                                    {totalUsers}
+                                </div>
+                                <div className="text-xs text-slate-400 mt-0.5">
+                                    บัญชีผู้ใช้ในระบบ
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                                ผู้ใช้งานทั้งหมด
+                    </div>
+
+                    {/* Latest Project Card */}
+                    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 h-fit">
+                        <div className="flex items-center space-x-4 mb-4">
+                            <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                    />
+                                </svg>
                             </div>
-                            <div className="text-3xl font-bold text-indigo-600">
-                                {totalUsers}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                บัญชีผู้ใช้ในระบบ
+                            <div>
+                                <div className="text-base font-bold text-slate-800">
+                                    โครงการล่าสุด
+                                </div>
+                                <div className="text-sm text-slate-500">
+                                    ที่เพิ่มเข้ามาในระบบ
+                                </div>
                             </div>
                         </div>
+
+                        {latestProject ? (
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <div className="text-sm font-medium text-slate-900 truncate mb-1">
+                                    {latestProject.name}
+                                </div>
+                                <div className="flex items-center justify-between text-xs text-slate-500">
+                                    <span>
+                                        สร้างโดย:{" "}
+                                        {latestProject.userName || "ไม่ระบุ"}
+                                    </span>
+                                    <span>
+                                        {new Date(
+                                            latestProject.created_at
+                                        ).toLocaleDateString("th-TH")}
+                                    </span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-4 text-slate-400 text-sm">
+                                ยังไม่มีโครงการในระบบ
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Latest Project Card */}
-            <div className="grid grid-cols-1 gap-6 mb-8">
-                <div className="card bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 transform hover:scale-100 transition-transform duration-300">
-                    <div className="flex items-center space-x-4">
-                        <div className="text-teal-600 bg-teal-100 dark:bg-teal-900/20 p-3 rounded-full">
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                    <h3 className="text-lg font-bold mb-4 flex items-center text-slate-800">
+                        <div className="p-2 bg-blue-50 rounded-lg mr-3 text-blue-600">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-8 w-8 stroke-current"
+                                className="h-5 w-5"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -340,86 +395,48 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth="2"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                                โครงการล่าสุด
-                            </div>
-                            <div
-                                className="text-lg font-bold truncate max-w-full text-teal-600"
-                                title={latestProject?.name || ""}
-                            >
-                                {latestProject?.name || "ไม่มี"}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {latestProject?.created_at
-                                    ? new Date(
-                                          latestProject.created_at
-                                      ).toLocaleDateString("th-TH")
-                                    : ""}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
-                    <h3 className="text-lg font-bold mb-4 flex items-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 mr-2 text-primary"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                        </svg>
                         การจัดการเอกสาร
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    <p className="text-slate-500 mb-6 text-sm">
                         ดู จัดการ และลบเอกสารทั้งหมดในระบบ
                     </p>
                     <Button
                         onClick={() => setActiveTab("documents")}
-                        className="w-full cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                        className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 h-11 font-medium"
                     >
                         เข้าสู่การจัดการเอกสาร
                     </Button>
                 </div>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl">
-                    <h3 className="text-lg font-bold mb-4 flex items-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 mr-2 text-primary"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                        </svg>
+                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+                    <h3 className="text-lg font-bold mb-4 flex items-center text-slate-800">
+                        <div className="p-2 bg-indigo-50 rounded-lg mr-3 text-indigo-600">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                            </svg>
+                        </div>
                         การจัดการผู้ใช้งาน
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    <p className="text-slate-500 mb-6 text-sm">
                         จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ
                     </p>
                     <Button
                         onClick={() => setActiveTab("users")}
-                        className="w-full cursor-pointer transform hover:scale-105 transition-transform duration-300"
+                        className="w-full rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 h-11 font-medium"
                         variant="outline"
                     >
                         เข้าสู่การจัดการผู้ใช้งาน

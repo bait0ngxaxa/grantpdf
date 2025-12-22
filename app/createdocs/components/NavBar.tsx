@@ -18,32 +18,35 @@ export const NavBar = ({
     onContractTypeSelect,
 }: NavBarProps) => {
     return (
-        <div className="navbar bg-base-100 rounded-box shadow-lg mb-6">
+        <div className="navbar bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-100 mb-6 p-2 sticky top-4 z-40">
             <div className="flex-1">
                 <Button
                     onClick={onBack}
-                    className="group flex items-center gap-2 px-6 py-4 bg-white border border-slate-200 text-slate-600 shadow-sm hover:shadow-md hover:border-slate-300 hover:text-slate-900 transition-all duration-300 rounded-full"
+                    variant="ghost"
+                    className="group flex items-center gap-2 px-4 py-2 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all duration-200 rounded-xl"
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 transition-transform group-hover:-translate-x-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                        />
-                    </svg>
+                    <div className="p-1 rounded-lg bg-slate-100 group-hover:bg-white border border-slate-200 group-hover:border-slate-300 transition-colors">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                            />
+                        </svg>
+                    </div>
                     <span className="font-medium">ย้อนกลับ</span>
                 </Button>
             </div>
-            <div className="flex-none flex items-center space-x-4">
+            <div className="flex-none flex items-center space-x-4 px-4">
                 {selectedContractType && (
-                    <div className="breadcrumbs text-sm">
+                    <div className="breadcrumbs text-sm text-slate-500">
                         <ul>
                             <li>
                                 <button
@@ -51,7 +54,7 @@ export const NavBar = ({
                                         onCategorySelect(null);
                                         onContractTypeSelect(null);
                                     }}
-                                    className="link link-hover"
+                                    className="hover:text-blue-600 transition-colors"
                                 >
                                     หน้าหลัก
                                 </button>
@@ -59,29 +62,29 @@ export const NavBar = ({
                             <li>
                                 <button
                                     onClick={() => onContractTypeSelect(null)}
-                                    className="link link-hover"
+                                    className="hover:text-blue-600 transition-colors"
                                 >
                                     ยื่นโครงการ
                                 </button>
                             </li>
-                            <li className="text-base-content/60">
+                            <li className="text-slate-900 font-medium">
                                 สัญญาจ้างปฏิบัติงานวิชาการ
                             </li>
                         </ul>
                     </div>
                 )}
                 {selectedCategory && !selectedContractType && (
-                    <div className="breadcrumbs text-sm">
+                    <div className="breadcrumbs text-sm text-slate-500">
                         <ul>
                             <li>
                                 <button
                                     onClick={() => onCategorySelect(null)}
-                                    className="link link-hover"
+                                    className="hover:text-blue-600 transition-colors"
                                 >
                                     หน้าหลัก
                                 </button>
                             </li>
-                            <li className="text-base-content/60">
+                            <li className="text-slate-900 font-medium">
                                 {selectedCategory === "general"
                                     ? "สัญญาจ้างทั่วไป"
                                     : "ยื่นโครงการ"}

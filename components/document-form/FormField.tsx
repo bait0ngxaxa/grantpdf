@@ -27,18 +27,18 @@ export function FormField({
     rows = 4,
     className = "",
 }: FormFieldProps) {
-    const baseClassName = `w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${className}`;
+    const baseClassName = `w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200 placeholder:text-slate-400 hover:border-blue-200 ${className}`;
 
     return (
-        <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+        <div className="group">
+            <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1 group-hover:text-blue-600 transition-colors">
                 {label} {required && <span className="text-red-500">*</span>}
             </label>
             {type === "textarea" ? (
                 <Textarea
                     name={name}
                     placeholder={placeholder}
-                    className={baseClassName}
+                    className={`${baseClassName} min-h-[120px] resize-y`}
                     value={value}
                     onChange={onChange}
                     rows={rows}

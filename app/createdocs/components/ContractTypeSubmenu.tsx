@@ -12,17 +12,17 @@ export const ContractTypeSubmenu = ({
     onContractSelect,
 }: ContractTypeSubmenuProps) => {
     return (
-        <div className="container mx-auto max-w-6xl bg-base-100 p-8 rounded-xl shadow-xl flex-grow flex flex-col justify-center">
-            <h1 className="text-3xl font-bold text-center mb-2">
+        <div className="flex-1 flex flex-col items-center justify-center p-4">
+            <h1 className="text-3xl font-bold text-center mb-2 text-slate-800">
                 สัญญาจ้างปฏิบัติงานวิชาการ
             </h1>
-            <p className="text-center text-base-content/60 mb-8">
+            <p className="text-center text-slate-500 mb-8">
                 เลือกประเภทสัญญาที่ต้องการสร้าง
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
                 <div
-                    className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-slate-200 hover:border-primary hover:shadow-2xl"
+                    className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
                     onClick={() =>
                         onContractSelect(
                             "academic-contract-abs",
@@ -31,11 +31,11 @@ export const ContractTypeSubmenu = ({
                         )
                     }
                 >
-                    <div className="card-body items-center text-center p-6">
-                        <div className="flex items-center justify-center p-4 rounded-full bg-blue-500">
+                    <div className="flex flex-col items-center text-center h-full">
+                        <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12 text-white"
+                                className="h-12 w-12"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -43,27 +43,27 @@ export const ContractTypeSubmenu = ({
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    strokeWidth={2}
+                                    strokeWidth={1.5}
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
                         </div>
-                        <h3 className="card-title mt-4 text-xl text-blue-600">
+                        <h3 className="text-xl font-bold text-blue-600 mb-2">
                             ABS
                         </h3>
-                        <p className="text-sm text-base-content/60">
+                        <p className="text-sm text-slate-500 mb-4">
                             สัญญาจ้างประเภท ABS
                         </p>
-                        <div className="mt-2">
-                            <div className="badge badge-primary badge-outline">
+                        <div className="mt-auto">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
                                 รหัส: ABS
-                            </div>
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div
-                    className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-slate-200 hover:border-primary hover:shadow-2xl"
+                    className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-green-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
                     onClick={() =>
                         onContractSelect(
                             "academic-contract-dmr",
@@ -72,11 +72,11 @@ export const ContractTypeSubmenu = ({
                         )
                     }
                 >
-                    <div className="card-body items-center text-center p-6">
-                        <div className="flex items-center justify-center p-4 rounded-full bg-green-500">
+                    <div className="flex flex-col items-center text-center h-full">
+                        <div className="p-4 rounded-2xl bg-green-50 text-green-600 mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12 text-white"
+                                className="h-12 w-12"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -84,27 +84,27 @@ export const ContractTypeSubmenu = ({
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    strokeWidth={2}
+                                    strokeWidth={1.5}
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
                         </div>
-                        <h3 className="card-title mt-4 text-xl text-green-600">
+                        <h3 className="text-xl font-bold text-green-600 mb-2">
                             DMR
                         </h3>
-                        <p className="text-sm text-base-content/60">
+                        <p className="text-sm text-slate-500 mb-4">
                             สัญญาจ้างประเภท DMR
                         </p>
-                        <div className="mt-2">
-                            <div className="badge badge-success badge-outline">
+                        <div className="mt-auto">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
                                 รหัส: DMR
-                            </div>
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div
-                    className="card bg-base-100 shadow-xl cursor-pointer hover:bg-base-200 transition-all duration-200 border-2 border-slate-200 hover:border-primary hover:shadow-2xl"
+                    className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-purple-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
                     onClick={() =>
                         onContractSelect(
                             "academic-contract-sip",
@@ -113,11 +113,11 @@ export const ContractTypeSubmenu = ({
                         )
                     }
                 >
-                    <div className="card-body items-center text-center p-6">
-                        <div className="flex items-center justify-center p-4 rounded-full bg-purple-500">
+                    <div className="flex flex-col items-center text-center h-full">
+                        <div className="p-4 rounded-2xl bg-purple-50 text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12 text-white"
+                                className="h-12 w-12"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -125,21 +125,21 @@ export const ContractTypeSubmenu = ({
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    strokeWidth={2}
+                                    strokeWidth={1.5}
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
                         </div>
-                        <h3 className="card-title mt-4 text-xl text-purple-600">
+                        <h3 className="text-xl font-bold text-purple-600 mb-2">
                             SIP
                         </h3>
-                        <p className="text-sm text-base-content/60">
+                        <p className="text-sm text-slate-500 mb-4">
                             สัญญาจ้างประเภท SIP
                         </p>
-                        <div className="mt-2">
-                            <div className="badge badge-secondary badge-outline">
+                        <div className="mt-auto">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
                                 รหัส: SIP
-                            </div>
+                            </span>
                         </div>
                     </div>
                 </div>

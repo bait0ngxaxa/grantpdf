@@ -27,16 +27,18 @@ export default function ProjectCard({
     onEditProjectStatus,
 }: ProjectCardProps) {
     return (
-        <div className="border border-gray-200 dark:border-gray-700 rounded-xl mb-6 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mb-4">
             {/* Project Header */}
             <div
-                className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 p-4 cursor-pointer hover:from-blue-100 hover:to-blue-200 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-300"
+                className={`p-5 cursor-pointer transition-colors duration-200 ${
+                    isExpanded ? "bg-slate-50/80" : "hover:bg-slate-50/50"
+                }`}
                 onClick={() => onToggleExpansion(project.id)}
             >
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-5">
                         <div className="flex-shrink-0">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-200">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     className="h-6 w-6 text-white"
@@ -54,85 +56,88 @@ export default function ProjectCard({
                             </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                            <div className="flex items-center space-x-3 mb-1">
+                                <h3 className="text-lg font-bold text-slate-800 truncate">
                                     {project.name}
                                 </h3>
                                 {showNewBadge && (
-                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-md animate-pulse">
-                                        <svg
-                                            className="w-3 h-3 mr-1"
-                                            fill="currentColor"
-                                            viewBox="0 0 20 20"
-                                        >
-                                            <path
-                                                fillRule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
-                                                clipRule="evenodd"
-                                            />
-                                        </svg>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-sm ring-1 ring-white">
                                         NEW
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600 dark:text-gray-300">
+
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
                                 <span className="flex items-center">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4 mr-1"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                        />
-                                    </svg>
+                                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-2 text-slate-500">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-3.5 w-3.5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                            />
+                                        </svg>
+                                    </div>
                                     {project.userName}
                                 </span>
                                 <span className="flex items-center">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4 mr-1"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6m2 0h4a2 2 0 002-2V9a2 2 0 00-2-2h-4m-6-3h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z"
-                                        />
-                                    </svg>
+                                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-2 text-slate-500">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-3.5 w-3.5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6m2 0h4a2 2 0 002-2V9a2 2 0 00-2-2h-4m-6-3h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z"
+                                            />
+                                        </svg>
+                                    </div>
                                     {project._count.files} ไฟล์
                                 </span>
                                 <span className="flex items-center">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4 mr-1"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6m2 0h4a2 2 0 002-2V9a2 2 0 00-2-2h-4m-6-3h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z"
-                                        />
-                                    </svg>
+                                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-2 text-slate-500">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-3.5 w-3.5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4h6m-6 4h6m2 0h4a2 2 0 002-2V9a2 2 0 00-2-2h-4m-6-3h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z"
+                                            />
+                                        </svg>
+                                    </div>
                                     {new Date(
                                         project.created_at
                                     ).toLocaleDateString("th-TH")}
                                 </span>
                             </div>
-                            <div className="flex items-center space-x-3 mt-2">
+
+                            {project.description && (
+                                <p className="text-sm text-slate-400 mt-2 truncate pl-1">
+                                    {project.description}
+                                </p>
+                            )}
+
+                            <div className="flex items-center space-x-3 mt-3">
                                 <span
-                                    className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border-2 shadow-md ${getStatusColor(
+                                    className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(
                                         project.status
                                     )}`}
                                 >
@@ -140,7 +145,7 @@ export default function ProjectCard({
                                     {project.status ===
                                         PROJECT_STATUS.APPROVED && (
                                         <svg
-                                            className="w-4 h-4 mr-2"
+                                            className="w-3.5 h-3.5 mr-1.5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -156,7 +161,7 @@ export default function ProjectCard({
                                     {project.status ===
                                         PROJECT_STATUS.REJECTED && (
                                         <svg
-                                            className="w-4 h-4 mr-2"
+                                            className="w-3.5 h-3.5 mr-1.5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -171,7 +176,7 @@ export default function ProjectCard({
                                     )}
                                     {project.status === PROJECT_STATUS.EDIT && (
                                         <svg
-                                            className="w-4 h-4 mr-2"
+                                            className="w-3.5 h-3.5 mr-1.5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -187,7 +192,7 @@ export default function ProjectCard({
                                     {project.status ===
                                         PROJECT_STATUS.IN_PROGRESS && (
                                         <svg
-                                            className="w-4 h-4 mr-2"
+                                            className="w-3.5 h-3.5 mr-1.5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -203,7 +208,7 @@ export default function ProjectCard({
                                     {project.status ===
                                         PROJECT_STATUS.CLOSED && (
                                         <svg
-                                            className="w-4 h-4 mr-2"
+                                            className="w-3.5 h-3.5 mr-1.5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -219,25 +224,21 @@ export default function ProjectCard({
                                     สถานะ: {project.status}
                                 </span>
                             </div>
-                            {project.description && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 truncate">
-                                    {project.description}
-                                </p>
-                            )}
                         </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+
+                    <div className="flex items-center space-x-3">
                         <Button
                             size="sm"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onEditProjectStatus(project);
                             }}
-                            className="cursor-pointer text-sm bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-none shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                            className="h-10 px-4 rounded-xl text-sm bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm font-medium transition-all"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 mr-2"
+                                className="h-4 w-4 mr-2 text-slate-400"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -251,30 +252,38 @@ export default function ProjectCard({
                             </svg>
                             จัดการสถานะ
                         </Button>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className={`h-5 w-5 text-gray-400 transform transition-transform duration-300 ${
-                                isExpanded ? "rotate-180" : ""
+                        <div
+                            className={`p-2 rounded-lg transition-colors ${
+                                isExpanded
+                                    ? "bg-slate-100 text-slate-600"
+                                    : "text-slate-400"
                             }`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
                         >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 9l-7 7-7-7"
-                            />
-                        </svg>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className={`h-5 w-5 transform transition-transform duration-300 ${
+                                    isExpanded ? "rotate-180" : ""
+                                }`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Expanded Files Section */}
             {isExpanded && (
-                <div className="border-t border-gray-200 dark:border-gray-600">
-                    <div className="p-4 bg-white dark:bg-gray-800">
+                <div className="border-t border-slate-100 bg-slate-50/50">
+                    <div className="p-5">
                         {project.files.length > 0 ? (
                             <div className="space-y-3">
                                 {project.files.map((file) => (
@@ -287,12 +296,12 @@ export default function ProjectCard({
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-8">
+                            <div className="text-center py-8 bg-white rounded-2xl border border-slate-100 border-dashed">
                                 <div className="flex flex-col items-center space-y-3">
-                                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
-                                            className="h-8 w-8 text-gray-400 dark:text-gray-500"
+                                            className="h-6 w-6 text-slate-400"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke="currentColor"
@@ -306,10 +315,10 @@ export default function ProjectCard({
                                         </svg>
                                     </div>
                                     <div className="text-center">
-                                        <h4 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                        <h4 className="text-base font-semibold text-slate-600">
                                             ยังไม่มีไฟล์ในโครงการ
                                         </h4>
-                                        <p className="text-sm text-gray-400 dark:text-gray-500">
+                                        <p className="text-sm text-slate-400">
                                             โครงการนี้ยังไม่มีการสร้าง/อัปโหลดไฟล์เอกสารใดๆ
                                         </p>
                                     </div>

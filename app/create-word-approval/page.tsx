@@ -655,6 +655,7 @@ export default function CreateWordDocPage() {
                 fileName={formData.fileName}
                 downloadUrl={generatedFileUrl}
                 documentType="เอกสาร Word"
+                onRedirect={allowNavigation}
             />
         </PageLayout>
     );

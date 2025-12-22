@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChartBarBig } from "lucide-react";
+import { ChartBarBig, LogOut } from "lucide-react";
 
 interface AdminTopBarProps {
     setIsSidebarOpen: (open: boolean) => void;
@@ -20,16 +20,16 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
     signOut,
 }) => {
     return (
-        <div className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white/70 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-slate-200/60 transition-all duration-300">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <button
-                        className="lg:hidden btn btn-ghost btn-sm"
+                        className="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors"
                         onClick={() => setIsSidebarOpen(true)}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
+                            className="h-6 w-6"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -42,19 +42,22 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
                             />
                         </svg>
                     </button>
-                    <ChartBarBig />
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
+                        <ChartBarBig className="h-6 w-6" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-slate-800">
                         {menuItems.find((item) => item.id === activeTab)
                             ?.name || "Admin Dashboard"}
                     </h1>
                 </div>
                 <div className="flex items-center space-x-4">
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => signOut()}
-                        className="cursor-pointer"
+                        className="cursor-pointer text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl"
                     >
+                        <LogOut className="h-4 w-4 mr-2" />
                         ออกจากระบบ
                     </Button>
                 </div>

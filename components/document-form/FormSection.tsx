@@ -18,14 +18,22 @@ export function FormSection({
     icon,
 }: FormSectionProps) {
     return (
-        <div className={`${bgColor} p-6 rounded-lg border ${borderColor}`}>
-            <h3
-                className={`text-lg font-semibold text-slate-800 mb-4 pb-2 border-b ${headerBorderColor} flex items-center gap-2`}
+        <div
+            className={`group ${bgColor} p-6 md:p-8 rounded-3xl border ${borderColor} hover:border-blue-200 hover:shadow-sm transition-all duration-300`}
+        >
+            <div
+                className={`flex items-center gap-3 mb-6 pb-4 border-b ${headerBorderColor}`}
             >
-                {icon && <span>{icon}</span>}
-                {title}
-            </h3>
-            {children}
+                {icon && (
+                    <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-blue-600 group-hover:scale-110 transition-transform duration-300">
+                        {icon}
+                    </div>
+                )}
+                <h3 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">
+                    {title}
+                </h3>
+            </div>
+            <div className="space-y-6">{children}</div>
         </div>
     );
 }
