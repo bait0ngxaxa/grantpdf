@@ -200,7 +200,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                                             variant="outline"
                                             className="hidden sm:flex rounded-xl border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all font-semibold"
                                         >
-                                            จัดการเอกสาร
+                                            จัดการ/เพิ่มเอกสาร
                                         </Button>
 
                                         <div className="flex space-x-1">
