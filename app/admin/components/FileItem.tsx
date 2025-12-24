@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import AttachmentList from "./AttachmentList";
 import type { AdminPdfFile } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
+import { useSignedDownload } from "@/hooks/useSignedDownload";
 
 interface FileItemProps {
     file: AdminPdfFile;
@@ -18,6 +19,7 @@ export default function FileItem({
     onDeleteFile,
 }: FileItemProps) {
     const [isAttachmentExpanded, setIsAttachmentExpanded] = useState(false);
+    const { download, isDownloading } = useSignedDownload();
 
     const toggleAttachmentExpansion = () => {
         setIsAttachmentExpanded(!isAttachmentExpanded);
@@ -173,11 +175,12 @@ export default function FileItem({
                 {/* Action Buttons */}
                 <div className="flex items-center space-x-2 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                     {file.storagePath && (
-                        <a
-                            href={`/api/admin/download/${file.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center p-2 rounded-xl text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                        <button
+                            onClick={() =>
+                                download({ fileId: file.id, type: "userFile" })
+                            }
+                            disabled={isDownloading}
+                            className="inline-flex items-center justify-center p-2 rounded-xl text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 transition-colors disabled:opacity-50"
                             title="ดาวน์โหลด"
                         >
                             <svg
@@ -194,7 +197,7 @@ export default function FileItem({
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                                 />
                             </svg>
-                        </a>
+                        </button>
                     )}
                     {file.fileExtension === "pdf" && (
                         <Button
@@ -255,16 +258,18 @@ export default function FileItem({
                 </div>
             </div>
 
-            {/* Attachment Files Section */}
-            {file.attachmentFiles && file.attachmentFiles.length > 0 && (
-                <div className="mt-3">
-                    <AttachmentList
-                        attachmentFiles={file.attachmentFiles}
-                        isExpanded={isAttachmentExpanded}
-                        onToggleExpand={toggleAttachmentExpansion}
-                    />
-                </div>
-            )}
+            {/* Attachment Files Section - แสดงเฉพาะเมื่อกดปุ่มไฟล์แนบ */}
+            {file.attachmentFiles &&
+                file.attachmentFiles.length > 0 &&
+                isAttachmentExpanded && (
+                    <div className="mt-3">
+                        <AttachmentList
+                            attachmentFiles={file.attachmentFiles}
+                            isExpanded={isAttachmentExpanded}
+                            onToggleExpand={toggleAttachmentExpansion}
+                        />
+                    </div>
+                )}
         </React.Fragment>
     );
 }

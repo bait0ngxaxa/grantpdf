@@ -290,7 +290,11 @@ export default function CreateWordDocPage() {
 
             if (response.ok) {
                 const result = await response.json();
-                if (result.success && result.downloadUrl) {
+                // รองรับทั้ง storagePath (ใหม่) และ downloadUrl (legacy)
+                if (
+                    result.success &&
+                    (result.storagePath || result.downloadUrl)
+                ) {
                     setIsSuccessModalOpen(true);
                 } else {
                     setMessage("ไม่สามารถสร้างเอกสาร Word ได้");

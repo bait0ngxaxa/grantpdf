@@ -286,14 +286,37 @@ export default function ProjectCard({
                     <div className="p-5">
                         {project.files.length > 0 ? (
                             <div className="space-y-3">
-                                {project.files.map((file) => (
-                                    <FileItem
-                                        key={file.id}
-                                        file={file}
-                                        onPreviewPdf={onPreviewPdf}
-                                        onDeleteFile={onDeleteFile}
-                                    />
-                                ))}
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="text-sm font-bold text-slate-700 flex items-center">
+                                        <span className="bg-purple-100 text-purple-600 p-1.5 rounded-lg mr-2">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-4 w-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                />
+                                            </svg>
+                                        </span>
+                                        รายการเอกสารในโครงการ
+                                    </div>
+                                </div>
+                                <div className="grid gap-3">
+                                    {project.files.map((file) => (
+                                        <FileItem
+                                            key={file.id}
+                                            file={file}
+                                            onPreviewPdf={onPreviewPdf}
+                                            onDeleteFile={onDeleteFile}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         ) : (
                             <div className="text-center py-8 bg-white rounded-2xl border border-slate-100 border-dashed">

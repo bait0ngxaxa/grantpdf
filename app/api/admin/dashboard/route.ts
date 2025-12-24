@@ -80,7 +80,19 @@ export async function GET() {
                 })) || [],
         }));
 
-        return NextResponse.json(sanitizedFiles, { status: 200 });
+        // กรองไฟล์ที่เป็น attachment ของไฟล์อื่นออก (ไม่ให้แสดงในรายการหลัก)
+        // ไฟล์ที่เป็น attachment จะมี storagePath เก็บใน attachmentFiles ของไฟล์อื่น
+        const attachmentPaths = new Set(
+            allUserFiles.flatMap(
+                (file) => file.attachmentFiles?.map((att) => att.filePath) || []
+            )
+        );
+
+        const filteredFiles = sanitizedFiles.filter(
+            (file) => !attachmentPaths.has(file.storagePath)
+        );
+
+        return NextResponse.json(filteredFiles, { status: 200 });
     } catch (error) {
         console.error("Error fetching all documents:", error);
         return NextResponse.json(

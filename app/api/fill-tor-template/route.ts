@@ -10,6 +10,11 @@ import {
     fixThaiDistributed,
     generateUniqueFilename,
 } from "@/lib/documentUtils";
+import {
+    ensureStorageDir,
+    getStoragePath,
+    getRelativeStoragePath,
+} from "@/lib/fileStorage";
 
 export async function POST(req: Request) {
     try {
@@ -179,11 +184,15 @@ export async function POST(req: Request) {
         });
 
         const uniqueFileName = generateUniqueFilename(fileName + ".docx");
-        const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
-        await fs.mkdir(uploadDir, { recursive: true });
+        // ใช้ storage directory นอก public/
+        await ensureStorageDir("documents");
+        const filePath = getStoragePath("documents", uniqueFileName);
+        const relativeStoragePath = getRelativeStoragePath(
+            "documents",
+            uniqueFileName
+        );
 
-        const filePath = path.join(uploadDir, uniqueFileName);
         await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
         let project;
@@ -227,17 +236,16 @@ export async function POST(req: Request) {
         await prisma.userFile.create({
             data: {
                 originalFileName: fileName + ".docx",
-                storagePath: `/upload/docx/${uniqueFileName}`,
+                storagePath: relativeStoragePath,
                 fileExtension: "docx",
                 userId: userId,
                 projectId: project.id,
             },
         });
 
-        const downloadUrl = `/upload/docx/${uniqueFileName}`;
         return NextResponse.json({
             success: true,
-            downloadUrl,
+            storagePath: relativeStoragePath,
             project: {
                 id: project.id.toString(),
                 name: project.name,

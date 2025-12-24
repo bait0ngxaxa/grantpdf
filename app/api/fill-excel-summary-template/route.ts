@@ -7,6 +7,11 @@ import fsPromises from "fs/promises";
 import ExcelJS from "exceljs";
 import { prisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
+import {
+    ensureStorageDir,
+    getStoragePath,
+    getRelativeStoragePath,
+} from "@/lib/fileStorage";
 
 // Helper function to generate a unique filename
 const generateUniqueFilename = (originalName: string): string => {
@@ -190,11 +195,15 @@ export async function POST(req: NextRequest) {
         const buffer = await workbook.xlsx.writeBuffer();
 
         const uniqueFileName = generateUniqueFilename(fileName + ".xlsx");
-        const uploadDir = path.join(process.cwd(), "public", "upload", "excel");
 
-        await fsPromises.mkdir(uploadDir, { recursive: true });
+        // ใช้ storage directory นอก public/
+        await ensureStorageDir("documents");
+        const filePath = getStoragePath("documents", uniqueFileName);
+        const relativeStoragePath = getRelativeStoragePath(
+            "documents",
+            uniqueFileName
+        );
 
-        const filePath = path.join(uploadDir, uniqueFileName);
         await fsPromises.writeFile(filePath, Buffer.from(buffer));
 
         let project;
@@ -238,17 +247,16 @@ export async function POST(req: NextRequest) {
         await prisma.userFile.create({
             data: {
                 originalFileName: fileName + ".xlsx",
-                storagePath: `/upload/excel/${uniqueFileName}`,
+                storagePath: relativeStoragePath,
                 fileExtension: "xlsx",
                 userId: userId,
                 projectId: project.id,
             },
         });
 
-        const downloadUrl = `/upload/excel/${uniqueFileName}`;
         return NextResponse.json({
             success: true,
-            downloadUrl,
+            storagePath: relativeStoragePath,
             project: {
                 id: project.id.toString(),
                 name: project.name,

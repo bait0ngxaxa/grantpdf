@@ -85,9 +85,38 @@ export async function GET() {
                 })) || [],
         }));
 
+        // รวม filePath ของ attachment files ทั้งหมด เพื่อกรองไฟล์ที่เป็น attachment ออก
+        const allAttachmentPaths = new Set<string>();
+
+        for (const project of sanitizedProjects) {
+            for (const file of project.files) {
+                for (const att of file.attachmentFiles || []) {
+                    allAttachmentPaths.add(att.filePath);
+                }
+            }
+        }
+
+        for (const file of sanitizedOrphanFiles) {
+            for (const att of file.attachmentFiles || []) {
+                allAttachmentPaths.add(att.filePath);
+            }
+        }
+
+        // กรองไฟล์ที่ storagePath ตรงกับ attachment filePath ออก
+        const filteredProjects = sanitizedProjects.map((project) => ({
+            ...project,
+            files: project.files.filter(
+                (file) => !allAttachmentPaths.has(file.storagePath)
+            ),
+        }));
+
+        const filteredOrphanFiles = sanitizedOrphanFiles.filter(
+            (file) => !allAttachmentPaths.has(file.storagePath)
+        );
+
         return NextResponse.json({
-            projects: sanitizedProjects,
-            orphanFiles: sanitizedOrphanFiles,
+            projects: filteredProjects,
+            orphanFiles: filteredOrphanFiles,
         });
     } catch (error) {
         console.error("Error fetching projects:", error);

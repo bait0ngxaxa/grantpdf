@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { AttachmentFile } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
+import { useSignedDownload } from "@/hooks/useSignedDownload";
 
 interface FileItemProps {
     file: {
@@ -23,6 +24,7 @@ export default function FileItem({
     onDeleteFile,
 }: FileItemProps) {
     const [isAttachmentExpanded, setIsAttachmentExpanded] = useState(false);
+    const { download, isDownloading } = useSignedDownload();
 
     return (
         <React.Fragment>
@@ -141,13 +143,13 @@ export default function FileItem({
                     </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex items-center space-x-2 flex-shrink-0">
-                    <a
-                        href={`/api/user-docs/download/${file.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    <button
+                        onClick={() =>
+                            download({ fileId: file.id, type: "userFile" })
+                        }
+                        disabled={isDownloading}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
                         title="ดาวน์โหลด"
                     >
                         <svg
@@ -164,7 +166,7 @@ export default function FileItem({
                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                             />
                         </svg>
-                    </a>
+                    </button>
                     {file.fileExtension === "pdf" && (
                         <button
                             onClick={() =>
@@ -318,11 +320,15 @@ export default function FileItem({
                                             </div>
                                         </div>
                                     </div>
-                                    <a
-                                        href={`/api/attachment/download/${attachment.id}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex-shrink-0 ml-1 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200"
+                                    <button
+                                        onClick={() =>
+                                            download({
+                                                fileId: attachment.id,
+                                                type: "attachment",
+                                            })
+                                        }
+                                        disabled={isDownloading}
+                                        className="flex-shrink-0 ml-1 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200 disabled:opacity-50"
                                         title="ดาวน์โหลด"
                                     >
                                         <svg
@@ -338,7 +344,7 @@ export default function FileItem({
                                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                                             />
                                         </svg>
-                                    </a>
+                                    </button>
                                 </div>
                             ))}
                         </div>

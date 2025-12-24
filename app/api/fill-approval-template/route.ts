@@ -12,6 +12,12 @@ import {
     generateUniqueFilename,
     getMimeType,
 } from "@/lib/documentUtils";
+import {
+    ensureStorageDir,
+    getStoragePath,
+    getRelativeStoragePath,
+    getFullPathFromStoragePath,
+} from "@/lib/fileStorage";
 
 export async function POST(req: Request) {
     try {
@@ -199,11 +205,15 @@ export async function POST(req: Request) {
         });
 
         const uniqueFileName = generateUniqueFilename(projectName + ".docx");
-        const uploadDir = path.join(process.cwd(), "public", "upload", "docx");
 
-        await fs.mkdir(uploadDir, { recursive: true });
+        // ใช้ storage directory นอก public/
+        await ensureStorageDir("documents");
+        const filePath = getStoragePath("documents", uniqueFileName);
+        const relativeStoragePath = getRelativeStoragePath(
+            "documents",
+            uniqueFileName
+        );
 
-        const filePath = path.join(uploadDir, uniqueFileName);
         await fs.writeFile(filePath, Buffer.from(outputBuffer));
 
         let project;
@@ -247,7 +257,7 @@ export async function POST(req: Request) {
         const savedFile = await prisma.userFile.create({
             data: {
                 originalFileName: projectName + ".docx",
-                storagePath: `/upload/docx/${uniqueFileName}`,
+                storagePath: relativeStoragePath,
                 fileExtension: "docx",
                 userId: userId,
                 projectId: project.id,
@@ -269,9 +279,8 @@ export async function POST(req: Request) {
                     if (attachmentFile) {
                         let actualFileSize = 0;
                         try {
-                            const fullFilePath = path.join(
-                                process.cwd(),
-                                "public",
+                            // ใช้ storage path ใหม่
+                            const fullFilePath = getFullPathFromStoragePath(
                                 attachmentFile.storagePath
                             );
                             const fileStats = await fs.stat(fullFilePath);
@@ -313,10 +322,9 @@ export async function POST(req: Request) {
             // No attachment files to link
         }
 
-        const downloadUrl = `/upload/${uniqueFileName}`;
         return NextResponse.json({
             success: true,
-            downloadUrl,
+            storagePath: relativeStoragePath,
             project: {
                 id: project.id.toString(),
                 name: project.name,

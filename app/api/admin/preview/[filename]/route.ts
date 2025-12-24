@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
+import { STORAGE_PATHS, getMimeType } from "@/lib/fileStorage";
 
 export async function GET(
     req: NextRequest,
@@ -34,16 +35,10 @@ export async function GET(
             );
         }
 
+        // ค้นหาใน storage directory แทน public
         const possiblePaths = [
-            path.join(process.cwd(), "public", "upload", "docx", filename),
-            path.join(
-                process.cwd(),
-                "public",
-                "upload",
-                "attachments",
-                filename
-            ),
-            path.join(process.cwd(), "public", "upload", filename),
+            path.join(STORAGE_PATHS.documents, filename),
+            path.join(STORAGE_PATHS.attachments, filename),
         ];
 
         let fullPath: string | null = null;
@@ -62,21 +57,7 @@ export async function GET(
         }
 
         const fileBuffer = fs.readFileSync(fullPath);
-        const fileExtension = path.extname(filename).toLowerCase();
-
-        let contentType = "application/octet-stream";
-        if (fileExtension === ".pdf") {
-            contentType = "application/pdf";
-        } else if (fileExtension === ".docx") {
-            contentType =
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        } else if (fileExtension === ".doc") {
-            contentType = "application/msword";
-        } else if ([".jpg", ".jpeg"].includes(fileExtension)) {
-            contentType = "image/jpeg";
-        } else if (fileExtension === ".png") {
-            contentType = "image/png";
-        }
+        const contentType = getMimeType(filename);
 
         return new NextResponse(fileBuffer, {
             headers: {

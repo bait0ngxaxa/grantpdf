@@ -162,8 +162,11 @@ export function useDocumentForm<T extends object>({
                         contentType.includes("application/json")
                     ) {
                         const result = await response.json();
-                        if (result.success && result.downloadUrl) {
-                            setGeneratedFileUrl(result.downloadUrl);
+                        // รองรับทั้ง storagePath (ใหม่) และ downloadUrl (legacy)
+                        const fileUrl =
+                            result.storagePath || result.downloadUrl;
+                        if (result.success && fileUrl) {
+                            setGeneratedFileUrl(fileUrl);
                             setMessage(
                                 `สร้างเอกสาร ${documentType} สำเร็จแล้ว!${
                                     result.project?.name
@@ -174,9 +177,8 @@ export function useDocumentForm<T extends object>({
                             setIsError(false);
                             setIsSuccessModalOpen(true);
                             if (onSuccess) onSuccess(result);
-                        } else if (result.downloadUrl) {
-                            const fullUrl =
-                                window.location.origin + result.downloadUrl;
+                        } else if (fileUrl) {
+                            const fullUrl = window.location.origin + fileUrl;
                             setGeneratedFileUrl(fullUrl);
                             setMessage(
                                 `สร้างเอกสาร ${documentType} สำเร็จแล้ว!`

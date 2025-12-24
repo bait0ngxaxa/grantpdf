@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import fs from "fs";
-import path from "path";
+
+import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 
 export async function GET(
     req: NextRequest,
@@ -47,11 +48,8 @@ export async function GET(
             );
         }
 
-        const fullPath = path.join(
-            process.cwd(),
-            "public",
-            attachment.filePath
-        );
+        // ใช้ storage path ใหม่
+        const fullPath = getFullPathFromStoragePath(attachment.filePath);
 
         if (!fs.existsSync(fullPath)) {
             return NextResponse.json(
@@ -61,20 +59,8 @@ export async function GET(
         }
 
         const fileBuffer = fs.readFileSync(fullPath);
-        const fileExtension = path.extname(attachment.fileName).toLowerCase();
-
-        let contentType = attachment.mimeType || "application/octet-stream";
-        if (!attachment.mimeType) {
-            if (fileExtension === ".pdf") contentType = "application/pdf";
-            else if (fileExtension === ".docx")
-                contentType =
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            else if (fileExtension === ".doc")
-                contentType = "application/msword";
-            else if (fileExtension === ".jpg" || fileExtension === ".jpeg")
-                contentType = "image/jpeg";
-            else if (fileExtension === ".png") contentType = "image/png";
-        }
+        const contentType =
+            attachment.mimeType || getMimeType(attachment.fileName);
 
         return new NextResponse(fileBuffer, {
             status: 200,
