@@ -57,6 +57,7 @@ export default function CreateWordDocPage() {
         setFormData,
         handleChange,
         isSubmitting,
+        setIsSubmitting,
         message,
         isError,
         isSuccessModalOpen,
@@ -189,100 +190,110 @@ export default function CreateWordDocPage() {
             return;
         }
 
-        const data = new FormData();
-
-        Object.keys(formData).forEach((key) => {
-            if (key === "attachments") {
-                data.append(
-                    "attachments",
-                    JSON.stringify(formData.attachments)
-                );
-            } else {
-                data.append(key, formData[key as keyof ApprovalData] as string);
-            }
-        });
-
-        Object.keys(approvalFixedValues).forEach((key) => {
-            data.append(
-                key,
-                approvalFixedValues[key as keyof typeof approvalFixedValues]
-            );
-        });
-
-        if (signatureFile) {
-            data.append("signatureFile", signatureFile);
-        }
-
-        if (signatureCanvasData) {
-            try {
-                if (!signatureCanvasData.startsWith("data:image/")) {
-                    throw new Error("Invalid signature data format");
-                }
-
-                const parts = signatureCanvasData.split(",");
-                if (parts.length !== 2) {
-                    throw new Error("Invalid base64 data structure");
-                }
-
-                const byteString = atob(parts[1]);
-                const mimeString = signatureCanvasData
-                    .split(",")[0]
-                    .split(":")[1]
-                    .split(";")[0];
-
-                const ab = new ArrayBuffer(byteString.length);
-                const ia = new Uint8Array(ab);
-                for (let i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
-                }
-
-                const canvasSignatureFile = new File(
-                    [ab],
-                    "canvas-signature.png",
-                    {
-                        type: mimeString,
-                    }
-                );
-
-                if (canvasSignatureFile.size === 0) {
-                    throw new Error("Generated signature file is empty");
-                }
-
-                data.append("canvasSignatureFile", canvasSignatureFile);
-            } catch (error: unknown) {
-                const errorMessage =
-                    error instanceof Error ? error.message : "Unknown error";
-                setMessage(
-                    `เกิดข้อผิดพลาดในการประมวลผลลายเซ็น: ${errorMessage}`
-                );
-                setIsError(true);
-                return;
-            }
-        }
-
-        if (attachmentFiles.length > 0) {
-            const uploadedAttachments = await uploadAttachmentFiles(
-                attachmentFiles
-            );
-            data.append(
-                "attachmentFileIds",
-                JSON.stringify(uploadedAttachments)
-            );
-        }
-
-        if (session.user?.id) {
-            data.append("userId", session.user.id.toString());
-        }
-        if (session.user?.email) {
-            data.append("userEmail", session.user.email);
-        }
-
-        const selectedProjectId = localStorage.getItem("selectedProjectId");
-        if (selectedProjectId) {
-            data.append("projectId", selectedProjectId);
-        }
+        // Start loading state
+        setIsSubmitting(true);
+        setMessage(null);
+        setIsError(false);
 
         try {
+            const data = new FormData();
+
+            Object.keys(formData).forEach((key) => {
+                if (key === "attachments") {
+                    data.append(
+                        "attachments",
+                        JSON.stringify(formData.attachments)
+                    );
+                } else {
+                    data.append(
+                        key,
+                        formData[key as keyof ApprovalData] as string
+                    );
+                }
+            });
+
+            Object.keys(approvalFixedValues).forEach((key) => {
+                data.append(
+                    key,
+                    approvalFixedValues[key as keyof typeof approvalFixedValues]
+                );
+            });
+
+            if (signatureFile) {
+                data.append("signatureFile", signatureFile);
+            }
+
+            if (signatureCanvasData) {
+                try {
+                    if (!signatureCanvasData.startsWith("data:image/")) {
+                        throw new Error("Invalid signature data format");
+                    }
+
+                    const parts = signatureCanvasData.split(",");
+                    if (parts.length !== 2) {
+                        throw new Error("Invalid base64 data structure");
+                    }
+
+                    const byteString = atob(parts[1]);
+                    const mimeString = signatureCanvasData
+                        .split(",")[0]
+                        .split(":")[1]
+                        .split(";")[0];
+
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+
+                    const canvasSignatureFile = new File(
+                        [ab],
+                        "canvas-signature.png",
+                        {
+                            type: mimeString,
+                        }
+                    );
+
+                    if (canvasSignatureFile.size === 0) {
+                        throw new Error("Generated signature file is empty");
+                    }
+
+                    data.append("canvasSignatureFile", canvasSignatureFile);
+                } catch (error: unknown) {
+                    const errorMessage =
+                        error instanceof Error
+                            ? error.message
+                            : "Unknown error";
+                    setMessage(
+                        `เกิดข้อผิดพลาดในการประมวลผลลายเซ็น: ${errorMessage}`
+                    );
+                    setIsError(true);
+                    return;
+                }
+            }
+
+            if (attachmentFiles.length > 0) {
+                const uploadedAttachments = await uploadAttachmentFiles(
+                    attachmentFiles
+                );
+                data.append(
+                    "attachmentFileIds",
+                    JSON.stringify(uploadedAttachments)
+                );
+            }
+
+            if (session.user?.id) {
+                data.append("userId", session.user.id.toString());
+            }
+            if (session.user?.email) {
+                data.append("userEmail", session.user.email);
+            }
+
+            const selectedProjectId = localStorage.getItem("selectedProjectId");
+            if (selectedProjectId) {
+                data.append("projectId", selectedProjectId);
+            }
+
             const response = await fetch("/api/fill-approval-template", {
                 method: "POST",
                 body: data,
@@ -312,9 +323,10 @@ export default function CreateWordDocPage() {
         } catch {
             setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ");
             setIsError(true);
+        } finally {
+            setIsSubmitting(false);
         }
     };
-
     const isDirty =
         Object.values(formData).some((value) => {
             if (Array.isArray(value)) return value.length > 0;

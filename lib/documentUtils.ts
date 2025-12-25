@@ -1,46 +1,75 @@
 import { v4 as uuidv4 } from "uuid";
+import Wordcut from "wordcut";
 
+// Initialize wordcut for Thai word segmentation
+Wordcut.init();
+
+// Zero-Width Space character for word breaks
+const ZWSP = "\u200B";
+
+/**
+ * Fix Thai text for proper rendering in Word documents with Thai Distributed alignment.
+ * Uses Thai word segmentation to insert Zero-Width Spaces (ZWSP) between words,
+ * allowing Word to properly distribute text across the line.
+ */
 export const fixThaiDistributed = (text: string): string => {
     if (!text || typeof text !== "string") return "";
 
-    return (
-        text
-            // 1. ลบ invisible characters ที่ทำให้ Thai Distributed ทำงานผิด
-            .replace(/[\u200B-\u200D\uFEFF]/g, "") // Zero-width chars + BOM
-            .replace(/[\u2060-\u206F]/g, "") // Word joiner, invisible chars
-            .replace(/\u00AD/g, "") // Soft hyphen (ปัญหาหลัก!)
-            .replace(/[\u034F\u061C]/g, "") // Combining grapheme joiner + Arabic letter mark
+    // Step 1: Remove existing invisible characters that might cause issues
+    let result = text
+        .replace(/[\u200B-\u200D\uFEFF\u00AD\u2060-\u206F\u034F\u061C]/g, "")
+        // Convert special spaces to normal space
+        .replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, " ")
+        // Unicode NFC normalization (important for Thai combining characters)
+        .normalize("NFC");
 
-            // 2. แปลง special spaces เป็น normal space
-            .replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, " ")
+    // Step 2: Normalize line breaks
+    result = result
+        .replace(/\r\n|\r|\u2028/g, "\n")
+        .replace(/\u2029/g, "\n\n")
+        .replace(/[\u000B\u000C]/g, "\n");
 
-            // 3. รวม Thai combining characters
-            .normalize("NFC")
+    // Step 3: Process text line by line to preserve line breaks
+    const lines = result.split("\n");
+    const processedLines = lines.map((line) => {
+        if (!line.trim()) return line;
 
-            // 4. จัดการ line breaks อย่างถูกต้อง (รักษา paragraph structure)
-            .replace(/\r\n|\r|\u2028/g, "\n") // แปลงเป็น LF
-            .replace(/\u2029/g, "\n\n") // Paragraph separator
-            .replace(/[\u000B\u000C]/g, "\n") // Vertical tab, Form feed
+        // Check if line contains Thai characters
+        const hasThaiChars = /[\u0E00-\u0E7F]/.test(line);
 
-            // 5. **ปรับปรุงการจัดการ spaces สำหรับ Thai Distributed**
-            .replace(/[ \t]{2,}/g, " ") // แปลง multiple spaces เป็น single space
-            .replace(/^[ \t]+|[ \t]+$/gm, "") // ลบ leading/trailing spaces ในแต่ละบรรทัด
+        if (hasThaiChars) {
+            // Use wordcut to segment Thai text and insert ZWSP between words
+            // This helps Word understand where to break/distribute text
+            return Wordcut.cut(line, ZWSP);
+        }
 
-            // 6. ลบ Word field codes และ formatting marks
-            .replace(/[\u0013-\u0015]/g, "") // Field separators
-            .replace(/[\u200E\u200F\u202A-\u202E]/g, "") // Directional marks
+        return line;
+    });
 
-            // 7. **เพิ่มการจัดการ Thai-specific issues**
-            .replace(/([ก-๏])\s+([ก-๏])/g, "$1 $2") // รักษาช่องว่างระหว่างคำไทย
-            .replace(/\s*([.,:;!?])\s*/g, "$1 ") // จัดการเครื่องหมายวรรคตอน
+    result = processedLines.join("\n");
 
-            // 8. จำกัด empty lines และ clean up
-            .replace(/\n{3,}/g, "\n\n") // จำกัด empty lines
-            .replace(/^\n+|\n+$/g, "") // ลบ leading/trailing newlines
-            .trim()
-    );
+    // Step 4: Clean up spacing issues
+    result = result
+        // Remove space before punctuation
+        .replace(/\s+([.,:;!?])/g, "$1")
+        // Reduce multiple spaces to single space
+        .replace(/[ \t]{2,}/g, " ")
+        // Remove leading/trailing spaces per line
+        .replace(/^[ \t]+|[ \t]+$/gm, "")
+        // Remove Word field codes and formatting marks
+        .replace(/[\u0013-\u0015\u200E\u200F\u202A-\u202E]/g, "")
+        // Clean up excessive empty lines
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/^\n+|\n+$/g, "")
+        .trim();
+
+    return result;
 };
 
+/**
+ * Generate a unique filename with UUID prefix.
+ * Preserves Thai characters in the filename.
+ */
 export const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
     const nameWithoutExt =
@@ -50,16 +79,19 @@ export const generateUniqueFilename = (originalName: string): string => {
     const extension =
         lastDotIndex > 0 ? originalName.substring(lastDotIndex) : "";
 
-    // ทำความสะอาดชื่อไฟล์โดยเก็บอักขระไทยไว้
+    // Clean filename while preserving Thai characters
     const sanitizedName = nameWithoutExt
-        .replace(/\s+/g, "_") // เปลี่ยนช่องว่างเป็น underscore
-        .replace(/[<>:"/\\|?*]/g, "") // ลบอักขระที่ไม่อนุญาตใน filename เท่านั้น
-        .substring(0, 50); // จำกัดความยาว
+        .replace(/\s+/g, "_") // Convert spaces to underscores
+        .replace(/[<>:"/\\|?*]/g, "") // Remove invalid filename characters only
+        .substring(0, 50); // Limit length
 
     const uniqueId = uuidv4();
     return `${uniqueId}_${sanitizedName}${extension}`;
 };
 
+/**
+ * Get MIME type from file extension.
+ */
 export const getMimeType = (fileExtension: string): string => {
     const ext = fileExtension.toLowerCase();
     switch (ext) {

@@ -26,6 +26,7 @@ interface UseDocumentFormReturn<T> {
     formData: T;
     setFormData: React.Dispatch<React.SetStateAction<T>>;
     isSubmitting: boolean;
+    setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
     message: string | null;
     isError: boolean;
     isSuccessModalOpen: boolean;
@@ -234,6 +235,7 @@ export function useDocumentForm<T extends object>({
         formData,
         setFormData,
         isSubmitting,
+        setIsSubmitting,
         message,
         isError,
         isSuccessModalOpen,
