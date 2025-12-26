@@ -89,8 +89,8 @@ export default function SignupPage() {
                     </h1>
 
                     <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
-                        สมัครสมาชิกวันนี้เพื่อเข้าถึงฟีเจอร์ทั้งหมด
-                        สร้างเอกสารสัญญา TOR และติดตามสถานะโครงการได้ทันที
+                        สมัครสมาชิกเพื่อเข้าถึงการ สร้างเอกสารสัญญา TOR
+                        และติดตามสถานะโครงการได้ทันที
                     </p>
 
                     <div className="space-y-4 max-w-lg">
@@ -100,10 +100,10 @@ export default function SignupPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-slate-800">
-                                    จัดการเอกสารง่าย
+                                    จัดการเอกสาร, โครงการ
                                 </h3>
                                 <p className="text-sm text-slate-500">
-                                    สร้างและแก้ไขเอกสาร
+                                    สร้างและเสนอโครงการ
                                 </p>
                             </div>
                         </div>
@@ -113,7 +113,7 @@ export default function SignupPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-slate-800">
-                                    ระบบอัตโนมัติ
+                                    ระบบเทมเพลตเอกสารอัตโนมัติ
                                 </h3>
                                 <p className="text-sm text-slate-500">
                                     ลดเวลาการทำงาน

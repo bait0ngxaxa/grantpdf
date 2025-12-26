@@ -79,7 +79,7 @@ export default function LoginPage() {
                                 สร้างเอกสาร
                             </div>
                             <div className="text-sm text-slate-400">
-                                รวดเร็ว ทันใจ
+                                ด้วยเทมเพลตที่กำหนด
                             </div>
                         </div>
                         <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
@@ -90,7 +90,7 @@ export default function LoginPage() {
                                 ติดตามสถานะ
                             </div>
                             <div className="text-sm text-slate-400">
-                                Real-time
+                                โครงการของคุณ
                             </div>
                         </div>
                     </div>

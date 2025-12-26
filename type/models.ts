@@ -41,6 +41,7 @@ export interface Project {
     name: string;
     description?: string;
     status: string;
+    statusNote?: string;
     created_at: string;
     updated_at: string;
     userId?: string;

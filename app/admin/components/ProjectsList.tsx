@@ -4,7 +4,7 @@ import React from "react";
 import ProjectCard from "./ProjectCard";
 import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
-import type { AdminProject, AdminPdfFile } from "@/type/models";
+import type { AdminProject } from "@/type/models";
 
 interface ProjectsListProps {
     projects: AdminProject[];
@@ -16,7 +16,6 @@ interface ProjectsListProps {
     endIndex: number;
     onToggleProjectExpansion: (projectId: string) => void;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
-    onDeleteFile: (file: AdminPdfFile) => void;
     onEditProjectStatus: (project: AdminProject) => void;
 }
 
@@ -30,7 +29,6 @@ export default function ProjectsList({
     endIndex,
     onToggleProjectExpansion,
     onPreviewPdf,
-    onDeleteFile,
     onEditProjectStatus,
 }: ProjectsListProps) {
     if (isLoading) {
@@ -88,7 +86,6 @@ export default function ProjectsList({
                         showNewBadge={!viewedProjects.has(project.id)}
                         onToggleExpansion={onToggleProjectExpansion}
                         onPreviewPdf={onPreviewPdf}
-                        onDeleteFile={onDeleteFile}
                         onEditProjectStatus={onEditProjectStatus}
                     />
                 ))}

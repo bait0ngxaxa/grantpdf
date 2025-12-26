@@ -183,6 +183,7 @@ export default function CreateTORPage() {
                         <FormField
                             label="อีเมล"
                             name="email"
+                            type="email"
                             placeholder="ระบุอีเมลผู้รับผิดชอบ"
                             value={formData.email}
                             onChange={handleChange}
@@ -191,6 +192,7 @@ export default function CreateTORPage() {
                         <FormField
                             label="เบอร์โทร"
                             name="tel"
+                            type="number"
                             placeholder="ระบุเบอร์โทรผู้รับผิดชอบ"
                             value={formData.tel}
                             onChange={handleChange}

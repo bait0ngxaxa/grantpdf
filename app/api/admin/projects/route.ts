@@ -157,7 +157,7 @@ export async function PUT(req: Request) {
             );
         }
 
-        const { projectId, status } = await req.json();
+        const { projectId, status, statusNote } = await req.json();
 
         const validStatuses = [
             "กำลังดำเนินการ",
@@ -183,6 +183,7 @@ export async function PUT(req: Request) {
             },
             data: {
                 status: status,
+                statusNote: statusNote || null,
                 updated_at: new Date(),
             },
             include: {

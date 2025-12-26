@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
 
                     <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
                         เพียงกรอกอีเมลที่คุณใช้สมัครสมาชิก
-                        เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้คุณทางอีเมล
+                        ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้คุณทางอีเมล
                     </p>
 
                     <div className="space-y-4 max-w-lg">
@@ -74,10 +74,10 @@ export default function ForgotPasswordPage() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-slate-800">
-                                    ปลอดภัยและรวดเร็ว
+                                    Secure Link
                                 </h3>
                                 <p className="text-sm text-slate-500">
-                                    ระบบรักษาความปลอดภัยมาตรฐานสูง
+                                    Link รีเซ็ตรหัสผ่าน เข้าถึงได้เฉพาะคุณ
                                 </p>
                             </div>
                         </div>

@@ -6,18 +6,11 @@ export const usePreviewModal = () => {
     const [previewFileName, setPreviewFileName] = useState("");
 
     const openPreviewModal = (storagePath: string, fileName: string) => {
-        let filename = storagePath;
-
-        if (filename.startsWith("/")) {
-            filename = filename.substring(1);
-        }
-
-        // If it's a full path like '/upload/docx/filename.pdf', extract just the filename
-        if (filename.includes("/")) {
-            filename = filename.split("/").pop() || filename;
-        }
-
-        setPreviewUrl(`/api/admin/preview/${filename}`);
+        // ใช้ API preview ใหม่ที่รองรับทั้ง user และ admin
+        const previewApiUrl = `/api/preview?path=${encodeURIComponent(
+            storagePath
+        )}`;
+        setPreviewUrl(previewApiUrl);
         setPreviewFileName(fileName);
         setIsPreviewModalOpen(true);
     };

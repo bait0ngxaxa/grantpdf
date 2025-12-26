@@ -100,7 +100,7 @@ export default function AdminDashboardPage() {
         selectedFileIdForDeletion,
         selectedFileNameForDeletion,
         isDeleting,
-        openDeleteModal,
+
         closeDeleteModal,
         handleDeleteFile,
     } = useFileActions(
@@ -115,6 +115,8 @@ export default function AdminDashboardPage() {
         selectedProjectForStatus,
         newStatus,
         setNewStatus,
+        statusNote,
+        setStatusNote,
         isUpdatingStatus,
         openStatusModal,
         closeStatusModal,
@@ -329,7 +331,6 @@ export default function AdminDashboardPage() {
                                         toggleProjectExpansion
                                     }
                                     onPreviewPdf={openPreviewModal}
-                                    onDeleteFile={openDeleteModal}
                                     onEditProjectStatus={openStatusModal}
                                 />
 
@@ -486,6 +487,8 @@ export default function AdminDashboardPage() {
                     selectedProjectForStatus={selectedProjectForStatus}
                     newStatus={newStatus}
                     setNewStatus={setNewStatus}
+                    statusNote={statusNote}
+                    setStatusNote={setStatusNote}
                     isUpdatingStatus={isUpdatingStatus}
                     closeStatusModal={closeStatusModal}
                     handleUpdateProjectStatus={handleUpdateProjectStatus}

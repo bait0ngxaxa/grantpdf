@@ -10,12 +10,14 @@ export const useProjectStatusActions = (
     const [selectedProjectForStatus, setSelectedProjectForStatus] =
         useState<AdminProject | null>(null);
     const [newStatus, setNewStatus] = useState("");
+    const [statusNote, setStatusNote] = useState("");
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
     // Open status modal
     const openStatusModal = (project: AdminProject) => {
         setSelectedProjectForStatus(project);
         setNewStatus(project.status);
+        setStatusNote(project.statusNote || "");
         setIsStatusModalOpen(true);
     };
 
@@ -24,6 +26,7 @@ export const useProjectStatusActions = (
         setIsStatusModalOpen(false);
         setSelectedProjectForStatus(null);
         setNewStatus("");
+        setStatusNote("");
     };
 
     // Handle update project status
@@ -40,6 +43,7 @@ export const useProjectStatusActions = (
                 body: JSON.stringify({
                     projectId: selectedProjectForStatus.id,
                     status: newStatus,
+                    statusNote: statusNote,
                 }),
             });
 
@@ -56,6 +60,7 @@ export const useProjectStatusActions = (
                         ? {
                               ...project,
                               status: newStatus,
+                              statusNote: statusNote,
                               updated_at: new Date().toISOString(),
                           }
                         : project
@@ -83,6 +88,8 @@ export const useProjectStatusActions = (
         selectedProjectForStatus,
         newStatus,
         setNewStatus,
+        statusNote,
+        setStatusNote,
         isUpdatingStatus,
         openStatusModal,
         closeStatusModal,

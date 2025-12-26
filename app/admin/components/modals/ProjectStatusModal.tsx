@@ -7,6 +7,8 @@ interface ProjectStatusModalProps {
     selectedProjectForStatus: AdminProject | null;
     newStatus: string;
     setNewStatus: (status: string) => void;
+    statusNote: string;
+    setStatusNote: (note: string) => void;
     isUpdatingStatus: boolean;
     closeStatusModal: () => void;
     handleUpdateProjectStatus: () => void;
@@ -18,6 +20,8 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     selectedProjectForStatus,
     newStatus,
     setNewStatus,
+    statusNote,
+    setStatusNote,
     isUpdatingStatus,
     closeStatusModal,
     handleUpdateProjectStatus,
@@ -91,7 +95,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 </div>
                             </div>
 
-                            <div className="form-control">
+                            <div className="form-control mb-4">
                                 <label className="label pl-0">
                                     <span className="label-text font-medium text-slate-700">
                                         เลือกสถานะใหม่
@@ -117,6 +121,22 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                     </option>
                                 </select>
                             </div>
+
+                            <div className="form-control">
+                                <label className="label pl-0">
+                                    <span className="label-text font-medium text-slate-700">
+                                        คำอธิบาย/หมายเหตุ (ไม่บังคับ)
+                                    </span>
+                                </label>
+                                <textarea
+                                    className="textarea textarea-bordered w-full bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl text-slate-700 h-24 resize-none"
+                                    placeholder="เพิ่มคำอธิบายหรือหมายเหตุสำหรับผู้ใช้..."
+                                    value={statusNote}
+                                    onChange={(e) =>
+                                        setStatusNote(e.target.value)
+                                    }
+                                />
+                            </div>
                         </div>
 
                         <div className="flex justify-end space-x-3">
@@ -131,12 +151,18 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 onClick={handleUpdateProjectStatus}
                                 disabled={
                                     isUpdatingStatus ||
-                                    newStatus ===
-                                        selectedProjectForStatus.status
+                                    (newStatus ===
+                                        selectedProjectForStatus.status &&
+                                        statusNote ===
+                                            (selectedProjectForStatus.statusNote ||
+                                                ""))
                                 }
                                 className={`cursor-pointer px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 transition-all transform active:scale-95 ${
                                     newStatus ===
-                                    selectedProjectForStatus.status
+                                        selectedProjectForStatus.status &&
+                                    statusNote ===
+                                        (selectedProjectForStatus.statusNote ||
+                                            "")
                                         ? "opacity-50 cursor-not-allowed"
                                         : ""
                                 }`}

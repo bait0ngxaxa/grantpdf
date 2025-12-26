@@ -10,14 +10,9 @@ import { useSignedDownload } from "@/hooks/useSignedDownload";
 interface FileItemProps {
     file: AdminPdfFile;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
-    onDeleteFile: (file: AdminPdfFile) => void;
 }
 
-export default function FileItem({
-    file,
-    onPreviewPdf,
-    onDeleteFile,
-}: FileItemProps) {
+export default function FileItem({ file, onPreviewPdf }: FileItemProps) {
     const [isAttachmentExpanded, setIsAttachmentExpanded] = useState(false);
     const { download, isDownloading } = useSignedDownload();
 
@@ -173,14 +168,14 @@ export default function FileItem({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center space-x-2 flex-shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                     {file.storagePath && (
                         <button
                             onClick={() =>
                                 download({ fileId: file.id, type: "userFile" })
                             }
                             disabled={isDownloading}
-                            className="inline-flex items-center justify-center p-2 rounded-xl text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 transition-colors disabled:opacity-50"
+                            className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 bg-slate-50 hover:bg-blue-100 hover:text-blue-600 transition-colors disabled:opacity-50"
                             title="ดาวน์โหลด"
                         >
                             <svg
@@ -233,28 +228,6 @@ export default function FileItem({
                             </svg>
                         </Button>
                     )}
-                    <Button
-                        onClick={() => onDeleteFile(file)}
-                        size="sm"
-                        className="h-8 w-8 p-0 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-none shadow-none"
-                        variant="destructive"
-                        title="ลบไฟล์"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                        </svg>
-                    </Button>
                 </div>
             </div>
 

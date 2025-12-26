@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import FileItem from "./FileItem";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -37,6 +37,52 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
     totalPages,
     onPageChange,
 }) => {
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [selectedStatusProject, setSelectedStatusProject] =
+        useState<Project | null>(null);
+
+    // Track which status notes have been viewed (stored in localStorage)
+    const [viewedStatusNotes, setViewedStatusNotes] = useState<Set<string>>(
+        () => {
+            if (typeof window !== "undefined") {
+                const saved = localStorage.getItem("viewedStatusNotes");
+                return saved ? new Set(JSON.parse(saved)) : new Set();
+            }
+            return new Set();
+        }
+    );
+
+    // Check if project has unread status note
+    const hasUnreadStatusNote = (project: Project) => {
+        if (!project.statusNote) return false;
+        // Create unique key combining project id and updated_at
+        const noteKey = `${project.id}_${project.updated_at}`;
+        return !viewedStatusNotes.has(noteKey);
+    };
+
+    const openStatusDetailModal = (project: Project, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSelectedStatusProject(project);
+        setShowStatusModal(true);
+
+        // Mark this status note as read
+        if (project.statusNote) {
+            const noteKey = `${project.id}_${project.updated_at}`;
+            const newViewed = new Set(viewedStatusNotes);
+            newViewed.add(noteKey);
+            setViewedStatusNotes(newViewed);
+            localStorage.setItem(
+                "viewedStatusNotes",
+                JSON.stringify([...newViewed])
+            );
+        }
+    };
+
+    const closeStatusDetailModal = () => {
+        setShowStatusModal(false);
+        setSelectedStatusProject(null);
+    };
+
     return (
         <div className="animate-fade-in-up">
             <div className="flex justify-between items-center mb-6">
@@ -173,17 +219,30 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                                 </div>
 
                                 <div className="flex items-center gap-4">
-                                    <div className="hidden md:block">
-                                        <span
-                                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border shadow-sm ${getStatusColor(
+                                    <div className="hidden md:block relative">
+                                        {hasUnreadStatusNote(project) && (
+                                            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                                            </span>
+                                        )}
+                                        <button
+                                            onClick={(e) =>
+                                                openStatusDetailModal(
+                                                    project,
+                                                    e
+                                                )
+                                            }
+                                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border shadow-sm cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(
                                                 project.status ||
                                                     PROJECT_STATUS.IN_PROGRESS
                                             )}`}
+                                            title="คลิกเพื่อดูรายละเอียดสถานะ"
                                         >
                                             <span className="w-2 h-2 rounded-full bg-current mr-2 opacity-75"></span>
                                             {project.status ||
                                                 PROJECT_STATUS.IN_PROGRESS}
-                                        </span>
+                                        </button>
                                     </div>
 
                                     <div className="flex items-center pl-4 border-l border-slate-100 space-x-3">
@@ -503,6 +562,113 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* Status Detail Modal */}
+            {showStatusModal && selectedStatusProject && (
+                <dialog className="modal modal-open backdrop-blur-sm bg-slate-900/40">
+                    <div className="modal-box bg-white p-6 max-w-md rounded-3xl shadow-2xl border border-slate-100">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-6 w-6"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <h3 className="font-bold text-xl text-slate-800">
+                                    รายละเอียดสถานะ
+                                </h3>
+                            </div>
+                            <button
+                                onClick={closeStatusDetailModal}
+                                className="btn btn-sm btn-circle btn-ghost text-slate-400 hover:bg-slate-50"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="bg-slate-50 p-4 rounded-2xl">
+                                <p className="text-sm text-slate-500 mb-2">
+                                    โครงการ
+                                </p>
+                                <p className="font-semibold text-slate-800 text-lg truncate">
+                                    {selectedStatusProject.name}
+                                </p>
+                            </div>
+
+                            <div className="bg-slate-50 p-4 rounded-2xl">
+                                <p className="text-sm text-slate-500 mb-2">
+                                    สถานะปัจจุบัน
+                                </p>
+                                <span
+                                    className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold border shadow-sm ${getStatusColor(
+                                        selectedStatusProject.status ||
+                                            PROJECT_STATUS.IN_PROGRESS
+                                    )}`}
+                                >
+                                    <span className="w-2 h-2 rounded-full bg-current mr-2 opacity-75"></span>
+                                    {selectedStatusProject.status ||
+                                        PROJECT_STATUS.IN_PROGRESS}
+                                </span>
+                            </div>
+
+                            <div className="bg-slate-50 p-4 rounded-2xl">
+                                <p className="text-sm text-slate-500 mb-2">
+                                    หมายเหตุจากผู้ดูแลระบบ
+                                </p>
+                                {selectedStatusProject.statusNote ? (
+                                    <p className="text-slate-700 whitespace-pre-wrap">
+                                        {selectedStatusProject.statusNote}
+                                    </p>
+                                ) : (
+                                    <p className="text-slate-400 italic">
+                                        ไม่มีหมายเหตุ
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end mt-6">
+                            <Button
+                                onClick={closeStatusDetailModal}
+                                className="cursor-pointer px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200"
+                            >
+                                ปิด
+                            </Button>
+                        </div>
+                    </div>
+                    <form method="dialog" className="modal-backdrop">
+                        <button
+                            onClick={closeStatusDetailModal}
+                            className="cursor-default"
+                        >
+                            ปิด
+                        </button>
+                    </form>
+                </dialog>
             )}
         </div>
     );

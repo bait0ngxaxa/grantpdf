@@ -119,7 +119,7 @@ export default function CreateFormProjectPage() {
                         <FormField
                             label="เบอร์โทรศัพท์"
                             name="tel"
-                            type="tel"
+                            type="number"
                             placeholder="ระบุเบอร์โทรศัพท์ผู้รับผิดชอบ"
                             value={formData.tel}
                             onChange={handleChange}

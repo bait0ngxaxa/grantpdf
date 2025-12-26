@@ -3,7 +3,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import FileItem from "./FileItem";
-import type { AdminProject, AdminPdfFile } from "@/type/models";
+import type { AdminProject } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
 import { getStatusColor } from "@/lib/utils";
 
@@ -13,7 +13,6 @@ interface ProjectCardProps {
     showNewBadge?: boolean;
     onToggleExpansion: (projectId: string) => void;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
-    onDeleteFile: (file: AdminPdfFile) => void;
     onEditProjectStatus: (project: AdminProject) => void;
 }
 
@@ -23,7 +22,6 @@ export default function ProjectCard({
     showNewBadge = false,
     onToggleExpansion,
     onPreviewPdf,
-    onDeleteFile,
     onEditProjectStatus,
 }: ProjectCardProps) {
     return (
@@ -135,94 +133,105 @@ export default function ProjectCard({
                                 </p>
                             )}
 
-                            <div className="flex items-center space-x-3 mt-3">
-                                <span
-                                    className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(
-                                        project.status
-                                    )}`}
-                                >
-                                    {/* Status Icon */}
-                                    {project.status ===
-                                        PROJECT_STATUS.APPROVED && (
-                                        <svg
-                                            className="w-3.5 h-3.5 mr-1.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M5 13l4 4L19 7"
-                                            />
-                                        </svg>
-                                    )}
-                                    {project.status ===
-                                        PROJECT_STATUS.REJECTED && (
-                                        <svg
-                                            className="w-3.5 h-3.5 mr-1.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M6 18L18 6M6 6l12 12"
-                                            />
-                                        </svg>
-                                    )}
-                                    {project.status === PROJECT_STATUS.EDIT && (
-                                        <svg
-                                            className="w-3.5 h-3.5 mr-1.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                            />
-                                        </svg>
-                                    )}
-                                    {project.status ===
-                                        PROJECT_STATUS.IN_PROGRESS && (
-                                        <svg
-                                            className="w-3.5 h-3.5 mr-1.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                        </svg>
-                                    )}
-                                    {project.status ===
-                                        PROJECT_STATUS.CLOSED && (
-                                        <svg
-                                            className="w-3.5 h-3.5 mr-1.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M6 18L18 6M6 6l12 12"
-                                            />
-                                        </svg>
-                                    )}
-                                    สถานะ: {project.status}
-                                </span>
+                            <div className="flex flex-col gap-2 mt-3">
+                                <div className="flex items-center space-x-3">
+                                    <span
+                                        className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(
+                                            project.status
+                                        )}`}
+                                    >
+                                        {/* Status Icon */}
+                                        {project.status ===
+                                            PROJECT_STATUS.APPROVED && (
+                                            <svg
+                                                className="w-3.5 h-3.5 mr-1.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                        )}
+                                        {project.status ===
+                                            PROJECT_STATUS.REJECTED && (
+                                            <svg
+                                                className="w-3.5 h-3.5 mr-1.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M6 18L18 6M6 6l12 12"
+                                                />
+                                            </svg>
+                                        )}
+                                        {project.status ===
+                                            PROJECT_STATUS.EDIT && (
+                                            <svg
+                                                className="w-3.5 h-3.5 mr-1.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                />
+                                            </svg>
+                                        )}
+                                        {project.status ===
+                                            PROJECT_STATUS.IN_PROGRESS && (
+                                            <svg
+                                                className="w-3.5 h-3.5 mr-1.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                />
+                                            </svg>
+                                        )}
+                                        {project.status ===
+                                            PROJECT_STATUS.CLOSED && (
+                                            <svg
+                                                className="w-3.5 h-3.5 mr-1.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth="2"
+                                                    d="M6 18L18 6M6 6l12 12"
+                                                />
+                                            </svg>
+                                        )}
+                                        สถานะ: {project.status}
+                                    </span>
+                                </div>
+                                {project.statusNote && (
+                                    <p className="text-xs text-slate-500 pl-1 truncate max-w-xs">
+                                        <span className="font-medium text-slate-600">
+                                            หมายเหตุ:
+                                        </span>{" "}
+                                        {project.statusNote}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -313,7 +322,6 @@ export default function ProjectCard({
                                             key={file.id}
                                             file={file}
                                             onPreviewPdf={onPreviewPdf}
-                                            onDeleteFile={onDeleteFile}
                                         />
                                     ))}
                                 </div>
