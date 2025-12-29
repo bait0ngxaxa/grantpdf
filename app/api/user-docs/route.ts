@@ -52,26 +52,42 @@ export async function GET() {
             },
         });
 
-        const sanitizedFiles = userFiles.map((file) => ({
-            ...file,
-            id: file.id.toString(),
-            userName: file.user?.name,
-            attachmentFiles:
-                file.attachmentFiles?.map((attachment) => ({
-                    ...attachment,
-                    id: attachment.id.toString(),
-                })) || [],
-        }));
+        const sanitizedFiles = userFiles.map(
+            (file: (typeof userFiles)[number]) => ({
+                ...file,
+                id: file.id.toString(),
+                userName: file.user?.name,
+                attachmentFiles:
+                    file.attachmentFiles?.map(
+                        (
+                            attachment: NonNullable<
+                                typeof file.attachmentFiles
+                            >[number]
+                        ) => ({
+                            ...attachment,
+                            id: attachment.id.toString(),
+                        })
+                    ) || [],
+            })
+        );
 
         // กรองไฟล์ที่เป็น attachment ของไฟล์อื่นออก (ไม่ให้แสดงในรายการหลัก)
         const attachmentPaths = new Set(
             userFiles.flatMap(
-                (file) => file.attachmentFiles?.map((att) => att.filePath) || []
+                (file: (typeof userFiles)[number]) =>
+                    file.attachmentFiles?.map(
+                        (
+                            att: NonNullable<
+                                typeof file.attachmentFiles
+                            >[number]
+                        ) => att.filePath
+                    ) || []
             )
         );
 
         const filteredFiles = sanitizedFiles.filter(
-            (file) => !attachmentPaths.has(file.storagePath)
+            (file: (typeof sanitizedFiles)[number]) =>
+                !attachmentPaths.has(file.storagePath)
         );
 
         return NextResponse.json(filteredFiles, { status: 200 });

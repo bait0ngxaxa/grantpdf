@@ -59,37 +59,53 @@ export async function GET() {
             },
         });
 
-        const sanitizedFiles = allUserFiles.map((file) => ({
-            id: file.id.toString(),
-            originalFileName: file.originalFileName,
-            storagePath: file.storagePath,
-            created_at: file.created_at,
-            updated_at: file.updated_at,
-            fileExtension: file.fileExtension,
-            downloadStatus: file.downloadStatus,
-            downloadedAt: file.downloadedAt,
-            userId: file.userId.toString(),
+        const sanitizedFiles = allUserFiles.map(
+            (file: (typeof allUserFiles)[number]) => ({
+                id: file.id.toString(),
+                originalFileName: file.originalFileName,
+                storagePath: file.storagePath,
+                created_at: file.created_at,
+                updated_at: file.updated_at,
+                fileExtension: file.fileExtension,
+                downloadStatus: file.downloadStatus,
+                downloadedAt: file.downloadedAt,
+                userId: file.userId.toString(),
 
-            userName: file.user?.name || "Unknown User",
-            userEmail: file.user?.email || "Unknown Email",
+                userName: file.user?.name || "Unknown User",
+                userEmail: file.user?.email || "Unknown Email",
 
-            attachmentFiles:
-                file.attachmentFiles?.map((attachment) => ({
-                    ...attachment,
-                    id: attachment.id.toString(),
-                })) || [],
-        }));
+                attachmentFiles:
+                    file.attachmentFiles?.map(
+                        (
+                            attachment: NonNullable<
+                                typeof file.attachmentFiles
+                            >[number]
+                        ) => ({
+                            ...attachment,
+                            id: attachment.id.toString(),
+                        })
+                    ) || [],
+            })
+        );
 
         // กรองไฟล์ที่เป็น attachment ของไฟล์อื่นออก (ไม่ให้แสดงในรายการหลัก)
         // ไฟล์ที่เป็น attachment จะมี storagePath เก็บใน attachmentFiles ของไฟล์อื่น
         const attachmentPaths = new Set(
             allUserFiles.flatMap(
-                (file) => file.attachmentFiles?.map((att) => att.filePath) || []
+                (file: (typeof allUserFiles)[number]) =>
+                    file.attachmentFiles?.map(
+                        (
+                            att: NonNullable<
+                                typeof file.attachmentFiles
+                            >[number]
+                        ) => att.filePath
+                    ) || []
             )
         );
 
         const filteredFiles = sanitizedFiles.filter(
-            (file) => !attachmentPaths.has(file.storagePath)
+            (file: (typeof sanitizedFiles)[number]) =>
+                !attachmentPaths.has(file.storagePath)
         );
 
         return NextResponse.json(filteredFiles, { status: 200 });

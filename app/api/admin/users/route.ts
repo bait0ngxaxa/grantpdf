@@ -28,7 +28,7 @@ export async function GET() {
             },
         });
 
-        const safeUsers = users.map((user) => ({
+        const safeUsers = users.map((user: (typeof users)[number]) => ({
             ...user,
             id: user.id.toString(),
         }));

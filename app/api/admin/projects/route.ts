@@ -69,38 +69,56 @@ export async function GET() {
             orderBy: { created_at: "desc" },
         });
 
-        const sanitizedProjects = projects.map((project) => ({
-            ...project,
-            id: project.id.toString(),
-            userId: project.userId.toString(),
-            userName: project.user?.name || "Unknown User",
-            userEmail: project.user?.email || "Unknown Email",
-            files: project.files.map((file) => ({
+        const sanitizedProjects = projects.map(
+            (project: (typeof projects)[number]) => ({
+                ...project,
+                id: project.id.toString(),
+                userId: project.userId.toString(),
+                userName: project.user?.name || "Unknown User",
+                userEmail: project.user?.email || "Unknown Email",
+                files: project.files.map(
+                    (file: (typeof project.files)[number]) => ({
+                        ...file,
+                        id: file.id.toString(),
+                        userId: file.userId.toString(),
+                        userName: project.user?.name || "Unknown User",
+                        userEmail: project.user?.email || "Unknown Email",
+                        attachmentFiles:
+                            file.attachmentFiles?.map(
+                                (
+                                    attachment: NonNullable<
+                                        typeof file.attachmentFiles
+                                    >[number]
+                                ) => ({
+                                    ...attachment,
+                                    id: attachment.id.toString(),
+                                })
+                            ) || [],
+                    })
+                ),
+            })
+        );
+
+        const sanitizedOrphanFiles = orphanFiles.map(
+            (file: (typeof orphanFiles)[number]) => ({
                 ...file,
                 id: file.id.toString(),
                 userId: file.userId.toString(),
-                userName: project.user?.name || "Unknown User",
-                userEmail: project.user?.email || "Unknown Email",
+                userName: file.user?.name || "Unknown User",
+                userEmail: file.user?.email || "Unknown Email",
                 attachmentFiles:
-                    file.attachmentFiles?.map((attachment) => ({
-                        ...attachment,
-                        id: attachment.id.toString(),
-                    })) || [],
-            })),
-        }));
-
-        const sanitizedOrphanFiles = orphanFiles.map((file) => ({
-            ...file,
-            id: file.id.toString(),
-            userId: file.userId.toString(),
-            userName: file.user?.name || "Unknown User",
-            userEmail: file.user?.email || "Unknown Email",
-            attachmentFiles:
-                file.attachmentFiles?.map((attachment) => ({
-                    ...attachment,
-                    id: attachment.id.toString(),
-                })) || [],
-        }));
+                    file.attachmentFiles?.map(
+                        (
+                            attachment: NonNullable<
+                                typeof file.attachmentFiles
+                            >[number]
+                        ) => ({
+                            ...attachment,
+                            id: attachment.id.toString(),
+                        })
+                    ) || [],
+            })
+        );
 
         // รวม filePath ของ attachment files ทั้งหมด เพื่อกรองไฟล์ที่เป็น attachment ออก
         const allAttachmentPaths = new Set<string>();
@@ -122,15 +140,19 @@ export async function GET() {
         }
 
         // กรองไฟล์ที่ storagePath ตรงกับ attachment filePath ออก
-        const filteredProjects = sanitizedProjects.map((project) => ({
-            ...project,
-            files: project.files.filter(
-                (file) => !allAttachmentPaths.has(file.storagePath)
-            ),
-        }));
+        const filteredProjects = sanitizedProjects.map(
+            (project: (typeof sanitizedProjects)[number]) => ({
+                ...project,
+                files: project.files.filter(
+                    (file: (typeof project.files)[number]) =>
+                        !allAttachmentPaths.has(file.storagePath)
+                ),
+            })
+        );
 
         const filteredOrphanFiles = sanitizedOrphanFiles.filter(
-            (file) => !allAttachmentPaths.has(file.storagePath)
+            (file: (typeof sanitizedOrphanFiles)[number]) =>
+                !allAttachmentPaths.has(file.storagePath)
         );
 
         return NextResponse.json({
