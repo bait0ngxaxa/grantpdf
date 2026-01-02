@@ -1,34 +1,31 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-import PizZip from "pizzip";
-import Docxtemplater from "docxtemplater";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import {
-    fixThaiDistributed,
-    generateUniqueFilename,
-} from "@/lib/documentUtils";
-import {
-    ensureStorageDir,
-    getStoragePath,
-    getRelativeStoragePath,
-} from "@/lib/fileStorage";
+    validateSession,
+    isSessionError,
+    loadTemplate,
+    createDocxRenderer,
+    saveDocumentToStorage,
+    findOrCreateProject,
+    isProjectError,
+    createUserFileRecord,
+    handleDocumentError,
+    buildSuccessResponse,
+} from "@/lib/documentRouteUtils";
+import { fixThaiDistributed } from "@/lib/documentUtils";
 
 export async function POST(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || !session.user || !session.user.id) {
-            return new NextResponse("Unauthorized", { status: 401 });
+        // Validate session
+        const sessionResult = await validateSession();
+        if (isSessionError(sessionResult)) {
+            return sessionResult;
         }
-
-        const userId = Number(session.user.id);
+        const { userId } = sessionResult;
 
         const formData = await req.formData();
 
+        // Extract form fields
         const projectName = formData.get("projectName") as string;
-
         const owner = formData.get("owner") as string;
         const address = formData.get("address") as string;
         const email = formData.get("email") as string;
@@ -38,7 +35,6 @@ export async function POST(req: Request) {
         const cost = formData.get("cost") as string;
         const topic1 = formData.get("topic1") as string;
         const objective1 = formData.get("objective1") as string;
-
         const target = formData.get("target") as string;
         const zone = formData.get("zone") as string;
         const plan = formData.get("plan") as string;
@@ -53,10 +49,9 @@ export async function POST(req: Request) {
             });
         }
 
-        // รับข้อมูลตารางกิจกรรม
+        // Parse activities data
         const activitiesData = formData.get("activities") as string;
-        let activities = [];
-
+        let activities: Record<string, unknown>[] = [];
         if (activitiesData) {
             try {
                 activities = JSON.parse(activitiesData);
@@ -66,72 +61,29 @@ export async function POST(req: Request) {
             }
         }
 
-        const templatePath = path.join(process.cwd(), "public", "tor.docx");
+        // Load template
+        const templateBuffer = await loadTemplate(
+            "tor.docx",
+            "blank_header.docx"
+        );
 
-        let content;
-        try {
-            content = await fs.readFile(templatePath);
-        } catch (_error) {
-            const fallbackTemplatePath = path.join(
-                process.cwd(),
-                "public",
-                "blank_header.docx"
-            );
-            content = await fs.readFile(fallbackTemplatePath);
-        }
-
-        const zip = new PizZip(content);
-
-        const doc = new Docxtemplater(zip, {
-            paragraphLoop: true,
-            linebreaks: true,
-            delimiters: {
-                start: "{",
-                end: "}",
-            },
-
-            nullGetter: function (_part) {
-                return "";
-            },
-
-            parser: function (tag) {
-                return {
-                    get: function (scope, _context) {
-                        if (tag === ".") {
-                            return scope;
-                        }
-
-                        let value = scope[tag];
-                        if (typeof value === "string" && value.trim()) {
-                            // **บังคับแก้ไข Thai formatting ทุกฟิลด์**
-                            value = fixThaiDistributed(value);
-
-                            // **เพิ่มการจัดการพิเศษสำหรับ textarea fields**
-                            if (
-                                [
-                                    "topic1",
-                                    "objective1",
-                                    "target",
-                                    "zone",
-                                    "plan",
-                                    "projectmanage",
-                                    "partner",
-                                ].includes(tag)
-                            ) {
-                                // แปลง line breaks เป็น format ที่ Word เข้าใจ
-                                value = value.replace(/\n/g, "\r\n");
-                            }
-                        }
-                        return value || "";
-                    },
-                };
-            },
+        // Create document renderer
+        const doc = createDocxRenderer(templateBuffer, {
+            textareaFields: [
+                "topic1",
+                "objective1",
+                "target",
+                "zone",
+                "plan",
+                "projectmanage",
+                "partner",
+            ],
         });
 
+        // Process activities with Thai formatting
         const processedActivities = activities.map(
             (activity: Record<string, unknown>) => ({
                 ...activity,
-
                 ...(typeof activity === "object"
                     ? Object.keys(activity).reduce((acc, key) => {
                           const value = activity[key];
@@ -146,6 +98,7 @@ export async function POST(req: Request) {
             })
         );
 
+        // Prepare data for template
         const processedData = {
             projectName: fixThaiDistributed(projectName || ""),
             owner: fixThaiDistributed(owner || ""),
@@ -163,11 +116,9 @@ export async function POST(req: Request) {
             projectmanage: fixThaiDistributed(projectmanage || ""),
             partner: fixThaiDistributed(partner || ""),
             date: date || "",
-
             activities: processedActivities,
             hasActivities: processedActivities.length > 0,
             activitiesCount: processedActivities.length,
-
             currentDate: new Date().toLocaleDateString("th-TH", {
                 year: "numeric",
                 month: "long",
@@ -178,87 +129,41 @@ export async function POST(req: Request) {
 
         doc.render(processedData);
 
+        // Generate output
         const outputBuffer = doc.getZip().generate({
             type: "uint8array",
             compression: "DEFLATE",
         });
 
-        const uniqueFileName = generateUniqueFilename(fileName + ".docx");
-
-        // ใช้ storage directory นอก public/
-        await ensureStorageDir("documents");
-        const filePath = getStoragePath("documents", uniqueFileName);
-        const relativeStoragePath = getRelativeStoragePath(
-            "documents",
-            uniqueFileName
+        // Save document
+        const { relativeStoragePath } = await saveDocumentToStorage(
+            outputBuffer,
+            fileName,
+            "docx"
         );
 
-        await fs.writeFile(filePath, Buffer.from(outputBuffer));
-
-        let project;
-
-        if (formData.get("projectId")) {
-            const projectId = formData.get("projectId") as string;
-            project = await prisma.project.findFirst({
-                where: {
-                    id: parseInt(projectId),
-                    userId: userId,
-                },
-            });
-
-            if (!project) {
-                return new NextResponse(
-                    "Project not found. Please select a valid project.",
-                    {
-                        status: 400,
-                    }
-                );
-            }
-        } else {
-            project = await prisma.project.findFirst({
-                where: {
-                    name: projectName,
-                    userId: userId,
-                },
-            });
-
-            if (!project) {
-                project = await prisma.project.create({
-                    data: {
-                        name: projectName,
-                        description: `${projectName} - สร้างจากเอกสาร TOR`,
-                        userId: userId,
-                    },
-                });
-            }
+        // Find or create project
+        const projectResult = await findOrCreateProject(
+            userId,
+            projectName,
+            formData.get("projectId") as string | null,
+            "สร้างจากเอกสาร TOR"
+        );
+        if (isProjectError(projectResult)) {
+            return projectResult;
         }
 
-        await prisma.userFile.create({
-            data: {
-                originalFileName: fileName + ".docx",
-                storagePath: relativeStoragePath,
-                fileExtension: "docx",
-                userId: userId,
-                projectId: project.id,
-            },
-        });
+        // Create database record
+        await createUserFileRecord(
+            userId,
+            projectResult.id,
+            fileName,
+            relativeStoragePath,
+            "docx"
+        );
 
-        return NextResponse.json({
-            success: true,
-            storagePath: relativeStoragePath,
-            project: {
-                id: project.id.toString(),
-                name: project.name,
-                description: project.description,
-            },
-        });
+        return buildSuccessResponse(relativeStoragePath, projectResult);
     } catch (error) {
-        console.error("Error generating TOR document:", error);
-        let errorMessage = "Internal Server Error";
-        if (error && typeof error === "object" && "properties" in error) {
-            errorMessage =
-                "Docxtemplater template error. Please check your template file placeholders.";
-        }
-        return new NextResponse(errorMessage, { status: 500 });
+        return handleDocumentError(error);
     }
 }

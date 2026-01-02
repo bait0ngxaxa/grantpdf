@@ -1,41 +1,54 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
-import path from "path";
-import PizZip from "pizzip";
-import Docxtemplater from "docxtemplater";
 import ImageModule from "docxtemplater-image-module-free";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import {
+    validateSession,
+    isSessionError,
+    loadTemplate,
+    saveDocumentToStorage,
+    findOrCreateProject,
+    isProjectError,
+    handleDocumentError,
+    buildSuccessResponse,
+} from "@/lib/documentRouteUtils";
 import {
     fixThaiDistributed,
     generateUniqueFilename,
     getMimeType,
 } from "@/lib/documentUtils";
-import {
-    ensureStorageDir,
-    getStoragePath,
-    getRelativeStoragePath,
-    getFullPathFromStoragePath,
-} from "@/lib/fileStorage";
+import { prisma } from "@/lib/prisma";
+import PizZip from "pizzip";
+import Docxtemplater from "docxtemplater";
+import { getFullPathFromStoragePath } from "@/lib/fileStorage";
 
 export async function POST(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || !session.user || !session.user.id) {
-            return new NextResponse("Unauthorized", { status: 401 });
+        // Validate session
+        const sessionResult = await validateSession();
+        if (isSessionError(sessionResult)) {
+            return sessionResult;
         }
-
-        const userId = Number(session.user.id);
+        const { userId } = sessionResult;
 
         const formData = await req.formData();
+
+        // Extract form fields
         const head = formData.get("head") as string;
         const _fileName = formData.get("fileName") as string;
         const projectName = formData.get("projectName") as string;
         const date = formData.get("date") as string;
         const topicdetail = formData.get("topicdetail") as string;
         const todetail = formData.get("todetail") as string;
+        const detail = formData.get("detail") as string;
+        const name = formData.get("name") as string;
+        const depart = formData.get("depart") as string;
+        const coor = formData.get("coor") as string;
+        const tel = formData.get("tel") as string;
+        const email = formData.get("email") as string;
+        const fixedRegard = formData.get("regard") as string;
+        const accept = formData.get("accept") as string;
 
+        // Parse attachments
         const attachmentsJson = formData.get("attachments") as string;
         let attachments: string[] = [];
         try {
@@ -44,25 +57,11 @@ export async function POST(req: Request) {
             attachments = [];
         }
 
-        const detail = formData.get("detail") as string;
-        const name = formData.get("name") as string;
-        const depart = formData.get("depart") as string;
-        const coor = formData.get("coor") as string;
-        const tel = formData.get("tel") as string;
-        const email = formData.get("email") as string;
-        const signatureFile = formData.get("signatureFile") as File | null;
-        const canvasSignatureFile = formData.get(
-            "canvasSignatureFile"
-        ) as File | null;
-
-        const fixedRegard = formData.get("regard") as string;
-        const accept = formData.get("accept") as string;
-
+        // Parse attachment file IDs
         const attachmentFileIdsJson = formData.get(
             "attachmentFileIds"
         ) as string;
         let attachmentFileIds: string[] = [];
-
         try {
             attachmentFileIds = JSON.parse(attachmentFileIdsJson || "[]");
         } catch (error) {
@@ -70,35 +69,33 @@ export async function POST(req: Request) {
             attachmentFileIds = [];
         }
 
+        // Handle signature files
+        const signatureFile = formData.get("signatureFile") as File | null;
+        const canvasSignatureFile = formData.get(
+            "canvasSignatureFile"
+        ) as File | null;
+
         if (!projectName) {
             return new NextResponse("Project name is required.", {
                 status: 400,
             });
         }
 
+        // Process signature
         let signatureImageBuffer: Buffer | null = null;
-
-        // จัดการลายเซ็นจาก canvas ก่อน (ให้ priority สูงกว่า)
         if (canvasSignatureFile && canvasSignatureFile.size > 0) {
-            const canvasSignatureArrayBuffer =
-                await canvasSignatureFile.arrayBuffer();
-            signatureImageBuffer = Buffer.from(canvasSignatureArrayBuffer);
-        }
-        // ถ้าไม่มีลายเซ็นจาก canvas ให้ใช้จากการอัปโหลดไฟล์
-        else if (signatureFile && signatureFile.size > 0) {
-            const signatureArrayBuffer = await signatureFile.arrayBuffer();
-            signatureImageBuffer = Buffer.from(signatureArrayBuffer);
+            const arrayBuffer = await canvasSignatureFile.arrayBuffer();
+            signatureImageBuffer = Buffer.from(arrayBuffer);
+        } else if (signatureFile && signatureFile.size > 0) {
+            const arrayBuffer = await signatureFile.arrayBuffer();
+            signatureImageBuffer = Buffer.from(arrayBuffer);
         }
 
-        const templatePath = path.join(
-            process.cwd(),
-            "public",
-            "approval.docx"
-        );
-        const content = await fs.readFile(templatePath);
+        // Load template
+        const templateBuffer = await loadTemplate("approval.docx");
+        const zip = new PizZip(templateBuffer);
 
-        const zip = new PizZip(content);
-
+        // Setup image module if signature exists
         const modules = [];
         if (signatureImageBuffer) {
             const imageModule = new ImageModule({
@@ -114,43 +111,40 @@ export async function POST(req: Request) {
             modules.push(imageModule);
         }
 
+        // Create custom document renderer for approval (has special signature handling)
         const doc = new Docxtemplater(zip, {
             paragraphLoop: true,
             linebreaks: true,
-            delimiters: {
-                start: "{",
-                end: "}",
-            },
-            modules: modules,
-
+            delimiters: { start: "{", end: "}" },
+            modules,
             nullGetter: function (part) {
                 if (part.value === "signature" && !signatureImageBuffer) {
                     return "\n\n\n_________________________\n         ลายเซ็น\n\n";
                 }
                 return "";
             },
-
             parser: function (tag) {
                 return {
-                    get: function (scope, _context) {
+                    get: function (
+                        scope: Record<string, unknown>,
+                        _context: unknown
+                    ) {
                         if (tag === ".") {
                             return scope;
                         }
 
-                        let value = scope[tag];
-
-                        // จัดการ signature พิเศษ
+                        // Special signature handling
                         if (tag === "signature") {
                             if (signatureImageBuffer) {
                                 return "signature";
                             } else {
-                                return "\n\n\n_________________________\n         ลายเซ็น\n\n"; // ช่องว่างสำหรับลายเซ็น
+                                return "\n\n\n_________________________\n         ลายเซ็น\n\n";
                             }
                         }
 
-                        if (typeof value === "string" && value.trim()) {
-                            value = fixThaiDistributed(value);
-
+                        const rawValue = scope[tag];
+                        if (typeof rawValue === "string" && rawValue.trim()) {
+                            let value = fixThaiDistributed(rawValue);
                             if (
                                 [
                                     "topicdetail",
@@ -162,28 +156,29 @@ export async function POST(req: Request) {
                             ) {
                                 value = value.replace(/\n/g, "\r\n");
                             }
+                            return value;
                         }
-                        return value || "";
+                        return rawValue || "";
                     },
                 };
             },
         });
 
+        // Prepare attachment data
         const attachmentData = attachments
             .filter((att) => att.trim() !== "")
             .map((att, index) => ({
                 attachmentdetail: `${index + 1}. ${fixThaiDistributed(att)}`,
             }));
 
-        const hasAttachments = attachmentData.length > 0;
-
+        // Prepare data for template
         const processedData = {
             head: fixThaiDistributed(head || ""),
             date: date || "",
             topicdetail: fixThaiDistributed(topicdetail || ""),
             todetail: fixThaiDistributed(todetail || ""),
             attachment: attachmentData,
-            hasAttachments: hasAttachments,
+            hasAttachments: attachmentData.length > 0,
             detail: fixThaiDistributed(detail || ""),
             regard: fixThaiDistributed(fixedRegard || ""),
             name: fixThaiDistributed(name || ""),
@@ -193,77 +188,49 @@ export async function POST(req: Request) {
             email: email || "",
             signature: signatureImageBuffer
                 ? "signature"
-                : "\n\n\n_________________________\n         ลายเซ็น\n\n", // จัดการ signature
+                : "\n\n\n_________________________\n         ลายเซ็น\n\n",
             accept: fixThaiDistributed(accept || ""),
         };
 
         doc.render(processedData);
 
+        // Generate output
         const outputBuffer = doc.getZip().generate({
             type: "uint8array",
             compression: "DEFLATE",
         });
 
+        // Save document
         const uniqueFileName = generateUniqueFilename(projectName + ".docx");
-
-        // ใช้ storage directory นอก public/
-        await ensureStorageDir("documents");
-        const filePath = getStoragePath("documents", uniqueFileName);
-        const relativeStoragePath = getRelativeStoragePath(
-            "documents",
-            uniqueFileName
+        const { relativeStoragePath } = await saveDocumentToStorage(
+            outputBuffer,
+            uniqueFileName.replace(".docx", ""),
+            "docx"
         );
 
-        await fs.writeFile(filePath, Buffer.from(outputBuffer));
-
-        let project;
-
-        if (formData.get("projectId")) {
-            const projectId = formData.get("projectId") as string;
-            project = await prisma.project.findFirst({
-                where: {
-                    id: parseInt(projectId),
-                    userId: userId,
-                },
-            });
-
-            if (!project) {
-                return new NextResponse(
-                    "Project not found. Please select a valid project.",
-                    {
-                        status: 400,
-                    }
-                );
-            }
-        } else {
-            project = await prisma.project.findFirst({
-                where: {
-                    name: projectName,
-                    userId: userId,
-                },
-            });
-
-            if (!project) {
-                project = await prisma.project.create({
-                    data: {
-                        name: projectName,
-                        description: `${projectName} - สร้างจากเอกสารขออนุมัติ`,
-                        userId: userId,
-                    },
-                });
-            }
+        // Find or create project
+        const projectResult = await findOrCreateProject(
+            userId,
+            projectName,
+            formData.get("projectId") as string | null,
+            "สร้างจากเอกสารขออนุมัติ"
+        );
+        if (isProjectError(projectResult)) {
+            return projectResult;
         }
 
+        // Create main file record
         const savedFile = await prisma.userFile.create({
             data: {
                 originalFileName: projectName + ".docx",
                 storagePath: relativeStoragePath,
                 fileExtension: "docx",
                 userId: userId,
-                projectId: project.id,
+                projectId: projectResult.id,
             },
         });
 
+        // Link attachment files
         if (attachmentFileIds.length > 0) {
             for (const fileId of attachmentFileIds) {
                 try {
@@ -279,7 +246,6 @@ export async function POST(req: Request) {
                     if (attachmentFile) {
                         let actualFileSize = 0;
                         try {
-                            // ใช้ storage path ใหม่
                             const fullFilePath = getFullPathFromStoragePath(
                                 attachmentFile.storagePath
                             );
@@ -290,22 +256,20 @@ export async function POST(req: Request) {
                                 `Error reading file size for ${attachmentFile.originalFileName}:`,
                                 sizeError
                             );
-
                             actualFileSize = 0;
                         }
 
-                        const _createdAttachment =
-                            await prisma.attachmentFile.create({
-                                data: {
-                                    fileName: attachmentFile.originalFileName,
-                                    filePath: attachmentFile.storagePath,
-                                    fileSize: actualFileSize,
-                                    mimeType: getMimeType(
-                                        attachmentFile.fileExtension
-                                    ),
-                                    userFileId: savedFile.id,
-                                },
-                            });
+                        await prisma.attachmentFile.create({
+                            data: {
+                                fileName: attachmentFile.originalFileName,
+                                filePath: attachmentFile.storagePath,
+                                fileSize: actualFileSize,
+                                mimeType: getMimeType(
+                                    attachmentFile.fileExtension
+                                ),
+                                userFileId: savedFile.id,
+                            },
+                        });
                     } else {
                         console.error(
                             `Attachment file not found with ID: ${fileId}`
@@ -318,26 +282,10 @@ export async function POST(req: Request) {
                     );
                 }
             }
-        } else {
-            // No attachment files to link
         }
 
-        return NextResponse.json({
-            success: true,
-            storagePath: relativeStoragePath,
-            project: {
-                id: project.id.toString(),
-                name: project.name,
-                description: project.description,
-            },
-        });
+        return buildSuccessResponse(relativeStoragePath, projectResult);
     } catch (error) {
-        console.error("Error generating or saving document:", error);
-        let errorMessage = "Internal Server Error";
-        if (error && typeof error === "object" && "properties" in error) {
-            errorMessage =
-                "Docxtemplater template error. Please check your template file placeholders.";
-        }
-        return new NextResponse(errorMessage, { status: 500 });
+        return handleDocumentError(error);
     }
 }

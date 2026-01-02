@@ -1,32 +1,30 @@
-// เส้นเขียนไฟล์ Word บันทึกลง db + local storage
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-import PizZip from "pizzip";
-import Docxtemplater from "docxtemplater";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import {
-    fixThaiDistributed,
-    generateUniqueFilename,
-} from "@/lib/documentUtils";
-import {
-    ensureStorageDir,
-    getStoragePath,
-    getRelativeStoragePath,
-} from "@/lib/fileStorage";
+    validateSession,
+    isSessionError,
+    loadTemplate,
+    createDocxRenderer,
+    saveDocumentToStorage,
+    findOrCreateProject,
+    isProjectError,
+    createUserFileRecord,
+    handleDocumentError,
+    buildSuccessResponse,
+} from "@/lib/documentRouteUtils";
+import { fixThaiDistributed } from "@/lib/documentUtils";
 
 export async function POST(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || !session.user || !session.user.id) {
-            return new NextResponse("Unauthorized", { status: 401 });
+        // Validate session
+        const sessionResult = await validateSession();
+        if (isSessionError(sessionResult)) {
+            return sessionResult;
         }
-
-        const userId = Number(session.user.id);
+        const { userId } = sessionResult;
 
         const formData = await req.formData();
+
+        // Extract form fields
         const projectName = formData.get("projectName") as string;
         const fileName = formData.get("fileName") as string;
         const person = formData.get("person") as string;
@@ -42,7 +40,6 @@ export async function POST(req: Request) {
         const product = formData.get("product") as string;
         const scope = formData.get("scope") as string;
         const result = formData.get("result") as string;
-
         const author = formData.get("author") as string;
 
         if (!projectName) {
@@ -51,62 +48,24 @@ export async function POST(req: Request) {
             });
         }
 
-        const templatePath = path.join(
-            process.cwd(),
-            "public",
-            "formproject.docx"
-        );
-        const content = await fs.readFile(templatePath);
+        // Load template
+        const templateBuffer = await loadTemplate("formproject.docx");
 
-        const zip = new PizZip(content);
-
-        const doc = new Docxtemplater(zip, {
-            paragraphLoop: true,
-            linebreaks: true,
-            delimiters: {
-                start: "{",
-                end: "}",
-            },
-
-            nullGetter: function (_part) {
-                return "";
-            },
-
-            parser: function (tag) {
-                return {
-                    get: function (scope, _context) {
-                        if (tag === ".") {
-                            return scope;
-                        }
-
-                        let value = scope[tag];
-                        if (typeof value === "string" && value.trim()) {
-                            // **บังคับแก้ไข Thai formatting ทุกฟิลด์**
-                            value = fixThaiDistributed(value);
-
-                            // **เพิ่มการจัดการพิเศษสำหรับ textarea fields**
-                            if (
-                                [
-                                    "rationale",
-                                    "objective",
-                                    "goal",
-                                    "target",
-                                    "product",
-                                    "scope",
-                                    "result",
-                                    "author",
-                                ].includes(tag)
-                            ) {
-                                // แปลง line breaks เป็น format ที่ Word เข้าใจ
-                                value = value.replace(/\n/g, "\r\n");
-                            }
-                        }
-                        return value || "";
-                    },
-                };
-            },
+        // Create document renderer
+        const doc = createDocxRenderer(templateBuffer, {
+            textareaFields: [
+                "rationale",
+                "objective",
+                "goal",
+                "target",
+                "product",
+                "scope",
+                "result",
+                "author",
+            ],
         });
 
+        // Prepare data for template
         const processedData = {
             projectName: fixThaiDistributed(projectName || ""),
             person: fixThaiDistributed(person || ""),
@@ -123,7 +82,6 @@ export async function POST(req: Request) {
             scope: fixThaiDistributed(scope || ""),
             result: fixThaiDistributed(result || ""),
             author: fixThaiDistributed(author || ""),
-
             currentDate: new Date().toLocaleDateString("th-TH", {
                 year: "numeric",
                 month: "long",
@@ -134,86 +92,41 @@ export async function POST(req: Request) {
 
         doc.render(processedData);
 
+        // Generate output
         const outputBuffer = doc.getZip().generate({
             type: "uint8array",
             compression: "DEFLATE",
         });
 
-        const uniqueFileName = generateUniqueFilename(fileName + ".docx");
-
-        // ใช้ storage directory นอก public/
-        await ensureStorageDir("documents");
-        const filePath = getStoragePath("documents", uniqueFileName);
-        const relativeStoragePath = getRelativeStoragePath(
-            "documents",
-            uniqueFileName
+        // Save document
+        const { relativeStoragePath } = await saveDocumentToStorage(
+            outputBuffer,
+            fileName,
+            "docx"
         );
 
-        await fs.writeFile(filePath, Buffer.from(outputBuffer));
-
-        let projectRecord;
-
-        if (formData.get("projectId")) {
-            const projectId = formData.get("projectId") as string;
-            projectRecord = await prisma.project.findFirst({
-                where: {
-                    id: parseInt(projectId),
-                    userId: userId,
-                },
-            });
-
-            if (!projectRecord) {
-                return new NextResponse(
-                    "Project not found. Please select a valid project.",
-                    {
-                        status: 400,
-                    }
-                );
-            }
-        } else {
-            projectRecord = await prisma.project.findFirst({
-                where: {
-                    name: projectName,
-                    userId: userId,
-                },
-            });
-
-            if (!projectRecord) {
-                projectRecord = await prisma.project.create({
-                    data: {
-                        name: projectName,
-                        description: `${projectName} - สร้างจากแบบฟอร์มข้อเสนอโครงการ`,
-                        userId: userId,
-                    },
-                });
-            }
+        // Find or create project
+        const projectResult = await findOrCreateProject(
+            userId,
+            projectName,
+            formData.get("projectId") as string | null,
+            "สร้างจากแบบฟอร์มข้อเสนอโครงการ"
+        );
+        if (isProjectError(projectResult)) {
+            return projectResult;
         }
 
-        await prisma.userFile.create({
-            data: {
-                originalFileName: fileName + ".docx",
-                storagePath: relativeStoragePath,
-                fileExtension: "docx",
-                userId: userId,
-                projectId: projectRecord.id,
-            },
-        });
-        return NextResponse.json({
-            success: true,
-            storagePath: relativeStoragePath,
-            project: {
-                id: projectRecord.id.toString(),
-                name: projectRecord.name,
-                description: projectRecord.description,
-            },
-        });
+        // Create database record
+        await createUserFileRecord(
+            userId,
+            projectResult.id,
+            fileName,
+            relativeStoragePath,
+            "docx"
+        );
+
+        return buildSuccessResponse(relativeStoragePath, projectResult);
     } catch (error) {
-        console.error("Error generating or saving document:", error);
-        let errorMessage = "Internal Server Error";
-        if (error && typeof error === "object" && "properties" in error) {
-            errorMessage =
-                "Docxtemplater template error. Please check your template file placeholders.";
-        }
-        return new NextResponse(errorMessage, { status: 500 });
+        return handleDocumentError(error);
     }
 }
