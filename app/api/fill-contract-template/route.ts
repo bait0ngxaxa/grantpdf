@@ -62,7 +62,10 @@ export async function POST(req: Request) {
         // Handle contract number generation for specific types
         let finalContractNumber = contractnumber;
         if (contractnumber && ["ABS", "DMR", "SIP"].includes(contractnumber)) {
-            const _counter = await prisma.contractCounter.upsert({
+            // Upsert: create with 0, increment by 1
+            // First call: create with 0, then increment to 1 → "01"
+            // Second call: increment from 1 to 2 → "02"
+            const counter = await prisma.contractCounter.upsert({
                 where: { contractType: contractnumber },
                 update: {
                     currentNumber: {
@@ -71,15 +74,12 @@ export async function POST(req: Request) {
                 },
                 create: {
                     contractType: contractnumber,
-                    currentNumber: 1,
+                    currentNumber: 1, // Start at 1 (first document)
                 },
             });
 
-            const updatedCounter = await prisma.contractCounter.findUnique({
-                where: { contractType: contractnumber },
-            });
-
-            const paddedNumber = updatedCounter!.currentNumber
+            // Use the result directly from upsert (no need for second query)
+            const paddedNumber = counter.currentNumber
                 .toString()
                 .padStart(2, "0");
             finalContractNumber = `${contractnumber}${paddedNumber}`;
