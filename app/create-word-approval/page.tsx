@@ -2,11 +2,10 @@
 
 import { useState, ChangeEvent, useRef, FormEvent } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
-import { usePreventNavigation } from "@/hooks/usePreventNavigation";
+import { useExitConfirmation } from "@/hooks/useExitConfirmation";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
@@ -335,21 +334,12 @@ export default function CreateWordDocPage() {
         attachmentFiles.length > 0 ||
         !!signatureFile ||
         !!signatureCanvasData;
-
-    const router = useRouter();
-    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
-    const { allowNavigation } = usePreventNavigation({
-        isDirty,
-        onNavigationAttempt: () => setIsExitModalOpen(true),
-    });
-
-    const handleConfirmExit = () => {
-        allowNavigation();
-        setIsExitModalOpen(false);
-        setTimeout(() => {
-            router.push("/createdocs");
-        }, 100);
-    };
+    const {
+        isExitModalOpen,
+        setIsExitModalOpen,
+        handleConfirmExit,
+        allowNavigation,
+    } = useExitConfirmation({ isDirty });
 
     if (!isClient) {
         return <LoadingState />;

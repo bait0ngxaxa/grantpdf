@@ -57,10 +57,12 @@ export default function SignupPage() {
                 }, 3000);
             } else {
                 const data = await res.json();
+                // Keep modal open and show error inside modal
                 setError(data.error || "เกิดข้อผิดพลาดในการสมัครสมาชิก");
                 console.error("Signup failed:", data.error);
             }
         } catch (err) {
+            // Keep modal open and show error inside modal
             setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
             console.error("Network error during signup:", err);
         } finally {
@@ -288,10 +290,32 @@ export default function SignupPage() {
                                 </div>
                             </div>
 
+                            {/* Error display inside modal */}
+                            {error && (
+                                <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                        className="w-5 h-5 shrink-0"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                    {error}
+                                </div>
+                            )}
+
                             <div className="flex gap-3 pt-2">
                                 <Button
                                     variant="outline"
-                                    onClick={() => setShowConfirmModal(false)}
+                                    onClick={() => {
+                                        setError("");
+                                        setShowConfirmModal(false);
+                                    }}
                                     className="flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                 >
                                     แก้ไข
@@ -314,7 +338,12 @@ export default function SignupPage() {
                         </div>
                     </div>
                     <form method="dialog" className="modal-backdrop">
-                        <button onClick={() => setShowConfirmModal(false)}>
+                        <button
+                            onClick={() => {
+                                setError("");
+                                setShowConfirmModal(false);
+                            }}
+                        >
                             close
                         </button>
                     </form>

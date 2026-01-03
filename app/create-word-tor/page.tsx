@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
-import { usePreventNavigation } from "@/hooks/usePreventNavigation";
+import { useExitConfirmation } from "@/hooks/useExitConfirmation";
 import { PageLayout } from "@/components/document-form/PageLayout";
 import { FormSection } from "@/components/document-form/FormSection";
 import { FormActions } from "@/components/document-form/FormActions";
@@ -97,20 +96,12 @@ export default function CreateTORPage() {
                 row.duration !== ""
         );
 
-    const router = useRouter();
-    const [isExitModalOpen, setIsExitModalOpen] = useState(false);
-    const { allowNavigation } = usePreventNavigation({
-        isDirty,
-        onNavigationAttempt: () => setIsExitModalOpen(true),
-    });
-
-    const handleConfirmExit = () => {
-        allowNavigation();
-        setIsExitModalOpen(false);
-        setTimeout(() => {
-            router.push("/createdocs");
-        }, 100);
-    };
+    const {
+        isExitModalOpen,
+        setIsExitModalOpen,
+        handleConfirmExit,
+        allowNavigation,
+    } = useExitConfirmation({ isDirty });
 
     if (!isClient) {
         return <LoadingState />;

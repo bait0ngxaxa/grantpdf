@@ -1,54 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import path from "path";
 import fs from "fs";
 import fsPromises from "fs/promises";
 import ExcelJS from "exceljs";
-import { prisma } from "@/lib/prisma";
-import { v4 as uuidv4 } from "uuid";
+import {
+    validateSession,
+    isSessionError,
+    findOrCreateProject,
+    isProjectError,
+    createUserFileRecord,
+} from "@/lib/documentRouteUtils";
+import { generateUniqueFilename } from "@/lib/documentUtils";
 import {
     ensureStorageDir,
     getStoragePath,
     getRelativeStoragePath,
 } from "@/lib/fileStorage";
 
-// Helper function to generate a unique filename
-const generateUniqueFilename = (originalName: string): string => {
-    const lastDotIndex = originalName.lastIndexOf(".");
-    const nameWithoutExt =
-        lastDotIndex > 0
-            ? originalName.substring(0, lastDotIndex)
-            : originalName;
-    const extension =
-        lastDotIndex > 0 ? originalName.substring(lastDotIndex) : "";
-
-    const sanitizedName = nameWithoutExt
-        .replace(/\s+/g, "_")
-        .replace(/[<>:"/\\|?*]/g, "")
-        .substring(0, 50);
-
-    const uniqueId = uuidv4();
-    return `${uniqueId}_${sanitizedName}${extension}`;
-};
-
 export async function POST(req: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || !session.user || !session.user.id) {
-            return new NextResponse("Unauthorized", { status: 401 });
+        // Validate session
+        const sessionResult = await validateSession();
+        if (isSessionError(sessionResult)) {
+            return sessionResult;
         }
-
-        const userId = Number(session.user.id);
+        const { userId } = sessionResult;
 
         const formData = await req.formData();
+
+        // Extract form fields
         const fileName = formData.get("fileName") as string;
         const projectName = formData.get("projectName") as string;
         const contractNumber = formData.get("contractNumber") as string;
         const organize = formData.get("organize") as string;
         const projectOwner = formData.get("projectOwner") as string;
         const projectReview = formData.get("projectReview") as string;
-
         const coordinator = formData.get("coordinator") as string;
         const projectCode = formData.get("projectCode") as string;
         const projectActivity = formData.get("projectActivity") as string;
@@ -68,8 +54,8 @@ export async function POST(req: NextRequest) {
             });
         }
 
+        // Load Excel template
         const templatePath = path.join(process.cwd(), "public", "summary.xlsx");
-
         if (!fs.existsSync(templatePath)) {
             return NextResponse.json(
                 {
@@ -90,19 +76,19 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Prepare template data
         const currentDate = new Date().toLocaleDateString("th-TH", {
             year: "numeric",
             month: "long",
             day: "numeric",
         });
 
-        const templateData = {
+        const templateData: Record<string, string | number> = {
             projectName: projectName || "",
             contractNumber: contractNumber || "",
             organize: organize || "",
             projectOwner: projectOwner || "",
             projectReview: projectReview || "",
-
             coordinator: coordinator || "",
             projectCode: projectCode || "",
             projectActivity: projectActivity || "",
@@ -130,7 +116,6 @@ export async function POST(req: NextRequest) {
             Object.keys(data).forEach((key) => {
                 const placeholder = `{{${key}}}`;
                 const value = String(data[key] || "");
-                // Escape special regex characters in placeholder
                 const escapedPlaceholder = placeholder.replace(
                     /[.*+?^${}()|[\]\\]/g,
                     "\\$&"
@@ -148,7 +133,6 @@ export async function POST(req: NextRequest) {
         worksheet.eachRow((_row, _rowNumber) => {
             _row.eachCell((cell, _colNumber) => {
                 if (cell.value && typeof cell.value === "string") {
-                    // Simple string cell
                     const originalValue = cell.value;
                     const newValue = replacePlaceholders(
                         originalValue,
@@ -158,7 +142,6 @@ export async function POST(req: NextRequest) {
                         cell.value = newValue;
                     }
                 } else if (cell.value && typeof cell.value === "object") {
-                    // Handle rich text cells
                     if (
                         "richText" in cell.value &&
                         Array.isArray(cell.value.richText)
@@ -174,7 +157,6 @@ export async function POST(req: NextRequest) {
                             }
                         );
                     }
-                    // Handle formula cells
                     if (
                         "formula" in cell.value &&
                         typeof cell.value.formula === "string"
@@ -192,75 +174,46 @@ export async function POST(req: NextRequest) {
             });
         });
 
+        // Generate output
         const buffer = await workbook.xlsx.writeBuffer();
-
         const uniqueFileName = generateUniqueFilename(fileName + ".xlsx");
 
-        // ใช้ storage directory นอก public/
+        // Save to storage
         await ensureStorageDir("documents");
         const filePath = getStoragePath("documents", uniqueFileName);
         const relativeStoragePath = getRelativeStoragePath(
             "documents",
             uniqueFileName
         );
-
         await fsPromises.writeFile(filePath, Buffer.from(buffer));
 
-        let project;
-
-        if (formData.get("projectId")) {
-            const projectId = formData.get("projectId") as string;
-            project = await prisma.project.findFirst({
-                where: {
-                    id: parseInt(projectId),
-                    userId: userId,
-                },
-            });
-
-            if (!project) {
-                return new NextResponse(
-                    "Project not found. Please select a valid project.",
-                    {
-                        status: 400,
-                    }
-                );
-            }
-        } else {
-            project = await prisma.project.findFirst({
-                where: {
-                    name: projectName,
-                    userId: userId,
-                },
-            });
-
-            if (!project) {
-                project = await prisma.project.create({
-                    data: {
-                        name: projectName,
-                        description: `${projectName} - สร้างจากแบบสรุปโครงการ`,
-                        userId: userId,
-                    },
-                });
-            }
+        // Find or create project
+        const projectResult = await findOrCreateProject(
+            userId,
+            projectName,
+            formData.get("projectId") as string | null,
+            "สร้างจากแบบสรุปโครงการ"
+        );
+        if (isProjectError(projectResult)) {
+            return projectResult;
         }
 
-        await prisma.userFile.create({
-            data: {
-                originalFileName: fileName + ".xlsx",
-                storagePath: relativeStoragePath,
-                fileExtension: "xlsx",
-                userId: userId,
-                projectId: project.id,
-            },
-        });
+        // Create database record
+        await createUserFileRecord(
+            userId,
+            projectResult.id,
+            fileName,
+            relativeStoragePath,
+            "xlsx"
+        );
 
         return NextResponse.json({
             success: true,
             storagePath: relativeStoragePath,
             project: {
-                id: project.id.toString(),
-                name: project.name,
-                description: project.description,
+                id: projectResult.id.toString(),
+                name: projectResult.name,
+                description: projectResult.description,
             },
         });
     } catch (error) {
