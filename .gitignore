@@ -46,6 +46,9 @@ next-env.d.ts
 
 /storage
 
+# Audit logs
+/logs
+
 
 
 

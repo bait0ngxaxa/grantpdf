@@ -1,4 +1,4 @@
-// เส้นลบไฟล์ในระบบ admin table userFile
+// User file deletion endpoint
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
+import { logAudit } from "@/lib/auditLog";
 
 export async function DELETE(
     req: NextRequest,
@@ -47,10 +48,18 @@ export async function DELETE(
             );
         }
 
+        // User can only delete their own files
+        if (document.userId !== parseInt(session.user.id)) {
+            return NextResponse.json(
+                { error: "Permission denied" },
+                { status: 403 }
+            );
+        }
+
         if (document.storagePath) {
             const fullPath = path.join(
                 process.cwd(),
-                "uploads",
+                "storage",
                 document.storagePath
             );
             if (fs.existsSync(fullPath)) {
@@ -61,6 +70,15 @@ export async function DELETE(
         }
 
         await prisma.userFile.delete({ where: { id: docId } });
+
+        // Log user file deletion
+        logAudit("FILE_DELETE", session.user.id, {
+            userEmail: session.user.email || undefined,
+            details: {
+                deletedFileId: document.id.toString(),
+                deletedFileName: document.originalFileName,
+            },
+        });
 
         return NextResponse.json(
             {

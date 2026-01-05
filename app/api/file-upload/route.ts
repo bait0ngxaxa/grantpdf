@@ -11,6 +11,7 @@ import {
     getRelativeStoragePath,
     validateFileMime,
 } from "@/lib/fileStorage";
+import { logAudit } from "@/lib/auditLog";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -146,6 +147,16 @@ export async function POST(request: NextRequest) {
                 fileExtension: fileExtension,
                 userId: parseInt(session.user.id),
                 projectId: parseInt(projectId),
+            },
+        });
+
+        // Log file upload
+        logAudit("FILE_UPLOAD", session.user.id, {
+            userEmail: session.user.email || undefined,
+            details: {
+                fileName: file.name,
+                fileId: userFile.id.toString(),
+                projectId,
             },
         });
 

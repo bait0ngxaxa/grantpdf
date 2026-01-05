@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logAudit } from "@/lib/auditLog";
 
 export async function GET() {
     try {
@@ -229,6 +230,18 @@ export async function PUT(req: Request) {
             userName: updatedProject.user?.name || "Unknown User",
             userEmail: updatedProject.user?.email || "Unknown Email",
         };
+
+        // Log admin project status update
+        logAudit("ADMIN_PROJECT_UPDATE", session.user.id, {
+            userEmail: session.user.email || undefined,
+            details: {
+                projectId: updatedProject.id.toString(),
+                projectName: updatedProject.name,
+                newStatus: status,
+                statusNote: statusNote || null,
+                projectOwnerEmail: updatedProject.user?.email,
+            },
+        });
 
         return NextResponse.json({
             success: true,

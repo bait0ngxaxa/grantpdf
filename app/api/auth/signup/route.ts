@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { rateLimit, getClientIP } from "@/lib/ratelimit";
+import { logAudit } from "@/lib/auditLog";
 
 export async function POST(req: NextRequest) {
     try {
@@ -77,6 +78,12 @@ export async function POST(req: NextRequest) {
                 email: trimmedEmail,
                 password: hashedPassword,
             },
+        });
+
+        // Log successful signup
+        logAudit("SIGNUP", String(newUser.id), {
+            userEmail: newUser.email,
+            ip,
         });
 
         return NextResponse.json(

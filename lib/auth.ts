@@ -27,6 +27,9 @@ export const authOptions: NextAuthOptions = {
                     return null;
                 }
 
+                // Dynamic import to avoid issues with server-side module
+                const { logAudit } = await import("@/lib/auditLog");
+
                 const user = await prisma.user.findUnique({
                     where: { email: credentials.email },
                 });
@@ -35,6 +38,11 @@ export const authOptions: NextAuthOptions = {
                     user &&
                     (await bcrypt.compare(credentials.password, user.password))
                 ) {
+                    // Log successful login
+                    logAudit("LOGIN_SUCCESS", String(user.id), {
+                        userEmail: user.email,
+                    });
+
                     const authorizedUser: User = {
                         id: String(user.id),
                         name: user.name,
@@ -43,6 +51,10 @@ export const authOptions: NextAuthOptions = {
                     };
                     return authorizedUser;
                 } else {
+                    // Log failed login attempt
+                    logAudit("LOGIN_FAILED", null, {
+                        details: { attemptedEmail: credentials.email },
+                    });
                     return null;
                 }
             },

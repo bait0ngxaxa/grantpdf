@@ -14,7 +14,7 @@ export const useFileActions = (
         setIsDeleting(fileId);
 
         try {
-            const res = await fetch(`/api/admin/dashboard/file/${fileId}`, {
+            const res = await fetch(`/api/user-docs/${fileId}`, {
                 method: "DELETE",
             });
 

@@ -7,11 +7,8 @@ import fs from "fs";
 import { Readable } from "stream";
 import { verifySignedToken } from "@/lib/signedUrl";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
+import { logAudit } from "@/lib/auditLog";
 
-/**
- * Signed URL File Download Endpoint
- * ดาวน์โหลดไฟล์ผ่าน signed token พร้อม streaming
- */
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ token: string }> }
@@ -108,6 +105,30 @@ export async function GET(
         const stat = fs.statSync(fullPath);
         const stream = fs.createReadStream(fullPath);
         const contentType = getMimeType(file.originalFileName);
+
+        // Update downloadStatus when admin downloads userFile
+        if (isAdmin && type === "userFile") {
+            await prisma.userFile.update({
+                where: { id: fileId },
+                data: {
+                    downloadStatus: "done",
+                    downloadedAt: new Date(),
+                },
+            });
+        }
+
+        // Log download - differentiate admin vs user
+        const downloadAction = isAdmin
+            ? "ADMIN_FILE_DOWNLOAD"
+            : "FILE_DOWNLOAD";
+        logAudit(downloadAction, session?.user?.id || String(userId), {
+            userEmail: session?.user?.email || undefined,
+            details: {
+                fileId: file.id.toString(),
+                fileName: file.originalFileName,
+                fileType: type,
+            },
+        });
 
         // Convert Node.js Readable to Web ReadableStream
         const webStream = Readable.toWeb(stream) as ReadableStream;

@@ -6,7 +6,6 @@ import React, { useEffect, useMemo } from "react";
 import { useTitle } from "@/hooks/useTitle";
 
 import { useAdminData } from "./hooks/useAdminData";
-import { useFileActions } from "./hooks/useFileActions";
 import { useProjectStatusActions } from "./hooks/useProjectStatusActions";
 import { usePreviewModal, useSuccessModal } from "./hooks/useModalStates";
 import { useUIStates } from "./hooks/useUIStates";
@@ -19,7 +18,6 @@ import { UsersTab } from "./components/UsersTab";
 import SearchAndFilter from "./components/SearchAndFilter";
 import ProjectsList from "./components/ProjectsList";
 
-import { DeleteFileModal } from "./components/modals/DeleteFileModal";
 import { SuccessModal } from "./components/modals/SuccessModal";
 import { PreviewModal } from "./components/modals/PreviewModal";
 import { ProjectStatusModal } from "./components/modals/ProjectStatusModal";
@@ -52,7 +50,7 @@ export default function AdminDashboardPage() {
         projects,
         setProjects,
         orphanFiles,
-        setOrphanFiles,
+
         isLoading,
         totalUsers,
         latestUser,
@@ -94,21 +92,6 @@ export default function AdminDashboardPage() {
         openPreviewModal,
         closePreviewModal,
     } = usePreviewModal();
-
-    const {
-        isDeleteModalOpen,
-        selectedFileIdForDeletion,
-        selectedFileNameForDeletion,
-        isDeleting,
-
-        closeDeleteModal,
-        handleDeleteFile,
-    } = useFileActions(
-        setProjects,
-        setOrphanFiles,
-        setSuccessMessage,
-        setIsSuccessModalOpen
-    );
 
     const {
         isStatusModalOpen,
@@ -460,15 +443,6 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* All Modals */}
-                <DeleteFileModal
-                    isDeleteModalOpen={isDeleteModalOpen}
-                    selectedFileIdForDeletion={selectedFileIdForDeletion}
-                    selectedFileNameForDeletion={selectedFileNameForDeletion}
-                    isDeleting={isDeleting}
-                    closeDeleteModal={closeDeleteModal}
-                    handleDeleteFile={handleDeleteFile}
-                />
-
                 <SuccessModal
                     isSuccessModalOpen={isSuccessModalOpen}
                     setIsSuccessModalOpen={setIsSuccessModalOpen}
