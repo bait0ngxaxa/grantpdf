@@ -2,12 +2,12 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import type { AdminPdfFile, LatestUser } from "@/type/models";
+import type { AdminDocumentFile, LatestUser } from "@/type/models";
 
 interface UsersTabProps {
     totalUsers: number;
     latestUser: LatestUser | null;
-    allFiles: AdminPdfFile[];
+    allFiles: AdminDocumentFile[];
     router: AppRouterInstance;
 }
 

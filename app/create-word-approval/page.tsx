@@ -29,6 +29,7 @@ import {
     initialApprovalData,
     approvalFixedValues,
 } from "@/config/initialData";
+import { validateAndFormatPhone, validatePhone } from "@/lib/validation";
 
 import type { SignatureCanvasRef } from "@/components/ui/SignatureCanvas";
 
@@ -70,6 +71,20 @@ export default function CreateWordDocPage() {
         apiEndpoint: "/api/fill-approval-template",
         documentType: "Word",
     });
+
+    // Validation errors state
+    const [errors, setErrors] = useState<{ tel?: string }>({});
+
+    // Custom handler for phone with validation
+    const handlePhoneChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const { value } = e.target;
+        const { value: formatted, error } = validateAndFormatPhone(value);
+
+        setFormData((prev) => ({ ...prev, tel: formatted }));
+        setErrors((prev) => ({ ...prev, tel: error }));
+    };
 
     // Attachment handlers
     const addAttachment = () => {
@@ -166,6 +181,17 @@ export default function CreateWordDocPage() {
     // Custom submit handler for approval (more complex due to signature)
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        // Validate phone number
+        const phoneValidation = validatePhone(formData.tel);
+        if (!phoneValidation.isValid) {
+            setErrors((prev) => ({ ...prev, tel: phoneValidation.error }));
+            setMessage(
+                phoneValidation.error || "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง"
+            );
+            setIsError(true);
+            return;
+        }
 
         if (!session) {
             setMessage("คุณต้องเข้าสู่ระบบก่อน");
@@ -489,11 +515,13 @@ export default function CreateWordDocPage() {
                         <FormField
                             label="เบอร์โทรศัพท์"
                             name="tel"
-                            type="number"
+                            type="tel"
                             placeholder="ระบุเบอร์โทรศัพท์ผู้ประสานงาน"
                             value={formData.tel}
-                            onChange={handleChange}
+                            onChange={handlePhoneChange}
                             required
+                            maxLength={10}
+                            error={errors.tel}
                         />
                         <div className="lg:col-span-2">
                             <FormField

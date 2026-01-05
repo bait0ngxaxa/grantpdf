@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
 import { useExitConfirmation } from "@/hooks/useExitConfirmation";
@@ -19,6 +19,10 @@ import {
 } from "@/components/document-form/PreviewField";
 import { ClipboardList, User } from "lucide-react";
 import { type ContractData, initialContractData } from "@/config/initialData";
+import {
+    validateAndFormatCitizenId,
+    validateCitizenId,
+} from "@/lib/validation";
 
 export default function CreateContractPage() {
     // Use lazy initialization to get contractCode from localStorage
@@ -43,6 +47,7 @@ export default function CreateContractPage() {
 
     const {
         formData,
+        setFormData,
         handleChange,
         handleSubmit,
         isSubmitting,
@@ -64,6 +69,41 @@ export default function CreateContractPage() {
             }
         },
     });
+
+    // Validation errors state
+    const [errors, setErrors] = useState<{ citizenid?: string }>({});
+
+    // Custom handler for citizen ID with validation
+    const handleCitizenIdChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const { value } = e.target;
+        const { value: formatted, error } = validateAndFormatCitizenId(value);
+
+        // Update form data with formatted value
+        setFormData((prev) => ({ ...prev, citizenid: formatted }));
+
+        // Update error state
+        setErrors((prev) => ({ ...prev, citizenid: error }));
+    };
+
+    // Validate before submit
+    const validateBeforeSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        // Validate citizen ID
+        const citizenIdValidation = validateCitizenId(formData.citizenid);
+        if (!citizenIdValidation.isValid) {
+            setErrors((prev) => ({
+                ...prev,
+                citizenid: citizenIdValidation.error,
+            }));
+            return;
+        }
+
+        // If all validations pass, submit the form
+        handleSubmit(e);
+    };
 
     const {
         isExitModalOpen,
@@ -89,7 +129,7 @@ export default function CreateContractPage() {
             setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
         >
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={validateBeforeSubmit} className="space-y-8">
                 {/* ข้อมูลโครงการ */}
                 <FormSection
                     title="ข้อมูลโครงการ"
@@ -194,11 +234,13 @@ export default function CreateContractPage() {
                         <FormField
                             label="บัตรประชาชนเลขที่"
                             name="citizenid"
-                            type="number"
+                            type="tel"
                             placeholder="ระบุเลขบัตรประชาชน 13 หลักผู้รับจ้าง"
                             value={formData.citizenid}
-                            onChange={handleChange}
+                            onChange={handleCitizenIdChange}
                             required
+                            maxLength={13}
+                            error={errors.citizenid}
                         />
                         <FormField
                             label="วันหมดอายุบัตรประชาชน"

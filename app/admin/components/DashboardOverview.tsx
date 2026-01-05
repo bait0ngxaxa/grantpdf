@@ -1,12 +1,12 @@
 import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
-import type { AdminProject, AdminPdfFile } from "@/type/models";
+import type { AdminProject, AdminDocumentFile } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
 
 interface DashboardOverviewProps {
     projects: AdminProject[];
-    allFiles: AdminPdfFile[];
+    allFiles: AdminDocumentFile[];
     totalUsers: number;
     todayProjects: number;
     todayFiles: number;

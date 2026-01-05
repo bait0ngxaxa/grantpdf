@@ -14,6 +14,8 @@ interface FormFieldProps {
     required?: boolean;
     rows?: number;
     className?: string;
+    error?: string;
+    maxLength?: number;
 }
 
 export function FormField({
@@ -26,8 +28,15 @@ export function FormField({
     required = false,
     rows = 4,
     className = "",
+    error,
+    maxLength,
 }: FormFieldProps) {
-    const baseClassName = `w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200 placeholder:text-slate-400 hover:border-blue-200 ${className}`;
+    const hasError = !!error;
+    const baseClassName = `w-full px-4 py-3 bg-white border rounded-xl focus:ring-4 transition-all duration-200 placeholder:text-slate-400 ${
+        hasError
+            ? "border-red-400 focus:ring-red-100 focus:border-red-400"
+            : "border-slate-200 focus:ring-blue-100 focus:border-blue-400 hover:border-blue-200"
+    } ${className}`;
 
     return (
         <div className="group">
@@ -53,8 +62,10 @@ export function FormField({
                     value={value}
                     onChange={onChange}
                     required={required}
+                    maxLength={maxLength}
                 />
             )}
+            {error && <p className="text-sm text-red-500 mt-1 ml-1">{error}</p>}
         </div>
     );
 }

@@ -16,19 +16,19 @@ export interface UserFile {
     userName?: string;
     userId?: string;
     userEmail?: string;
-    pdfUrl?: string;
+    fileUrl?: string;
     downloadStatus?: string;
     downloadedAt?: string;
     attachmentFiles?: AttachmentFile[];
 }
 
-export interface PdfFile extends UserFile {
+export interface DocumentFile extends UserFile {
     fileName?: string;
     createdAt?: string;
     lastModified?: string;
 }
 
-export interface AdminPdfFile extends UserFile {
+export interface AdminDocumentFile extends UserFile {
     fileName: string;
     createdAt: string;
     lastModified: string;
@@ -58,7 +58,7 @@ export interface AdminProject
     userId: string;
     userName: string;
     userEmail: string;
-    files: AdminPdfFile[];
+    files: AdminDocumentFile[];
 }
 
 export interface LatestUser {

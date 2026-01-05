@@ -1,16 +1,20 @@
 import { useState, useCallback } from "react";
-import type { AdminPdfFile, AdminProject, LatestUser } from "@/type/models";
+import type {
+    AdminDocumentFile,
+    AdminProject,
+    LatestUser,
+} from "@/type/models";
 import type { Session } from "next-auth";
 import { API_ROUTES } from "@/lib/constants";
 
 interface ProjectsResponse {
     projects: AdminProject[];
-    orphanFiles: AdminPdfFile[];
+    orphanFiles: AdminDocumentFile[];
 }
 
 export const useAdminData = () => {
     const [projects, setProjects] = useState<AdminProject[]>([]);
-    const [orphanFiles, setOrphanFiles] = useState<AdminPdfFile[]>([]);
+    const [orphanFiles, setOrphanFiles] = useState<AdminDocumentFile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [totalUsers, setTotalUsers] = useState(0);

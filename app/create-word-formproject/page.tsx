@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, ChangeEvent, FormEvent } from "react";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/hooks/useTitle";
 import { useExitConfirmation } from "@/hooks/useExitConfirmation";
@@ -21,6 +22,7 @@ import {
     type FormProjectData,
     initialFormProjectData,
 } from "@/config/initialData";
+import { validateAndFormatPhone, validatePhone } from "@/lib/validation";
 
 export default function CreateFormProjectPage() {
     useTitle("สร้างหนังสือข้อเสนอโครงการ | ระบบจัดการเอกสาร");
@@ -40,11 +42,47 @@ export default function CreateFormProjectPage() {
         generatedFileUrl,
         isDirty,
         isClient,
+        setMessage,
+        setIsError,
     } = useDocumentForm<FormProjectData>({
         initialData: initialFormProjectData,
         apiEndpoint: "/api/fill-formproject-template",
         documentType: "Word",
     });
+
+    // Validation errors state
+    const [errors, setErrors] = useState<{ tel?: string }>({});
+
+    // Custom handler for phone with validation
+    const handlePhoneChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const { value } = e.target;
+        const { value: formatted, error } = validateAndFormatPhone(value);
+
+        const syntheticEvent = {
+            target: { name: "tel", value: formatted },
+        } as ChangeEvent<HTMLInputElement>;
+        handleChange(syntheticEvent);
+        setErrors((prev) => ({ ...prev, tel: error }));
+    };
+
+    // Validate before submit
+    const validateBeforeSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const phoneValidation = validatePhone(formData.tel);
+        if (!phoneValidation.isValid) {
+            setErrors((prev) => ({ ...prev, tel: phoneValidation.error }));
+            setMessage(
+                phoneValidation.error || "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง"
+            );
+            setIsError(true);
+            return;
+        }
+
+        handleSubmit(e);
+    };
 
     const {
         isExitModalOpen,
@@ -66,7 +104,7 @@ export default function CreateFormProjectPage() {
             setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
         >
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={validateBeforeSubmit} className="space-y-8">
                 {/* ข้อมูลโครงการ */}
                 <FormSection
                     title="ข้อมูลโครงการ"
@@ -108,11 +146,13 @@ export default function CreateFormProjectPage() {
                         <FormField
                             label="เบอร์โทรศัพท์"
                             name="tel"
-                            type="number"
+                            type="tel"
                             placeholder="ระบุเบอร์โทรศัพท์ผู้รับผิดชอบ"
                             value={formData.tel}
-                            onChange={handleChange}
+                            onChange={handlePhoneChange}
                             required
+                            maxLength={10}
+                            error={errors.tel}
                         />
                         <FormField
                             label="อีเมล"

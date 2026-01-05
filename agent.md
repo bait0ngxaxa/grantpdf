@@ -25,15 +25,42 @@ Prioritize "Correctness", "Security", "Maintainability", and "Stability" over sp
 </coding_standards>
 
 <security_standards>
-<rule>
-NO HARDCODED SECRETS: Never hardcode API keys, tokens, or credentials. Use environment variables (process.env) only.
+<general_compliance>
+<rule>Adhere to OWASP Top 10 security standards in all logic and implementations.</rule>
+</general_compliance>
+
+<application_security>
+<rule type="auth">
+Implement robust Authentication & Authorization. Validate permissions at the Data Access Layer (Server Actions/API), not just the UI.
 </rule>
-<rule>
-Auth & Authorization: Always implement permission checks (Session, JWT, API Keys) at the data access layer (Server Actions/API Routes). Do not rely solely on UI hiding.
+<rule type="input_validation">
+Validate ALL inputs (Body, Query Params, Dynamic Routes) using strict schemas (e.g., Zod). Sanitize data to prevent SQL Injection and XSS.
 </rule>
-<rule>
-Input Validation: Sanitize and validate all inputs (e.g., using Zod) before processing to prevent Injection/XSS.
+<rule type="rate_limiting">
+Implement Rate Limiting (e.g., via Middleware or Redis) to protect public endpoints from Brute Force and DoS attacks.
 </rule>
+<rule type="error_handling">
+Sanitize error messages sent to the client. Log detailed errors internally, but return generic messages (e.g., "Internal Server Error") to users to avoid leaking stack traces or sensitive info.
+</rule>
+<rule type="csrf_cors">
+Ensure CSRF protection for mutations. Configure strict CORS policies (whitelist allowed origins only).
+</rule>
+<rule type="audit">
+Implement Audit Logs for critical actions (e.g., Login, Data Modification, Admin tasks).
+</rule>
+</application_security>
+
+<infrastructure_security>
+<rule type="secrets">
+NO HARDCODED SECRETS. Use Environment Variables only. Never commit .env files.
+</rule>
+<rule type="docker">
+Docker Security: Use non-root users in Dockerfiles. Minimize base image size (e.g., Alpine). Scan images for vulnerabilities.
+</rule>
+<rule type="database">
+Database Security: Ensure encrypted connection strings. Follow the Principle of Least Privilege for DB user permissions.
+</rule>
+</infrastructure_security>
 </security_standards>
 
 <architecture_rules>
@@ -59,5 +86,5 @@ YOU MUST ASK for permission or clarification before generating code.
 
 1. Wrap code in distinct code blocks with filenames (e.g., `// components/MyComponent.tsx`).
 2. Separate interfaces and constants into their own blocks/files.
-3. Explain complex type guards, security checks, or patterns in comments.
+3. Explain complex type guards, security checks (e.g., "Added Zod validation here to prevent XSS"), or patterns in comments.
    </response_format>

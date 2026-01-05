@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { AttachmentFile } from "@/type/models";
 
-interface PdfFile {
+interface DocumentFile {
     id: string;
     fileName: string;
     createdAt: string;
@@ -9,7 +9,7 @@ interface PdfFile {
     userId: string;
     userName?: string;
     userEmail?: string;
-    pdfUrl?: string;
+    fileUrl?: string;
     originalFileName: string;
     storagePath: string;
     created_at: string;
@@ -30,7 +30,7 @@ interface Project {
     userId: string;
     userName: string;
     userEmail: string;
-    files: PdfFile[];
+    files: DocumentFile[];
     _count: {
         files: number;
     };
@@ -38,7 +38,7 @@ interface Project {
 
 export const useFileActions = (
     setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
-    setOrphanFiles: React.Dispatch<React.SetStateAction<PdfFile[]>>,
+    setOrphanFiles: React.Dispatch<React.SetStateAction<DocumentFile[]>>,
     setSuccessMessage: (message: string) => void,
     setIsSuccessModalOpen: (open: boolean) => void
 ) => {
@@ -51,7 +51,7 @@ export const useFileActions = (
     const [isDeleting, setIsDeleting] = useState(false);
 
     // Open delete modal
-    const openDeleteModal = (file: PdfFile) => {
+    const openDeleteModal = (file: DocumentFile) => {
         setSelectedFileIdForDeletion(file.id);
         setSelectedFileNameForDeletion(file.originalFileName);
         setIsDeleteModalOpen(true);

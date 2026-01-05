@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import AttachmentList from "./AttachmentList";
-import type { AdminPdfFile } from "@/type/models";
+import type { AdminDocumentFile } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
 import { useSignedDownload } from "@/hooks/useSignedDownload";
 
 interface FileItemProps {
-    file: AdminPdfFile;
+    file: AdminDocumentFile;
     onPreviewPdf: (storagePath: string, fileName: string) => void;
 }
 

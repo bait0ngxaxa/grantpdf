@@ -62,27 +62,36 @@ export async function POST(req: Request) {
         // Handle contract number generation for specific types
         let finalContractNumber = contractnumber;
         if (contractnumber && ["ABS", "DMR", "SIP"].includes(contractnumber)) {
-            // Upsert: create with 0, increment by 1
-            // First call: create with 0, then increment to 1 → "01"
-            // Second call: increment from 1 to 2 → "02"
-            const counter = await prisma.contractCounter.upsert({
+            // Step 1: Find or create the counter record
+            let counter = await prisma.contractCounter.findUnique({
                 where: { contractType: contractnumber },
-                update: {
-                    currentNumber: {
-                        increment: 1,
-                    },
-                },
-                create: {
-                    contractType: contractnumber,
-                    currentNumber: 1, // Start at 1 (first document)
-                },
             });
 
-            // Use the result directly from upsert (no need for second query)
+            if (!counter) {
+                // Create new counter starting at 1
+                counter = await prisma.contractCounter.create({
+                    data: {
+                        contractType: contractnumber,
+                        currentNumber: 1,
+                    },
+                });
+            }
+
+            // Step 2: Use current number for this contract
             const paddedNumber = counter.currentNumber
                 .toString()
                 .padStart(2, "0");
             finalContractNumber = `${contractnumber}${paddedNumber}`;
+
+            // Step 3: Increment for next usage
+            await prisma.contractCounter.update({
+                where: { contractType: contractnumber },
+                data: {
+                    currentNumber: {
+                        increment: 1,
+                    },
+                },
+            });
         }
 
         // Load template
