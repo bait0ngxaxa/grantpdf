@@ -74,7 +74,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                                 className={`w-full h-12 rounded-2xl text-lg font-medium shadow-lg transition-all transform active:scale-95 ${
                                     isError
                                         ? "bg-red-500 hover:bg-red-600 shadow-red-200 text-white"
-                                        : "bg-slate-900 hover:bg-slate-800 shadow-slate-200 text-white"
+                                        : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-blue-200 text-white"
                                 }`}
                             >
                                 ตกลง

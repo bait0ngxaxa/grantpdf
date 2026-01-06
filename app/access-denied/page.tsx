@@ -102,7 +102,7 @@ export default function AccessDeniedPage() {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
                             <Button
                                 onClick={() => router.push("/")}
-                                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-6 rounded-xl text-base font-semibold shadow-lg shadow-slate-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-6 rounded-xl text-base font-semibold shadow-lg shadow-blue-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"

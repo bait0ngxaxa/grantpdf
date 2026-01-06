@@ -91,8 +91,8 @@ export default function SignupPage() {
                     </h1>
 
                     <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
-                        สมัครสมาชิกเพื่อเข้าถึงการ สร้างเอกสารสัญญา TOR
-                        และติดตามสถานะโครงการได้ทันที
+                        สมัครสมาชิกเพื่อเข้าถึงการ สร้างเอกสารสัญญา TOR <br />
+                        และติดตามสถานะโครงการ
                     </p>
 
                     <div className="space-y-4 max-w-lg">

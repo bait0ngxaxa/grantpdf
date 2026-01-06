@@ -71,7 +71,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
 
                 <Button
                     size="lg"
-                    className="h-14 px-8 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white shadow-xl hover:shadow-2xl shadow-slate-200 text-lg font-medium transition-all duration-300 transform hover:-translate-y-1"
+                    className="h-14 px-8 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-xl hover:shadow-2xl shadow-blue-200 text-lg font-medium transition-all duration-300 transform hover:-translate-y-1"
                     onClick={() => router.push("/admin/users")}
                 >
                     <Users className="w-5 h-5 mr-3" />

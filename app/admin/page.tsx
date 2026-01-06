@@ -112,6 +112,9 @@ export default function AdminDashboardPage() {
 
     useTitle(getTitleByTab(activeTab));
 
+    // Ref to track if initial fetch has been done
+    const hasFetchedRef = React.useRef(false);
+
     useEffect(() => {
         if (status === "loading") return;
         if (!session || session.user?.role !== "admin") {
@@ -120,7 +123,12 @@ export default function AdminDashboardPage() {
     }, [session, status, router]);
 
     useEffect(() => {
-        if (session && session.user?.role === "admin") {
+        if (
+            session &&
+            session.user?.role === "admin" &&
+            !hasFetchedRef.current
+        ) {
+            hasFetchedRef.current = true;
             fetchProjects(session);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

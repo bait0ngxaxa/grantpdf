@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useTitle } from "@/hooks/useTitle";
 
 import { UsersSidebar } from "./components/UsersSidebar";
@@ -58,8 +58,16 @@ export default function AdminUserManagementPage() {
         }
     }, [session, status, router]);
 
+    // Ref to track if initial fetch has been done
+    const hasFetchedRef = useRef(false);
+
     useEffect(() => {
-        if (status === "authenticated" && session?.user?.role === "admin") {
+        if (
+            status === "authenticated" &&
+            session?.user?.role === "admin" &&
+            !hasFetchedRef.current
+        ) {
+            hasFetchedRef.current = true;
             fetchUsers();
         }
     }, [status, session, fetchUsers]);

@@ -194,7 +194,7 @@ export default function Home() {
                                 </Button>
                             </Link>
                             <Link href="/signup">
-                                <Button className="bg-slate-900 text-white hover:bg-slate-800 rounded-full px-6 shadow-lg shadow-slate-900/20 transition-all hover:scale-105 active:scale-95">
+                                <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-full px-6 shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95">
                                     เริ่มต้นใช้งาน
                                 </Button>
                             </Link>
@@ -337,34 +337,6 @@ export default function Home() {
                                         สร้างเลย <span className="ml-1">→</span>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Recent Activity or Info Section could go here */}
-                        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-3xl p-8 md:p-10 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-2">
-                                        พร้อมเริ่มต้นสร้างเอกสาร?
-                                    </h3>
-                                    <p className="text-blue-100">
-                                        ระบบช่วยจัดการข้อมูลให้อัตโนมัติ
-                                        ลดเวลาการทำงาน
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={() =>
-                                        router.push(
-                                            session ? "/createdocs" : "/signup"
-                                        )
-                                    }
-                                    className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg"
-                                >
-                                    {session
-                                        ? "เริ่มสร้างเอกสารใหม่"
-                                        : "สมัครใช้งานฟรี"}
-                                </button>
                             </div>
                         </div>
                     </div>

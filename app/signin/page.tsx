@@ -66,8 +66,9 @@ export default function LoginPage() {
                     </h1>
 
                     <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
-                        เข้าสู่ระบบเพื่อสร้างและจัดการ ใบอนุมัติ, สัญญา, TOR
-                        และติดตามสถานะโครงการของคุณได้อย่างง่ายดาย
+                        เข้าสู่ระบบเพื่อสร้างและจัดการ ใบอนุมัติ, สัญญา, TOR{" "}
+                        <br />
+                        และติดตามสถานะโครงการ
                     </p>
 
                     <div className="grid grid-cols-2 gap-4 max-w-lg">

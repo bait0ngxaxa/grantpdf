@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
                     </h1>
 
                     <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
-                        เพียงกรอกอีเมลที่คุณใช้สมัครสมาชิก
+                        กรอกอีเมลที่คุณใช้สมัครสมาชิก
                         ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้คุณทางอีเมล
                     </p>
 

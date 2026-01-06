@@ -49,7 +49,7 @@ export const ForgotPasswordSuccessModal: React.FC<
 
                     <Button
                         onClick={handleGoToSignin}
-                        className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-200 h-12 text-base font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
+                        className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-200 h-12 text-base font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
                     >
                         ไปยังหน้าเข้าสู่ระบบ
                     </Button>
