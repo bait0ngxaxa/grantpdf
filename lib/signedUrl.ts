@@ -1,10 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
 
-/**
- * Signed URL Utility
- * สร้างและตรวจสอบ signed tokens สำหรับดาวน์โหลดไฟล์
- */
-
 // Secret key for signing (should be in environment variables)
 const getSecretKey = () => {
     const secret = process.env.FILE_TOKEN_SECRET || process.env.NEXTAUTH_SECRET;
@@ -18,6 +13,7 @@ export interface SignedUrlPayload {
     fileId: number;
     userId: number;
     type: "userFile" | "attachment";
+    fromAdminPanel?: boolean;
 }
 
 export interface VerifyResult {
@@ -30,9 +26,10 @@ export async function generateSignedToken(
     fileId: number,
     userId: number,
     type: "userFile" | "attachment" = "userFile",
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
+    fromAdminPanel: boolean = false
 ): Promise<string> {
-    const token = await new SignJWT({ fileId, userId, type })
+    const token = await new SignJWT({ fileId, userId, type, fromAdminPanel })
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
         .setExpirationTime(Math.floor(Date.now() / 1000) + expiresIn)
@@ -45,9 +42,16 @@ export async function generateSignedUrl(
     fileId: number,
     userId: number,
     type: "userFile" | "attachment" = "userFile",
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
+    fromAdminPanel: boolean = false
 ): Promise<string> {
-    const token = await generateSignedToken(fileId, userId, type, expiresIn);
+    const token = await generateSignedToken(
+        fileId,
+        userId,
+        type,
+        expiresIn,
+        fromAdminPanel
+    );
     return `/api/file/${token}`;
 }
 
@@ -68,6 +72,7 @@ export async function verifySignedToken(token: string): Promise<VerifyResult> {
                 fileId: payload.fileId as number,
                 userId: payload.userId as number,
                 type: (payload.type as "userFile" | "attachment") || "userFile",
+                fromAdminPanel: (payload.fromAdminPanel as boolean) || false,
             },
         };
     } catch (error) {

@@ -172,7 +172,11 @@ export default function FileItem({ file, onPreviewPdf }: FileItemProps) {
                     {file.storagePath && (
                         <button
                             onClick={() =>
-                                download({ fileId: file.id, type: "userFile" })
+                                download({
+                                    fileId: file.id,
+                                    type: "userFile",
+                                    fromAdminPanel: true,
+                                })
                             }
                             disabled={isDownloading}
                             className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 bg-slate-50 hover:bg-blue-100 hover:text-blue-600 transition-colors disabled:opacity-50"

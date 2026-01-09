@@ -22,6 +22,7 @@ export default defineConfig([
                     caughtErrorsIgnorePattern: "^_",
                 },
             ],
+            "@next/next/no-html-link-for-pages": ["error", "app"],
         },
     },
 ]);

@@ -5,10 +5,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { generateSignedUrl } from "@/lib/signedUrl";
 
-/**
- * Generate Signed URL API
- * สร้าง signed URL สำหรับดาวน์โหลดไฟล์
- */
 export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
@@ -20,7 +16,12 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { fileId, type = "userFile", expiresIn = 3600 } = body;
+        const {
+            fileId,
+            type = "userFile",
+            expiresIn = 3600,
+            fromAdminPanel = false,
+        } = body;
 
         if (!fileId) {
             return NextResponse.json(
@@ -78,12 +79,13 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // Generate signed URL
+        // Generate signed URL - only pass fromAdminPanel if user is actually admin
         const signedUrl = await generateSignedUrl(
             Number(fileId),
             userId,
             type,
-            expiresIn
+            expiresIn,
+            isAdmin && fromAdminPanel
         );
 
         return NextResponse.json({

@@ -26,7 +26,7 @@ export async function GET(
             );
         }
 
-        const { fileId, userId, type } = verification.payload;
+        const { fileId, userId, type, fromAdminPanel } = verification.payload;
 
         // Get current session (optional - for additional permission check)
         const session = await getServerSession(authOptions);
@@ -106,8 +106,8 @@ export async function GET(
         const stream = fs.createReadStream(fullPath);
         const contentType = getMimeType(file.originalFileName);
 
-        // Update downloadStatus when admin downloads userFile
-        if (isAdmin && type === "userFile") {
+        // Update downloadStatus ONLY when downloaded from Admin Panel
+        if (fromAdminPanel && type === "userFile") {
             await prisma.userFile.update({
                 where: { id: fileId },
                 data: {

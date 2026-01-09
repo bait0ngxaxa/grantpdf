@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 interface DownloadOptions {
     fileId: string | number;
     type?: "userFile" | "attachment";
+    fromAdminPanel?: boolean;
 }
 
 interface UseSignedDownloadReturn {
@@ -13,16 +14,16 @@ interface UseSignedDownloadReturn {
     error: string | null;
 }
 
-/**
- * Hook for downloading files using signed URLs
- * ดาวน์โหลดไฟล์ผ่าน signed URL ที่มีความปลอดภัยสูง
- */
 export function useSignedDownload(): UseSignedDownloadReturn {
     const [isDownloading, setIsDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const download = useCallback(
-        async ({ fileId, type = "userFile" }: DownloadOptions) => {
+        async ({
+            fileId,
+            type = "userFile",
+            fromAdminPanel = false,
+        }: DownloadOptions) => {
             setIsDownloading(true);
             setError(null);
 
@@ -33,7 +34,11 @@ export function useSignedDownload(): UseSignedDownloadReturn {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ fileId: Number(fileId), type }),
+                    body: JSON.stringify({
+                        fileId: Number(fileId),
+                        type,
+                        fromAdminPanel,
+                    }),
                 });
 
                 if (!response.ok) {
