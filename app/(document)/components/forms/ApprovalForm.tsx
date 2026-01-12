@@ -321,7 +321,7 @@ export function ApprovalForm() {
                 data.append("projectId", projectId);
             }
 
-            const response = await fetch("/api/fill-approval-template", {
+            const response = await fetch("/api/generate/approval", {
                 method: "POST",
                 body: data,
             });
