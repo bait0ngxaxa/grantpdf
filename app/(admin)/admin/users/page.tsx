@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useTitle } from "@/hooks/useTitle";
+import { useTitle } from "@/lib/hooks/useTitle";
 
 import { UsersSidebar } from "./components/UsersSidebar";
 import { UsersTopBar } from "./components/UsersTopBar";

@@ -10,7 +10,7 @@ export const useProjectData = (
     setProjects: (projects: Project[]) => void,
     setIsLoading: (loading: boolean) => void,
     setError: (error: string | null) => void,
-    setSelectedProjectId: (id: string | null) => void
+    _setSelectedProjectId: (id: string | null) => void
 ): UseProjectDataReturn => {
     const { status } = useSession();
 
@@ -24,15 +24,6 @@ export const useProjectData = (
             }
             const data = await res.json();
             setProjects(data.projects);
-
-            // Check if there's a selected project from localStorage
-            const storedProjectId = localStorage.getItem("selectedProjectId");
-            if (
-                storedProjectId &&
-                data.projects.some((p: Project) => p.id === storedProjectId)
-            ) {
-                setSelectedProjectId(storedProjectId);
-            }
         } catch (err) {
             console.error("Error fetching projects:", err);
             setError("ไม่สามารถโหลดโครงการได้");

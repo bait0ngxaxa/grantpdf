@@ -8,7 +8,7 @@ import {
     CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hooks/useTitle";
+import { useTitle } from "@/lib/hooks/useTitle";
 
 export default function ResetPasswordPage() {
     const searchParams = useSearchParams();

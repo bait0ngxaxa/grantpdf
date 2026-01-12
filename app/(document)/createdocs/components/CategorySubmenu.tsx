@@ -3,9 +3,9 @@
 interface CategorySubmenuProps {
     selectedCategory: string;
     isAdmin: boolean;
-    onApprovalSelect: (templateId: string, title: string) => void;
-    onTorSelect: (templateId: string, title: string) => void;
-    onFormProjectSelect: (templateId: string, title: string) => void;
+    onApprovalSelect: () => void;
+    onTorSelect: () => void;
+    onFormProjectSelect: () => void;
     onContractTypeSelect: (type: string) => void;
     onCategorySelect: (category: string | null) => void;
 }
@@ -20,9 +20,7 @@ export const CategorySubmenu = ({
     onCategorySelect,
 }: CategorySubmenuProps) => {
     if (selectedCategory === "general") {
-        // เฉพาะแอดมินเท่านั้นที่เข้าถึงได้
         if (!isAdmin) {
-            // หาก user ทั่วไปพยายามเข้าถึง ให้กลับไปหน้าหลัก
             onCategorySelect(null);
             return null;
         }
@@ -41,12 +39,7 @@ export const CategorySubmenu = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
                     <div
                         className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() =>
-                            onApprovalSelect(
-                                "approval-letter",
-                                "หนังสือขออนุมัติของมูลนิธิ"
-                            )
-                        }
+                        onClick={() => onApprovalSelect()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -76,9 +69,7 @@ export const CategorySubmenu = ({
 
                     <div
                         className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() =>
-                            onTorSelect("tor-general", "ขอบเขตของงาน (TOR)")
-                        }
+                        onClick={() => onTorSelect()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -121,12 +112,7 @@ export const CategorySubmenu = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
                     <div
                         className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-pink-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() =>
-                            onFormProjectSelect(
-                                "project-proposal",
-                                "ข้อเสนอโครงการ"
-                            )
-                        }
+                        onClick={() => onFormProjectSelect()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-pink-50 text-pink-500 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">
@@ -186,9 +172,7 @@ export const CategorySubmenu = ({
 
                     <div
                         className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-pink-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() =>
-                            onTorSelect("tor-project", "ขอบเขตของงาน (TOR)")
-                        }
+                        onClick={() => onTorSelect()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-pink-50 text-pink-500 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">

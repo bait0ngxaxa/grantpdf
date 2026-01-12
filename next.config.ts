@@ -32,10 +32,8 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
-    output: "standalone",
     reactStrictMode: true, // ยังใช้ได้
     poweredByHeader: false,
-    productionBrowserSourceMaps: true, // ถ้ไม่ต้องดีบัก prod ค่อยปิดภายหลัง
 
     async headers() {
         return [

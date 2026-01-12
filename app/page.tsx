@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import HomeNavbar from "@/components/home/HomeNavbar";
 import HeroSection from "@/components/home/HeroSection";
 import TemplateGrid from "@/components/home/TemplateGrid";
-import { useTitle } from "@/hooks/useTitle";
+import { useTitle } from "@/lib/hooks/useTitle";
 
 export default function Home(): React.ReactElement {
     const { data: session, status } = useSession();

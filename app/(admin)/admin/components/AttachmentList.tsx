@@ -1,6 +1,6 @@
 "use client";
 
-import { useSignedDownload } from "@/hooks/useSignedDownload";
+import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 
 interface AttachmentFile {
     id: string;

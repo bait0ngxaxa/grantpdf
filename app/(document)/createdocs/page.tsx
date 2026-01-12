@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hooks/useTitle";
+import { useTitle } from "@/lib/hooks/useTitle";
 import { useSession } from "next-auth/react";
 
 import { useCreateDocsState } from "./hooks/useCreateDocsState";
@@ -40,7 +40,6 @@ export default function CreateTorsPage() {
     useProjectData(setProjects, setIsLoading, setError, setSelectedProjectId);
 
     const {
-        handleProjectSelection: handleProjectSelectionBase,
         handleBack: handleBackBase,
         handleCategorySelection: handleCategorySelectionBase,
         handleApprovalSelection,
@@ -48,7 +47,7 @@ export default function CreateTorsPage() {
         handleFormProjectSelection,
         handleSummarySelection,
         handleTorSelection,
-    } = useNavigation();
+    } = useNavigation({ selectedProjectId });
 
     const {
         currentProjects,
@@ -61,7 +60,6 @@ export default function CreateTorsPage() {
 
     const handleProjectSelection = (projectId: string) => {
         setSelectedProjectId(projectId);
-        handleProjectSelectionBase(projectId);
     };
 
     const handleBack = () => {

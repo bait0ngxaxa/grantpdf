@@ -13,8 +13,7 @@ export interface TORData {
     cost: string;
     topic1: string;
     objective1: string;
-    objective2: string;
-    objective3: string;
+
     target: string;
     zone: string;
     plan: string;
@@ -43,8 +42,7 @@ export const initialTORData: TORData = {
     cost: "",
     topic1: "",
     objective1: "",
-    objective2: "",
-    objective3: "",
+
     target: "",
     zone: "",
     plan: "",

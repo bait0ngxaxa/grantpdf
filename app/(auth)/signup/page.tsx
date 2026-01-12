@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hooks/useTitle";
+import { useTitle } from "@/lib/hooks/useTitle";
 import { Zap, FileText, CheckCircle2 } from "lucide-react";
 
 export default function SignupPage() {

@@ -1,24 +1,25 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
-import { useTitle } from "@/hooks/useTitle";
-import { useExitConfirmation } from "@/hooks/useExitConfirmation";
-import { PageLayout } from "@/components/document-form/PageLayout";
-import { FormSection } from "@/components/document-form/FormSection";
-import { FormActions } from "@/components/document-form/FormActions";
-import { PreviewModal } from "@/components/document-form/PreviewModal";
-import { FormField } from "@/components/document-form/FormField";
-import { ErrorAlert } from "@/components/document-form/ErrorAlert";
-import { LoadingState } from "@/components/document-form/LoadingState";
-import { useDocumentForm } from "@/components/document-form/useDocumentForm";
-import { usePreviewModal } from "@/components/document-form/usePreviewModal";
+import { useTitle } from "@/lib/hooks/useTitle";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+import { PageLayout } from "@/app/(document)/components/document-form/PageLayout";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { FormActions } from "@/app/(document)/components/document-form/FormActions";
+import { PreviewModal } from "@/app/(document)/components/document-form/PreviewModal";
+import { FormField } from "@/app/(document)/components/document-form/FormField";
+import { ErrorAlert } from "@/app/(document)/components/document-form/ErrorAlert";
+import { LoadingState } from "@/app/(document)/components/document-form/LoadingState";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import {
     PreviewField,
     PreviewGrid,
-} from "@/components/document-form/PreviewField";
+} from "@/app/(document)/components/document-form/PreviewField";
 import {
     ClipboardList,
     FileText,
@@ -33,9 +34,13 @@ import {
     initialTORData,
     initialActivity,
 } from "@/config/initialData";
-import { validateAndFormatPhone, validatePhone } from "@/lib/validation";
+import { validateTOR } from "@/lib/validation";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 
-export default function CreateTORPage() {
+export function TorForm() {
+    const searchParams = useSearchParams();
+    const projectId = searchParams.get("projectId") || "";
+
     useTitle("สร้างเอกสาร TOR | ระบบจัดการเอกสาร");
 
     const [activities, setActivities] = useState<ActivityData[]>([
@@ -56,48 +61,42 @@ export default function CreateTORPage() {
         setIsSuccessModalOpen,
         generatedFileUrl,
         isClient,
-        setMessage,
-        setIsError,
     } = useDocumentForm<TORData>({
         initialData: initialTORData,
-        apiEndpoint: "/api/fill-tor-template",
+        apiEndpoint: "/api/generate/tor",
         documentType: "TOR",
+        projectId,
         prepareFormData: (_data, formDataObj) => {
             formDataObj.append("activities", JSON.stringify(activities));
         },
     });
 
-    // Validation errors state
-    const [errors, setErrors] = useState<{ tel?: string }>({});
+    // Use validation hook
+    const {
+        errors,
+        handlePreview: onPreview,
+        createPhoneChangeHandler,
+        validateBeforeSubmit,
+    } = useDocumentValidation<TORData>({
+        validateForm: validateTOR,
+        openPreview,
+        phoneFields: ["tel"],
+        emailFields: ["email"],
+    });
 
-    // Custom handler for phone with validation
-    const handlePhoneChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { value } = e.target;
-        const { value: formatted, error } = validateAndFormatPhone(value);
+    // Wrap handlePreview to pass formData
+    const handlePreview = () => onPreview(formData);
 
-        // Need to use handleChange pattern since setFormData is not available
-        const syntheticEvent = {
-            target: { name: "tel", value: formatted },
-        } as ChangeEvent<HTMLInputElement>;
-        handleChange(syntheticEvent);
-        setErrors((prev) => ({ ...prev, tel: error }));
-    };
+    // Create phone change handler
+    const handlePhoneChange = createPhoneChangeHandler(
+        "tel",
+        handleChange,
+        () => {}
+    );
 
-    // Validate before submit
-    const validateBeforeSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const phoneValidation = validatePhone(formData.tel);
-        if (!phoneValidation.isValid) {
-            setErrors((prev) => ({ ...prev, tel: phoneValidation.error }));
-            setMessage(phoneValidation.error || "กรุณากรอกเบอร์โทรให้ถูกต้อง");
-            setIsError(true);
-            return;
-        }
-
-        handleSubmit(e);
+    // Wrap validateBeforeSubmit
+    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+        validateBeforeSubmit(e, formData, handleSubmit);
     };
 
     // Activity handlers
@@ -152,7 +151,7 @@ export default function CreateTORPage() {
             setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
         >
-            <form onSubmit={validateBeforeSubmit} className="space-y-8">
+            <form onSubmit={onSubmit} className="space-y-8">
                 {/* ข้อมูลพื้นฐาน */}
                 <FormSection
                     title="ข้อมูลพื้นฐานโครงการ"
@@ -165,6 +164,7 @@ export default function CreateTORPage() {
                             placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
                             value={formData.fileName}
                             onChange={handleChange}
+                            error={errors.fileName}
                             required
                         />
                         <FormField
@@ -173,6 +173,7 @@ export default function CreateTORPage() {
                             placeholder="ระบุชื่อโครงการ"
                             value={formData.projectName}
                             onChange={handleChange}
+                            error={errors.projectName}
                             required
                         />
                         <FormField
@@ -181,6 +182,7 @@ export default function CreateTORPage() {
                             placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2566"
                             value={formData.date}
                             onChange={handleChange}
+                            error={errors.date}
                             required
                         />
                         <FormField
@@ -189,6 +191,7 @@ export default function CreateTORPage() {
                             placeholder="ระบุเลขที่สัญญา"
                             value={formData.contractnumber}
                             onChange={handleChange}
+                            error={errors.contractnumber}
                             required
                         />
                         <FormField
@@ -197,6 +200,7 @@ export default function CreateTORPage() {
                             placeholder="ระบุชื่อผู้รับผิดชอบ"
                             value={formData.owner}
                             onChange={handleChange}
+                            error={errors.owner}
                             required
                         />
                         <FormField
@@ -205,6 +209,7 @@ export default function CreateTORPage() {
                             placeholder="ระบุสถานที่ติดต่อผู้รับผิดชอบ"
                             value={formData.address}
                             onChange={handleChange}
+                            error={errors.address}
                             required
                         />
                         <FormField
@@ -214,6 +219,7 @@ export default function CreateTORPage() {
                             placeholder="ระบุอีเมลผู้รับผิดชอบ"
                             value={formData.email}
                             onChange={handleChange}
+                            error={errors.email}
                             required
                         />
                         <FormField
@@ -233,6 +239,7 @@ export default function CreateTORPage() {
                             placeholder="เช่น 1 มกราคม 2566 - 31 ธันวาคม 2566"
                             value={formData.timeline}
                             onChange={handleChange}
+                            error={errors.timeline}
                             required
                         />
                         <FormField
@@ -241,6 +248,7 @@ export default function CreateTORPage() {
                             placeholder="เช่น 500000 บาท (ห้าแสนบาทถ้วน)"
                             value={formData.cost}
                             onChange={handleChange}
+                            error={errors.cost}
                             required
                         />
                     </div>
@@ -262,6 +270,7 @@ export default function CreateTORPage() {
                             placeholder="หลักการและเหตุผล"
                             value={formData.topic1}
                             onChange={handleChange}
+                            error={errors.topic1}
                             rows={12}
                             className="h-96"
                         />
@@ -272,6 +281,7 @@ export default function CreateTORPage() {
                             placeholder="วัตถุประสงค์โครงการ"
                             value={formData.objective1}
                             onChange={handleChange}
+                            error={errors.objective1}
                             rows={6}
                             className="h-40"
                         />
@@ -282,6 +292,7 @@ export default function CreateTORPage() {
                             placeholder="กลุ่มเป้าหมายของโครงการ"
                             value={formData.target}
                             onChange={handleChange}
+                            error={errors.target}
                             rows={6}
                             className="h-40"
                         />
@@ -304,6 +315,7 @@ export default function CreateTORPage() {
                             placeholder="พื้นที่หรือเขตดำเนินการ"
                             value={formData.zone}
                             onChange={handleChange}
+                            error={errors.zone}
                             rows={6}
                             className="h-40"
                         />
@@ -314,6 +326,7 @@ export default function CreateTORPage() {
                             placeholder="แผนการดำเนินงานโครงการ"
                             value={formData.plan}
                             onChange={handleChange}
+                            error={errors.plan}
                             rows={6}
                             className="h-40"
                         />
@@ -324,6 +337,7 @@ export default function CreateTORPage() {
                             placeholder="วิธีการจัดการและบริหารโครงการ"
                             value={formData.projectmanage}
                             onChange={handleChange}
+                            error={errors.projectmanage}
                             rows={6}
                             className="h-40"
                         />
@@ -333,6 +347,7 @@ export default function CreateTORPage() {
                             type="textarea"
                             placeholder="องค์กร ภาค ร่วมงาน"
                             value={formData.partner}
+                            error={errors.partner}
                             onChange={handleChange}
                             rows={6}
                             className="h-40"
@@ -464,7 +479,7 @@ export default function CreateTORPage() {
                 </FormSection>
 
                 <FormActions
-                    onPreview={openPreview}
+                    onPreview={handlePreview}
                     isSubmitting={isSubmitting}
                 />
             </form>

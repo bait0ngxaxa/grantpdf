@@ -1,138 +1,135 @@
 import { useRouter } from "next/navigation";
 
-export interface UseNavigationReturn {
-  handleProjectSelection: (projectId: string) => void;
-  handleBackToProjects: () => void;
-  handleBack: (
-    selectedContractType: string | null,
-    selectedProjectId: string | null,
-    selectedCategory: string | null,
-    setSelectedContractType: (type: string | null) => void,
-    setSelectedProjectId: (id: string | null) => void,
-    setSelectedCategory: (category: string | null) => void
-  ) => void;
-  handleCategorySelection: (category: string, isAdmin: boolean, setSelectedCategory: (category: string | null) => void) => void;
-  handleApprovalSelection: (templateId: string, title: string) => void;
-  handleContractSelection: (templateId: string, title: string, contractCode?: string) => void;
-  handleFormProjectSelection: (templateId: string, title: string) => void;
-  handleSummarySelection: (templateId: string, title: string) => void;
-  handleTorSelection: (templateId: string, title: string) => void;
+export interface UseNavigationProps {
+    selectedProjectId: string | null;
 }
 
-export const useNavigation = (): UseNavigationReturn => {
-  const router = useRouter();
+export interface UseNavigationReturn {
+    handleBack: (
+        selectedContractType: string | null,
+        selectedProjectId: string | null,
+        selectedCategory: string | null,
+        setSelectedContractType: (type: string | null) => void,
+        setSelectedProjectId: (id: string | null) => void,
+        setSelectedCategory: (category: string | null) => void
+    ) => void;
+    handleCategorySelection: (
+        category: string,
+        isAdmin: boolean,
+        setSelectedCategory: (category: string | null) => void
+    ) => void;
+    handleApprovalSelection: () => void;
+    handleContractSelection: (contractCode?: string) => void;
+    handleFormProjectSelection: () => void;
+    handleSummarySelection: () => void;
+    handleTorSelection: () => void;
+}
 
-  // Handle project selection
-  const handleProjectSelection = (projectId: string) => {
-    localStorage.setItem("selectedProjectId", projectId);
-  };
+export const useNavigation = ({
+    selectedProjectId,
+}: UseNavigationProps): UseNavigationReturn => {
+    const router = useRouter();
 
-  // Handle back to project selection
-  const handleBackToProjects = () => {
-    localStorage.removeItem("selectedProjectId");
-  };
-
-  // Handle back button logic
-  const handleBack = (
-    selectedContractType: string | null,
-    selectedProjectId: string | null,
-    selectedCategory: string | null,
-    setSelectedContractType: (type: string | null) => void,
-    setSelectedProjectId: (id: string | null) => void,
-    setSelectedCategory: (category: string | null) => void
-  ) => {
-    if (selectedContractType) {
-      setSelectedContractType(null);
-    } else if (selectedProjectId) {
-      setSelectedProjectId(null);
-      handleBackToProjects();
-    } else if (selectedCategory) {
-      setSelectedCategory(null);
-    } else {
-      router.push("/userdashboard");
-    }
-  };
-
-  // Handle category selection with role-based access control
-  const handleCategorySelection = (category: string, isAdmin: boolean, setSelectedCategory: (category: string | null) => void) => {
-    // ป้องกันไม่ให้ user ทั่วไปเข้าถึงหมวด 'general'
-    if (category === "general" && !isAdmin) {
-      // แสดงการแจ้งเตือนหรือเปลี่ยนเส้นทางไปหมวด project แทน
-      setSelectedCategory("project");
-      return;
-    }
-    setSelectedCategory(category);
-  };
-
-  // ✅ ฟังก์ชันสำหรับการ redirect ไป /create-word-doc
-  const handleApprovalSelection = (templateId: string, title: string) => {
-    // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-doc
-    const templateData = {
-      id: templateId,
-      title: title,
+    // Handle back button logic
+    const handleBack = (
+        selectedContractType: string | null,
+        selectedProjectId: string | null,
+        selectedCategory: string | null,
+        setSelectedContractType: (type: string | null) => void,
+        setSelectedProjectId: (id: string | null) => void,
+        setSelectedCategory: (category: string | null) => void
+    ) => {
+        if (selectedContractType) {
+            setSelectedContractType(null);
+        } else if (selectedProjectId) {
+            setSelectedProjectId(null);
+        } else if (selectedCategory) {
+            setSelectedCategory(null);
+        } else {
+            router.push("/userdashboard");
+        }
     };
-    localStorage.setItem(
-      "selectedApprovalTemplate",
-      JSON.stringify(templateData)
-    );
-    // redirect ไปหน้า create-word-doc
-    router.push("/create-word-approval");
-  };
 
-  const handleContractSelection = (templateId: string, title: string, contractCode?: string) => {
-    // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-contract
-    const templateData = {
-      id: templateId,
-      title: title,
-      contractCode: contractCode || '', // เพิ่ม contractCode สำหรับ ABS, DMR, SIP
+    // Handle category selection with role-based access control
+    const handleCategorySelection = (
+        category: string,
+        isAdmin: boolean,
+        setSelectedCategory: (category: string | null) => void
+    ) => {
+        if (category === "general" && !isAdmin) {
+            setSelectedCategory("project");
+            return;
+        }
+        setSelectedCategory(category);
     };
-    localStorage.setItem("selectedTorsTemplate", JSON.stringify(templateData));
-    // redirect ไปหน้า create-word-contract
-    router.push("/create-word-contract");
-  };
 
-  const handleFormProjectSelection = (templateId: string, title: string) => {
-    // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-doc
-    const templateData = {
-      id: templateId,
-      title: title,
+    const handleApprovalSelection = () => {
+        if (!selectedProjectId) {
+            console.error("No project selected");
+            return;
+        }
+        router.push(
+            `/create-word/approval?projectId=${encodeURIComponent(
+                selectedProjectId
+            )}`
+        );
     };
-    localStorage.setItem("selectedTorsTemplate", JSON.stringify(templateData));
-    // redirect ไปหน้า create-word-doc
-    router.push("/create-word-formproject");
-  };
 
-  const handleSummarySelection = (templateId: string, title: string) => {
-      // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-summary
-      const templateData = {
-          id: templateId,
-          title: title,
-      };
-      localStorage.setItem('selectedSummaryTemplate', JSON.stringify(templateData));
-      // redirect ไปหน้า create-word-summary
-      router.push('/create-word-summary');
-  };
-  
-  const handleTorSelection = (templateId: string, title: string) => {
-    // เก็บข้อมูล template ใน localStorage เพื่อนำไปใช้ในหน้า create-word-doc
-    const templateData = {
-      id: templateId,
-      title: title,
+    const handleContractSelection = (contractCode?: string) => {
+        if (!selectedProjectId) {
+            console.error("No project selected");
+            return;
+        }
+        const params = new URLSearchParams({ projectId: selectedProjectId });
+        if (contractCode) {
+            params.set("contractCode", contractCode);
+        }
+        router.push(`/create-word/contract?${params.toString()}`);
     };
-    localStorage.setItem("selectedTorsTemplate", JSON.stringify(templateData));
-    // redirect ไปหน้า create-word-doc
-    router.push("/create-word-tor");
-  };
 
-  return {
-    handleProjectSelection,
-    handleBackToProjects,
-    handleBack,
-    handleCategorySelection,
-    handleApprovalSelection,
-    handleContractSelection,
-    handleFormProjectSelection,
-    handleSummarySelection,
-    handleTorSelection,
-  };
+    const handleFormProjectSelection = () => {
+        if (!selectedProjectId) {
+            console.error("No project selected");
+            return;
+        }
+        router.push(
+            `/create-word/formproject?projectId=${encodeURIComponent(
+                selectedProjectId
+            )}`
+        );
+    };
+
+    const handleSummarySelection = () => {
+        if (!selectedProjectId) {
+            console.error("No project selected");
+            return;
+        }
+        router.push(
+            `/create-word/summary?projectId=${encodeURIComponent(
+                selectedProjectId
+            )}`
+        );
+    };
+
+    const handleTorSelection = () => {
+        if (!selectedProjectId) {
+            console.error("No project selected");
+            return;
+        }
+        router.push(
+            `/create-word/tor?projectId=${encodeURIComponent(
+                selectedProjectId
+            )}`
+        );
+    };
+
+    return {
+        handleBack,
+        handleCategorySelection,
+        handleApprovalSelection,
+        handleContractSelection,
+        handleFormProjectSelection,
+        handleSummarySelection,
+        handleTorSelection,
+    };
 };

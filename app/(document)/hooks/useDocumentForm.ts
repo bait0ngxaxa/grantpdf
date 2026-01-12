@@ -16,6 +16,8 @@ interface UseDocumentFormOptions<T> {
 
     documentType: string;
 
+    projectId?: string;
+
     prepareFormData?: (data: T, formData: FormData) => void;
 
     onSuccess?: (result: unknown) => void;
@@ -52,6 +54,7 @@ export function useDocumentForm<T extends object>({
     initialData,
     apiEndpoint,
     documentType,
+    projectId,
     prepareFormData,
     onSuccess,
 }: UseDocumentFormOptions<T>): UseDocumentFormReturn<T> {
@@ -132,10 +135,9 @@ export function useDocumentForm<T extends object>({
                     data.append("userEmail", session.user.email);
                 }
 
-                const selectedProjectId =
-                    localStorage.getItem("selectedProjectId");
-                if (selectedProjectId) {
-                    data.append("projectId", selectedProjectId);
+                // Use projectId from URL params (passed as option)
+                if (projectId) {
+                    data.append("projectId", projectId);
                 }
 
                 // Add access token if available
@@ -225,6 +227,7 @@ export function useDocumentForm<T extends object>({
             formData,
             apiEndpoint,
             documentType,
+            projectId,
             prepareFormData,
             onSuccess,
         ]

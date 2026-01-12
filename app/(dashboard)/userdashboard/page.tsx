@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useTitle } from "@/hooks/useTitle";
+import { useTitle } from "@/lib/hooks/useTitle";
 
 import { useUserData } from "./hooks/useUserData";
 import { useProjectActions } from "./hooks/useProjectActions";
@@ -209,7 +209,7 @@ export default function DashboardPage() {
                 />
 
                 {/* Main Content */}
-                <div className="lg:ml-64 min-h-screen transition-all duration-300">
+                <div className="lg:ml-72 min-h-screen transition-all duration-300">
                     <TopBar
                         setIsSidebarOpen={setIsSidebarOpen}
                         activeTab={activeTab}

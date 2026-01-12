@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { PAGINATION } from "@/lib/constants";
 import type { Project } from "@/type/models";
@@ -24,6 +25,8 @@ export interface UseCreateDocsStateReturn {
 
 export const useCreateDocsState = (): UseCreateDocsStateReturn => {
     const { data: session } = useSession();
+    const searchParams = useSearchParams();
+
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
         null
     );
@@ -31,8 +34,9 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
         string | null
     >(null);
     const [projects, setProjects] = useState<Project[]>([]);
+
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-        null
+        searchParams.get("projectId")
     );
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

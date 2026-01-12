@@ -102,14 +102,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200/50 shadow-2xl lg:shadow-none transform transition-transform duration-300 z-50 ${
+                className={`fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-white via-white to-blue-50/30 backdrop-blur-2xl border-r border-slate-100 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] transform transition-transform duration-300 z-50 ${
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-                } lg:translate-x-0`}
+                } lg:translate-x-0 flex flex-col`}
             >
-                <div className="p-6 border-b border-slate-100/50">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                {/* Header */}
+                <div className="p-6 pb-2">
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center space-x-3.5 group cursor-default">
+                            <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 transition-all duration-300">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     className="h-6 w-6 text-white"
@@ -125,22 +126,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     />
                                 </svg>
                             </div>
-                            <div>
-                                <h2 className="text-lg font-bold text-slate-800 tracking-tight">
+                            <div className="flex flex-col">
+                                <h2 className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-1">
                                     Dashboard
                                 </h2>
-                                <p className="text-[10px] uppercase font-semibold text-blue-600 tracking-wider">
-                                    Management System
-                                </p>
+                                <div className="flex items-center space-x-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                    <p className="text-[11px] uppercase font-bold text-blue-600 tracking-wider">
+                                        Management System
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <button
-                            className="lg:hidden btn btn-ghost btn-sm btn-circle text-slate-500"
+                            className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
                             onClick={() => setIsSidebarOpen(false)}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
+                                className="h-6 w-6"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -157,8 +161,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 {/* Navigation Menu */}
-                <nav className="p-4 mt-2">
-                    <ul className="space-y-2">
+                <nav className="flex-1 px-4 py-4 overflow-y-auto custom-scrollbar">
+                    <p className="px-4 mb-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        เมนูหลัก
+                    </p>
+                    <ul className="space-y-1.5">
                         {menuItems.map((item) => (
                             <li key={item.id}>
                                 <button
@@ -170,24 +177,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                         }
                                         setIsSidebarOpen(false);
                                     }}
-                                    className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 text-left font-medium group ${
+                                    className={`w-full group flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 text-left font-medium relative overflow-hidden ${
                                         activeTab === item.id
-                                            ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30"
-                                            : "text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm"
+                                            ? "text-white shadow-lg shadow-blue-500/25"
+                                            : "text-slate-600 hover:text-blue-700 hover:bg-blue-50/50"
                                     }`}
                                 >
+                                    {/* Active Background Gradient */}
+                                    {activeTab === item.id && (
+                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl" />
+                                    )}
+
+                                    {/* Hover slide effect for inactive items */}
+                                    {activeTab !== item.id && (
+                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                                    )}
+
                                     <span
-                                        className={`${
+                                        className={`relative z-10 transition-transform duration-300 group-hover:scale-110 ${
                                             activeTab === item.id
                                                 ? "text-white"
-                                                : "text-slate-400 group-hover:text-blue-500"
-                                        } transition-colors`}
+                                                : "text-slate-400 group-hover:text-blue-600"
+                                        }`}
                                     >
                                         {item.icon}
                                     </span>
-                                    <span>{item.name}</span>
+                                    <span className="relative z-10">
+                                        {item.name}
+                                    </span>
+
+                                    {/* Right indicator for active item */}
                                     {activeTab === item.id && (
-                                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/50 animate-pulse" />
+                                        <div className="relative z-10 ml-auto flex items-center">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                        </div>
                                     )}
                                 </button>
                             </li>
@@ -196,32 +219,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </nav>
 
                 {/* User Info */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100/50 bg-slate-50/50 backdrop-blur-sm">
-                    <div className="flex items-center space-x-3 mb-3 p-2 rounded-xl bg-white border border-slate-100 shadow-sm">
-                        <div className="w-9 h-9 bg-gradient-to-br from-blue-100 to-slate-100 rounded-lg flex items-center justify-center border border-white shadow-inner">
-                            <span className="text-sm font-bold text-blue-600">
-                                {session?.user?.name?.charAt(0) ||
-                                    session?.user?.email?.charAt(0) ||
-                                    "U"}
-                            </span>
+                <div className="p-4 mt-auto">
+                    <div className="relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-md border border-white/60 shadow-lg shadow-slate-200/50 p-4 group hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+                        {/* Decorativr background blur */}
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-400/10 rounded-full blur-2xl group-hover:bg-blue-400/20 transition-colors" />
+
+                        <div className="flex items-center space-x-3 mb-3 relative z-10">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-100 via-indigo-50 to-white rounded-xl flex items-center justify-center border border-white shadow-sm ring-2 ring-white group-hover:scale-105 transition-transform duration-300">
+                                <span className="text-base font-bold text-blue-600">
+                                    {session?.user?.name?.charAt(0) ||
+                                        session?.user?.email?.charAt(0) ||
+                                        "U"}
+                                </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-slate-800 truncate group-hover:text-blue-700 transition-colors">
+                                    {session?.user?.name || "ผู้ใช้"}
+                                </p>
+                                <p className="text-xs text-slate-500 truncate font-medium">
+                                    {session?.user?.email}
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-slate-800 truncate">
-                                {session?.user?.name || "ผู้ใช้"}
-                            </p>
-                            <p className="text-xs text-slate-500 truncate font-medium">
-                                {session?.user?.email}
-                            </p>
+                        <div className="flex gap-2 relative z-10">
+                            <Button
+                                onClick={() => setShowProfileModal(true)}
+                                variant="outline"
+                                className="w-full h-9 text-xs font-semibold rounded-lg border-slate-200/60 bg-white/50 hover:bg-white hover:text-blue-600 hover:border-blue-200 hover:shadow-md hover:shadow-blue-500/10 transition-all duration-300"
+                            >
+                                ข้อมูลส่วนตัว
+                            </Button>
                         </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button
-                            onClick={() => setShowProfileModal(true)}
-                            variant="outline"
-                            className="w-full text-xs font-semibold h-9 rounded-lg border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-100 transition-all shadow-sm"
-                        >
-                            ข้อมูลส่วนตัว
-                        </Button>
                     </div>
                 </div>
             </div>

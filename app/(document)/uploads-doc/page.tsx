@@ -1,10 +1,10 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useTitle } from "@/hooks/useTitle";
+import { useTitle } from "@/lib/hooks/useTitle";
 
 interface Project {
     id: string;
@@ -16,6 +16,7 @@ interface Project {
 export default function UploadDocPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -24,8 +25,9 @@ export default function UploadDocPage() {
     const [uploadSuccess, setUploadSuccess] = useState(false);
 
     const [projects, setProjects] = useState<Project[]>([]);
+    // Initialize from URL params if available
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-        null
+        searchParams.get("projectId")
     );
     const [isLoadingProjects, setIsLoadingProjects] = useState(true);
     const [projectError, setProjectError] = useState<string | null>(null);
@@ -47,18 +49,7 @@ export default function UploadDocPage() {
 
                 const data = await response.json();
                 setProjects(data.projects || []);
-
-                // ตรวจสอบ projectId ที่เก็บไว้ใน localStorage
-                const storedProjectId =
-                    localStorage.getItem("selectedProjectId");
-                if (
-                    storedProjectId &&
-                    data.projects?.some(
-                        (p: Project) => p.id === storedProjectId
-                    )
-                ) {
-                    setSelectedProjectId(storedProjectId);
-                }
+                // ไม่ต้องอ่าน localStorage อีกต่อไป - ใช้ state เท่านั้น
             } catch (error) {
                 console.error("Error fetching projects:", error);
                 setProjectError("เกิดข้อผิดพลาดในการโหลดรายการโครงการ");
@@ -264,10 +255,6 @@ export default function UploadDocPage() {
                                                 }`}
                                                 onClick={() => {
                                                     setSelectedProjectId(
-                                                        project.id
-                                                    );
-                                                    localStorage.setItem(
-                                                        "selectedProjectId",
                                                         project.id
                                                     );
                                                 }}

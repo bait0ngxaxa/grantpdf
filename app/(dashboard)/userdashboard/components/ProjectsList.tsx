@@ -249,11 +249,11 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                                         <Button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                localStorage.setItem(
-                                                    "selectedProjectId",
-                                                    project.id
+                                                router.push(
+                                                    `/createdocs?projectId=${encodeURIComponent(
+                                                        project.id
+                                                    )}`
                                                 );
-                                                router.push("/createdocs");
                                             }}
                                             size="sm"
                                             variant="outline"
@@ -373,12 +373,10 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                                                 <Button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        localStorage.setItem(
-                                                            "selectedProjectId",
-                                                            project.id
-                                                        );
                                                         router.push(
-                                                            "/createdocs"
+                                                            `/createdocs?projectId=${encodeURIComponent(
+                                                                project.id
+                                                            )}`
                                                         );
                                                     }}
                                                     size="sm"
@@ -429,11 +427,11 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                                             </p>
                                             <Button
                                                 onClick={() => {
-                                                    localStorage.setItem(
-                                                        "selectedProjectId",
-                                                        project.id
+                                                    router.push(
+                                                        `/createdocs?projectId=${encodeURIComponent(
+                                                            project.id
+                                                        )}`
                                                     );
-                                                    router.push("/createdocs");
                                                 }}
                                                 size="sm"
                                                 className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md shadow-blue-200"

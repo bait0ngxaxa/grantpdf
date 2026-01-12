@@ -1,30 +1,35 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
-import { useTitle } from "@/hooks/useTitle";
-import { useExitConfirmation } from "@/hooks/useExitConfirmation";
-import { PageLayout } from "@/components/document-form/PageLayout";
-import { FormSection } from "@/components/document-form/FormSection";
-import { FormActions } from "@/components/document-form/FormActions";
-import { PreviewModal } from "@/components/document-form/PreviewModal";
-import { FormField } from "@/components/document-form/FormField";
-import { ErrorAlert } from "@/components/document-form/ErrorAlert";
-import { LoadingState } from "@/components/document-form/LoadingState";
-import { useDocumentForm } from "@/components/document-form/useDocumentForm";
-import { usePreviewModal } from "@/components/document-form/usePreviewModal";
+import { useTitle } from "@/lib/hooks/useTitle";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+import { PageLayout } from "@/app/(document)/components/document-form/PageLayout";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { FormActions } from "@/app/(document)/components/document-form/FormActions";
+import { PreviewModal } from "@/app/(document)/components/document-form/PreviewModal";
+import { FormField } from "@/app/(document)/components/document-form/FormField";
+import { ErrorAlert } from "@/app/(document)/components/document-form/ErrorAlert";
+import { LoadingState } from "@/app/(document)/components/document-form/LoadingState";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import {
     PreviewField,
     PreviewGrid,
-} from "@/components/document-form/PreviewField";
+} from "@/app/(document)/components/document-form/PreviewField";
 import { ClipboardList, FileText } from "lucide-react";
 import {
     type FormProjectData,
     initialFormProjectData,
 } from "@/config/initialData";
-import { validateAndFormatPhone, validatePhone } from "@/lib/validation";
+import { validateFormProject } from "@/lib/validation";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 
-export default function CreateFormProjectPage() {
+export function FormProjectForm() {
+    const searchParams = useSearchParams();
+    const projectId = searchParams.get("projectId") || "";
+
     useTitle("สร้างหนังสือข้อเสนอโครงการ | ระบบจัดการเอกสาร");
 
     const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
@@ -42,46 +47,39 @@ export default function CreateFormProjectPage() {
         generatedFileUrl,
         isDirty,
         isClient,
-        setMessage,
-        setIsError,
     } = useDocumentForm<FormProjectData>({
         initialData: initialFormProjectData,
-        apiEndpoint: "/api/fill-formproject-template",
+        apiEndpoint: "/api/generate/formproject",
         documentType: "Word",
+        projectId,
     });
 
-    // Validation errors state
-    const [errors, setErrors] = useState<{ tel?: string }>({});
+    // Use validation hook
+    const {
+        errors,
+        handlePreview: onPreview,
+        createPhoneChangeHandler,
+        validateBeforeSubmit,
+    } = useDocumentValidation<FormProjectData>({
+        validateForm: validateFormProject,
+        openPreview,
+        phoneFields: ["tel"],
+        emailFields: ["email"],
+    });
 
-    // Custom handler for phone with validation
-    const handlePhoneChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { value } = e.target;
-        const { value: formatted, error } = validateAndFormatPhone(value);
+    // Wrap handlePreview to pass formData
+    const handlePreview = () => onPreview(formData);
 
-        const syntheticEvent = {
-            target: { name: "tel", value: formatted },
-        } as ChangeEvent<HTMLInputElement>;
-        handleChange(syntheticEvent);
-        setErrors((prev) => ({ ...prev, tel: error }));
-    };
+    // Create phone change handler
+    const handlePhoneChange = createPhoneChangeHandler(
+        "tel",
+        handleChange,
+        () => {}
+    );
 
-    // Validate before submit
-    const validateBeforeSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const phoneValidation = validatePhone(formData.tel);
-        if (!phoneValidation.isValid) {
-            setErrors((prev) => ({ ...prev, tel: phoneValidation.error }));
-            setMessage(
-                phoneValidation.error || "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง"
-            );
-            setIsError(true);
-            return;
-        }
-
-        handleSubmit(e);
+    // Wrap validateBeforeSubmit
+    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+        validateBeforeSubmit(e, formData, handleSubmit);
     };
 
     const {
@@ -104,7 +102,7 @@ export default function CreateFormProjectPage() {
             setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
         >
-            <form onSubmit={validateBeforeSubmit} className="space-y-8">
+            <form onSubmit={onSubmit} className="space-y-8">
                 {/* ข้อมูลโครงการ */}
                 <FormSection
                     title="ข้อมูลโครงการ"
@@ -117,6 +115,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
                             value={formData.fileName}
                             onChange={handleChange}
+                            error={errors.fileName}
                             required
                         />
                         <FormField
@@ -125,6 +124,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุชื่อโครงการ"
                             value={formData.projectName}
                             onChange={handleChange}
+                            error={errors.projectName}
                             required
                         />
                         <FormField
@@ -133,6 +133,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุชื่อผู้รับผิดชอบโครงการ"
                             value={formData.person}
                             onChange={handleChange}
+                            error={errors.person}
                             required
                         />
                         <FormField
@@ -141,6 +142,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุที่อยู่ติดต่อผู้รับผิดชอบ"
                             value={formData.address}
                             onChange={handleChange}
+                            error={errors.address}
                             required
                         />
                         <FormField
@@ -161,6 +163,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุอีเมลผู้รับผิดชอบ example@mail.com"
                             value={formData.email}
                             onChange={handleChange}
+                            error={errors.email}
                             required
                         />
                         <FormField
@@ -169,6 +172,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ตัวอย่าง 1 มกราคม 2566 - 31 ธันวาคม 2566"
                             value={formData.timeline}
                             onChange={handleChange}
+                            error={errors.timeline}
                             required
                         />
                         <FormField
@@ -177,6 +181,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ตัวอย่าง 1000000 บาท (หนึ่งล้านบาทถ้วน)"
                             value={formData.cost}
                             onChange={handleChange}
+                            error={errors.cost}
                             required
                         />
                     </div>
@@ -198,6 +203,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุเหตุผลความจำเป็นในการดำเนินโครงการ"
                             value={formData.rationale}
                             onChange={handleChange}
+                            error={errors.rationale}
                             rows={12}
                             className="h-96"
                         />
@@ -208,6 +214,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุเป้าประสงค์โครงการ"
                             value={formData.goal}
                             onChange={handleChange}
+                            error={errors.goal}
                             rows={4}
                             className="h-30"
                         />
@@ -218,6 +225,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุวัตถุประสงค์โครงการ"
                             value={formData.objective}
                             onChange={handleChange}
+                            error={errors.objective}
                             rows={4}
                             className="h-30"
                         />
@@ -228,6 +236,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุเป้าหมายโครงการ"
                             value={formData.target}
                             onChange={handleChange}
+                            error={errors.target}
                             rows={6}
                             className="h-40"
                         />
@@ -238,6 +247,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุกรอบการดำเนินงาน"
                             value={formData.scope}
                             onChange={handleChange}
+                            error={errors.scope}
                             rows={6}
                             className="h-40"
                         />
@@ -248,6 +258,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุผลผลิตโครงการ"
                             value={formData.product}
                             onChange={handleChange}
+                            error={errors.product}
                             rows={6}
                             className="h-40"
                         />
@@ -258,6 +269,7 @@ export default function CreateFormProjectPage() {
                             placeholder="ระบุผลลัพธ์โครงการ"
                             value={formData.result}
                             onChange={handleChange}
+                            error={errors.result}
                             rows={6}
                             className="h-40"
                         />
@@ -268,6 +280,7 @@ export default function CreateFormProjectPage() {
                             placeholder="กรอกประวัติส่วนตัว"
                             value={formData.author}
                             onChange={handleChange}
+                            error={errors.author}
                             rows={6}
                             className="h-40"
                         />
@@ -275,7 +288,7 @@ export default function CreateFormProjectPage() {
                 </FormSection>
 
                 <FormActions
-                    onPreview={openPreview}
+                    onPreview={handlePreview}
                     isSubmitting={isSubmitting}
                 />
             </form>

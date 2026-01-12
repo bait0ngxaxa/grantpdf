@@ -1,25 +1,33 @@
 "use client";
 
+// useState removed
+import { useSearchParams } from "next/navigation";
+
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
-import { useTitle } from "@/hooks/useTitle";
-import { useExitConfirmation } from "@/hooks/useExitConfirmation";
-import { PageLayout } from "@/components/document-form/PageLayout";
-import { FormSection } from "@/components/document-form/FormSection";
-import { FormActions } from "@/components/document-form/FormActions";
-import { PreviewModal } from "@/components/document-form/PreviewModal";
-import { FormField } from "@/components/document-form/FormField";
-import { ErrorAlert } from "@/components/document-form/ErrorAlert";
-import { LoadingState } from "@/components/document-form/LoadingState";
-import { useDocumentForm } from "@/components/document-form/useDocumentForm";
-import { usePreviewModal } from "@/components/document-form/usePreviewModal";
+import { useTitle } from "@/lib/hooks/useTitle";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+import { PageLayout } from "@/app/(document)/components/document-form/PageLayout";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { FormActions } from "@/app/(document)/components/document-form/FormActions";
+import { PreviewModal } from "@/app/(document)/components/document-form/PreviewModal";
+import { FormField } from "@/app/(document)/components/document-form/FormField";
+import { ErrorAlert } from "@/app/(document)/components/document-form/ErrorAlert";
+import { LoadingState } from "@/app/(document)/components/document-form/LoadingState";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import {
     PreviewField,
     PreviewGrid,
-} from "@/components/document-form/PreviewField";
+} from "@/app/(document)/components/document-form/PreviewField";
 import { ClipboardList, Users, Calculator } from "lucide-react";
 import { type SummaryData, initialSummaryData } from "@/config/initialData";
+import { validateSummary } from "@/lib/validation";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 
-export default function CreateWordSummaryPage() {
+export function SummaryForm() {
+    const searchParams = useSearchParams();
+    const projectId = searchParams.get("projectId") || "";
+
     useTitle("สร้างแบบสรุปโครงการ | ระบบจัดการเอกสาร");
 
     const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
@@ -39,8 +47,9 @@ export default function CreateWordSummaryPage() {
         isClient,
     } = useDocumentForm<SummaryData>({
         initialData: initialSummaryData,
-        apiEndpoint: "/api/fill-excel-summary-template",
+        apiEndpoint: "/api/generate/summary",
         documentType: "Excel",
+        projectId,
     });
 
     const {
@@ -49,6 +58,24 @@ export default function CreateWordSummaryPage() {
         handleConfirmExit,
         allowNavigation,
     } = useExitConfirmation({ isDirty });
+
+    // Use validation hook
+    const {
+        errors,
+        handlePreview: onPreview,
+        validateBeforeSubmit,
+    } = useDocumentValidation<SummaryData>({
+        validateForm: validateSummary,
+        openPreview,
+    });
+
+    // Wrap handlePreview to pass formData
+    const handlePreview = () => onPreview(formData);
+
+    // Wrap validateBeforeSubmit
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        validateBeforeSubmit(e, formData, handleSubmit);
+    };
 
     if (!isClient) {
         return <LoadingState />;
@@ -63,7 +90,7 @@ export default function CreateWordSummaryPage() {
             setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
         >
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={onSubmit} className="space-y-8">
                 {/* ข้อมูลโครงการ */}
                 <FormSection
                     title="ข้อมูลโครงการ"
@@ -76,6 +103,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
                             value={formData.fileName}
                             onChange={handleChange}
+                            error={errors.fileName}
                             required
                         />
                         <FormField
@@ -84,6 +112,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุชื่อโครงการ"
                             value={formData.projectName}
                             onChange={handleChange}
+                            error={errors.projectName}
                             required
                         />
                         <FormField
@@ -92,6 +121,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุรหัสชุดโครงการ"
                             value={formData.projectCode}
                             onChange={handleChange}
+                            error={errors.projectCode}
                         />
                         <FormField
                             label="รหัสภายใต้กิจกรรม"
@@ -99,6 +129,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุรหัสภายใต้กิจกรรม"
                             value={formData.projectActivity}
                             onChange={handleChange}
+                            error={errors.projectActivity}
                         />
                         <FormField
                             label="เลขที่สัญญา"
@@ -106,6 +137,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุเลขที่สัญญา"
                             value={formData.contractNumber}
                             onChange={handleChange}
+                            error={errors.contractNumber}
                         />
                         <FormField
                             label="หน่วยงานที่เสนอโครงการ"
@@ -113,6 +145,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุหน่วยงานที่เสนอโครงการ"
                             value={formData.organize}
                             onChange={handleChange}
+                            error={errors.organize}
                         />
                         <FormField
                             label="เลขที่ มสช น."
@@ -120,6 +153,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุเลขที่ มสช น."
                             value={formData.projectNhf}
                             onChange={handleChange}
+                            error={errors.projectNhf}
                         />
                         <FormField
                             label="ชุดโครงการ"
@@ -127,6 +161,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุชุดโครงการ"
                             value={formData.projectCo}
                             onChange={handleChange}
+                            error={errors.projectCo}
                         />
                         <FormField
                             label="ระยะเวลาดำเนินการ (เดือน)"
@@ -135,6 +170,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุจำนวนเดือน"
                             value={formData.month}
                             onChange={handleChange}
+                            error={errors.month}
                         />
                         <FormField
                             label="ระยะเวลา"
@@ -142,6 +178,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุระยะเวลา เช่น 1มกราคม 2568 - 31กันยายน 2568"
                             value={formData.timeline}
                             onChange={handleChange}
+                            error={errors.timeline}
                         />
                     </div>
                 </FormSection>
@@ -161,6 +198,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุผู้เสนอโครงการ"
                             value={formData.projectOwner}
                             onChange={handleChange}
+                            error={errors.projectOwner}
                         />
                         <FormField
                             label="ผู้ทบทวนโครงการ"
@@ -168,6 +206,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุผู้ทบทวนโครงการ"
                             value={formData.projectReview}
                             onChange={handleChange}
+                            error={errors.projectReview}
                         />
                         <FormField
                             label="ผู้ประสานงาน"
@@ -175,6 +214,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุผู้ประสานงาน"
                             value={formData.coordinator}
                             onChange={handleChange}
+                            error={errors.coordinator}
                         />
                     </div>
                 </FormSection>
@@ -195,6 +235,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุจำนวนเงินงวด 1 (ตัวเลข)"
                             value={formData.sec1}
                             onChange={handleChange}
+                            error={errors.sec1}
                         />
                         <FormField
                             label="งวด 2"
@@ -203,6 +244,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุจำนวนเงินงวด 2 (ตัวเลข)"
                             value={formData.sec2}
                             onChange={handleChange}
+                            error={errors.sec2}
                         />
                         <FormField
                             label="งวด 3"
@@ -211,6 +253,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุจำนวนเงินงวด 3 (ตัวเลข)"
                             value={formData.sec3}
                             onChange={handleChange}
+                            error={errors.sec3}
                         />
                         <FormField
                             label="รวม"
@@ -219,6 +262,7 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุจำนวนเงินรวม (ตัวเลข)"
                             value={formData.sum}
                             onChange={handleChange}
+                            error={errors.sum}
                         />
                         <FormField
                             label="แหล่งทุน"
@@ -226,12 +270,13 @@ export default function CreateWordSummaryPage() {
                             placeholder="ระบุแหล่งทุน"
                             value={formData.funds}
                             onChange={handleChange}
+                            error={errors.funds}
                         />
                     </div>
                 </FormSection>
 
                 <FormActions
-                    onPreview={openPreview}
+                    onPreview={handlePreview}
                     isSubmitting={isSubmitting}
                 />
             </form>

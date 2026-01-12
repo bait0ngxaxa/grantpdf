@@ -1,40 +1,44 @@
 "use client";
 
 import { useState, ChangeEvent, useRef, FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
-import { useTitle } from "@/hooks/useTitle";
-import { useExitConfirmation } from "@/hooks/useExitConfirmation";
-import { PageLayout } from "@/components/document-form/PageLayout";
-import { FormSection } from "@/components/document-form/FormSection";
-import { FormActions } from "@/components/document-form/FormActions";
-import { PreviewModal } from "@/components/document-form/PreviewModal";
-import { FormField } from "@/components/document-form/FormField";
-import { AttachmentList } from "@/components/document-form/AttachmentList";
-import { AttachmentUpload } from "@/components/document-form/AttachmentUpload";
-import { SignatureSection } from "@/components/document-form/SignatureSection";
-import { ErrorAlert } from "@/components/document-form/ErrorAlert";
-import { LoadingState } from "@/components/document-form/LoadingState";
-import { useDocumentForm } from "@/components/document-form/useDocumentForm";
-import { usePreviewModal } from "@/components/document-form/usePreviewModal";
+import { useTitle } from "@/lib/hooks/useTitle";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+import { PageLayout } from "@/app/(document)/components/document-form/PageLayout";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { FormActions } from "@/app/(document)/components/document-form/FormActions";
+import { PreviewModal } from "@/app/(document)/components/document-form/PreviewModal";
+import { FormField } from "@/app/(document)/components/document-form/FormField";
+import { AttachmentList } from "@/app/(document)/components/document-form/AttachmentList";
+import { AttachmentUpload } from "@/app/(document)/components/document-form/AttachmentUpload";
+import { SignatureSection } from "@/app/(document)/components/document-form/SignatureSection";
+import { ErrorAlert } from "@/app/(document)/components/document-form/ErrorAlert";
+import { LoadingState } from "@/app/(document)/components/document-form/LoadingState";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import {
     PreviewField,
     PreviewGrid,
     PreviewList,
-} from "@/components/document-form/PreviewField";
+} from "@/app/(document)/components/document-form/PreviewField";
 import { ClipboardList, FileText, Folder, UserPen } from "lucide-react";
 import {
     type ApprovalData,
     initialApprovalData,
     approvalFixedValues,
 } from "@/config/initialData";
-import { validateAndFormatPhone, validatePhone } from "@/lib/validation";
+import { validateApproval } from "@/lib/validation";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 
 import type { SignatureCanvasRef } from "@/components/ui/SignatureCanvas";
 
-export default function CreateWordDocPage() {
+export function ApprovalForm() {
     const { data: session } = useSession();
+    const searchParams = useSearchParams();
+    const projectId = searchParams.get("projectId") || "";
     const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
 
     useTitle("สร้างหนังสือขอนุมัติ | ระบบจัดการเอกสาร");
@@ -68,23 +72,32 @@ export default function CreateWordDocPage() {
         setIsError,
     } = useDocumentForm<ApprovalData>({
         initialData: initialApprovalData,
-        apiEndpoint: "/api/fill-approval-template",
+        apiEndpoint: "/api/generate/approval",
         documentType: "Word",
     });
 
-    // Validation errors state
-    const [errors, setErrors] = useState<{ tel?: string }>({});
+    // Use validation hook
+    const {
+        errors,
+        handlePreview: onPreview,
+        createPhoneChangeHandler,
+        validateBeforeSubmit,
+    } = useDocumentValidation<ApprovalData>({
+        validateForm: validateApproval,
+        openPreview,
+        phoneFields: ["tel"],
+        emailFields: ["email"],
+    });
 
-    // Custom handler for phone with validation
-    const handlePhoneChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { value } = e.target;
-        const { value: formatted, error } = validateAndFormatPhone(value);
+    // Wrap handlePreview to pass formData
+    const handlePreview = () => onPreview(formData);
 
-        setFormData((prev) => ({ ...prev, tel: formatted }));
-        setErrors((prev) => ({ ...prev, tel: error }));
-    };
+    // Create phone change handler
+    const handlePhoneChange = createPhoneChangeHandler(
+        "tel",
+        handleChange,
+        setFormData
+    );
 
     // Attachment handlers
     const addAttachment = () => {
@@ -141,8 +154,7 @@ export default function CreateWordDocPage() {
     // Upload attachment files
     const uploadAttachmentFiles = async (files: File[]): Promise<string[]> => {
         const uploadedIds: string[] = [];
-        const selectedProjectId = localStorage.getItem("selectedProjectId");
-        if (!selectedProjectId) {
+        if (!projectId) {
             throw new Error("กรุณาเลือกโครงการก่อนอัปโหลดไฟล์");
         }
 
@@ -150,7 +162,7 @@ export default function CreateWordDocPage() {
             try {
                 const uploadFormData = new FormData();
                 uploadFormData.append("file", file);
-                uploadFormData.append("projectId", selectedProjectId);
+                uploadFormData.append("projectId", projectId);
 
                 if (session?.user?.id) {
                     uploadFormData.append("userId", session.user.id.toString());
@@ -179,19 +191,10 @@ export default function CreateWordDocPage() {
     };
 
     // Custom submit handler for approval (more complex due to signature)
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleApprovalSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Validate phone number
-        const phoneValidation = validatePhone(formData.tel);
-        if (!phoneValidation.isValid) {
-            setErrors((prev) => ({ ...prev, tel: phoneValidation.error }));
-            setMessage(
-                phoneValidation.error || "กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง"
-            );
-            setIsError(true);
-            return;
-        }
+        // Note: Phone validation is now handled by validateBeforeSubmit wrapper
 
         if (!session) {
             setMessage("คุณต้องเข้าสู่ระบบก่อน");
@@ -314,9 +317,8 @@ export default function CreateWordDocPage() {
                 data.append("userEmail", session.user.email);
             }
 
-            const selectedProjectId = localStorage.getItem("selectedProjectId");
-            if (selectedProjectId) {
-                data.append("projectId", selectedProjectId);
+            if (projectId) {
+                data.append("projectId", projectId);
             }
 
             const response = await fetch("/api/fill-approval-template", {
@@ -380,7 +382,12 @@ export default function CreateWordDocPage() {
             setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
         >
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form
+                onSubmit={(e) =>
+                    validateBeforeSubmit(e, formData, handleApprovalSubmit)
+                }
+                className="space-y-8"
+            >
                 {/* ข้อมูลพื้นฐาน */}
                 <FormSection
                     title="ข้อมูลพื้นฐาน"
@@ -393,6 +400,7 @@ export default function CreateWordDocPage() {
                             placeholder="ระบุชื่อเอกสาร"
                             value={formData.projectName}
                             onChange={handleChange}
+                            error={errors.projectName}
                             required
                         />
                         <FormField
@@ -401,6 +409,7 @@ export default function CreateWordDocPage() {
                             placeholder="ระบุเลขที่หนังสือ"
                             value={formData.head}
                             onChange={handleChange}
+                            error={errors.head}
                             required
                         />
                         <FormField
@@ -409,6 +418,7 @@ export default function CreateWordDocPage() {
                             placeholder="ระบุวัน เดือน ปีเช่น 14 สิงหาคม 2568"
                             value={formData.date}
                             onChange={handleChange}
+                            error={errors.date}
                             required
                         />
                     </div>
@@ -429,6 +439,7 @@ export default function CreateWordDocPage() {
                             placeholder="หัวข้อหนังสือ"
                             value={formData.topicdetail}
                             onChange={handleChange}
+                            error={errors.topicdetail}
                             required
                         />
                         <FormField
@@ -437,6 +448,7 @@ export default function CreateWordDocPage() {
                             placeholder="ระบุผู้รับ"
                             value={formData.todetail}
                             onChange={handleChange}
+                            error={errors.todetail}
                             required
                         />
                     </div>
@@ -473,6 +485,7 @@ export default function CreateWordDocPage() {
                             placeholder="รายละเอียดเนื้อหา"
                             value={formData.detail}
                             onChange={handleChange}
+                            error={errors.detail}
                             rows={12}
                             className="h-96"
                         />
@@ -494,6 +507,7 @@ export default function CreateWordDocPage() {
                             placeholder="ระบุชื่อ-นามสกุลผู้ขออนุมัติ"
                             value={formData.name}
                             onChange={handleChange}
+                            error={errors.name}
                             required
                         />
                         <FormField
@@ -502,6 +516,7 @@ export default function CreateWordDocPage() {
                             placeholder="ระบุตำแหน่ง/แผนกผู้ขออนุมัติ"
                             value={formData.depart}
                             onChange={handleChange}
+                            error={errors.depart}
                             required
                         />
                         <FormField
@@ -510,6 +525,7 @@ export default function CreateWordDocPage() {
                             placeholder="ระบุชื่อ-นามสกุลผู้ประสานงาน"
                             value={formData.coor}
                             onChange={handleChange}
+                            error={errors.coor}
                             required
                         />
                         <FormField
@@ -531,6 +547,7 @@ export default function CreateWordDocPage() {
                                 placeholder="ระบุอีเมลผู้ประสานงาน"
                                 value={formData.email}
                                 onChange={handleChange}
+                                error={errors.email}
                                 required
                             />
                         </div>
@@ -551,6 +568,7 @@ export default function CreateWordDocPage() {
                         placeholder="ระบุชื่อ-นามสกุลผู้อนุมัติ"
                         value={formData.accept}
                         onChange={handleChange}
+                        error={errors.accept}
                         required
                     />
                 </FormSection>
@@ -567,7 +585,7 @@ export default function CreateWordDocPage() {
                 />
 
                 <FormActions
-                    onPreview={openPreview}
+                    onPreview={handlePreview}
                     isSubmitting={isSubmitting}
                 />
             </form>

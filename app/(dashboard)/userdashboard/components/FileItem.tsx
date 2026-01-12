@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import type { AttachmentFile } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
-import { useSignedDownload } from "@/hooks/useSignedDownload";
+import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 
 interface FileItemProps {
     file: {

@@ -17,8 +17,16 @@ export function PreviewField({
 }: PreviewFieldProps) {
     return (
         <div className={className}>
-            <h4 className="font-semibold text-sm text-gray-600">{label}:</h4>
-            {children ? children : <p className="text-sm">{value || "-"}</p>}
+            <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
+                {label}
+            </h4>
+            {children ? (
+                children
+            ) : (
+                <p className="text-base font-semibold text-slate-800">
+                    {value || "-"}
+                </p>
+            )}
         </div>
     );
 }
@@ -52,17 +60,19 @@ export function PreviewList({
 }: PreviewListProps) {
     return (
         <div>
-            <h4 className="font-medium text-slate-700 mb-2">{label}:</h4>
+            <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
+                {label}
+            </h4>
             {items.length > 0 ? (
-                <ul className="text-sm list-disc list-inside">
+                <ul className="text-base font-semibold text-slate-800 list-disc list-inside space-y-1">
                     {items.map((item, index) => (
-                        <li key={index} className="mb-1">
+                        <li key={index}>
                             {item || `รายการที่ ${index + 1} (ยังไม่ได้กรอก)`}
                         </li>
                     ))}
                 </ul>
             ) : (
-                <p className="text-sm text-slate-500">{emptyMessage}</p>
+                <p className="text-sm text-slate-400 italic">{emptyMessage}</p>
             )}
         </div>
     );

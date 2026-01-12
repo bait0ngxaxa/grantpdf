@@ -1,44 +1,32 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
-import { useTitle } from "@/hooks/useTitle";
-import { useExitConfirmation } from "@/hooks/useExitConfirmation";
-import { PageLayout } from "@/components/document-form/PageLayout";
-import { FormSection } from "@/components/document-form/FormSection";
-import { FormActions } from "@/components/document-form/FormActions";
-import { PreviewModal } from "@/components/document-form/PreviewModal";
-import { FormField } from "@/components/document-form/FormField";
-import { ErrorAlert } from "@/components/document-form/ErrorAlert";
-import { LoadingState } from "@/components/document-form/LoadingState";
-import { useDocumentForm } from "@/components/document-form/useDocumentForm";
-import { usePreviewModal } from "@/components/document-form/usePreviewModal";
+import { useTitle } from "@/lib/hooks/useTitle";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+import { PageLayout } from "@/app/(document)/components/document-form/PageLayout";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { FormActions } from "@/app/(document)/components/document-form/FormActions";
+import { PreviewModal } from "@/app/(document)/components/document-form/PreviewModal";
+import { FormField } from "@/app/(document)/components/document-form/FormField";
+import { ErrorAlert } from "@/app/(document)/components/document-form/ErrorAlert";
+import { LoadingState } from "@/app/(document)/components/document-form/LoadingState";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import {
     PreviewField,
     PreviewGrid,
-} from "@/components/document-form/PreviewField";
+} from "@/app/(document)/components/document-form/PreviewField";
 import { ClipboardList, User } from "lucide-react";
 import { type ContractData, initialContractData } from "@/config/initialData";
-import {
-    validateAndFormatCitizenId,
-    validateCitizenId,
-} from "@/lib/validation";
+import { validateContract } from "@/lib/validation";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 
-export default function CreateContractPage() {
-    // Use lazy initialization to get contractCode from localStorage
-    const [contractCode] = useState<string>(() => {
-        if (typeof window === "undefined") return "";
-        const selectedTemplate = localStorage.getItem("selectedTorsTemplate");
-        if (selectedTemplate) {
-            try {
-                const templateData = JSON.parse(selectedTemplate);
-                return templateData.contractCode || "";
-            } catch {
-                return "";
-            }
-        }
-        return "";
-    });
+export function ContractForm() {
+    const searchParams = useSearchParams();
+    const contractCode = searchParams.get("contractCode") || "";
+    const projectId = searchParams.get("projectId") || "";
 
     useTitle("สร้างหนังสือสัญญาเพื่อรับรองการลงนาม | ระบบจัดการเอกสาร");
 
@@ -60,8 +48,9 @@ export default function CreateContractPage() {
         isClient,
     } = useDocumentForm<ContractData>({
         initialData: initialContractData,
-        apiEndpoint: "/api/fill-contract-template",
+        apiEndpoint: "/api/generate/contract",
         documentType: "Word",
+        projectId,
         prepareFormData: (_data, formDataObj) => {
             // Override contractnumber with contractCode if available
             if (contractCode) {
@@ -70,39 +59,30 @@ export default function CreateContractPage() {
         },
     });
 
-    // Validation errors state
-    const [errors, setErrors] = useState<{ citizenid?: string }>({});
+    // Use validation hook
+    const {
+        errors,
+        handlePreview: onPreview,
+        createCitizenIdChangeHandler,
+        validateBeforeSubmit,
+    } = useDocumentValidation<ContractData>({
+        validateForm: validateContract,
+        openPreview,
+        citizenIdFields: ["citizenid"],
+    });
 
-    // Custom handler for citizen ID with validation
-    const handleCitizenIdChange = (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { value } = e.target;
-        const { value: formatted, error } = validateAndFormatCitizenId(value);
+    // Wrap handlePreview to pass formData
+    const handlePreview = () => onPreview(formData);
 
-        // Update form data with formatted value
-        setFormData((prev) => ({ ...prev, citizenid: formatted }));
+    // Create citizen ID change handler
+    const handleCitizenIdChange = createCitizenIdChangeHandler(
+        "citizenid",
+        setFormData
+    );
 
-        // Update error state
-        setErrors((prev) => ({ ...prev, citizenid: error }));
-    };
-
-    // Validate before submit
-    const validateBeforeSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        // Validate citizen ID
-        const citizenIdValidation = validateCitizenId(formData.citizenid);
-        if (!citizenIdValidation.isValid) {
-            setErrors((prev) => ({
-                ...prev,
-                citizenid: citizenIdValidation.error,
-            }));
-            return;
-        }
-
-        // If all validations pass, submit the form
-        handleSubmit(e);
+    // Wrap validateBeforeSubmit
+    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+        validateBeforeSubmit(e, formData, handleSubmit);
     };
 
     const {
@@ -129,7 +109,7 @@ export default function CreateContractPage() {
             setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
         >
-            <form onSubmit={validateBeforeSubmit} className="space-y-8">
+            <form onSubmit={onSubmit} className="space-y-8">
                 {/* ข้อมูลโครงการ */}
                 <FormSection
                     title="ข้อมูลโครงการ"
@@ -142,6 +122,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
                             value={formData.fileName}
                             onChange={handleChange}
+                            error={errors.fileName}
                             required
                         />
                         <FormField
@@ -150,6 +131,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุชื่อโครงการ"
                             value={formData.projectName}
                             onChange={handleChange}
+                            error={errors.projectName}
                             required
                         />
                         <FormField
@@ -158,6 +140,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2568"
                             value={formData.date}
                             onChange={handleChange}
+                            error={errors.date}
                             required
                         />
 
@@ -181,6 +164,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุหน่วยงานที่ดำเนินการร่วมกัน เช่น สพบ. และ สสส."
                             value={formData.projectOffer}
                             onChange={handleChange}
+                            error={errors.projectOffer}
                             required
                         />
                         <FormField
@@ -189,6 +173,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุชื่อผู้อำนวยการ ผู้จัดการโครงการ"
                             value={formData.owner}
                             onChange={handleChange}
+                            error={errors.owner}
                             required
                         />
                         <FormField
@@ -197,6 +182,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุองค์กรให้ทุน"
                             value={formData.projectCo}
                             onChange={handleChange}
+                            error={errors.projectCo}
                             required
                         />
                         <FormField
@@ -205,6 +191,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุรหัสโครงการ"
                             value={formData.projectCode}
                             onChange={handleChange}
+                            error={errors.projectCode}
                             required
                         />
                         <FormField
@@ -213,6 +200,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุเลขที่ข้อตกลง"
                             value={formData.acceptNum}
                             onChange={handleChange}
+                            error={errors.acceptNum}
                             required
                         />
                         <FormField
@@ -221,6 +209,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุชื่อผู้รับจ้าง"
                             value={formData.name}
                             onChange={handleChange}
+                            error={errors.name}
                             required
                         />
                         <FormField
@@ -229,6 +218,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุที่อยู่ติดต่อผู้รับจ้าง"
                             value={formData.address}
                             onChange={handleChange}
+                            error={errors.address}
                             required
                         />
                         <FormField
@@ -248,6 +238,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุวันหมดอายุ ตัวอย่าง 31 ธันวาคม 2568"
                             value={formData.citizenexpire}
                             onChange={handleChange}
+                            error={errors.citizenexpire}
                             required
                         />
                         <FormField
@@ -256,6 +247,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุชื่อ-นามสกุล พยาน"
                             value={formData.witness}
                             onChange={handleChange}
+                            error={errors.witness}
                             required
                         />
                     </div>
@@ -276,6 +268,7 @@ export default function CreateContractPage() {
                             placeholder="ตัวอย่าง : 500,000 บาท (ห้าแสนบาทถ้วน)"
                             value={formData.cost}
                             onChange={handleChange}
+                            error={errors.cost}
                             required
                         />
                         <FormField
@@ -285,6 +278,7 @@ export default function CreateContractPage() {
                             placeholder="ระบุตัวเลข เช่น 12 (ใส่เฉพาะตัวเลข)"
                             value={formData.timelineMonth}
                             onChange={handleChange}
+                            error={errors.timelineMonth}
                             required
                         />
                         <FormField
@@ -293,6 +287,7 @@ export default function CreateContractPage() {
                             placeholder="ตัวอย่าง : 1 มกราคม 2568 ถึง 31 ธันวาคม 2568"
                             value={formData.timelineText}
                             onChange={handleChange}
+                            error={errors.timelineText}
                             required
                         />
                         <FormField
@@ -302,13 +297,14 @@ export default function CreateContractPage() {
                             placeholder="ระบุเลขจำนวนงวด เช่น 3 (ใส่เฉพาะตัวเลข)"
                             value={formData.section}
                             onChange={handleChange}
+                            error={errors.section}
                             required
                         />
                     </div>
                 </FormSection>
 
                 <FormActions
-                    onPreview={openPreview}
+                    onPreview={handlePreview}
                     isSubmitting={isSubmitting}
                 />
             </form>

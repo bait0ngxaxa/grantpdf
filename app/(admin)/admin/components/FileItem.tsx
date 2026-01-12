@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import AttachmentList from "./AttachmentList";
 import type { AdminDocumentFile } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
-import { useSignedDownload } from "@/hooks/useSignedDownload";
+import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 
 interface FileItemProps {
     file: AdminDocumentFile;

@@ -6,7 +6,7 @@ interface MainMenuProps {
     isAdmin: boolean;
     selectedProjectId: string | null;
     onCategorySelect: (category: string) => void;
-    onSummarySelect: (templateId: string, title: string) => void;
+    onSummarySelect: () => void;
 }
 
 export const MainMenu = ({
@@ -72,9 +72,7 @@ export const MainMenu = ({
                 {isAdmin && (
                     <div
                         className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-amber-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() =>
-                            onSummarySelect("project-summary", "แบบสรุปโครงการ")
-                        }
+                        onClick={() => onSummarySelect()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-amber-50 text-amber-600 mb-6 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
@@ -153,11 +151,11 @@ export const MainMenu = ({
                         หรือ{" "}
                         <button
                             onClick={() => {
-                                localStorage.setItem(
-                                    "selectedProjectId",
-                                    selectedProjectId
+                                router.push(
+                                    `/uploads-doc?projectId=${encodeURIComponent(
+                                        selectedProjectId
+                                    )}`
                                 );
-                                router.push("/uploads-doc");
                             }}
                             className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors"
                         >

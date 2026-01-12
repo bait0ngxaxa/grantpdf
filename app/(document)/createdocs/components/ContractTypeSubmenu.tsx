@@ -1,11 +1,7 @@
 "use client";
 
 interface ContractTypeSubmenuProps {
-    onContractSelect: (
-        templateId: string,
-        title: string,
-        contractCode?: string
-    ) => void;
+    onContractSelect: (contractCode: string) => void;
 }
 
 export const ContractTypeSubmenu = ({
@@ -23,13 +19,7 @@ export const ContractTypeSubmenu = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
                 <div
                     className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                    onClick={() =>
-                        onContractSelect(
-                            "academic-contract-abs",
-                            "สัญญาจ้างปฏิบัติงานวิชาการ - ABS",
-                            "ABS"
-                        )
-                    }
+                    onClick={() => onContractSelect("ABS")}
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -64,13 +54,7 @@ export const ContractTypeSubmenu = ({
 
                 <div
                     className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-green-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                    onClick={() =>
-                        onContractSelect(
-                            "academic-contract-dmr",
-                            "สัญญาจ้างปฏิบัติงานวิชาการ - DMR",
-                            "DMR"
-                        )
-                    }
+                    onClick={() => onContractSelect("DMR")}
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-green-50 text-green-600 mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
@@ -105,13 +89,7 @@ export const ContractTypeSubmenu = ({
 
                 <div
                     className="group bg-white rounded-3xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-purple-200 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                    onClick={() =>
-                        onContractSelect(
-                            "academic-contract-sip",
-                            "สัญญาจ้างปฏิบัติงานวิชาการ - SIP",
-                            "SIP"
-                        )
-                    }
+                    onClick={() => onContractSelect("SIP")}
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-purple-50 text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
