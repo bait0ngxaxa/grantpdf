@@ -206,6 +206,7 @@ export default function DashboardPage() {
                     setShowCreateProjectModal={setShowCreateProjectModal}
                     setShowProfileModal={setShowProfileModal}
                     session={session}
+                    signOut={signOut}
                 />
 
                 {/* Main Content */}

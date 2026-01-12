@@ -6,19 +6,19 @@ import { useSearchParams } from "next/navigation";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
-import { PageLayout } from "@/app/(document)/components/document-form/PageLayout";
-import { FormSection } from "@/app/(document)/components/document-form/FormSection";
-import { FormActions } from "@/app/(document)/components/document-form/FormActions";
-import { PreviewModal } from "@/app/(document)/components/document-form/PreviewModal";
-import { FormField } from "@/app/(document)/components/document-form/FormField";
-import { ErrorAlert } from "@/app/(document)/components/document-form/ErrorAlert";
-import { LoadingState } from "@/app/(document)/components/document-form/LoadingState";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import {
+    PageLayout,
+    FormSection,
+    FormActions,
+    PreviewModal,
+    FormField,
+    ErrorAlert,
+    LoadingState,
     PreviewField,
     PreviewGrid,
-} from "@/app/(document)/components/document-form/PreviewField";
+} from "@/app/(document)/components/document-form";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import { ClipboardList, Users, Calculator } from "lucide-react";
 import { type SummaryData, initialSummaryData } from "@/config/initialData";
 import { validateSummary } from "@/lib/validation";

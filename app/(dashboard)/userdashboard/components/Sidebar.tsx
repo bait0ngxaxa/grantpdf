@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 import type { Session } from "next-auth";
 
 type MenuItemType = {
@@ -16,6 +17,7 @@ interface SidebarProps {
     setShowCreateProjectModal: (show: boolean) => void;
     setShowProfileModal: (show: boolean) => void;
     session: Session | null;
+    signOut: () => void;
 }
 
 const menuItems: MenuItemType[] = [
@@ -89,6 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setShowCreateProjectModal,
     setShowProfileModal,
     session,
+    signOut,
 }) => {
     return (
         <>
@@ -245,9 +248,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             <Button
                                 onClick={() => setShowProfileModal(true)}
                                 variant="outline"
-                                className="w-full h-9 text-xs font-semibold rounded-lg border-slate-200/60 bg-white/50 hover:bg-white hover:text-blue-600 hover:border-blue-200 hover:shadow-md hover:shadow-blue-500/10 transition-all duration-300"
+                                className="flex-1 h-9 text-xs font-semibold rounded-lg border-slate-200/60 bg-white/50 hover:bg-white hover:text-blue-600 hover:border-blue-200 hover:shadow-md hover:shadow-blue-500/10 transition-all duration-300"
                             >
                                 ข้อมูลส่วนตัว
+                            </Button>
+                            <Button
+                                onClick={() => signOut()}
+                                variant="outline"
+                                className="w-9 h-9 p-0 rounded-lg border-slate-200/60 bg-white/50 hover:bg-red-50 hover:text-red-600 hover:border-red-200 hover:shadow-md hover:shadow-red-500/10 transition-all duration-300"
+                                title="ออกจากระบบ"
+                            >
+                                <LogOut className="w-4 h-4" />
                             </Button>
                         </div>
                     </div>

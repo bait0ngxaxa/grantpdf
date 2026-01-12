@@ -1,5 +1,11 @@
 import React from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogClose,
+} from "@/components/ui/dialog";
+import { X } from "lucide-react";
 import type { Session } from "next-auth";
 
 interface ProfileModalProps {
@@ -15,7 +21,16 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 }) => {
     return (
         <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
-            <DialogContent className="sm:max-w-[450px] rounded-3xl p-0 bg-white border-0 shadow-2xl overflow-hidden">
+            <DialogContent
+                showCloseButton={false}
+                className="sm:max-w-[450px] rounded-3xl p-0 bg-white border-0 shadow-2xl overflow-hidden"
+            >
+                {/* Custom Close Button */}
+                <DialogClose className="absolute right-4 top-4 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all z-50 focus:outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close</span>
+                </DialogClose>
+
                 {/* Background Pattern */}
                 <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-blue-600 to-cyan-500 z-0"></div>
                 <div className="absolute top-10 right-10 w-24 h-24 bg-white/10 rounded-full blur-2xl z-0"></div>
@@ -37,7 +52,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                             ข้อมูลส่วนตัว
                         </DialogTitle>
                         <p className="text-sm text-slate-500">
-                            จัดการบัญชีผู้ใช้งานของคุณ
+                            ข้อมูลบัญชีผู้ใช้งานของคุณ
                         </p>
                     </div>
 

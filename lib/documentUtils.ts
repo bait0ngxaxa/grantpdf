@@ -2,11 +2,6 @@ import { v4 as uuidv4 } from "uuid";
 
 const ZWSP = "\u200B";
 
-/**
- * Fix Thai text for proper rendering in Word documents with Thai Distributed alignment.
- * Uses Intl.Segmenter (native browser/Node API) to insert Zero-Width Spaces (ZWSP) between words,
- * allowing Word to properly distribute text across the line.
- */
 export const fixThaiDistributed = (text: string): string => {
     if (!text || typeof text !== "string") return "";
 
