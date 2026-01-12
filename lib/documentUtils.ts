@@ -1,17 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
-import Wordcut from "wordcut";
 
-// Initialize wordcut for Thai word segmentation
-Wordcut.init();
-
-// Zero-Width Space character for word breaks
 const ZWSP = "\u200B";
 
-/**
- * Fix Thai text for proper rendering in Word documents with Thai Distributed alignment.
- * Uses Thai word segmentation to insert Zero-Width Spaces (ZWSP) between words,
- * allowing Word to properly distribute text across the line.
- */
 export const fixThaiDistributed = (text: string): string => {
     if (!text || typeof text !== "string") return "";
 
@@ -29,6 +19,10 @@ export const fixThaiDistributed = (text: string): string => {
         .replace(/\u2029/g, "\n\n")
         .replace(/[\u000B\u000C]/g, "\n");
 
+    // Initialize Intl.Segmenter for Thai
+    // Granularity 'word' ensures we get word segments
+    const segmenter = new Intl.Segmenter("th", { granularity: "word" });
+
     // Step 3: Process text line by line to preserve line breaks
     const lines = result.split("\n");
     const processedLines = lines.map((line) => {
@@ -38,9 +32,14 @@ export const fixThaiDistributed = (text: string): string => {
         const hasThaiChars = /[\u0E00-\u0E7F]/.test(line);
 
         if (hasThaiChars) {
-            // Use wordcut to segment Thai text and insert ZWSP between words
-            // This helps Word understand where to break/distribute text
-            return Wordcut.cut(line, ZWSP);
+            // Use Intl.Segmenter to segment text
+            const segments = segmenter.segment(line);
+
+            // Map segments to their string representation
+            const words = Array.from(segments).map((s) => s.segment);
+
+            // Join words with Zero-Width Space
+            return words.join(ZWSP);
         }
 
         return line;

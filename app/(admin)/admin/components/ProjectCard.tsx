@@ -243,7 +243,7 @@ export default function ProjectCard({
                                 e.stopPropagation();
                                 onEditProjectStatus(project);
                             }}
-                            className="h-10 px-4 rounded-xl text-sm bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm font-medium transition-all"
+                            className="h-10 px-2 sm:px-4 rounded-xl text-sm bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm font-medium transition-all"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -259,7 +259,9 @@ export default function ProjectCard({
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                 />
                             </svg>
-                            จัดการสถานะ
+                            <span className="hidden sm:inline">
+                                จัดการสถานะ
+                            </span>
                         </Button>
                         <div
                             className={`p-2 rounded-lg transition-colors ${

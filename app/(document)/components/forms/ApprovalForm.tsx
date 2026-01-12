@@ -7,23 +7,23 @@ import Image from "next/image";
 import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
-import { PageLayout } from "@/app/(document)/components/document-form/PageLayout";
-import { FormSection } from "@/app/(document)/components/document-form/FormSection";
-import { FormActions } from "@/app/(document)/components/document-form/FormActions";
-import { PreviewModal } from "@/app/(document)/components/document-form/PreviewModal";
-import { FormField } from "@/app/(document)/components/document-form/FormField";
-import { AttachmentList } from "@/app/(document)/components/document-form/AttachmentList";
-import { AttachmentUpload } from "@/app/(document)/components/document-form/AttachmentUpload";
-import { SignatureSection } from "@/app/(document)/components/document-form/SignatureSection";
-import { ErrorAlert } from "@/app/(document)/components/document-form/ErrorAlert";
-import { LoadingState } from "@/app/(document)/components/document-form/LoadingState";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import {
+    PageLayout,
+    FormSection,
+    FormActions,
+    PreviewModal,
+    FormField,
+    AttachmentList,
+    AttachmentUpload,
+    SignatureSection,
+    ErrorAlert,
+    LoadingState,
     PreviewField,
     PreviewGrid,
     PreviewList,
-} from "@/app/(document)/components/document-form/PreviewField";
+} from "@/app/(document)/components/document-form";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import { ClipboardList, FileText, Folder, UserPen } from "lucide-react";
 import {
     type ApprovalData,
@@ -321,7 +321,7 @@ export function ApprovalForm() {
                 data.append("projectId", projectId);
             }
 
-            const response = await fetch("/api/fill-approval-template", {
+            const response = await fetch("/api/generate/approval", {
                 method: "POST",
                 body: data,
             });
