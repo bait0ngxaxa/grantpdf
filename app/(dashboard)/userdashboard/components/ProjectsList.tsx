@@ -17,9 +17,6 @@ interface ProjectsListProps {
     handleDeleteFile: (fileId: string) => void;
     setShowCreateProjectModal: (show: boolean) => void;
     router: AppRouterInstance;
-    currentPage: number;
-    totalPages: number;
-    onPageChange: (page: number) => void;
 }
 
 export const ProjectsList: React.FC<ProjectsListProps> = ({
@@ -33,9 +30,6 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
     handleDeleteFile,
     setShowCreateProjectModal,
     router,
-    currentPage,
-    totalPages,
-    onPageChange,
 }) => {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [selectedStatusProject, setSelectedStatusProject] =
@@ -478,89 +472,6 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                     </div>
                 )}
             </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex justify-center mt-10">
-                    <div className="flex items-center gap-1 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
-                        {/* Previous Button */}
-                        <button
-                            onClick={() =>
-                                onPageChange(Math.max(1, currentPage - 1))
-                            }
-                            disabled={currentPage === 1}
-                            className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${
-                                currentPage === 1
-                                    ? "text-slate-300 cursor-not-allowed"
-                                    : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
-                            }`}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M15 19l-7-7 7-7"
-                                />
-                            </svg>
-                        </button>
-
-                        {/* Page Numbers */}
-                        {Array.from(
-                            { length: totalPages },
-                            (_, i) => i + 1
-                        ).map((page) => (
-                            <button
-                                key={page}
-                                onClick={() => onPageChange(page)}
-                                className={`w-10 h-10 flex items-center justify-center rounded-lg font-bold transition-all ${
-                                    currentPage === page
-                                        ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
-                                }`}
-                            >
-                                {page}
-                            </button>
-                        ))}
-
-                        {/* Next Button */}
-                        <button
-                            onClick={() =>
-                                onPageChange(
-                                    Math.min(totalPages, currentPage + 1)
-                                )
-                            }
-                            disabled={currentPage === totalPages}
-                            className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all ${
-                                currentPage === totalPages
-                                    ? "text-slate-300 cursor-not-allowed"
-                                    : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
-                            }`}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M9 5l7 7-7 7"
-                                />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            )}
 
             {/* Status Detail Modal */}
             {showStatusModal && selectedStatusProject && (

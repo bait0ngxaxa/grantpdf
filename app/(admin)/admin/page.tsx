@@ -9,6 +9,7 @@ import { useAdminData } from "./hooks/useAdminData";
 import { useProjectStatusActions } from "./hooks/useProjectStatusActions";
 import { usePreviewModal, useSuccessModal } from "./hooks/useModalStates";
 import { useUIStates } from "./hooks/useUIStates";
+import { useAdminProjectFilter } from "./hooks/useAdminProjectFilter";
 
 import { AdminSidebar } from "./components/AdminSidebar";
 import { AdminTopBar } from "./components/AdminTopBar";
@@ -21,10 +22,11 @@ import ProjectsList from "./components/ProjectsList";
 import { SuccessModal } from "./components/modals/SuccessModal";
 import { PreviewModal } from "./components/modals/PreviewModal";
 import { ProjectStatusModal } from "./components/modals/ProjectStatusModal";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
 
 // Import shared types and constants
-import { PROJECT_STATUS } from "@/type/models";
-import { PAGINATION, FILE_TYPES, STATUS_FILTER } from "@/lib/constants";
+import { PAGINATION } from "@/lib/constants";
 import { getStatusColor } from "@/lib/utils";
 
 const itemsPerPage = PAGINATION.ITEMS_PER_PAGE;
@@ -66,8 +68,7 @@ export default function AdminDashboardPage() {
         setIsSidebarOpen,
         expandedProjects,
         viewedProjects,
-        currentPage,
-        setCurrentPage,
+
         searchTerm,
         setSearchTerm,
         sortBy,
@@ -134,115 +135,32 @@ export default function AdminDashboardPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session]);
 
-    const filteredAndSortedProjects = useMemo(() => {
-        const filteredProjects = projects.filter((project) => {
-            const matchesSearch =
-                project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                project.userName
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
-                project.files.some((file) =>
-                    file.originalFileName
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
-                );
-
-            let matchesFileType = true;
-            if (selectedFileType !== FILE_TYPES.ALL) {
-                matchesFileType = project.files.some(
-                    (file) =>
-                        file.fileExtension.toLowerCase() ===
-                        selectedFileType.toLowerCase()
-                );
-            }
-
-            let matchesStatus = true;
-            if (selectedStatus !== STATUS_FILTER.ALL) {
-                matchesStatus = project.status === selectedStatus;
-            }
-
-            return matchesSearch && matchesFileType && matchesStatus;
-        });
-
-        filteredProjects.sort((a, b) => {
-            switch (sortBy) {
-                case "createdAtAsc":
-                    return (
-                        new Date(a.created_at).getTime() -
-                        new Date(b.created_at).getTime()
-                    );
-                case "createdAtDesc":
-                default:
-                    return (
-                        new Date(b.created_at).getTime() -
-                        new Date(a.created_at).getTime()
-                    );
-                case "statusDoneFirst":
-                    const aDoneCount = a.files.filter(
-                        (f) => f.downloadStatus === "done"
-                    ).length;
-                    const bDoneCount = b.files.filter(
-                        (f) => f.downloadStatus === "done"
-                    ).length;
-                    return bDoneCount - aDoneCount;
-                case "statusPendingFirst":
-                    const aPendingCount = a.files.filter(
-                        (f) => f.downloadStatus !== "done"
-                    ).length;
-                    const bPendingCount = b.files.filter(
-                        (f) => f.downloadStatus !== "done"
-                    ).length;
-                    return bPendingCount - aPendingCount;
-                case "statusApproved":
-                    return (
-                        (b.status === PROJECT_STATUS.APPROVED ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.APPROVED ? 1 : 0)
-                    );
-                case "statusPending":
-                    return (
-                        (b.status === PROJECT_STATUS.IN_PROGRESS ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.IN_PROGRESS ? 1 : 0)
-                    );
-                case "statusRejected":
-                    return (
-                        (b.status === PROJECT_STATUS.REJECTED ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.REJECTED ? 1 : 0)
-                    );
-                case "statusEdit":
-                    return (
-                        (b.status === PROJECT_STATUS.EDIT ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.EDIT ? 1 : 0)
-                    );
-                case "statusClosed":
-                    return (
-                        (b.status === PROJECT_STATUS.CLOSED ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.CLOSED ? 1 : 0)
-                    );
-            }
-        });
-
-        return { projects: filteredProjects, orphanFiles };
-    }, [
+    const filteredAndSortedProjects = useAdminProjectFilter({
         projects,
         orphanFiles,
         searchTerm,
         selectedFileType,
         selectedStatus,
         sortBy,
-    ]);
+    });
 
     const allFiles = useMemo(() => {
         return [...orphanFiles, ...projects.flatMap((p) => p.files)];
     }, [orphanFiles, projects]);
 
     // Pagination
-    const totalItems = filteredAndSortedProjects.projects.length;
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedProjects = filteredAndSortedProjects.projects.slice(
+    const {
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        paginatedItems: paginatedProjects,
         startIndex,
-        endIndex
-    );
+        endIndex,
+        totalItems,
+    } = usePagination({
+        items: filteredAndSortedProjects.projects,
+        itemsPerPage,
+    });
 
     if (status === "loading" || isLoading) {
         return (
@@ -326,115 +244,11 @@ export default function AdminDashboardPage() {
                                 />
 
                                 {/* Pagination */}
-                                {totalItems > itemsPerPage && (
-                                    <div className="flex justify-center mt-8">
-                                        <div className="flex items-center space-x-2">
-                                            {/* Previous Button */}
-                                            <button
-                                                onClick={() =>
-                                                    setCurrentPage(
-                                                        Math.max(
-                                                            1,
-                                                            currentPage - 1
-                                                        )
-                                                    )
-                                                }
-                                                disabled={currentPage === 1}
-                                                className={`px-3 py-2 rounded-lg border transition-colors ${
-                                                    currentPage === 1
-                                                        ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                                                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 cursor-pointer"
-                                                }`}
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-4 w-4"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="M15 19l-7-7 7-7"
-                                                    />
-                                                </svg>
-                                            </button>
-
-                                            {/* Page Numbers */}
-                                            {Array.from(
-                                                {
-                                                    length: Math.ceil(
-                                                        totalItems /
-                                                            itemsPerPage
-                                                    ),
-                                                },
-                                                (_, i) => i + 1
-                                            ).map((page) => (
-                                                <button
-                                                    key={page}
-                                                    onClick={() =>
-                                                        setCurrentPage(page)
-                                                    }
-                                                    className={`px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
-                                                        currentPage === page
-                                                            ? "bg-primary text-white border-primary"
-                                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
-                                                    }`}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ))}
-
-                                            {/* Next Button */}
-                                            <button
-                                                onClick={() =>
-                                                    setCurrentPage(
-                                                        Math.min(
-                                                            Math.ceil(
-                                                                totalItems /
-                                                                    itemsPerPage
-                                                            ),
-                                                            currentPage + 1
-                                                        )
-                                                    )
-                                                }
-                                                disabled={
-                                                    currentPage ===
-                                                    Math.ceil(
-                                                        totalItems /
-                                                            itemsPerPage
-                                                    )
-                                                }
-                                                className={`px-3 py-2 rounded-lg border transition-colors ${
-                                                    currentPage ===
-                                                    Math.ceil(
-                                                        totalItems /
-                                                            itemsPerPage
-                                                    )
-                                                        ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                                                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 cursor-pointer"
-                                                }`}
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-4 w-4"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="M9 5l7 7-7 7"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    onPageChange={setCurrentPage}
+                                />
                             </div>
                         )}
 

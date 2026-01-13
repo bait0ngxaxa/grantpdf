@@ -1,11 +1,19 @@
 import { useState } from "react";
+import { useExpandableState } from "@/lib/hooks/useExpandableState";
 
 export const useUIStates = () => {
     const [activeTab, setActiveTab] = useState("dashboard");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
-        new Set()
-    );
+
+    // Use shared expandable state hook
+    const {
+        expandedProjects,
+        expandedRows,
+        toggleProjectExpansion: baseToggleProjectExpansion,
+        toggleRowExpansion,
+    } = useExpandableState();
+
+    // Admin-specific: Track viewed projects for "NEW" badge
     const [viewedProjects, setViewedProjects] = useState<Set<string>>(() => {
         if (typeof window !== "undefined") {
             const storedViewedProjects = localStorage.getItem("viewedProjects");
@@ -20,50 +28,29 @@ export const useUIStates = () => {
         }
         return new Set();
     });
-    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-    const [currentPage, setCurrentPage] = useState(1);
 
-    // Filter and search states
+    // Admin-specific: Filter and search states
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("createdAtDesc");
     const [selectedFileType, setSelectedFileType] = useState("ไฟล์ทั้งหมด");
     const [selectedStatus, setSelectedStatus] = useState("สถานะทั้งหมด");
 
-    // Toggle project expansion
+    // Custom toggle that also marks project as viewed
     const toggleProjectExpansion = (projectId: string) => {
-        setExpandedProjects((prev) => {
-            const newSet = new Set(prev);
-            if (newSet.has(projectId)) {
-                newSet.delete(projectId);
-            } else {
-                newSet.add(projectId);
-                // Mark project as viewed when expanded
-                setViewedProjects((prevViewed) => {
-                    const newViewedSet = new Set(prevViewed);
-                    newViewedSet.add(projectId);
-                    // Store in localStorage to persist across sessions
-                    localStorage.setItem(
-                        "viewedProjects",
-                        JSON.stringify([...newViewedSet])
-                    );
-                    return newViewedSet;
-                });
-            }
-            return newSet;
-        });
-    };
+        baseToggleProjectExpansion(projectId);
 
-    // Toggle row expansion
-    const toggleRowExpansion = (fileId: string) => {
-        setExpandedRows((prev) => {
-            const newSet = new Set(prev);
-            if (newSet.has(fileId)) {
-                newSet.delete(fileId);
-            } else {
-                newSet.add(fileId);
-            }
-            return newSet;
-        });
+        // Mark project as viewed when expanded
+        if (!expandedProjects.has(projectId)) {
+            setViewedProjects((prevViewed) => {
+                const newViewedSet = new Set(prevViewed);
+                newViewedSet.add(projectId);
+                localStorage.setItem(
+                    "viewedProjects",
+                    JSON.stringify([...newViewedSet])
+                );
+                return newViewedSet;
+            });
+        }
     };
 
     return {
@@ -74,8 +61,7 @@ export const useUIStates = () => {
         expandedProjects,
         viewedProjects,
         expandedRows,
-        currentPage,
-        setCurrentPage,
+
         searchTerm,
         setSearchTerm,
         sortBy,

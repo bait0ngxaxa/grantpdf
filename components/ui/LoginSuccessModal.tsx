@@ -77,7 +77,7 @@ export const LoginSuccessModal: React.FC<LoginSuccessModalProps> = ({
 
                     <Button
                         onClick={handleGoToDashboard}
-                        className="w-full rounded-xl bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 h-12 text-lg font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
+                        className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-200 h-12 text-lg font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
                     >
                         ไปยังหน้าหลัก
                     </Button>

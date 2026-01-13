@@ -70,10 +70,10 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                     </p>
                     <Button
                         onClick={() => setShowSuccessModal(false)}
-                        className={`w-full rounded-xl h-12 text-lg font-semibold shadow-lg shadow-blue-500/10 ${
+                        className={`w-full rounded-xl h-12 text-lg font-semibold shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 ${
                             isError
-                                ? "bg-red-500 hover:bg-red-600 text-white"
-                                : "bg-green-500 hover:bg-green-600 text-white"
+                                ? "bg-red-500 hover:bg-red-600 text-white shadow-red-200"
+                                : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-blue-200"
                         }`}
                     >
                         ตกลง

@@ -24,15 +24,38 @@ import { SuccessModal } from "./components/modals/SuccessModal";
 import { PreviewModal } from "./components/modals/PreviewModal";
 import { ProfileModal } from "./components/modals/ProfileModal";
 
-// Import shared constants and local types
 import { PAGINATION } from "@/lib/constants";
+import { Pagination } from "@/components/ui/Pagination";
+import { usePagination } from "@/lib/hooks/usePagination";
 import type { Project } from "./hooks/useUserData";
+
+const getTitleByTab = (tab: string) => {
+    switch (tab) {
+        case "dashboard":
+            return "Dashboard - ภาพรวม | ระบบจัดการเอกสาร";
+        case "projects":
+            return "Dashboard - โครงการ | ระบบจัดการเอกสาร";
+        case "create":
+            return "Dashboard - สร้างเอกสาร | ระบบจัดการเอกสาร";
+        default:
+            return "Dashboard | ระบบจัดการเอกสาร";
+    }
+};
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
-    useTitle("UserDashboard | ระบบจัดการเอกสาร");
+    const {
+        activeTab,
+        setActiveTab,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        expandedProjects,
+        toggleProjectExpansion,
+    } = useUIStates();
+
+    useTitle(getTitleByTab(activeTab));
 
     const {
         projects,
@@ -61,17 +84,6 @@ export default function DashboardPage() {
         setShowEditProjectModal,
         openPreviewModal,
     } = useModalStates();
-
-    const {
-        activeTab,
-        setActiveTab,
-        isSidebarOpen,
-        setIsSidebarOpen,
-        expandedProjects,
-        toggleProjectExpansion,
-        currentProjectPage,
-        setCurrentProjectPage,
-    } = useUIStates();
 
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState("");
@@ -103,15 +115,15 @@ export default function DashboardPage() {
         orphanFiles.length;
 
     // Pagination logic
-    const projectsPerPage = PAGINATION.PROJECTS_PER_PAGE;
-    const totalPages = Math.ceil(projects.length / projectsPerPage);
-    const startIndex = (currentProjectPage - 1) * projectsPerPage;
-    const endIndex = startIndex + projectsPerPage;
-    const currentProjects = projects.slice(startIndex, endIndex);
-
-    const handlePageChange = (page: number) => {
-        setCurrentProjectPage(page);
-    };
+    const {
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        paginatedItems: paginatedProjects,
+    } = usePagination({
+        items: projects,
+        itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
+    });
 
     const handleDeleteFile = (fileId: string) => {
         setFileToDelete(fileId);
@@ -232,23 +244,29 @@ export default function DashboardPage() {
 
                         {/* Projects Tab */}
                         {activeTab === "projects" && (
-                            <ProjectsList
-                                projects={currentProjects}
-                                totalProjects={projects.length}
-                                expandedProjects={expandedProjects}
-                                toggleProjectExpansion={toggleProjectExpansion}
-                                handleEditProject={handleEditProject}
-                                handleDeleteProject={handleDeleteProject}
-                                openPreviewModal={openPreviewModal}
-                                handleDeleteFile={handleDeleteFile}
-                                setShowCreateProjectModal={
-                                    setShowCreateProjectModal
-                                }
-                                router={router}
-                                currentPage={currentProjectPage}
-                                totalPages={totalPages}
-                                onPageChange={handlePageChange}
-                            />
+                            <>
+                                <ProjectsList
+                                    projects={paginatedProjects}
+                                    totalProjects={projects.length}
+                                    expandedProjects={expandedProjects}
+                                    toggleProjectExpansion={
+                                        toggleProjectExpansion
+                                    }
+                                    handleEditProject={handleEditProject}
+                                    handleDeleteProject={handleDeleteProject}
+                                    openPreviewModal={openPreviewModal}
+                                    handleDeleteFile={handleDeleteFile}
+                                    setShowCreateProjectModal={
+                                        setShowCreateProjectModal
+                                    }
+                                    router={router}
+                                />
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    onPageChange={setCurrentPage}
+                                />
+                            </>
                         )}
 
                         {/* Create Tab */}
