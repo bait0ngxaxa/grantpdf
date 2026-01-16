@@ -9,7 +9,7 @@ import { CheckCircle2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import { AlertCircle } from "lucide-react";
 
-export default function SignupPage() {
+export default function SignupPage(): React.JSX.Element {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -22,7 +22,7 @@ export default function SignupPage() {
     const router = useRouter();
     useTitle("สมัครสมาชิก - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
-    const handleOpenConfirm = (e: React.FormEvent) => {
+    const handleOpenConfirm = (e: React.FormEvent): void => {
         e.preventDefault();
         setError("");
 
@@ -39,7 +39,7 @@ export default function SignupPage() {
         setShowConfirmModal(true);
     };
 
-    const handleSignup = async () => {
+    const handleSignup = async (): Promise<void> => {
         setError("");
         setIsSubmitting(true);
 
@@ -77,8 +77,8 @@ export default function SignupPage() {
                 <div className="hidden md:flex flex-col space-y-8 p-8">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm self-start animate-fade-in-up">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                         </span>
                         GRANT ONLINE
                     </div>
@@ -95,7 +95,7 @@ export default function SignupPage() {
                 <div className="w-full max-w-md mx-auto">
                     <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 p-8 border border-slate-100 relative overflow-hidden">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                         <div className="mb-8 relative z-10">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">
@@ -271,7 +271,7 @@ export default function SignupPage() {
                                 >
                                     {isSubmitting ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="loading loading-spinner loading-xs"></span>
+                                            <span className="loading loading-spinner loading-xs" />
                                             <span>กำลังยืนยัน...</span>
                                         </div>
                                     ) : (

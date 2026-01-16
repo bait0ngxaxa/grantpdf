@@ -22,7 +22,7 @@ const statusItems = [
 
 export const ProjectStatusDetails: React.FC<ProjectStatusDetailsProps> = ({
     counts,
-}) => {
+}): React.JSX.Element => {
     return (
         <div className="space-y-2.5 pt-2 border-t border-slate-50 mt-4">
             {statusItems.map(({ key, label, color }) => (
@@ -33,7 +33,7 @@ export const ProjectStatusDetails: React.FC<ProjectStatusDetailsProps> = ({
                     <div className="flex items-center">
                         <div
                             className={`w-1.5 h-1.5 ${color} rounded-full mr-2.5`}
-                        ></div>
+                         />
                         <span className="text-xs font-medium text-slate-500 group-hover/item:text-slate-700 transition-colors">
                             {label}
                         </span>

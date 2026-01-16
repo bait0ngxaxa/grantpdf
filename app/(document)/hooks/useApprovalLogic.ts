@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { type Session } from "next-auth";
 import { type ApprovalData, approvalFixedValues } from "@/config/initialData";
 
@@ -15,6 +15,21 @@ interface UseApprovalLogicProps {
     setIsSuccessModalOpen: (isOpen: boolean) => void;
 }
 
+export interface UseApprovalLogicReturn {
+    signatureFile: File | null;
+    signaturePreview: string | null;
+    signatureCanvasData: string | null;
+    attachmentFiles: File[];
+    addAttachment: () => void;
+    removeAttachment: (index: number) => void;
+    updateAttachment: (index: number, value: string) => void;
+    handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    handleSignatureCanvasChange: (signatureDataURL: string | null) => void;
+    handleAttachmentFilesChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    removeAttachmentFile: (index: number) => void;
+    handleApprovalSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
+}
+
 export function useApprovalLogic({
     formData,
     setFormData,
@@ -24,7 +39,7 @@ export function useApprovalLogic({
     setIsError,
     setIsSubmitting,
     setIsSuccessModalOpen,
-}: UseApprovalLogicProps) {
+}: UseApprovalLogicProps): UseApprovalLogicReturn {
     // Signature states
     const [signatureFile, setSignatureFile] = useState<File | null>(null);
     const [signaturePreview, setSignaturePreview] = useState<string | null>(
@@ -38,21 +53,21 @@ export function useApprovalLogic({
     const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
 
     // Attachment string array handlers (for formData)
-    const addAttachment = () => {
+    const addAttachment = (): void => {
         setFormData((prev) => ({
             ...prev,
             attachments: [...prev.attachments, ""],
         }));
     };
 
-    const removeAttachment = (index: number) => {
+    const removeAttachment = (index: number): void => {
         setFormData((prev) => ({
             ...prev,
             attachments: prev.attachments.filter((_, i) => i !== index),
         }));
     };
 
-    const updateAttachment = (index: number, value: string) => {
+    const updateAttachment = (index: number, value: string): void => {
         setFormData((prev) => ({
             ...prev,
             attachments: prev.attachments.map((item, i) =>
@@ -62,12 +77,12 @@ export function useApprovalLogic({
     };
 
     // Signature handlers
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
         const file = e.target.files?.[0] || null;
         setSignatureFile(file);
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
+            reader.onloadend = (): void => {
                 setSignaturePreview(reader.result as string);
             };
             reader.readAsDataURL(file);
@@ -76,17 +91,33 @@ export function useApprovalLogic({
         }
     };
 
-    const handleSignatureCanvasChange = (signatureDataURL: string | null) => {
+    const handleSignatureCanvasChange = (
+        signatureDataURL: string | null
+    ): void => {
         setSignatureCanvasData(signatureDataURL);
     };
 
     // Attachment file handlers
-    const handleAttachmentFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleAttachmentFilesChange = (
+        e: ChangeEvent<HTMLInputElement>
+    ): void => {
         const files = Array.from(e.target.files || []);
-        setAttachmentFiles(files);
+        setAttachmentFiles((prev) => {
+            const newFiles = files.filter(
+                (file) =>
+                    !prev.some(
+                        (existingFile) =>
+                            existingFile.name === file.name &&
+                            existingFile.size === file.size
+                    )
+            );
+            return [...prev, ...newFiles];
+        });
+
+        e.target.value = "";
     };
 
-    const removeAttachmentFile = (index: number) => {
+    const removeAttachmentFile = (index: number): void => {
         setAttachmentFiles((prev) => prev.filter((_, i) => i !== index));
     };
 
@@ -121,8 +152,9 @@ export function useApprovalLogic({
                         uploadedIds.push(result.file.id);
                     }
                 }
-            } catch {
-                // Silent fail for individual files
+            } catch (error) {
+                console.error(`Error uploading file ${file.name}:`, error);
+                // Silent fail for individual files to allow others to proceed
             }
         }
 
@@ -130,7 +162,9 @@ export function useApprovalLogic({
     };
 
     // Submit handler
-    const handleApprovalSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleApprovalSubmit = async (
+        e: FormEvent<HTMLFormElement>
+    ): Promise<void> => {
         e.preventDefault();
 
         if (!session) {

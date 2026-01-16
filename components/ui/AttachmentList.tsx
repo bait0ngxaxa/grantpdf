@@ -11,14 +11,16 @@ interface AttachmentListProps {
     isExpanded?: boolean;
 }
 
-export function AttachmentList({ attachmentFiles }: AttachmentListProps) {
+export function AttachmentList({
+    attachmentFiles,
+}: AttachmentListProps): React.JSX.Element | null {
     const { download, isDownloading } = useSignedDownload();
 
     if (!attachmentFiles || attachmentFiles.length === 0) {
         return null;
     }
 
-    const getAttachmentIcon = (mimeType: string | null) => {
+    const getAttachmentIcon = (mimeType: string | null): React.JSX.Element => {
         if (mimeType?.includes("image")) {
             return <ImageIcon className="w-4 h-4 text-green-500" />;
         } else if (mimeType?.includes("pdf")) {

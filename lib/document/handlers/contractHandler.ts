@@ -23,7 +23,7 @@ export async function handleContractGeneration(
     const address = formData.get("address") as string;
     const citizenid = formData.get("citizenid") as string;
     const citizenexpire = formData.get("citizenexpire") as string;
-    const contractnumber = (() => {
+    const contractnumber = ((): string => {
         const allContractNumbers = formData.getAll(
             "contractnumber"
         ) as string[];

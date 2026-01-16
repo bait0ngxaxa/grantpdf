@@ -47,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setShowProfileModal,
     session,
     signOut,
-}) => {
+}): React.JSX.Element => {
     return (
         <>
             {/* Mobile sidebar overlay */}
@@ -55,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div
                     className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
                     onClick={() => setIsSidebarOpen(false)}
-                ></div>
+                 />
             )}
 
             {/* Sidebar */}
@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     Dashboard
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                     <p className="text-[11px] uppercase font-bold text-blue-600 tracking-wider">
                                         Management Documents
                                     </p>

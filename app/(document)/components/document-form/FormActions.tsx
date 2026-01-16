@@ -15,7 +15,7 @@ export function FormActions({
     submitLabel = "สร้างเอกสาร",
     submittingLabel = "กำลังสร้างเอกสาร...",
     disabled = false,
-}: FormActionsProps) {
+}: FormActionsProps): React.JSX.Element {
     return (
         <div className="flex justify-center pt-8 border-t border-slate-200/60 mt-8">
             <Button

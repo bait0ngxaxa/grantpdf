@@ -22,7 +22,7 @@ export function ProjectList({
     onSelectProject,
     isLoading,
     error,
-}: ProjectListProps) {
+}: ProjectListProps): React.JSX.Element {
     const router = useRouter();
 
     return (
@@ -35,7 +35,7 @@ export function ProjectList({
 
                 {isLoading ? (
                     <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
                     </div>
                 ) : error ? (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-md">

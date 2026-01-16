@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Search, Archive, Building2, LucideIcon } from "lucide-react";
+import { Search, Archive, Building2, type LucideIcon } from "lucide-react";
 
 interface EmptyStateProps {
     title: string;
@@ -14,8 +14,8 @@ export function EmptyState({
     description,
     icon = "project",
     children,
-}: EmptyStateProps) {
-    const renderIcon = () => {
+}: EmptyStateProps): React.JSX.Element {
+    const renderIcon = (): React.JSX.Element => {
         if (typeof icon !== "string") {
             const Icon = icon;
             return <Icon className="mx-auto h-24 w-24 text-gray-400" />;

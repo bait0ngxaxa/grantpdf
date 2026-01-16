@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent } from "react";
+import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
@@ -31,7 +31,7 @@ import {
     ProjectDetailSection,
 } from "@/app/(document)/components/forms/project";
 
-export function FormProjectForm() {
+export function FormProjectForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
 
@@ -73,7 +73,7 @@ export function FormProjectForm() {
     });
 
     // Wrap handlePreview to pass formData
-    const handlePreview = () => onPreview(formData);
+    const handlePreview = (): void => onPreview(formData);
 
     // Create phone change handler
     const handlePhoneChange = createPhoneChangeHandler(
@@ -83,7 +83,7 @@ export function FormProjectForm() {
     );
 
     // Wrap validateBeforeSubmit
-    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: FormEvent<HTMLFormElement>): void => {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
 
@@ -165,7 +165,7 @@ export function FormProjectForm() {
                     <PreviewField
                         label="ความเป็นมาและแนวคิด"
                         value={formData.rationale}
-                    ></PreviewField>
+                     />
                 </PreviewGrid>
 
                 <PreviewField label="เป้าประสงค์">

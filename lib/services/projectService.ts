@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { AdminProject, AdminDocumentFile } from "@/type/models";
+import type { Project } from "@prisma/client";
 
 // =====================================================
 // Types
@@ -125,7 +126,9 @@ const VALID_STATUSES = [
 // Private Helper Functions
 // =====================================================
 
-function sanitizeAttachments(attachments: RawAttachment[] | undefined) {
+function sanitizeAttachments(
+    attachments: RawAttachment[] | undefined
+): AdminDocumentFile["attachmentFiles"] {
     return (
         attachments?.map((attachment) => ({
             id: attachment.id.toString(),
@@ -408,7 +411,7 @@ export async function updateProjectStatus({
     projectId,
     status,
     statusNote,
-}: UpdateProjectStatusParams) {
+}: UpdateProjectStatusParams): Promise<Partial<AdminProject>> {
     if (!VALID_STATUSES.includes(status as (typeof VALID_STATUSES)[number])) {
         throw new Error(
             `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`
@@ -462,7 +465,7 @@ export async function createProject(
     userId: number,
     name: string,
     description?: string
-) {
+): Promise<{ id: string } & Omit<Project, "id">> {
     const project = await prisma.project.create({
         data: {
             name,

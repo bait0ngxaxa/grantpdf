@@ -34,8 +34,8 @@ export default function ProjectCard({
     onToggleExpansion,
     onPreviewPdf,
     onEditProjectStatus,
-}: ProjectCardProps) {
-    const getStatusIcon = (status: string) => {
+}: ProjectCardProps): React.JSX.Element {
+    const getStatusIcon = (status: string): React.JSX.Element | null => {
         switch (status) {
             case PROJECT_STATUS.APPROVED:
                 return <Check className="w-3.5 h-3.5 mr-1.5" />;

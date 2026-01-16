@@ -1,5 +1,5 @@
 // app/api/auth/forgot-password/route.ts
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         // 2. **อีเมลผู้รับ:** รับอีเมลที่ผู้ใช้กรอกมาจากฟอร์ม
         const { email } = await req.json();

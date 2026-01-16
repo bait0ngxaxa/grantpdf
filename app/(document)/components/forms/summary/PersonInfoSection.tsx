@@ -15,7 +15,7 @@ export function PersonInfoSection({
     formData,
     handleChange,
     errors,
-}: PersonInfoSectionProps) {
+}: PersonInfoSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="ข้อมูลผู้เกี่ยวข้อง"

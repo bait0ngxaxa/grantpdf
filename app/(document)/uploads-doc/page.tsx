@@ -9,7 +9,7 @@ import {
 } from "@/app/(document)/components";
 import { ROUTES } from "@/lib/constants";
 
-export default function UploadDocPage() {
+export default function UploadDocPage(): React.JSX.Element | null {
     useTitle("อัพโหลดเอกสาร | ระบบจัดการเอกสาร");
 
     const {
@@ -36,7 +36,7 @@ export default function UploadDocPage() {
     if (status === "loading") {
         return (
             <div className="flex justify-center items-center min-h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
         );
     }

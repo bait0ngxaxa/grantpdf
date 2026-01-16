@@ -26,7 +26,7 @@ const cleanupTimer = setInterval(() => {
     }
 
     if (process.env.NODE_ENV === "development") {
-        console.log(
+        console.warn(
             `[RateLimit] Cleanup completed. Active IPs: ${rateLimitMap.size}`
         );
     }
@@ -140,7 +140,7 @@ export function resetRateLimit(ip: string): void {
 /**
  * Get current statistics (useful for monitoring)
  */
-export function getRateLimitStats() {
+export function getRateLimitStats(): { totalIPs: number; memoryUsage: string } {
     return {
         totalIPs: rateLimitMap.size,
         memoryUsage: `${Math.round(

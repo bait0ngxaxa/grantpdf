@@ -15,7 +15,7 @@ export function BudgetSection({
     formData,
     handleChange,
     errors,
-}: BudgetSectionProps) {
+}: BudgetSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="ข้อมูลงบประมาณ"

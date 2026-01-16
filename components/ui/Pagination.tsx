@@ -13,10 +13,10 @@ export const Pagination: React.FC<PaginationProps> = ({
     currentPage,
     totalPages,
     onPageChange,
-}) => {
+}): React.JSX.Element | null => {
     if (totalPages <= 1) return null;
 
-    const getPageNumbers = () => {
+    const getPageNumbers = (): (number | string)[] => {
         const pages: (number | string)[] = [];
         const maxVisible = 5;
 

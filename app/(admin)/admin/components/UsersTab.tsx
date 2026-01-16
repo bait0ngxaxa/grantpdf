@@ -20,7 +20,7 @@ interface UsersTabProps {
     totalUsers?: number;
 }
 
-export const UsersTab: React.FC<UsersTabProps> = () => {
+export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
     const { data: session, status } = useSession();
     const [searchTerm, setSearchTerm] = React.useState("");
 
@@ -82,7 +82,7 @@ export const UsersTab: React.FC<UsersTabProps> = () => {
     if (loadingUsers) {
         return (
             <div className="flex items-center justify-center py-20">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
+                <span className="loading loading-spinner loading-lg text-primary" />
             </div>
         );
     }

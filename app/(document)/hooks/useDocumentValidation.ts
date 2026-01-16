@@ -1,7 +1,7 @@
-import { useState, useCallback, ChangeEvent } from "react";
+import { useState, useCallback, type ChangeEvent } from "react";
 import {
-    ValidationErrors,
-    DocumentValidationResult,
+    type ValidationErrors,
+    type DocumentValidationResult,
     validatePhone,
     validateEmail,
     validateCitizenId,
@@ -150,7 +150,9 @@ export function useDocumentValidation<T extends object>(
             handleChange: (e: ChangeEvent<HTMLInputElement>) => void,
             setFormData: React.Dispatch<React.SetStateAction<T>>
         ) => {
-            return (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            return (
+                e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+            ): void => {
                 const { value } = e.target;
                 const { value: formatted, error } =
                     validateAndFormatPhone(value);
@@ -179,7 +181,9 @@ export function useDocumentValidation<T extends object>(
             fieldName: keyof T,
             setFormData: React.Dispatch<React.SetStateAction<T>>
         ) => {
-            return (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            return (
+                e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+            ): void => {
                 const { value } = e.target;
                 const { value: formatted, error } =
                     validateAndFormatCitizenId(value);

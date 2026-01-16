@@ -32,7 +32,7 @@ export function AttachmentSection({
     addAttachment,
     removeAttachment,
     updateAttachment,
-}: AttachmentSectionProps) {
+}: AttachmentSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="สิ่งที่ส่งมาด้วยและเนื้อหา"

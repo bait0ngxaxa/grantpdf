@@ -15,7 +15,7 @@ import {
 export async function POST(
     req: Request,
     { params }: { params: Promise<{ type: string }> }
-) {
+): Promise<NextResponse | Response> {
     try {
         const sessionResult = await validateSession();
         if (isSessionError(sessionResult)) {

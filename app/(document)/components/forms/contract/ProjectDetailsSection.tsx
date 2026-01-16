@@ -17,7 +17,7 @@ export function ProjectDetailsSection({
     handleChange,
     errors,
     contractCode,
-}: ProjectDetailsSectionProps) {
+}: ProjectDetailsSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="ข้อมูลโครงการ"

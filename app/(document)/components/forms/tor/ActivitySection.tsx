@@ -20,7 +20,7 @@ export function ActivitySection({
     addActivityRow,
     removeActivityRow,
     updateActivity,
-}: ActivitySectionProps) {
+}: ActivitySectionProps): React.JSX.Element {
     return (
         <FormSection
             title="การกำกับติดตามและประเมินผล"

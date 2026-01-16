@@ -26,7 +26,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     session,
     router,
     signOut,
-}) => {
+}): React.JSX.Element => {
     return (
         <div className="bg-gradient-to-r from-white/80 via-white/80 to-blue-50/30 backdrop-blur-2xl sticky top-0 z-30 px-6 py-4 border-b border-white/60 shadow-sm">
             <div className="flex items-center justify-between">

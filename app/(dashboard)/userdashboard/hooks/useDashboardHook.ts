@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Project } from "@/type";
+import type { Project, UserFile } from "@/type";
 import { PAGINATION } from "@/lib/constants";
 import { usePagination } from "@/lib/hooks";
 import {
@@ -10,7 +10,62 @@ import {
     useUIStates,
 } from "./";
 
-export function useDashboardHook() {
+export function useDashboardHook(): {
+    activeTab: string;
+    setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+    isSidebarOpen: boolean;
+    setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    projects: Project[];
+    paginatedProjects: Project[];
+    orphanFiles: UserFile[];
+    totalDocuments: number;
+    isLoading: boolean;
+    error: string | null;
+    fetchUserData: () => Promise<void>;
+    expandedProjects: Set<string>;
+    toggleProjectExpansion: (projectId: string) => void;
+    currentPage: number;
+    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+    totalPages: number;
+    isModalOpen: boolean;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    previewUrl: string;
+    previewTitle: string;
+    showProfileModal: boolean;
+    setShowProfileModal: React.Dispatch<React.SetStateAction<boolean>>;
+    showCreateProjectModal: boolean;
+    setShowCreateProjectModal: React.Dispatch<React.SetStateAction<boolean>>;
+    showDeleteModal: boolean;
+    setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
+    showSuccessModal: boolean;
+    setShowSuccessModal: React.Dispatch<React.SetStateAction<boolean>>;
+    showEditProjectModal: boolean;
+    setShowEditProjectModal: React.Dispatch<React.SetStateAction<boolean>>;
+    openPreviewModal: (storagePath: string, title: string) => void;
+    fileToDelete: string | null;
+    projectToDelete: string | null;
+    projectToEdit: Project | null;
+    setProjectToEdit: React.Dispatch<React.SetStateAction<Project | null>>;
+    successMessage: string;
+    editProjectName: string;
+    setEditProjectName: React.Dispatch<React.SetStateAction<string>>;
+    editProjectDescription: string;
+    setEditProjectDescription: React.Dispatch<React.SetStateAction<string>>;
+    newProjectName: string;
+    setNewProjectName: React.Dispatch<React.SetStateAction<string>>;
+    newProjectDescription: string;
+    setNewProjectDescription: React.Dispatch<React.SetStateAction<string>>;
+    isCreatingProject: boolean;
+    isUpdatingProject: boolean;
+    handleDeleteFile: (fileId: string) => void;
+    handleDeleteProject: (projectId: string) => void;
+    handleEditProject: (project: Project) => void;
+    cancelDelete: () => void;
+    onConfirmDeleteFile: () => Promise<void>;
+    onConfirmDeleteProject: () => Promise<void>;
+    onConfirmUpdateProject: () => Promise<void>;
+    onCreateProject: () => void;
+} {
     // 1. UI States (Tabs, Sidebar)
     const {
         activeTab,
@@ -93,44 +148,44 @@ export function useDashboardHook() {
         projects.reduce((total, project) => total + project.files.length, 0) +
         orphanFiles.length;
 
-    const handleDeleteFile = (fileId: string) => {
+    const handleDeleteFile = (fileId: string): void => {
         setFileToDelete(fileId);
         setShowDeleteModal(true);
     };
 
-    const handleDeleteProject = (projectId: string) => {
+    const handleDeleteProject = (projectId: string): void => {
         setProjectToDelete(projectId);
         setShowDeleteModal(true);
     };
 
-    const handleEditProject = (project: Project) => {
+    const handleEditProject = (project: Project): void => {
         setProjectToEdit(project);
         setEditProjectName(project.name);
         setEditProjectDescription(project.description || "");
         setShowEditProjectModal(true);
     };
 
-    const cancelDelete = () => {
+    const cancelDelete = (): void => {
         setShowDeleteModal(false);
         setFileToDelete(null);
         setProjectToDelete(null);
     };
 
-    const onConfirmDeleteFile = async () => {
+    const onConfirmDeleteFile = async (): Promise<void> => {
         if (!fileToDelete) return;
         setShowDeleteModal(false);
         await deleteFileAction(fileToDelete);
         setFileToDelete(null);
     };
 
-    const onConfirmDeleteProject = async () => {
+    const onConfirmDeleteProject = async (): Promise<void> => {
         if (!projectToDelete) return;
         setShowDeleteModal(false);
         await deleteProjectAction(projectToDelete);
         setProjectToDelete(null);
     };
 
-    const onConfirmUpdateProject = async () => {
+    const onConfirmUpdateProject = async (): Promise<void> => {
         if (!projectToEdit || !editProjectName.trim()) return;
 
         await updateProjectAction(
@@ -145,7 +200,7 @@ export function useDashboardHook() {
         setEditProjectDescription("");
     };
 
-    const onCreateProject = () => {
+    const onCreateProject = (): void => {
         createProjectAction(newProjectName, newProjectDescription);
     };
 

@@ -5,13 +5,21 @@ import { API_ROUTES } from "@/lib/constants";
 
 export type { Project, UserFile } from "@/type";
 
-export const useUserData = () => {
+export const useUserData = (): {
+    projects: Project[];
+    setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
+    orphanFiles: UserFile[];
+    setOrphanFiles: React.Dispatch<React.SetStateAction<UserFile[]>>;
+    isLoading: boolean;
+    error: string | null;
+    fetchUserData: () => Promise<void>;
+} => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [orphanFiles, setOrphanFiles] = useState<UserFile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchUserData = async () => {
+    const fetchUserData = async (): Promise<void> => {
         setIsLoading(true);
         setError(null);
         try {

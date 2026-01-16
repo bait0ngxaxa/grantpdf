@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getAllUsers } from "@/lib/services";
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 

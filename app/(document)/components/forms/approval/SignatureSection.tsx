@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, forwardRef } from "react";
+import { type ChangeEvent, forwardRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,7 @@ export const SignatureSection = forwardRef<
         canvasTitle = "วาดลายเซ็นผู้ขออนุมัติ",
     },
     ref
-) {
+): React.JSX.Element {
     return (
         <div ref={ref}>
             {/* อัปโหลดลายเซ็น */}
@@ -90,7 +90,7 @@ export const SignatureSection = forwardRef<
                     className="absolute inset-0 flex items-center"
                     aria-hidden="true"
                 >
-                    <div className="w-full border-t-2 border-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+                    <div className="w-full border-t-2 border-gradient-to-r from-transparent via-slate-300 to-transparent" />
                 </div>
                 <div className="relative flex justify-center">
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-3 rounded-full border-2 border-blue-200 shadow-md">

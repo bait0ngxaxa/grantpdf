@@ -15,7 +15,7 @@ export function DocumentDetailSection({
     formData,
     handleChange,
     errors,
-}: DocumentDetailSectionProps) {
+}: DocumentDetailSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="รายละเอียดหนังสือ"

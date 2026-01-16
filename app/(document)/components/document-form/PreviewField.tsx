@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface PreviewFieldProps {
     label: string;
@@ -14,7 +14,7 @@ export function PreviewField({
     value,
     children,
     className = "",
-}: PreviewFieldProps) {
+}: PreviewFieldProps): React.JSX.Element {
     return (
         <div className={className}>
             <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
@@ -36,7 +36,10 @@ interface PreviewGridProps {
     children: ReactNode;
 }
 
-export function PreviewGrid({ columns = 2, children }: PreviewGridProps) {
+export function PreviewGrid({
+    columns = 2,
+    children,
+}: PreviewGridProps): React.JSX.Element {
     const gridClass =
         columns === 1
             ? "grid-cols-1"
@@ -57,7 +60,7 @@ export function PreviewList({
     label,
     items,
     emptyMessage = "ไม่มีข้อมูล",
-}: PreviewListProps) {
+}: PreviewListProps): React.JSX.Element {
     return (
         <div>
             <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">

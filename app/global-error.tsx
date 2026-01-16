@@ -8,7 +8,7 @@ export default function GlobalError({
 }: {
     error: Error & { digest?: string };
     reset: () => void;
-}) {
+}): React.JSX.Element {
     return (
         <html lang="th">
             <body className="bg-gray-100 dark:bg-gray-900">

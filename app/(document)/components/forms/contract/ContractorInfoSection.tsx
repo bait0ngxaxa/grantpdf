@@ -19,7 +19,7 @@ export function ContractorInfoSection({
     handleChange,
     handleCitizenIdChange,
     errors,
-}: ContractorInfoSectionProps) {
+}: ContractorInfoSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="ข้อมูลผู้รับจ้าง"

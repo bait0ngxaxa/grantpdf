@@ -18,7 +18,7 @@ export default function SearchAndFilter({
     setSortBy,
     selectedStatus,
     setSelectedStatus,
-}: SearchAndFilterProps) {
+}: SearchAndFilterProps): React.JSX.Element {
     return (
         <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
             <div className="relative w-full lg:w-96">

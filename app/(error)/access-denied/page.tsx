@@ -6,7 +6,7 @@ import { Button } from "@/components/ui";
 import { ROUTES } from "@/lib/constants";
 import { Lock, Home, Circle } from "lucide-react";
 
-export default function AccessDeniedPage() {
+export default function AccessDeniedPage(): React.JSX.Element {
     const router = useRouter();
     const [countdown, setCountdown] = useState(5);
 
@@ -19,7 +19,7 @@ export default function AccessDeniedPage() {
             router.push(ROUTES.HOME);
         }, 6000);
 
-        return () => {
+        return (): void => {
             clearInterval(countdownInterval);
             clearTimeout(redirectTimer);
         };
@@ -28,14 +28,14 @@ export default function AccessDeniedPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center px-4 py-8 font-sans">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-grid-slate-900/[0.04] bg-[size:40px_40px] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-grid-slate-900/[0.04] bg-[size:40px_40px] pointer-events-none" />
 
             {/* Main Content */}
             <div className="relative w-full max-w-xl z-10">
                 <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/50 border border-white/50 overflow-hidden ring-1 ring-slate-900/5 transform transition-all duration-500 hover:scale-[1.01]">
                     {/* Header with Icon */}
                     <div className="bg-gradient-to-r from-red-500 to-orange-500 p-8 text-white relative overflow-hidden">
-                        <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div>
+                        <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
                         <div className="relative z-10 flex flex-col items-center">
                             <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner ring-1 ring-white/30">
                                 <Lock className="h-10 w-10 text-white drop-shadow-sm" />
@@ -97,7 +97,7 @@ export default function AccessDeniedPage() {
                     </div>
 
                     {/* Footer Stripe */}
-                    <div className="h-2 bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100"></div>
+                    <div className="h-2 bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100" />
                 </div>
             </div>
         </div>

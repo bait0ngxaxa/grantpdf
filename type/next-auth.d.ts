@@ -1,7 +1,7 @@
 // next-auth.d.ts
 import "next-auth";
 import "next-auth/jwt";
-import { DefaultSession, DefaultUser } from "next-auth";
+import { type DefaultSession, type DefaultUser } from "next-auth";
 
 // Extend the built-in 'User' type
 declare module "next-auth" {

@@ -26,7 +26,7 @@ export const CategorySubmenu = ({
     onFormProjectSelect,
     onContractTypeSelect,
     onCategorySelect,
-}: CategorySubmenuProps) => {
+}: CategorySubmenuProps): React.JSX.Element | null => {
     if (selectedCategory === "general") {
         if (!isAdmin) {
             onCategorySelect(null);

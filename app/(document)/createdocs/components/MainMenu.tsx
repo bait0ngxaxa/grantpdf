@@ -15,7 +15,7 @@ export const MainMenu = ({
     selectedProjectId,
     onCategorySelect,
     onSummarySelect,
-}: MainMenuProps) => {
+}: MainMenuProps): React.JSX.Element => {
     const router = useRouter();
 
     return (

@@ -86,13 +86,13 @@ export async function handleApprovalGeneration(
     const modules = [];
     if (signatureImageBuffer) {
         const imageModule = new ImageModule({
-            getImage: (tag: string) => {
+            getImage: (tag: string): Buffer | null => {
                 if (tag === "signature") {
                     return signatureImageBuffer;
                 }
                 return null;
             },
-            getSize: () => [130, 60],
+            getSize: (): [number, number] => [130, 60],
             centered: false,
         });
         modules.push(imageModule);
@@ -104,18 +104,23 @@ export async function handleApprovalGeneration(
         linebreaks: true,
         delimiters: { start: "{", end: "}" },
         modules,
-        nullGetter: function (part) {
+        nullGetter: function (part): string {
             if (part.value === "signature" && !signatureImageBuffer) {
                 return "\n\n\n_________________________\n         ลายเซ็น\n\n";
             }
             return "";
         },
-        parser: function (tag) {
+        parser: function (tag): {
+            get: (
+                scope: Record<string, unknown>,
+                context: { scopePathItem: number[] }
+            ) => string | unknown;
+        } {
             return {
                 get: function (
                     scope: Record<string, unknown>,
                     _context: unknown
-                ) {
+                ): string | unknown {
                     if (tag === ".") {
                         return scope;
                     }

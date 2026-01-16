@@ -16,7 +16,33 @@ interface EditFormData {
     role: string;
 }
 
-export function useUserManagement() {
+export interface UserManagementHook {
+    users: UserData[];
+    loadingUsers: boolean;
+    fetchError: string | null;
+    selectedUser: UserData | null;
+    editFormData: EditFormData;
+    isSaving: boolean;
+    isDeleting: boolean;
+    isEditModalOpen: boolean;
+    isDeleteModalOpen: boolean;
+    isResultModalOpen: boolean;
+    resultMessage: string;
+    isResultSuccess: boolean;
+    fetchUsers: () => Promise<void>;
+    openEditModal: (user: UserData) => void;
+    closeEditModal: () => void;
+    handleEditFormChange: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => void;
+    handleUpdateUser: (e: React.FormEvent) => Promise<void>;
+    openDeleteModal: (user: UserData) => void;
+    closeDeleteModal: () => void;
+    handleDeleteUser: () => Promise<void>;
+    closeResultModal: () => void;
+}
+
+export function useUserManagement(): UserManagementHook {
     const [users, setUsers] = useState<UserData[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [fetchError, setFetchError] = useState<string | null>(null);

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent } from "react";
+import { type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FileText, Upload } from "lucide-react";
@@ -17,7 +17,7 @@ export function AttachmentUpload({
     onFilesChange,
     onRemoveFile,
     accept = ".pdf,.doc,.docx",
-}: AttachmentUploadProps) {
+}: AttachmentUploadProps): React.JSX.Element {
     return (
         <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
             <h4 className="text-md font-semibold text-slate-800 mb-3 flex items-center">

@@ -23,7 +23,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     todayProjects,
     todayFiles,
     setActiveTab,
-}) => {
+}): React.JSX.Element => {
     // Calculate latest project
     const latestProject = useMemo(() => {
         const sortedProjects = projects.sort(

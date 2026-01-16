@@ -19,7 +19,7 @@ export function ApproverInfoSection({
     handleChange,
     handlePhoneChange,
     errors,
-}: ApproverInfoSectionProps) {
+}: ApproverInfoSectionProps): React.JSX.Element {
     return (
         <>
             {/* ข้อมูลผู้ขออนุมัติ */}

@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
     Button,
     Dialog,
@@ -42,7 +42,7 @@ export function PageLayout({
     isExitModalOpen: externalIsExitModalOpen,
     setIsExitModalOpen: externalSetIsExitModalOpen,
     onConfirmExit,
-}: PageLayoutProps) {
+}: PageLayoutProps): React.JSX.Element {
     const router = useRouter();
     const [internalIsExitModalOpen, setInternalIsExitModalOpen] =
         useState(false);
@@ -51,7 +51,7 @@ export function PageLayout({
     const setIsExitModalOpen =
         externalSetIsExitModalOpen ?? setInternalIsExitModalOpen;
 
-    const handleBack = () => {
+    const handleBack = (): void => {
         if (isDirty) {
             setIsExitModalOpen(true);
         } else {
@@ -59,7 +59,7 @@ export function PageLayout({
         }
     };
 
-    const confirmExit = () => {
+    const confirmExit = (): void => {
         setIsExitModalOpen(false);
         if (onConfirmExit) {
             onConfirmExit();

@@ -19,7 +19,7 @@ export function BasicInfoSection({
     handleChange,
     handlePhoneChange,
     errors,
-}: BasicInfoSectionProps) {
+}: BasicInfoSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="ข้อมูลพื้นฐานโครงการ"

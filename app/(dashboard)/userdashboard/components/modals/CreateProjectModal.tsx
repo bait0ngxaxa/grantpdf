@@ -33,7 +33,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     isCreatingProject,
     setActiveTab,
 }) => {
-    const onCreateProject = async () => {
+    const onCreateProject = async (): Promise<void> => {
         await handleCreateProject();
         setShowCreateProjectModal(false);
         setNewProjectName("");

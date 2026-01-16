@@ -15,7 +15,7 @@ export const useProjectData = (
 ): UseProjectDataReturn => {
     const { status } = useSession();
 
-    const fetchProjects = async () => {
+    const fetchProjects = async (): Promise<void> => {
         if (status !== "authenticated") return;
 
         try {

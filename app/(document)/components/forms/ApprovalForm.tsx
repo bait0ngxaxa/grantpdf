@@ -35,7 +35,7 @@ import {
     type SignatureCanvasRef,
 } from "@/app/(document)/components/forms/approval";
 
-export function ApprovalForm() {
+export function ApprovalForm(): React.JSX.Element {
     const { data: session } = useSession();
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
@@ -104,7 +104,7 @@ export function ApprovalForm() {
     });
 
     // Wrap handlePreview to pass formData
-    const handlePreview = () => onPreview(formData);
+    const handlePreview = (): void => onPreview(formData);
 
     // Create phone change handler
     const handlePhoneChange = createPhoneChangeHandler(

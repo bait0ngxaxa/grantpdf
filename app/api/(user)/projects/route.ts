@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getProjectsByUserId, createProject } from "@/lib/services";
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
@@ -28,7 +28,7 @@ export async function GET() {
 }
 
 // POST: สร้างโครงการใหม่
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 

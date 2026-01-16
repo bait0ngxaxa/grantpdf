@@ -14,7 +14,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     projects,
     totalDocuments,
     setActiveTab,
-}) => {
+}): React.JSX.Element => {
     return (
         <div className="animate-fade-in-up">
             {/* Statistics Cards */}

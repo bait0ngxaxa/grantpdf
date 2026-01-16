@@ -15,7 +15,7 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
     projects,
     setShowCreateProjectModal,
     router,
-}) => {
+}): React.JSX.Element => {
     return (
         <div className="animate-fade-in-up">
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-10 text-center">

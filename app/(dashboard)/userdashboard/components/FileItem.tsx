@@ -32,11 +32,11 @@ export default function FileItem({
     file,
     onPreviewFile,
     onDeleteFile,
-}: FileItemProps) {
+}: FileItemProps): React.JSX.Element {
     const [isAttachmentExpanded, setIsAttachmentExpanded] = useState(false);
     const { download, isDownloading } = useSignedDownload();
 
-    const getFileIcon = (extension: string) => {
+    const getFileIcon = (extension: string): React.JSX.Element => {
         if (extension === "pdf") {
             return <File className="w-8 h-8 text-red-500" />;
         } else if (extension === "xlsx") {

@@ -13,13 +13,15 @@ export function usePreventNavigation({
     isDirty,
     message = "ข้อมูลที่คุณกรอกจะไม่ถูกบันทึก คุณต้องการออกจากหน้านี้ใช่หรือไม่?",
     onNavigationAttempt,
-}: UsePreventNavigationOptions) {
+}: UsePreventNavigationOptions): { allowNavigation: () => void } {
     const router = useRouter();
     const isNavigatingRef = useRef(false);
 
     // Prevent browser refresh/close
     useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        const handleBeforeUnload = (
+            e: BeforeUnloadEvent
+        ): string | undefined => {
             if (isDirty && !isNavigatingRef.current) {
                 e.preventDefault();
                 e.returnValue = message;
@@ -28,7 +30,7 @@ export function usePreventNavigation({
         };
 
         window.addEventListener("beforeunload", handleBeforeUnload);
-        return () => {
+        return (): void => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
     }, [isDirty, message]);
@@ -37,7 +39,7 @@ export function usePreventNavigation({
     useEffect(() => {
         if (!isDirty) return;
 
-        const handlePopState = (_e: PopStateEvent) => {
+        const handlePopState = (_e: PopStateEvent): void => {
             if (isDirty && !isNavigatingRef.current) {
                 window.history.pushState(null, "", window.location.href);
 
@@ -57,12 +59,12 @@ export function usePreventNavigation({
         window.history.pushState(null, "", window.location.href);
         window.addEventListener("popstate", handlePopState);
 
-        return () => {
+        return (): void => {
             window.removeEventListener("popstate", handlePopState);
         };
     }, [isDirty, message, router, onNavigationAttempt]);
 
-    const allowNavigation = useCallback(() => {
+    const allowNavigation = useCallback((): void => {
         isNavigatingRef.current = true;
     }, []);
 

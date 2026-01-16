@@ -15,7 +15,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
     isOpen,
     project,
     onClose,
-}) => {
+}): React.JSX.Element | null => {
     if (!isOpen || !project) return null;
 
     return (
@@ -55,7 +55,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                                 project.status || PROJECT_STATUS.IN_PROGRESS
                             )}`}
                         >
-                            <span className="w-2 h-2 rounded-full bg-current mr-2 opacity-75"></span>
+                            <span className="w-2 h-2 rounded-full bg-current mr-2 opacity-75" />
                             {project.status || PROJECT_STATUS.IN_PROGRESS}
                         </span>
                     </div>

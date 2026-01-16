@@ -8,7 +8,20 @@ interface UsePaginationProps<T> {
 export function usePagination<T>({
     items,
     itemsPerPage = 10,
-}: UsePaginationProps<T>) {
+}: UsePaginationProps<T>): {
+    currentPage: number;
+    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+    totalPages: number;
+    paginatedItems: T[];
+    itemsPerPage: number;
+    startIndex: number;
+    endIndex: number;
+    totalItems: number;
+    goToPage: (page: number) => void;
+    goToNextPage: () => void;
+    goToPreviousPage: () => void;
+    resetPage: () => void;
+} {
     const [currentPage, setCurrentPage] = useState(1);
 
     const totalPages = Math.ceil(items.length / itemsPerPage);

@@ -19,7 +19,7 @@ import { SuccessModal } from "@/components/ui";
 
 import { useUserManagement } from "./hooks/useUserManagement";
 
-export default function AdminUserManagementPage() {
+export default function AdminUserManagementPage(): React.JSX.Element | null {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -93,7 +93,7 @@ export default function AdminUserManagementPage() {
     if (status === "loading" || loadingUsers) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
+                <span className="loading loading-spinner loading-lg text-primary" />
             </div>
         );
     }

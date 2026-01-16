@@ -40,7 +40,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     icon,
     colorTheme,
     children,
-}) => {
+}): React.JSX.Element => {
     const colors = colorClasses[colorTheme];
 
     return (
@@ -49,7 +49,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         >
             <div
                 className={`absolute top-0 right-0 w-24 h-24 ${colors.accent} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}
-            ></div>
+             />
             <div className="flex items-start space-x-4 relative z-10">
                 <div
                     className={`${colors.bg} ${colors.text} p-3.5 rounded-2xl flex-shrink-0 ${colors.hoverBg} group-hover:text-white transition-colors duration-300 shadow-sm`}

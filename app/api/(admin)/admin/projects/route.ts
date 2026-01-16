@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { logAudit } from "@/lib/auditLog";
 import { getAllProjects, updateProjectStatus } from "@/lib/services";
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
@@ -26,7 +26,7 @@ export async function GET() {
     }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: Request): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 

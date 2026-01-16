@@ -15,7 +15,7 @@ export function ScopeSection({
     formData,
     handleChange,
     errors,
-}: ScopeSectionProps) {
+}: ScopeSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="ขอบเขตและการจัดการ"

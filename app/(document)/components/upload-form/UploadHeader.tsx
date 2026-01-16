@@ -5,12 +5,16 @@ import { ROUTES } from "@/lib/constants";
 
 interface UploadHeaderProps {
     onBack?: () => void;
+    title?: string;
+    subtitle?: string;
 }
 
-export function UploadHeader({ onBack }: UploadHeaderProps) {
+export const UploadHeader = ({
+    onBack,
+}: UploadHeaderProps): React.JSX.Element => {
     const router = useRouter();
 
-    const handleBack = () => {
+    const handleBack = (): void => {
         if (onBack) {
             onBack();
         } else {
@@ -21,7 +25,7 @@ export function UploadHeader({ onBack }: UploadHeaderProps) {
     return (
         <div className="bg-white border-b border-gray-200">
             {/* Top decorative bar */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+            <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between py-6 gap-4">
@@ -58,4 +62,4 @@ export function UploadHeader({ onBack }: UploadHeaderProps) {
             </div>
         </div>
     );
-}
+};

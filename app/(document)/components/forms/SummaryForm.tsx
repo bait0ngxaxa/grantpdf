@@ -29,7 +29,7 @@ import {
     BudgetSection,
 } from "@/app/(document)/components/forms/summary";
 
-export function SummaryForm() {
+export function SummaryForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
 
@@ -75,10 +75,10 @@ export function SummaryForm() {
     });
 
     // Wrap handlePreview to pass formData
-    const handlePreview = () => onPreview(formData);
+    const handlePreview = (): void => onPreview(formData);
 
     // Wrap validateBeforeSubmit
-    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
 

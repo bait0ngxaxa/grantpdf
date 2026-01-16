@@ -1,5 +1,5 @@
 // เส้นแก้ไขและลบข้อมูลแต่ละ id ระบบ admin
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import {
@@ -12,7 +12,7 @@ import {
 export async function PUT(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
@@ -71,7 +71,7 @@ export async function PUT(
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 

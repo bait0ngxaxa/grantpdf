@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { Home, ArrowLeft } from "lucide-react";
 
-export default function NotFound() {
+export default function NotFound(): React.JSX.Element {
     const router = useRouter();
 
     return (

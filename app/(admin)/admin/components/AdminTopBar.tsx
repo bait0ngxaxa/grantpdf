@@ -18,7 +18,7 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
     setIsSidebarOpen,
     activeTab,
     signOut,
-}) => {
+}): React.JSX.Element => {
     return (
         <div className="bg-white/70 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-slate-200/60 transition-all duration-300">
             <div className="flex items-center justify-between">

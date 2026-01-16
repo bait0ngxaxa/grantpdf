@@ -34,7 +34,7 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
             <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                     <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-sm shadow-yellow-200"></div>
+                        <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-sm shadow-yellow-200" />
                         <span className="text-sm font-medium text-slate-600">
                             กำลังดำเนินการ
                         </span>
@@ -46,7 +46,7 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
 
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                     <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-sm shadow-green-200"></div>
+                        <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-sm shadow-green-200" />
                         <span className="text-sm font-medium text-slate-600">
                             อนุมัติแล้ว
                         </span>
@@ -58,7 +58,7 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
 
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                     <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm shadow-red-200"></div>
+                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm shadow-red-200" />
                         <span className="text-sm font-medium text-slate-600">
                             ไม่อนุมัติ
                         </span>
@@ -70,7 +70,7 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
 
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                     <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-orange-500 rounded-full shadow-sm shadow-orange-200"></div>
+                        <div className="w-2.5 h-2.5 bg-orange-500 rounded-full shadow-sm shadow-orange-200" />
                         <span className="text-sm font-medium text-slate-600">
                             แก้ไข
                         </span>
@@ -82,7 +82,7 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
 
                 <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                     <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-slate-500 rounded-full shadow-sm shadow-slate-200"></div>
+                        <div className="w-2.5 h-2.5 bg-slate-500 rounded-full shadow-sm shadow-slate-200" />
                         <span className="text-sm font-medium text-slate-600">
                             ปิดโครงการ
                         </span>

@@ -17,7 +17,7 @@ export const NavBar = ({
     onBack,
     onCategorySelect,
     onContractTypeSelect,
-}: NavBarProps) => {
+}: NavBarProps): React.JSX.Element => {
     return (
         <div className="navbar bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-100 mb-6 p-2 sticky top-4 z-40">
             <div className="flex-1">

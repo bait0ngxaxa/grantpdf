@@ -10,7 +10,7 @@ interface ProjectsListHeaderProps {
 export const ProjectsListHeader: React.FC<ProjectsListHeaderProps> = ({
     totalProjects,
     onCreateProject,
-}) => {
+}): React.JSX.Element => {
     return (
         <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">

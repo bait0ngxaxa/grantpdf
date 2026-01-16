@@ -32,8 +32,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 </DialogClose>
 
                 {/* Background Pattern */}
-                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-blue-600 to-cyan-500 z-0"></div>
-                <div className="absolute top-10 right-10 w-24 h-24 bg-white/10 rounded-full blur-2xl z-0"></div>
+                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-blue-600 to-cyan-500 z-0" />
+                <div className="absolute top-10 right-10 w-24 h-24 bg-white/10 rounded-full blur-2xl z-0" />
 
                 {/* Content */}
                 <div className="relative z-10 px-6 pb-8 pt-12">

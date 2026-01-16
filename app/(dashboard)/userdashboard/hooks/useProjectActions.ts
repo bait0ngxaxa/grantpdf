@@ -6,13 +6,27 @@ export const useProjectActions = (
     setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
     setSuccessMessage: (message: string) => void,
     setShowSuccessModal: (show: boolean) => void
-) => {
+): {
+    isCreatingProject: boolean;
+    isDeletingProject: boolean;
+    isUpdatingProject: boolean;
+    handleCreateProject: (name: string, description: string) => Promise<void>;
+    confirmDeleteProject: (projectId: string) => Promise<boolean>;
+    confirmUpdateProject: (
+        projectId: string,
+        name: string,
+        description: string
+    ) => Promise<boolean>;
+} => {
     const [isCreatingProject, setIsCreatingProject] = useState(false);
     const [isDeletingProject, setIsDeletingProject] = useState(false);
     const [isUpdatingProject, setIsUpdatingProject] = useState(false);
 
     // Create new project
-    const handleCreateProject = async (name: string, description: string) => {
+    const handleCreateProject = async (
+        name: string,
+        description: string
+    ): Promise<void> => {
         if (!name.trim()) return;
 
         setIsCreatingProject(true);
@@ -49,7 +63,9 @@ export const useProjectActions = (
     };
 
     // Delete project
-    const confirmDeleteProject = async (projectId: string) => {
+    const confirmDeleteProject = async (
+        projectId: string
+    ): Promise<boolean> => {
         setIsDeletingProject(true);
 
         try {
@@ -87,7 +103,7 @@ export const useProjectActions = (
         projectId: string,
         name: string,
         description: string
-    ) => {
+    ): Promise<boolean> => {
         if (!name.trim()) return false;
 
         setIsUpdatingProject(true);

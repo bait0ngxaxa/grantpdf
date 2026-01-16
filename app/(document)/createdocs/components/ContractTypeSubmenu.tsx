@@ -8,7 +8,7 @@ interface ContractTypeSubmenuProps {
 
 export const ContractTypeSubmenu = ({
     onContractSelect,
-}: ContractTypeSubmenuProps) => {
+}: ContractTypeSubmenuProps): React.JSX.Element => {
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
             <h1 className="text-3xl font-bold text-center mb-2 text-slate-800">

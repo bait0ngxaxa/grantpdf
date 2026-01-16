@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent } from "react";
+import { type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -30,7 +30,7 @@ export function FormField({
     className = "",
     error,
     maxLength,
-}: FormFieldProps) {
+}: FormFieldProps): React.JSX.Element {
     const hasError = !!error;
     const baseClassName = `w-full px-4 py-3 bg-white border rounded-xl focus:ring-4 transition-all duration-200 placeholder:text-slate-400 ${
         hasError

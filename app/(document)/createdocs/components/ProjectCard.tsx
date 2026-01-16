@@ -13,7 +13,7 @@ export const ProjectCard = ({
     project,
     selectedProjectId,
     onProjectSelect,
-}: ProjectCardProps) => {
+}: ProjectCardProps): React.JSX.Element => {
     const isSelected = selectedProjectId === project.id;
 
     return (

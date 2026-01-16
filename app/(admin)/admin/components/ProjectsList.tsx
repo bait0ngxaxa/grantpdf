@@ -30,7 +30,7 @@ export default function ProjectsList({
     onToggleProjectExpansion,
     onPreviewPdf,
     onEditProjectStatus,
-}: ProjectsListProps) {
+}: ProjectsListProps): React.JSX.Element {
     if (isLoading) {
         return <LoadingSpinner message="กำลังโหลดโครงการ..." />;
     }

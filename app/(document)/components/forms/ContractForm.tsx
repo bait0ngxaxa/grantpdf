@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent } from "react";
+import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
@@ -28,7 +28,7 @@ import {
     BudgetSection,
 } from "@/app/(document)/components/forms/contract";
 
-export function ContractForm() {
+export function ContractForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const contractCode = searchParams.get("contractCode") || "";
     const projectId = searchParams.get("projectId") || "";
@@ -77,7 +77,7 @@ export function ContractForm() {
     });
 
     // Wrap handlePreview to pass formData
-    const handlePreview = () => onPreview(formData);
+    const handlePreview = (): void => onPreview(formData);
 
     // Create citizen ID change handler
     const handleCitizenIdChange = createCitizenIdChangeHandler(
@@ -86,7 +86,7 @@ export function ContractForm() {
     );
 
     // Wrap validateBeforeSubmit
-    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: FormEvent<HTMLFormElement>): void => {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
 

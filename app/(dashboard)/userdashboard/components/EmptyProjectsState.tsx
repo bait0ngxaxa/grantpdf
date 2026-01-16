@@ -8,7 +8,7 @@ interface EmptyProjectsStateProps {
 
 export const EmptyProjectsState: React.FC<EmptyProjectsStateProps> = ({
     onCreateProject,
-}) => {
+}): React.JSX.Element => {
     return (
         <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-slate-100">
             <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">

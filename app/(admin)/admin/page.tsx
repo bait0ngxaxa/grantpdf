@@ -3,12 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
-import {
-    useTitle,
-    usePagination,
-    usePreviewModal,
-    useSuccessModal,
-} from "@/lib/hooks";
+import { useTitle, usePagination, useModalStates } from "@/lib/hooks";
 
 import {
     useAdminData,
@@ -34,7 +29,7 @@ import { getStatusColor } from "@/lib/utils";
 
 const itemsPerPage = PAGINATION.ITEMS_PER_PAGE;
 
-const getTitleByTab = (tab: string) => {
+const getTitleByTab = (tab: string): string => {
     switch (tab) {
         case "dashboard":
             return "Admin Dashboard - ภาพรวมระบบ | ระบบจัดการเอกสาร";
@@ -47,7 +42,7 @@ const getTitleByTab = (tab: string) => {
     }
 };
 
-export default function AdminDashboardPage() {
+export default function AdminDashboardPage(): React.JSX.Element | null {
     const { data: session, status } = useSession();
     const router = useRouter();
 
@@ -83,19 +78,19 @@ export default function AdminDashboardPage() {
     } = useUIStates();
 
     const {
+        // Success Modal
         isSuccessModalOpen,
         setIsSuccessModalOpen,
         successMessage,
         setSuccessMessage,
-    } = useSuccessModal();
 
-    const {
+        // Preview Modal
         isPreviewModalOpen,
         previewUrl,
         previewFileName,
         openPreviewModal,
         closePreviewModal,
-    } = usePreviewModal();
+    } = useModalStates();
 
     const {
         isStatusModalOpen,
@@ -169,7 +164,7 @@ export default function AdminDashboardPage() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
                 <div className="flex flex-col items-center space-y-4">
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                    <span className="loading loading-spinner loading-lg text-primary" />
                     <p className="text-gray-600 dark:text-gray-400">
                         กำลังโหลดข้อมูล...
                     </p>

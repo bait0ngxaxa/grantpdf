@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, ChangeEvent, DragEvent } from "react";
+import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Project } from "@/type";
@@ -9,7 +9,31 @@ type ProjectListItem = Pick<
     "id" | "name" | "description" | "created_at"
 >;
 
-export function useUploadDoc() {
+import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { type Session } from "next-auth";
+
+export interface UseUploadDocReturn {
+    session: Session | null;
+    status: string;
+    fileInputRef: React.RefObject<HTMLInputElement | null>;
+    selectedFile: File | null;
+    isUploading: boolean;
+    uploadMessage: string;
+    uploadSuccess: boolean;
+    projects: ProjectListItem[];
+    selectedProjectId: string | null;
+    setSelectedProjectId: React.Dispatch<React.SetStateAction<string | null>>;
+    isLoadingProjects: boolean;
+    projectError: string | null;
+    handleFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;
+    handleDragOver: (event: DragEvent<HTMLDivElement>) => void;
+    handleDrop: (event: DragEvent<HTMLDivElement>) => void;
+    handleUpload: () => Promise<void>;
+    router: AppRouterInstance;
+    setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>;
+}
+
+export function useUploadDoc(): UseUploadDocReturn {
     const { data: session, status } = useSession();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -29,7 +53,7 @@ export function useUploadDoc() {
     const [projectError, setProjectError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchProjects = async () => {
+        const fetchProjects = async (): Promise<void> => {
             if (!session) return;
 
             try {
@@ -79,7 +103,7 @@ export function useUploadDoc() {
         return true;
     };
 
-    const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (event: ChangeEvent<HTMLInputElement>): void => {
         const file = event.target.files?.[0];
         if (file && validateFile(file)) {
             setSelectedFile(file);
@@ -88,11 +112,11 @@ export function useUploadDoc() {
         }
     };
 
-    const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    const handleDragOver = (event: DragEvent<HTMLDivElement>): void => {
         event.preventDefault();
     };
 
-    const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    const handleDrop = (event: DragEvent<HTMLDivElement>): void => {
         event.preventDefault();
         const files = event.dataTransfer.files;
         if (files.length > 0) {
@@ -105,7 +129,7 @@ export function useUploadDoc() {
         }
     };
 
-    const handleUpload = async () => {
+    const handleUpload = async (): Promise<void> => {
         if (!selectedFile) {
             setUploadMessage("กรุณาเลือกไฟล์ก่อน");
             setUploadSuccess(false);

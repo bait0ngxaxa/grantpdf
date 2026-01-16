@@ -10,7 +10,7 @@ import { SuccessModal } from "@/components/ui/SuccessModal";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { AlertCircle } from "lucide-react";
 
-export default function LoginPage() {
+export default function LoginPage(): React.JSX.Element {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -25,11 +25,11 @@ export default function LoginPage() {
             const timer = setTimeout(() => {
                 router.push("/userdashboard");
             }, 2000);
-            return () => clearTimeout(timer);
+            return (): void => clearTimeout(timer);
         }
     }, [showSuccessModal, router]);
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
@@ -64,8 +64,8 @@ export default function LoginPage() {
                 <div className="hidden md:flex flex-col space-y-8 p-8">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm self-start animate-fade-in-up">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                         </span>
                         GRANT ONLINE
                     </div>
@@ -82,7 +82,7 @@ export default function LoginPage() {
                 <div className="w-full max-w-md mx-auto">
                     <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 p-8 md:p-10 border border-slate-100 relative overflow-hidden">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                         <div className="mb-8 relative z-10">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">
@@ -149,7 +149,7 @@ export default function LoginPage() {
                             >
                                 {isLoading ? (
                                     <div className="flex items-center gap-2">
-                                        <span className="loading loading-spinner loading-sm"></span>
+                                        <span className="loading loading-spinner loading-sm" />
                                         กำลังเข้าสู่ระบบ...
                                     </div>
                                 ) : (

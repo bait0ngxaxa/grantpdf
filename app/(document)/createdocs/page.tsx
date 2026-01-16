@@ -20,7 +20,7 @@ import { PAGINATION } from "@/lib/constants";
 
 import { useRouter } from "next/navigation";
 
-export default function CreateTorsPage() {
+export default function CreateTorsPage(): React.JSX.Element {
     const router = useRouter();
     const { data: session, status } = useSession();
 
@@ -66,11 +66,11 @@ export default function CreateTorsPage() {
 
     useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
 
-    const handleProjectSelection = (projectId: string) => {
+    const handleProjectSelection = (projectId: string): void => {
         setSelectedProjectId(projectId);
     };
 
-    const handleBack = () => {
+    const handleBack = (): void => {
         handleBackBase(
             selectedContractType,
             selectedProjectId,
@@ -81,7 +81,7 @@ export default function CreateTorsPage() {
         );
     };
 
-    const handleCategorySelection = (category: string) => {
+    const handleCategorySelection = (category: string): void => {
         handleCategorySelectionBase(category, isAdmin, setSelectedCategory);
     };
 

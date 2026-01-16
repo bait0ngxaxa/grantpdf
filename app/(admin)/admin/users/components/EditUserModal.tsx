@@ -1,4 +1,4 @@
-import React, { FormEvent } from "react";
+import React, { type FormEvent } from "react";
 import { Button, Input } from "@/components/ui";
 import { ChevronDown } from "lucide-react";
 

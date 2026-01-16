@@ -31,7 +31,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
     handleDeleteFile,
     setShowCreateProjectModal,
     router,
-}) => {
+}): React.JSX.Element => {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [selectedStatusProject, setSelectedStatusProject] =
         useState<Project | null>(null);
@@ -48,13 +48,16 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
     );
 
     // Check if project has unread status note
-    const hasUnreadStatusNote = (project: Project) => {
+    const hasUnreadStatusNote = (project: Project): boolean => {
         if (!project.statusNote) return false;
         const noteKey = `${project.id}_${project.updated_at}`;
         return !viewedStatusNotes.has(noteKey);
     };
 
-    const openStatusDetailModal = (project: Project, e: React.MouseEvent) => {
+    const openStatusDetailModal = (
+        project: Project,
+        e: React.MouseEvent
+    ): void => {
         e.stopPropagation();
         setSelectedStatusProject(project);
         setShowStatusModal(true);
@@ -72,7 +75,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
         }
     };
 
-    const closeStatusDetailModal = () => {
+    const closeStatusDetailModal = (): void => {
         setShowStatusModal(false);
         setSelectedStatusProject(null);
     };

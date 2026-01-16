@@ -7,10 +7,13 @@ export const useFileActions = (
     setOrphanFiles: React.Dispatch<React.SetStateAction<UserFile[]>>,
     setSuccessMessage: (message: string) => void,
     setShowSuccessModal: (show: boolean) => void
-) => {
+): {
+    isDeleting: string | null;
+    confirmDeleteFile: (fileId: string) => Promise<boolean>;
+} => {
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-    const confirmDeleteFile = async (fileId: string) => {
+    const confirmDeleteFile = async (fileId: string): Promise<boolean> => {
         setIsDeleting(fileId);
 
         try {

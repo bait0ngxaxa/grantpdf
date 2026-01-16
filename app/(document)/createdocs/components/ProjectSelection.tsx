@@ -38,7 +38,7 @@ export const ProjectSelection = ({
     indexOfLastProject,
     onProjectSelect,
     onPageChange,
-}: ProjectSelectionProps) => {
+}: ProjectSelectionProps): React.JSX.Element => {
     const router = useRouter();
 
     return (

@@ -9,7 +9,7 @@ interface LoadingSpinnerProps {
 export function LoadingSpinner({
     message = "กำลังโหลด...",
     className = "",
-}: LoadingSpinnerProps) {
+}: LoadingSpinnerProps): React.JSX.Element {
     return (
         <div className={`flex items-center justify-center py-12 ${className}`}>
             <Loader2 className="h-8 w-8 animate-spin text-primary" />

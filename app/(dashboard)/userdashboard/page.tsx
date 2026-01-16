@@ -26,7 +26,7 @@ import { SuccessModal, PdfPreviewModal } from "@/components/ui";
 
 import { Pagination } from "@/components/ui";
 
-const getTitleByTab = (tab: string) => {
+const getTitleByTab = (tab: string): string => {
     switch (tab) {
         case "dashboard":
             return "Dashboard - ภาพรวม | ระบบจัดการเอกสาร";
@@ -39,7 +39,7 @@ const getTitleByTab = (tab: string) => {
     }
 };
 
-export default function DashboardPage() {
+export default function DashboardPage(): React.JSX.Element | null {
     const { data: session, status } = useSession();
     const router = useRouter();
 
@@ -124,7 +124,7 @@ export default function DashboardPage() {
     if (status === "loading" || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
+                <span className="loading loading-spinner loading-lg text-primary" />
             </div>
         );
     }

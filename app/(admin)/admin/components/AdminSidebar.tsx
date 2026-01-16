@@ -52,7 +52,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     todayProjects,
     todayFiles,
     totalProjects,
-}) => {
+}): React.JSX.Element => {
     return (
         <>
             {/* Mobile sidebar overlay */}
@@ -60,7 +60,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 <div
                     className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
                     onClick={() => setIsSidebarOpen(false)}
-                ></div>
+                 />
             )}
 
             {/* Sidebar */}
@@ -81,7 +81,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                     Admin Panel
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
                                     <p className="text-[11px] uppercase font-bold text-orange-600 tracking-wider">
                                         Administrator Control
                                     </p>
@@ -103,8 +103,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                 สถิติวันนี้
                             </h4>
                             <span className="flex h-1.5 w-1.5 relative">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500" />
                             </span>
                         </div>
 

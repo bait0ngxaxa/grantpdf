@@ -22,7 +22,7 @@ export default function CreateDocumentPage({
     params,
 }: {
     params: Promise<{ type: string }>;
-}) {
+}): React.JSX.Element {
     const { type } = use(params);
     const FormComponent = DOCUMENT_FORMS[type];
 

@@ -9,7 +9,7 @@ export default function Error({
 }: {
     error: Error & { digest?: string };
     reset: () => void;
-}) {
+}): React.JSX.Element {
     useEffect(() => {
         if (process.env.NODE_ENV === "development") {
             console.error("Application Error:", error);

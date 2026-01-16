@@ -15,7 +15,7 @@ export function BasicInfoSection({
     formData,
     handleChange,
     errors,
-}: BasicInfoSectionProps) {
+}: BasicInfoSectionProps): React.JSX.Element {
     return (
         <FormSection
             title="ข้อมูลโครงการ"

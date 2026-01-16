@@ -38,7 +38,7 @@ export const useNavigation = ({
         setSelectedContractType: (type: string | null) => void,
         setSelectedProjectId: (id: string | null) => void,
         setSelectedCategory: (category: string | null) => void
-    ) => {
+    ): void => {
         if (selectedContractType) {
             setSelectedContractType(null);
         } else if (selectedProjectId) {
@@ -54,7 +54,7 @@ export const useNavigation = ({
         category: string,
         isAdmin: boolean,
         setSelectedCategory: (category: string | null) => void
-    ) => {
+    ): void => {
         if (category === "general" && !isAdmin) {
             setSelectedCategory("project");
             return;
@@ -62,7 +62,7 @@ export const useNavigation = ({
         setSelectedCategory(category);
     };
 
-    const handleApprovalSelection = () => {
+    const handleApprovalSelection = (): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;
@@ -74,7 +74,7 @@ export const useNavigation = ({
         );
     };
 
-    const handleContractSelection = (contractCode?: string) => {
+    const handleContractSelection = (contractCode?: string): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;
@@ -86,7 +86,7 @@ export const useNavigation = ({
         router.push(`/create-word/contract?${params.toString()}`);
     };
 
-    const handleFormProjectSelection = () => {
+    const handleFormProjectSelection = (): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;
@@ -98,7 +98,7 @@ export const useNavigation = ({
         );
     };
 
-    const handleSummarySelection = () => {
+    const handleSummarySelection = (): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;
@@ -110,7 +110,7 @@ export const useNavigation = ({
         );
     };
 
-    const handleTorSelection = () => {
+    const handleTorSelection = (): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;

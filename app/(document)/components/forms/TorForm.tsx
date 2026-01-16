@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
@@ -35,7 +35,7 @@ import {
     ActivitySection,
 } from "@/app/(document)/components/forms/tor";
 
-export function TorForm() {
+export function TorForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
 
@@ -83,7 +83,7 @@ export function TorForm() {
     });
 
     // Wrap handlePreview to pass formData
-    const handlePreview = () => onPreview(formData);
+    const handlePreview = (): void => onPreview(formData);
 
     // Create phone change handler
     const handlePhoneChange = createPhoneChangeHandler(
@@ -93,16 +93,16 @@ export function TorForm() {
     );
 
     // Wrap validateBeforeSubmit
-    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: FormEvent<HTMLFormElement>): void => {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
 
     // Activity handlers
-    const addActivityRow = () => {
+    const addActivityRow = (): void => {
         setActivities([...activities, { ...initialActivity }]);
     };
 
-    const removeActivityRow = (index: number) => {
+    const removeActivityRow = (index: number): void => {
         if (activities.length > 1) {
             setActivities(activities.filter((_, i) => i !== index));
         }
@@ -112,7 +112,7 @@ export function TorForm() {
         index: number,
         field: keyof ActivityData,
         value: string
-    ) => {
+    ): void => {
         const updatedActivities = activities.map((item, i) =>
             i === index ? { ...item, [field]: value } : item
         );

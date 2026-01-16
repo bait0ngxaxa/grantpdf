@@ -7,7 +7,7 @@ import HeroSection from "@/components/home/HeroSection";
 import TemplateGrid from "@/components/home/TemplateGrid";
 import { useTitle } from "@/lib/hooks/useTitle";
 
-export default function Home(): React.ReactElement {
+export default function Home(): React.JSX.Element {
     const { data: session, status } = useSession();
 
     useTitle("HOMEPAGE - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
@@ -22,12 +22,12 @@ export default function Home(): React.ReactElement {
                         </span>
                     </div>
                     <div className="flex-none">
-                        <div className="skeleton w-24 h-8 rounded-full mr-2"></div>
-                        <div className="skeleton w-24 h-8 rounded-full"></div>
+                        <div className="skeleton w-24 h-8 rounded-full mr-2" />
+                        <div className="skeleton w-24 h-8 rounded-full" />
                     </div>
                 </div>
                 <main className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-                    <div className="loading loading-spinner loading-lg text-primary"></div>
+                    <div className="loading loading-spinner loading-lg text-primary" />
                 </main>
             </>
         );

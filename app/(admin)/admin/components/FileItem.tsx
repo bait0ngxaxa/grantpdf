@@ -20,15 +20,18 @@ interface FileItemProps {
     onPreviewPdf: (storagePath: string, fileName: string) => void;
 }
 
-export default function FileItem({ file, onPreviewPdf }: FileItemProps) {
+export default function FileItem({
+    file,
+    onPreviewPdf,
+}: FileItemProps): React.JSX.Element {
     const [isAttachmentExpanded, setIsAttachmentExpanded] = useState(false);
     const { download, isDownloading } = useSignedDownload();
 
-    const toggleAttachmentExpansion = () => {
+    const toggleAttachmentExpansion = (): void => {
         setIsAttachmentExpanded(!isAttachmentExpanded);
     };
 
-    const getFileIcon = () => {
+    const getFileIcon = (): React.JSX.Element => {
         if (file.fileExtension === "pdf") {
             return (
                 <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-500">
@@ -125,12 +128,14 @@ export default function FileItem({ file, onPreviewPdf }: FileItemProps) {
                     )}
                     {file.fileExtension === "pdf" && (
                         <Button
-                            onClick={() =>
-                                onPreviewPdf(
-                                    file.storagePath!,
-                                    file.originalFileName
-                                )
-                            }
+                            onClick={() => {
+                                if (file.storagePath) {
+                                    onPreviewPdf(
+                                        file.storagePath,
+                                        file.originalFileName
+                                    );
+                                }
+                            }}
                             size="sm"
                             className="h-8 w-8 p-0 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 border-none shadow-none"
                             title="พรีวิว PDF"

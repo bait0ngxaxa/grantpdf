@@ -58,7 +58,7 @@ const SignatureCanvasComponent = forwardRef<
         ctx.lineCap = "round";
     }, [backgroundColor, penColor]);
 
-    const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    const startDrawing = (e: React.MouseEvent | React.TouchEvent): void => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -74,7 +74,7 @@ const SignatureCanvasComponent = forwardRef<
         }
     };
 
-    const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    const draw = (e: React.MouseEvent | React.TouchEvent): void => {
         if (!isDrawing.current) return;
 
         const canvas = canvasRef.current;
@@ -108,7 +108,7 @@ const SignatureCanvasComponent = forwardRef<
         }
     };
 
-    const stopDrawing = () => {
+    const stopDrawing = (): void => {
         isDrawing.current = false;
 
         if (hasDrawing.current && onSignatureChange) {
@@ -121,7 +121,7 @@ const SignatureCanvasComponent = forwardRef<
         }
     };
 
-    const clearCanvas = () => {
+    const clearCanvas = (): void => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -139,11 +139,11 @@ const SignatureCanvasComponent = forwardRef<
         }
     };
 
-    const checkIsEmpty = () => {
+    const checkIsEmpty = (): boolean => {
         return !hasDrawing.current;
     };
 
-    const getSignatureDataURL = () => {
+    const getSignatureDataURL = (): string | null => {
         const canvas = canvasRef.current;
         if (!canvas || !hasDrawing.current) return null;
         return canvas.toDataURL("image/png");

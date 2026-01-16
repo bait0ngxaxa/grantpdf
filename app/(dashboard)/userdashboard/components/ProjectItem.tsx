@@ -39,7 +39,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
     openPreviewModal,
     handleDeleteFile,
     router,
-}) => {
+}): React.JSX.Element => {
     return (
         <div
             className={`group bg-white rounded-3xl shadow-sm border transition-all duration-300 overflow-hidden ${
@@ -91,8 +91,8 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                     <div className="hidden md:block relative">
                         {hasUnreadStatusNote && (
                             <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500" />
                             </span>
                         )}
                         <button
@@ -102,7 +102,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                             )}`}
                             title="คลิกเพื่อดูรายละเอียดสถานะ"
                         >
-                            <span className="w-2 h-2 rounded-full bg-current mr-2 opacity-75"></span>
+                            <span className="w-2 h-2 rounded-full bg-current mr-2 opacity-75" />
                             {project.status || PROJECT_STATUS.IN_PROGRESS}
                         </button>
                     </div>
