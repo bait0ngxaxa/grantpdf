@@ -1,7 +1,25 @@
 import { useState } from "react";
 import { useExpandableState } from "@/lib/hooks/useExpandableState";
 
-export const useUIStates = () => {
+export const useUIStates = (): {
+    activeTab: string;
+    setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+    isSidebarOpen: boolean;
+    setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    expandedProjects: Set<string>;
+    viewedProjects: Set<string>;
+    expandedRows: Set<string>;
+    searchTerm: string;
+    setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+    sortBy: string;
+    setSortBy: React.Dispatch<React.SetStateAction<string>>;
+    selectedFileType: string;
+    setSelectedFileType: React.Dispatch<React.SetStateAction<string>>;
+    selectedStatus: string;
+    setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+    toggleProjectExpansion: (projectId: string) => void;
+    toggleRowExpansion: (fileId: string) => void;
+} => {
     const [activeTab, setActiveTab] = useState("dashboard");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -36,7 +54,7 @@ export const useUIStates = () => {
     const [selectedStatus, setSelectedStatus] = useState("สถานะทั้งหมด");
 
     // Custom toggle that also marks project as viewed
-    const toggleProjectExpansion = (projectId: string) => {
+    const toggleProjectExpansion = (projectId: string): void => {
         baseToggleProjectExpansion(projectId);
 
         // Mark project as viewed when expanded

@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Folder, Building2, Plus, X } from "lucide-react";
 import type { Session } from "next-auth";
 
 type MenuItemType = {
@@ -24,62 +24,17 @@ const menuItems: MenuItemType[] = [
     {
         id: "dashboard",
         name: "ภาพรวม",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                />
-            </svg>
-        ),
+        icon: <Folder className="h-5 w-5" />,
     },
     {
         id: "projects",
         name: "โครงการของฉัน",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-            </svg>
-        ),
+        icon: <Building2 className="h-5 w-5" />,
     },
     {
         id: "create-project",
         name: "สร้างโครงการ",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 4v16m8-8H4"
-                />
-            </svg>
-        ),
+        icon: <Plus className="h-5 w-5" />,
     },
 ];
 
@@ -92,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setShowProfileModal,
     session,
     signOut,
-}) => {
+}): React.JSX.Element => {
     return (
         <>
             {/* Mobile sidebar overlay */}
@@ -100,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div
                     className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
                     onClick={() => setIsSidebarOpen(false)}
-                ></div>
+                 />
             )}
 
             {/* Sidebar */}
@@ -114,29 +69,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center space-x-3.5 group cursor-default">
                             <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 transition-all duration-300">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-6 w-6 text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                                    />
-                                </svg>
+                                <Folder className="h-6 w-6 text-white" />
                             </div>
                             <div className="flex flex-col">
                                 <h2 className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-1">
                                     Dashboard
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                     <p className="text-[11px] uppercase font-bold text-blue-600 tracking-wider">
-                                        Management System
+                                        Management Documents
                                     </p>
                                 </div>
                             </div>
@@ -145,20 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
                             onClick={() => setIsSidebarOpen(false)}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
+                            <X className="h-6 w-6" />
                         </button>
                     </div>
                 </div>

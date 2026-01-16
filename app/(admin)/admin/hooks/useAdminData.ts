@@ -12,7 +12,19 @@ interface ProjectsResponse {
     orphanFiles: AdminDocumentFile[];
 }
 
-export const useAdminData = () => {
+export const useAdminData = (): {
+    projects: AdminProject[];
+    setProjects: React.Dispatch<React.SetStateAction<AdminProject[]>>;
+    orphanFiles: AdminDocumentFile[];
+    setOrphanFiles: React.Dispatch<React.SetStateAction<AdminDocumentFile[]>>;
+    isLoading: boolean;
+    error: string | null;
+    totalUsers: number;
+    latestUser: LatestUser | null;
+    todayProjects: number;
+    todayFiles: number;
+    fetchProjects: (session: Session | null) => Promise<void>;
+} => {
     const [projects, setProjects] = useState<AdminProject[]>([]);
     const [orphanFiles, setOrphanFiles] = useState<AdminDocumentFile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +35,7 @@ export const useAdminData = () => {
     const [todayFiles, setTodayFiles] = useState(0);
 
     // Fetch latest user data
-    const fetchLatestUser = async () => {
+    const fetchLatestUser = async (): Promise<void> => {
         try {
             const response = await fetch(API_ROUTES.ADMIN_USERS, {
                 method: "GET",

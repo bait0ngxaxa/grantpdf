@@ -15,7 +15,7 @@ export function AttachmentList({
     onAdd,
     onRemove,
     onUpdate,
-}: AttachmentListProps) {
+}: AttachmentListProps): React.JSX.Element {
     return (
         <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">

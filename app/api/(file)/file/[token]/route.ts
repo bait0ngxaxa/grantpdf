@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -12,7 +12,7 @@ import { logAudit } from "@/lib/auditLog";
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ token: string }> }
-) {
+): Promise<NextResponse> {
     try {
         const { token } = await params;
 

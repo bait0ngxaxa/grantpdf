@@ -1,6 +1,11 @@
 import { useState, useCallback } from "react";
 
-export function useExpandableState() {
+export function useExpandableState(): {
+    expandedProjects: Set<string>;
+    expandedRows: Set<string>;
+    toggleProjectExpansion: (projectId: string) => void;
+    toggleRowExpansion: (fileId: string) => void;
+} {
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
         new Set()
     );

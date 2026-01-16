@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { PROJECT_STATUS } from "@/type/models";
 import { FILE_TYPES, STATUS_FILTER } from "@/lib/constants";
-import { AdminProject, AdminDocumentFile } from "@/type/models";
+import { type AdminProject, type AdminDocumentFile } from "@/type/models";
 
 interface UseAdminProjectFilterProps {
     projects: AdminProject[];
@@ -19,7 +19,10 @@ export function useAdminProjectFilter({
     selectedFileType,
     selectedStatus,
     sortBy,
-}: UseAdminProjectFilterProps) {
+}: UseAdminProjectFilterProps): {
+    projects: AdminProject[];
+    orphanFiles: AdminDocumentFile[];
+} {
     const filteredAndSortedProjects = useMemo(() => {
         const filteredProjects = projects.filter((project) => {
             const matchesSearch =

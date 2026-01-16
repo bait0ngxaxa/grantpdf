@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { API_ROUTES } from "@/lib/constants";
 
 interface UserData {
     id: string;
@@ -15,7 +16,33 @@ interface EditFormData {
     role: string;
 }
 
-export function useUserManagement() {
+export interface UserManagementHook {
+    users: UserData[];
+    loadingUsers: boolean;
+    fetchError: string | null;
+    selectedUser: UserData | null;
+    editFormData: EditFormData;
+    isSaving: boolean;
+    isDeleting: boolean;
+    isEditModalOpen: boolean;
+    isDeleteModalOpen: boolean;
+    isResultModalOpen: boolean;
+    resultMessage: string;
+    isResultSuccess: boolean;
+    fetchUsers: () => Promise<void>;
+    openEditModal: (user: UserData) => void;
+    closeEditModal: () => void;
+    handleEditFormChange: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => void;
+    handleUpdateUser: (e: React.FormEvent) => Promise<void>;
+    openDeleteModal: (user: UserData) => void;
+    closeDeleteModal: () => void;
+    handleDeleteUser: () => Promise<void>;
+    closeResultModal: () => void;
+}
+
+export function useUserManagement(): UserManagementHook {
     const [users, setUsers] = useState<UserData[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [fetchError, setFetchError] = useState<string | null>(null);
@@ -42,7 +69,7 @@ export function useUserManagement() {
         setLoadingUsers(true);
         setFetchError(null);
         try {
-            const res = await fetch("/api/admin/users");
+            const res = await fetch(API_ROUTES.ADMIN_USERS);
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.error || "Failed to fetch users");
@@ -103,11 +130,14 @@ export function useUserManagement() {
 
             setIsSaving(true);
             try {
-                const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(editFormData),
-                });
+                const res = await fetch(
+                    `${API_ROUTES.ADMIN_USERS}/${selectedUser.id}`,
+                    {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(editFormData),
+                    }
+                );
 
                 if (!res.ok) {
                     const errorData = await res.json();
@@ -152,9 +182,12 @@ export function useUserManagement() {
 
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
-                method: "DELETE",
-            });
+            const res = await fetch(
+                `${API_ROUTES.ADMIN_USERS}/${selectedUser.id}`,
+                {
+                    method: "DELETE",
+                }
+            );
 
             if (!res.ok) {
                 const errorData = await res.json();

@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { PROJECT_STATUS } from "@/type/models";
 import { TEXT_LIMITS } from "@/lib/constants";
 
-export function cn(...inputs: ClassValue[]) {
+export function cn(...inputs: ClassValue[]): string {
     return twMerge(clsx(inputs));
 }
 

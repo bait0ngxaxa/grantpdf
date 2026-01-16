@@ -3,10 +3,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { Home, ArrowLeft } from "lucide-react";
 
-export default function NotFound() {
+export default function NotFound(): React.JSX.Element {
     const router = useRouter();
 
     return (
@@ -14,25 +14,17 @@ export default function NotFound() {
             <div className="absolute inset-0 bg-grid-slate-900/[0.04] bg-[size:40px_40px] pointer-events-none" />
 
             <section className="relative z-10 w-full max-w-lg bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white/50 p-8 md:p-12 text-center ring-1 ring-slate-900/5">
-                {/* Visual Element */}
-                <div className="mb-8 relative inline-block">
-                    <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 relative z-10">
-                        <span className="text-4xl">🤔</span>
+                {/* 404 Large Display */}
+                <div className="mb-6 relative">
+                    <h1 className="text-[10rem] leading-none font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 animate-gradient-x select-none drop-shadow-2xl">
+                        404
+                    </h1>
+                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-full">
+                        <span className="inline-block px-4 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-sm font-bold tracking-wider uppercase">
+                            Page Not Found
+                        </span>
                     </div>
-                    <div className="absolute top-0 left-0 w-full h-full bg-blue-200 rounded-full blur-xl opacity-50 animate-pulse" />
                 </div>
-
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/50 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-slate-600 mb-6 shadow-sm">
-                    <span className="inline-block h-2 w-2 rounded-full bg-orange-400" />
-                    <span>404 – Page Not Found</span>
-                </div>
-
-                {/* Heading */}
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-4">
-                    หลงทางนิดหน่อย <br className="hidden sm:block" />
-                    แต่ไม่เป็นไรนะ ✨
-                </h1>
 
                 {/* Subtext */}
                 <p className="text-slate-500 mb-8 leading-relaxed max-w-sm mx-auto">

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import type { Project } from "@/type/models";
+import { API_ROUTES } from "@/lib/constants";
 
 export interface UseProjectDataReturn {
     fetchProjects: () => Promise<void>;
@@ -14,11 +15,11 @@ export const useProjectData = (
 ): UseProjectDataReturn => {
     const { status } = useSession();
 
-    const fetchProjects = async () => {
+    const fetchProjects = async (): Promise<void> => {
         if (status !== "authenticated") return;
 
         try {
-            const res = await fetch("/api/projects");
+            const res = await fetch(API_ROUTES.PROJECTS);
             if (!res.ok) {
                 throw new Error("Failed to fetch projects");
             }
@@ -32,7 +33,6 @@ export const useProjectData = (
         }
     };
 
-    // Fetch projects when component mounts and status changes
     useEffect(() => {
         fetchProjects();
         // eslint-disable-next-line react-hooks/exhaustive-deps

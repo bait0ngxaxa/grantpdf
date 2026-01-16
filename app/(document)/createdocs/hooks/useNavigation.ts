@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/constants";
 
 export interface UseNavigationProps {
     selectedProjectId: string | null;
@@ -30,7 +31,6 @@ export const useNavigation = ({
 }: UseNavigationProps): UseNavigationReturn => {
     const router = useRouter();
 
-    // Handle back button logic
     const handleBack = (
         selectedContractType: string | null,
         selectedProjectId: string | null,
@@ -38,7 +38,7 @@ export const useNavigation = ({
         setSelectedContractType: (type: string | null) => void,
         setSelectedProjectId: (id: string | null) => void,
         setSelectedCategory: (category: string | null) => void
-    ) => {
+    ): void => {
         if (selectedContractType) {
             setSelectedContractType(null);
         } else if (selectedProjectId) {
@@ -46,16 +46,15 @@ export const useNavigation = ({
         } else if (selectedCategory) {
             setSelectedCategory(null);
         } else {
-            router.push("/userdashboard");
+            router.push(ROUTES.DASHBOARD);
         }
     };
 
-    // Handle category selection with role-based access control
     const handleCategorySelection = (
         category: string,
         isAdmin: boolean,
         setSelectedCategory: (category: string | null) => void
-    ) => {
+    ): void => {
         if (category === "general" && !isAdmin) {
             setSelectedCategory("project");
             return;
@@ -63,7 +62,7 @@ export const useNavigation = ({
         setSelectedCategory(category);
     };
 
-    const handleApprovalSelection = () => {
+    const handleApprovalSelection = (): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;
@@ -75,7 +74,7 @@ export const useNavigation = ({
         );
     };
 
-    const handleContractSelection = (contractCode?: string) => {
+    const handleContractSelection = (contractCode?: string): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;
@@ -87,7 +86,7 @@ export const useNavigation = ({
         router.push(`/create-word/contract?${params.toString()}`);
     };
 
-    const handleFormProjectSelection = () => {
+    const handleFormProjectSelection = (): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;
@@ -99,7 +98,7 @@ export const useNavigation = ({
         );
     };
 
-    const handleSummarySelection = () => {
+    const handleSummarySelection = (): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;
@@ -111,7 +110,7 @@ export const useNavigation = ({
         );
     };
 
-    const handleTorSelection = () => {
+    const handleTorSelection = (): void => {
         if (!selectedProjectId) {
             console.error("No project selected");
             return;

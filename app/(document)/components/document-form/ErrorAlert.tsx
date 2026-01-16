@@ -5,7 +5,10 @@ interface ErrorAlertProps {
     isError: boolean;
 }
 
-export function ErrorAlert({ message, isError }: ErrorAlertProps) {
+export function ErrorAlert({
+    message,
+    isError,
+}: ErrorAlertProps): React.JSX.Element | null {
     if (!message || !isError) return null;
 
     return (

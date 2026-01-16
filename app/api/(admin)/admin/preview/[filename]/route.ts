@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import fs from "fs";
@@ -9,7 +9,7 @@ import { STORAGE_PATHS, getMimeType } from "@/lib/fileStorage";
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ filename: string }> }
-) {
+): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !session.user?.id) {

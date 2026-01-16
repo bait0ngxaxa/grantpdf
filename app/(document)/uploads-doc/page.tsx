@@ -2,11 +2,14 @@
 
 import { useTitle } from "@/lib/hooks/useTitle";
 import { useUploadDoc } from "@/app/(document)/hooks/useUploadDoc";
-import { UploadHeader } from "@/app/(document)/components/upload-form/UploadHeader";
-import { ProjectList } from "@/app/(document)/components/upload-form/ProjectList";
-import { UploadArea } from "@/app/(document)/components/upload-form/UploadArea";
+import {
+    UploadHeader,
+    ProjectList,
+    UploadArea,
+} from "@/app/(document)/components";
+import { ROUTES } from "@/lib/constants";
 
-export default function UploadDocPage() {
+export default function UploadDocPage(): React.JSX.Element | null {
     useTitle("อัพโหลดเอกสาร | ระบบจัดการเอกสาร");
 
     const {
@@ -33,13 +36,13 @@ export default function UploadDocPage() {
     if (status === "loading") {
         return (
             <div className="flex justify-center items-center min-h-screen bg-gray-50">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
         );
     }
 
     if (!session) {
-        router.push("/signin");
+        router.push(ROUTES.SIGNIN);
         return null;
     }
 

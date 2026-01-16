@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -12,6 +12,7 @@ import {
     validateFileMime,
 } from "@/lib/fileStorage";
 import { logAudit } from "@/lib/auditLog";
+import { FILE_UPLOAD } from "@/lib/constants";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -32,7 +33,7 @@ const generateUniqueFilename = (originalName: string): string => {
     return `${sanitizedName}_${uniqueId}${extension}`;
 };
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !session.user?.id) {
@@ -101,10 +102,11 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const maxSize = 10 * 1024 * 1024;
-        if (file.size > maxSize) {
+        if (file.size > FILE_UPLOAD.MAX_SIZE_BYTES) {
             return NextResponse.json(
-                { error: "File size too large (max 10MB)" },
+                {
+                    error: `File size too large (max ${FILE_UPLOAD.MAX_SIZE_MB}MB)`,
+                },
                 { status: 400 }
             );
         }

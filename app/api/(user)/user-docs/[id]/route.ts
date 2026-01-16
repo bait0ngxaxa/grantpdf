@@ -1,9 +1,9 @@
 // User file deletion endpoint
 import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { type NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getFileForDeletion, deleteFileRecord } from "@/lib/services";
 import fs from "fs";
 import path from "path";
 import { logAudit } from "@/lib/auditLog";
@@ -11,7 +11,7 @@ import { logAudit } from "@/lib/auditLog";
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !session.user?.id) {
@@ -30,16 +30,7 @@ export async function DELETE(
         }
 
         const docId = Number(id);
-
-        const document = await prisma.userFile.findUnique({
-            where: { id: docId },
-            select: {
-                id: true,
-                originalFileName: true,
-                storagePath: true,
-                userId: true,
-            },
-        });
+        const document = await getFileForDeletion(docId);
 
         if (!document) {
             return NextResponse.json(
@@ -49,7 +40,7 @@ export async function DELETE(
         }
 
         // User can only delete their own files
-        if (document.userId !== parseInt(session.user.id)) {
+        if (document.userId !== session.user.id) {
             return NextResponse.json(
                 { error: "Permission denied" },
                 { status: 403 }
@@ -69,13 +60,13 @@ export async function DELETE(
             }
         }
 
-        await prisma.userFile.delete({ where: { id: docId } });
+        await deleteFileRecord(docId);
 
         // Log user file deletion
         logAudit("FILE_DELETE", session.user.id, {
             userEmail: session.user.email || undefined,
             details: {
-                deletedFileId: document.id.toString(),
+                deletedFileId: document.id,
                 deletedFileName: document.originalFileName,
             },
         });
@@ -85,7 +76,7 @@ export async function DELETE(
                 success: true,
                 message: "Document deleted successfully",
                 deletedDocument: {
-                    id: document.id.toString(),
+                    id: document.id,
                     fileName: document.originalFileName,
                 },
             },

@@ -2,12 +2,9 @@ import fs from "fs/promises";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import { fixThaiDistributed } from "@/lib/documentUtils";
+import { fixThaiDistributed } from "./utils";
 import type { DocxParserOptions } from "./types";
 
-/**
- * Create a configured Docxtemplater instance.
- */
 export function createDocxRenderer(
     templateBuffer: Buffer,
     options: DocxParserOptions = {}
@@ -26,15 +23,20 @@ export function createDocxRenderer(
         modules,
         nullGetter:
             customNullGetter ||
-            function (_part) {
+            function (_part): string {
                 return "";
             },
-        parser: function (tag) {
+        parser: function (tag): {
+            get: (
+                scope: Record<string, unknown>,
+                context: { scopePathItem: number[] }
+            ) => string | unknown;
+        } {
             return {
                 get: function (
                     scope: Record<string, unknown>,
                     _context: unknown
-                ) {
+                ): string | unknown {
                     if (tag === ".") {
                         return scope;
                     }

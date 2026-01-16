@@ -1,57 +1,47 @@
 "use client";
 
-import { useState, ChangeEvent, useRef, FormEvent } from "react";
+import { useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
+import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+import {
+    useDocumentForm,
+    usePreviewModal,
+    useDocumentValidation,
+    useExitConfirmation,
+    useApprovalLogic,
+} from "@/app/(document)/hooks";
 import {
     PageLayout,
-    FormSection,
     FormActions,
     PreviewModal,
-    FormField,
-    AttachmentList,
-    AttachmentUpload,
-    SignatureSection,
     ErrorAlert,
-    LoadingState,
     PreviewField,
     PreviewGrid,
     PreviewList,
-} from "@/app/(document)/components/document-form";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
-import { ClipboardList, FileText, Folder, UserPen } from "lucide-react";
-import {
-    type ApprovalData,
-    initialApprovalData,
-    approvalFixedValues,
-} from "@/config/initialData";
+} from "@/app/(document)/components";
+import { LoadingSpinner } from "@/components/ui";
+import { FileText } from "lucide-react";
+import { type ApprovalData, initialApprovalData } from "@/config/initialData";
 import { validateApproval } from "@/lib/validation";
-import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
+import {
+    BasicInfoSection,
+    DocumentDetailSection,
+    AttachmentSection,
+    ApproverInfoSection,
+    SignatureSection,
+    type SignatureCanvasRef,
+} from "@/app/(document)/components/forms/approval";
 
-import type { SignatureCanvasRef } from "@/components/ui/SignatureCanvas";
-
-export function ApprovalForm() {
+export function ApprovalForm(): React.JSX.Element {
     const { data: session } = useSession();
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
     const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
 
     useTitle("สร้างหนังสือขอนุมัติ | ระบบจัดการเอกสาร");
-
-    // Signature states
-    const [signatureFile, setSignatureFile] = useState<File | null>(null);
-    const [signaturePreview, setSignaturePreview] = useState<string | null>(
-        null
-    );
-    const [signatureCanvasData, setSignatureCanvasData] = useState<
-        string | null
-    >(null);
-    const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
 
     const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
         usePreviewModal();
@@ -76,6 +66,30 @@ export function ApprovalForm() {
         documentType: "Word",
     });
 
+    const {
+        signatureFile,
+        signaturePreview,
+        signatureCanvasData,
+        attachmentFiles,
+        addAttachment,
+        removeAttachment,
+        updateAttachment,
+        handleFileChange,
+        handleSignatureCanvasChange,
+        handleAttachmentFilesChange,
+        removeAttachmentFile,
+        handleApprovalSubmit,
+    } = useApprovalLogic({
+        formData,
+        setFormData,
+        session,
+        projectId,
+        setMessage,
+        setIsError,
+        setIsSubmitting,
+        setIsSuccessModalOpen,
+    });
+
     // Use validation hook
     const {
         errors,
@@ -90,7 +104,7 @@ export function ApprovalForm() {
     });
 
     // Wrap handlePreview to pass formData
-    const handlePreview = () => onPreview(formData);
+    const handlePreview = (): void => onPreview(formData);
 
     // Create phone change handler
     const handlePhoneChange = createPhoneChangeHandler(
@@ -99,261 +113,6 @@ export function ApprovalForm() {
         setFormData
     );
 
-    // Attachment handlers
-    const addAttachment = () => {
-        setFormData((prev) => ({
-            ...prev,
-            attachments: [...prev.attachments, ""],
-        }));
-    };
-
-    const removeAttachment = (index: number) => {
-        setFormData((prev) => ({
-            ...prev,
-            attachments: prev.attachments.filter((_, i) => i !== index),
-        }));
-    };
-
-    const updateAttachment = (index: number, value: string) => {
-        setFormData((prev) => ({
-            ...prev,
-            attachments: prev.attachments.map((item, i) =>
-                i === index ? value : item
-            ),
-        }));
-    };
-
-    // Signature handlers
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        setSignatureFile(file);
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setSignaturePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setSignaturePreview(null);
-        }
-    };
-
-    const handleSignatureCanvasChange = (signatureDataURL: string | null) => {
-        setSignatureCanvasData(signatureDataURL);
-    };
-
-    const handleAttachmentFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        setAttachmentFiles(files);
-    };
-
-    const removeAttachmentFile = (index: number) => {
-        setAttachmentFiles((prev) => prev.filter((_, i) => i !== index));
-    };
-
-    // Upload attachment files
-    const uploadAttachmentFiles = async (files: File[]): Promise<string[]> => {
-        const uploadedIds: string[] = [];
-        if (!projectId) {
-            throw new Error("กรุณาเลือกโครงการก่อนอัปโหลดไฟล์");
-        }
-
-        for (const file of files) {
-            try {
-                const uploadFormData = new FormData();
-                uploadFormData.append("file", file);
-                uploadFormData.append("projectId", projectId);
-
-                if (session?.user?.id) {
-                    uploadFormData.append("userId", session.user.id.toString());
-                }
-                if (session?.user?.email) {
-                    uploadFormData.append("userEmail", session.user.email);
-                }
-
-                const response = await fetch("/api/file-upload", {
-                    method: "POST",
-                    body: uploadFormData,
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.success && result.file?.id) {
-                        uploadedIds.push(result.file.id);
-                    }
-                }
-            } catch {
-                // Silent fail for individual files
-            }
-        }
-
-        return uploadedIds;
-    };
-
-    // Custom submit handler for approval (more complex due to signature)
-    const handleApprovalSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        // Note: Phone validation is now handled by validateBeforeSubmit wrapper
-
-        if (!session) {
-            setMessage("คุณต้องเข้าสู่ระบบก่อน");
-            setIsError(true);
-            return;
-        }
-
-        if (signatureFile && signatureCanvasData) {
-            setMessage(
-                "กรุณาเลือกเพียงวิธีการหนึ่งในการเพิ่มลายเซ็น (อัปโหลดไฟล์ หรือ วาดลายเซ็นเอง)"
-            );
-            setIsError(true);
-            return;
-        }
-
-        if (!signatureFile && !signatureCanvasData) {
-            setMessage(
-                "กรุณาเพิ่มลายเซ็นโดยการอัปโหลดไฟล์ หรือ วาดลายเซ็นบนหน้าจอ"
-            );
-            setIsError(true);
-            return;
-        }
-
-        // Start loading state
-        setIsSubmitting(true);
-        setMessage(null);
-        setIsError(false);
-
-        try {
-            const data = new FormData();
-
-            Object.keys(formData).forEach((key) => {
-                if (key === "attachments") {
-                    data.append(
-                        "attachments",
-                        JSON.stringify(formData.attachments)
-                    );
-                } else {
-                    data.append(
-                        key,
-                        formData[key as keyof ApprovalData] as string
-                    );
-                }
-            });
-
-            Object.keys(approvalFixedValues).forEach((key) => {
-                data.append(
-                    key,
-                    approvalFixedValues[key as keyof typeof approvalFixedValues]
-                );
-            });
-
-            if (signatureFile) {
-                data.append("signatureFile", signatureFile);
-            }
-
-            if (signatureCanvasData) {
-                try {
-                    if (!signatureCanvasData.startsWith("data:image/")) {
-                        throw new Error("Invalid signature data format");
-                    }
-
-                    const parts = signatureCanvasData.split(",");
-                    if (parts.length !== 2) {
-                        throw new Error("Invalid base64 data structure");
-                    }
-
-                    const byteString = atob(parts[1]);
-                    const mimeString = signatureCanvasData
-                        .split(",")[0]
-                        .split(":")[1]
-                        .split(";")[0];
-
-                    const ab = new ArrayBuffer(byteString.length);
-                    const ia = new Uint8Array(ab);
-                    for (let i = 0; i < byteString.length; i++) {
-                        ia[i] = byteString.charCodeAt(i);
-                    }
-
-                    const canvasSignatureFile = new File(
-                        [ab],
-                        "canvas-signature.png",
-                        {
-                            type: mimeString,
-                        }
-                    );
-
-                    if (canvasSignatureFile.size === 0) {
-                        throw new Error("Generated signature file is empty");
-                    }
-
-                    data.append("canvasSignatureFile", canvasSignatureFile);
-                } catch (error: unknown) {
-                    const errorMessage =
-                        error instanceof Error
-                            ? error.message
-                            : "Unknown error";
-                    setMessage(
-                        `เกิดข้อผิดพลาดในการประมวลผลลายเซ็น: ${errorMessage}`
-                    );
-                    setIsError(true);
-                    return;
-                }
-            }
-
-            if (attachmentFiles.length > 0) {
-                const uploadedAttachments = await uploadAttachmentFiles(
-                    attachmentFiles
-                );
-                data.append(
-                    "attachmentFileIds",
-                    JSON.stringify(uploadedAttachments)
-                );
-            }
-
-            if (session.user?.id) {
-                data.append("userId", session.user.id.toString());
-            }
-            if (session.user?.email) {
-                data.append("userEmail", session.user.email);
-            }
-
-            if (projectId) {
-                data.append("projectId", projectId);
-            }
-
-            const response = await fetch("/api/generate/approval", {
-                method: "POST",
-                body: data,
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                // รองรับทั้ง storagePath (ใหม่) และ downloadUrl (legacy)
-                if (
-                    result.success &&
-                    (result.storagePath || result.downloadUrl)
-                ) {
-                    setIsSuccessModalOpen(true);
-                } else {
-                    setMessage("ไม่สามารถสร้างเอกสาร Word ได้");
-                    setIsError(true);
-                }
-            } else {
-                const errorText = await response.text();
-                setMessage(
-                    `เกิดข้อผิดพลาด: ${
-                        errorText || "ไม่สามารถสร้างเอกสาร Word ได้"
-                    }`
-                );
-                setIsError(true);
-            }
-        } catch {
-            setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            setIsError(true);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
     const isDirty =
         Object.values(formData).some((value) => {
             if (Array.isArray(value)) return value.length > 0;
@@ -362,6 +121,7 @@ export function ApprovalForm() {
         attachmentFiles.length > 0 ||
         !!signatureFile ||
         !!signatureCanvasData;
+
     const {
         isExitModalOpen,
         setIsExitModalOpen,
@@ -370,7 +130,7 @@ export function ApprovalForm() {
     } = useExitConfirmation({ isDirty });
 
     if (!isClient) {
-        return <LoadingState />;
+        return <LoadingSpinner />;
     }
 
     return (
@@ -388,190 +148,36 @@ export function ApprovalForm() {
                 }
                 className="space-y-8"
             >
-                {/* ข้อมูลพื้นฐาน */}
-                <FormSection
-                    title="ข้อมูลพื้นฐาน"
-                    icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
-                >
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <FormField
-                            label="ชื่อเอกสาร"
-                            name="projectName"
-                            placeholder="ระบุชื่อเอกสาร"
-                            value={formData.projectName}
-                            onChange={handleChange}
-                            error={errors.projectName}
-                            required
-                        />
-                        <FormField
-                            label="เลขที่หนังสือ"
-                            name="head"
-                            placeholder="ระบุเลขที่หนังสือ"
-                            value={formData.head}
-                            onChange={handleChange}
-                            error={errors.head}
-                            required
-                        />
-                        <FormField
-                            label="วันที่สร้างหนังสือ"
-                            name="date"
-                            placeholder="ระบุวัน เดือน ปีเช่น 14 สิงหาคม 2568"
-                            value={formData.date}
-                            onChange={handleChange}
-                            error={errors.date}
-                            required
-                        />
-                    </div>
-                </FormSection>
+                <BasicInfoSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                />
 
-                {/* รายละเอียดหนังสือ */}
-                <FormSection
-                    title="รายละเอียดหนังสือ"
-                    bgColor="bg-blue-50"
-                    borderColor="border-blue-200"
-                    headerBorderColor="border-blue-300"
-                    icon={<FileText className="w-5 h-5 text-blue-600" />}
-                >
-                    <div className="space-y-6">
-                        <FormField
-                            label="เรื่อง"
-                            name="topicdetail"
-                            placeholder="หัวข้อหนังสือ"
-                            value={formData.topicdetail}
-                            onChange={handleChange}
-                            error={errors.topicdetail}
-                            required
-                        />
-                        <FormField
-                            label="เรียน"
-                            name="todetail"
-                            placeholder="ระบุผู้รับ"
-                            value={formData.todetail}
-                            onChange={handleChange}
-                            error={errors.todetail}
-                            required
-                        />
-                    </div>
-                </FormSection>
+                <DocumentDetailSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                />
 
-                {/* สิ่งที่ส่งมาด้วยและเนื้อหา */}
-                <FormSection
-                    title="สิ่งที่ส่งมาด้วยและเนื้อหา"
-                    bgColor="bg-green-50"
-                    borderColor="border-green-200"
-                    headerBorderColor="border-green-300"
-                    icon={<Folder className="w-5 h-5 text-green-600" />}
-                >
-                    <div className="space-y-6">
-                        <AttachmentList
-                            attachments={formData.attachments}
-                            onAdd={addAttachment}
-                            onRemove={removeAttachment}
-                            onUpdate={updateAttachment}
-                        />
+                <AttachmentSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                    attachmentFiles={attachmentFiles}
+                    handleAttachmentFilesChange={handleAttachmentFilesChange}
+                    removeAttachmentFile={removeAttachmentFile}
+                    addAttachment={addAttachment}
+                    removeAttachment={removeAttachment}
+                    updateAttachment={updateAttachment}
+                />
 
-                        {formData.attachments.length > 0 && (
-                            <AttachmentUpload
-                                files={attachmentFiles}
-                                onFilesChange={handleAttachmentFilesChange}
-                                onRemoveFile={removeAttachmentFile}
-                            />
-                        )}
-
-                        <FormField
-                            label="เนื้อหา"
-                            name="detail"
-                            type="textarea"
-                            placeholder="รายละเอียดเนื้อหา"
-                            value={formData.detail}
-                            onChange={handleChange}
-                            error={errors.detail}
-                            rows={12}
-                            className="h-96"
-                        />
-                    </div>
-                </FormSection>
-
-                {/* ข้อมูลผู้ขออนุมัติ */}
-                <FormSection
-                    title="ข้อมูลผู้ขออนุมัติ"
-                    bgColor="bg-purple-50"
-                    borderColor="border-purple-200"
-                    headerBorderColor="border-purple-300"
-                    icon={<UserPen className="w-5 h-5 text-purple-600" />}
-                >
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <FormField
-                            label="ชื่อผู้ขออนุมัติ"
-                            name="name"
-                            placeholder="ระบุชื่อ-นามสกุลผู้ขออนุมัติ"
-                            value={formData.name}
-                            onChange={handleChange}
-                            error={errors.name}
-                            required
-                        />
-                        <FormField
-                            label="ตำแหน่ง/แผนก"
-                            name="depart"
-                            placeholder="ระบุตำแหน่ง/แผนกผู้ขออนุมัติ"
-                            value={formData.depart}
-                            onChange={handleChange}
-                            error={errors.depart}
-                            required
-                        />
-                        <FormField
-                            label="ผู้ประสานงาน"
-                            name="coor"
-                            placeholder="ระบุชื่อ-นามสกุลผู้ประสานงาน"
-                            value={formData.coor}
-                            onChange={handleChange}
-                            error={errors.coor}
-                            required
-                        />
-                        <FormField
-                            label="เบอร์โทรศัพท์"
-                            name="tel"
-                            type="tel"
-                            placeholder="ระบุเบอร์โทรศัพท์ผู้ประสานงาน"
-                            value={formData.tel}
-                            onChange={handlePhoneChange}
-                            required
-                            maxLength={10}
-                            error={errors.tel}
-                        />
-                        <div className="lg:col-span-2">
-                            <FormField
-                                label="อีเมล"
-                                name="email"
-                                type="email"
-                                placeholder="ระบุอีเมลผู้ประสานงาน"
-                                value={formData.email}
-                                onChange={handleChange}
-                                error={errors.email}
-                                required
-                            />
-                        </div>
-                    </div>
-                </FormSection>
-
-                {/* ข้อมูลผู้อนุมัติ */}
-                <FormSection
-                    title="ข้อมูลผู้ลงนามอนุมัติ"
-                    bgColor="bg-red-50"
-                    borderColor="border-red-200"
-                    headerBorderColor="border-red-300"
-                    icon={<UserPen className="w-5 h-5 text-red-600" />}
-                >
-                    <FormField
-                        label="ชื่อผู้อนุมัติ"
-                        name="accept"
-                        placeholder="ระบุชื่อ-นามสกุลผู้อนุมัติ"
-                        value={formData.accept}
-                        onChange={handleChange}
-                        error={errors.accept}
-                        required
-                    />
-                </FormSection>
+                <ApproverInfoSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    handlePhoneChange={handlePhoneChange}
+                    errors={errors}
+                />
 
                 {/* ลายเซ็น */}
                 <SignatureSection
@@ -704,7 +310,11 @@ export function ApprovalForm() {
             <CreateDocSuccessModal
                 isOpen={isSuccessModalOpen}
                 onClose={() => setIsSuccessModalOpen(false)}
-                fileName={formData.fileName}
+                fileName={
+                    formData.fileName ||
+                    formData.projectName ||
+                    "หนังสือขออนุมัติ"
+                }
                 downloadUrl={generatedFileUrl}
                 documentType="เอกสาร Word"
                 onRedirect={allowNavigation}

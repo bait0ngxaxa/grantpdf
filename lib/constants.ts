@@ -1,6 +1,7 @@
 export const PAGINATION = {
     ITEMS_PER_PAGE: 5,
     PROJECTS_PER_PAGE: 5,
+    USERS_PER_PAGE: 10,
 } as const;
 
 export const SESSION = {
@@ -52,4 +53,10 @@ export const API_ROUTES = {
 
 export const TEXT_LIMITS = {
     FILE_NAME_MAX_LENGTH: 30,
+} as const;
+
+export const FILE_UPLOAD = {
+    MAX_SIZE_MB: 10,
+    MAX_SIZE_BYTES: 10 * 1024 * 1024,
+    ALLOWED_EXTENSIONS: [".docx", ".pdf"],
 } as const;

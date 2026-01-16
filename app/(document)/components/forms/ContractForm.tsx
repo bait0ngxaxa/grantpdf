@@ -1,29 +1,34 @@
 "use client";
 
-import { FormEvent } from "react";
+import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
+import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+
 import {
     PageLayout,
-    FormSection,
     FormActions,
     PreviewModal,
-    FormField,
     ErrorAlert,
-    LoadingState,
     PreviewField,
     PreviewGrid,
-} from "@/app/(document)/components/document-form";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
-import { ClipboardList, User } from "lucide-react";
+} from "@/app/(document)/components";
+import { LoadingSpinner } from "@/components/ui";
+import {
+    useDocumentForm,
+    usePreviewModal,
+    useDocumentValidation,
+    useExitConfirmation,
+} from "@/app/(document)/hooks";
 import { type ContractData, initialContractData } from "@/config/initialData";
 import { validateContract } from "@/lib/validation";
-import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
+import {
+    ProjectDetailsSection,
+    ContractorInfoSection,
+    BudgetSection,
+} from "@/app/(document)/components/forms/contract";
 
-export function ContractForm() {
+export function ContractForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const contractCode = searchParams.get("contractCode") || "";
     const projectId = searchParams.get("projectId") || "";
@@ -72,7 +77,7 @@ export function ContractForm() {
     });
 
     // Wrap handlePreview to pass formData
-    const handlePreview = () => onPreview(formData);
+    const handlePreview = (): void => onPreview(formData);
 
     // Create citizen ID change handler
     const handleCitizenIdChange = createCitizenIdChangeHandler(
@@ -81,7 +86,7 @@ export function ContractForm() {
     );
 
     // Wrap validateBeforeSubmit
-    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: FormEvent<HTMLFormElement>): void => {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
 
@@ -93,7 +98,7 @@ export function ContractForm() {
     } = useExitConfirmation({ isDirty });
 
     if (!isClient) {
-        return <LoadingState />;
+        return <LoadingSpinner />;
     }
 
     return (
@@ -110,198 +115,25 @@ export function ContractForm() {
             onConfirmExit={handleConfirmExit}
         >
             <form onSubmit={onSubmit} className="space-y-8">
-                {/* ข้อมูลโครงการ */}
-                <FormSection
-                    title="ข้อมูลโครงการ"
-                    icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
-                >
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <FormField
-                            label="ชื่อไฟล์"
-                            name="fileName"
-                            placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
-                            value={formData.fileName}
-                            onChange={handleChange}
-                            error={errors.fileName}
-                            required
-                        />
-                        <FormField
-                            label="ชื่อโครงการ"
-                            name="projectName"
-                            placeholder="ระบุชื่อโครงการ"
-                            value={formData.projectName}
-                            onChange={handleChange}
-                            error={errors.projectName}
-                            required
-                        />
-                        <FormField
-                            label="วันที่จัดทำสัญญา"
-                            name="date"
-                            placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2568"
-                            value={formData.date}
-                            onChange={handleChange}
-                            error={errors.date}
-                            required
-                        />
+                <ProjectDetailsSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                    contractCode={contractCode}
+                />
 
-                        {contractCode && (
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
-                                    รหัสสัญญา
-                                </label>
-                                <div className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-slate-100 text-slate-600">
-                                    {contractCode}
-                                </div>
-                                <p className="text-sm text-slate-500 mt-1">
-                                    รหัสนี้จะใช้เป็นเลขที่สัญญาโดยอัตโนมัติ
-                                </p>
-                            </div>
-                        )}
+                <ContractorInfoSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    handleCitizenIdChange={handleCitizenIdChange}
+                    errors={errors}
+                />
 
-                        <FormField
-                            label="ระหว่าง"
-                            name="projectOffer"
-                            placeholder="ระบุหน่วยงานที่ดำเนินการร่วมกัน เช่น สพบ. และ สสส."
-                            value={formData.projectOffer}
-                            onChange={handleChange}
-                            error={errors.projectOffer}
-                            required
-                        />
-                        <FormField
-                            label="โดย"
-                            name="owner"
-                            placeholder="ระบุชื่อผู้อำนวยการ ผู้จัดการโครงการ"
-                            value={formData.owner}
-                            onChange={handleChange}
-                            error={errors.owner}
-                            required
-                        />
-                        <FormField
-                            label="รับดำเนินโครงการจาก"
-                            name="projectCo"
-                            placeholder="ระบุองค์กรให้ทุน"
-                            value={formData.projectCo}
-                            onChange={handleChange}
-                            error={errors.projectCo}
-                            required
-                        />
-                        <FormField
-                            label="รหัสโครงการ"
-                            name="projectCode"
-                            placeholder="ระบุรหัสโครงการ"
-                            value={formData.projectCode}
-                            onChange={handleChange}
-                            error={errors.projectCode}
-                            required
-                        />
-                        <FormField
-                            label="ตามข้อตกลงเลขที่"
-                            name="acceptNum"
-                            placeholder="ระบุเลขที่ข้อตกลง"
-                            value={formData.acceptNum}
-                            onChange={handleChange}
-                            error={errors.acceptNum}
-                            required
-                        />
-                        <FormField
-                            label="ชื่อผู้รับจ้าง"
-                            name="name"
-                            placeholder="ระบุชื่อผู้รับจ้าง"
-                            value={formData.name}
-                            onChange={handleChange}
-                            error={errors.name}
-                            required
-                        />
-                        <FormField
-                            label="ที่อยู่"
-                            name="address"
-                            placeholder="ระบุที่อยู่ติดต่อผู้รับจ้าง"
-                            value={formData.address}
-                            onChange={handleChange}
-                            error={errors.address}
-                            required
-                        />
-                        <FormField
-                            label="บัตรประชาชนเลขที่"
-                            name="citizenid"
-                            type="tel"
-                            placeholder="ระบุเลขบัตรประชาชน 13 หลักผู้รับจ้าง"
-                            value={formData.citizenid}
-                            onChange={handleCitizenIdChange}
-                            required
-                            maxLength={13}
-                            error={errors.citizenid}
-                        />
-                        <FormField
-                            label="วันหมดอายุบัตรประชาชน"
-                            name="citizenexpire"
-                            placeholder="ระบุวันหมดอายุ ตัวอย่าง 31 ธันวาคม 2568"
-                            value={formData.citizenexpire}
-                            onChange={handleChange}
-                            error={errors.citizenexpire}
-                            required
-                        />
-                        <FormField
-                            label="ชื่อพยาน"
-                            name="witness"
-                            placeholder="ระบุชื่อ-นามสกุล พยาน"
-                            value={formData.witness}
-                            onChange={handleChange}
-                            error={errors.witness}
-                            required
-                        />
-                    </div>
-                </FormSection>
-
-                {/* ข้อมูลงบประมาณ */}
-                <FormSection
-                    title="ข้อมูลงบประมาณ ระยะเวลา จำนวนงวด"
-                    bgColor="bg-blue-50"
-                    borderColor="border-blue-200"
-                    headerBorderColor="border-blue-300"
-                    icon={<User className="w-5 h-5 text-blue-600" />}
-                >
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <FormField
-                            label="งบประมาณ"
-                            name="cost"
-                            placeholder="ตัวอย่าง : 500,000 บาท (ห้าแสนบาทถ้วน)"
-                            value={formData.cost}
-                            onChange={handleChange}
-                            error={errors.cost}
-                            required
-                        />
-                        <FormField
-                            label="ระยะเวลา (เดือน)"
-                            name="timelineMonth"
-                            type="number"
-                            placeholder="ระบุตัวเลข เช่น 12 (ใส่เฉพาะตัวเลข)"
-                            value={formData.timelineMonth}
-                            onChange={handleChange}
-                            error={errors.timelineMonth}
-                            required
-                        />
-                        <FormField
-                            label="เริ่มตั้งแต่"
-                            name="timelineText"
-                            placeholder="ตัวอย่าง : 1 มกราคม 2568 ถึง 31 ธันวาคม 2568"
-                            value={formData.timelineText}
-                            onChange={handleChange}
-                            error={errors.timelineText}
-                            required
-                        />
-                        <FormField
-                            label="จำนวนงวด"
-                            name="section"
-                            type="number"
-                            placeholder="ระบุเลขจำนวนงวด เช่น 3 (ใส่เฉพาะตัวเลข)"
-                            value={formData.section}
-                            onChange={handleChange}
-                            error={errors.section}
-                            required
-                        />
-                    </div>
-                </FormSection>
+                <BudgetSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                />
 
                 <FormActions
                     onPreview={handlePreview}

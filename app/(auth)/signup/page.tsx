@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input, Button, SuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { Zap, FileText, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { ROUTES } from "@/lib/constants";
+import { AlertCircle } from "lucide-react";
 
-export default function SignupPage() {
+export default function SignupPage(): React.JSX.Element {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -21,7 +22,7 @@ export default function SignupPage() {
     const router = useRouter();
     useTitle("สมัครสมาชิก - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
-    const handleOpenConfirm = (e: React.FormEvent) => {
+    const handleOpenConfirm = (e: React.FormEvent): void => {
         e.preventDefault();
         setError("");
 
@@ -38,7 +39,7 @@ export default function SignupPage() {
         setShowConfirmModal(true);
     };
 
-    const handleSignup = async () => {
+    const handleSignup = async (): Promise<void> => {
         setError("");
         setIsSubmitting(true);
 
@@ -53,16 +54,15 @@ export default function SignupPage() {
                 setShowConfirmModal(false);
                 setShowSuccessModal(true);
                 setTimeout(() => {
-                    router.push("/signin");
+                    router.push(ROUTES.SIGNIN);
                 }, 3000);
             } else {
                 const data = await res.json();
-                // Keep modal open and show error inside modal
+
                 setError(data.error || "เกิดข้อผิดพลาดในการสมัครสมาชิก");
                 console.error("Signup failed:", data.error);
             }
         } catch (err) {
-            // Keep modal open and show error inside modal
             setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
             console.error("Network error during signup:", err);
         } finally {
@@ -77,8 +77,8 @@ export default function SignupPage() {
                 <div className="hidden md:flex flex-col space-y-8 p-8">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm self-start animate-fade-in-up">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                         </span>
                         GRANT ONLINE
                     </div>
@@ -89,47 +89,13 @@ export default function SignupPage() {
                             สร้างบัญชีใหม่
                         </span>
                     </h1>
-
-                    <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
-                        สมัครสมาชิกเพื่อเข้าถึงการ สร้างเอกสารสัญญา TOR <br />
-                        และติดตามสถานะโครงการ
-                    </p>
-
-                    <div className="space-y-4 max-w-lg">
-                        <div className="flex items-center gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
-                            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
-                                <FileText className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-slate-800">
-                                    จัดการเอกสาร, โครงการ
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    สร้างและเสนอโครงการ
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
-                            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 shrink-0">
-                                <Zap className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-slate-800">
-                                    ระบบเทมเพลตเอกสารอัตโนมัติ
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    ลดเวลาการทำงาน
-                                </p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Right Side - Signup Form */}
                 <div className="w-full max-w-md mx-auto">
                     <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 p-8 border border-slate-100 relative overflow-hidden">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                         <div className="mb-8 relative z-10">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">
@@ -206,18 +172,7 @@ export default function SignupPage() {
 
                             {error && (
                                 <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                        className="w-5 h-5 shrink-0"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>
                             )}
@@ -233,7 +188,7 @@ export default function SignupPage() {
                         <div className="mt-6 text-center text-sm text-slate-500 relative z-10">
                             มีบัญชีอยู่แล้ว?{" "}
                             <Link
-                                href="/signin"
+                                href={ROUTES.SIGNIN}
                                 className="font-bold text-blue-600 hover:text-blue-700 transition-colors"
                             >
                                 เข้าสู่ระบบ
@@ -293,18 +248,7 @@ export default function SignupPage() {
                             {/* Error display inside modal */}
                             {error && (
                                 <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                        className="w-5 h-5 shrink-0"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>
                             )}
@@ -327,7 +271,7 @@ export default function SignupPage() {
                                 >
                                     {isSubmitting ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="loading loading-spinner loading-xs"></span>
+                                            <span className="loading loading-spinner loading-xs" />
                                             <span>กำลังยืนยัน...</span>
                                         </div>
                                     ) : (
@@ -350,51 +294,12 @@ export default function SignupPage() {
                 </dialog>
             )}
 
-            {/* Success Modal - Simplified for brevity but keeping styling */}
-            {showSuccessModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center animate-bounce-in">
-                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <CheckCircle2 className="w-10 h-10 text-green-500" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                            สำเร็จ!
-                        </h2>
-                        <p className="text-slate-500 mb-6">
-                            สร้างบัญชีผู้ใช้เรียบร้อยแล้ว
-                            <br />
-                            กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...
-                        </p>
-                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div className="bg-green-500 h-full w-full animate-[progressFill_3s_ease-in-out]"></div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <style jsx global>{`
-                @keyframes bounce-in {
-                    0% {
-                        transform: scale(0.8);
-                        opacity: 0;
-                    }
-                    50% {
-                        transform: scale(1.05);
-                        opacity: 1;
-                    }
-                    100% {
-                        transform: scale(1);
-                    }
-                }
-                @keyframes progressFill {
-                    0% {
-                        width: 0%;
-                    }
-                    100% {
-                        width: 100%;
-                    }
-                }
-            `}</style>
+            {/* Success Modal */}
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                message={`สร้างบัญชีผู้ใช้เรียบร้อยแล้ว\nกำลังนำคุณไปยังหน้าเข้าสู่ระบบ...`}
+            />
         </div>
     );
 }

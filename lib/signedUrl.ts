@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 
 // Secret key for signing (should be in environment variables)
-const getSecretKey = () => {
+const getSecretKey = (): Uint8Array => {
     const secret = process.env.FILE_TOKEN_SECRET || process.env.NEXTAUTH_SECRET;
     if (!secret) {
         throw new Error("FILE_TOKEN_SECRET or NEXTAUTH_SECRET must be set");

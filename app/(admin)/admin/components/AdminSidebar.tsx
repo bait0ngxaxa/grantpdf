@@ -1,8 +1,16 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
+import { Button } from "@/components/ui";
+import {
+    Users,
+    Folder,
+    Archive,
+    ShieldCheck,
+    X,
+    ArrowLeft,
+} from "lucide-react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { Session } from "next-auth";
+import { ROUTES } from "@/lib/constants";
 
 interface AdminSidebarProps {
     isSidebarOpen: boolean;
@@ -20,42 +28,12 @@ const menuItems = [
     {
         id: "dashboard",
         name: "ภาพรวมระบบ",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                />
-            </svg>
-        ),
+        icon: <Folder className="h-5 w-5" />,
     },
     {
         id: "documents",
         name: "จัดการโครงการและเอกสาร",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-            </svg>
-        ),
+        icon: <Archive className="h-5 w-5" />,
     },
     {
         id: "users",
@@ -74,7 +52,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     todayProjects,
     todayFiles,
     totalProjects,
-}) => {
+}): React.JSX.Element => {
     return (
         <>
             {/* Mobile sidebar overlay */}
@@ -82,7 +60,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 <div
                     className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden transition-opacity"
                     onClick={() => setIsSidebarOpen(false)}
-                ></div>
+                 />
             )}
 
             {/* Sidebar */}
@@ -96,29 +74,16 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center space-x-3.5 group cursor-default">
                             <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 transition-all duration-300">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-6 w-6 text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M9 12l2 2 4-4m5.586 1.414A11.955 11.955 0 0112 2.036 11.955 11.955 0 010 13.938V21.5h7.5v-7.562z"
-                                    />
-                                </svg>
+                                <ShieldCheck className="h-6 w-6 text-white" />
                             </div>
                             <div className="flex flex-col">
                                 <h2 className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-1">
                                     Admin Panel
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
                                     <p className="text-[11px] uppercase font-bold text-orange-600 tracking-wider">
-                                        System Control
+                                        Administrator Control
                                     </p>
                                 </div>
                             </div>
@@ -127,20 +92,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                             className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
                             onClick={() => setIsSidebarOpen(false)}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
+                            <X className="h-6 w-6" />
                         </button>
                     </div>
 
@@ -151,8 +103,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                 สถิติวันนี้
                             </h4>
                             <span className="flex h-1.5 w-1.5 relative">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500" />
                             </span>
                         </div>
 
@@ -267,23 +219,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         </div>
                         <div className="flex gap-2 relative z-10">
                             <Button
-                                onClick={() => router.push("/userdashboard")}
+                                onClick={() => router.push(ROUTES.DASHBOARD)}
                                 variant="outline"
                                 className="w-full h-9 text-xs font-semibold rounded-lg border-slate-200/60 bg-white/50 hover:bg-white hover:text-orange-600 hover:border-orange-200 hover:shadow-md hover:shadow-orange-500/10 transition-all duration-300"
                             >
-                                <svg
-                                    className="w-3.5 h-3.5 mr-2"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M11 17l-5-5m0 0l5-5m-5 5h12"
-                                    />
-                                </svg>
+                                <ArrowLeft className="w-3.5 h-3.5 mr-2" />
                                 กลับ User Dashboard
                             </Button>
                         </div>

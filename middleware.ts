@@ -57,7 +57,9 @@ function validateCSRF(req: NextRequest): boolean {
     return true;
 }
 
-export async function middleware(req: NextRequest) {
+export async function middleware(
+    req: NextRequest
+): Promise<NextResponse | Response> {
     const { pathname } = req.nextUrl;
 
     if (
@@ -86,7 +88,7 @@ export async function middleware(req: NextRequest) {
     });
 
     if (token && AUTH_PAGES.includes(pathname)) {
-        console.log(
+        console.warn(
             "User already authenticated. Redirecting from auth page to dashboard."
         );
         return NextResponse.redirect(new URL("/userdashboard", req.url));
@@ -94,14 +96,14 @@ export async function middleware(req: NextRequest) {
 
     if (ADMIN_PAGES.includes(pathname)) {
         if (!token || token.role !== "admin") {
-            console.log(
+            console.warn(
                 `User with role '${token?.role}' tried to access admin page. Redirecting to /access-denied...`
             );
             return NextResponse.redirect(new URL("/access-denied", req.url));
         }
     } else if (PROTECTED_PAGES.includes(pathname)) {
         if (!token) {
-            console.log(
+            console.warn(
                 `User is not authenticated. Redirecting from '${pathname}' to /signin...`
             );
             const url = new URL("/signin", req.url);
@@ -113,7 +115,7 @@ export async function middleware(req: NextRequest) {
     if (RESET_PASSWORD_PAGES.includes(pathname)) {
         const resetToken = req.nextUrl.searchParams.get("token");
         if (!resetToken) {
-            console.log(
+            console.warn(
                 "User tried to access reset password page without a token. Redirecting to forgot password..."
             );
             return NextResponse.redirect(new URL("/forgot-password", req.url));

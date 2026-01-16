@@ -1,35 +1,26 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
+import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+
 import {
     PageLayout,
-    FormSection,
     FormActions,
     PreviewModal,
-    FormField,
     ErrorAlert,
-    LoadingState,
-} from "@/app/(document)/components/document-form";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
-import {
     PreviewField,
     PreviewGrid,
-} from "@/app/(document)/components/document-form/PreviewField";
+} from "@/app/(document)/components";
+import { LoadingSpinner } from "@/components/ui";
 import {
-    ClipboardList,
-    FileText,
-    Target,
-    BarChart,
-    Plus,
-    Trash2,
-} from "lucide-react";
+    useDocumentForm,
+    usePreviewModal,
+    useDocumentValidation,
+    useExitConfirmation,
+} from "@/app/(document)/hooks";
+
 import {
     type TORData,
     type ActivityData,
@@ -37,9 +28,14 @@ import {
     initialActivity,
 } from "@/config/initialData";
 import { validateTOR } from "@/lib/validation";
-import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
+import {
+    BasicInfoSection,
+    ProjectDetailSection,
+    ScopeSection,
+    ActivitySection,
+} from "@/app/(document)/components/forms/tor";
 
-export function TorForm() {
+export function TorForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
 
@@ -87,7 +83,7 @@ export function TorForm() {
     });
 
     // Wrap handlePreview to pass formData
-    const handlePreview = () => onPreview(formData);
+    const handlePreview = (): void => onPreview(formData);
 
     // Create phone change handler
     const handlePhoneChange = createPhoneChangeHandler(
@@ -97,16 +93,16 @@ export function TorForm() {
     );
 
     // Wrap validateBeforeSubmit
-    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: FormEvent<HTMLFormElement>): void => {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
 
     // Activity handlers
-    const addActivityRow = () => {
+    const addActivityRow = (): void => {
         setActivities([...activities, { ...initialActivity }]);
     };
 
-    const removeActivityRow = (index: number) => {
+    const removeActivityRow = (index: number): void => {
         if (activities.length > 1) {
             setActivities(activities.filter((_, i) => i !== index));
         }
@@ -116,7 +112,7 @@ export function TorForm() {
         index: number,
         field: keyof ActivityData,
         value: string
-    ) => {
+    ): void => {
         const updatedActivities = activities.map((item, i) =>
             i === index ? { ...item, [field]: value } : item
         );
@@ -141,7 +137,7 @@ export function TorForm() {
     } = useExitConfirmation({ isDirty });
 
     if (!isClient) {
-        return <LoadingState />;
+        return <LoadingSpinner />;
     }
 
     return (
@@ -154,331 +150,31 @@ export function TorForm() {
             onConfirmExit={handleConfirmExit}
         >
             <form onSubmit={onSubmit} className="space-y-8">
-                {/* ข้อมูลพื้นฐาน */}
-                <FormSection
-                    title="ข้อมูลพื้นฐานโครงการ"
-                    icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
-                >
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <FormField
-                            label="ชื่อไฟล์"
-                            name="fileName"
-                            placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
-                            value={formData.fileName}
-                            onChange={handleChange}
-                            error={errors.fileName}
-                            required
-                        />
-                        <FormField
-                            label="ชื่อโครงการ"
-                            name="projectName"
-                            placeholder="ระบุชื่อโครงการ"
-                            value={formData.projectName}
-                            onChange={handleChange}
-                            error={errors.projectName}
-                            required
-                        />
-                        <FormField
-                            label="วันที่จัดทำ"
-                            name="date"
-                            placeholder="ระบุวัน เดือน ปี เช่น 1 มกราคม 2566"
-                            value={formData.date}
-                            onChange={handleChange}
-                            error={errors.date}
-                            required
-                        />
-                        <FormField
-                            label="เลขที่สัญญา"
-                            name="contractnumber"
-                            placeholder="ระบุเลขที่สัญญา"
-                            value={formData.contractnumber}
-                            onChange={handleChange}
-                            error={errors.contractnumber}
-                            required
-                        />
-                        <FormField
-                            label="ผู้รับผิดชอบ"
-                            name="owner"
-                            placeholder="ระบุชื่อผู้รับผิดชอบ"
-                            value={formData.owner}
-                            onChange={handleChange}
-                            error={errors.owner}
-                            required
-                        />
-                        <FormField
-                            label="สถานที่ติดต่อ"
-                            name="address"
-                            placeholder="ระบุสถานที่ติดต่อผู้รับผิดชอบ"
-                            value={formData.address}
-                            onChange={handleChange}
-                            error={errors.address}
-                            required
-                        />
-                        <FormField
-                            label="อีเมล"
-                            name="email"
-                            type="email"
-                            placeholder="ระบุอีเมลผู้รับผิดชอบ"
-                            value={formData.email}
-                            onChange={handleChange}
-                            error={errors.email}
-                            required
-                        />
-                        <FormField
-                            label="เบอร์โทร"
-                            name="tel"
-                            type="tel"
-                            placeholder="ระบุเบอร์โทรผู้รับผิดชอบ"
-                            value={formData.tel}
-                            onChange={handlePhoneChange}
-                            required
-                            maxLength={10}
-                            error={errors.tel}
-                        />
-                        <FormField
-                            label="ระยะเวลาโครงการ"
-                            name="timeline"
-                            placeholder="เช่น 1 มกราคม 2566 - 31 ธันวาคม 2566"
-                            value={formData.timeline}
-                            onChange={handleChange}
-                            error={errors.timeline}
-                            required
-                        />
-                        <FormField
-                            label="งบประมาณ"
-                            name="cost"
-                            placeholder="เช่น 500000 บาท (ห้าแสนบาทถ้วน)"
-                            value={formData.cost}
-                            onChange={handleChange}
-                            error={errors.cost}
-                            required
-                        />
-                    </div>
-                </FormSection>
+                <BasicInfoSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    handlePhoneChange={handlePhoneChange}
+                    errors={errors}
+                />
 
-                {/* รายละเอียดโครงการ */}
-                <FormSection
-                    title="รายละเอียดโครงการ"
-                    bgColor="bg-blue-50"
-                    borderColor="border-blue-200"
-                    headerBorderColor="border-blue-300"
-                    icon={<FileText className="w-5 h-5 text-blue-600" />}
-                >
-                    <div className="space-y-6">
-                        <FormField
-                            label="หลักการและเหตุผล"
-                            name="topic1"
-                            type="textarea"
-                            placeholder="หลักการและเหตุผล"
-                            value={formData.topic1}
-                            onChange={handleChange}
-                            error={errors.topic1}
-                            rows={12}
-                            className="h-96"
-                        />
-                        <FormField
-                            label="วัตถุประสงค์"
-                            name="objective1"
-                            type="textarea"
-                            placeholder="วัตถุประสงค์โครงการ"
-                            value={formData.objective1}
-                            onChange={handleChange}
-                            error={errors.objective1}
-                            rows={6}
-                            className="h-40"
-                        />
-                        <FormField
-                            label="กลุ่มเป้าหมาย"
-                            name="target"
-                            type="textarea"
-                            placeholder="กลุ่มเป้าหมายของโครงการ"
-                            value={formData.target}
-                            onChange={handleChange}
-                            error={errors.target}
-                            rows={6}
-                            className="h-40"
-                        />
-                    </div>
-                </FormSection>
+                <ProjectDetailSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                />
 
-                {/* ขอบเขตและการจัดการ */}
-                <FormSection
-                    title="ขอบเขตและการจัดการ"
-                    bgColor="bg-yellow-50"
-                    borderColor="border-yellow-200"
-                    headerBorderColor="border-yellow-300"
-                    icon={<Target className="w-5 h-5 text-yellow-600" />}
-                >
-                    <div className="space-y-6">
-                        <FormField
-                            label="พื้นที่/เขต"
-                            name="zone"
-                            type="textarea"
-                            placeholder="พื้นที่หรือเขตดำเนินการ"
-                            value={formData.zone}
-                            onChange={handleChange}
-                            error={errors.zone}
-                            rows={6}
-                            className="h-40"
-                        />
-                        <FormField
-                            label="แผนการดำเนินงาน"
-                            name="plan"
-                            type="textarea"
-                            placeholder="แผนการดำเนินงานโครงการ"
-                            value={formData.plan}
-                            onChange={handleChange}
-                            error={errors.plan}
-                            rows={6}
-                            className="h-40"
-                        />
-                        <FormField
-                            label="การจัดการโครงการ"
-                            name="projectmanage"
-                            type="textarea"
-                            placeholder="วิธีการจัดการและบริหารโครงการ"
-                            value={formData.projectmanage}
-                            onChange={handleChange}
-                            error={errors.projectmanage}
-                            rows={6}
-                            className="h-40"
-                        />
-                        <FormField
-                            label="องค์กร ภาคี ร่วมงาน"
-                            name="partner"
-                            type="textarea"
-                            placeholder="องค์กร ภาค ร่วมงาน"
-                            value={formData.partner}
-                            error={errors.partner}
-                            onChange={handleChange}
-                            rows={6}
-                            className="h-40"
-                        />
-                    </div>
-                </FormSection>
+                <ScopeSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                />
 
-                {/* ตารางกิจกรรม */}
-                <FormSection
-                    title="การกำกับติดตามและประเมินผล"
-                    bgColor="bg-indigo-50"
-                    borderColor="border-indigo-200"
-                    headerBorderColor="border-indigo-300"
-                    icon={<BarChart className="w-5 h-5 text-indigo-600" />}
-                >
-                    <div className="space-y-4">
-                        {/* Header */}
-                        <div className="hidden lg:grid grid-cols-4 gap-2 p-3 bg-indigo-100 rounded-t-lg font-semibold text-sm text-indigo-900">
-                            <div>กิจกรรม</div>
-                            <div>ผู้ติดตามโครงการ</div>
-                            <div>วิธีการประเมินผล</div>
-                            <div>ระยะเวลา</div>
-                        </div>
-
-                        {/* Dynamic Rows */}
-                        {activities.map((activity, index) => (
-                            <div
-                                key={index}
-                                className="grid grid-cols-1 lg:grid-cols-4 gap-2 p-4 border border-slate-200 rounded-lg bg-white shadow-sm relative"
-                            >
-                                <div className="lg:contents">
-                                    <label className="lg:hidden block text-sm font-medium text-slate-700 mb-1">
-                                        กิจกรรม
-                                    </label>
-                                    <Textarea
-                                        placeholder="กิจกรรม"
-                                        value={activity.activity}
-                                        onChange={(e) =>
-                                            updateActivity(
-                                                index,
-                                                "activity",
-                                                e.target.value
-                                            )
-                                        }
-                                        className="text-sm h-32 lg:h-40"
-                                    />
-                                </div>
-                                <div className="lg:contents">
-                                    <label className="lg:hidden block text-sm font-medium text-slate-700 mt-2 mb-1">
-                                        ผู้ติดตามโครงการ
-                                    </label>
-                                    <Textarea
-                                        placeholder="ผู้ติดตามโครงการ"
-                                        value={activity.manager}
-                                        onChange={(e) =>
-                                            updateActivity(
-                                                index,
-                                                "manager",
-                                                e.target.value
-                                            )
-                                        }
-                                        className="text-sm h-32 lg:h-40"
-                                    />
-                                </div>
-                                <div className="lg:contents">
-                                    <label className="lg:hidden block text-sm font-medium text-slate-700 mt-2 mb-1">
-                                        วิธีการประเมินผล
-                                    </label>
-                                    <Textarea
-                                        placeholder="วิธีการประเมินผล"
-                                        value={activity.evaluation2}
-                                        onChange={(e) =>
-                                            updateActivity(
-                                                index,
-                                                "evaluation2",
-                                                e.target.value
-                                            )
-                                        }
-                                        className="text-sm h-32 lg:h-40"
-                                    />
-                                </div>
-                                <div className="relative">
-                                    <label className="lg:hidden block text-sm font-medium text-slate-700 mt-2 mb-1">
-                                        ระยะเวลา
-                                    </label>
-                                    <Textarea
-                                        placeholder="ระยะเวลา"
-                                        value={activity.duration}
-                                        onChange={(e) =>
-                                            updateActivity(
-                                                index,
-                                                "duration",
-                                                e.target.value
-                                            )
-                                        }
-                                        className="text-sm h-32 lg:h-40 mb-8 lg:mb-0"
-                                    />
-                                    {activities.length > 1 && (
-                                        <Button
-                                            type="button"
-                                            onClick={() =>
-                                                removeActivityRow(index)
-                                            }
-                                            variant="ghost"
-                                            size="sm"
-                                            className="absolute bottom-2 right-2 lg:top-1 lg:right-1 lg:bottom-auto text-red-500 hover:text-red-700 hover:bg-red-50"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                            <span className="lg:hidden ml-1">
-                                                ลบ
-                                            </span>
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-
-                        {/* Add Row Button */}
-                        <Button
-                            type="button"
-                            onClick={addActivityRow}
-                            variant="outline"
-                            className="w-full border-dashed border-2 border-indigo-300 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 py-4 h-auto"
-                        >
-                            <Plus className="w-5 h-5 mr-2" />
-                            เพิ่มแถวกิจกรรม
-                        </Button>
-                    </div>
-                </FormSection>
+                <ActivitySection
+                    activities={activities}
+                    addActivityRow={addActivityRow}
+                    removeActivityRow={removeActivityRow}
+                    updateActivity={updateActivity}
+                />
 
                 <FormActions
                     onPreview={handlePreview}
@@ -580,7 +276,7 @@ export function TorForm() {
                 onClose={() => setIsSuccessModalOpen(false)}
                 fileName={formData.fileName}
                 downloadUrl={generatedFileUrl}
-                documentType="เอกสาร TOR"
+                documentType="เอกสาร Word"
                 onRedirect={allowNavigation}
             />
         </PageLayout>

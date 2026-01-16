@@ -2,8 +2,8 @@
 
 import {
     useState,
-    ChangeEvent,
-    FormEvent,
+    type ChangeEvent,
+    type FormEvent,
     useCallback,
     useEffect,
 } from "react";
@@ -141,11 +141,9 @@ export function useDocumentForm<T extends object>({
                 }
 
                 // Add access token if available
-                if ((session as { accessToken?: string })?.accessToken) {
-                    data.append(
-                        "token",
-                        (session as { accessToken?: string }).accessToken!
-                    );
+                const sessionWithToken = session as { accessToken?: string };
+                if (sessionWithToken?.accessToken) {
+                    data.append("token", sessionWithToken.accessToken);
                 }
 
                 if (prepareFormData) {

@@ -50,7 +50,7 @@ function TemplateCard({
         >
             <div
                 className={`absolute top-0 right-0 w-24 h-24 ${colors.accent} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}
-            ></div>
+             />
             <div className="relative">
                 <div
                     className={`w-12 h-12 ${colors.iconBg} rounded-xl flex items-center justify-center text-2xl mb-4 ${colors.iconHover} group-hover:text-white transition-colors duration-300`}

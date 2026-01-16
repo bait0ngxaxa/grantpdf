@@ -3,35 +3,33 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
-import { useTitle } from "@/lib/hooks/useTitle";
+import { useTitle, usePagination, useModalStates } from "@/lib/hooks";
 
-import { useAdminData } from "./hooks/useAdminData";
-import { useProjectStatusActions } from "./hooks/useProjectStatusActions";
-import { usePreviewModal, useSuccessModal } from "./hooks/useModalStates";
-import { useUIStates } from "./hooks/useUIStates";
-import { useAdminProjectFilter } from "./hooks/useAdminProjectFilter";
+import {
+    useAdminData,
+    useProjectStatusActions,
+    useUIStates,
+    useAdminProjectFilter,
+} from "./hooks";
 
-import { AdminSidebar } from "./components/AdminSidebar";
-import { AdminTopBar } from "./components/AdminTopBar";
-import { DashboardOverview } from "./components/DashboardOverview";
-import { UsersTab } from "./components/UsersTab";
+import {
+    AdminSidebar,
+    AdminTopBar,
+    DashboardOverview,
+    UsersTab,
+    SearchAndFilter,
+    ProjectsList,
+} from "./components";
 
-import SearchAndFilter from "./components/SearchAndFilter";
-import ProjectsList from "./components/ProjectsList";
+import { SuccessModal, PdfPreviewModal, Pagination } from "@/components/ui";
+import { ProjectStatusModal } from "./components/modals";
 
-import { SuccessModal } from "./components/modals/SuccessModal";
-import { PreviewModal } from "./components/modals/PreviewModal";
-import { ProjectStatusModal } from "./components/modals/ProjectStatusModal";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-
-// Import shared types and constants
 import { PAGINATION } from "@/lib/constants";
 import { getStatusColor } from "@/lib/utils";
 
 const itemsPerPage = PAGINATION.ITEMS_PER_PAGE;
 
-const getTitleByTab = (tab: string) => {
+const getTitleByTab = (tab: string): string => {
     switch (tab) {
         case "dashboard":
             return "Admin Dashboard - ภาพรวมระบบ | ระบบจัดการเอกสาร";
@@ -44,7 +42,7 @@ const getTitleByTab = (tab: string) => {
     }
 };
 
-export default function AdminDashboardPage() {
+export default function AdminDashboardPage(): React.JSX.Element | null {
     const { data: session, status } = useSession();
     const router = useRouter();
 
@@ -55,7 +53,7 @@ export default function AdminDashboardPage() {
 
         isLoading,
         totalUsers,
-        latestUser,
+
         todayProjects,
         todayFiles,
         fetchProjects,
@@ -80,19 +78,19 @@ export default function AdminDashboardPage() {
     } = useUIStates();
 
     const {
+        // Success Modal
         isSuccessModalOpen,
         setIsSuccessModalOpen,
         successMessage,
         setSuccessMessage,
-    } = useSuccessModal();
 
-    const {
+        // Preview Modal
         isPreviewModalOpen,
         previewUrl,
         previewFileName,
         openPreviewModal,
         closePreviewModal,
-    } = usePreviewModal();
+    } = useModalStates();
 
     const {
         isStatusModalOpen,
@@ -166,7 +164,7 @@ export default function AdminDashboardPage() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
                 <div className="flex flex-col items-center space-y-4">
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                    <span className="loading loading-spinner loading-lg text-primary" />
                     <p className="text-gray-600 dark:text-gray-400">
                         กำลังโหลดข้อมูล...
                     </p>
@@ -199,7 +197,7 @@ export default function AdminDashboardPage() {
                     <AdminTopBar
                         setIsSidebarOpen={setIsSidebarOpen}
                         activeTab={activeTab}
-                        signOut={signOut}
+                        signOut={() => signOut({ callbackUrl: "/signin" })}
                     />
 
                     {/* Content Area */}
@@ -253,29 +251,22 @@ export default function AdminDashboardPage() {
                         )}
 
                         {/* Users Tab */}
-                        {activeTab === "users" && (
-                            <UsersTab
-                                totalUsers={totalUsers}
-                                latestUser={latestUser}
-                                allFiles={allFiles}
-                                router={router}
-                            />
-                        )}
+                        {activeTab === "users" && <UsersTab />}
                     </div>
                 </div>
 
                 {/* All Modals */}
                 <SuccessModal
-                    isSuccessModalOpen={isSuccessModalOpen}
-                    setIsSuccessModalOpen={setIsSuccessModalOpen}
-                    successMessage={successMessage}
+                    isOpen={isSuccessModalOpen}
+                    onClose={() => setIsSuccessModalOpen(false)}
+                    message={successMessage}
                 />
 
-                <PreviewModal
-                    isPreviewModalOpen={isPreviewModalOpen}
+                <PdfPreviewModal
+                    isOpen={isPreviewModalOpen}
                     previewUrl={previewUrl}
                     previewFileName={previewFileName}
-                    closePreviewModal={closePreviewModal}
+                    onClose={closePreviewModal}
                 />
 
                 <ProjectStatusModal

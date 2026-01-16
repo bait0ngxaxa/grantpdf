@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button, Dialog, DialogContent, DialogTitle } from "@/components/ui";
 import { FileText, CheckCircle2 } from "lucide-react";
 
 interface CreateDocSuccessModalProps {
@@ -21,7 +20,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
     downloadUrl: _downloadUrl,
     documentType = "เอกสาร",
     onRedirect,
-}) => {
+}): React.JSX.Element => {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const isRedirectingRef = useRef(false);
     const onRedirectRef = useRef(onRedirect);
@@ -31,7 +30,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
         onRedirectRef.current = onRedirect;
     }, [onRedirect]);
 
-    const downloadFileName = (() => {
+    const downloadFileName = ((): string => {
         if (!fileName || fileName.trim() === "") {
             if (documentType?.includes("Excel")) {
                 return "document.xlsx";
@@ -51,7 +50,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
         }
     })();
 
-    const handleRedirect = () => {
+    const handleRedirect = (): void => {
         if (isRedirectingRef.current) return;
         isRedirectingRef.current = true;
 
@@ -79,7 +78,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
             }, 3000);
         }
 
-        return () => {
+        return (): void => {
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
                 timerRef.current = null;

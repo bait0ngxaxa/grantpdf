@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -32,7 +32,7 @@ export function PreviewModal({
     confirmLabel = "ยืนยันและสร้างเอกสาร",
     cancelLabel = "แก้ไข",
     maxWidth = "max-w-2xl",
-}: PreviewModalProps) {
+}: PreviewModalProps): React.JSX.Element {
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className={`${maxWidth} max-h-[85vh] flex flex-col`}>

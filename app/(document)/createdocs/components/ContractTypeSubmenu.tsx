@@ -1,12 +1,14 @@
 "use client";
 
+import { FileText } from "lucide-react";
+
 interface ContractTypeSubmenuProps {
     onContractSelect: (contractCode: string) => void;
 }
 
 export const ContractTypeSubmenu = ({
     onContractSelect,
-}: ContractTypeSubmenuProps) => {
+}: ContractTypeSubmenuProps): React.JSX.Element => {
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
             <h1 className="text-3xl font-bold text-center mb-2 text-slate-800">
@@ -23,20 +25,7 @@ export const ContractTypeSubmenu = ({
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.5}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
+                            <FileText className="h-12 w-12" strokeWidth={1.5} />
                         </div>
                         <h3 className="text-xl font-bold text-blue-600 mb-2">
                             ABS
@@ -58,20 +47,7 @@ export const ContractTypeSubmenu = ({
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-green-50 text-green-600 mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.5}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
+                            <FileText className="h-12 w-12" strokeWidth={1.5} />
                         </div>
                         <h3 className="text-xl font-bold text-green-600 mb-2">
                             DMR
@@ -93,20 +69,7 @@ export const ContractTypeSubmenu = ({
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-purple-50 text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.5}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
+                            <FileText className="h-12 w-12" strokeWidth={1.5} />
                         </div>
                         <h3 className="text-xl font-bold text-purple-600 mb-2">
                             SIP

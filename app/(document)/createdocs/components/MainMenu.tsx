@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { FileText, FileBarChart, Building2 } from "lucide-react";
 
 interface MainMenuProps {
     isAdmin: boolean;
@@ -14,7 +15,7 @@ export const MainMenu = ({
     selectedProjectId,
     onCategorySelect,
     onSummarySelect,
-}: MainMenuProps) => {
+}: MainMenuProps): React.JSX.Element => {
     const router = useRouter();
 
     return (
@@ -38,20 +39,10 @@ export const MainMenu = ({
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
+                                <FileText
                                     className="h-12 w-12"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1.5}
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                </svg>
+                                    strokeWidth={1.5}
+                                />
                             </div>
                             <h2 className="text-xl font-bold text-slate-900 mb-2">
                                 เอกสารสัญญาจ้างทั่วไป
@@ -76,20 +67,10 @@ export const MainMenu = ({
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-amber-50 text-amber-600 mb-6 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
+                                <FileBarChart
                                     className="h-12 w-12"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1.5}
-                                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                </svg>
+                                    strokeWidth={1.5}
+                                />
                             </div>
                             <h2 className="text-xl font-bold text-slate-900 mb-2">
                                 แบบสรุปโครงการ
@@ -115,20 +96,10 @@ export const MainMenu = ({
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-pink-50 text-pink-500 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
+                            <Building2
                                 className="h-12 w-12"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={1.5}
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                />
-                            </svg>
+                                strokeWidth={1.5}
+                            />
                         </div>
                         <h2 className="text-xl font-bold text-slate-900 mb-2">
                             เอกสารยื่นโครงการ

@@ -2,20 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input, Button, SuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { Lock } from "lucide-react";
-import { ForgotPasswordSuccessModal } from "@/components/ui/ForgotPasswordSuccessModal";
+import { ROUTES } from "@/lib/constants";
+import { AlertCircle } from "lucide-react";
 
-export default function ForgotPasswordPage() {
+import { useRouter } from "next/navigation";
+
+export default function ForgotPasswordPage(): React.JSX.Element {
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [error, setError] = useState("");
     useTitle("ลืมรหัสผ่าน - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
 
-    const handleForgotPassword = async (e: React.FormEvent) => {
+    const handleForgotPassword = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setLoading(true);
         setError("");
@@ -52,8 +54,8 @@ export default function ForgotPasswordPage() {
                 <div className="hidden md:flex flex-col space-y-8 p-8">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm self-start animate-fade-in-up">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                         </span>
                         GRANT ONLINE Password Recovery
                     </div>
@@ -66,29 +68,13 @@ export default function ForgotPasswordPage() {
                         กรอกอีเมลที่คุณใช้สมัครสมาชิก
                         ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้คุณทางอีเมล
                     </p>
-
-                    <div className="space-y-4 max-w-lg">
-                        <div className="flex items-center gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
-                            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
-                                <Lock className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-slate-800">
-                                    Secure Link
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    Link รีเซ็ตรหัสผ่าน เข้าถึงได้เฉพาะคุณ
-                                </p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Right Side - Form */}
                 <div className="w-full max-w-md mx-auto">
                     <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 p-8 border border-slate-100 relative overflow-hidden">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                         <div className="mb-8 relative z-10">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">
@@ -120,18 +106,7 @@ export default function ForgotPasswordPage() {
 
                             {error && (
                                 <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                        className="w-5 h-5 shrink-0"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>
                             )}
@@ -143,7 +118,7 @@ export default function ForgotPasswordPage() {
                             >
                                 {loading ? (
                                     <div className="flex items-center gap-2">
-                                        <span className="loading loading-spinner loading-sm"></span>
+                                        <span className="loading loading-spinner loading-sm" />
                                         <span>กำลังส่งคำขอ...</span>
                                     </div>
                                 ) : (
@@ -155,7 +130,7 @@ export default function ForgotPasswordPage() {
                         <div className="mt-6 text-center text-sm text-slate-500 relative z-10">
                             จำรหัสผ่านได้แล้ว?{" "}
                             <Link
-                                href="/signin"
+                                href={ROUTES.SIGNIN}
                                 className="font-bold text-blue-600 hover:text-blue-700 transition-colors"
                             >
                                 เข้าสู่ระบบ
@@ -166,10 +141,13 @@ export default function ForgotPasswordPage() {
             </div>
 
             {/* Modal อยู่นอก form และนอก container หลัก */}
-            <ForgotPasswordSuccessModal
+            <SuccessModal
                 isOpen={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
-                email={email}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    router.push(ROUTES.SIGNIN);
+                }}
+                message={`ส่งคำขอสำเร็จ!\nได้ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมล ${email} แล้ว\nกรุณาตรวจสอบอีเมลของคุณ`}
             />
         </div>
     );

@@ -1,23 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LoginSuccessModal } from "@/components/ui/LoginSuccessModal";
+import { SuccessModal } from "@/components/ui/SuccessModal";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { FileText, Activity } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
-export default function LoginPage() {
+export default function LoginPage(): React.JSX.Element {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     useTitle("เข้าสู่ระบบ - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
+    const router = useRouter();
 
-    const handleLogin = async (e: React.FormEvent) => {
+    // Auto-redirect effect
+    useEffect(() => {
+        if (showSuccessModal) {
+            const timer = setTimeout(() => {
+                router.push("/userdashboard");
+            }, 2000);
+            return (): void => clearTimeout(timer);
+        }
+    }, [showSuccessModal, router]);
+
+    const handleLogin = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
@@ -52,8 +64,8 @@ export default function LoginPage() {
                 <div className="hidden md:flex flex-col space-y-8 p-8">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm self-start animate-fade-in-up">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                         </span>
                         GRANT ONLINE
                     </div>
@@ -61,47 +73,16 @@ export default function LoginPage() {
                     <h1 className="text-5xl font-bold text-slate-900 leading-tight">
                         ยินดีต้อนรับสู่ <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600">
-                            ระบบจัดการเอกสาร
+                            ระบบจัดการเอกสาร GRANT ONLINE
                         </span>
                     </h1>
-
-                    <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
-                        เข้าสู่ระบบเพื่อสร้างและจัดการ ใบอนุมัติ, สัญญา, TOR{" "}
-                        <br />
-                        และติดตามสถานะโครงการ
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-4 max-w-lg">
-                        <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
-                            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-3">
-                                <FileText className="w-5 h-5" />
-                            </div>
-                            <div className="font-semibold text-slate-800">
-                                สร้างเอกสาร
-                            </div>
-                            <div className="text-sm text-slate-400">
-                                ด้วยเทมเพลตที่กำหนด
-                            </div>
-                        </div>
-                        <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
-                            <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600 mb-3">
-                                <Activity className="w-5 h-5" />
-                            </div>
-                            <div className="font-semibold text-slate-800">
-                                ติดตามสถานะ
-                            </div>
-                            <div className="text-sm text-slate-400">
-                                โครงการของคุณ
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Right Side - Login Form */}
                 <div className="w-full max-w-md mx-auto">
                     <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 p-8 md:p-10 border border-slate-100 relative overflow-hidden">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none"></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                         <div className="mb-8 relative z-10">
                             <h2 className="text-2xl font-bold text-slate-900 mb-2">
@@ -156,18 +137,7 @@ export default function LoginPage() {
 
                             {error && (
                                 <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                        className="w-5 h-5 shrink-0"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>
                             )}
@@ -179,7 +149,7 @@ export default function LoginPage() {
                             >
                                 {isLoading ? (
                                     <div className="flex items-center gap-2">
-                                        <span className="loading loading-spinner loading-sm"></span>
+                                        <span className="loading loading-spinner loading-sm" />
                                         กำลังเข้าสู่ระบบ...
                                     </div>
                                 ) : (
@@ -201,11 +171,14 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            {/* Login Success Modal */}
-            <LoginSuccessModal
+            {/* Success Modal */}
+            <SuccessModal
                 isOpen={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
-                email={email}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    window.location.href = "/userdashboard";
+                }}
+                message={`เข้าสู่ระบบสำเร็จ!\nยินดีต้อนรับ ${email}\nกำลังนำคุณไปยังหน้าหลัก...`}
             />
         </div>
     );

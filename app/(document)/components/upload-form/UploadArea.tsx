@@ -1,5 +1,5 @@
-import { ChangeEvent, DragEvent } from "react";
-import { Button } from "@/components/ui/button";
+import { type ChangeEvent, type DragEvent } from "react";
+import { Button } from "@/components/ui";
 import {
     UploadCloud,
     FileText,
@@ -34,8 +34,8 @@ export function UploadArea({
     onDrop,
     onUpload,
     onClearFile,
-}: UploadAreaProps) {
-    const formatFileSize = (bytes: number) => {
+}: UploadAreaProps): React.JSX.Element {
+    const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return "0 Bytes";
         const k = 1024;
         const sizes = ["Bytes", "KB", "MB", "GB"];

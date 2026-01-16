@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 interface NavBarProps {
     selectedCategory: string | null;
@@ -16,7 +17,7 @@ export const NavBar = ({
     onBack,
     onCategorySelect,
     onContractTypeSelect,
-}: NavBarProps) => {
+}: NavBarProps): React.JSX.Element => {
     return (
         <div className="navbar bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-100 mb-6 p-2 sticky top-4 z-40">
             <div className="flex-1">
@@ -26,20 +27,7 @@ export const NavBar = ({
                     className="group flex items-center gap-2 px-4 py-2 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-all duration-200 rounded-xl"
                 >
                     <div className="p-1 rounded-lg bg-slate-100 group-hover:bg-white border border-slate-200 group-hover:border-slate-300 transition-colors">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                            />
-                        </svg>
+                        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                     </div>
                     <span className="font-medium">ย้อนกลับ</span>
                 </Button>

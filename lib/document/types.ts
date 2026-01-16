@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { type getServerSession } from "next-auth";
 
 // ============================================================================
 // Session Types

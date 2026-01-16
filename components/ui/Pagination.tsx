@@ -13,11 +13,10 @@ export const Pagination: React.FC<PaginationProps> = ({
     currentPage,
     totalPages,
     onPageChange,
-}) => {
+}): React.JSX.Element | null => {
     if (totalPages <= 1) return null;
 
-    // Generate page numbers with ellipsis for large page counts
-    const getPageNumbers = () => {
+    const getPageNumbers = (): (number | string)[] => {
         const pages: (number | string)[] = [];
         const maxVisible = 5;
 

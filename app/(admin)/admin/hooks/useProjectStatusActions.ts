@@ -1,11 +1,23 @@
 import { useState } from "react";
 import type { AdminProject } from "@/type/models";
+import { API_ROUTES } from "@/lib/constants";
 
 export const useProjectStatusActions = (
     setProjects: React.Dispatch<React.SetStateAction<AdminProject[]>>,
     setSuccessMessage: (message: string) => void,
     setIsSuccessModalOpen: (open: boolean) => void
-) => {
+): {
+    isStatusModalOpen: boolean;
+    selectedProjectForStatus: AdminProject | null;
+    newStatus: string;
+    setNewStatus: React.Dispatch<React.SetStateAction<string>>;
+    statusNote: string;
+    setStatusNote: React.Dispatch<React.SetStateAction<string>>;
+    isUpdatingStatus: boolean;
+    openStatusModal: (project: AdminProject) => void;
+    closeStatusModal: () => void;
+    handleUpdateProjectStatus: () => Promise<void>;
+} => {
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
     const [selectedProjectForStatus, setSelectedProjectForStatus] =
         useState<AdminProject | null>(null);
@@ -14,7 +26,7 @@ export const useProjectStatusActions = (
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
     // Open status modal
-    const openStatusModal = (project: AdminProject) => {
+    const openStatusModal = (project: AdminProject): void => {
         setSelectedProjectForStatus(project);
         setNewStatus(project.status);
         setStatusNote(project.statusNote || "");
@@ -22,7 +34,7 @@ export const useProjectStatusActions = (
     };
 
     // Close status modal
-    const closeStatusModal = () => {
+    const closeStatusModal = (): void => {
         setIsStatusModalOpen(false);
         setSelectedProjectForStatus(null);
         setNewStatus("");
@@ -30,12 +42,12 @@ export const useProjectStatusActions = (
     };
 
     // Handle update project status
-    const handleUpdateProjectStatus = async () => {
+    const handleUpdateProjectStatus = async (): Promise<void> => {
         if (!selectedProjectForStatus || !newStatus) return;
 
         setIsUpdatingStatus(true);
         try {
-            const response = await fetch("/api/admin/projects", {
+            const response = await fetch(API_ROUTES.ADMIN_PROJECTS, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -53,7 +65,6 @@ export const useProjectStatusActions = (
 
             const result = await response.json();
 
-            // Update status in state
             setProjects((prev) =>
                 prev.map((project) =>
                     project.id === selectedProjectForStatus.id
@@ -69,7 +80,6 @@ export const useProjectStatusActions = (
 
             closeStatusModal();
 
-            // Show success message
             setSuccessMessage(result.message || "อัปเดตสถานะโครงการสำเร็จแล้ว");
             setIsSuccessModalOpen(true);
         } catch (error) {

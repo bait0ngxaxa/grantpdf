@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { Button } from "@/components/ui";
+import { LogOut, Menu } from "lucide-react";
 
 interface UsersTopBarProps {
     setIsSidebarOpen: (open: boolean) => void;
@@ -22,20 +22,7 @@ export const UsersTopBar: React.FC<UsersTopBarProps> = ({
                     className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
                     onClick={() => setIsSidebarOpen(true)}
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M4 6h16M4 12h16M4 18h16"
-                        />
-                    </svg>
+                    <Menu className="h-6 w-6" />
                 </button>
                 <div>
                     <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">

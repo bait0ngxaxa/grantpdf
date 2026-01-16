@@ -13,6 +13,7 @@ app.prepare().then(() => {
         handle(req, res, parsedUrl);
     }).listen(process.env.PORT || 3000, (err) => {
         if (err) throw err;
+        // eslint-disable-next-line no-console
         console.log("> Ready on port " + (process.env.PORT || 3000));
     });
 });

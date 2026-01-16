@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface FormSectionProps {
     title: string;
@@ -16,7 +16,7 @@ export function FormSection({
     borderColor = "border-slate-200",
     headerBorderColor = "border-slate-300",
     icon,
-}: FormSectionProps) {
+}: FormSectionProps): React.JSX.Element {
     return (
         <div
             className={`group ${bgColor} p-6 md:p-8 rounded-3xl border ${borderColor} hover:border-blue-200 hover:shadow-sm transition-all duration-300`}

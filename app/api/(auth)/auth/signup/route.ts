@@ -1,12 +1,12 @@
 // /app/api/auth/signup/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { rateLimit, getClientIP } from "@/lib/ratelimit";
 import { logAudit } from "@/lib/auditLog";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const { name, email, password } = await req.json();
         const ip = getClientIP(req);

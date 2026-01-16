@@ -1,59 +1,33 @@
 import { useState } from "react";
+import type { Project, UserFile } from "@/type";
+import type { ProjectsApiResponse } from "@/type/api";
+import { API_ROUTES } from "@/lib/constants";
 
-export type AttachmentFile = {
-    id: string;
-    fileName: string;
-    filePath: string;
-    fileSize: number;
-    mimeType: string;
-};
+export type { Project, UserFile } from "@/type";
 
-export type UserFile = {
-    id: string;
-    originalFileName: string;
-    storagePath: string;
-    created_at: string;
-    updated_at: string;
-    fileExtension: string;
-    userName: string;
-    attachmentFiles?: AttachmentFile[];
-};
-
-export type Project = {
-    id: string;
-    name: string;
-    description?: string;
-    status: string;
-    statusNote?: string;
-    created_at: string;
-    updated_at: string;
-    files: UserFile[];
-    _count: {
-        files: number;
-    };
-};
-
-type ProjectsResponse = {
+export const useUserData = (): {
     projects: Project[];
+    setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
     orphanFiles: UserFile[];
-};
-
-export const useUserData = () => {
+    setOrphanFiles: React.Dispatch<React.SetStateAction<UserFile[]>>;
+    isLoading: boolean;
+    error: string | null;
+    fetchUserData: () => Promise<void>;
+} => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [orphanFiles, setOrphanFiles] = useState<UserFile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch user projects and documents from the API
-    const fetchUserData = async () => {
+    const fetchUserData = async (): Promise<void> => {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await fetch("/api/projects");
+            const res = await fetch(API_ROUTES.PROJECTS);
             if (!res.ok) {
                 throw new Error("Failed to fetch projects");
             }
-            const data: ProjectsResponse = await res.json();
+            const data: ProjectsApiResponse = await res.json();
             setProjects(data.projects);
             setOrphanFiles(data.orphanFiles);
         } catch (err) {

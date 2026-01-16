@@ -4,18 +4,19 @@ import {
     isSessionError,
     handleDocumentError,
 } from "@/lib/document";
-import { handleTorGeneration } from "@/lib/document-handlers/torHandler";
-import { handleApprovalGeneration } from "@/lib/document-handlers/approvalHandler";
-import { handleContractGeneration } from "@/lib/document-handlers/contractHandler";
-import { handleFormProjectGeneration } from "@/lib/document-handlers/formProjectHandler";
-import { handleSummaryGeneration } from "@/lib/document-handlers/summaryHandler";
+import {
+    handleTorGeneration,
+    handleApprovalGeneration,
+    handleContractGeneration,
+    handleFormProjectGeneration,
+    handleSummaryGeneration,
+} from "@/lib/document/handlers";
 
 export async function POST(
     req: Request,
     { params }: { params: Promise<{ type: string }> }
-) {
+): Promise<NextResponse | Response> {
     try {
-        // Validate session
         const sessionResult = await validateSession();
         if (isSessionError(sessionResult)) {
             return sessionResult;

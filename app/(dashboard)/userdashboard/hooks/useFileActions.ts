@@ -1,20 +1,23 @@
 import { useState } from "react";
-import type { Project, UserFile } from "./useUserData";
+import type { Project, UserFile } from "@/type";
+import { API_ROUTES } from "@/lib/constants";
 
 export const useFileActions = (
     setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
     setOrphanFiles: React.Dispatch<React.SetStateAction<UserFile[]>>,
     setSuccessMessage: (message: string) => void,
     setShowSuccessModal: (show: boolean) => void
-) => {
+): {
+    isDeleting: string | null;
+    confirmDeleteFile: (fileId: string) => Promise<boolean>;
+} => {
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-    // Delete file
-    const confirmDeleteFile = async (fileId: string) => {
+    const confirmDeleteFile = async (fileId: string): Promise<boolean> => {
         setIsDeleting(fileId);
 
         try {
-            const res = await fetch(`/api/user-docs/${fileId}`, {
+            const res = await fetch(`${API_ROUTES.USER_DOCS}/${fileId}`, {
                 method: "DELETE",
             });
 

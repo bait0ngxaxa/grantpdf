@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth";
 export async function PUT(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
@@ -79,7 +79,7 @@ export async function PUT(
 export async function DELETE(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
-) {
+): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 

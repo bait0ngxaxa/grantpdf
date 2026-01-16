@@ -2,14 +2,14 @@
 //  รับ storagePath เป็น query parameter
 
 import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import fs from "fs";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !session.user?.id) {

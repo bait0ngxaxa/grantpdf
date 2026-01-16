@@ -1,6 +1,22 @@
 import { useState } from "react";
 
-export const useModalStates = () => {
+export const useModalStates = (): {
+    isModalOpen: boolean;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    previewUrl: string;
+    previewTitle: string;
+    showProfileModal: boolean;
+    setShowProfileModal: React.Dispatch<React.SetStateAction<boolean>>;
+    showCreateProjectModal: boolean;
+    setShowCreateProjectModal: React.Dispatch<React.SetStateAction<boolean>>;
+    showDeleteModal: boolean;
+    setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
+    showSuccessModal: boolean;
+    setShowSuccessModal: React.Dispatch<React.SetStateAction<boolean>>;
+    showEditProjectModal: boolean;
+    setShowEditProjectModal: React.Dispatch<React.SetStateAction<boolean>>;
+    openPreviewModal: (storagePath: string, title: string) => void;
+} => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [previewUrl, setPreviewUrl] = useState("");
     const [previewTitle, setPreviewTitle] = useState("");
@@ -10,8 +26,7 @@ export const useModalStates = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showEditProjectModal, setShowEditProjectModal] = useState(false);
 
-    const openPreviewModal = (storagePath: string, title: string) => {
-        // ใช้ API preview ใหม่ที่รับ storagePath และตรวจสอบ permission
+    const openPreviewModal = (storagePath: string, title: string): void => {
         const previewApiUrl = `/api/preview?path=${encodeURIComponent(
             storagePath
         )}`;

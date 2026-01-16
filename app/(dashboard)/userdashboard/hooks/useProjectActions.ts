@@ -1,22 +1,37 @@
 import { useState } from "react";
-import type { Project } from "./useUserData";
+import type { Project } from "@/type";
+import { API_ROUTES } from "@/lib/constants";
 
 export const useProjectActions = (
     setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
     setSuccessMessage: (message: string) => void,
     setShowSuccessModal: (show: boolean) => void
-) => {
+): {
+    isCreatingProject: boolean;
+    isDeletingProject: boolean;
+    isUpdatingProject: boolean;
+    handleCreateProject: (name: string, description: string) => Promise<void>;
+    confirmDeleteProject: (projectId: string) => Promise<boolean>;
+    confirmUpdateProject: (
+        projectId: string,
+        name: string,
+        description: string
+    ) => Promise<boolean>;
+} => {
     const [isCreatingProject, setIsCreatingProject] = useState(false);
     const [isDeletingProject, setIsDeletingProject] = useState(false);
     const [isUpdatingProject, setIsUpdatingProject] = useState(false);
 
     // Create new project
-    const handleCreateProject = async (name: string, description: string) => {
+    const handleCreateProject = async (
+        name: string,
+        description: string
+    ): Promise<void> => {
         if (!name.trim()) return;
 
         setIsCreatingProject(true);
         try {
-            const res = await fetch("/api/projects", {
+            const res = await fetch(API_ROUTES.PROJECTS, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -48,11 +63,13 @@ export const useProjectActions = (
     };
 
     // Delete project
-    const confirmDeleteProject = async (projectId: string) => {
+    const confirmDeleteProject = async (
+        projectId: string
+    ): Promise<boolean> => {
         setIsDeletingProject(true);
 
         try {
-            const res = await fetch(`/api/projects/${projectId}`, {
+            const res = await fetch(`${API_ROUTES.PROJECTS}/${projectId}`, {
                 method: "DELETE",
             });
 
@@ -86,13 +103,13 @@ export const useProjectActions = (
         projectId: string,
         name: string,
         description: string
-    ) => {
+    ): Promise<boolean> => {
         if (!name.trim()) return false;
 
         setIsUpdatingProject(true);
 
         try {
-            const res = await fetch(`/api/projects/${projectId}`, {
+            const res = await fetch(`${API_ROUTES.PROJECTS}/${projectId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
