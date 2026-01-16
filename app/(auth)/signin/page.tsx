@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LoginSuccessModal } from "@/components/ui/LoginSuccessModal";
+import { SuccessModal } from "@/components/ui/SuccessModal";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { AlertCircle } from "lucide-react";
 
@@ -16,6 +17,17 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     useTitle("เข้าสู่ระบบ - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
+    const router = useRouter();
+
+    // Auto-redirect effect
+    useEffect(() => {
+        if (showSuccessModal) {
+            const timer = setTimeout(() => {
+                router.push("/userdashboard");
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessModal, router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -159,11 +171,14 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            {/* Login Success Modal */}
-            <LoginSuccessModal
+            {/* Success Modal */}
+            <SuccessModal
                 isOpen={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
-                email={email}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    window.location.href = "/userdashboard";
+                }}
+                message={`เข้าสู่ระบบสำเร็จ!\nยินดีต้อนรับ ${email}\nกำลังนำคุณไปยังหน้าหลัก...`}
             />
         </div>
     );

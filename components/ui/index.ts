@@ -1,9 +1,8 @@
 export * from "./CreateDocSuccessModal";
-export * from "./ForgotPasswordSuccessModal";
-export * from "./LoginSuccessModal";
+
 export * from "./Pagination";
 export * from "./PdfPreviewModal";
-export * from "./SignatureCanvas";
+
 export * from "./SuccessModal";
 export * from "./LoadingSpinner";
 export * from "./EmptyState";

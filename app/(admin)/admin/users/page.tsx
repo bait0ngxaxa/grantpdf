@@ -119,7 +119,7 @@ export default function AdminUserManagementPage() {
                     setIsSidebarOpen={setIsSidebarOpen}
                     userName={session.user?.name}
                     userRole={session.user?.role}
-                    onSignOut={() => signOut()}
+                    onSignOut={() => signOut({ callbackUrl: "/signin" })}
                 />
 
                 {/* Content Area */}

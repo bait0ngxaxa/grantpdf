@@ -1,18 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import {
-    ArrowLeftCircleIcon,
-    CheckCircleIcon,
-} from "@heroicons/react/24/solid";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Button } from "@/components/ui/button";
+import { SuccessModal } from "@/components/ui/SuccessModal";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { ROUTES } from "@/lib/constants";
 import { AlertCircle } from "lucide-react";
 
 export default function ResetPasswordPage() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
     const [newPassword, setNewPassword] = useState("");
@@ -130,86 +128,75 @@ export default function ResetPasswordPage() {
                             </div>
                         )}
 
-                        {message ? (
-                            <div className="text-center py-8 animate-fade-in-up">
-                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <CheckCircleIcon className="w-10 h-10 text-green-500" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                                    สำเร็จ!
-                                </h3>
-                                <p className="text-slate-600 mb-8">{message}</p>
-                                <Link
-                                    href={ROUTES.SIGNIN}
-                                    className="btn btn-primary w-full rounded-xl shadow-lg border-none bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold h-12 normal-case text-lg"
-                                >
-                                    <ArrowLeftCircleIcon className="w-5 h-5 mr-2" />
-                                    กลับไปหน้าเข้าสู่ระบบ
-                                </Link>
-                            </div>
-                        ) : (
-                            <form
-                                onSubmit={handleResetPassword}
-                                className="space-y-4 relative z-10"
-                            >
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-700">
-                                        รหัสผ่านใหม่
-                                    </label>
-                                    <input
-                                        type="password"
-                                        className="w-full h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400 px-4 outline-none"
-                                        placeholder="รหัสผ่านใหม่"
-                                        value={newPassword}
-                                        onChange={(e) =>
-                                            setNewPassword(e.target.value)
-                                        }
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-700">
-                                        ยืนยันรหัสผ่านใหม่
-                                    </label>
-                                    <input
-                                        type="password"
-                                        className="w-full h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400 px-4 outline-none"
-                                        placeholder="ยืนยันรหัสผ่านอีกครั้ง"
-                                        value={confirmPassword}
-                                        onChange={(e) =>
-                                            setConfirmPassword(e.target.value)
-                                        }
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
-
-                                <Button
-                                    type="submit"
-                                    className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 mt-4"
-                                    disabled={
-                                        loading ||
-                                        !token ||
-                                        newPassword !== confirmPassword ||
-                                        newPassword.length === 0
+                        <form
+                            onSubmit={handleResetPassword}
+                            className="space-y-4 relative z-10"
+                        >
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    รหัสผ่านใหม่
+                                </label>
+                                <input
+                                    type="password"
+                                    className="w-full h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400 px-4 outline-none"
+                                    placeholder="รหัสผ่านใหม่"
+                                    value={newPassword}
+                                    onChange={(e) =>
+                                        setNewPassword(e.target.value)
                                     }
-                                >
-                                    {loading ? (
-                                        <div className="flex items-center gap-2">
-                                            <span className="loading loading-spinner loading-sm"></span>
-                                            <span>กำลังบันทึก...</span>
-                                        </div>
-                                    ) : (
-                                        "บันทึกรหัสผ่านใหม่"
-                                    )}
-                                </Button>
-                            </form>
-                        )}
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    ยืนยันรหัสผ่านใหม่
+                                </label>
+                                <input
+                                    type="password"
+                                    className="w-full h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400 px-4 outline-none"
+                                    placeholder="ยืนยันรหัสผ่านอีกครั้ง"
+                                    value={confirmPassword}
+                                    onChange={(e) =>
+                                        setConfirmPassword(e.target.value)
+                                    }
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            <Button
+                                type="submit"
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 mt-4"
+                                disabled={
+                                    loading ||
+                                    !token ||
+                                    newPassword !== confirmPassword ||
+                                    newPassword.length === 0
+                                }
+                            >
+                                {loading ? (
+                                    <div className="flex items-center gap-2">
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                        <span>กำลังบันทึก...</span>
+                                    </div>
+                                ) : (
+                                    "บันทึกรหัสผ่านใหม่"
+                                )}
+                            </Button>
+                        </form>
                     </div>
                 </div>
             </div>
+
+            <SuccessModal
+                isOpen={!!message}
+                onClose={() => {
+                    router.push(ROUTES.SIGNIN);
+                }}
+                message={message}
+            />
         </div>
     );
 }

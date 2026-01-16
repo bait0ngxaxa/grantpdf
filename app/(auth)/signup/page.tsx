@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Input, Button } from "@/components/ui";
+import { Input, Button, SuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { CheckCircle2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
@@ -294,27 +294,12 @@ export default function SignupPage() {
                 </dialog>
             )}
 
-            {/* Success Modal - Simplified for brevity but keeping styling */}
-            {showSuccessModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center animate-[pulse_0.5s_ease-in-out]">
-                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <CheckCircle2 className="w-10 h-10 text-green-500" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                            สำเร็จ!
-                        </h2>
-                        <p className="text-slate-500 mb-6">
-                            สร้างบัญชีผู้ใช้เรียบร้อยแล้ว
-                            <br />
-                            กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...
-                        </p>
-                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div className="bg-green-500 h-full w-full transition-transform duration-[3000ms] ease-in-out origin-left scale-x-100"></div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Success Modal */}
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                message={`สร้างบัญชีผู้ใช้เรียบร้อยแล้ว\nกำลังนำคุณไปยังหน้าเข้าสู่ระบบ...`}
+            />
         </div>
     );
 }

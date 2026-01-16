@@ -7,10 +7,8 @@ import { useTitle } from "@/lib/hooks/useTitle";
 
 import {
     PageLayout,
-    FormSection,
     FormActions,
     PreviewModal,
-    FormField,
     ErrorAlert,
     PreviewField,
     PreviewGrid,
@@ -22,12 +20,16 @@ import {
     useDocumentValidation,
     useExitConfirmation,
 } from "@/app/(document)/hooks";
-import { ClipboardList, FileText } from "lucide-react";
+
 import {
     type FormProjectData,
     initialFormProjectData,
 } from "@/config/initialData";
 import { validateFormProject } from "@/lib/validation";
+import {
+    BasicInfoSection,
+    ProjectDetailSection,
+} from "@/app/(document)/components/forms/project";
 
 export function FormProjectForm() {
     const searchParams = useSearchParams();
@@ -106,189 +108,18 @@ export function FormProjectForm() {
             onConfirmExit={handleConfirmExit}
         >
             <form onSubmit={onSubmit} className="space-y-8">
-                {/* ข้อมูลโครงการ */}
-                <FormSection
-                    title="ข้อมูลโครงการ"
-                    icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
-                >
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <FormField
-                            label="ชื่อไฟล์"
-                            name="fileName"
-                            placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
-                            value={formData.fileName}
-                            onChange={handleChange}
-                            error={errors.fileName}
-                            required
-                        />
-                        <FormField
-                            label="ชื่อโครงการ"
-                            name="projectName"
-                            placeholder="ระบุชื่อโครงการ"
-                            value={formData.projectName}
-                            onChange={handleChange}
-                            error={errors.projectName}
-                            required
-                        />
-                        <FormField
-                            label="ผู้รับผิดชอบ"
-                            name="person"
-                            placeholder="ระบุชื่อผู้รับผิดชอบโครงการ"
-                            value={formData.person}
-                            onChange={handleChange}
-                            error={errors.person}
-                            required
-                        />
-                        <FormField
-                            label="ที่อยู่ สถานที่ติดต่อ"
-                            name="address"
-                            placeholder="ระบุที่อยู่ติดต่อผู้รับผิดชอบ"
-                            value={formData.address}
-                            onChange={handleChange}
-                            error={errors.address}
-                            required
-                        />
-                        <FormField
-                            label="เบอร์โทรศัพท์"
-                            name="tel"
-                            type="tel"
-                            placeholder="ระบุเบอร์โทรศัพท์ผู้รับผิดชอบ"
-                            value={formData.tel}
-                            onChange={handlePhoneChange}
-                            required
-                            maxLength={10}
-                            error={errors.tel}
-                        />
-                        <FormField
-                            label="อีเมล"
-                            name="email"
-                            type="email"
-                            placeholder="ระบุอีเมลผู้รับผิดชอบ example@mail.com"
-                            value={formData.email}
-                            onChange={handleChange}
-                            error={errors.email}
-                            required
-                        />
-                        <FormField
-                            label="ระยะเวลาดำเนินการ"
-                            name="timeline"
-                            placeholder="ตัวอย่าง 1 มกราคม 2566 - 31 ธันวาคม 2566"
-                            value={formData.timeline}
-                            onChange={handleChange}
-                            error={errors.timeline}
-                            required
-                        />
-                        <FormField
-                            label="งบประมาณ"
-                            name="cost"
-                            placeholder="ตัวอย่าง 1000000 บาท (หนึ่งล้านบาทถ้วน)"
-                            value={formData.cost}
-                            onChange={handleChange}
-                            error={errors.cost}
-                            required
-                        />
-                    </div>
-                </FormSection>
+                <BasicInfoSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    handlePhoneChange={handlePhoneChange}
+                    errors={errors}
+                />
 
-                {/* รายละเอียดโครงการ */}
-                <FormSection
-                    title="รายละเอียดโครงการ"
-                    bgColor="bg-green-50"
-                    borderColor="border-green-200"
-                    headerBorderColor="border-green-300"
-                    icon={<FileText className="w-5 h-5 text-green-600" />}
-                >
-                    <div className="space-y-6">
-                        <FormField
-                            label="ความเป็นมาและแนวคิดการจัดโครงการ"
-                            name="rationale"
-                            type="textarea"
-                            placeholder="ระบุเหตุผลความจำเป็นในการดำเนินโครงการ"
-                            value={formData.rationale}
-                            onChange={handleChange}
-                            error={errors.rationale}
-                            rows={12}
-                            className="h-96"
-                        />
-                        <FormField
-                            label="เป้าประสงค์"
-                            name="goal"
-                            type="textarea"
-                            placeholder="ระบุเป้าประสงค์โครงการ"
-                            value={formData.goal}
-                            onChange={handleChange}
-                            error={errors.goal}
-                            rows={4}
-                            className="h-30"
-                        />
-                        <FormField
-                            label="วัตถุประสงค์"
-                            name="objective"
-                            type="textarea"
-                            placeholder="ระบุวัตถุประสงค์โครงการ"
-                            value={formData.objective}
-                            onChange={handleChange}
-                            error={errors.objective}
-                            rows={4}
-                            className="h-30"
-                        />
-                        <FormField
-                            label="เป้าหมายโครงการ"
-                            name="target"
-                            type="textarea"
-                            placeholder="ระบุเป้าหมายโครงการ"
-                            value={formData.target}
-                            onChange={handleChange}
-                            error={errors.target}
-                            rows={6}
-                            className="h-40"
-                        />
-                        <FormField
-                            label="กรอบการดำเนินงาน"
-                            name="scope"
-                            type="textarea"
-                            placeholder="ระบุกรอบการดำเนินงาน"
-                            value={formData.scope}
-                            onChange={handleChange}
-                            error={errors.scope}
-                            rows={6}
-                            className="h-40"
-                        />
-                        <FormField
-                            label="ผลผลิต"
-                            name="product"
-                            type="textarea"
-                            placeholder="ระบุผลผลิตโครงการ"
-                            value={formData.product}
-                            onChange={handleChange}
-                            error={errors.product}
-                            rows={6}
-                            className="h-40"
-                        />
-                        <FormField
-                            label="ผลลัพธ์"
-                            name="result"
-                            type="textarea"
-                            placeholder="ระบุผลลัพธ์โครงการ"
-                            value={formData.result}
-                            onChange={handleChange}
-                            error={errors.result}
-                            rows={6}
-                            className="h-40"
-                        />
-                        <FormField
-                            label="ประวัติผู้ช่วยวิทยากรกระบวนการถอดบทเรียน"
-                            name="author"
-                            type="textarea"
-                            placeholder="กรอกประวัติส่วนตัว"
-                            value={formData.author}
-                            onChange={handleChange}
-                            error={errors.author}
-                            rows={6}
-                            className="h-40"
-                        />
-                    </div>
-                </FormSection>
+                <ProjectDetailSection
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                />
 
                 <FormActions
                     onPreview={handlePreview}
@@ -330,11 +161,12 @@ export function FormProjectForm() {
                     <PreviewField label="งบประมาณ" value={formData.cost} />
                 </PreviewGrid>
 
-                <PreviewField label="ความเป็นมาและแนวคิด">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.rationale || "-"}
-                    </p>
-                </PreviewField>
+                <PreviewGrid>
+                    <PreviewField
+                        label="ความเป็นมาและแนวคิด"
+                        value={formData.rationale}
+                    ></PreviewField>
+                </PreviewGrid>
 
                 <PreviewField label="เป้าประสงค์">
                     <p className="text-sm whitespace-pre-wrap">

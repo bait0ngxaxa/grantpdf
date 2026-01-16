@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Input, Button, ForgotPasswordSuccessModal } from "@/components/ui";
+import { Input, Button, SuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { ROUTES } from "@/lib/constants";
 import { AlertCircle } from "lucide-react";
 
+import { useRouter } from "next/navigation";
+
 export default function ForgotPasswordPage() {
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -138,10 +141,13 @@ export default function ForgotPasswordPage() {
             </div>
 
             {/* Modal อยู่นอก form และนอก container หลัก */}
-            <ForgotPasswordSuccessModal
+            <SuccessModal
                 isOpen={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
-                email={email}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    router.push(ROUTES.SIGNIN);
+                }}
+                message={`ส่งคำขอสำเร็จ!\nได้ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมล ${email} แล้ว\nกรุณาตรวจสอบอีเมลของคุณ`}
             />
         </div>
     );

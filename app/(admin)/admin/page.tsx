@@ -202,7 +202,7 @@ export default function AdminDashboardPage() {
                     <AdminTopBar
                         setIsSidebarOpen={setIsSidebarOpen}
                         activeTab={activeTab}
-                        signOut={signOut}
+                        signOut={() => signOut({ callbackUrl: "/signin" })}
                     />
 
                     {/* Content Area */}

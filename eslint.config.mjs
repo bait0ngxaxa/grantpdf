@@ -23,6 +23,7 @@ export default defineConfig([
                 },
             ],
             "@next/next/no-html-link-for-pages": ["error", "app"],
+            "@typescript-eslint/explicit-function-return-type": "warn",
         },
     },
 ]);
