@@ -2,32 +2,29 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useTitle } from "@/lib/hooks/useTitle";
 
-import { useUserData } from "./hooks/useUserData";
-import { useProjectActions } from "./hooks/useProjectActions";
-import { useFileActions } from "./hooks/useFileActions";
-import { useModalStates } from "./hooks/useModalStates";
-import { useUIStates } from "./hooks/useUIStates";
+import { useDashboardHook } from "./hooks";
 
-import { Sidebar } from "./components/Sidebar";
-import { TopBar } from "./components/TopBar";
-import { DashboardOverview } from "./components/DashboardOverview";
-import { ProjectsList } from "./components/ProjectsList";
-import { CreateProjectTab } from "./components/CreateProjectTab";
+import {
+    Sidebar,
+    TopBar,
+    DashboardOverview,
+    ProjectsList,
+    CreateProjectTab,
+} from "./components";
 
-import { CreateProjectModal } from "./components/modals/CreateProjectModal";
-import { EditProjectModal } from "./components/modals/EditProjectModal";
-import { DeleteConfirmModal } from "./components/modals/DeleteConfirmModal";
-import { SuccessModal } from "./components/modals/SuccessModal";
-import { PreviewModal } from "./components/modals/PreviewModal";
-import { ProfileModal } from "./components/modals/ProfileModal";
+import {
+    CreateProjectModal,
+    EditProjectModal,
+    DeleteConfirmModal,
+    ProfileModal,
+} from "./components/modals";
 
-import { PAGINATION } from "@/lib/constants";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-import type { Project } from "./hooks/useUserData";
+import { SuccessModal, PdfPreviewModal } from "@/components/ui";
+
+import { Pagination } from "@/components/ui";
 
 const getTitleByTab = (tab: string) => {
     switch (tab) {
@@ -47,27 +44,26 @@ export default function DashboardPage() {
     const router = useRouter();
 
     const {
+        // UI & Data
         activeTab,
         setActiveTab,
         isSidebarOpen,
         setIsSidebarOpen,
-        expandedProjects,
-        toggleProjectExpansion,
-    } = useUIStates();
-
-    useTitle(getTitleByTab(activeTab));
-
-    const {
         projects,
-        setProjects,
-        orphanFiles,
-        setOrphanFiles,
+        paginatedProjects,
+        totalDocuments,
         isLoading,
         error,
         fetchUserData,
-    } = useUserData();
+        expandedProjects,
+        toggleProjectExpansion,
 
-    const {
+        // Pagination
+        currentPage,
+        totalPages,
+        setCurrentPage,
+
+        // Modal Visibility
         isModalOpen,
         setIsModalOpen,
         previewUrl,
@@ -83,104 +79,38 @@ export default function DashboardPage() {
         showEditProjectModal,
         setShowEditProjectModal,
         openPreviewModal,
-    } = useModalStates();
 
-    const [fileToDelete, setFileToDelete] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState("");
-    const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
-    const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
-    const [editProjectName, setEditProjectName] = useState("");
-    const [editProjectDescription, setEditProjectDescription] = useState("");
-    const [newProjectName, setNewProjectName] = useState("");
-    const [newProjectDescription, setNewProjectDescription] = useState("");
+        // Form States
+        fileToDelete,
+        projectToDelete,
+        projectToEdit,
+        successMessage,
+        editProjectName,
+        setEditProjectName,
+        editProjectDescription,
+        setEditProjectDescription,
+        newProjectName,
+        setNewProjectName,
+        newProjectDescription,
+        setNewProjectDescription,
+        setProjectToEdit,
 
-    const {
+        // Loading States
         isCreatingProject,
         isUpdatingProject,
-        handleCreateProject,
-        confirmDeleteProject,
-        confirmUpdateProject,
-    } = useProjectActions(setProjects, setSuccessMessage, setShowSuccessModal);
 
-    const { confirmDeleteFile } = useFileActions(
-        setProjects,
-        setOrphanFiles,
-        setSuccessMessage,
-        setShowSuccessModal
-    );
+        // Handlers
+        handleDeleteFile,
+        handleDeleteProject,
+        handleEditProject,
+        cancelDelete,
+        onConfirmDeleteFile,
+        onConfirmDeleteProject,
+        onConfirmUpdateProject,
+        onCreateProject,
+    } = useDashboardHook();
 
-    // Calculate total documents across all projects
-    const totalDocuments =
-        projects.reduce((total, project) => total + project.files.length, 0) +
-        orphanFiles.length;
-
-    // Pagination logic
-    const {
-        currentPage,
-        setCurrentPage,
-        totalPages,
-        paginatedItems: paginatedProjects,
-    } = usePagination({
-        items: projects,
-        itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
-    });
-
-    const handleDeleteFile = (fileId: string) => {
-        setFileToDelete(fileId);
-        setShowDeleteModal(true);
-    };
-
-    const handleDeleteProject = (projectId: string) => {
-        setProjectToDelete(projectId);
-        setShowDeleteModal(true);
-    };
-
-    const handleEditProject = (project: Project) => {
-        setProjectToEdit(project);
-        setEditProjectName(project.name);
-        setEditProjectDescription(project.description || "");
-        setShowEditProjectModal(true);
-    };
-
-    const cancelDelete = () => {
-        setShowDeleteModal(false);
-        setFileToDelete(null);
-        setProjectToDelete(null);
-    };
-
-    const onConfirmDeleteFile = async () => {
-        if (!fileToDelete) return;
-        setShowDeleteModal(false);
-        await confirmDeleteFile(fileToDelete);
-        setFileToDelete(null);
-    };
-
-    const onConfirmDeleteProject = async () => {
-        if (!projectToDelete) return;
-        setShowDeleteModal(false);
-        await confirmDeleteProject(projectToDelete);
-        setProjectToDelete(null);
-    };
-
-    const onConfirmUpdateProject = async () => {
-        if (!projectToEdit || !editProjectName.trim()) return;
-
-        await confirmUpdateProject(
-            projectToEdit.id,
-            editProjectName,
-            editProjectDescription
-        );
-
-        // Close modal and reset state
-        setShowEditProjectModal(false);
-        setProjectToEdit(null);
-        setEditProjectName("");
-        setEditProjectDescription("");
-    };
-
-    const onCreateProject = () => {
-        handleCreateProject(newProjectName, newProjectDescription);
-    };
+    useTitle(getTitleByTab(activeTab));
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -289,11 +219,11 @@ export default function DashboardPage() {
                     session={session}
                 />
 
-                <PreviewModal
-                    isModalOpen={isModalOpen}
-                    setIsModalOpen={setIsModalOpen}
+                <PdfPreviewModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
                     previewUrl={previewUrl}
-                    previewTitle={previewTitle}
+                    previewFileName={previewTitle}
                 />
 
                 <DeleteConfirmModal
@@ -307,9 +237,9 @@ export default function DashboardPage() {
                 />
 
                 <SuccessModal
-                    showSuccessModal={showSuccessModal}
-                    setShowSuccessModal={setShowSuccessModal}
-                    successMessage={successMessage}
+                    isOpen={showSuccessModal}
+                    onClose={() => setShowSuccessModal(false)}
+                    message={successMessage}
                 />
 
                 <CreateProjectModal

@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChartBarBig, UserStar, LogOut } from "lucide-react";
+import { ChartBarBig, UserStar, LogOut, Menu } from "lucide-react";
+import { ROUTES } from "@/lib/constants";
 
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { Session } from "next-auth";
@@ -34,20 +35,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                         className="lg:hidden btn btn-ghost btn-sm btn-circle hover:bg-blue-50 hover:text-blue-600 transition-colors"
                         onClick={() => setIsSidebarOpen(true)}
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M4 6h16M4 12h16M4 18h16"
-                            />
-                        </svg>
+                        <Menu className="h-6 w-6" />
                     </button>
                     <div className="flex items-center gap-3 text-slate-800">
                         <div className="p-2 bg-blue-50 rounded-lg shadow-sm">
@@ -72,7 +60,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                     {session?.user?.role === "admin" && (
                         <Button
                             className="font-semibold cursor-pointer transform hover:scale-105 active:scale-95 transition-all duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 border-0"
-                            onClick={() => router.push("/admin")}
+                            onClick={() => router.push(ROUTES.ADMIN)}
                         >
                             <UserStar className="w-4 h-4 mr-2" />
                             ระบบแอดมิน

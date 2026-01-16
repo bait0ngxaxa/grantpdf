@@ -2,8 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button, Dialog, DialogContent, DialogTitle } from "@/components/ui";
 import { CheckCircle2 } from "lucide-react";
 
 interface ForgotPasswordSuccessModalProps {

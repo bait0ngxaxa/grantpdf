@@ -1,21 +1,27 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, LoadingSpinner } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { useSession } from "next-auth/react";
+import { ROUTES } from "@/lib/constants";
 
-import { useCreateDocsState } from "./hooks/useCreateDocsState";
-import { useProjectData } from "./hooks/useProjectData";
-import { useNavigation } from "./hooks/useNavigation";
-import { usePagination } from "./hooks/usePagination";
+import { useCreateDocsState, useProjectData, useNavigation } from "./hooks";
 
-import { ProjectSelection } from "./components/ProjectSelection";
-import { MainMenu } from "./components/MainMenu";
-import { ContractTypeSubmenu } from "./components/ContractTypeSubmenu";
-import { CategorySubmenu } from "./components/CategorySubmenu";
-import { NavBar } from "./components/NavBar";
+import {
+    ProjectSelection,
+    MainMenu,
+    ContractTypeSubmenu,
+    CategorySubmenu,
+    NavBar,
+} from "./components";
+
+import { usePagination } from "@/lib/hooks";
+import { PAGINATION } from "@/lib/constants";
+
+import { useRouter } from "next/navigation";
 
 export default function CreateTorsPage() {
+    const router = useRouter();
     const { data: session, status } = useSession();
 
     const {
@@ -31,9 +37,6 @@ export default function CreateTorsPage() {
         setIsLoading,
         error,
         setError,
-        currentPage,
-        setCurrentPage,
-        projectsPerPage,
         isAdmin,
     } = useCreateDocsState();
 
@@ -50,11 +53,16 @@ export default function CreateTorsPage() {
     } = useNavigation({ selectedProjectId });
 
     const {
-        currentProjects,
+        paginatedItems: currentProjects,
         totalPages,
-        indexOfFirstProject,
-        indexOfLastProject,
-    } = usePagination(projects, currentPage, projectsPerPage);
+        startIndex: indexOfFirstProject,
+        endIndex: indexOfLastProject,
+        currentPage,
+        goToPage: setCurrentPage,
+    } = usePagination({
+        items: projects,
+        itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
+    });
 
     useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
 
@@ -80,13 +88,8 @@ export default function CreateTorsPage() {
     return (
         <div className="max-w-6xl mx-auto min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900 p-6 flex flex-col">
             {status === "loading" && (
-                <div className="flex justify-center items-center min-h-[50vh]">
-                    <div className="text-center">
-                        <span className="loading loading-spinner loading-lg text-primary"></span>
-                        <p className="mt-4 text-lg text-slate-500">
-                            กำลังโหลด...
-                        </p>
-                    </div>
+                <div className="min-h-[50vh] flex items-center justify-center">
+                    <LoadingSpinner />
                 </div>
             )}
 
@@ -98,7 +101,7 @@ export default function CreateTorsPage() {
                             กรุณาเข้าสู่ระบบก่อน
                         </p>
                         <Button
-                            onClick={() => (window.location.href = "/signin")}
+                            onClick={() => router.push(ROUTES.SIGNIN)}
                             className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all"
                         >
                             เข้าสู่ระบบ

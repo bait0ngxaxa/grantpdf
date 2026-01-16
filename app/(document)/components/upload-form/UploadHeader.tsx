@@ -1,6 +1,7 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, UploadCloud, FileText } from "lucide-react";
+import { ROUTES } from "@/lib/constants";
 
 interface UploadHeaderProps {
     onBack?: () => void;
@@ -13,7 +14,7 @@ export function UploadHeader({ onBack }: UploadHeaderProps) {
         if (onBack) {
             onBack();
         } else {
-            router.push("/userdashboard");
+            router.push(ROUTES.DASHBOARD);
         }
     };
 

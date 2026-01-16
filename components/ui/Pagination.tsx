@@ -16,7 +16,6 @@ export const Pagination: React.FC<PaginationProps> = ({
 }) => {
     if (totalPages <= 1) return null;
 
-    // Generate page numbers with ellipsis for large page counts
     const getPageNumbers = () => {
         const pages: (number | string)[] = [];
         const maxVisible = 5;

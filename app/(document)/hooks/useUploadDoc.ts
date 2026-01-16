@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect, ChangeEvent, DragEvent } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { Project } from "@/type";
+import { FILE_UPLOAD, API_ROUTES } from "@/lib/constants";
 
-interface Project {
-    id: string;
-    name: string;
-    description?: string;
-    created_at: string;
-}
+type ProjectListItem = Pick<
+    Project,
+    "id" | "name" | "description" | "created_at"
+>;
 
 export function useUploadDoc() {
     const { data: session, status } = useSession();
@@ -20,7 +20,7 @@ export function useUploadDoc() {
     const [uploadMessage, setUploadMessage] = useState("");
     const [uploadSuccess, setUploadSuccess] = useState(false);
 
-    const [projects, setProjects] = useState<Project[]>([]);
+    const [projects, setProjects] = useState<ProjectListItem[]>([]);
     // Initialize from URL params if available
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
         searchParams.get("projectId")
@@ -36,7 +36,7 @@ export function useUploadDoc() {
                 setIsLoadingProjects(true);
                 setProjectError(null);
 
-                const response = await fetch("/api/projects");
+                const response = await fetch(API_ROUTES.PROJECTS);
                 if (!response.ok) {
                     throw new Error("ไม่สามารถโหลดรายการโครงการได้");
                 }
@@ -57,18 +57,21 @@ export function useUploadDoc() {
     }, [session]);
 
     const validateFile = (file: File): boolean => {
-        if (
-            !file.name.toLowerCase().endsWith(".docx") &&
-            !file.name.toLowerCase().endsWith(".pdf")
-        ) {
+        const fileName = file.name.toLowerCase();
+        const isValidExtension = FILE_UPLOAD.ALLOWED_EXTENSIONS.some((ext) =>
+            fileName.endsWith(ext)
+        );
+
+        if (!isValidExtension) {
             setUploadMessage("กรุณาเลือกไฟล์ .docx และ .pdf เท่านั้น");
             setUploadSuccess(false);
             return false;
         }
 
-        const maxSize = 10 * 1024 * 1024;
-        if (file.size > maxSize) {
-            setUploadMessage("ไฟล์มีขนาดใหญ่เกินไป (สูงสุด 10MB)");
+        if (file.size > FILE_UPLOAD.MAX_SIZE_BYTES) {
+            setUploadMessage(
+                `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${FILE_UPLOAD.MAX_SIZE_MB}MB)`
+            );
             setUploadSuccess(false);
             return false;
         }

@@ -1,11 +1,10 @@
 "use client";
 
-// useState removed
 import { useSearchParams } from "next/navigation";
 
-import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
+import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+
 import {
     PageLayout,
     FormSection,
@@ -13,16 +12,19 @@ import {
     PreviewModal,
     FormField,
     ErrorAlert,
-    LoadingState,
     PreviewField,
     PreviewGrid,
-} from "@/app/(document)/components/document-form";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
+} from "@/app/(document)/components";
+import { LoadingSpinner } from "@/components/ui";
+import {
+    useDocumentForm,
+    usePreviewModal,
+    useDocumentValidation,
+    useExitConfirmation,
+} from "@/app/(document)/hooks";
 import { ClipboardList, Users, Calculator } from "lucide-react";
 import { type SummaryData, initialSummaryData } from "@/config/initialData";
 import { validateSummary } from "@/lib/validation";
-import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 
 export function SummaryForm() {
     const searchParams = useSearchParams();
@@ -78,7 +80,7 @@ export function SummaryForm() {
     };
 
     if (!isClient) {
-        return <LoadingState />;
+        return <LoadingSpinner />;
     }
 
     return (

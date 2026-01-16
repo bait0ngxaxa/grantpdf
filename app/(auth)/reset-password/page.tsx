@@ -9,6 +9,8 @@ import {
 } from "@heroicons/react/24/solid";
 import { Button } from "@/components/ui/button";
 import { useTitle } from "@/lib/hooks/useTitle";
+import { ROUTES } from "@/lib/constants";
+import { AlertCircle } from "lucide-react";
 
 export default function ResetPasswordPage() {
     const searchParams = useSearchParams();
@@ -123,18 +125,7 @@ export default function ResetPasswordPage() {
 
                         {error && !message && (
                             <div className="p-3 mb-6 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                    className="w-5 h-5 shrink-0"
-                                >
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
+                                <AlertCircle className="w-5 h-5 shrink-0" />
                                 {error}
                             </div>
                         )}
@@ -149,7 +140,7 @@ export default function ResetPasswordPage() {
                                 </h3>
                                 <p className="text-slate-600 mb-8">{message}</p>
                                 <Link
-                                    href="/signin"
+                                    href={ROUTES.SIGNIN}
                                     className="btn btn-primary w-full rounded-xl shadow-lg border-none bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold h-12 normal-case text-lg"
                                 >
                                     <ArrowLeftCircleIcon className="w-5 h-5 mr-2" />

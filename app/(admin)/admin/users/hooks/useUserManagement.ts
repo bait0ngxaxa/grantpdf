@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { API_ROUTES } from "@/lib/constants";
 
 interface UserData {
     id: string;
@@ -42,7 +43,7 @@ export function useUserManagement() {
         setLoadingUsers(true);
         setFetchError(null);
         try {
-            const res = await fetch("/api/admin/users");
+            const res = await fetch(API_ROUTES.ADMIN_USERS);
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.error || "Failed to fetch users");
@@ -103,11 +104,14 @@ export function useUserManagement() {
 
             setIsSaving(true);
             try {
-                const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(editFormData),
-                });
+                const res = await fetch(
+                    `${API_ROUTES.ADMIN_USERS}/${selectedUser.id}`,
+                    {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(editFormData),
+                    }
+                );
 
                 if (!res.ok) {
                     const errorData = await res.json();
@@ -152,9 +156,12 @@ export function useUserManagement() {
 
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/admin/users/${selectedUser.id}`, {
-                method: "DELETE",
-            });
+            const res = await fetch(
+                `${API_ROUTES.ADMIN_USERS}/${selectedUser.id}`,
+                {
+                    method: "DELETE",
+                }
+            );
 
             if (!res.ok) {
                 const errorData = await res.json();

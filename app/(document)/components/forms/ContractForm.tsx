@@ -2,9 +2,9 @@
 
 import { FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
+import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+
 import {
     PageLayout,
     FormSection,
@@ -12,16 +12,19 @@ import {
     PreviewModal,
     FormField,
     ErrorAlert,
-    LoadingState,
     PreviewField,
     PreviewGrid,
-} from "@/app/(document)/components/document-form";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
+} from "@/app/(document)/components";
+import { LoadingSpinner } from "@/components/ui";
+import {
+    useDocumentForm,
+    usePreviewModal,
+    useDocumentValidation,
+    useExitConfirmation,
+} from "@/app/(document)/hooks";
 import { ClipboardList, User } from "lucide-react";
 import { type ContractData, initialContractData } from "@/config/initialData";
 import { validateContract } from "@/lib/validation";
-import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 
 export function ContractForm() {
     const searchParams = useSearchParams();
@@ -93,7 +96,7 @@ export function ContractForm() {
     } = useExitConfirmation({ isDirty });
 
     if (!isClient) {
-        return <LoadingState />;
+        return <LoadingSpinner />;
     }
 
     return (

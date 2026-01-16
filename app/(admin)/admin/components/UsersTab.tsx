@@ -1,83 +1,150 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
-import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import type { AdminDocumentFile, LatestUser } from "@/type/models";
+"use client";
+
+import React, { useEffect, useMemo, useRef } from "react";
+import { useSession } from "next-auth/react";
+
+import {
+    UserStatsCards,
+    UsersTable,
+    EditUserModal,
+    DeleteUserModal,
+} from "../users/components";
+import { SuccessModal } from "@/components/ui";
+
+import { useUserManagement } from "../users/hooks/useUserManagement";
+import { usePagination } from "@/lib/hooks";
+import { PAGINATION } from "@/lib/constants";
+import { XCircle } from "lucide-react";
 
 interface UsersTabProps {
-    totalUsers: number;
-    latestUser: LatestUser | null;
-    allFiles: AdminDocumentFile[];
-    router: AppRouterInstance;
+    totalUsers?: number;
 }
 
-export const UsersTab: React.FC<UsersTabProps> = ({
-    totalUsers,
-    latestUser,
-    allFiles,
-    router,
-}) => {
+export const UsersTab: React.FC<UsersTabProps> = () => {
+    const { data: session, status } = useSession();
+    const [searchTerm, setSearchTerm] = React.useState("");
+
+    // User management hook
+    const {
+        users,
+        loadingUsers,
+        fetchError,
+        selectedUser,
+        editFormData,
+        isSaving,
+        isDeleting,
+        isEditModalOpen,
+        isDeleteModalOpen,
+        isResultModalOpen,
+        resultMessage,
+        isResultSuccess,
+        fetchUsers,
+        openEditModal,
+        closeEditModal,
+        handleEditFormChange,
+        handleUpdateUser,
+        openDeleteModal,
+        closeDeleteModal,
+        handleDeleteUser,
+        closeResultModal,
+    } = useUserManagement();
+
+    const hasFetchedRef = useRef(false);
+
+    useEffect(() => {
+        if (
+            status === "authenticated" &&
+            session?.user?.role === "admin" &&
+            !hasFetchedRef.current
+        ) {
+            hasFetchedRef.current = true;
+            fetchUsers();
+        }
+    }, [status, session, fetchUsers]);
+
+    const filteredUsers = useMemo(() => {
+        return users.filter(
+            (user) =>
+                user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [users, searchTerm]);
+
+    const pagination = usePagination({
+        items: filteredUsers,
+        itemsPerPage: PAGINATION.USERS_PER_PAGE,
+    });
+
+    useEffect(() => {
+        pagination.resetPage();
+    }, [searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    if (loadingUsers) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
+
     return (
         <div>
-            <div className="bg-white p-10 rounded-3xl shadow-sm border border-slate-100 text-center max-w-4xl mx-auto">
-                <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-200">
-                    <Users className="h-10 w-10 text-white" />
-                </div>
-
-                <h3 className="text-3xl font-bold mb-4 text-slate-800">
-                    การจัดการผู้ใช้งาน
-                </h3>
-
-                <p className="text-slate-500 mb-10 max-w-xl mx-auto text-lg">
-                    จัดการบัญชีผู้ใช้งานทั้งหมดในระบบ ดู แก้ไข
-                    และจัดการสิทธิ์การเข้าถึงของผู้ใช้
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-                    <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-                        <div className="text-4xl font-extrabold text-blue-600 mb-2">
-                            {totalUsers}
-                        </div>
-                        <div className="text-sm font-semibold text-blue-600/80 uppercase tracking-wide">
-                            ผู้ใช้งานทั้งหมด
-                        </div>
-                    </div>
-
-                    <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
-                        <div className="text-lg font-bold text-emerald-700 truncate mb-1">
-                            {latestUser ? latestUser.name : "-"}
-                        </div>
-                        <div className="text-xs font-semibold text-emerald-600/80 uppercase tracking-wide mb-1">
-                            สมาชิกล่าสุด
-                        </div>
-                        {latestUser && (
-                            <div className="text-xs text-emerald-600/60">
-                                {new Date(
-                                    latestUser.created_at
-                                ).toLocaleDateString("th-TH")}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100">
-                        <div className="text-4xl font-extrabold text-purple-600 mb-2">
-                            {allFiles.length}
-                        </div>
-                        <div className="text-sm font-semibold text-purple-600/80 uppercase tracking-wide">
-                            เอกสารที่สร้าง
-                        </div>
-                    </div>
-                </div>
-
-                <Button
-                    size="lg"
-                    className="h-14 px-8 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-xl hover:shadow-2xl shadow-blue-200 text-lg font-medium transition-all duration-300 transform hover:-translate-y-1"
-                    onClick={() => router.push("/admin/users")}
+            {/* Error Alert */}
+            {fetchError && (
+                <div
+                    role="alert"
+                    className="alert alert-error mb-6 bg-red-50 border border-red-200 text-red-800 rounded-2xl"
                 >
-                    <Users className="w-5 h-5 mr-3" />
-                    เข้าสู่การจัดการผู้ใช้งาน
-                </Button>
-            </div>
+                    <XCircle className="stroke-current shrink-0 h-6 w-6" />
+                    <span>{fetchError}</span>
+                </div>
+            )}
+
+            {/* Statistics Cards */}
+            <UserStatsCards users={users} />
+
+            {/* Users Table */}
+            <UsersTable
+                users={pagination.paginatedItems}
+                filteredCount={filteredUsers.length}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onEdit={openEditModal}
+                onDelete={openDeleteModal}
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                itemsPerPage={pagination.itemsPerPage}
+                onPageChange={pagination.goToPage}
+            />
+
+            {/* Modals */}
+            <EditUserModal
+                isOpen={isEditModalOpen}
+                onClose={closeEditModal}
+                user={selectedUser}
+                editFormData={editFormData}
+                onFormChange={handleEditFormChange}
+                onSubmit={handleUpdateUser}
+                isSaving={isSaving}
+            />
+
+            <DeleteUserModal
+                isOpen={isDeleteModalOpen}
+                onClose={closeDeleteModal}
+                user={selectedUser}
+                isDeleting={isDeleting}
+                onConfirm={handleDeleteUser}
+            />
+
+            <SuccessModal
+                isOpen={isResultModalOpen}
+                onClose={closeResultModal}
+                message={
+                    isResultSuccess
+                        ? resultMessage
+                        : `ข้อผิดพลาด: ${resultMessage}`
+                }
+            />
         </div>
     );
 };

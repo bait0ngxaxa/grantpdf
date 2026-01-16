@@ -2,9 +2,12 @@
 
 import { useTitle } from "@/lib/hooks/useTitle";
 import { useUploadDoc } from "@/app/(document)/hooks/useUploadDoc";
-import { UploadHeader } from "@/app/(document)/components/upload-form/UploadHeader";
-import { ProjectList } from "@/app/(document)/components/upload-form/ProjectList";
-import { UploadArea } from "@/app/(document)/components/upload-form/UploadArea";
+import {
+    UploadHeader,
+    ProjectList,
+    UploadArea,
+} from "@/app/(document)/components";
+import { ROUTES } from "@/lib/constants";
 
 export default function UploadDocPage() {
     useTitle("อัพโหลดเอกสาร | ระบบจัดการเอกสาร");
@@ -39,7 +42,7 @@ export default function UploadDocPage() {
     }
 
     if (!session) {
-        router.push("/signin");
+        router.push(ROUTES.SIGNIN);
         return null;
     }
 

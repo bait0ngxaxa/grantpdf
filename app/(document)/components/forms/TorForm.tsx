@@ -2,11 +2,9 @@
 
 import { useState, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
+import { Button, Textarea, CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+
 import {
     PageLayout,
     FormSection,
@@ -14,14 +12,17 @@ import {
     PreviewModal,
     FormField,
     ErrorAlert,
-    LoadingState,
-} from "@/app/(document)/components/document-form";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
-import {
     PreviewField,
     PreviewGrid,
-} from "@/app/(document)/components/document-form/PreviewField";
+} from "@/app/(document)/components";
+import { LoadingSpinner } from "@/components/ui";
+import {
+    useDocumentForm,
+    usePreviewModal,
+    useDocumentValidation,
+    useExitConfirmation,
+} from "@/app/(document)/hooks";
+
 import {
     ClipboardList,
     FileText,
@@ -37,7 +38,6 @@ import {
     initialActivity,
 } from "@/config/initialData";
 import { validateTOR } from "@/lib/validation";
-import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 
 export function TorForm() {
     const searchParams = useSearchParams();
@@ -141,7 +141,7 @@ export function TorForm() {
     } = useExitConfirmation({ isDirty });
 
     if (!isClient) {
-        return <LoadingState />;
+        return <LoadingSpinner />;
     }
 
     return (
@@ -580,7 +580,7 @@ export function TorForm() {
                 onClose={() => setIsSuccessModalOpen(false)}
                 fileName={formData.fileName}
                 downloadUrl={generatedFileUrl}
-                documentType="เอกสาร TOR"
+                documentType="เอกสาร Word"
                 onRedirect={allowNavigation}
             />
         </PageLayout>

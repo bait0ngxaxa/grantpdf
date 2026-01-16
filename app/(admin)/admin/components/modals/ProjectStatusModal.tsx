@@ -1,6 +1,7 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
+import { ClipboardList, X } from "lucide-react";
 
 interface ProjectStatusModalProps {
     isStatusModalOpen: boolean;
@@ -35,20 +36,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center space-x-3">
                                 <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-6 w-6"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                                        />
-                                    </svg>
+                                    <ClipboardList className="h-6 w-6" />
                                 </div>
                                 <h3 className="font-bold text-xl text-slate-800">
                                     จัดการสถานะ
@@ -58,18 +46,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 onClick={closeStatusModal}
                                 className="btn btn-sm btn-circle btn-ghost text-slate-400 hover:bg-slate-50"
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                >
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
+                                <X className="h-5 w-5" />
                             </button>
                         </div>
 

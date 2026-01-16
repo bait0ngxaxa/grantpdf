@@ -3,9 +3,14 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ProjectCard } from "./ProjectCard";
-import { PaginationControls } from "./PaginationControls";
-import { EmptyState } from "./EmptyState";
+import {
+    Pagination,
+    LoadingSpinner,
+    EmptyState as SharedEmptyState,
+} from "@/components/ui";
+import { Building2 } from "lucide-react";
 import type { Project } from "@/type/models";
+import { ROUTES } from "@/lib/constants";
 
 interface ProjectSelectionProps {
     projects: Project[];
@@ -42,12 +47,33 @@ export const ProjectSelection = ({
                 เลือกโครงการสำหรับเอกสาร
             </h1>
 
-            {isLoading && <EmptyState type="loading" />}
+            {isLoading && <LoadingSpinner message="กำลังโหลดโครงการ..." />}
 
-            {error && <EmptyState type="error" error={error} />}
+            {error && (
+                <SharedEmptyState
+                    title="เกิดข้อผิดพลาด"
+                    description={error || "ไม่สามารถโหลดข้อมูลได้"}
+                    icon={Building2} // Fallback icon
+                >
+                    <Button
+                        onClick={() => router.push(ROUTES.DASHBOARD)}
+                        className="mt-4"
+                    >
+                        กลับไปแดชบอร์ด
+                    </Button>
+                </SharedEmptyState>
+            )}
 
             {!isLoading && !error && projects.length === 0 && (
-                <EmptyState type="no-projects" />
+                <SharedEmptyState
+                    title="ยังไม่มีโครงการ"
+                    description="กรุณาสร้างโครงการก่อนสร้างเอกสาร"
+                    icon={Building2}
+                >
+                    <Button onClick={() => router.push(ROUTES.DASHBOARD)}>
+                        สร้างโครงการใหม่
+                    </Button>
+                </SharedEmptyState>
             )}
 
             {!isLoading && !error && projects.length > 0 && (
@@ -64,7 +90,7 @@ export const ProjectSelection = ({
                     </div>
 
                     <div className="w-full max-w-4xl mt-6">
-                        <PaginationControls
+                        <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
                             onPageChange={onPageChange}
@@ -82,14 +108,14 @@ export const ProjectSelection = ({
 
                     <div className="flex justify-center mt-8 gap-4">
                         <Button
-                            onClick={() => router.push("/userdashboard")}
+                            onClick={() => router.push(ROUTES.DASHBOARD)}
                             variant="outline"
                             className="bg-white hover:bg-slate-50 rounded-xl"
                         >
                             กลับไปแดชบอร์ด
                         </Button>
                         <Button
-                            onClick={() => router.push("/userdashboard")}
+                            onClick={() => router.push(ROUTES.DASHBOARD)}
                             className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all"
                         >
                             สร้างโครงการใหม่

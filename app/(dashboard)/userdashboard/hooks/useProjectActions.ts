@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { Project } from "./useUserData";
+import type { Project } from "@/type";
+import { API_ROUTES } from "@/lib/constants";
 
 export const useProjectActions = (
     setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
@@ -16,7 +17,7 @@ export const useProjectActions = (
 
         setIsCreatingProject(true);
         try {
-            const res = await fetch("/api/projects", {
+            const res = await fetch(API_ROUTES.PROJECTS, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -52,7 +53,7 @@ export const useProjectActions = (
         setIsDeletingProject(true);
 
         try {
-            const res = await fetch(`/api/projects/${projectId}`, {
+            const res = await fetch(`${API_ROUTES.PROJECTS}/${projectId}`, {
                 method: "DELETE",
             });
 
@@ -92,7 +93,7 @@ export const useProjectActions = (
         setIsUpdatingProject(true);
 
         try {
-            const res = await fetch(`/api/projects/${projectId}`, {
+            const res = await fetch(`${API_ROUTES.PROJECTS}/${projectId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

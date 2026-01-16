@@ -4,9 +4,14 @@ import { useState, ChangeEvent, useRef, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { CreateDocSuccessModal } from "@/components/ui/CreateDocSuccessModal";
+import { CreateDocSuccessModal, SignatureCanvasRef } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+import {
+    useDocumentForm,
+    usePreviewModal,
+    useDocumentValidation,
+    useExitConfirmation,
+} from "@/app/(document)/hooks";
 import {
     PageLayout,
     FormSection,
@@ -17,13 +22,11 @@ import {
     AttachmentUpload,
     SignatureSection,
     ErrorAlert,
-    LoadingState,
     PreviewField,
     PreviewGrid,
     PreviewList,
-} from "@/app/(document)/components/document-form";
-import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
-import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
+} from "@/app/(document)/components";
+import { LoadingSpinner } from "@/components/ui";
 import { ClipboardList, FileText, Folder, UserPen } from "lucide-react";
 import {
     type ApprovalData,
@@ -31,9 +34,6 @@ import {
     approvalFixedValues,
 } from "@/config/initialData";
 import { validateApproval } from "@/lib/validation";
-import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
-
-import type { SignatureCanvasRef } from "@/components/ui/SignatureCanvas";
 
 export function ApprovalForm() {
     const { data: session } = useSession();
@@ -370,7 +370,7 @@ export function ApprovalForm() {
     } = useExitConfirmation({ isDirty });
 
     if (!isClient) {
-        return <LoadingState />;
+        return <LoadingSpinner />;
     }
 
     return (
@@ -704,7 +704,11 @@ export function ApprovalForm() {
             <CreateDocSuccessModal
                 isOpen={isSuccessModalOpen}
                 onClose={() => setIsSuccessModalOpen(false)}
-                fileName={formData.fileName}
+                fileName={
+                    formData.fileName ||
+                    formData.projectName ||
+                    "หนังสือขออนุมัติ"
+                }
                 downloadUrl={generatedFileUrl}
                 documentType="เอกสาร Word"
                 onRedirect={allowNavigation}

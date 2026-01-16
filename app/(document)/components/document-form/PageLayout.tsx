@@ -1,16 +1,16 @@
 import { ReactNode, useState } from "react";
-import { Button } from "@/components/ui/button";
-
-import { useRouter } from "next/navigation";
 import {
+    Button,
     Dialog,
     DialogContent,
-    DialogHeader,
-    DialogTitle,
     DialogDescription,
     DialogFooter,
+    DialogHeader,
+    DialogTitle,
     DialogClose,
-} from "@/components/ui/dialog";
+} from "@/components/ui";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface PageLayoutProps {
     children: ReactNode;
@@ -47,7 +47,6 @@ export function PageLayout({
     const [internalIsExitModalOpen, setInternalIsExitModalOpen] =
         useState(false);
 
-    // Use external state if provided, otherwise use internal
     const isExitModalOpen = externalIsExitModalOpen ?? internalIsExitModalOpen;
     const setIsExitModalOpen =
         externalSetIsExitModalOpen ?? setInternalIsExitModalOpen;
@@ -80,20 +79,7 @@ export function PageLayout({
                     className="group bg-white/80 backdrop-blur-sm hover:bg-white border border-slate-200 text-slate-600 shadow-sm hover:shadow-md hover:border-slate-300 hover:text-slate-900 transition-all duration-300 rounded-2xl px-5 py-6"
                 >
                     <div className="p-1 rounded-lg bg-slate-100 group-hover:bg-slate-50 border border-slate-200 group-hover:border-slate-300 transition-colors mr-3">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 transition-transform group-hover:-translate-x-0.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                            />
-                        </svg>
+                        <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-0.5" />
                     </div>
                     <span className="font-semibold text-base">ย้อนกลับ</span>
                 </Button>

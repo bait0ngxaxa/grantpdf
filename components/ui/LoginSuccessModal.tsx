@@ -2,8 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button, Dialog, DialogContent, DialogTitle } from "@/components/ui";
 
 interface LoginSuccessModalProps {
     isOpen: boolean;
@@ -39,10 +38,10 @@ export const LoginSuccessModal: React.FC<LoginSuccessModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border-0 shadow-2xl focus:outline-none">
+            <DialogContent className="sm:max-w-lg rounded-3xl p-8 bg-white border-0 shadow-2xl focus:outline-none">
                 <div className="flex flex-col items-center text-center p-4">
                     {/* Success Icon */}
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg bg-green-50 text-green-500 ring-4 ring-green-50">
+                    <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-lg bg-green-50 text-green-500 ring-4 ring-green-50">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-10 w-10 animate-[bounce_1s_infinite]"
@@ -64,13 +63,13 @@ export const LoginSuccessModal: React.FC<LoginSuccessModalProps> = ({
                     </DialogTitle>
 
                     <div className="text-slate-500 mb-8 leading-relaxed space-y-1">
-                        <p>ยินดีต้อนรับเข้าสู่ระบบ</p>
+                        <p className="text-lg">ยินดีต้อนรับเข้าสู่ระบบ</p>
                         {email && (
-                            <p className="font-medium text-slate-700">
+                            <p className="font-medium text-slate-800 text-lg">
                                 {email}
                             </p>
                         )}
-                        <p className="text-xs text-slate-400 mt-4 pt-4">
+                        <p className="text-sm text-slate-400 mt-6 pt-2">
                             กำลังนำทางไปยังหน้าหลักอัตโนมัติ...
                         </p>
                     </div>

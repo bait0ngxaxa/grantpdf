@@ -1,9 +1,17 @@
 import React from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
+import { Button } from "@/components/ui";
+import {
+    Users,
+    Folder,
+    Archive,
+    ShieldCheck,
+    X,
+    ArrowLeft,
+} from "lucide-react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { Session } from "next-auth";
+import { ROUTES } from "@/lib/constants";
 
 interface UsersSidebarProps {
     isSidebarOpen: boolean;
@@ -16,49 +24,19 @@ const menuItems = [
     {
         id: "dashboard",
         name: "ภาพรวมระบบ",
-        href: "/admin",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                />
-            </svg>
-        ),
+        href: ROUTES.ADMIN,
+        icon: <Folder className="h-5 w-5" />,
     },
     {
         id: "documents",
         name: "จัดการโครงการและเอกสาร",
-        href: "/admin",
-        icon: (
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-            </svg>
-        ),
+        href: ROUTES.ADMIN,
+        icon: <Archive className="h-5 w-5" />,
     },
     {
         id: "users",
         name: "จัดการผู้ใช้งาน",
-        href: "/admin/users",
+        href: `${ROUTES.ADMIN}/users`,
         icon: <Users className="h-5 w-5" />,
     },
 ];
@@ -89,20 +67,7 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-6 w-6 text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M9 12l2 2 4-4m5.586 1.414A11.955 11.955 0 0112 2.036 11.955 11.955 0 010 13.938V21.5h7.5v-7.562z"
-                                    />
-                                </svg>
+                                <ShieldCheck className="h-6 w-6 text-white" />
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
@@ -117,20 +82,7 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                             className="lg:hidden p-2 hover:bg-slate-100 rounded-full transition-colors"
                             onClick={() => setIsSidebarOpen(false)}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5 text-slate-500"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
+                            <X className="h-5 w-5 text-slate-500" />
                         </button>
                     </div>
 
@@ -184,21 +136,9 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                     <Button
                         variant="outline"
                         className="w-full justify-center rounded-xl border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all duration-200"
-                        onClick={() => router.push("/userdashboard")}
+                        onClick={() => router.push(ROUTES.DASHBOARD)}
                     >
-                        <svg
-                            className="w-4 h-4 mr-2"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M11 17l-5-5m0 0l5-5m-5 5h12"
-                            />
-                        </svg>
+                        <ArrowLeft className="w-4 h-4 mr-2" />
                         กลับ User Dashboard
                     </Button>
                 </div>

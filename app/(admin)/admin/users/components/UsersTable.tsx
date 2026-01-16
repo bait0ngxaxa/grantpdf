@@ -1,7 +1,6 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button, Pagination } from "@/components/ui";
 import { Edit, Trash2, Search, Users } from "lucide-react";
-import { Pagination } from "./Pagination";
 
 interface UserData {
     id: string;
@@ -18,7 +17,7 @@ interface UsersTableProps {
     onSearchChange: (value: string) => void;
     onEdit: (user: UserData) => void;
     onDelete: (user: UserData) => void;
-    // Pagination props
+
     currentPage: number;
     totalPages: number;
     itemsPerPage: number;
@@ -169,12 +168,19 @@ export const UsersTable: React.FC<UsersTableProps> = ({
             </div>
 
             {/* Pagination */}
-            <div className="bg-white border-t border-slate-100 p-4">
+            <div className="bg-white border-t border-slate-100 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-sm text-slate-500">
+                    แสดง{" "}
+                    {Math.min(
+                        (currentPage - 1) * itemsPerPage + 1,
+                        filteredCount
+                    )}{" "}
+                    - {Math.min(currentPage * itemsPerPage, filteredCount)} จาก{" "}
+                    {filteredCount} รายการ
+                </div>
                 <Pagination
                     currentPage={currentPage}
                     totalPages={totalPages}
-                    totalItems={filteredCount}
-                    itemsPerPage={itemsPerPage}
                     onPageChange={onPageChange}
                 />
             </div>

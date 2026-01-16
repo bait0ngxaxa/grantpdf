@@ -1,5 +1,6 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
+import { Trash2, AlertTriangle } from "lucide-react";
 
 interface UserData {
     id: string;
@@ -30,20 +31,7 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
             <div className="relative w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100">
                 <div className="flex flex-col items-center justify-center text-center mb-6">
                     <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4 shadow-sm">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-8 w-8"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                        </svg>
+                        <Trash2 className="h-8 w-8" />
                     </div>
                     <h3 className="text-xl font-bold text-slate-800">
                         ยืนยันการลบผู้ใช้งาน
@@ -60,17 +48,7 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                 <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-6">
                     <div className="flex">
                         <div className="flex-shrink-0">
-                            <svg
-                                className="h-5 w-5 text-red-400"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
+                            <AlertTriangle className="h-5 w-5 text-red-400" />
                         </div>
                         <div className="ml-3">
                             <h3 className="text-sm font-medium text-red-800">

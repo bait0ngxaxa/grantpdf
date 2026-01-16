@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { PAGINATION } from "@/lib/constants";
+
 import type { Project } from "@/type/models";
 
 export interface UseCreateDocsStateReturn {
@@ -17,9 +17,6 @@ export interface UseCreateDocsStateReturn {
     setIsLoading: (loading: boolean) => void;
     error: string | null;
     setError: (error: string | null) => void;
-    currentPage: number;
-    setCurrentPage: (page: number) => void;
-    projectsPerPage: number;
     isAdmin: boolean;
 }
 
@@ -40,8 +37,6 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
     );
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const projectsPerPage = PAGINATION.PROJECTS_PER_PAGE;
 
     // Check if user is admin
     const isAdmin = session?.user?.role === "admin";
@@ -59,9 +54,6 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
         setIsLoading,
         error,
         setError,
-        currentPage,
-        setCurrentPage,
-        projectsPerPage,
         isAdmin,
     };
 };

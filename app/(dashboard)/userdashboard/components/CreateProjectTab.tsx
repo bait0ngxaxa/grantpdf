@@ -1,7 +1,9 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import type { Project } from "../hooks/useUserData";
+import type { Project } from "@/type";
+import { ROUTES } from "@/lib/constants";
+import { Plus, Building2, FileText, Upload } from "lucide-react";
 
 interface CreateProjectTabProps {
     projects: Project[];
@@ -18,20 +20,7 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
         <div className="animate-fade-in-up">
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-10 text-center">
                 <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-12 w-12 text-blue-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 4v16m8-8H4"
-                        />
-                    </svg>
+                    <Plus className="h-12 w-12 text-blue-500" />
                 </div>
 
                 {/* แสดงเนื้อหาแตกต่างกันตามว่ามีโครงการหรือไม่ */}
@@ -51,20 +40,7 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
                                 className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-500/30 cursor-pointer transform hover:scale-105 transition-all duration-300 px-8 py-6 h-auto text-lg rounded-xl border-0"
                                 onClick={() => setShowCreateProjectModal(true)}
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-6 w-6 mr-3"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                    />
-                                </svg>
+                                <Building2 className="h-6 w-6 mr-3" />
                                 สร้างโครงการแรกของฉัน
                             </Button>
                         </div>
@@ -85,41 +61,15 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
                                 className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 cursor-pointer transform hover:scale-105 transition-all duration-300 h-14 rounded-xl px-8"
                                 onClick={() => setShowCreateProjectModal(true)}
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5 mr-2"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                    />
-                                </svg>
+                                <Building2 className="h-5 w-5 mr-2" />
                                 สร้างโครงการใหม่
                             </Button>
                             <Button
                                 size="lg"
                                 className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 cursor-pointer transform hover:scale-105 transition-all duration-300 h-14 rounded-xl px-8"
-                                onClick={() => router.push("/createdocs")}
+                                onClick={() => router.push(ROUTES.CREATE_DOCS)}
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5 mr-2"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                </svg>
+                                <FileText className="h-5 w-5 mr-2" />
                                 สร้างเอกสารในโครงการ
                             </Button>
                             <Button
@@ -127,20 +77,7 @@ export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
                                 className="bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 shadow-sm cursor-pointer transform hover:scale-105 transition-all duration-300 h-14 rounded-xl px-8"
                                 onClick={() => router.push("/uploads-doc")}
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5 mr-2"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 13l3-3m0 0l3 3m-3-3v12"
-                                    />
-                                </svg>
+                                <Upload className="h-5 w-5 mr-2" />
                                 อัพโหลดเอกสาร
                             </Button>
                         </div>

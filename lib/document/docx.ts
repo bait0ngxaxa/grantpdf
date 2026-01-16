@@ -2,12 +2,9 @@ import fs from "fs/promises";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import { fixThaiDistributed } from "@/lib/documentUtils";
+import { fixThaiDistributed } from "./utils";
 import type { DocxParserOptions } from "./types";
 
-/**
- * Create a configured Docxtemplater instance.
- */
 export function createDocxRenderer(
     templateBuffer: Buffer,
     options: DocxParserOptions = {}

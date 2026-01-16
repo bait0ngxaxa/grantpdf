@@ -3,20 +3,21 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { useTitle } from "@/lib/hooks/useTitle";
+import { useTitle, usePagination } from "@/lib/hooks";
+import { PAGINATION } from "@/lib/constants";
+import { XCircle } from "lucide-react";
 
-import { UsersSidebar } from "./components/UsersSidebar";
-import { UsersTopBar } from "./components/UsersTopBar";
-import { UserStatsCards } from "./components/UserStatsCards";
-import { UsersTable } from "./components/UsersTable";
-import { EditUserModal } from "./components/EditUserModal";
-import { DeleteUserModal } from "./components/DeleteUserModal";
-import { SuccessModal } from "../components/modals/SuccessModal";
+import {
+    UsersSidebar,
+    UsersTopBar,
+    UserStatsCards,
+    UsersTable,
+    EditUserModal,
+    DeleteUserModal,
+} from "./components";
+import { SuccessModal } from "@/components/ui";
 
 import { useUserManagement } from "./hooks/useUserManagement";
-import { usePagination } from "./hooks/usePagination";
-
-const USERS_PER_PAGE = 10;
 
 export default function AdminUserManagementPage() {
     const { data: session, status } = useSession();
@@ -80,8 +81,9 @@ export default function AdminUserManagementPage() {
         );
     }, [users, searchTerm]);
 
-    const pagination = usePagination(filteredUsers, {
-        itemsPerPage: USERS_PER_PAGE,
+    const pagination = usePagination({
+        items: filteredUsers,
+        itemsPerPage: PAGINATION.USERS_PER_PAGE,
     });
 
     useEffect(() => {
@@ -128,19 +130,7 @@ export default function AdminUserManagementPage() {
                             role="alert"
                             className="alert alert-error mb-6 bg-red-50 border border-red-200 text-red-800 rounded-2xl"
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="stroke-current shrink-0 h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
+                            <XCircle className="stroke-current shrink-0 h-6 w-6" />
                             <span>{fetchError}</span>
                         </div>
                     )}
@@ -184,9 +174,9 @@ export default function AdminUserManagementPage() {
             />
 
             <SuccessModal
-                isSuccessModalOpen={isResultModalOpen}
-                setIsSuccessModalOpen={closeResultModal}
-                successMessage={
+                isOpen={isResultModalOpen}
+                onClose={closeResultModal}
+                message={
                     isResultSuccess
                         ? resultMessage
                         : `ข้อผิดพลาด: ${resultMessage}`

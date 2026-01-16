@@ -3,29 +3,32 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
-import { useTitle } from "@/lib/hooks/useTitle";
+import {
+    useTitle,
+    usePagination,
+    usePreviewModal,
+    useSuccessModal,
+} from "@/lib/hooks";
 
-import { useAdminData } from "./hooks/useAdminData";
-import { useProjectStatusActions } from "./hooks/useProjectStatusActions";
-import { usePreviewModal, useSuccessModal } from "./hooks/useModalStates";
-import { useUIStates } from "./hooks/useUIStates";
-import { useAdminProjectFilter } from "./hooks/useAdminProjectFilter";
+import {
+    useAdminData,
+    useProjectStatusActions,
+    useUIStates,
+    useAdminProjectFilter,
+} from "./hooks";
 
-import { AdminSidebar } from "./components/AdminSidebar";
-import { AdminTopBar } from "./components/AdminTopBar";
-import { DashboardOverview } from "./components/DashboardOverview";
-import { UsersTab } from "./components/UsersTab";
+import {
+    AdminSidebar,
+    AdminTopBar,
+    DashboardOverview,
+    UsersTab,
+    SearchAndFilter,
+    ProjectsList,
+} from "./components";
 
-import SearchAndFilter from "./components/SearchAndFilter";
-import ProjectsList from "./components/ProjectsList";
+import { SuccessModal, PdfPreviewModal, Pagination } from "@/components/ui";
+import { ProjectStatusModal } from "./components/modals";
 
-import { SuccessModal } from "./components/modals/SuccessModal";
-import { PreviewModal } from "./components/modals/PreviewModal";
-import { ProjectStatusModal } from "./components/modals/ProjectStatusModal";
-import { Pagination } from "@/components/ui/Pagination";
-import { usePagination } from "@/lib/hooks/usePagination";
-
-// Import shared types and constants
 import { PAGINATION } from "@/lib/constants";
 import { getStatusColor } from "@/lib/utils";
 
@@ -55,7 +58,7 @@ export default function AdminDashboardPage() {
 
         isLoading,
         totalUsers,
-        latestUser,
+
         todayProjects,
         todayFiles,
         fetchProjects,
@@ -253,29 +256,22 @@ export default function AdminDashboardPage() {
                         )}
 
                         {/* Users Tab */}
-                        {activeTab === "users" && (
-                            <UsersTab
-                                totalUsers={totalUsers}
-                                latestUser={latestUser}
-                                allFiles={allFiles}
-                                router={router}
-                            />
-                        )}
+                        {activeTab === "users" && <UsersTab />}
                     </div>
                 </div>
 
                 {/* All Modals */}
                 <SuccessModal
-                    isSuccessModalOpen={isSuccessModalOpen}
-                    setIsSuccessModalOpen={setIsSuccessModalOpen}
-                    successMessage={successMessage}
+                    isOpen={isSuccessModalOpen}
+                    onClose={() => setIsSuccessModalOpen(false)}
+                    message={successMessage}
                 />
 
-                <PreviewModal
-                    isPreviewModalOpen={isPreviewModalOpen}
+                <PdfPreviewModal
+                    isOpen={isPreviewModalOpen}
                     previewUrl={previewUrl}
                     previewFileName={previewFileName}
-                    closePreviewModal={closePreviewModal}
+                    onClose={closePreviewModal}
                 />
 
                 <ProjectStatusModal

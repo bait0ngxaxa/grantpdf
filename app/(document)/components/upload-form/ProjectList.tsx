@@ -1,16 +1,15 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { Folder, Calendar, ChevronRight } from "lucide-react";
+import type { Project } from "@/type";
 
-interface Project {
-    id: string;
-    name: string;
-    description?: string;
-    created_at: string;
-}
+type ProjectListItem = Pick<
+    Project,
+    "id" | "name" | "description" | "created_at"
+>;
 
 interface ProjectListProps {
-    projects: Project[];
+    projects: ProjectListItem[];
     selectedProjectId: string | null;
     onSelectProject: (id: string) => void;
     isLoading: boolean;

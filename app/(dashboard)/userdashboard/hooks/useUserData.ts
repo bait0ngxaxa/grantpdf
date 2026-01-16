@@ -1,42 +1,9 @@
 import { useState } from "react";
+import type { Project, UserFile } from "@/type";
+import type { ProjectsApiResponse } from "@/type/api";
+import { API_ROUTES } from "@/lib/constants";
 
-export type AttachmentFile = {
-    id: string;
-    fileName: string;
-    filePath: string;
-    fileSize: number;
-    mimeType: string;
-};
-
-export type UserFile = {
-    id: string;
-    originalFileName: string;
-    storagePath: string;
-    created_at: string;
-    updated_at: string;
-    fileExtension: string;
-    userName: string;
-    attachmentFiles?: AttachmentFile[];
-};
-
-export type Project = {
-    id: string;
-    name: string;
-    description?: string;
-    status: string;
-    statusNote?: string;
-    created_at: string;
-    updated_at: string;
-    files: UserFile[];
-    _count: {
-        files: number;
-    };
-};
-
-type ProjectsResponse = {
-    projects: Project[];
-    orphanFiles: UserFile[];
-};
+export type { Project, UserFile } from "@/type";
 
 export const useUserData = () => {
     const [projects, setProjects] = useState<Project[]>([]);
@@ -44,16 +11,15 @@ export const useUserData = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch user projects and documents from the API
     const fetchUserData = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const res = await fetch("/api/projects");
+            const res = await fetch(API_ROUTES.PROJECTS);
             if (!res.ok) {
                 throw new Error("Failed to fetch projects");
             }
-            const data: ProjectsResponse = await res.json();
+            const data: ProjectsApiResponse = await res.json();
             setProjects(data.projects);
             setOrphanFiles(data.orphanFiles);
         } catch (err) {

@@ -1,8 +1,8 @@
 // เส้นดึงข้อมูล user จาก table user ทั้งหมด
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getAllUsers } from "@/lib/services";
 
 export async function GET() {
     try {
@@ -15,25 +15,8 @@ export async function GET() {
             );
         }
 
-        const users = await prisma.user.findMany({
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                created_at: true,
-            },
-            orderBy: {
-                created_at: "desc",
-            },
-        });
-
-        const safeUsers = users.map((user: (typeof users)[number]) => ({
-            ...user,
-            id: user.id.toString(),
-        }));
-
-        return NextResponse.json({ users: safeUsers }, { status: 200 });
+        const users = await getAllUsers();
+        return NextResponse.json({ users }, { status: 200 });
     } catch (error) {
         console.error("Error fetching users:", error);
         return NextResponse.json(

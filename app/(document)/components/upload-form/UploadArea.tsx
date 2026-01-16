@@ -1,5 +1,5 @@
 import { ChangeEvent, DragEvent } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui";
 import {
     UploadCloud,
     FileText,

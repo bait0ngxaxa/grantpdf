@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoginSuccessModal } from "@/components/ui/LoginSuccessModal";
 import { useTitle } from "@/lib/hooks/useTitle";
-import { FileText, Activity } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -61,40 +61,9 @@ export default function LoginPage() {
                     <h1 className="text-5xl font-bold text-slate-900 leading-tight">
                         ยินดีต้อนรับสู่ <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600">
-                            ระบบจัดการเอกสาร
+                            ระบบจัดการเอกสาร GRANT ONLINE
                         </span>
                     </h1>
-
-                    <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
-                        เข้าสู่ระบบเพื่อสร้างและจัดการ ใบอนุมัติ, สัญญา, TOR{" "}
-                        <br />
-                        และติดตามสถานะโครงการ
-                    </p>
-
-                    <div className="grid grid-cols-2 gap-4 max-w-lg">
-                        <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
-                            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-3">
-                                <FileText className="w-5 h-5" />
-                            </div>
-                            <div className="font-semibold text-slate-800">
-                                สร้างเอกสาร
-                            </div>
-                            <div className="text-sm text-slate-400">
-                                ด้วยเทมเพลตที่กำหนด
-                            </div>
-                        </div>
-                        <div className="bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-white shadow-sm">
-                            <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600 mb-3">
-                                <Activity className="w-5 h-5" />
-                            </div>
-                            <div className="font-semibold text-slate-800">
-                                ติดตามสถานะ
-                            </div>
-                            <div className="text-sm text-slate-400">
-                                โครงการของคุณ
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Right Side - Login Form */}
@@ -156,18 +125,7 @@ export default function LoginPage() {
 
                             {error && (
                                 <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 20 20"
-                                        fill="currentColor"
-                                        className="w-5 h-5 shrink-0"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>
                             )}

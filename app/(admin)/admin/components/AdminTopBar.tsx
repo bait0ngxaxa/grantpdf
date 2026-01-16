@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { ChartBarBig, LogOut } from "lucide-react";
+import { Button } from "@/components/ui";
+import { ChartBarBig, LogOut, Menu } from "lucide-react";
 
 interface AdminTopBarProps {
     setIsSidebarOpen: (open: boolean) => void;
@@ -27,20 +27,7 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
                         className="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors"
                         onClick={() => setIsSidebarOpen(true)}
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M4 6h16M4 12h16M4 18h16"
-                            />
-                        </svg>
+                        <Menu className="h-6 w-6" />
                     </button>
                     <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
                         <ChartBarBig className="h-6 w-6" />

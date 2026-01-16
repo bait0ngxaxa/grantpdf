@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/constants";
 
 export interface UseNavigationProps {
     selectedProjectId: string | null;
@@ -30,7 +31,6 @@ export const useNavigation = ({
 }: UseNavigationProps): UseNavigationReturn => {
     const router = useRouter();
 
-    // Handle back button logic
     const handleBack = (
         selectedContractType: string | null,
         selectedProjectId: string | null,
@@ -46,11 +46,10 @@ export const useNavigation = ({
         } else if (selectedCategory) {
             setSelectedCategory(null);
         } else {
-            router.push("/userdashboard");
+            router.push(ROUTES.DASHBOARD);
         }
     };
 
-    // Handle category selection with role-based access control
     const handleCategorySelection = (
         category: string,
         isAdmin: boolean,
