@@ -79,6 +79,7 @@ export function ApprovalForm(): React.JSX.Element {
         handleAttachmentFilesChange,
         removeAttachmentFile,
         handleApprovalSubmit,
+        getPreviewError,
     } = useApprovalLogic({
         formData,
         setFormData,
@@ -93,24 +94,22 @@ export function ApprovalForm(): React.JSX.Element {
     // Use validation hook
     const {
         errors,
-        handlePreview: onPreview,
+        getHandlePreview: handlePreview,
         createPhoneChangeHandler,
         validateBeforeSubmit,
     } = useDocumentValidation<ApprovalData>({
         validateForm: validateApproval,
         openPreview,
+        formData,
         phoneFields: ["tel"],
         emailFields: ["email"],
     });
-
-    // Wrap handlePreview to pass formData
-    const handlePreview = (): void => onPreview(formData);
 
     // Create phone change handler
     const handlePhoneChange = createPhoneChangeHandler(
         "tel",
         handleChange,
-        setFormData
+        setFormData,
     );
 
     const isDirty =
@@ -203,6 +202,7 @@ export function ApprovalForm(): React.JSX.Element {
                 isOpen={isPreviewOpen}
                 onClose={closePreview}
                 onConfirm={confirmPreview}
+                errorMessage={getPreviewError()}
             >
                 <PreviewGrid>
                     <PreviewField
@@ -295,7 +295,7 @@ export function ApprovalForm(): React.JSX.Element {
                                         <span className="text-xs text-slate-500">
                                             (
                                             {(file.size / 1024 / 1024).toFixed(
-                                                2
+                                                2,
                                             )}{" "}
                                             MB)
                                         </span>

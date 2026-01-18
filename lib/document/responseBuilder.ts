@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import type { ProjectResult } from "./types";
 
-/**
- * Handle document generation errors with standardized response.
- */
 export function handleDocumentError(error: unknown): NextResponse {
     console.error("Error generating document:", error);
 
@@ -16,12 +13,9 @@ export function handleDocumentError(error: unknown): NextResponse {
     return new NextResponse(errorMessage, { status: 500 });
 }
 
-/**
- * Build success response for document generation.
- */
 export function buildSuccessResponse(
     storagePath: string,
-    project: ProjectResult
+    project: ProjectResult,
 ): NextResponse {
     return NextResponse.json({
         success: true,

@@ -15,6 +15,7 @@ export {
     updateUser,
     deleteUser,
     getUserCount,
+    checkAdminPermission,
 } from "./userService";
 
 // File Service

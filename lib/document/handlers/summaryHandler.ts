@@ -8,7 +8,7 @@ import {
     isProjectError,
     createUserFileRecord,
 } from "@/lib/document";
-import { generateUniqueFilename } from "../utils";
+import { generateUniqueFilename } from "../fixThaiwordUtils";
 import {
     ensureStorageDir,
     getStoragePath,
@@ -17,7 +17,7 @@ import {
 
 export async function handleSummaryGeneration(
     formData: FormData,
-    userId: number
+    userId: number,
 ): Promise<Response> {
     // Extract form fields
     const fileName = formData.get("fileName") as string;
@@ -52,7 +52,7 @@ export async function handleSummaryGeneration(
             {
                 error: "Template file not found at public/summary.xlsx. Please ensure the template is in .xlsx format (not .xls)",
             },
-            { status: 404 }
+            { status: 404 },
         );
     }
 
@@ -63,7 +63,7 @@ export async function handleSummaryGeneration(
     if (!worksheet) {
         return NextResponse.json(
             { error: "No worksheet found in template" },
-            { status: 400 }
+            { status: 400 },
         );
     }
 
@@ -99,7 +99,7 @@ export async function handleSummaryGeneration(
     // Function to replace placeholders in cell values
     const replacePlaceholders = (
         text: string,
-        data: Record<string, string | number>
+        data: Record<string, string | number>,
     ): string => {
         if (typeof text !== "string") return text;
 
@@ -109,7 +109,7 @@ export async function handleSummaryGeneration(
             const value = String(data[key] || "");
             const escapedPlaceholder = placeholder.replace(
                 /[.*+?^${}()|[\]\\]/g,
-                "\\$&"
+                "\\$&",
             );
             result = result.replace(new RegExp(escapedPlaceholder, "g"), value);
         });
@@ -124,7 +124,7 @@ export async function handleSummaryGeneration(
                 const originalValue = cell.value;
                 const newValue = replacePlaceholders(
                     originalValue,
-                    templateData
+                    templateData,
                 );
                 if (originalValue !== newValue) {
                     cell.value = newValue;
@@ -139,10 +139,10 @@ export async function handleSummaryGeneration(
                             if (textRun.text) {
                                 textRun.text = replacePlaceholders(
                                     textRun.text,
-                                    templateData
+                                    templateData,
                                 );
                             }
-                        }
+                        },
                     );
                 }
                 if (
@@ -152,7 +152,7 @@ export async function handleSummaryGeneration(
                     const originalFormula = cell.value.formula;
                     const newFormula = replacePlaceholders(
                         originalFormula,
-                        templateData
+                        templateData,
                     );
                     if (originalFormula !== newFormula) {
                         cell.value = { ...cell.value, formula: newFormula };
@@ -171,7 +171,7 @@ export async function handleSummaryGeneration(
     const filePath = getStoragePath("documents", uniqueFileName);
     const relativeStoragePath = getRelativeStoragePath(
         "documents",
-        uniqueFileName
+        uniqueFileName,
     );
     await fsPromises.writeFile(filePath, Buffer.from(buffer));
 
@@ -180,7 +180,7 @@ export async function handleSummaryGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
-        "สร้างจากแบบสรุปโครงการ"
+        "สร้างจากแบบสรุปโครงการ",
     );
     if (isProjectError(projectResult)) {
         return projectResult;
@@ -192,7 +192,7 @@ export async function handleSummaryGeneration(
         projectResult.id,
         fileName,
         relativeStoragePath,
-        "xlsx"
+        "xlsx",
     );
 
     return NextResponse.json({

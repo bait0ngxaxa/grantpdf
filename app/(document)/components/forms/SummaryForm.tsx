@@ -67,15 +67,13 @@ export function SummaryForm(): React.JSX.Element {
     // Use validation hook
     const {
         errors,
-        handlePreview: onPreview,
+        getHandlePreview: handlePreview,
         validateBeforeSubmit,
     } = useDocumentValidation<SummaryData>({
         validateForm: validateSummary,
         openPreview,
+        formData,
     });
-
-    // Wrap handlePreview to pass formData
-    const handlePreview = (): void => onPreview(formData);
 
     // Wrap validateBeforeSubmit
     const onSubmit = (e: React.FormEvent<HTMLFormElement>): void => {

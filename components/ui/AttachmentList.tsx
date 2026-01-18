@@ -3,7 +3,6 @@
 import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 import type { AttachmentFile } from "@/type";
 import { Image as ImageIcon, File, FileText, Download } from "lucide-react";
-import { truncateFileName } from "@/lib/utils";
 
 interface AttachmentListProps {
     attachmentFiles: AttachmentFile[];
@@ -30,23 +29,23 @@ export function AttachmentList({
     };
 
     return (
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {attachmentFiles.map((attachment) => (
                     <div
                         key={attachment.id}
-                        className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border"
+                        className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border overflow-hidden"
                     >
-                        <div className="flex items-center space-x-2 flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden">
                             <div className="flex-shrink-0">
                                 {getAttachmentIcon(attachment.mimeType)}
                             </div>
-                            <div className="flex-1 min-w-0">
+                            <div className="flex-1 min-w-0 overflow-hidden">
                                 <div
                                     className="text-sm font-medium text-gray-900 dark:text-white truncate"
                                     title={attachment.fileName}
                                 >
-                                    {truncateFileName(attachment.fileName, 25)}
+                                    {attachment.fileName}
                                 </div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400">
                                     {attachment.fileSize > 0
@@ -67,7 +66,7 @@ export function AttachmentList({
                                 })
                             }
                             disabled={isDownloading}
-                            className="flex-shrink-0 ml-2 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200 disabled:opacity-50"
+                            className="flex-shrink-0 ml-2 p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200 disabled:opacity-50"
                             title="ดาวน์โหลด"
                         >
                             <Download className="w-4 h-4" />

@@ -2,12 +2,12 @@ import fs from "fs/promises";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import { fixThaiDistributed } from "./utils";
+import { fixThaiDistributed } from "./fixThaiwordUtils";
 import type { DocxParserOptions } from "./types";
 
 export function createDocxRenderer(
     templateBuffer: Buffer,
-    options: DocxParserOptions = {}
+    options: DocxParserOptions = {},
 ): Docxtemplater {
     const { textareaFields = [], modules = [], customNullGetter } = options;
 
@@ -29,13 +29,13 @@ export function createDocxRenderer(
         parser: function (tag): {
             get: (
                 scope: Record<string, unknown>,
-                context: { scopePathItem: number[] }
+                context: { scopePathItem: number[] },
             ) => string | unknown;
         } {
             return {
                 get: function (
                     scope: Record<string, unknown>,
-                    _context: unknown
+                    _context: unknown,
                 ): string | unknown {
                     if (tag === ".") {
                         return scope;
@@ -64,7 +64,7 @@ export function createDocxRenderer(
  */
 export async function loadTemplate(
     templateName: string,
-    fallbackTemplate?: string
+    fallbackTemplate?: string,
 ): Promise<Buffer> {
     const templatePath = path.join(process.cwd(), "public", templateName);
 
@@ -75,7 +75,7 @@ export async function loadTemplate(
             const fallbackPath = path.join(
                 process.cwd(),
                 "public",
-                fallbackTemplate
+                fallbackTemplate,
             );
             return await fs.readFile(fallbackPath);
         }

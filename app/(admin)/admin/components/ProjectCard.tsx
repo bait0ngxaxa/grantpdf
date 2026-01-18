@@ -60,16 +60,16 @@ export default function ProjectCard({
                 }`}
                 onClick={() => onToggleExpansion(project.id)}
             >
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-start space-x-4">
                         <div className="flex-shrink-0">
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-200">
                                 <Archive className="h-6 w-6 text-white" />
                             </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-3 mb-1">
-                                <h3 className="text-lg font-bold text-slate-800 truncate">
+                            <div className="flex items-center flex-wrap gap-2 mb-1">
+                                <h3 className="text-lg font-bold text-slate-800 break-words">
                                     {project.name}
                                 </h3>
                                 {showNewBadge && (
@@ -97,13 +97,13 @@ export default function ProjectCard({
                                         <Calendar className="h-3.5 w-3.5" />
                                     </div>
                                     {new Date(
-                                        project.created_at
+                                        project.created_at,
                                     ).toLocaleDateString("th-TH")}
                                 </span>
                             </div>
 
                             {project.description && (
-                                <p className="text-sm text-slate-400 mt-2 truncate pl-1">
+                                <p className="text-sm text-slate-400 mt-2 break-words pl-1">
                                     {project.description}
                                 </p>
                             )}
@@ -112,7 +112,7 @@ export default function ProjectCard({
                                 <div className="flex items-center space-x-3">
                                     <span
                                         className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(
-                                            project.status
+                                            project.status,
                                         )}`}
                                     >
                                         {getStatusIcon(project.status)}
@@ -120,7 +120,7 @@ export default function ProjectCard({
                                     </span>
                                 </div>
                                 {project.statusNote && (
-                                    <p className="text-xs text-slate-500 pl-1 truncate max-w-xs">
+                                    <p className="text-xs text-slate-500 pl-1 break-words">
                                         <span className="font-medium text-slate-600">
                                             หมายเหตุ:
                                         </span>{" "}
@@ -131,22 +131,23 @@ export default function ProjectCard({
                         </div>
                     </div>
 
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center justify-between sm:justify-end space-x-3 pl-16 sm:pl-0">
                         <Button
                             size="sm"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onEditProjectStatus(project);
                             }}
-                            className="h-10 px-2 sm:px-4 rounded-xl text-sm bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm font-medium transition-all"
+                            className="h-10 px-4 rounded-xl text-sm bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm font-medium transition-all"
                         >
-                            <Pencil className="h-4 w-4 mr-2 text-slate-400" />
+                            <Pencil className="h-4 w-4 sm:mr-2 text-slate-400" />
                             <span className="hidden sm:inline">
                                 จัดการสถานะ
                             </span>
+                            <span className="sm:hidden ml-2">จัดการ</span>
                         </Button>
                         <div
-                            className={`p-2 rounded-lg transition-colors ${
+                            className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
                                 isExpanded
                                     ? "bg-slate-100 text-slate-600"
                                     : "text-slate-400"

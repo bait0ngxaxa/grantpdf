@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { logAudit } from "@/lib/auditLog";
-import { getAllProjects, updateProjectStatus } from "@/lib/services";
+import {
+    getAllProjects,
+    updateProjectStatus,
+    checkAdminPermission,
+} from "@/lib/services";
 
 export async function GET(): Promise<NextResponse> {
     try {
@@ -11,7 +15,7 @@ export async function GET(): Promise<NextResponse> {
         if (!session || !session.user?.id || session.user?.role !== "admin") {
             return NextResponse.json(
                 { error: "Unauthorized" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -21,19 +25,19 @@ export async function GET(): Promise<NextResponse> {
         console.error("Error fetching admin projects:", error);
         return NextResponse.json(
             { error: "Failed to fetch projects" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
 
 export async function PUT(req: Request): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const { isAdmin, session } = await checkAdminPermission();
 
-        if (!session || !session.user?.id || session.user?.role !== "admin") {
+        if (!isAdmin || !session) {
             return NextResponse.json(
                 { error: "Unauthorized" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -74,7 +78,7 @@ export async function PUT(req: Request): Promise<NextResponse> {
 
         return NextResponse.json(
             { error: "Failed to update project status" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }

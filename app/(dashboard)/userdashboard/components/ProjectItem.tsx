@@ -50,27 +50,27 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
         >
             {/* Project Header */}
             <div
-                className="flex items-center justify-between cursor-pointer p-6 transition-colors duration-200"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between cursor-pointer p-4 sm:p-6 transition-colors duration-200 gap-4"
                 onClick={onToggleExpand}
             >
-                <div className="flex items-center space-x-5">
+                <div className="flex items-start space-x-4 min-w-0">
                     <div
-                        className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors duration-300 ${
+                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex-shrink-0 flex items-center justify-center transition-colors duration-300 ${
                             isExpanded
                                 ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
                                 : "bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500"
                         }`}
                     >
-                        <Building2 className="h-7 w-7" />
+                        <Building2 className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
-                    <div>
-                        <h3 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-blue-700 transition-colors">
+                    <div className="min-w-0 flex-1">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-1 group-hover:text-blue-700 transition-colors break-words">
                             {project.name}
                         </h3>
-                        <p className="text-slate-500 text-sm mb-3 max-w-xl truncate">
+                        <p className="text-slate-500 text-sm mb-3 break-words line-clamp-2 sm:line-clamp-1">
                             {project.description || "ไม่มีคำอธิบาย"}
                         </p>
-                        <div className="flex items-center space-x-4">
+                        <div className="flex flex-wrap items-center gap-2">
                             <div className="flex items-center text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
                                 <FileText className="h-3.5 w-3.5 mr-1.5" />
                                 {project.files.length} เอกสาร
@@ -78,17 +78,38 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                             <div className="flex items-center text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
                                 <Calendar className="h-3.5 w-3.5 mr-1.5" />
                                 {new Date(
-                                    project.created_at
+                                    project.created_at,
                                 ).toLocaleDateString("th-TH")}
+                            </div>
+                            {/* Mobile Status Badge */}
+                            <div className="sm:hidden relative">
+                                {hasUnreadStatusNote && (
+                                    <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500" />
+                                    </span>
+                                )}
+                                <button
+                                    onClick={onStatusClick}
+                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border shadow-sm cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(
+                                        project.status ||
+                                            PROJECT_STATUS.IN_PROGRESS,
+                                    )}`}
+                                    title="คลิกเพื่อดูรายละเอียดสถานะ"
+                                >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-current mr-1.5 opacity-75" />
+                                    {project.status ||
+                                        PROJECT_STATUS.IN_PROGRESS}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-4">
-                    {/* Status Badge */}
-                    <div className="hidden md:block relative">
+                <div className="flex items-center justify-between sm:justify-end gap-3 pl-16 sm:pl-0">
+                    {/* Desktop Status Badge */}
+                    <div className="hidden sm:block relative">
                         {hasUnreadStatusNote && (
                             <span className="absolute -top-1 -right-1 flex h-3 w-3">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
@@ -98,7 +119,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                         <button
                             onClick={onStatusClick}
                             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border shadow-sm cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(
-                                project.status || PROJECT_STATUS.IN_PROGRESS
+                                project.status || PROJECT_STATUS.IN_PROGRESS,
                             )}`}
                             title="คลิกเพื่อดูรายละเอียดสถานะ"
                         >
@@ -108,7 +129,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center pl-4 border-l border-slate-100 space-x-3">
+                    <div className="flex items-center sm:pl-4 sm:border-l border-slate-100 space-x-1 sm:space-x-3">
                         <Button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -116,13 +137,13 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                                     `${
                                         ROUTES.CREATE_DOCS
                                     }?projectId=${encodeURIComponent(
-                                        project.id
-                                    )}`
+                                        project.id,
+                                    )}`,
                                 );
                             }}
                             size="sm"
                             variant="outline"
-                            className="hidden sm:flex rounded-xl border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all font-semibold"
+                            className="hidden md:flex rounded-xl border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all font-semibold"
                         >
                             จัดการ/เพิ่มเอกสาร
                         </Button>
@@ -153,7 +174,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
 
                     {/* Expand Arrow */}
                     <div
-                        className={`p-2 rounded-full transition-transform duration-300 ${
+                        className={`p-2 rounded-full flex-shrink-0 transition-transform duration-300 ${
                             isExpanded
                                 ? "bg-slate-100 rotate-180"
                                 : "bg-white text-slate-400"
@@ -187,8 +208,8 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                                         e.stopPropagation();
                                         router.push(
                                             `/createdocs?projectId=${encodeURIComponent(
-                                                project.id
-                                            )}`
+                                                project.id,
+                                            )}`,
                                         );
                                     }}
                                     size="sm"
@@ -223,8 +244,8 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                                 onClick={() => {
                                     router.push(
                                         `/createdocs?projectId=${encodeURIComponent(
-                                            project.id
-                                        )}`
+                                            project.id,
+                                        )}`,
                                     );
                                 }}
                                 size="sm"

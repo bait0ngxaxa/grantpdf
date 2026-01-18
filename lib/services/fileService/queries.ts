@@ -1,97 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import type { AdminDocumentFile, AttachmentFile } from "@/type/models";
+import type { AdminDocumentFile } from "@/type/models";
+import type { RawFile, FileForDeletion } from "./types";
+import { sanitizeFile, filterOutAttachmentFiles } from "./sanitizers";
 
-// =====================================================
-// Types
-// =====================================================
-
-interface RawFile {
-    id: bigint;
-    userId: bigint;
-    projectId: bigint | null;
-    originalFileName: string;
-    storagePath: string;
-    fileExtension: string;
-    downloadStatus: string | null;
-    downloadedAt: Date | null;
-    created_at: Date;
-    updated_at: Date;
-    user?: {
-        id: bigint;
-        name: string | null;
-        email: string;
-    } | null;
-    attachmentFiles?: RawAttachment[];
-}
-
-interface RawAttachment {
-    id: bigint;
-    fileName: string;
-    filePath: string | null;
-    fileSize: number;
-    mimeType: string | null;
-}
-
-// =====================================================
-// Private Helper Functions
-// =====================================================
-
-function sanitizeAttachments(
-    attachments: RawAttachment[] | undefined
-): AttachmentFile[] {
-    return (
-        attachments?.map((attachment) => ({
-            id: attachment.id.toString(),
-            fileName: attachment.fileName,
-            filePath: attachment.filePath ?? undefined,
-            fileSize: attachment.fileSize,
-            mimeType: attachment.mimeType,
-        })) || []
-    );
-}
-
-function sanitizeFile(file: RawFile): AdminDocumentFile {
-    return {
-        id: file.id.toString(),
-        userId: file.userId.toString(),
-        originalFileName: file.originalFileName,
-        storagePath: file.storagePath,
-        fileExtension: file.fileExtension,
-        downloadStatus: file.downloadStatus || "pending",
-        downloadedAt: file.downloadedAt?.toISOString(),
-        created_at: file.created_at.toISOString(),
-        updated_at: file.updated_at.toISOString(),
-        fileName: file.originalFileName,
-        createdAt: file.created_at.toISOString(),
-        lastModified: file.updated_at.toISOString(),
-        userName: file.user?.name || "Unknown User",
-        userEmail: file.user?.email || "Unknown Email",
-        attachmentFiles: sanitizeAttachments(file.attachmentFiles),
-    };
-}
-
-function filterOutAttachmentFiles(
-    files: AdminDocumentFile[]
-): AdminDocumentFile[] {
-    const attachmentPaths = new Set(
-        files.flatMap(
-            (file) =>
-                file.attachmentFiles
-                    ?.map((att) => att.filePath)
-                    .filter(Boolean) || []
-        )
-    );
-
-    return files.filter((file) => !attachmentPaths.has(file.storagePath));
-}
-
-// =====================================================
-// Public API
-// =====================================================
-
-/**
- * Get all files for admin dashboard view
- */
 export async function getAllFilesForAdmin(): Promise<AdminDocumentFile[]> {
     const allUserFiles = await prisma.userFile.findMany({
         orderBy: {
@@ -127,16 +38,13 @@ export async function getAllFilesForAdmin(): Promise<AdminDocumentFile[]> {
     });
 
     const sanitizedFiles = (allUserFiles as unknown as RawFile[]).map(
-        sanitizeFile
+        sanitizeFile,
     );
     return filterOutAttachmentFiles(sanitizedFiles);
 }
 
-/**
- * Get files for a specific user
- */
 export async function getFilesByUserId(
-    userId: number
+    userId: number,
 ): Promise<AdminDocumentFile[]> {
     const userFiles = await prisma.userFile.findMany({
         where: { userId },
@@ -174,9 +82,6 @@ export async function getFilesByUserId(
     return filterOutAttachmentFiles(sanitizedFiles);
 }
 
-/**
- * Check if file exists
- */
 export async function fileExists(id: number): Promise<boolean> {
     const file = await prisma.userFile.findUnique({
         where: { id },
@@ -185,11 +90,8 @@ export async function fileExists(id: number): Promise<boolean> {
     return file !== null;
 }
 
-/**
- * Get file by ID
- */
 export async function getFileById(
-    id: number
+    id: number,
 ): Promise<AdminDocumentFile | null> {
     const file = await prisma.userFile.findUnique({
         where: { id },
@@ -226,18 +128,8 @@ export async function getFileById(
     return sanitizeFile(file as unknown as RawFile);
 }
 
-interface FileForDeletion {
-    id: string;
-    originalFileName: string;
-    storagePath: string;
-    userId: string;
-}
-
-/**
- * Get file info needed for deletion validation
- */
 export async function getFileForDeletion(
-    id: number
+    id: number,
 ): Promise<FileForDeletion | null> {
     const file = await prisma.userFile.findUnique({
         where: { id },
@@ -259,9 +151,6 @@ export async function getFileForDeletion(
     };
 }
 
-/**
- * Delete file record from database
- */
 export async function deleteFileRecord(id: number): Promise<void> {
     await prisma.userFile.delete({ where: { id } });
 }

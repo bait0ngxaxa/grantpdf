@@ -12,7 +12,7 @@ import {
     fixThaiDistributed,
     generateUniqueFilename,
     getMimeType,
-} from "../utils";
+} from "../fixThaiwordUtils";
 import { prisma } from "@/lib/prisma";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
@@ -20,7 +20,7 @@ import { getFullPathFromStoragePath } from "@/lib/fileStorage";
 
 export async function handleApprovalGeneration(
     formData: FormData,
-    userId: number
+    userId: number,
 ): Promise<Response> {
     // Extract form fields
     const head = formData.get("head") as string;
@@ -59,7 +59,7 @@ export async function handleApprovalGeneration(
     // Handle signature files
     const signatureFile = formData.get("signatureFile") as File | null;
     const canvasSignatureFile = formData.get(
-        "canvasSignatureFile"
+        "canvasSignatureFile",
     ) as File | null;
 
     if (!projectName) {
@@ -113,13 +113,13 @@ export async function handleApprovalGeneration(
         parser: function (tag): {
             get: (
                 scope: Record<string, unknown>,
-                context: { scopePathItem: number[] }
+                context: { scopePathItem: number[] },
             ) => string | unknown;
         } {
             return {
                 get: function (
                     scope: Record<string, unknown>,
-                    _context: unknown
+                    _context: unknown,
                 ): string | unknown {
                     if (tag === ".") {
                         return scope;
@@ -197,7 +197,7 @@ export async function handleApprovalGeneration(
     const { relativeStoragePath } = await saveDocumentToStorage(
         outputBuffer,
         uniqueFileName.replace(".docx", ""),
-        "docx"
+        "docx",
     );
 
     // Find or create project
@@ -205,7 +205,7 @@ export async function handleApprovalGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
-        "สร้างจากเอกสารขออนุมัติ"
+        "สร้างจากเอกสารขออนุมัติ",
     );
     if (isProjectError(projectResult)) {
         return projectResult;
@@ -239,14 +239,14 @@ export async function handleApprovalGeneration(
                     let actualFileSize = 0;
                     try {
                         const fullFilePath = getFullPathFromStoragePath(
-                            attachmentFile.storagePath
+                            attachmentFile.storagePath,
                         );
                         const fileStats = await fs.stat(fullFilePath);
                         actualFileSize = fileStats.size;
                     } catch (sizeError) {
                         console.error(
                             `Error reading file size for ${attachmentFile.originalFileName}:`,
-                            sizeError
+                            sizeError,
                         );
                         actualFileSize = 0;
                     }
@@ -262,13 +262,13 @@ export async function handleApprovalGeneration(
                     });
                 } else {
                     console.error(
-                        `Attachment file not found with ID: ${fileId}`
+                        `Attachment file not found with ID: ${fileId}`,
                     );
                 }
             } catch (error) {
                 console.error(
                     `Error linking attachment file ${fileId}:`,
-                    error
+                    error,
                 );
             }
         }

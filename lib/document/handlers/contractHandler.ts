@@ -8,12 +8,12 @@ import {
     createUserFileRecord,
     buildSuccessResponse,
 } from "@/lib/document";
-import { fixThaiDistributed } from "../utils";
+import { fixThaiDistributed } from "../fixThaiwordUtils";
 import { prisma } from "@/lib/prisma";
 
 export async function handleContractGeneration(
     formData: FormData,
-    userId: number
+    userId: number,
 ): Promise<Response> {
     // Extract form fields
     const fileName = formData.get("fileName") as string;
@@ -25,10 +25,10 @@ export async function handleContractGeneration(
     const citizenexpire = formData.get("citizenexpire") as string;
     const contractnumber = ((): string => {
         const allContractNumbers = formData.getAll(
-            "contractnumber"
+            "contractnumber",
         ) as string[];
         const validContractNumber = allContractNumbers.find(
-            (num) => num && num.trim()
+            (num) => num && num.trim(),
         );
         return validContractNumber || "";
     })();
@@ -123,7 +123,7 @@ export async function handleContractGeneration(
     const { relativeStoragePath } = await saveDocumentToStorage(
         outputBuffer,
         fileName,
-        "docx"
+        "docx",
     );
 
     // Find or create project
@@ -131,7 +131,7 @@ export async function handleContractGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
-        "สร้างจากเอกสารสัญญาจ้างปฎิบัติงาน"
+        "สร้างจากเอกสารสัญญาจ้างปฎิบัติงาน",
     );
     if (isProjectError(projectResult)) {
         return projectResult;
@@ -143,7 +143,7 @@ export async function handleContractGeneration(
         projectResult.id,
         fileName,
         relativeStoragePath,
-        "docx"
+        "docx",
     );
 
     return buildSuccessResponse(relativeStoragePath, projectResult);
