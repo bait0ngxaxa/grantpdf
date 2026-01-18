@@ -67,22 +67,20 @@ export function ContractForm(): React.JSX.Element {
     // Use validation hook
     const {
         errors,
-        handlePreview: onPreview,
+        getHandlePreview: handlePreview,
         createCitizenIdChangeHandler,
         validateBeforeSubmit,
     } = useDocumentValidation<ContractData>({
         validateForm: validateContract,
         openPreview,
+        formData,
         citizenIdFields: ["citizenid"],
     });
-
-    // Wrap handlePreview to pass formData
-    const handlePreview = (): void => onPreview(formData);
 
     // Create citizen ID change handler
     const handleCitizenIdChange = createCitizenIdChangeHandler(
         "citizenid",
-        setFormData
+        setFormData,
     );
 
     // Wrap validateBeforeSubmit

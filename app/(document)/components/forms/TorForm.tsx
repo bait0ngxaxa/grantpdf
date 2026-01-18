@@ -72,24 +72,22 @@ export function TorForm(): React.JSX.Element {
     // Use validation hook
     const {
         errors,
-        handlePreview: onPreview,
+        getHandlePreview: handlePreview,
         createPhoneChangeHandler,
         validateBeforeSubmit,
     } = useDocumentValidation<TORData>({
         validateForm: validateTOR,
         openPreview,
+        formData,
         phoneFields: ["tel"],
         emailFields: ["email"],
     });
-
-    // Wrap handlePreview to pass formData
-    const handlePreview = (): void => onPreview(formData);
 
     // Create phone change handler
     const handlePhoneChange = createPhoneChangeHandler(
         "tel",
         handleChange,
-        () => {}
+        () => {},
     );
 
     // Wrap validateBeforeSubmit
@@ -111,10 +109,10 @@ export function TorForm(): React.JSX.Element {
     const updateActivity = (
         index: number,
         field: keyof ActivityData,
-        value: string
+        value: string,
     ): void => {
         const updatedActivities = activities.map((item, i) =>
-            i === index ? { ...item, [field]: value } : item
+            i === index ? { ...item, [field]: value } : item,
         );
         setActivities(updatedActivities);
     };
@@ -126,7 +124,7 @@ export function TorForm(): React.JSX.Element {
                 row.activity !== "" ||
                 row.manager !== "" ||
                 row.evaluation2 !== "" ||
-                row.duration !== ""
+                row.duration !== "",
         );
 
     const {

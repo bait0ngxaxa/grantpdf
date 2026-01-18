@@ -7,12 +7,12 @@ import {
     createUserFileRecord,
     buildSuccessResponse,
 } from "@/lib/document";
-import { fixThaiDistributed } from "../utils";
+import { fixThaiDistributed } from "../fixThaiwordUtils";
 import { NextResponse } from "next/server";
 
 export async function handleTorGeneration(
     formData: FormData,
-    userId: number
+    userId: number,
 ): Promise<Response> {
     // Extract form fields
     const projectName = formData.get("projectName") as string;
@@ -72,17 +72,20 @@ export async function handleTorGeneration(
         (activity: Record<string, unknown>) => ({
             ...activity,
             ...(typeof activity === "object"
-                ? Object.keys(activity).reduce((acc, key) => {
-                      const value = activity[key];
-                      if (typeof value === "string") {
-                          acc[key] = fixThaiDistributed(value);
-                      } else {
-                          acc[key] = value;
-                      }
-                      return acc;
-                  }, {} as Record<string, unknown>)
+                ? Object.keys(activity).reduce(
+                      (acc, key) => {
+                          const value = activity[key];
+                          if (typeof value === "string") {
+                              acc[key] = fixThaiDistributed(value);
+                          } else {
+                              acc[key] = value;
+                          }
+                          return acc;
+                      },
+                      {} as Record<string, unknown>,
+                  )
                 : activity),
-        })
+        }),
     );
 
     // Prepare data for template
@@ -126,7 +129,7 @@ export async function handleTorGeneration(
     const { relativeStoragePath } = await saveDocumentToStorage(
         outputBuffer,
         fileName,
-        "docx"
+        "docx",
     );
 
     // Find or create project
@@ -134,7 +137,7 @@ export async function handleTorGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
-        "สร้างจากเอกสาร TOR"
+        "สร้างจากเอกสาร TOR",
     );
     if (isProjectError(projectResult)) {
         return projectResult;
@@ -146,7 +149,7 @@ export async function handleTorGeneration(
         projectResult.id,
         fileName,
         relativeStoragePath,
-        "docx"
+        "docx",
     );
 
     return buildSuccessResponse(relativeStoragePath, projectResult);

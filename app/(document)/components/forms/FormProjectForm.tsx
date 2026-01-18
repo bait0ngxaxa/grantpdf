@@ -62,24 +62,22 @@ export function FormProjectForm(): React.JSX.Element {
     // Use validation hook
     const {
         errors,
-        handlePreview: onPreview,
+        getHandlePreview: handlePreview,
         createPhoneChangeHandler,
         validateBeforeSubmit,
     } = useDocumentValidation<FormProjectData>({
         validateForm: validateFormProject,
         openPreview,
+        formData,
         phoneFields: ["tel"],
         emailFields: ["email"],
     });
-
-    // Wrap handlePreview to pass formData
-    const handlePreview = (): void => onPreview(formData);
 
     // Create phone change handler
     const handlePhoneChange = createPhoneChangeHandler(
         "tel",
         handleChange,
-        () => {}
+        () => {},
     );
 
     // Wrap validateBeforeSubmit
@@ -165,7 +163,7 @@ export function FormProjectForm(): React.JSX.Element {
                     <PreviewField
                         label="ความเป็นมาและแนวคิด"
                         value={formData.rationale}
-                     />
+                    />
                 </PreviewGrid>
 
                 <PreviewField label="เป้าประสงค์">

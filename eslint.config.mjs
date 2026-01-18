@@ -30,12 +30,12 @@ export default defineConfig([
                     destructuredArrayIgnorePattern: "^_",
                 },
             ],
-            "@typescript-eslint/explicit-module-boundary-types": [
-                "warn",
-                {
-                    allowArgumentsExplicitlyTypedAsAny: true,
-                },
-            ],
+            // "@typescript-eslint/explicit-module-boundary-types": [
+            //     "warn",
+            //     {
+            //         allowArgumentsExplicitlyTypedAsAny: true,
+            //     },
+            // ],
             "@typescript-eslint/no-explicit-any": "error",
             "@typescript-eslint/ban-ts-comment": "error",
             "@typescript-eslint/no-non-null-assertion": "warn",

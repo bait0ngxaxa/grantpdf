@@ -9,6 +9,7 @@ import {
     DialogFooter,
     DialogClose,
 } from "@/components/ui/dialog";
+import { AlertCircle } from "lucide-react";
 
 interface PreviewModalProps {
     isOpen: boolean;
@@ -20,6 +21,7 @@ interface PreviewModalProps {
     confirmLabel?: string;
     cancelLabel?: string;
     maxWidth?: string;
+    errorMessage?: string | null;
 }
 
 export function PreviewModal({
@@ -32,7 +34,10 @@ export function PreviewModal({
     confirmLabel = "ยืนยันและสร้างเอกสาร",
     cancelLabel = "แก้ไข",
     maxWidth = "max-w-2xl",
+    errorMessage,
 }: PreviewModalProps): React.JSX.Element {
+    const hasError = Boolean(errorMessage);
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className={`${maxWidth} max-h-[85vh] flex flex-col`}>
@@ -40,6 +45,19 @@ export function PreviewModal({
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>{description}</DialogDescription>
                 </DialogHeader>
+
+                {/* Error Alert */}
+                {hasError && (
+                    <div className="flex-shrink-0 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-red-700">
+                            <p className="font-medium">
+                                กรุณาแก้ไขข้อมูลก่อนสร้างเอกสาร
+                            </p>
+                            <p className="mt-1">{errorMessage}</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Scrollable content area with word break */}
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-0">
@@ -60,7 +78,8 @@ export function PreviewModal({
                     </DialogClose>
                     <Button
                         onClick={onConfirm}
-                        className="cursor-pointer rounded-lg"
+                        disabled={hasError}
+                        className="cursor-pointer rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {confirmLabel}
                     </Button>

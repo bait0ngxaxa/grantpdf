@@ -10,23 +10,23 @@ export type {
 export { isSessionError, isProjectError } from "./types";
 
 // Session
-export { validateSession } from "./session";
+export { validateSession } from "./sessionValidator";
 
-// Docxtemplater
-export { createDocxRenderer, loadTemplate } from "./docx";
+// Template Renderer (Docxtemplater)
+export { createDocxRenderer, loadTemplate } from "./templateRenderer";
 
 // Storage
 export { saveDocumentToStorage } from "./storage";
 
-// Project
-export { findOrCreateProject, createUserFileRecord } from "./project";
+// Project Service
+export { findOrCreateProject, createUserFileRecord } from "./projectService";
 
 // Response
-export { handleDocumentError, buildSuccessResponse } from "./response";
+export { handleDocumentError, buildSuccessResponse } from "./responseBuilder";
 
 // Utils
 export {
     fixThaiDistributed,
     generateUniqueFilename,
     getMimeType,
-} from "./utils";
+} from "./fixThaiwordUtils";

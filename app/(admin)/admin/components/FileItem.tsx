@@ -54,19 +54,19 @@ export default function FileItem({
 
     return (
         <React.Fragment>
-            <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-blue-100 hover:shadow-sm transition-all duration-200 group">
-                <div className="flex items-center space-x-4 flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-blue-100 hover:shadow-sm transition-all duration-200 group gap-3">
+                <div className="flex items-start sm:items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
                     {/* File Icon */}
                     <div className="flex-shrink-0">{getFileIcon()}</div>
 
                     {/* File Info */}
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2">
-                            <span className="text-base font-semibold text-slate-800 truncate">
-                                {truncateFileName(file.originalFileName, 40)}
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm sm:text-base font-semibold text-slate-800 break-words">
+                                {truncateFileName(file.originalFileName, 30)}
                             </span>
                             <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex-shrink-0 ${
                                     file.downloadStatus === "done"
                                         ? "bg-green-100 text-green-700"
                                         : "bg-amber-100 text-amber-700"
@@ -77,11 +77,11 @@ export default function FileItem({
                                     : "ใหม่"}
                             </span>
                         </div>
-                        <div className="flex items-center space-x-4 mt-1 text-sm text-slate-500">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-sm text-slate-500">
                             <span className="flex items-center">
                                 <Calendar className="h-3.5 w-3.5 mr-1.5 text-slate-400" />
                                 {new Date(file.created_at).toLocaleDateString(
-                                    "th-TH"
+                                    "th-TH",
                                 )}
                             </span>
                             <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded border border-slate-200 uppercase font-medium">
@@ -109,7 +109,7 @@ export default function FileItem({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center space-x-2 flex-shrink-0">
+                <div className="flex items-center space-x-2 flex-shrink-0 pl-12 sm:pl-0">
                     {file.storagePath && (
                         <button
                             onClick={() =>
@@ -132,7 +132,7 @@ export default function FileItem({
                                 if (file.storagePath) {
                                     onPreviewPdf(
                                         file.storagePath,
-                                        file.originalFileName
+                                        file.originalFileName,
                                     );
                                 }
                             }}

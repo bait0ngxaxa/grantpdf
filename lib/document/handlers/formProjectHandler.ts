@@ -8,11 +8,11 @@ import {
     createUserFileRecord,
     buildSuccessResponse,
 } from "@/lib/document";
-import { fixThaiDistributed } from "../utils";
+import { fixThaiDistributed } from "../fixThaiwordUtils";
 
 export async function handleFormProjectGeneration(
     formData: FormData,
-    userId: number
+    userId: number,
 ): Promise<Response> {
     // Extract form fields
     const projectName = formData.get("projectName") as string;
@@ -92,7 +92,7 @@ export async function handleFormProjectGeneration(
     const { relativeStoragePath } = await saveDocumentToStorage(
         outputBuffer,
         fileName,
-        "docx"
+        "docx",
     );
 
     // Find or create project
@@ -100,7 +100,7 @@ export async function handleFormProjectGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
-        "สร้างจากแบบฟอร์มข้อเสนอโครงการ"
+        "สร้างจากแบบฟอร์มข้อเสนอโครงการ",
     );
     if (isProjectError(projectResult)) {
         return projectResult;
@@ -112,7 +112,7 @@ export async function handleFormProjectGeneration(
         projectResult.id,
         fileName,
         relativeStoragePath,
-        "docx"
+        "docx",
     );
 
     return buildSuccessResponse(relativeStoragePath, projectResult);

@@ -1,22 +1,21 @@
 // เส้นแก้ไขและลบข้อมูลแต่ละ id ระบบ admin
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import {
     userExists,
     isValidRole,
     updateUser,
     deleteUser,
+    checkAdminPermission,
 } from "@/lib/services";
 
 export async function PUT(
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const { isAdmin, session } = await checkAdminPermission();
 
-        if (!session || session.user?.role !== "admin") {
+        if (!isAdmin || !session) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
@@ -27,14 +26,14 @@ export async function PUT(
         if (!name || !role) {
             return NextResponse.json(
                 { error: "กรุณากรอกข้อมูลให้ครบถ้วน" },
-                { status: 400 }
+                { status: 400 },
             );
         }
 
         if (!isValidRole(role)) {
             return NextResponse.json(
                 { error: "บทบาทไม่ถูกต้อง" },
-                { status: 400 }
+                { status: 400 },
             );
         }
 
@@ -42,14 +41,14 @@ export async function PUT(
         if (!exists) {
             return NextResponse.json(
                 { error: "ไม่พบผู้ใช้งาน" },
-                { status: 404 }
+                { status: 404 },
             );
         }
 
         if (userId === session.user.id && role !== "admin") {
             return NextResponse.json(
                 { error: "ไม่สามารถเปลี่ยนบทบาทของตัวเองได้" },
-                { status: 403 }
+                { status: 403 },
             );
         }
 
@@ -57,25 +56,25 @@ export async function PUT(
 
         return NextResponse.json(
             { message: "อัปเดตผู้ใช้งานสำเร็จ", user: updatedUser },
-            { status: 200 }
+            { status: 200 },
         );
     } catch (error) {
         console.error("Error updating user:", error);
         return NextResponse.json(
             { error: "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้งาน" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const { isAdmin, session } = await checkAdminPermission();
 
-        if (!session || session.user?.role !== "admin") {
+        if (!isAdmin || !session) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
@@ -85,7 +84,7 @@ export async function DELETE(
         if (userId === session.user.id) {
             return NextResponse.json(
                 { error: "ไม่สามารถลบบัญชีผู้ดูแลระบบของตัวเองได้" },
-                { status: 403 }
+                { status: 403 },
             );
         }
 
@@ -93,7 +92,7 @@ export async function DELETE(
         if (!exists) {
             return NextResponse.json(
                 { error: "ไม่พบผู้ใช้งาน" },
-                { status: 404 }
+                { status: 404 },
             );
         }
 
@@ -101,13 +100,13 @@ export async function DELETE(
 
         return NextResponse.json(
             { message: "ลบผู้ใช้งานสำเร็จ" },
-            { status: 200 }
+            { status: 200 },
         );
     } catch (error) {
         console.error("Error deleting user:", error);
         return NextResponse.json(
             { error: "เกิดข้อผิดพลาดในการลบผู้ใช้งาน" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
