@@ -15,7 +15,7 @@ export function useModalStates<T, F>(): {
     editFormData: Partial<T>;
     setEditFormData: React.Dispatch<React.SetStateAction<Partial<T>>>;
     handleEditFormChange: (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     isDeleteModalOpen: boolean;
     openDeleteModal: (item: T) => void;
@@ -29,7 +29,7 @@ export function useModalStates<T, F>(): {
     isPreviewModalOpen: boolean;
     previewUrl: string;
     previewFileName: string;
-    openPreviewModal: (url: string, fileName: string) => void;
+    openPreviewModal: (storagePath: string, fileName: string) => void;
     closePreviewModal: () => void;
     isUploadModalOpen: boolean;
     openUploadModal: (project: F[keyof F]) => void;
@@ -67,7 +67,7 @@ export function useModalStates<T, F>(): {
             const { name, value } = e.target;
             setEditFormData((prev) => ({ ...prev, [name]: value }));
         },
-        []
+        [],
     );
 
     // Delete Modal
@@ -104,11 +104,15 @@ export function useModalStates<T, F>(): {
     const [previewUrl, setPreviewUrl] = useState("");
     const [previewFileName, setPreviewFileName] = useState("");
 
-    const openPreviewModal = useCallback((url: string, fileName: string) => {
-        setPreviewUrl(url);
-        setPreviewFileName(fileName);
-        setIsPreviewModalOpen(true);
-    }, []);
+    const openPreviewModal = useCallback(
+        (storagePath: string, fileName: string) => {
+            const previewApiUrl = `/api/preview?path=${encodeURIComponent(storagePath)}`;
+            setPreviewUrl(previewApiUrl);
+            setPreviewFileName(fileName);
+            setIsPreviewModalOpen(true);
+        },
+        [],
+    );
 
     const closePreviewModal = useCallback(() => {
         setIsPreviewModalOpen(false);
