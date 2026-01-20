@@ -3,15 +3,10 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
 
-import {
-    UserStatsCards,
-    UsersTable,
-    EditUserModal,
-    DeleteUserModal,
-} from "../users/components";
+import { UserStatsCards, UsersTable, EditUserModal, DeleteUserModal } from ".";
 import { SuccessModal } from "@/components/ui";
 
-import { useUserManagement } from "../users/hooks/useUserManagement";
+import { useUserManagement } from "../../hooks/useUserManagement";
 import { usePagination } from "@/lib/hooks";
 import { PAGINATION } from "@/lib/constants";
 import { XCircle } from "lucide-react";
@@ -66,7 +61,7 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
         return users.filter(
             (user) =>
                 user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchTerm.toLowerCase())
+                user.email.toLowerCase().includes(searchTerm.toLowerCase()),
         );
     }, [users, searchTerm]);
 

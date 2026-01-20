@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
 import {
     useDocumentForm,
@@ -14,13 +13,10 @@ import {
     useApprovalLogic,
 } from "@/app/(document)/hooks";
 import {
-    PageLayout,
-    FormActions,
-    PreviewModal,
-    ErrorAlert,
     PreviewField,
     PreviewGrid,
     PreviewList,
+    DocumentEditorLayout,
 } from "@/app/(document)/components";
 import { LoadingSpinner } from "@/components/ui";
 import { FileText } from "lucide-react";
@@ -121,204 +117,202 @@ export function ApprovalForm(): React.JSX.Element {
         !!signatureFile ||
         !!signatureCanvasData;
 
-    const {
-        isExitModalOpen,
-        setIsExitModalOpen,
-        handleConfirmExit,
-        allowNavigation,
-    } = useExitConfirmation({ isDirty });
+    const { handleConfirmExit, allowNavigation } = useExitConfirmation({
+        isDirty,
+    });
 
     if (!isClient) {
         return <LoadingSpinner />;
     }
 
     return (
-        <PageLayout
+        <DocumentEditorLayout
             title="สร้างหนังสือขออนุมัติของมูลนิธิ"
             subtitle="กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารขออนุมัติ"
+            onSubmit={(e) =>
+                validateBeforeSubmit(e, formData, handleApprovalSubmit)
+            }
+            isSubmitting={isSubmitting}
             isDirty={isDirty}
-            isExitModalOpen={isExitModalOpen}
-            setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
-        >
-            <form
-                onSubmit={(e) =>
-                    validateBeforeSubmit(e, formData, handleApprovalSubmit)
-                }
-                className="space-y-8"
-            >
-                <BasicInfoSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    errors={errors}
-                />
-
-                <DocumentDetailSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    errors={errors}
-                />
-
-                <AttachmentSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    errors={errors}
-                    attachmentFiles={attachmentFiles}
-                    handleAttachmentFilesChange={handleAttachmentFilesChange}
-                    removeAttachmentFile={removeAttachmentFile}
-                    addAttachment={addAttachment}
-                    removeAttachment={removeAttachment}
-                    updateAttachment={updateAttachment}
-                />
-
-                <ApproverInfoSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    handlePhoneChange={handlePhoneChange}
-                    errors={errors}
-                />
-
-                {/* ลายเซ็น */}
-                <SignatureSection
-                    signaturePreview={signaturePreview}
-                    signatureCanvasData={signatureCanvasData}
-                    onFileChange={handleFileChange}
-                    onCanvasChange={handleSignatureCanvasChange}
-                    signatureCanvasRef={signatureCanvasRef}
-                    uploadTitle="อัปโหลดลายเซ็นผู้ขออนุมัติ"
-                    canvasTitle="วาดลายเซ็นผู้ขออนุมัติ"
-                />
-
-                <FormActions
-                    onPreview={handlePreview}
-                    isSubmitting={isSubmitting}
-                />
-            </form>
-
-            <ErrorAlert message={message} isError={isError} />
-
-            {/* Preview Modal */}
-            <PreviewModal
-                isOpen={isPreviewOpen}
-                onClose={closePreview}
-                onConfirm={confirmPreview}
-                errorMessage={getPreviewError()}
-            >
-                <PreviewGrid>
-                    <PreviewField
-                        label="ชื่อไฟล์"
-                        value={formData.projectName}
-                    />
-                    <PreviewField label="เลขที่หนังสือ" value={formData.head} />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField label="วันที่" value={formData.date} />
-                    <PreviewField label="เรื่อง" value={formData.topicdetail} />
-                </PreviewGrid>
-
-                <PreviewField label="ผู้รับ" value={formData.todetail} />
-
-                <PreviewList
-                    label="สิ่งที่ส่งมาด้วย"
-                    items={formData.attachments}
-                    emptyMessage="ไม่มีสิ่งที่ส่งมาด้วย"
-                />
-
-                <PreviewField label="เนื้อหา">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.detail || "-"}
-                    </p>
-                </PreviewField>
-
-                <PreviewGrid>
-                    <PreviewField label="ชื่อผู้ลงนาม" value={formData.name} />
-                    <PreviewField
-                        label="ตำแหน่ง/แผนก"
-                        value={formData.depart}
-                    />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField label="ผู้ประสานงาน" value={formData.coor} />
-                    <PreviewField label="เบอร์โทรศัพท์" value={formData.tel} />
-                </PreviewGrid>
-
-                <PreviewField label="อีเมล" value={formData.email} />
-
-                {(signaturePreview || signatureCanvasData) && (
-                    <PreviewField label="ลายเซ็น">
-                        {signaturePreview && (
-                            <div>
-                                <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
-                                    จากการอัปโหลดไฟล์:
-                                </p>
-                                <Image
-                                    src={signaturePreview}
-                                    alt="Signature Preview"
-                                    width={320}
-                                    height={200}
-                                    className="max-w-xs h-auto object-contain mt-2 border dark:border-slate-600 rounded"
-                                />
-                            </div>
-                        )}
-                        {signatureCanvasData && (
-                            <div className={signaturePreview ? "mt-4" : ""}>
-                                <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
-                                    จากการวาดออนไลน์:
-                                </p>
-                                <Image
-                                    src={signatureCanvasData}
-                                    alt="Canvas Signature Preview"
-                                    width={320}
-                                    height={200}
-                                    className="max-w-xs h-auto object-contain mt-2 border dark:border-slate-600 rounded"
-                                />
-                            </div>
-                        )}
-                    </PreviewField>
-                )}
-
-                {formData.attachments.length > 0 &&
-                    attachmentFiles.length > 0 && (
+            onPreview={handlePreview}
+            message={message}
+            isError={isError}
+            isPreviewOpen={isPreviewOpen}
+            onClosePreview={closePreview}
+            onConfirmPreview={confirmPreview}
+            previewErrorMessage={getPreviewError() || undefined}
+            previewContent={
+                <>
+                    <PreviewGrid>
                         <PreviewField
-                            label={`ไฟล์แนบ (${attachmentFiles.length} ไฟล์)`}
-                        >
-                            <div className="mt-2 space-y-1">
-                                {attachmentFiles.map((file, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center space-x-2 text-sm"
-                                    >
-                                        <FileText className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                                        <span>{file.name}</span>
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                                            (
-                                            {(file.size / 1024 / 1024).toFixed(
-                                                2,
-                                            )}{" "}
-                                            MB)
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                            label="ชื่อไฟล์"
+                            value={formData.projectName}
+                        />
+                        <PreviewField
+                            label="เลขที่หนังสือ"
+                            value={formData.head}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField label="วันที่" value={formData.date} />
+                        <PreviewField
+                            label="เรื่อง"
+                            value={formData.topicdetail}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewField label="ผู้รับ" value={formData.todetail} />
+
+                    <PreviewList
+                        label="สิ่งที่ส่งมาด้วย"
+                        items={formData.attachments}
+                        emptyMessage="ไม่มีสิ่งที่ส่งมาด้วย"
+                    />
+
+                    <PreviewField label="เนื้อหา">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.detail || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ชื่อผู้ลงนาม"
+                            value={formData.name}
+                        />
+                        <PreviewField
+                            label="ตำแหน่ง/แผนก"
+                            value={formData.depart}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ผู้ประสานงาน"
+                            value={formData.coor}
+                        />
+                        <PreviewField
+                            label="เบอร์โทรศัพท์"
+                            value={formData.tel}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewField label="อีเมล" value={formData.email} />
+
+                    {(signaturePreview || signatureCanvasData) && (
+                        <PreviewField label="ลายเซ็น">
+                            {signaturePreview && (
+                                <div>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
+                                        จากการอัปโหลดไฟล์:
+                                    </p>
+                                    <Image
+                                        src={signaturePreview}
+                                        alt="Signature Preview"
+                                        width={320}
+                                        height={200}
+                                        className="max-w-xs h-auto object-contain mt-2 border dark:border-slate-600 rounded"
+                                    />
+                                </div>
+                            )}
+                            {signatureCanvasData && (
+                                <div className={signaturePreview ? "mt-4" : ""}>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
+                                        จากการวาดออนไลน์:
+                                    </p>
+                                    <Image
+                                        src={signatureCanvasData}
+                                        alt="Canvas Signature Preview"
+                                        width={320}
+                                        height={200}
+                                        className="max-w-xs h-auto object-contain mt-2 border dark:border-slate-600 rounded"
+                                    />
+                                </div>
+                            )}
                         </PreviewField>
                     )}
-            </PreviewModal>
 
-            {/* Success Modal */}
-            <CreateDocSuccessModal
-                isOpen={isSuccessModalOpen}
-                onClose={() => setIsSuccessModalOpen(false)}
-                fileName={
-                    formData.fileName ||
-                    formData.projectName ||
-                    "หนังสือขออนุมัติ"
-                }
-                downloadUrl={generatedFileUrl}
-                documentType="เอกสาร Word"
-                onRedirect={allowNavigation}
+                    {formData.attachments.length > 0 &&
+                        attachmentFiles.length > 0 && (
+                            <PreviewField
+                                label={`ไฟล์แนบ (${attachmentFiles.length} ไฟล์)`}
+                            >
+                                <div className="mt-2 space-y-1">
+                                    {attachmentFiles.map((file, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center space-x-2 text-sm"
+                                        >
+                                            <FileText className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                                            <span>{file.name}</span>
+                                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                                                (
+                                                {(
+                                                    file.size /
+                                                    1024 /
+                                                    1024
+                                                ).toFixed(2)}{" "}
+                                                MB)
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </PreviewField>
+                        )}
+                </>
+            }
+            isSuccessOpen={isSuccessModalOpen}
+            onCloseSuccess={() => setIsSuccessModalOpen(false)}
+            fileName={
+                formData.fileName || formData.projectName || "หนังสือขออนุมัติ"
+            }
+            downloadUrl={generatedFileUrl}
+            successDocumentType="เอกสาร Word"
+            onSuccessRedirect={allowNavigation}
+        >
+            <BasicInfoSection
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
             />
-        </PageLayout>
+
+            <DocumentDetailSection
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
+            />
+
+            <AttachmentSection
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
+                attachmentFiles={attachmentFiles}
+                handleAttachmentFilesChange={handleAttachmentFilesChange}
+                removeAttachmentFile={removeAttachmentFile}
+                addAttachment={addAttachment}
+                removeAttachment={removeAttachment}
+                updateAttachment={updateAttachment}
+            />
+
+            <ApproverInfoSection
+                formData={formData}
+                handleChange={handleChange}
+                handlePhoneChange={handlePhoneChange}
+                errors={errors}
+            />
+
+            {/* ลายเซ็น */}
+            <SignatureSection
+                signaturePreview={signaturePreview}
+                signatureCanvasData={signatureCanvasData}
+                onFileChange={handleFileChange}
+                onCanvasChange={handleSignatureCanvasChange}
+                signatureCanvasRef={signatureCanvasRef}
+                uploadTitle="อัปโหลดลายเซ็นผู้ขออนุมัติ"
+                canvasTitle="วาดลายเซ็นผู้ขออนุมัติ"
+            />
+        </DocumentEditorLayout>
     );
 }

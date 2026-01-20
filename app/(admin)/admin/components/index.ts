@@ -1,11 +1,8 @@
-export * from "./AdminSidebar";
-export * from "./AdminTopBar";
-export * from "./AdminTopBar";
-export * from "./DashboardOverview";
-export * from "./FileItem";
-
-export * from "./ProjectCard";
-export { default as ProjectsList } from "./ProjectsList";
+export * from "./dashboard/DashboardOverview";
+export { default as ProjectsList } from "./project/ProjectsList";
+export * from "./users/UsersTab";
 export { default as SearchAndFilter } from "./SearchAndFilter";
-export * from "./UsersTab";
-export * from "./modals";
+export * from "./AdminTopBar"; // Checking if it is named or default, safe to do both if compatible? No.
+export * from "./AdminSidebar";
+export * from "./AdminModals";
+export * from "./project/ProjectsTab";

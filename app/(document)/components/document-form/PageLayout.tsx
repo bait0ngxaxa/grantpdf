@@ -1,16 +1,8 @@
-import { type ReactNode, useState } from "react";
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogClose,
-} from "@/components/ui";
+import { type ReactNode } from "react";
+import { Button } from "@/components/ui";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useGlobalModal } from "@/lib/hooks/useGlobalModal";
 
 interface PageLayoutProps {
     children: ReactNode;
@@ -23,8 +15,6 @@ interface PageLayoutProps {
     headerGradientTo?: string;
     headerTextColor?: string;
     isDirty?: boolean;
-    isExitModalOpen?: boolean;
-    setIsExitModalOpen?: (open: boolean) => void;
     onConfirmExit?: () => void;
 }
 
@@ -39,34 +29,34 @@ export function PageLayout({
     headerGradientTo = "to-purple-600 dark:to-purple-800",
     headerTextColor = "text-blue-100",
     isDirty = false,
-    isExitModalOpen: externalIsExitModalOpen,
-    setIsExitModalOpen: externalSetIsExitModalOpen,
     onConfirmExit,
 }: PageLayoutProps): React.JSX.Element {
     const router = useRouter();
-    const [internalIsExitModalOpen, setInternalIsExitModalOpen] =
-        useState(false);
-
-    const isExitModalOpen = externalIsExitModalOpen ?? internalIsExitModalOpen;
-    const setIsExitModalOpen =
-        externalSetIsExitModalOpen ?? setInternalIsExitModalOpen;
+    const { showConfirm } = useGlobalModal();
 
     const handleBack = (): void => {
         if (isDirty) {
-            setIsExitModalOpen(true);
+            showConfirm({
+                title: "ยืนยันการออกจากหน้านี้",
+                description:
+                    "ข้อมูลที่คุณกรอกจะไม่ถูกบันทึก คุณต้องการออกจากหน้านี้ใช่หรือไม่?",
+                confirmText: "ยืนยัน",
+                cancelText: "ยกเลิก",
+                isDestructive: true,
+                onConfirm: () => {
+                    if (onConfirmExit) {
+                        onConfirmExit();
+                    } else {
+                        router.push(backPath);
+                    }
+                },
+            });
         } else {
             router.push(backPath);
         }
     };
 
-    const confirmExit = (): void => {
-        setIsExitModalOpen(false);
-        if (onConfirmExit) {
-            onConfirmExit();
-        } else {
-            router.push(backPath);
-        }
-    };
+    // confirmExit function is no longer needed as wrapper, logic is inside showConfirm callback
 
     return (
         <div
@@ -109,35 +99,6 @@ export function PageLayout({
                     {children}
                 </div>
             </div>
-
-            <Dialog open={isExitModalOpen} onOpenChange={setIsExitModalOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>ยืนยันการออกจากหน้านี้</DialogTitle>
-                        <DialogDescription>
-                            ข้อมูลที่คุณกรอกจะไม่ถูกบันทึก
-                            คุณต้องการออกจากหน้านี้ใช่หรือไม่?
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button
-                                variant="outline"
-                                className="cursor-pointer"
-                            >
-                                ยกเลิก
-                            </Button>
-                        </DialogClose>
-                        <Button
-                            variant="destructive"
-                            onClick={confirmExit}
-                            className="cursor-pointer"
-                        >
-                            ยืนยัน
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }

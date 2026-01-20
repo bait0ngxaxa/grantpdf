@@ -1,7 +1,11 @@
 import { type Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { SessionProvider, ThemeProvider } from "@/components/providers";
+import {
+    SessionProvider,
+    ThemeProvider,
+    GlobalModalProvider,
+} from "@/components/providers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -29,7 +33,9 @@ export default async function RootLayout({
                 className={`${googleSans.variable} antialiased bg-background text-foreground font-sans`}
             >
                 <SessionProvider session={session}>
-                    <ThemeProvider>{children}</ThemeProvider>
+                    <ThemeProvider>
+                        <GlobalModalProvider>{children}</GlobalModalProvider>
+                    </ThemeProvider>
                 </SessionProvider>
             </body>
         </html>

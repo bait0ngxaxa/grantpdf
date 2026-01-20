@@ -2,16 +2,12 @@
 
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
 
 import {
-    PageLayout,
-    FormActions,
-    PreviewModal,
-    ErrorAlert,
     PreviewField,
     PreviewGrid,
+    DocumentEditorLayout,
 } from "@/app/(document)/components";
 import { LoadingSpinner } from "@/components/ui";
 import {
@@ -127,156 +123,156 @@ export function TorForm(): React.JSX.Element {
                 row.duration !== "",
         );
 
-    const {
-        isExitModalOpen,
-        setIsExitModalOpen,
-        handleConfirmExit,
-        allowNavigation,
-    } = useExitConfirmation({ isDirty });
+    const { handleConfirmExit, allowNavigation } = useExitConfirmation({
+        isDirty,
+    });
 
     if (!isClient) {
         return <LoadingSpinner />;
     }
 
     return (
-        <PageLayout
+        <DocumentEditorLayout
             title="สร้างเอกสาร Terms of Reference (TOR)"
             subtitle="กรุณากรอกข้อมูลโครงการและกิจกรรมให้ครบถ้วน"
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
             isDirty={isDirty}
-            isExitModalOpen={isExitModalOpen}
-            setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
-        >
-            <form onSubmit={onSubmit} className="space-y-8">
-                <BasicInfoSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    handlePhoneChange={handlePhoneChange}
-                    errors={errors}
-                />
+            onPreview={handlePreview}
+            message={message}
+            isError={isError}
+            isPreviewOpen={isPreviewOpen}
+            onClosePreview={closePreview}
+            onConfirmPreview={confirmPreview}
+            previewContent={
+                <>
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ชื่อโครงการ"
+                            value={formData.projectName}
+                        />
+                        <PreviewField label="วันที่" value={formData.date} />
+                    </PreviewGrid>
 
-                <ProjectDetailSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    errors={errors}
-                />
+                    <PreviewGrid>
+                        <PreviewField
+                            label="เลขที่สัญญา"
+                            value={formData.contractnumber}
+                        />
+                        <PreviewField
+                            label="ผู้รับผิดชอบ"
+                            value={formData.owner}
+                        />
+                    </PreviewGrid>
 
-                <ScopeSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    errors={errors}
-                />
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ที่อยู่"
+                            value={formData.address}
+                        />
+                        <PreviewField
+                            label="กำหนดเวลา"
+                            value={formData.timeline}
+                        />
+                    </PreviewGrid>
 
-                <ActivitySection
-                    activities={activities}
-                    addActivityRow={addActivityRow}
-                    removeActivityRow={removeActivityRow}
-                    updateActivity={updateActivity}
-                />
+                    <PreviewField label="หัวข้อ/เรื่อง">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.topic1 || "-"}
+                        </p>
+                    </PreviewField>
 
-                <FormActions
-                    onPreview={handlePreview}
-                    isSubmitting={isSubmitting}
-                />
-            </form>
+                    <PreviewField label="วัตถุประสงค์">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.objective1 || "-"}
+                        </p>
+                    </PreviewField>
 
-            <ErrorAlert message={message} isError={isError} />
-
-            {/* Preview Modal */}
-            <PreviewModal
-                isOpen={isPreviewOpen}
-                onClose={closePreview}
-                onConfirm={confirmPreview}
-            >
-                <PreviewGrid>
-                    <PreviewField
-                        label="ชื่อโครงการ"
-                        value={formData.projectName}
-                    />
-                    <PreviewField label="วันที่" value={formData.date} />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField
-                        label="เลขที่สัญญา"
-                        value={formData.contractnumber}
-                    />
-                    <PreviewField label="ผู้รับผิดชอบ" value={formData.owner} />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField label="ที่อยู่" value={formData.address} />
-                    <PreviewField label="กำหนดเวลา" value={formData.timeline} />
-                </PreviewGrid>
-
-                <PreviewField label="หัวข้อ/เรื่อง">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.topic1 || "-"}
-                    </p>
-                </PreviewField>
-
-                <PreviewField label="วัตถุประสงค์">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.objective1 || "-"}
-                    </p>
-                </PreviewField>
-
-                {/* แสดงตารางกิจกรรม */}
-                {activities.length > 0 &&
-                    activities.some((a) => a.activity) && (
-                        <PreviewField label="ตารางกิจกรรม">
-                            <div className="overflow-x-auto mt-2">
-                                <table className="min-w-full text-xs border border-gray-200 dark:border-slate-700">
-                                    <thead className="bg-gray-50 dark:bg-slate-700/50">
-                                        <tr>
-                                            <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
-                                                กิจกรรม
-                                            </th>
-                                            <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
-                                                ผู้รับผิดชอบ
-                                            </th>
-                                            <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
-                                                วิธีการประเมิน
-                                            </th>
-                                            <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
-                                                ระยะเวลา
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="text-slate-600 dark:text-slate-300">
-                                        {activities.map((activity, index) => (
-                                            <tr key={index}>
-                                                <td className="px-2 py-1 border dark:border-slate-600">
-                                                    {activity.activity || "-"}
-                                                </td>
-                                                <td className="px-2 py-1 border dark:border-slate-600">
-                                                    {activity.manager || "-"}
-                                                </td>
-                                                <td className="px-2 py-1 border dark:border-slate-600">
-                                                    {activity.evaluation2 ||
-                                                        "-"}
-                                                </td>
-                                                <td className="px-2 py-1 border dark:border-slate-600">
-                                                    {activity.duration || "-"}
-                                                </td>
+                    {/* แสดงตารางกิจกรรม */}
+                    {activities.length > 0 &&
+                        activities.some((a) => a.activity) && (
+                            <PreviewField label="ตารางกิจกรรม">
+                                <div className="overflow-x-auto mt-2">
+                                    <table className="min-w-full text-xs border border-gray-200 dark:border-slate-700">
+                                        <thead className="bg-gray-50 dark:bg-slate-700/50">
+                                            <tr>
+                                                <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
+                                                    กิจกรรม
+                                                </th>
+                                                <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
+                                                    ผู้รับผิดชอบ
+                                                </th>
+                                                <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
+                                                    วิธีการประเมิน
+                                                </th>
+                                                <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
+                                                    ระยะเวลา
+                                                </th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </PreviewField>
-                    )}
-            </PreviewModal>
-
-            {/* Success Modal */}
-            <CreateDocSuccessModal
-                isOpen={isSuccessModalOpen}
-                onClose={() => setIsSuccessModalOpen(false)}
-                fileName={formData.fileName}
-                downloadUrl={generatedFileUrl}
-                documentType="เอกสาร Word"
-                onRedirect={allowNavigation}
+                                        </thead>
+                                        <tbody className="text-slate-600 dark:text-slate-300">
+                                            {activities.map(
+                                                (activity, index) => (
+                                                    <tr key={index}>
+                                                        <td className="px-2 py-1 border dark:border-slate-600">
+                                                            {activity.activity ||
+                                                                "-"}
+                                                        </td>
+                                                        <td className="px-2 py-1 border dark:border-slate-600">
+                                                            {activity.manager ||
+                                                                "-"}
+                                                        </td>
+                                                        <td className="px-2 py-1 border dark:border-slate-600">
+                                                            {activity.evaluation2 ||
+                                                                "-"}
+                                                        </td>
+                                                        <td className="px-2 py-1 border dark:border-slate-600">
+                                                            {activity.duration ||
+                                                                "-"}
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </PreviewField>
+                        )}
+                </>
+            }
+            isSuccessOpen={isSuccessModalOpen}
+            onCloseSuccess={() => setIsSuccessModalOpen(false)}
+            fileName={formData.fileName}
+            downloadUrl={generatedFileUrl}
+            successDocumentType="เอกสาร Word"
+            onSuccessRedirect={allowNavigation}
+        >
+            <BasicInfoSection
+                formData={formData}
+                handleChange={handleChange}
+                handlePhoneChange={handlePhoneChange}
+                errors={errors}
             />
-        </PageLayout>
+
+            <ProjectDetailSection
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
+            />
+
+            <ScopeSection
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
+            />
+
+            <ActivitySection
+                activities={activities}
+                addActivityRow={addActivityRow}
+                removeActivityRow={removeActivityRow}
+                updateActivity={updateActivity}
+            />
+        </DocumentEditorLayout>
     );
 }

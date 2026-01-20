@@ -1,23 +1,29 @@
 import { useState } from "react";
-import type { Project, UserFile } from "@/type";
+import type { UserFile } from "@/type";
 import { API_ROUTES } from "@/lib/constants";
+import { useDashboardContext } from "../DashboardContext";
 
-export const useFileActions = (
-    setProjects: React.Dispatch<React.SetStateAction<Project[]>>,
-    setOrphanFiles: React.Dispatch<React.SetStateAction<UserFile[]>>,
-    setSuccessMessage: (message: string) => void,
-    setShowSuccessModal: (show: boolean) => void
-): {
+export const useFileActions = (): {
     isDeleting: string | null;
-    confirmDeleteFile: (fileId: string) => Promise<boolean>;
+    confirmDeleteFile: () => Promise<boolean>;
 } => {
+    const {
+        setProjects,
+        setOrphanFiles,
+        setSuccessMessage,
+        setShowSuccessModal,
+        fileToDelete,
+    } = useDashboardContext();
+
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-    const confirmDeleteFile = async (fileId: string): Promise<boolean> => {
-        setIsDeleting(fileId);
+    const confirmDeleteFile = async (): Promise<boolean> => {
+        if (!fileToDelete) return false;
+
+        setIsDeleting(fileToDelete);
 
         try {
-            const res = await fetch(`${API_ROUTES.USER_DOCS}/${fileId}`, {
+            const res = await fetch(`${API_ROUTES.USER_DOCS}/${fileToDelete}`, {
                 method: "DELETE",
             });
 
@@ -30,11 +36,13 @@ export const useFileActions = (
                 prev.map((project) => ({
                     ...project,
                     files: project.files.filter(
-                        (file: UserFile) => file.id !== fileId
+                        (file: UserFile) => file.id !== fileToDelete,
                     ),
-                }))
+                })),
             );
-            setOrphanFiles((prev) => prev.filter((file) => file.id !== fileId));
+            setOrphanFiles((prev) =>
+                prev.filter((file) => file.id !== fileToDelete),
+            );
 
             setSuccessMessage("ลบไฟล์สำเร็จ");
             setShowSuccessModal(true);

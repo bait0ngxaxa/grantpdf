@@ -1,7 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, Folder, Building2, Plus, X } from "lucide-react";
-import type { Session } from "next-auth";
+import { useSession, signOut } from "next-auth/react";
+import { useDashboardContext } from "../DashboardContext";
 
 type MenuItemType = {
     id: string;
@@ -9,16 +10,7 @@ type MenuItemType = {
     icon: React.ReactNode;
 };
 
-interface SidebarProps {
-    isSidebarOpen: boolean;
-    setIsSidebarOpen: (open: boolean) => void;
-    activeTab: string;
-    setActiveTab: (tab: string) => void;
-    setShowCreateProjectModal: (show: boolean) => void;
-    setShowProfileModal: (show: boolean) => void;
-    session: Session | null;
-    signOut: () => void;
-}
+// Removed props interface as it's no longer needed
 
 const menuItems: MenuItemType[] = [
     {
@@ -38,16 +30,17 @@ const menuItems: MenuItemType[] = [
     },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({
-    isSidebarOpen,
-    setIsSidebarOpen,
-    activeTab,
-    setActiveTab,
-    setShowCreateProjectModal,
-    setShowProfileModal,
-    session,
-    signOut,
-}): React.JSX.Element => {
+export const Sidebar: React.FC = (): React.JSX.Element => {
+    const { data: session } = useSession();
+    const {
+        isSidebarOpen,
+        setIsSidebarOpen,
+        activeTab,
+        setActiveTab,
+        setShowCreateProjectModal,
+        setShowProfileModal,
+    } = useDashboardContext();
+
     return (
         <>
             {/* Mobile sidebar overlay */}

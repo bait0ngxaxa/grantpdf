@@ -1,21 +1,15 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import type { Project } from "@/type";
+import { useRouter } from "next/navigation";
+
 import { ROUTES } from "@/lib/constants";
 import { Plus, Building2, FileText, Upload } from "lucide-react";
 
-interface CreateProjectTabProps {
-    projects: Project[];
-    setShowCreateProjectModal: (show: boolean) => void;
-    router: AppRouterInstance;
-}
+import { useUserDashboardContext } from "../UserDashboardContext";
 
-export const CreateProjectTab: React.FC<CreateProjectTabProps> = ({
-    projects,
-    setShowCreateProjectModal,
-    router,
-}): React.JSX.Element => {
+export const CreateProjectTab: React.FC = (): React.JSX.Element => {
+    const { projects, setShowCreateProjectModal } = useUserDashboardContext();
+    const router = useRouter(); // Router still needed or provided by component?
     return (
         <div className="animate-fade-in-up">
             <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-10 text-center transition-colors duration-200">

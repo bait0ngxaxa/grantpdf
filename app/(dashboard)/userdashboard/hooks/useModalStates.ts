@@ -1,34 +1,45 @@
-import { useState } from "react";
+import { useDashboardContext } from "../DashboardContext";
 
 export const useModalStates = (): {
     isModalOpen: boolean;
-    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsModalOpen: (open: boolean) => void;
     previewUrl: string;
     previewTitle: string;
     showProfileModal: boolean;
-    setShowProfileModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowProfileModal: (show: boolean) => void;
     showCreateProjectModal: boolean;
-    setShowCreateProjectModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowCreateProjectModal: (show: boolean) => void;
     showDeleteModal: boolean;
-    setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowDeleteModal: (show: boolean) => void;
     showSuccessModal: boolean;
-    setShowSuccessModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowSuccessModal: (show: boolean) => void;
     showEditProjectModal: boolean;
-    setShowEditProjectModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowEditProjectModal: (show: boolean) => void;
     openPreviewModal: (storagePath: string, title: string) => void;
 } => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [previewUrl, setPreviewUrl] = useState("");
-    const [previewTitle, setPreviewTitle] = useState("");
-    const [showProfileModal, setShowProfileModal] = useState(false);
-    const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [showEditProjectModal, setShowEditProjectModal] = useState(false);
+    // Shared state from Context
+    const {
+        isModalOpen,
+        setIsModalOpen,
+        previewUrl,
+        setPreviewUrl,
+        previewTitle,
+        setPreviewTitle,
+        showProfileModal,
+        setShowProfileModal,
+        showCreateProjectModal,
+        setShowCreateProjectModal,
+        showDeleteModal,
+        setShowDeleteModal,
+        showSuccessModal,
+        setShowSuccessModal,
+        showEditProjectModal,
+        setShowEditProjectModal,
+    } = useDashboardContext();
 
     const openPreviewModal = (storagePath: string, title: string): void => {
         const previewApiUrl = `/api/preview?path=${encodeURIComponent(
-            storagePath
+            storagePath,
         )}`;
         setPreviewUrl(previewApiUrl);
         setPreviewTitle(title);

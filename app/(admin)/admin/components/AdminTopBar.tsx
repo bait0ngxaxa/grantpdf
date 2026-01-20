@@ -1,12 +1,8 @@
 import React from "react";
 import { Button, ThemeToggle } from "@/components/ui";
 import { ChartBarBig, LogOut, Menu } from "lucide-react";
-
-interface AdminTopBarProps {
-    setIsSidebarOpen: (open: boolean) => void;
-    activeTab: string;
-    signOut: () => void;
-}
+import { signOut } from "next-auth/react";
+import { useAdminDashboardContext } from "../AdminDashboardContext";
 
 const menuItems = [
     { id: "dashboard", name: "ภาพรวมระบบ" },
@@ -14,11 +10,9 @@ const menuItems = [
     { id: "users", name: "จัดการผู้ใช้งาน" },
 ];
 
-export const AdminTopBar: React.FC<AdminTopBarProps> = ({
-    setIsSidebarOpen,
-    activeTab,
-    signOut,
-}): React.JSX.Element => {
+export const AdminTopBar: React.FC = (): React.JSX.Element => {
+    const { setIsSidebarOpen, activeTab } = useAdminDashboardContext();
+
     return (
         <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-slate-200/60 dark:border-slate-700/60 transition-all duration-300">
             <div className="flex items-center justify-between">
@@ -42,7 +36,7 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => signOut()}
+                        onClick={() => signOut({ callbackUrl: "/signin" })}
                         className="cursor-pointer text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl"
                     >
                         <LogOut className="h-4 w-4 mr-2" />

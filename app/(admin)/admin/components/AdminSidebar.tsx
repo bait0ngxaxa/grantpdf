@@ -8,21 +8,10 @@ import {
     X,
     ArrowLeft,
 } from "lucide-react";
-import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import type { Session } from "next-auth";
 import { ROUTES } from "@/lib/constants";
-
-interface AdminSidebarProps {
-    isSidebarOpen: boolean;
-    setIsSidebarOpen: (open: boolean) => void;
-    activeTab: string;
-    setActiveTab: (tab: string) => void;
-    session: Session;
-    router: AppRouterInstance;
-    todayProjects: number;
-    todayFiles: number;
-    totalProjects: number;
-}
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useAdminDashboardContext } from "../AdminDashboardContext";
 
 const menuItems = [
     {
@@ -42,17 +31,21 @@ const menuItems = [
     },
 ];
 
-export const AdminSidebar: React.FC<AdminSidebarProps> = ({
-    isSidebarOpen,
-    setIsSidebarOpen,
-    activeTab,
-    setActiveTab,
-    session,
-    router,
-    todayProjects,
-    todayFiles,
-    totalProjects,
-}): React.JSX.Element => {
+export const AdminSidebar: React.FC = (): React.JSX.Element => {
+    const { data: session } = useSession();
+    const router = useRouter();
+    const {
+        isSidebarOpen,
+        setIsSidebarOpen,
+        activeTab,
+        setActiveTab,
+        todayProjects,
+        todayFiles,
+        projects,
+    } = useAdminDashboardContext();
+
+    const totalProjects = projects.length;
+
     return (
         <>
             {/* Mobile sidebar overlay */}
@@ -203,17 +196,17 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         <div className="flex items-center space-x-3 mb-3 relative z-10">
                             <div className="w-10 h-10 bg-gradient-to-br from-orange-100 via-amber-50 to-white dark:from-orange-900 dark:via-amber-900 dark:to-slate-800 rounded-xl flex items-center justify-center border border-white dark:border-slate-700 shadow-sm ring-2 ring-white dark:ring-slate-700 group-hover:scale-105 transition-transform duration-300">
                                 <span className="text-base font-bold text-orange-600 dark:text-orange-400">
-                                    {session.user?.name?.charAt(0) ||
-                                        session.user?.email?.charAt(0) ||
+                                    {session?.user?.name?.charAt(0) ||
+                                        session?.user?.email?.charAt(0) ||
                                         "A"}
                                 </span>
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors">
-                                    {session.user?.name || "Admin"}
+                                    {session?.user?.name || "Admin"}
                                 </p>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-800 uppercase tracking-wide">
-                                    {session.user?.role}
+                                    {session?.user?.role}
                                 </span>
                             </div>
                         </div>
