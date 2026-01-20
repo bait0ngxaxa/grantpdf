@@ -1,18 +1,19 @@
-import { useState } from "react";
 import { useExpandableState } from "@/lib/hooks/useExpandableState";
+import { useDashboardContext } from "../DashboardContext";
 
 export const useUIStates = (): {
     activeTab: string;
-    setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+    setActiveTab: (tab: string) => void;
     isSidebarOpen: boolean;
-    setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsSidebarOpen: (open: boolean) => void;
     expandedProjects: Set<string>;
     expandedRows: Set<string>;
     toggleProjectExpansion: (projectId: string) => void;
     toggleRowExpansion: (fileId: string) => void;
 } => {
-    const [activeTab, setActiveTab] = useState("dashboard");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    // Consume state from Context instead of local state
+    const { activeTab, setActiveTab, isSidebarOpen, setIsSidebarOpen } =
+        useDashboardContext();
 
     // Use shared expandable state hook
     const {

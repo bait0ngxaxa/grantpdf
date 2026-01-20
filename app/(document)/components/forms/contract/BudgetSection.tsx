@@ -6,7 +6,7 @@ import { type ChangeEvent } from "react";
 interface BudgetSectionProps {
     formData: ContractData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof ContractData, string>>;
 }
@@ -19,10 +19,12 @@ export function BudgetSection({
     return (
         <FormSection
             title="ข้อมูลงบประมาณ ระยะเวลา จำนวนงวด"
-            bgColor="bg-blue-50"
-            borderColor="border-blue-200"
-            headerBorderColor="border-blue-300"
-            icon={<Calculator className="w-5 h-5 text-blue-600" />}
+            bgColor="bg-blue-50 dark:bg-blue-900/20"
+            borderColor="border-blue-200 dark:border-blue-900/50"
+            headerBorderColor="border-blue-300 dark:border-blue-800"
+            icon={
+                <Calculator className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            }
         >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <FormField

@@ -4,8 +4,8 @@ import type { Project } from "@/type";
 import { PROJECT_STATUS } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
 
-import { StatsCard } from "../StatsCard";
-import { ProjectStatusDetails } from "../ProjectStatusDetails";
+import { StatsCard } from "./StatsCard";
+import { ProjectStatusDetails } from "./ProjectStatusDetails";
 
 interface StatsCardsProps {
     projects: Project[];
@@ -86,7 +86,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
                 subtitle={
                     latestProject
                         ? new Date(latestProject.created_at).toLocaleDateString(
-                              "th-TH"
+                              "th-TH",
                           )
                         : "ยังไม่มีโครงการ"
                 }

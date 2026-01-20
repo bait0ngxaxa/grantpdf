@@ -1,28 +1,28 @@
+import { API_ROUTES } from "@/lib/constants";
+import { useAdminDashboardContext } from "../AdminDashboardContext";
 import { useState } from "react";
 import type { AdminProject } from "@/type/models";
-import { API_ROUTES } from "@/lib/constants";
 
-export const useProjectStatusActions = (
-    setProjects: React.Dispatch<React.SetStateAction<AdminProject[]>>,
-    setSuccessMessage: (message: string) => void,
-    setIsSuccessModalOpen: (open: boolean) => void
-): {
-    isStatusModalOpen: boolean;
-    selectedProjectForStatus: AdminProject | null;
-    newStatus: string;
-    setNewStatus: React.Dispatch<React.SetStateAction<string>>;
-    statusNote: string;
-    setStatusNote: React.Dispatch<React.SetStateAction<string>>;
+export const useProjectStatusActions = (): {
+    // Actions are mainly used here, but we expose state too if needed
     isUpdatingStatus: boolean;
     openStatusModal: (project: AdminProject) => void;
     closeStatusModal: () => void;
     handleUpdateProjectStatus: () => Promise<void>;
 } => {
-    const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-    const [selectedProjectForStatus, setSelectedProjectForStatus] =
-        useState<AdminProject | null>(null);
-    const [newStatus, setNewStatus] = useState("");
-    const [statusNote, setStatusNote] = useState("");
+    const {
+        setProjects,
+        setSuccessMessage,
+        setIsSuccessModalOpen,
+        selectedProjectForStatus,
+        setSelectedProjectForStatus,
+        newStatus,
+        setNewStatus,
+        statusNote,
+        setStatusNote,
+        setIsStatusModalOpen,
+    } = useAdminDashboardContext();
+
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
     // Open status modal
@@ -74,8 +74,8 @@ export const useProjectStatusActions = (
                               statusNote: statusNote,
                               updated_at: new Date().toISOString(),
                           }
-                        : project
-                )
+                        : project,
+                ),
             );
 
             closeStatusModal();
@@ -85,7 +85,7 @@ export const useProjectStatusActions = (
         } catch (error) {
             console.error("Failed to update project status:", error);
             setSuccessMessage(
-                "เกิดข้อผิดพลาดในการอัปเดตสถานะโครงการ กรุณาลองใหม่อีกครั้ง"
+                "เกิดข้อผิดพลาดในการอัปเดตสถานะโครงการ กรุณาลองใหม่อีกครั้ง",
             );
             setIsSuccessModalOpen(true);
         } finally {
@@ -94,12 +94,6 @@ export const useProjectStatusActions = (
     };
 
     return {
-        isStatusModalOpen,
-        selectedProjectForStatus,
-        newStatus,
-        setNewStatus,
-        statusNote,
-        setStatusNote,
         isUpdatingStatus,
         openStatusModal,
         closeStatusModal,

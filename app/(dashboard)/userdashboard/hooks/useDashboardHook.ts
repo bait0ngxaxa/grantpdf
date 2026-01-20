@@ -1,20 +1,19 @@
-import { useState } from "react";
-import type { Project, UserFile } from "@/type";
+import { type Project, type UserFile } from "@/type";
 import { PAGINATION } from "@/lib/constants";
 import { usePagination } from "@/lib/hooks";
 import {
-    useUserData,
     useProjectActions,
     useFileActions,
     useModalStates,
     useUIStates,
 } from "./";
+import { useDashboardContext } from "../DashboardContext";
 
 export function useDashboardHook(): {
     activeTab: string;
-    setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+    setActiveTab: (tab: string) => void;
     isSidebarOpen: boolean;
-    setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsSidebarOpen: (open: boolean) => void;
     projects: Project[];
     paginatedProjects: Project[];
     orphanFiles: UserFile[];
@@ -28,19 +27,19 @@ export function useDashboardHook(): {
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     totalPages: number;
     isModalOpen: boolean;
-    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsModalOpen: (open: boolean) => void;
     previewUrl: string;
     previewTitle: string;
     showProfileModal: boolean;
-    setShowProfileModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowProfileModal: (show: boolean) => void;
     showCreateProjectModal: boolean;
-    setShowCreateProjectModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowCreateProjectModal: (show: boolean) => void;
     showDeleteModal: boolean;
-    setShowDeleteModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowDeleteModal: (show: boolean) => void;
     showSuccessModal: boolean;
-    setShowSuccessModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowSuccessModal: (show: boolean) => void;
     showEditProjectModal: boolean;
-    setShowEditProjectModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowEditProjectModal: (show: boolean) => void;
     openPreviewModal: (storagePath: string, title: string) => void;
     fileToDelete: string | null;
     projectToDelete: string | null;
@@ -48,13 +47,13 @@ export function useDashboardHook(): {
     setProjectToEdit: React.Dispatch<React.SetStateAction<Project | null>>;
     successMessage: string;
     editProjectName: string;
-    setEditProjectName: React.Dispatch<React.SetStateAction<string>>;
+    setEditProjectName: (name: string) => void;
     editProjectDescription: string;
-    setEditProjectDescription: React.Dispatch<React.SetStateAction<string>>;
+    setEditProjectDescription: (desc: string) => void;
     newProjectName: string;
-    setNewProjectName: React.Dispatch<React.SetStateAction<string>>;
+    setNewProjectName: (name: string) => void;
     newProjectDescription: string;
-    setNewProjectDescription: React.Dispatch<React.SetStateAction<string>>;
+    setNewProjectDescription: (desc: string) => void;
     isCreatingProject: boolean;
     isUpdatingProject: boolean;
     handleDeleteFile: (fileId: string) => void;
@@ -66,28 +65,48 @@ export function useDashboardHook(): {
     onConfirmUpdateProject: () => Promise<void>;
     onCreateProject: () => void;
 } {
-    // 1. UI States (Tabs, Sidebar)
+    // 1. UI States (Tabs, Sidebar) helper
+    const { expandedProjects, toggleProjectExpansion } = useUIStates();
+
+    // 2. Context Data & States
     const {
+        // UI
         activeTab,
         setActiveTab,
         isSidebarOpen,
         setIsSidebarOpen,
-        expandedProjects,
-        toggleProjectExpansion,
-    } = useUIStates();
 
-    // 2. Data Fetching
-    const {
+        // Data
         projects,
-        setProjects,
         orphanFiles,
-        setOrphanFiles,
         isLoading,
         error,
         fetchUserData,
-    } = useUserData();
 
-    // 3. Modal States
+        // Modal Visibility (Some consumed by useModalStates, but we need setters for handlers)
+        setShowDeleteModal,
+        setShowEditProjectModal,
+
+        // Modal Payloads/Form State
+        setFileToDelete,
+        fileToDelete,
+        setProjectToDelete,
+        projectToDelete,
+        setProjectToEdit,
+        projectToEdit,
+        setEditProjectName,
+        editProjectName,
+        setEditProjectDescription,
+        editProjectDescription,
+
+        successMessage,
+        newProjectName,
+        setNewProjectName,
+        newProjectDescription,
+        setNewProjectDescription,
+    } = useDashboardContext();
+
+    // 3. Modal Helper (Exposes visibility states mainly)
     const {
         isModalOpen,
         setIsModalOpen,
@@ -98,41 +117,24 @@ export function useDashboardHook(): {
         showCreateProjectModal,
         setShowCreateProjectModal,
         showDeleteModal,
-        setShowDeleteModal,
         showSuccessModal,
         setShowSuccessModal,
         showEditProjectModal,
-        setShowEditProjectModal,
         openPreviewModal,
     } = useModalStates();
 
-    // 4. Local Form/Action States
-    const [fileToDelete, setFileToDelete] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState("");
-    const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
-    const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
-    const [editProjectName, setEditProjectName] = useState("");
-    const [editProjectDescription, setEditProjectDescription] = useState("");
-    const [newProjectName, setNewProjectName] = useState("");
-    const [newProjectDescription, setNewProjectDescription] = useState("");
-
-    // 5. Actions
+    // 4. Actions Hook (Context-aware now)
     const {
         isCreatingProject,
         isUpdatingProject,
         handleCreateProject: createProjectAction,
         confirmDeleteProject: deleteProjectAction,
         confirmUpdateProject: updateProjectAction,
-    } = useProjectActions(setProjects, setSuccessMessage, setShowSuccessModal);
+    } = useProjectActions();
 
-    const { confirmDeleteFile: deleteFileAction } = useFileActions(
-        setProjects,
-        setOrphanFiles,
-        setSuccessMessage,
-        setShowSuccessModal
-    );
+    const { confirmDeleteFile: deleteFileAction } = useFileActions();
 
-    // 6. Pagination
+    // 5. Pagination
     const {
         currentPage,
         setCurrentPage,
@@ -143,7 +145,7 @@ export function useDashboardHook(): {
         itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
     });
 
-    // 7. Handlers / Logic
+    // 6. Handlers / Logic
     const totalDocuments =
         projects.reduce((total, project) => total + project.files.length, 0) +
         orphanFiles.length;
@@ -174,25 +176,21 @@ export function useDashboardHook(): {
     const onConfirmDeleteFile = async (): Promise<void> => {
         if (!fileToDelete) return;
         setShowDeleteModal(false);
-        await deleteFileAction(fileToDelete);
+        await deleteFileAction();
         setFileToDelete(null);
     };
 
     const onConfirmDeleteProject = async (): Promise<void> => {
         if (!projectToDelete) return;
         setShowDeleteModal(false);
-        await deleteProjectAction(projectToDelete);
+        await deleteProjectAction();
         setProjectToDelete(null);
     };
 
     const onConfirmUpdateProject = async (): Promise<void> => {
         if (!projectToEdit || !editProjectName.trim()) return;
 
-        await updateProjectAction(
-            projectToEdit.id,
-            editProjectName,
-            editProjectDescription
-        );
+        await updateProjectAction();
 
         setShowEditProjectModal(false);
         setProjectToEdit(null);
@@ -201,7 +199,7 @@ export function useDashboardHook(): {
     };
 
     const onCreateProject = (): void => {
-        createProjectAction(newProjectName, newProjectDescription);
+        createProjectAction();
     };
 
     return {

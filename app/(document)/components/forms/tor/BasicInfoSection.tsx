@@ -6,10 +6,10 @@ import { type ChangeEvent } from "react";
 interface BasicInfoSectionProps {
     formData: TORData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     handlePhoneChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof TORData, string>>;
 }
@@ -23,7 +23,9 @@ export function BasicInfoSection({
     return (
         <FormSection
             title="ข้อมูลพื้นฐานโครงการ"
-            icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
+            icon={
+                <ClipboardList className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            }
         >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <FormField

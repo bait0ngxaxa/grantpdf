@@ -42,10 +42,10 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
 }): React.JSX.Element => {
     return (
         <div
-            className={`group bg-white rounded-3xl shadow-sm border transition-all duration-300 overflow-hidden ${
+            className={`group bg-white dark:bg-slate-800 rounded-3xl shadow-sm border transition-all duration-300 overflow-hidden ${
                 isExpanded
-                    ? "border-blue-200 shadow-md ring-1 ring-blue-100"
-                    : "border-slate-100 hover:border-blue-200 hover:shadow-md"
+                    ? "border-blue-200 dark:border-blue-800 shadow-md ring-1 ring-blue-100 dark:ring-blue-900"
+                    : "border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md"
             }`}
         >
             {/* Project Header */}
@@ -58,24 +58,24 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                         className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex-shrink-0 flex items-center justify-center transition-colors duration-300 ${
                             isExpanded
                                 ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
-                                : "bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500"
+                                : "bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/50 group-hover:text-blue-500 dark:group-hover:text-blue-400"
                         }`}
                     >
                         <Building2 className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-1 group-hover:text-blue-700 transition-colors break-words">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors break-words">
                             {project.name}
                         </h3>
-                        <p className="text-slate-500 text-sm mb-3 break-words line-clamp-2 sm:line-clamp-1">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-3 break-words line-clamp-2 sm:line-clamp-1">
                             {project.description || "ไม่มีคำอธิบาย"}
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                            <div className="flex items-center text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
+                            <div className="flex items-center text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 px-2 py-1 rounded-md">
                                 <FileText className="h-3.5 w-3.5 mr-1.5" />
                                 {project.files.length} เอกสาร
                             </div>
-                            <div className="flex items-center text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
+                            <div className="flex items-center text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 px-2 py-1 rounded-md">
                                 <Calendar className="h-3.5 w-3.5 mr-1.5" />
                                 {new Date(
                                     project.created_at,
@@ -129,7 +129,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center sm:pl-4 sm:border-l border-slate-100 space-x-1 sm:space-x-3">
+                    <div className="flex items-center sm:pl-4 sm:border-l border-slate-100 dark:border-slate-700 space-x-1 sm:space-x-3">
                         <Button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -143,7 +143,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                             }}
                             size="sm"
                             variant="outline"
-                            className="hidden md:flex rounded-xl border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all font-semibold"
+                            className="hidden md:flex rounded-xl border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all font-semibold"
                         >
                             จัดการ/เพิ่มเอกสาร
                         </Button>
@@ -154,7 +154,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                                     e.stopPropagation();
                                     onEditProject();
                                 }}
-                                className="p-2 rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors duration-200"
+                                className="p-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/30 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                                 title="แก้ไขโครงการ"
                             >
                                 <Pencil className="h-5 w-5" />
@@ -164,7 +164,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                                     e.stopPropagation();
                                     onDeleteProject();
                                 }}
-                                className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors duration-200"
+                                className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
                                 title="ลบโครงการ"
                             >
                                 <Trash2 className="h-5 w-5" />
@@ -176,8 +176,8 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                     <div
                         className={`p-2 rounded-full flex-shrink-0 transition-transform duration-300 ${
                             isExpanded
-                                ? "bg-slate-100 rotate-180"
-                                : "bg-white text-slate-400"
+                                ? "bg-slate-100 dark:bg-slate-700 rotate-180"
+                                : "bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500"
                         }`}
                     >
                         <ChevronDown className="h-5 w-5" />
@@ -193,12 +193,12 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                         : "max-h-0 opacity-0"
                 }`}
             >
-                <div className="border-t border-slate-100 bg-slate-50/50 p-6">
+                <div className="border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 p-6">
                     {project.files.length > 0 ? (
                         <div className="space-y-3">
                             <div className="flex items-center justify-between mb-4">
-                                <div className="text-sm font-bold text-slate-700 flex items-center">
-                                    <span className="bg-purple-100 text-purple-600 p-1.5 rounded-lg mr-2">
+                                <div className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center">
+                                    <span className="bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 p-1.5 rounded-lg mr-2">
                                         <FileText className="h-4 w-4" />
                                     </span>
                                     รายการเอกสารในโครงการ
@@ -213,7 +213,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                                         );
                                     }}
                                     size="sm"
-                                    className="h-8 text-xs bg-white border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 shadow-sm"
+                                    className="h-8 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-700 shadow-sm"
                                 >
                                     + เพิ่มเอกสาร
                                 </Button>
@@ -230,14 +230,14 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200">
-                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <FileText className="h-8 w-8 text-slate-300" />
+                        <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-600">
+                            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <FileText className="h-8 w-8 text-slate-300 dark:text-slate-500" />
                             </div>
-                            <h3 className="text-sm font-bold text-slate-800">
+                            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
                                 ยังไม่มีเอกสารในโครงการ
                             </h3>
-                            <p className="text-xs text-slate-500 mb-4 mt-1">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 mt-1">
                                 เริ่มต้นสร้างเอกสารสัญญา TOR หรือบันทึกข้อความ
                             </p>
                             <Button

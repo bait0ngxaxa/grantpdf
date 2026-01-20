@@ -96,29 +96,29 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border-0 shadow-2xl focus:outline-none">
+            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border-0 shadow-2xl focus:outline-none">
                 <div className="flex flex-col items-center text-center p-2">
                     {/* Success Icon with Animation */}
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg bg-green-50 text-green-600 ring-4 ring-green-50 animate-in zoom-in-50 duration-300">
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 ring-4 ring-green-50 dark:ring-green-900/30 animate-in zoom-in-50 duration-300">
                         <CheckCircle2 className="w-10 h-10" />
                     </div>
 
-                    <DialogTitle className="font-bold text-2xl mb-3 text-center text-slate-800">
+                    <DialogTitle className="font-bold text-2xl mb-3 text-center text-slate-800 dark:text-slate-100">
                         สร้าง{documentType}สำเร็จ!
                     </DialogTitle>
 
-                    <div className="text-slate-500 mb-8 leading-relaxed w-full">
+                    <div className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed w-full">
                         <p className="mb-4">
                             {documentType}ของคุณถูกสร้างเรียบร้อยแล้ว
                         </p>
 
                         {/* File Card info */}
-                        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center gap-3 text-left w-full shadow-sm mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 text-left w-full shadow-sm mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
                                 <FileText className="w-5 h-5" />
                             </div>
                             <div className="min-w-0 flex-1">
-                                <p className="text-sm font-semibold text-slate-700 truncate">
+                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">
                                     {downloadFileName}
                                 </p>
                                 <p className="text-xs text-slate-400">
@@ -135,7 +135,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
                     <div className="flex flex-col space-y-3 w-full">
                         <Button
                             onClick={handleRedirect}
-                            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-200 h-12 text-base font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
+                            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-200 dark:shadow-none h-12 text-base font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
                         >
                             กลับไปหน้าหลัก
                         </Button>

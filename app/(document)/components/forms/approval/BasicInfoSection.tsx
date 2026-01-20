@@ -6,7 +6,7 @@ import { type ChangeEvent } from "react";
 interface BasicInfoSectionProps {
     formData: ApprovalData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof ApprovalData, string>>;
 }
@@ -19,7 +19,9 @@ export function BasicInfoSection({
     return (
         <FormSection
             title="ข้อมูลพื้นฐาน"
-            icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
+            icon={
+                <ClipboardList className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            }
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <FormField

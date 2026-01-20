@@ -17,21 +17,21 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         <div className="space-y-6">
             {/* Users Card */}
             <div
-                className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group h-fit"
+                className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group h-fit"
                 onClick={() => setActiveTab("users")}
             >
                 <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
                         <Users className="h-6 w-6" />
                     </div>
                     <div>
-                        <div className="text-sm font-medium text-slate-500">
+                        <div className="text-sm font-medium text-slate-500 dark:text-slate-400">
                             ผู้ใช้งานทั้งหมด
                         </div>
-                        <div className="text-2xl font-bold text-indigo-600">
+                        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                             {totalUsers}
                         </div>
-                        <div className="text-xs text-slate-400 mt-0.5">
+                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                             บัญชีผู้ใช้ในระบบ
                         </div>
                     </div>
@@ -39,39 +39,39 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
             </div>
 
             {/* Latest Project Card */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 h-fit">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 h-fit">
                 <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600">
+                    <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/50 rounded-xl flex items-center justify-center text-teal-600 dark:text-teal-400">
                         <Archive className="h-6 w-6" />
                     </div>
                     <div>
-                        <div className="text-base font-bold text-slate-800">
+                        <div className="text-base font-bold text-slate-800 dark:text-slate-100">
                             โครงการล่าสุด
                         </div>
-                        <div className="text-sm text-slate-500">
+                        <div className="text-sm text-slate-500 dark:text-slate-400">
                             ที่เพิ่มเข้ามาในระบบ
                         </div>
                     </div>
                 </div>
 
                 {latestProject ? (
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <div className="text-sm font-medium text-slate-900 truncate mb-1">
+                    <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-100 dark:border-slate-600">
+                        <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate mb-1">
                             {latestProject.name}
                         </div>
-                        <div className="flex items-center justify-between text-xs text-slate-500">
+                        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                             <span>
                                 สร้างโดย: {latestProject.userName || "ไม่ระบุ"}
                             </span>
                             <span>
                                 {new Date(
-                                    latestProject.created_at
+                                    latestProject.created_at,
                                 ).toLocaleDateString("th-TH")}
                             </span>
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center py-4 text-slate-400 text-sm">
+                    <div className="text-center py-4 text-slate-400 dark:text-slate-500 text-sm">
                         ยังไม่มีโครงการในระบบ
                     </div>
                 )}

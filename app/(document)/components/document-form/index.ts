@@ -4,6 +4,7 @@ export * from "./ErrorAlert";
 export * from "./FormActions";
 export * from "./FormField";
 export * from "./FormSection";
+export * from "./DocumentEditorLayout";
 export * from "./PageLayout";
 export * from "./PreviewField";
 export * from "./PreviewModal";

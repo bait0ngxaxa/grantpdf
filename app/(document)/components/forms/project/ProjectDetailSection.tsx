@@ -6,7 +6,7 @@ import { type ChangeEvent } from "react";
 interface ProjectDetailSectionProps {
     formData: FormProjectData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof FormProjectData, string>>;
 }
@@ -19,10 +19,12 @@ export function ProjectDetailSection({
     return (
         <FormSection
             title="รายละเอียดโครงการ"
-            bgColor="bg-green-50"
-            borderColor="border-green-200"
-            headerBorderColor="border-green-300"
-            icon={<FileText className="w-5 h-5 text-green-600" />}
+            bgColor="bg-green-50 dark:bg-green-900/20"
+            borderColor="border-green-200 dark:border-green-900/50"
+            headerBorderColor="border-green-300 dark:border-green-800"
+            icon={
+                <FileText className="w-5 h-5 text-green-600 dark:text-green-400" />
+            }
         >
             <div className="space-y-6">
                 <FormField

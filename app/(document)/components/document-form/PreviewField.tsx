@@ -17,13 +17,13 @@ export function PreviewField({
 }: PreviewFieldProps): React.JSX.Element {
     return (
         <div className={className}>
-            <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
+            <h4 className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">
                 {label}
             </h4>
             {children ? (
                 children
             ) : (
-                <p className="text-base font-semibold text-slate-800">
+                <p className="text-base font-semibold text-slate-800 dark:text-slate-100">
                     {value || "-"}
                 </p>
             )}
@@ -44,8 +44,8 @@ export function PreviewGrid({
         columns === 1
             ? "grid-cols-1"
             : columns === 2
-            ? "grid-cols-2"
-            : "grid-cols-3";
+              ? "grid-cols-2"
+              : "grid-cols-3";
 
     return <div className={`grid ${gridClass} gap-4`}>{children}</div>;
 }
@@ -63,11 +63,11 @@ export function PreviewList({
 }: PreviewListProps): React.JSX.Element {
     return (
         <div>
-            <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">
                 {label}
             </h4>
             {items.length > 0 ? (
-                <ul className="text-base font-semibold text-slate-800 list-disc list-inside space-y-1">
+                <ul className="text-base font-semibold text-slate-800 dark:text-slate-100 list-disc list-inside space-y-1">
                     {items.map((item, index) => (
                         <li key={index}>
                             {item || `รายการที่ ${index + 1} (ยังไม่ได้กรอก)`}
@@ -75,7 +75,9 @@ export function PreviewList({
                     ))}
                 </ul>
             ) : (
-                <p className="text-sm text-slate-400 italic">{emptyMessage}</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500 italic">
+                    {emptyMessage}
+                </p>
             )}
         </div>
     );

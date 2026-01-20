@@ -43,7 +43,7 @@ export const ProjectSelection = ({
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
-            <h1 className="text-3xl font-bold text-center mb-8 text-slate-800">
+            <h1 className="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100">
                 เลือกโครงการสำหรับเอกสาร
             </h1>
 
@@ -99,7 +99,7 @@ export const ProjectSelection = ({
 
                     {/* Project Info */}
                     {projects.length > 0 && (
-                        <div className="text-center mt-4 text-sm text-slate-500">
+                        <div className="text-center mt-4 text-sm text-slate-500 dark:text-slate-400">
                             แสดง {indexOfFirstProject + 1}-
                             {Math.min(indexOfLastProject, projects.length)} จาก{" "}
                             {projects.length} โครงการ
@@ -110,7 +110,7 @@ export const ProjectSelection = ({
                         <Button
                             onClick={() => router.push(ROUTES.DASHBOARD)}
                             variant="outline"
-                            className="bg-white hover:bg-slate-50 rounded-xl"
+                            className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl"
                         >
                             กลับไปแดชบอร์ด
                         </Button>

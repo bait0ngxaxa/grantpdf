@@ -17,8 +17,8 @@ export default function Error({
     }, [error]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
-            <div className="card w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-2xl overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 p-4">
+            <div className="card w-full max-w-md bg-white dark:bg-slate-800 shadow-2xl rounded-2xl overflow-hidden">
                 <div className="card-body p-8 text-center">
                     {/* Error Icon */}
                     <div className="flex justify-center mb-6">
@@ -28,12 +28,12 @@ export default function Error({
                     </div>
 
                     {/* Error Title */}
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
                         เกิดข้อผิดพลาด
                     </h2>
 
                     {/* Error Message */}
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    <p className="text-slate-600 dark:text-slate-400 mb-6">
                         ขออภัย เกิดข้อผิดพลาดบางอย่าง กรุณาลองอีกครั้ง
                     </p>
 
@@ -62,7 +62,7 @@ export default function Error({
                         </button>
                         <button
                             onClick={() => (window.location.href = "/")}
-                            className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                            className="flex-1 px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors cursor-pointer"
                         >
                             กลับหน้าหลัก
                         </button>

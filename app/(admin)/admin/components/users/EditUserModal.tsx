@@ -21,7 +21,7 @@ interface EditUserModalProps {
     user: UserData | null;
     editFormData: EditFormData;
     onFormChange: (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     ) => void;
     onSubmit: (e: FormEvent) => void;
     isSaving: boolean;
@@ -40,25 +40,25 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100">
+            <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100 dark:border-slate-700">
                 <div className="mb-6">
-                    <h3 className="text-xl font-bold text-slate-800">
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                         แก้ไขผู้ใช้งาน
                     </h3>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                         อัปเดตข้อมูลของ {user.name}
                     </p>
                 </div>
 
                 <form onSubmit={onSubmit} className="space-y-5">
                     <div className="space-y-1.5">
-                        <label className="text-sm font-semibold text-slate-700 ml-1">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">
                             ชื่อ
                         </label>
                         <Input
                             type="text"
                             name="name"
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-900"
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-900 dark:text-slate-100"
                             value={editFormData.name}
                             onChange={onFormChange}
                             required
@@ -66,33 +66,33 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-sm font-semibold text-slate-700 ml-1">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">
                             อีเมล
                         </label>
                         <div className="relative">
                             <Input
                                 type="email"
                                 name="email"
-                                className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed"
+                                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-500 dark:text-slate-400 cursor-not-allowed"
                                 value={editFormData.email}
                                 onChange={onFormChange}
                                 required
                                 disabled
                             />
                         </div>
-                        <p className="text-xs text-slate-400 font-medium ml-1">
+                        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium ml-1">
                             *อีเมลไม่สามารถแก้ไขได้เพื่อความปลอดภัย
                         </p>
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-sm font-semibold text-slate-700 ml-1">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">
                             บทบาท
                         </label>
                         <div className="relative">
                             <select
                                 name="role"
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none font-medium cursor-pointer"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none font-medium cursor-pointer"
                                 value={editFormData.role}
                                 onChange={onFormChange}
                                 required
@@ -102,7 +102,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                                     ผู้ดูแลระบบ (Admin)
                                 </option>
                             </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500 dark:text-slate-400">
                                 <ChevronDown className="h-4 w-4" />
                             </div>
                         </div>
@@ -113,7 +113,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                             type="button"
                             variant="ghost"
                             onClick={onClose}
-                            className="px-6 rounded-xl hover:bg-slate-100 text-slate-600 font-medium transition-colors"
+                            className="px-6 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium transition-colors"
                         >
                             ยกเลิก
                         </Button>

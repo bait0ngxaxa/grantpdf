@@ -6,10 +6,10 @@ import { type ChangeEvent } from "react";
 interface ApproverInfoSectionProps {
     formData: ApprovalData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     handlePhoneChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof ApprovalData, string>>;
 }
@@ -25,10 +25,12 @@ export function ApproverInfoSection({
             {/* ข้อมูลผู้ขออนุมัติ */}
             <FormSection
                 title="ข้อมูลผู้ขออนุมัติ"
-                bgColor="bg-purple-50"
-                borderColor="border-purple-200"
-                headerBorderColor="border-purple-300"
-                icon={<UserPen className="w-5 h-5 text-purple-600" />}
+                bgColor="bg-purple-50 dark:bg-purple-900/20"
+                borderColor="border-purple-200 dark:border-purple-900/50"
+                headerBorderColor="border-purple-300 dark:border-purple-800"
+                icon={
+                    <UserPen className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                }
             >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <FormField
@@ -87,10 +89,12 @@ export function ApproverInfoSection({
             {/* ข้อมูลผู้อนุมัติ */}
             <FormSection
                 title="ข้อมูลผู้ลงนามอนุมัติ"
-                bgColor="bg-red-50"
-                borderColor="border-red-200"
-                headerBorderColor="border-red-300"
-                icon={<UserPen className="w-5 h-5 text-red-600" />}
+                bgColor="bg-red-50 dark:bg-red-900/20"
+                borderColor="border-red-200 dark:border-red-900/50"
+                headerBorderColor="border-red-300 dark:border-red-800"
+                icon={
+                    <UserPen className="w-5 h-5 text-red-600 dark:text-red-400" />
+                }
             >
                 <FormField
                     label="ชื่อผู้อนุมัติ"

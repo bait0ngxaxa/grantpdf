@@ -6,10 +6,10 @@ import { type ChangeEvent } from "react";
 interface ContractorInfoSectionProps {
     formData: ContractData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     handleCitizenIdChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof ContractData, string>>;
 }
@@ -23,10 +23,12 @@ export function ContractorInfoSection({
     return (
         <FormSection
             title="ข้อมูลผู้รับจ้าง"
-            bgColor="bg-purple-50"
-            borderColor="border-purple-200"
-            headerBorderColor="border-purple-300"
-            icon={<User className="w-5 h-5 text-purple-600" />}
+            bgColor="bg-purple-50 dark:bg-purple-900/20"
+            borderColor="border-purple-200 dark:border-purple-900/50"
+            headerBorderColor="border-purple-300 dark:border-purple-800"
+            icon={
+                <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            }
         >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <FormField

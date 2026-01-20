@@ -23,24 +23,24 @@ export const UploadHeader = ({
     };
 
     return (
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
             {/* Top decorative bar */}
             <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between py-6 gap-4">
                     <div className="flex items-start gap-4">
-                        <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 shadow-sm">
-                            <UploadCloud className="w-8 h-8 text-blue-600" />
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/50 rounded-xl border border-blue-100 dark:border-blue-800 shadow-sm">
+                            <UploadCloud className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 flex items-center gap-2">
                                 อัพโหลดเอกสาร
-                                <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+                                <span className="text-sm font-normal text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full border border-gray-200 dark:border-slate-600">
                                     Upload Documents
                                 </span>
                             </h1>
-                            <p className="text-gray-500 mt-1 flex items-center gap-2">
+                            <p className="text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-2">
                                 <FileText className="w-4 h-4" />
                                 อัพโหลดไฟล์เอกสาร .docx หรือ .pdf
                                 เพื่อแนบในโครงการ
@@ -52,7 +52,7 @@ export const UploadHeader = ({
                         <Button
                             onClick={handleBack}
                             variant="ghost"
-                            className="cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-100 gap-2"
+                            className="cursor-pointer text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-700 gap-2"
                         >
                             <ChevronLeft className="w-4 h-4" />
                             กลับไปยังแดชบอร์ด

@@ -2,16 +2,12 @@
 
 import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
 
 import {
-    PageLayout,
-    FormActions,
-    PreviewModal,
-    ErrorAlert,
     PreviewField,
     PreviewGrid,
+    DocumentEditorLayout,
 } from "@/app/(document)/components";
 import { LoadingSpinner } from "@/components/ui";
 import {
@@ -85,139 +81,137 @@ export function FormProjectForm(): React.JSX.Element {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
 
-    const {
-        isExitModalOpen,
-        setIsExitModalOpen,
-        handleConfirmExit,
-        allowNavigation,
-    } = useExitConfirmation({ isDirty });
+    const { handleConfirmExit, allowNavigation } = useExitConfirmation({
+        isDirty,
+    });
 
     if (!isClient) {
         return <LoadingSpinner />;
     }
 
     return (
-        <PageLayout
+        <DocumentEditorLayout
             title="สร้างหนังสือข้อเสนอโครงการ"
             subtitle="กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสาร"
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
             isDirty={isDirty}
-            isExitModalOpen={isExitModalOpen}
-            setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
+            onPreview={handlePreview}
+            message={message}
+            isError={isError}
+            isPreviewOpen={isPreviewOpen}
+            onClosePreview={closePreview}
+            onConfirmPreview={confirmPreview}
+            previewContent={
+                <>
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ชื่อไฟล์"
+                            value={formData.fileName}
+                        />
+                        <PreviewField
+                            label="ชื่อโครงการ"
+                            value={formData.projectName}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ผู้รับผิดชอบ"
+                            value={formData.person}
+                        />
+                        <PreviewField
+                            label="ที่อยู่"
+                            value={formData.address}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="เบอร์โทรศัพท์"
+                            value={formData.tel}
+                        />
+                        <PreviewField label="อีเมล" value={formData.email} />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ระยะเวลา"
+                            value={formData.timeline}
+                        />
+                        <PreviewField label="งบประมาณ" value={formData.cost} />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ความเป็นมาและแนวคิด"
+                            value={formData.rationale}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewField label="เป้าประสงค์">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.goal || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="วัตถุประสงค์">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.objective || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="เป้าหมายโครงการ">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.target || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="กรอบการดำเนินงาน">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.scope || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="ผลผลิต">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.product || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="ผลลัพธ์">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.result || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="ประวัติผู้ช่วยวิทยากร">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.author || "-"}
+                        </p>
+                    </PreviewField>
+                </>
+            }
+            isSuccessOpen={isSuccessModalOpen}
+            onCloseSuccess={() => setIsSuccessModalOpen(false)}
+            fileName={formData.fileName}
+            downloadUrl={generatedFileUrl}
+            successDocumentType="เอกสาร Word"
+            onSuccessRedirect={allowNavigation}
         >
-            <form onSubmit={onSubmit} className="space-y-8">
-                <BasicInfoSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    handlePhoneChange={handlePhoneChange}
-                    errors={errors}
-                />
-
-                <ProjectDetailSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    errors={errors}
-                />
-
-                <FormActions
-                    onPreview={handlePreview}
-                    isSubmitting={isSubmitting}
-                />
-            </form>
-
-            <ErrorAlert message={message} isError={isError} />
-
-            {/* Preview Modal */}
-            <PreviewModal
-                isOpen={isPreviewOpen}
-                onClose={closePreview}
-                onConfirm={confirmPreview}
-            >
-                <PreviewGrid>
-                    <PreviewField label="ชื่อไฟล์" value={formData.fileName} />
-                    <PreviewField
-                        label="ชื่อโครงการ"
-                        value={formData.projectName}
-                    />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField
-                        label="ผู้รับผิดชอบ"
-                        value={formData.person}
-                    />
-                    <PreviewField label="ที่อยู่" value={formData.address} />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField label="เบอร์โทรศัพท์" value={formData.tel} />
-                    <PreviewField label="อีเมล" value={formData.email} />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField label="ระยะเวลา" value={formData.timeline} />
-                    <PreviewField label="งบประมาณ" value={formData.cost} />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField
-                        label="ความเป็นมาและแนวคิด"
-                        value={formData.rationale}
-                    />
-                </PreviewGrid>
-
-                <PreviewField label="เป้าประสงค์">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.goal || "-"}
-                    </p>
-                </PreviewField>
-
-                <PreviewField label="วัตถุประสงค์">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.objective || "-"}
-                    </p>
-                </PreviewField>
-
-                <PreviewField label="เป้าหมายโครงการ">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.target || "-"}
-                    </p>
-                </PreviewField>
-
-                <PreviewField label="กรอบการดำเนินงาน">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.scope || "-"}
-                    </p>
-                </PreviewField>
-
-                <PreviewField label="ผลผลิต">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.product || "-"}
-                    </p>
-                </PreviewField>
-
-                <PreviewField label="ผลลัพธ์">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.result || "-"}
-                    </p>
-                </PreviewField>
-
-                <PreviewField label="ประวัติผู้ช่วยวิทยากร">
-                    <p className="text-sm whitespace-pre-wrap">
-                        {formData.author || "-"}
-                    </p>
-                </PreviewField>
-            </PreviewModal>
-
-            {/* Success Modal */}
-            <CreateDocSuccessModal
-                isOpen={isSuccessModalOpen}
-                onClose={() => setIsSuccessModalOpen(false)}
-                fileName={formData.fileName}
-                downloadUrl={generatedFileUrl}
-                documentType="เอกสาร Word"
-                onRedirect={allowNavigation}
+            <BasicInfoSection
+                formData={formData}
+                handleChange={handleChange}
+                handlePhoneChange={handlePhoneChange}
+                errors={errors}
             />
-        </PageLayout>
+
+            <ProjectDetailSection
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
+            />
+        </DocumentEditorLayout>
     );
 }

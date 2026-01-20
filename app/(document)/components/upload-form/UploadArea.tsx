@@ -46,37 +46,37 @@ export function UploadArea({
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                    <UploadCloud className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                    <UploadCloud className="w-5 h-5 text-green-600 dark:text-green-400" />
                     อัปโหลดไฟล์เอกสาร
                 </h3>
 
                 <div
                     className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
                         selectedFile
-                            ? "border-green-400 bg-green-50/50"
-                            : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+                            ? "border-green-400 dark:border-green-600 bg-green-50/50 dark:bg-green-900/20"
+                            : "border-gray-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800"
                     }`}
                     onDragOver={onDragOver}
                     onDrop={onDrop}
                 >
                     {selectedFile ? (
                         <div className="space-y-4">
-                            <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center shadow-sm border border-green-100">
-                                <FileText className="w-8 h-8 text-green-600" />
+                            <div className="w-16 h-16 mx-auto bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm border border-green-100 dark:border-green-900">
+                                <FileText className="w-8 h-8 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
-                                <h4 className="text-lg font-medium text-gray-900 break-all px-4">
+                                <h4 className="text-lg font-medium text-gray-900 dark:text-slate-100 break-all px-4">
                                     {selectedFile.name}
                                 </h4>
-                                <p className="text-sm text-gray-500 mt-1">
+                                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                                     ขนาด: {formatFileSize(selectedFile.size)}
                                 </p>
                             </div>
                             {onClearFile && !isUploading && (
                                 <button
                                     onClick={onClearFile}
-                                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+                                    className="absolute top-4 right-4 text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -84,17 +84,17 @@ export function UploadArea({
                         </div>
                     ) : (
                         <div className="space-y-4 py-4">
-                            <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center">
+                            <div className="w-16 h-16 mx-auto bg-blue-50 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
                                 <UploadCloud className="w-8 h-8 text-blue-500" />
                             </div>
                             <div>
-                                <h4 className="text-lg font-medium text-gray-900">
+                                <h4 className="text-lg font-medium text-gray-900 dark:text-slate-100">
                                     ลากไฟล์มาวางที่นี่
                                 </h4>
-                                <p className="text-sm text-gray-500 mt-2">
+                                <p className="text-sm text-gray-500 dark:text-slate-400 mt-2">
                                     หรือคลิกปุ่มด้านล่างเพื่อเลือกไฟล์
                                 </p>
-                                <p className="text-xs text-gray-400 mt-2">
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-2">
                                     รองรับไฟล์ .docx และ .pdf (สูงสุด 10MB)
                                 </p>
                             </div>
@@ -114,7 +114,7 @@ export function UploadArea({
                         <Button
                             onClick={() => fileInputRef.current?.click()}
                             variant="outline"
-                            className="mt-6 cursor-pointer hover:bg-white"
+                            className="mt-6 cursor-pointer hover:bg-white dark:hover:bg-slate-700"
                             disabled={isUploading}
                         >
                             เลือกไฟล์จากเครื่อง
@@ -149,9 +149,9 @@ export function UploadArea({
 
             {/* Warning when file selected but no project */}
             {selectedFile && !hasSelectedProject && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-3 animate-in fade-in">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                    <p className="text-yellow-800 text-sm">
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-900/50 rounded-lg flex items-center gap-3 animate-in fade-in">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 flex-shrink-0" />
+                    <p className="text-yellow-800 dark:text-yellow-400 text-sm">
                         กรุณาเลือกโครงการทางด้านซ้ายก่อนอัพโหลดไฟล์
                     </p>
                 </div>
@@ -162,8 +162,8 @@ export function UploadArea({
                 <div
                     className={`p-4 rounded-lg flex items-start gap-3 animate-in fade-in ${
                         uploadSuccess
-                            ? "bg-green-50 border border-green-200 text-green-800"
-                            : "bg-red-50 border border-red-200 text-red-800"
+                            ? "bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-900/50 text-green-800 dark:text-green-400"
+                            : "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-400"
                     }`}
                 >
                     {uploadSuccess ? (

@@ -1,35 +1,29 @@
 import React, { useMemo } from "react";
-import type { AdminProject, AdminDocumentFile } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
 
-import { StatsCards } from "./dashboard/StatsCards";
-import { ProjectStatusStats } from "./dashboard/ProjectStatusStats";
-import { RecentActivity } from "./dashboard/RecentActivity";
-import { QuickActions } from "./dashboard/QuickActions";
+import { StatsCards } from "./StatsCards";
+import { ProjectStatusStats } from "./ProjectStatusStats";
+import { RecentActivity } from "./RecentActivity";
+import { QuickActions } from "./QuickActions";
 
-interface DashboardOverviewProps {
-    projects: AdminProject[];
-    allFiles: AdminDocumentFile[];
-    totalUsers: number;
-    todayProjects: number;
-    todayFiles: number;
-    setActiveTab: (tab: string) => void;
-}
+import { useAdminDashboardContext } from "../../AdminDashboardContext";
 
-export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
-    projects,
-    allFiles,
-    totalUsers,
-    todayProjects,
-    todayFiles,
-    setActiveTab,
-}): React.JSX.Element => {
+export const DashboardOverview: React.FC = (): React.JSX.Element => {
+    // Consume Context
+    const {
+        projects,
+        allFiles,
+        totalUsers,
+        todayProjects,
+        todayFiles,
+        setActiveTab,
+    } = useAdminDashboardContext();
     // Calculate latest project
     const latestProject = useMemo(() => {
         const sortedProjects = projects.sort(
             (a, b) =>
                 new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime()
+                new Date(a.created_at).getTime(),
         );
         return sortedProjects.length > 0 ? sortedProjects[0] : null;
     }, [projects]);

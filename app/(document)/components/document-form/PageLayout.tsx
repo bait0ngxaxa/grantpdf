@@ -1,16 +1,8 @@
-import { type ReactNode, useState } from "react";
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogClose,
-} from "@/components/ui";
+import { type ReactNode } from "react";
+import { Button } from "@/components/ui";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useGlobalModal } from "@/lib/hooks/useGlobalModal";
 
 interface PageLayoutProps {
     children: ReactNode;
@@ -23,8 +15,6 @@ interface PageLayoutProps {
     headerGradientTo?: string;
     headerTextColor?: string;
     isDirty?: boolean;
-    isExitModalOpen?: boolean;
-    setIsExitModalOpen?: (open: boolean) => void;
     onConfirmExit?: () => void;
 }
 
@@ -33,40 +23,40 @@ export function PageLayout({
     title,
     subtitle,
     backPath = "/createdocs",
-    gradientFrom = "from-slate-50",
-    gradientTo = "to-blue-50",
-    headerGradientFrom = "from-blue-600",
-    headerGradientTo = "to-purple-600",
+    gradientFrom = "from-slate-50 dark:from-slate-900",
+    gradientTo = "to-blue-50 dark:to-slate-800",
+    headerGradientFrom = "from-blue-600 dark:from-blue-800",
+    headerGradientTo = "to-purple-600 dark:to-purple-800",
     headerTextColor = "text-blue-100",
     isDirty = false,
-    isExitModalOpen: externalIsExitModalOpen,
-    setIsExitModalOpen: externalSetIsExitModalOpen,
     onConfirmExit,
 }: PageLayoutProps): React.JSX.Element {
     const router = useRouter();
-    const [internalIsExitModalOpen, setInternalIsExitModalOpen] =
-        useState(false);
-
-    const isExitModalOpen = externalIsExitModalOpen ?? internalIsExitModalOpen;
-    const setIsExitModalOpen =
-        externalSetIsExitModalOpen ?? setInternalIsExitModalOpen;
+    const { showConfirm } = useGlobalModal();
 
     const handleBack = (): void => {
         if (isDirty) {
-            setIsExitModalOpen(true);
+            showConfirm({
+                title: "ยืนยันการออกจากหน้านี้",
+                description:
+                    "ข้อมูลที่คุณกรอกจะไม่ถูกบันทึก คุณต้องการออกจากหน้านี้ใช่หรือไม่?",
+                confirmText: "ยืนยัน",
+                cancelText: "ยกเลิก",
+                isDestructive: true,
+                onConfirm: () => {
+                    if (onConfirmExit) {
+                        onConfirmExit();
+                    } else {
+                        router.push(backPath);
+                    }
+                },
+            });
         } else {
             router.push(backPath);
         }
     };
 
-    const confirmExit = (): void => {
-        setIsExitModalOpen(false);
-        if (onConfirmExit) {
-            onConfirmExit();
-        } else {
-            router.push(backPath);
-        }
-    };
+    // confirmExit function is no longer needed as wrapper, logic is inside showConfirm callback
 
     return (
         <div
@@ -76,16 +66,16 @@ export function PageLayout({
                 <Button
                     onClick={handleBack}
                     variant="ghost"
-                    className="group bg-white/80 backdrop-blur-sm hover:bg-white border border-slate-200 text-slate-600 shadow-sm hover:shadow-md hover:border-slate-300 hover:text-slate-900 transition-all duration-300 rounded-2xl px-5 py-6"
+                    className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-slate-100 transition-all duration-300 rounded-2xl px-5 py-6"
                 >
-                    <div className="p-1 rounded-lg bg-slate-100 group-hover:bg-slate-50 border border-slate-200 group-hover:border-slate-300 transition-colors mr-3">
+                    <div className="p-1 rounded-lg bg-slate-100 dark:bg-slate-700 group-hover:bg-slate-50 dark:group-hover:bg-slate-600 border border-slate-200 dark:border-slate-600 group-hover:border-slate-300 dark:group-hover:border-slate-500 transition-colors mr-3">
                         <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-0.5" />
                     </div>
                     <span className="font-semibold text-base">ย้อนกลับ</span>
                 </Button>
             </div>
 
-            <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-white/50 overflow-hidden ring-1 ring-slate-900/5">
+            <div className="w-full max-w-5xl bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 border border-white/50 dark:border-slate-700 overflow-hidden ring-1 ring-slate-900/5 dark:ring-white/5">
                 <div
                     className={`bg-gradient-to-r ${headerGradientFrom} ${headerGradientTo} p-8 text-white relative overflow-hidden`}
                 >
@@ -105,37 +95,10 @@ export function PageLayout({
                         )}
                     </div>
                 </div>
-                <div className="p-6 md:p-10 bg-slate-50/30">{children}</div>
+                <div className="p-6 md:p-10 bg-slate-50/30 dark:bg-slate-900/30">
+                    {children}
+                </div>
             </div>
-
-            <Dialog open={isExitModalOpen} onOpenChange={setIsExitModalOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>ยืนยันการออกจากหน้านี้</DialogTitle>
-                        <DialogDescription>
-                            ข้อมูลที่คุณกรอกจะไม่ถูกบันทึก
-                            คุณต้องการออกจากหน้านี้ใช่หรือไม่?
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button
-                                variant="outline"
-                                className="cursor-pointer"
-                            >
-                                ยกเลิก
-                            </Button>
-                        </DialogClose>
-                        <Button
-                            variant="destructive"
-                            onClick={confirmExit}
-                            className="cursor-pointer"
-                        >
-                            ยืนยัน
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }

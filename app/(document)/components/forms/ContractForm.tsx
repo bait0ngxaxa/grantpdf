@@ -2,16 +2,12 @@
 
 import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { CreateDocSuccessModal } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
 
 import {
-    PageLayout,
-    FormActions,
-    PreviewModal,
-    ErrorAlert,
     PreviewField,
     PreviewGrid,
+    DocumentEditorLayout,
 } from "@/app/(document)/components";
 import { LoadingSpinner } from "@/components/ui";
 import {
@@ -88,151 +84,146 @@ export function ContractForm(): React.JSX.Element {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
 
-    const {
-        isExitModalOpen,
-        setIsExitModalOpen,
-        handleConfirmExit,
-        allowNavigation,
-    } = useExitConfirmation({ isDirty });
+    const { handleConfirmExit, allowNavigation } = useExitConfirmation({
+        isDirty,
+    });
 
     if (!isClient) {
         return <LoadingSpinner />;
     }
 
     return (
-        <PageLayout
+        <DocumentEditorLayout
             title="สร้างหนังสือสัญญาเพื่อรับรองการลงนาม"
             subtitle={
                 contractCode
                     ? `ประเภท: ${contractCode}`
                     : "กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสร้างเอกสารสัญญา"
             }
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
             isDirty={isDirty}
-            isExitModalOpen={isExitModalOpen}
-            setIsExitModalOpen={setIsExitModalOpen}
             onConfirmExit={handleConfirmExit}
+            onPreview={handlePreview}
+            message={message}
+            isError={isError}
+            isPreviewOpen={isPreviewOpen}
+            onClosePreview={closePreview}
+            onConfirmPreview={confirmPreview}
+            previewContent={
+                <>
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ชื่อไฟล์"
+                            value={formData.fileName}
+                        />
+                        <PreviewField
+                            label="ชื่อโครงการ"
+                            value={formData.projectName}
+                        />
+                    </PreviewGrid>
+
+                    {contractCode && (
+                        <PreviewField label="รหัสสัญญา" value={contractCode} />
+                    )}
+
+                    <PreviewGrid>
+                        <PreviewField label="วันที่" value={formData.date} />
+                        <PreviewField
+                            label="ระหว่าง"
+                            value={formData.projectOffer}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField label="โดย" value={formData.owner} />
+                        <PreviewField
+                            label="รับดำเนินโครงการจาก"
+                            value={formData.projectCo}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="รหัสโครงการ"
+                            value={formData.projectCode}
+                        />
+                        <PreviewField
+                            label="ตามข้อตกลงเลขที่"
+                            value={formData.acceptNum}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="ชื่อผู้รับจ้าง"
+                            value={formData.name}
+                        />
+                        <PreviewField
+                            label="ที่อยู่"
+                            value={formData.address}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="เลขบัตรประชาชน"
+                            value={formData.citizenid}
+                        />
+                        <PreviewField
+                            label="วันหมดอายุ"
+                            value={formData.citizenexpire}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewField label="ชื่อพยาน" value={formData.witness} />
+
+                    <PreviewGrid>
+                        <PreviewField label="งบประมาณ" value={formData.cost} />
+                        <PreviewField
+                            label="ระยะเวลา (เดือน)"
+                            value={formData.timelineMonth}
+                        />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
+                        <PreviewField
+                            label="เริ่มตั้งแต่"
+                            value={formData.timelineText}
+                        />
+                        <PreviewField
+                            label="จำนวนงวด"
+                            value={formData.section}
+                        />
+                    </PreviewGrid>
+                </>
+            }
+            isSuccessOpen={isSuccessModalOpen}
+            onCloseSuccess={() => setIsSuccessModalOpen(false)}
+            fileName={formData.fileName}
+            downloadUrl={generatedFileUrl}
+            successDocumentType="เอกสาร Word"
+            onSuccessRedirect={allowNavigation}
         >
-            <form onSubmit={onSubmit} className="space-y-8">
-                <ProjectDetailsSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    errors={errors}
-                    contractCode={contractCode}
-                />
-
-                <ContractorInfoSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    handleCitizenIdChange={handleCitizenIdChange}
-                    errors={errors}
-                />
-
-                <BudgetSection
-                    formData={formData}
-                    handleChange={handleChange}
-                    errors={errors}
-                />
-
-                <FormActions
-                    onPreview={handlePreview}
-                    isSubmitting={isSubmitting}
-                />
-            </form>
-
-            <ErrorAlert message={message} isError={isError} />
-
-            {/* Preview Modal */}
-            <PreviewModal
-                isOpen={isPreviewOpen}
-                onClose={closePreview}
-                onConfirm={confirmPreview}
-            >
-                <PreviewGrid>
-                    <PreviewField label="ชื่อไฟล์" value={formData.fileName} />
-                    <PreviewField
-                        label="ชื่อโครงการ"
-                        value={formData.projectName}
-                    />
-                </PreviewGrid>
-
-                {contractCode && (
-                    <PreviewField label="รหัสสัญญา" value={contractCode} />
-                )}
-
-                <PreviewGrid>
-                    <PreviewField label="วันที่" value={formData.date} />
-                    <PreviewField
-                        label="ระหว่าง"
-                        value={formData.projectOffer}
-                    />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField label="โดย" value={formData.owner} />
-                    <PreviewField
-                        label="รับดำเนินโครงการจาก"
-                        value={formData.projectCo}
-                    />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField
-                        label="รหัสโครงการ"
-                        value={formData.projectCode}
-                    />
-                    <PreviewField
-                        label="ตามข้อตกลงเลขที่"
-                        value={formData.acceptNum}
-                    />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField
-                        label="ชื่อผู้รับจ้าง"
-                        value={formData.name}
-                    />
-                    <PreviewField label="ที่อยู่" value={formData.address} />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField
-                        label="เลขบัตรประชาชน"
-                        value={formData.citizenid}
-                    />
-                    <PreviewField
-                        label="วันหมดอายุ"
-                        value={formData.citizenexpire}
-                    />
-                </PreviewGrid>
-
-                <PreviewField label="ชื่อพยาน" value={formData.witness} />
-
-                <PreviewGrid>
-                    <PreviewField label="งบประมาณ" value={formData.cost} />
-                    <PreviewField
-                        label="ระยะเวลา (เดือน)"
-                        value={formData.timelineMonth}
-                    />
-                </PreviewGrid>
-
-                <PreviewGrid>
-                    <PreviewField
-                        label="เริ่มตั้งแต่"
-                        value={formData.timelineText}
-                    />
-                    <PreviewField label="จำนวนงวด" value={formData.section} />
-                </PreviewGrid>
-            </PreviewModal>
-
-            {/* Success Modal */}
-            <CreateDocSuccessModal
-                isOpen={isSuccessModalOpen}
-                onClose={() => setIsSuccessModalOpen(false)}
-                fileName={formData.fileName}
-                downloadUrl={generatedFileUrl}
-                documentType="เอกสาร Word"
-                onRedirect={allowNavigation}
+            <ProjectDetailsSection
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
+                contractCode={contractCode}
             />
-        </PageLayout>
+
+            <ContractorInfoSection
+                formData={formData}
+                handleChange={handleChange}
+                handleCitizenIdChange={handleCitizenIdChange}
+                errors={errors}
+            />
+
+            <BudgetSection
+                formData={formData}
+                handleChange={handleChange}
+                errors={errors}
+            />
+        </DocumentEditorLayout>
     );
 }

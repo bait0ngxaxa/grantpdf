@@ -6,7 +6,7 @@ import { type ChangeEvent } from "react";
 interface ScopeSectionProps {
     formData: TORData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof TORData, string>>;
 }
@@ -19,10 +19,12 @@ export function ScopeSection({
     return (
         <FormSection
             title="ขอบเขตและการจัดการ"
-            bgColor="bg-yellow-50"
-            borderColor="border-yellow-200"
-            headerBorderColor="border-yellow-300"
-            icon={<Target className="w-5 h-5 text-yellow-600" />}
+            bgColor="bg-yellow-50 dark:bg-yellow-900/20"
+            borderColor="border-yellow-200 dark:border-yellow-900/50"
+            headerBorderColor="border-yellow-300 dark:border-yellow-800"
+            icon={
+                <Target className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            }
         >
             <div className="space-y-6">
                 <FormField

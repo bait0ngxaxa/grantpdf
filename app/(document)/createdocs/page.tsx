@@ -4,23 +4,19 @@ import { Button, LoadingSpinner } from "@/components/ui";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { useSession } from "next-auth/react";
 import { ROUTES } from "@/lib/constants";
-
-import { useCreateDocsState, useProjectData, useNavigation } from "./hooks";
+import { useRouter } from "next/navigation";
+import { usePagination } from "@/lib/hooks";
+import { PAGINATION } from "@/lib/constants";
+import { useCreateDocsContext } from "./CreateDocsContext";
 
 import {
     ProjectSelection,
     MainMenu,
     ContractTypeSubmenu,
     CategorySubmenu,
-    NavBar,
 } from "./components";
 
-import { usePagination } from "@/lib/hooks";
-import { PAGINATION } from "@/lib/constants";
-
-import { useRouter } from "next/navigation";
-
-export default function CreateTorsPage(): React.JSX.Element {
+export default function CreateDocsPage(): React.JSX.Element {
     const router = useRouter();
     const { data: session, status } = useSession();
 
@@ -32,26 +28,14 @@ export default function CreateTorsPage(): React.JSX.Element {
         selectedProjectId,
         setSelectedProjectId,
         projects,
-        setProjects,
         isLoading,
-        setIsLoading,
-        error,
-        setError,
         isAdmin,
-    } = useCreateDocsState();
+        handleCategorySelection,
+    } = useCreateDocsContext();
 
-    useProjectData(setProjects, setIsLoading, setError, setSelectedProjectId);
+    useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
 
-    const {
-        handleBack: handleBackBase,
-        handleCategorySelection: handleCategorySelectionBase,
-        handleApprovalSelection,
-        handleContractSelection,
-        handleFormProjectSelection,
-        handleSummarySelection,
-        handleTorSelection,
-    } = useNavigation({ selectedProjectId });
-
+    // Local Pagination for Project Selection Step
     const {
         paginatedItems: currentProjects,
         totalPages,
@@ -64,29 +48,46 @@ export default function CreateTorsPage(): React.JSX.Element {
         itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
     });
 
-    useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
-
-    const handleProjectSelection = (projectId: string): void => {
-        setSelectedProjectId(projectId);
-    };
-
-    const handleBack = (): void => {
-        handleBackBase(
-            selectedContractType,
-            selectedProjectId,
-            selectedCategory,
-            setSelectedContractType,
-            setSelectedProjectId,
-            setSelectedCategory
+    // Navigation Handlers (Routing)
+    const handleApprovalSelection = (): void => {
+        if (!selectedProjectId) return;
+        router.push(
+            `/create-word/approval?projectId=${encodeURIComponent(selectedProjectId)}`,
         );
     };
 
-    const handleCategorySelection = (category: string): void => {
-        handleCategorySelectionBase(category, isAdmin, setSelectedCategory);
+    const handleContractSelection = (contractCode?: string): void => {
+        if (!selectedProjectId) return;
+        const params = new URLSearchParams({ projectId: selectedProjectId });
+        if (contractCode) {
+            params.set("contractCode", contractCode);
+        }
+        router.push(`/create-word/contract?${params.toString()}`);
+    };
+
+    const handleFormProjectSelection = (): void => {
+        if (!selectedProjectId) return;
+        router.push(
+            `/create-word/formproject?projectId=${encodeURIComponent(selectedProjectId)}`,
+        );
+    };
+
+    const handleSummarySelection = (): void => {
+        if (!selectedProjectId) return;
+        router.push(
+            `/create-word/summary?projectId=${encodeURIComponent(selectedProjectId)}`,
+        );
+    };
+
+    const handleTorSelection = (): void => {
+        if (!selectedProjectId) return;
+        router.push(
+            `/create-word/tor?projectId=${encodeURIComponent(selectedProjectId)}`,
+        );
     };
 
     return (
-        <div className="max-w-6xl mx-auto min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900 p-6 flex flex-col">
+        <div className="w-full">
             {status === "loading" && (
                 <div className="min-h-[50vh] flex items-center justify-center">
                     <LoadingSpinner />
@@ -97,7 +98,7 @@ export default function CreateTorsPage(): React.JSX.Element {
             {status === "unauthenticated" && (
                 <div className="flex justify-center items-center min-h-[50vh]">
                     <div className="text-center">
-                        <p className="text-lg text-red-500 mb-4">
+                        <p className="text-lg text-slate-500 mb-4 dark:text-slate-400">
                             กรุณาเข้าสู่ระบบก่อน
                         </p>
                         <Button
@@ -112,29 +113,20 @@ export default function CreateTorsPage(): React.JSX.Element {
 
             {/* Authenticated content */}
             {status === "authenticated" && session && (
-                <>
-                    {/* Header and Back button */}
-                    <NavBar
-                        selectedCategory={selectedCategory}
-                        selectedContractType={selectedContractType}
-                        onBack={handleBack}
-                        onCategorySelect={setSelectedCategory}
-                        onContractTypeSelect={setSelectedContractType}
-                    />
-
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {/* Conditional rendering based on selected state */}
                     {!selectedProjectId ? (
                         <ProjectSelection
                             projects={projects}
                             selectedProjectId={selectedProjectId}
                             isLoading={isLoading}
-                            error={error}
+                            error={null} // Error handled by context/hook mostly, or pass if needed
                             currentProjects={currentProjects}
                             currentPage={currentPage}
                             totalPages={totalPages}
                             indexOfFirstProject={indexOfFirstProject}
                             indexOfLastProject={indexOfLastProject}
-                            onProjectSelect={handleProjectSelection}
+                            onProjectSelect={setSelectedProjectId}
                             onPageChange={setCurrentPage}
                         />
                     ) : selectedContractType ? (
@@ -159,7 +151,7 @@ export default function CreateTorsPage(): React.JSX.Element {
                             onSummarySelect={handleSummarySelection}
                         />
                     )}
-                </>
+                </div>
             )}
         </div>
     );

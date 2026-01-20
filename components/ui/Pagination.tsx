@@ -55,15 +55,15 @@ export const Pagination: React.FC<PaginationProps> = ({
 
     return (
         <div className="flex justify-center mt-8">
-            <div className="inline-flex items-center gap-1 p-1.5 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100">
+            <div className="inline-flex items-center gap-1 p-1.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-700">
                 {/* Previous Button */}
                 <button
                     onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                     className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 ${
                         currentPage === 1
-                            ? "text-slate-300 cursor-not-allowed"
-                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
+                            ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
                     }`}
                     aria-label="Previous page"
                 >
@@ -86,13 +86,13 @@ export const Pagination: React.FC<PaginationProps> = ({
                                 onClick={() => onPageChange(page as number)}
                                 className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
                                     currentPage === page
-                                        ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-200"
-                                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
+                                        ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-200 dark:shadow-none"
+                                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200"
                                 }`}
                             >
                                 {page}
                             </button>
-                        )
+                        ),
                     )}
                 </div>
 
@@ -104,8 +104,8 @@ export const Pagination: React.FC<PaginationProps> = ({
                     disabled={currentPage === totalPages}
                     className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 ${
                         currentPage === totalPages
-                            ? "text-slate-300 cursor-not-allowed"
-                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
+                            ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
                     }`}
                     aria-label="Next page"
                 >

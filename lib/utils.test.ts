@@ -5,32 +5,44 @@ import { PROJECT_STATUS } from "@/type/models";
 describe("getStatusColor", () => {
     it("should return yellow classes for IN_PROGRESS status", () => {
         const result = getStatusColor(PROJECT_STATUS.IN_PROGRESS);
-        expect(result).toBe("bg-yellow-100 text-yellow-800 border-yellow-200");
+        expect(result).toBe(
+            "bg-yellow-50 text-yellow-600 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/30",
+        );
     });
 
     it("should return green classes for APPROVED status", () => {
         const result = getStatusColor(PROJECT_STATUS.APPROVED);
-        expect(result).toBe("bg-green-100 text-green-800 border-green-200");
+        expect(result).toBe(
+            "bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30",
+        );
     });
 
     it("should return red classes for REJECTED status", () => {
         const result = getStatusColor(PROJECT_STATUS.REJECTED);
-        expect(result).toBe("bg-red-100 text-red-800 border-red-200");
+        expect(result).toBe(
+            "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30",
+        );
     });
 
     it("should return orange classes for EDIT status", () => {
         const result = getStatusColor(PROJECT_STATUS.EDIT);
-        expect(result).toBe("bg-orange-100 text-orange-800 border-orange-200");
+        expect(result).toBe(
+            "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/30",
+        );
     });
 
     it("should return gray classes for CLOSED status", () => {
         const result = getStatusColor(PROJECT_STATUS.CLOSED);
-        expect(result).toBe("bg-gray-100 text-gray-800 border-gray-200");
+        expect(result).toBe(
+            "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-900/20 dark:text-slate-400 dark:border-slate-800",
+        );
     });
 
     it("should return gray classes for unknown status", () => {
         const result = getStatusColor("unknown");
-        expect(result).toBe("bg-gray-100 text-gray-800 border-gray-200");
+        expect(result).toBe(
+            "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-900/20 dark:text-slate-400 dark:border-slate-800",
+        );
     });
 });
 

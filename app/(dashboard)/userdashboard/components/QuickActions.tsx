@@ -1,6 +1,6 @@
 import React from "react";
 import { Building2, Plus } from "lucide-react";
-import { QuickActionCard } from "../QuickActionCard";
+import { QuickActionCard } from "./QuickActionCard";
 
 interface QuickActionsProps {
     setActiveTab: (tab: string) => void;

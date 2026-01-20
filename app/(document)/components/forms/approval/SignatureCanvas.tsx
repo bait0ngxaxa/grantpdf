@@ -157,9 +157,9 @@ const SignatureCanvasComponent = forwardRef<
 
     return (
         <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
+            <div className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-4 bg-gray-50 dark:bg-slate-800/50">
                 <div className="flex justify-center">
-                    <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white">
+                    <div className="border-2 border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
                         <canvas
                             ref={canvasRef}
                             width={width}
@@ -189,7 +189,7 @@ const SignatureCanvasComponent = forwardRef<
                     </Button>
                 </div>
 
-                <p className="text-xs text-gray-500 text-center mt-2">
+                <p className="text-xs text-gray-500 dark:text-slate-400 text-center mt-2">
                     ลากเมาส์หรือนิ้วเพื่อวาดลายเซ็นในกรอบข้างต้น
                 </p>
             </div>
