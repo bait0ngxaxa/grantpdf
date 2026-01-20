@@ -35,7 +35,7 @@ export default function UploadDocPage(): React.JSX.Element | null {
 
     if (status === "loading") {
         return (
-            <div className="flex justify-center items-center min-h-screen bg-gray-50">
+            <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-slate-900">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
         );
@@ -47,11 +47,11 @@ export default function UploadDocPage(): React.JSX.Element | null {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 font-sans">
             <UploadHeader />
 
             <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
                     <div className="p-6 lg:p-8">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                             {/* Left Column - Project Selection */}
@@ -64,7 +64,7 @@ export default function UploadDocPage(): React.JSX.Element | null {
                             />
 
                             {/* Right Column - Upload Area */}
-                            <div className="lg:border-l lg:pl-12 lg:border-dashed lg:border-gray-200">
+                            <div className="lg:border-l lg:pl-12 lg:border-dashed lg:border-gray-200 dark:lg:border-slate-700">
                                 <UploadArea
                                     fileInputRef={fileInputRef}
                                     selectedFile={selectedFile}

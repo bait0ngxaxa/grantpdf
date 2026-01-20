@@ -11,7 +11,7 @@ import { type ChangeEvent } from "react";
 interface AttachmentSectionProps {
     formData: ApprovalData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof ApprovalData, string>>;
     attachmentFiles: File[];
@@ -36,10 +36,12 @@ export function AttachmentSection({
     return (
         <FormSection
             title="สิ่งที่ส่งมาด้วยและเนื้อหา"
-            bgColor="bg-green-50"
-            borderColor="border-green-200"
-            headerBorderColor="border-green-300"
-            icon={<Folder className="w-5 h-5 text-green-600" />}
+            bgColor="bg-green-50 dark:bg-green-900/20"
+            borderColor="border-green-200 dark:border-green-900/50"
+            headerBorderColor="border-green-300 dark:border-green-800"
+            icon={
+                <Folder className="w-5 h-5 text-green-600 dark:text-green-400" />
+            }
         >
             <div className="space-y-6">
                 <AttachmentList

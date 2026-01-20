@@ -34,19 +34,19 @@ export default function FileItem({
     const getFileIcon = (): React.JSX.Element => {
         if (file.fileExtension === "pdf") {
             return (
-                <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-red-500">
+                <div className="w-10 h-10 bg-red-50 dark:bg-red-900/30 rounded-lg flex items-center justify-center text-red-500 dark:text-red-400">
                     <File className="w-6 h-6" />
                 </div>
             );
         } else if (file.fileExtension === "xlsx") {
             return (
-                <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-600">
+                <div className="w-10 h-10 bg-green-50 dark:bg-green-900/30 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
                     <FileText className="w-6 h-6" />
                 </div>
             );
         }
         return (
-            <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500">
+            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-500 dark:text-blue-400">
                 <FileText className="w-6 h-6" />
             </div>
         );
@@ -54,7 +54,7 @@ export default function FileItem({
 
     return (
         <React.Fragment>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-white border border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-blue-100 hover:shadow-sm transition-all duration-200 group gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:border-blue-100 dark:hover:border-blue-900/50 hover:shadow-sm transition-all duration-200 group gap-3">
                 <div className="flex items-start sm:items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
                     {/* File Icon */}
                     <div className="flex-shrink-0">{getFileIcon()}</div>
@@ -62,14 +62,14 @@ export default function FileItem({
                     {/* File Info */}
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm sm:text-base font-semibold text-slate-800 break-words">
+                            <span className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 break-words">
                                 {truncateFileName(file.originalFileName, 30)}
                             </span>
                             <span
                                 className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex-shrink-0 ${
                                     file.downloadStatus === "done"
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-amber-100 text-amber-700"
+                                        ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400"
+                                        : "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
                                 }`}
                             >
                                 {file.downloadStatus === "done"
@@ -77,21 +77,21 @@ export default function FileItem({
                                     : "ใหม่"}
                             </span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-sm text-slate-500">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-sm text-slate-500 dark:text-slate-400">
                             <span className="flex items-center">
-                                <Calendar className="h-3.5 w-3.5 mr-1.5 text-slate-400" />
+                                <Calendar className="h-3.5 w-3.5 mr-1.5 text-slate-400 dark:text-slate-500" />
                                 {new Date(file.created_at).toLocaleDateString(
                                     "th-TH",
                                 )}
                             </span>
-                            <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded border border-slate-200 uppercase font-medium">
+                            <span className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded border border-slate-200 dark:border-slate-600 uppercase font-medium">
                                 {file.fileExtension}
                             </span>
                             {file.attachmentFiles &&
                                 file.attachmentFiles.length > 0 && (
                                     <button
                                         onClick={toggleAttachmentExpansion}
-                                        className="flex items-center text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors duration-200 bg-blue-50 px-2 py-0.5 rounded-full"
+                                        className="flex items-center text-xs text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full"
                                     >
                                         <Paperclip className="w-3.5 h-3.5 mr-1" />
                                         {file.attachmentFiles.length} ไฟล์แนบ
@@ -120,7 +120,7 @@ export default function FileItem({
                                 })
                             }
                             disabled={isDownloading}
-                            className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 bg-slate-50 hover:bg-blue-100 hover:text-blue-600 transition-colors disabled:opacity-50"
+                            className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:opacity-50"
                             title="ดาวน์โหลด"
                         >
                             <Download className="h-4 w-4" />
@@ -137,7 +137,7 @@ export default function FileItem({
                                 }
                             }}
                             size="sm"
-                            className="h-8 w-8 p-0 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 border-none shadow-none"
+                            className="h-8 w-8 p-0 rounded-xl bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 hover:text-green-700 dark:hover:text-green-300 border-none shadow-none"
                             title="พรีวิว PDF"
                         >
                             <Eye className="h-4 w-4" />

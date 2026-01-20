@@ -226,37 +226,37 @@ export function TorForm(): React.JSX.Element {
                     activities.some((a) => a.activity) && (
                         <PreviewField label="ตารางกิจกรรม">
                             <div className="overflow-x-auto mt-2">
-                                <table className="min-w-full text-xs border border-gray-200">
-                                    <thead className="bg-gray-50">
+                                <table className="min-w-full text-xs border border-gray-200 dark:border-slate-700">
+                                    <thead className="bg-gray-50 dark:bg-slate-700/50">
                                         <tr>
-                                            <th className="px-2 py-1 border">
+                                            <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
                                                 กิจกรรม
                                             </th>
-                                            <th className="px-2 py-1 border">
+                                            <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
                                                 ผู้รับผิดชอบ
                                             </th>
-                                            <th className="px-2 py-1 border">
+                                            <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
                                                 วิธีการประเมิน
                                             </th>
-                                            <th className="px-2 py-1 border">
+                                            <th className="px-2 py-1 border dark:border-slate-600 text-slate-700 dark:text-slate-200">
                                                 ระยะเวลา
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="text-slate-600 dark:text-slate-300">
                                         {activities.map((activity, index) => (
                                             <tr key={index}>
-                                                <td className="px-2 py-1 border">
+                                                <td className="px-2 py-1 border dark:border-slate-600">
                                                     {activity.activity || "-"}
                                                 </td>
-                                                <td className="px-2 py-1 border">
+                                                <td className="px-2 py-1 border dark:border-slate-600">
                                                     {activity.manager || "-"}
                                                 </td>
-                                                <td className="px-2 py-1 border">
+                                                <td className="px-2 py-1 border dark:border-slate-600">
                                                     {activity.evaluation2 ||
                                                         "-"}
                                                 </td>
-                                                <td className="px-2 py-1 border">
+                                                <td className="px-2 py-1 border dark:border-slate-600">
                                                     {activity.duration || "-"}
                                                 </td>
                                             </tr>

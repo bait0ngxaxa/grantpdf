@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Building2 } from "lucide-react";
+import { FolderPlus } from "lucide-react";
 
 interface EmptyProjectsStateProps {
     onCreateProject: () => void;
@@ -10,15 +10,15 @@ export const EmptyProjectsState: React.FC<EmptyProjectsStateProps> = ({
     onCreateProject,
 }): React.JSX.Element => {
     return (
-        <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-slate-100">
-            <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Building2 className="h-12 w-12 text-blue-300" />
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-8 text-center animate-fade-in-up">
+            <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FolderPlus className="h-10 w-10 text-blue-500 dark:text-blue-400" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">
+            <h3 className="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">
                 ยังไม่มีโครงการ
             </h3>
-            <p className="text-slate-500 mb-8 max-w-xs mx-auto">
-                เริ่มต้นใช้งานระบบโดยการสร้างโครงการใหม่เพื่อจัดการเอกสารของคุณ
+            <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">
+                เริ่มต้นสร้างโครงการแรกของคุณเพื่อจัดการเอกสารอย่างเป็นระบบ
             </p>
             <Button
                 onClick={onCreateProject}

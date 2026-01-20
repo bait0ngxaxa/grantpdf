@@ -48,11 +48,11 @@ export default function ForgotPasswordPage(): React.JSX.Element {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-blue-50">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
             <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 {/* Left Side - Hero Content */}
                 <div className="hidden md:flex flex-col space-y-8 p-8">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-medium text-sm self-start animate-fade-in-up">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/50 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-medium text-sm self-start animate-fade-in-up">
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
@@ -60,11 +60,11 @@ export default function ForgotPasswordPage(): React.JSX.Element {
                         GRANT ONLINE Password Recovery
                     </div>
 
-                    <h1 className="text-5xl font-bold text-slate-900 leading-tight">
+                    <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
                         ลืมรหัสผ่าน? <br />
                     </h1>
 
-                    <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
+                    <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-lg">
                         กรอกอีเมลที่คุณใช้สมัครสมาชิก
                         ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้คุณทางอีเมล
                     </p>
@@ -72,15 +72,15 @@ export default function ForgotPasswordPage(): React.JSX.Element {
 
                 {/* Right Side - Form */}
                 <div className="w-full max-w-md mx-auto">
-                    <div className="bg-white rounded-3xl shadow-xl shadow-blue-100/50 p-8 border border-slate-100 relative overflow-hidden">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-blue-100/50 dark:shadow-slate-900/50 p-8 border border-slate-100 dark:border-slate-700 relative overflow-hidden">
                         {/* Decorative background blob */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/30 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                         <div className="mb-8 relative z-10">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                                 กู้คืนรหัสผ่าน
                             </h2>
-                            <p className="text-slate-500">
+                            <p className="text-slate-500 dark:text-slate-400">
                                 กรอกอีเมลเพื่อรับลิงก์รีเซ็ตรหัสผ่าน
                             </p>
                         </div>
@@ -90,12 +90,12 @@ export default function ForgotPasswordPage(): React.JSX.Element {
                             className="space-y-4 relative z-10"
                         >
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                     อีเมล
                                 </label>
                                 <Input
                                     type="email"
-                                    className="h-11 rounded-xl bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="your@email.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -105,7 +105,7 @@ export default function ForgotPasswordPage(): React.JSX.Element {
                             </div>
 
                             {error && (
-                                <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-shake">
+                                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake">
                                     <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>
@@ -127,11 +127,11 @@ export default function ForgotPasswordPage(): React.JSX.Element {
                             </Button>
                         </form>
 
-                        <div className="mt-6 text-center text-sm text-slate-500 relative z-10">
+                        <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400 relative z-10">
                             จำรหัสผ่านได้แล้ว?{" "}
                             <Link
                                 href={ROUTES.SIGNIN}
-                                className="font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                                className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                             >
                                 เข้าสู่ระบบ
                             </Link>

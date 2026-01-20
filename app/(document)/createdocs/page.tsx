@@ -77,7 +77,7 @@ export default function CreateTorsPage(): React.JSX.Element {
             selectedCategory,
             setSelectedContractType,
             setSelectedProjectId,
-            setSelectedCategory
+            setSelectedCategory,
         );
     };
 
@@ -86,7 +86,7 @@ export default function CreateTorsPage(): React.JSX.Element {
     };
 
     return (
-        <div className="max-w-6xl mx-auto min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-900 p-6 flex flex-col">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100 p-6 flex flex-col">
             {status === "loading" && (
                 <div className="min-h-[50vh] flex items-center justify-center">
                     <LoadingSpinner />

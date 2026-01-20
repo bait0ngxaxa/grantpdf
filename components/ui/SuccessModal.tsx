@@ -22,13 +22,13 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border-0 shadow-2xl">
+            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border-0 shadow-2xl">
                 <div className="flex flex-col items-center text-center p-4">
                     <div
                         className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg ${
                             isError
-                                ? "bg-red-50 text-red-500 ring-4 ring-red-50"
-                                : "bg-green-50 text-green-500 ring-4 ring-green-50"
+                                ? "bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 ring-4 ring-red-50 dark:ring-red-900/30"
+                                : "bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400 ring-4 ring-green-50 dark:ring-green-900/30"
                         }`}
                     >
                         {isError ? (
@@ -39,20 +39,22 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                     </div>
                     <DialogTitle
                         className={`font-bold text-2xl mb-3 text-center ${
-                            isError ? "text-slate-800" : "text-slate-800"
+                            isError
+                                ? "text-slate-800 dark:text-slate-100"
+                                : "text-slate-800 dark:text-slate-100"
                         }`}
                     >
                         {isError ? "เกิดข้อผิดพลาด" : "ดำเนินการสำเร็จ"}
                     </DialogTitle>
-                    <p className="text-slate-500 mb-8 leading-relaxed">
+                    <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
                         {message}
                     </p>
                     <Button
                         onClick={onClose}
                         className={`w-full rounded-xl h-12 text-lg font-semibold shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 ${
                             isError
-                                ? "bg-red-500 hover:bg-red-600 text-white shadow-red-200"
-                                : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-blue-200"
+                                ? "bg-red-500 hover:bg-red-600 text-white shadow-red-200 dark:shadow-none"
+                                : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-blue-200 dark:shadow-none"
                         }`}
                     >
                         ตกลง

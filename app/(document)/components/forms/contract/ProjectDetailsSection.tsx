@@ -6,7 +6,7 @@ import { type ChangeEvent } from "react";
 interface ProjectDetailsSectionProps {
     formData: ContractData;
     handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => void;
     errors: Partial<Record<keyof ContractData, string>>;
     contractCode: string;
@@ -21,7 +21,9 @@ export function ProjectDetailsSection({
     return (
         <FormSection
             title="ข้อมูลโครงการ"
-            icon={<ClipboardList className="w-5 h-5 text-slate-600" />}
+            icon={
+                <ClipboardList className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            }
         >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <FormField
@@ -54,13 +56,13 @@ export function ProjectDetailsSection({
 
                 {contractCode && (
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                             รหัสสัญญา
                         </label>
-                        <div className="w-full px-4 py-3 border border-slate-300 rounded-lg bg-slate-100 text-slate-600">
+                        <div className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                             {contractCode}
                         </div>
-                        <p className="text-sm text-slate-500 mt-1">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                             รหัสนี้จะใช้เป็นเลขที่สัญญาโดยอัตโนมัติ
                         </p>
                     </div>

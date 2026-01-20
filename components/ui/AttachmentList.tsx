@@ -66,7 +66,7 @@ export function AttachmentList({
                                 })
                             }
                             disabled={isDownloading}
-                            className="flex-shrink-0 ml-2 p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors duration-200 disabled:opacity-50"
+                            className="flex-shrink-0 ml-2 p-1.5 text-blue-600 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors duration-200 disabled:opacity-50"
                             title="ดาวน์โหลด"
                         >
                             <Download className="w-4 h-4" />

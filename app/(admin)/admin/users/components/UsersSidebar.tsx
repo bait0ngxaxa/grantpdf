@@ -54,12 +54,12 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                 <div
                     className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
                     onClick={() => setIsSidebarOpen(false)}
-                 />
+                />
             )}
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 shadow-2xl lg:shadow-none transform transition-all duration-300 ease-in-out z-50 ${
+                className={`fixed left-0 top-0 h-full w-72 bg-white/80 dark:bg-slate-800/90 backdrop-blur-xl border-r border-slate-200/60 dark:border-slate-700/60 shadow-2xl lg:shadow-none transform transition-all duration-300 ease-in-out z-50 ${
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 } lg:translate-x-0`}
             >
@@ -70,19 +70,19 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                                 <ShieldCheck className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                                <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
                                     Admin Panel
                                 </h2>
-                                <p className="text-xs text-slate-400 font-medium">
+                                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
                                     ส่วนของผู้ดูแลระบบ
                                 </p>
                             </div>
                         </div>
                         <button
-                            className="lg:hidden p-2 hover:bg-slate-100 rounded-full transition-colors"
+                            className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
                             onClick={() => setIsSidebarOpen(false)}
                         >
-                            <X className="h-5 w-5 text-slate-500" />
+                            <X className="h-5 w-5 text-slate-500 dark:text-slate-400" />
                         </button>
                     </div>
 
@@ -96,14 +96,14 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                                 className={`w-full flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-200 group text-sm font-medium ${
                                     item.id === "users"
                                         ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
                                 }`}
                             >
                                 <span
                                     className={`${
                                         item.id === "users"
                                             ? "text-white"
-                                            : "text-slate-400 group-hover:text-blue-500"
+                                            : "text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400"
                                     } transition-colors duration-200`}
                                 >
                                     {item.icon}
@@ -115,27 +115,27 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                 </div>
 
                 {/* User Info */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100 bg-white/50 backdrop-blur-sm">
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
                     <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
-                            <span className="text-sm font-bold text-slate-600">
+                        <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-600 shadow-sm">
+                            <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
                                 {session.user?.name?.charAt(0) ||
                                     session.user?.email?.charAt(0) ||
                                     "A"}
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-slate-900 truncate">
+                            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                                 {session.user?.name || "Admin"}
                             </p>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
                                 {session.user?.role}
                             </span>
                         </div>
                     </div>
                     <Button
                         variant="outline"
-                        className="w-full justify-center rounded-xl border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all duration-200"
+                        className="w-full justify-center rounded-xl border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200"
                         onClick={() => router.push(ROUTES.DASHBOARD)}
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />

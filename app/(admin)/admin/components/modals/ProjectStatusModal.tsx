@@ -32,39 +32,39 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
         <>
             {isStatusModalOpen && selectedProjectForStatus && (
                 <dialog className="modal modal-open backdrop-blur-sm bg-slate-900/20">
-                    <div className="modal-box bg-white p-8 max-w-md rounded-3xl shadow-2xl border border-slate-100">
+                    <div className="modal-box bg-white dark:bg-slate-800 p-8 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                                     <ClipboardList className="h-6 w-6" />
                                 </div>
-                                <h3 className="font-bold text-xl text-slate-800">
+                                <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100">
                                     จัดการสถานะ
                                 </h3>
                             </div>
                             <button
                                 onClick={closeStatusModal}
-                                className="btn btn-sm btn-circle btn-ghost text-slate-400 hover:bg-slate-50"
+                                className="btn btn-sm btn-circle btn-ghost text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
                             >
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
 
                         <div className="mb-8">
-                            <div className="bg-slate-50 p-4 rounded-2xl mb-6">
-                                <p className="text-sm text-slate-500 mb-2">
+                            <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl mb-6">
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
                                     โครงการ
                                 </p>
-                                <p className="font-semibold text-slate-800 text-lg mb-4 truncate">
+                                <p className="font-semibold text-slate-800 dark:text-slate-100 text-lg mb-4 truncate">
                                     {selectedProjectForStatus.name}
                                 </p>
-                                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                                    <span className="text-sm text-slate-500">
+                                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-600">
+                                    <span className="text-sm text-slate-500 dark:text-slate-400">
                                         สถานะปัจจุบัน
                                     </span>
                                     <span
                                         className={`px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(
-                                            selectedProjectForStatus.status
+                                            selectedProjectForStatus.status,
                                         )}`}
                                     >
                                         {selectedProjectForStatus.status}
@@ -74,12 +74,12 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
 
                             <div className="form-control mb-4">
                                 <label className="label pl-0">
-                                    <span className="label-text font-medium text-slate-700">
+                                    <span className="label-text font-medium text-slate-700 dark:text-slate-300">
                                         เลือกสถานะใหม่
                                     </span>
                                 </label>
                                 <select
-                                    className="select select-bordered w-full bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl text-slate-700"
+                                    className="select select-bordered w-full bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 rounded-xl text-slate-700 dark:text-slate-200"
                                     value={newStatus}
                                     onChange={(e) =>
                                         setNewStatus(e.target.value)
@@ -101,12 +101,12 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
 
                             <div className="form-control">
                                 <label className="label pl-0">
-                                    <span className="label-text font-medium text-slate-700">
+                                    <span className="label-text font-medium text-slate-700 dark:text-slate-300">
                                         คำอธิบาย/หมายเหตุ (ไม่บังคับ)
                                     </span>
                                 </label>
                                 <textarea
-                                    className="textarea textarea-bordered w-full bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl text-slate-700 h-24 resize-none"
+                                    className="textarea textarea-bordered w-full bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 rounded-xl text-slate-700 dark:text-slate-200 h-24 resize-none"
                                     placeholder="เพิ่มคำอธิบายหรือหมายเหตุสำหรับผู้ใช้..."
                                     value={statusNote}
                                     onChange={(e) =>
@@ -120,7 +120,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                             <Button
                                 variant="outline"
                                 onClick={closeStatusModal}
-                                className="cursor-pointer px-6 py-2 rounded-xl text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                                className="cursor-pointer px-6 py-2 rounded-xl text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
                             >
                                 ยกเลิก
                             </Button>

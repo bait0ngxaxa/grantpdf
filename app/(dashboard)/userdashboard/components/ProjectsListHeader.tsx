@@ -13,12 +13,12 @@ export const ProjectsListHeader: React.FC<ProjectsListHeaderProps> = ({
 }): React.JSX.Element => {
     return (
         <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-                <span className="bg-blue-100 p-2 rounded-xl text-blue-600">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
+                <span className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-xl text-blue-600 dark:text-blue-400">
                     <Building2 className="h-6 w-6" />
                 </span>
                 โครงการทั้งหมด
-                <span className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full">
                     {totalProjects}
                 </span>
             </h2>

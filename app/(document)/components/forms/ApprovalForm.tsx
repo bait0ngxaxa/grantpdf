@@ -250,7 +250,7 @@ export function ApprovalForm(): React.JSX.Element {
                     <PreviewField label="ลายเซ็น">
                         {signaturePreview && (
                             <div>
-                                <p className="text-xs text-gray-500 mb-2">
+                                <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
                                     จากการอัปโหลดไฟล์:
                                 </p>
                                 <Image
@@ -258,13 +258,13 @@ export function ApprovalForm(): React.JSX.Element {
                                     alt="Signature Preview"
                                     width={320}
                                     height={200}
-                                    className="max-w-xs h-auto object-contain mt-2 border rounded"
+                                    className="max-w-xs h-auto object-contain mt-2 border dark:border-slate-600 rounded"
                                 />
                             </div>
                         )}
                         {signatureCanvasData && (
                             <div className={signaturePreview ? "mt-4" : ""}>
-                                <p className="text-xs text-gray-500 mb-2">
+                                <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
                                     จากการวาดออนไลน์:
                                 </p>
                                 <Image
@@ -272,7 +272,7 @@ export function ApprovalForm(): React.JSX.Element {
                                     alt="Canvas Signature Preview"
                                     width={320}
                                     height={200}
-                                    className="max-w-xs h-auto object-contain mt-2 border rounded"
+                                    className="max-w-xs h-auto object-contain mt-2 border dark:border-slate-600 rounded"
                                 />
                             </div>
                         )}
@@ -290,9 +290,9 @@ export function ApprovalForm(): React.JSX.Element {
                                         key={index}
                                         className="flex items-center space-x-2 text-sm"
                                     >
-                                        <FileText className="w-4 h-4 text-slate-500" />
+                                        <FileText className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                                         <span>{file.name}</span>
-                                        <span className="text-xs text-slate-500">
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">
                                             (
                                             {(file.size / 1024 / 1024).toFixed(
                                                 2,

@@ -28,33 +28,33 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100">
+            <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100 dark:border-slate-700">
                 <div className="flex flex-col items-center justify-center text-center mb-6">
-                    <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4 shadow-sm">
+                    <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mb-4 shadow-sm">
                         <Trash2 className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800">
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                         ยืนยันการลบผู้ใช้งาน
                     </h3>
-                    <p className="text-slate-500 mt-2">
+                    <p className="text-slate-500 dark:text-slate-400 mt-2">
                         คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้งาน <br />
-                        <span className="font-semibold text-slate-800">
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
                             &quot;{user.name}&quot;
                         </span>{" "}
                         ({user.email})?
                     </p>
                 </div>
 
-                <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-6">
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/50 mb-6">
                     <div className="flex">
                         <div className="flex-shrink-0">
-                            <AlertTriangle className="h-5 w-5 text-red-400" />
+                            <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
                         </div>
                         <div className="ml-3">
-                            <h3 className="text-sm font-medium text-red-800">
+                            <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
                                 คำเตือน
                             </h3>
-                            <div className="mt-2 text-sm text-red-700">
+                            <div className="mt-2 text-sm text-red-700 dark:text-red-400/80">
                                 <p>
                                     การกระทำนี้ไม่สามารถกู้คืนได้
                                     ข้อมูลทั้งหมดของผู้ใช้งานรายนี้จะถูกลบออกจากระบบอย่างถาวร
@@ -69,7 +69,7 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                         variant="ghost"
                         onClick={onClose}
                         disabled={isDeleting}
-                        className="px-6 rounded-xl hover:bg-slate-100 text-slate-600 font-medium transition-colors"
+                        className="px-6 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium transition-colors"
                     >
                         ยกเลิก
                     </Button>

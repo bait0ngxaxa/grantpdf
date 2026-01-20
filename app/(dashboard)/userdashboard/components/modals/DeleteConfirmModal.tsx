@@ -30,17 +30,17 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 }) => {
     return (
         <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white border-0 shadow-2xl">
+            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-800 border-0 shadow-2xl">
                 <div className="flex flex-col items-center text-center p-4">
-                    <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6 shadow-inner ring-4 ring-red-50">
+                    <div className="w-20 h-20 bg-red-50 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-6 shadow-inner ring-4 ring-red-50 dark:ring-red-900/20">
                         <Trash2 className="h-10 w-10 text-red-500" />
                     </div>
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold text-slate-800 mb-2">
+                        <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
                             ยืนยันการลบ
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="text-slate-500 mb-8 leading-relaxed">
+                    <div className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
                         {fileToDelete
                             ? "คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้? การกระทำนี้ไม่สามารถย้อนกลับได้"
                             : "คุณแน่ใจหรือไม่ที่จะลบโครงการนี้? การกระทำนี้ไม่สามารถย้อนกลับได้"}
@@ -51,7 +51,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
                         <Button
                             variant="ghost"
                             onClick={cancelDelete}
-                            className="flex-1 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 h-12 text-base font-semibold"
+                            className="flex-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 h-12 text-base font-semibold"
                         >
                             ยกเลิก
                         </Button>
