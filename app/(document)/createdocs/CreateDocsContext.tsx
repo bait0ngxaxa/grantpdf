@@ -1,9 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, type ReactNode } from "react";
+import React, {
+    createContext,
+    useContext,
+    useMemo,
+    useCallback,
+    type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useCreateDocsState, useProjectData } from "./hooks";
-import { ROUTES } from "@/lib/constants";
+import { usePagination } from "@/lib/hooks";
+import { ROUTES, PAGINATION } from "@/lib/constants";
 import type { Project } from "@/type";
 
 interface CreateDocsContextType {
@@ -21,9 +28,22 @@ interface CreateDocsContextType {
     error: string | null;
     isAdmin: boolean;
 
+    // Pagination
+    currentProjects: Project[];
+    currentPage: number;
+    totalPages: number;
+    indexOfFirstProject: number;
+    indexOfLastProject: number;
+    setCurrentPage: (page: number) => void;
+
     // Actions
     goBack: () => void;
     handleCategorySelection: (category: string) => void;
+    handleApprovalSelection: () => void;
+    handleContractSelection: (contractCode?: string) => void;
+    handleFormProjectSelection: () => void;
+    handleSummarySelection: () => void;
+    handleTorSelection: () => void;
 }
 
 const CreateDocsContext = createContext<CreateDocsContextType | undefined>(
@@ -32,10 +52,6 @@ const CreateDocsContext = createContext<CreateDocsContextType | undefined>(
 
 export function CreateDocsProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
-
-    // We reuse the existing hook logic.
-    // Actually, useCreateDocsState handles internal logic like isAdmin check?
-    // Let's reuse useCreateDocsState but control navigation here.
 
     const {
         selectedCategory,
@@ -56,8 +72,23 @@ export function CreateDocsProvider({ children }: { children: ReactNode }) {
     // Fetch projects
     useProjectData(setProjects, setIsLoading, setError, setSelectedProjectId);
 
-    // Fixed Back Logic
-    const goBack = () => {
+    // Pagination
+    const {
+        paginatedItems: currentProjects,
+        totalPages,
+        startIndex: indexOfFirstProject,
+        endIndex: indexOfLastProject,
+        currentPage,
+        goToPage: setCurrentPage,
+    } = usePagination({
+        items: projects,
+        itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
+    });
+
+    // ==========================================================================
+    // Navigation Actions
+    // ==========================================================================
+    const goBack = useCallback(() => {
         if (selectedContractType) {
             setSelectedContractType(null);
         } else if (selectedCategory) {
@@ -67,31 +98,138 @@ export function CreateDocsProvider({ children }: { children: ReactNode }) {
         } else {
             router.push(ROUTES.DASHBOARD);
         }
-    };
-
-    const handleCategorySelection = (category: string) => {
-        if (category === "general" && !isAdmin) {
-            // Logic from useNavigation: if general but not admin -> project
-            setSelectedCategory("project");
-            return;
-        }
-        setSelectedCategory(category);
-    };
-
-    const value = {
-        selectedProjectId,
-        setSelectedProjectId,
-        selectedCategory,
-        setSelectedCategory,
+    }, [
         selectedContractType,
+        selectedCategory,
+        selectedProjectId,
         setSelectedContractType,
-        projects,
-        isLoading,
-        error,
-        isAdmin,
-        goBack,
-        handleCategorySelection,
-    };
+        setSelectedCategory,
+        setSelectedProjectId,
+        router,
+    ]);
+
+    const handleCategorySelection = useCallback(
+        (category: string) => {
+            if (category === "general" && !isAdmin) {
+                setSelectedCategory("project");
+                return;
+            }
+            setSelectedCategory(category);
+        },
+        [isAdmin, setSelectedCategory],
+    );
+
+    const handleApprovalSelection = useCallback((): void => {
+        if (!selectedProjectId) return;
+        router.push(
+            `/create-word/approval?projectId=${encodeURIComponent(selectedProjectId)}`,
+        );
+    }, [selectedProjectId, router]);
+
+    const handleContractSelection = useCallback(
+        (contractCode?: string): void => {
+            if (!selectedProjectId) return;
+            const params = new URLSearchParams({
+                projectId: selectedProjectId,
+            });
+            if (contractCode) {
+                params.set("contractCode", contractCode);
+            }
+            router.push(`/create-word/contract?${params.toString()}`);
+        },
+        [selectedProjectId, router],
+    );
+
+    const handleFormProjectSelection = useCallback((): void => {
+        if (!selectedProjectId) return;
+        router.push(
+            `/create-word/formproject?projectId=${encodeURIComponent(selectedProjectId)}`,
+        );
+    }, [selectedProjectId, router]);
+
+    const handleSummarySelection = useCallback((): void => {
+        if (!selectedProjectId) return;
+        router.push(
+            `/create-word/summary?projectId=${encodeURIComponent(selectedProjectId)}`,
+        );
+    }, [selectedProjectId, router]);
+
+    const handleTorSelection = useCallback((): void => {
+        if (!selectedProjectId) return;
+        router.push(
+            `/create-word/tor?projectId=${encodeURIComponent(selectedProjectId)}`,
+        );
+    }, [selectedProjectId, router]);
+
+    // ==========================================================================
+    // Context Value
+    // ==========================================================================
+    const value = useMemo(
+        () => ({
+            // State
+            selectedProjectId,
+            setSelectedProjectId,
+            selectedCategory,
+            setSelectedCategory,
+            selectedContractType,
+            setSelectedContractType,
+
+            // Data
+            projects,
+            isLoading,
+            error,
+            isAdmin,
+
+            // Pagination
+            currentProjects,
+            currentPage,
+            totalPages,
+            indexOfFirstProject,
+            indexOfLastProject,
+            setCurrentPage,
+
+            // Actions
+            goBack,
+            handleCategorySelection,
+            handleApprovalSelection,
+            handleContractSelection,
+            handleFormProjectSelection,
+            handleSummarySelection,
+            handleTorSelection,
+        }),
+        [
+            // State
+            selectedProjectId,
+            setSelectedProjectId,
+            selectedCategory,
+            setSelectedCategory,
+            selectedContractType,
+            setSelectedContractType,
+
+            // Data
+            projects,
+            isLoading,
+            error,
+            isAdmin,
+
+            // Pagination
+            currentProjects,
+            currentPage,
+            totalPages,
+            indexOfFirstProject,
+            indexOfLastProject,
+            setCurrentPage,
+
+            // Actions
+            goBack,
+            handleCategorySelection,
+            handleApprovalSelection,
+            handleContractSelection,
+            handleFormProjectSelection,
+            handleSummarySelection,
+            handleTorSelection,
+        ],
+    );
 
     return (
         <CreateDocsContext.Provider value={value}>

@@ -31,9 +31,10 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.540.0",
     "next": "15.4.10",
-    "next-auth": "^4.24.11",
+    "next-auth": "^4.24.7",
     "next-themes": "^0.4.6",
     "nodemailer": "^7.0.12",
+    "open-docxtemplater-image-module": "^1.0.3",
     "pizzip": "^3.2.0",
     "postcss": "^8.5.6",
     "react": "19.1.0",
@@ -41,6 +42,9 @@
     "react-signature-canvas": "^1.1.0-alpha.2",
     "tailwind-merge": "^3.3.1",
     "uuid": "^11.1.0"
+  },
+  "overrides": {
+    "xmldom": "npm:@xmldom/xmldom@^0.8.10"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",

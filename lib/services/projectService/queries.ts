@@ -152,3 +152,29 @@ export async function getProjectsByUserId(
         attachmentPaths,
     );
 }
+
+/**
+ * Find a project by name and userId
+ */
+export async function findProjectByNameAndUser(
+    name: string,
+    userId: number,
+): Promise<{ id: number; name: string; description: string | null } | null> {
+    return await prisma.project.findFirst({
+        where: { name, userId },
+        select: { id: true, name: true, description: true },
+    });
+}
+
+/**
+ * Find a project by ID and userId
+ */
+export async function findProjectByIdAndUser(
+    projectId: number,
+    userId: number,
+): Promise<{ id: number; name: string; description: string | null } | null> {
+    return await prisma.project.findFirst({
+        where: { id: projectId, userId },
+        select: { id: true, name: true, description: true },
+    });
+}

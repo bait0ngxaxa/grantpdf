@@ -1,14 +1,4 @@
 import { NextResponse } from "next/server";
-import { type getServerSession } from "next-auth";
-
-// ============================================================================
-// Session Types
-// ============================================================================
-
-export interface SessionValidationResult {
-    userId: number;
-    session: NonNullable<Awaited<ReturnType<typeof getServerSession>>>;
-}
 
 // ============================================================================
 // Document Types
@@ -52,14 +42,8 @@ export interface DocxParserOptions {
 // Type Guards
 // ============================================================================
 
-export function isSessionError(
-    result: SessionValidationResult | NextResponse
-): result is NextResponse {
-    return result instanceof NextResponse;
-}
-
 export function isProjectError(
-    result: ProjectResult | NextResponse
+    result: ProjectResult | NextResponse,
 ): result is NextResponse {
     return result instanceof NextResponse;
 }

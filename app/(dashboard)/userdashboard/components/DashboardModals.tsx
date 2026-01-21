@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useDashboardHook } from "../hooks";
+import { useUserDashboardContext } from "../UserDashboardContext";
 import {
     CreateProjectModal,
     EditProjectModal,
@@ -14,45 +14,16 @@ import { useSession } from "next-auth/react";
 export const DashboardModals = () => {
     const { data: session } = useSession();
     const {
-        // Modal Visibility
         isModalOpen,
         setIsModalOpen,
         previewUrl,
         previewTitle,
         showProfileModal,
         setShowProfileModal,
-        showCreateProjectModal,
-        setShowCreateProjectModal,
-        showDeleteModal,
-        setShowDeleteModal,
         showSuccessModal,
         setShowSuccessModal,
-        showEditProjectModal,
-        setShowEditProjectModal,
-
-        // Form States & Handlers
-        fileToDelete,
-        projectToDelete,
-        projectToEdit,
-        setProjectToEdit,
         successMessage,
-        editProjectName,
-        setEditProjectName,
-        editProjectDescription,
-        setEditProjectDescription,
-        newProjectName,
-        setNewProjectName,
-        newProjectDescription,
-        setNewProjectDescription,
-        isCreatingProject,
-        isUpdatingProject,
-        onCreateProject,
-        onConfirmDeleteFile,
-        onConfirmDeleteProject,
-        onConfirmUpdateProject,
-        cancelDelete,
-        setActiveTab,
-    } = useDashboardHook();
+    } = useUserDashboardContext();
 
     return (
         <>
@@ -69,45 +40,15 @@ export const DashboardModals = () => {
                 previewFileName={previewTitle}
             />
 
-            <DeleteConfirmModal
-                showDeleteModal={showDeleteModal}
-                setShowDeleteModal={setShowDeleteModal}
-                fileToDelete={fileToDelete}
-                projectToDelete={projectToDelete}
-                confirmDeleteFile={onConfirmDeleteFile}
-                confirmDeleteProject={onConfirmDeleteProject}
-                cancelDelete={cancelDelete}
-            />
+            {/* Modals that use context directly */}
+            <DeleteConfirmModal />
+            <CreateProjectModal />
+            <EditProjectModal />
 
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={() => setShowSuccessModal(false)}
                 message={successMessage}
-            />
-
-            <CreateProjectModal
-                showCreateProjectModal={showCreateProjectModal}
-                setShowCreateProjectModal={setShowCreateProjectModal}
-                newProjectName={newProjectName}
-                setNewProjectName={setNewProjectName}
-                newProjectDescription={newProjectDescription}
-                setNewProjectDescription={setNewProjectDescription}
-                handleCreateProject={onCreateProject}
-                isCreatingProject={isCreatingProject}
-                setActiveTab={setActiveTab}
-            />
-
-            <EditProjectModal
-                showEditProjectModal={showEditProjectModal}
-                setShowEditProjectModal={setShowEditProjectModal}
-                projectToEdit={projectToEdit}
-                setProjectToEdit={setProjectToEdit}
-                editProjectName={editProjectName}
-                setEditProjectName={setEditProjectName}
-                editProjectDescription={editProjectDescription}
-                setEditProjectDescription={setEditProjectDescription}
-                confirmUpdateProject={onConfirmUpdateProject}
-                isUpdatingProject={isUpdatingProject}
             />
         </>
     );

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
     Dialog,
@@ -8,38 +10,31 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Project } from "@/type";
 import { Pencil, Loader2 } from "lucide-react";
+import { useUserDashboardContext } from "../../UserDashboardContext";
 
-interface EditProjectModalProps {
-    showEditProjectModal: boolean;
-    setShowEditProjectModal: (show: boolean) => void;
-    projectToEdit: Project | null;
-    setProjectToEdit: (project: Project | null) => void;
-    editProjectName: string;
-    setEditProjectName: (name: string) => void;
-    editProjectDescription: string;
-    setEditProjectDescription: (description: string) => void;
-    confirmUpdateProject: () => void;
-    isUpdatingProject: boolean;
-}
+export const EditProjectModal: React.FC = () => {
+    const {
+        showEditProjectModal,
+        setShowEditProjectModal,
+        setProjectToEdit,
+        editProjectName,
+        setEditProjectName,
+        editProjectDescription,
+        setEditProjectDescription,
+        onConfirmUpdateProject,
+        isUpdatingProject,
+    } = useUserDashboardContext();
 
-export const EditProjectModal: React.FC<EditProjectModalProps> = ({
-    showEditProjectModal,
-    setShowEditProjectModal,
-    setProjectToEdit,
-    editProjectName,
-    setEditProjectName,
-    editProjectDescription,
-    setEditProjectDescription,
-    confirmUpdateProject,
-    isUpdatingProject,
-}) => {
+    const handleClose = (): void => {
+        setShowEditProjectModal(false);
+        setProjectToEdit(null);
+        setEditProjectName("");
+        setEditProjectDescription("");
+    };
+
     return (
-        <Dialog
-            open={showEditProjectModal}
-            onOpenChange={setShowEditProjectModal}
-        >
+        <Dialog open={showEditProjectModal} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-[500px] rounded-3xl p-6 bg-white dark:bg-slate-800 border-0 shadow-2xl">
                 <DialogHeader>
                     <div className="flex items-center gap-3 mb-2">
@@ -80,18 +75,13 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 <DialogFooter className="gap-2 sm:gap-0">
                     <Button
                         variant="ghost"
-                        onClick={() => {
-                            setShowEditProjectModal(false);
-                            setProjectToEdit(null);
-                            setEditProjectName("");
-                            setEditProjectDescription("");
-                        }}
+                        onClick={handleClose}
                         className="rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 h-11"
                     >
                         ยกเลิก
                     </Button>
                     <Button
-                        onClick={confirmUpdateProject}
+                        onClick={onConfirmUpdateProject}
                         disabled={!editProjectName.trim() || isUpdatingProject}
                         className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 h-11 px-6 font-semibold"
                     >

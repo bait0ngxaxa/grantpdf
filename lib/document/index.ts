@@ -1,16 +1,19 @@
 // Types
 export type {
-    SessionValidationResult,
     DocumentSaveResult,
     ProjectResult,
     DocxModule,
     DocxParserOptions,
 } from "./types";
 
-export { isSessionError, isProjectError } from "./types";
+export { isProjectError } from "./types";
 
-// Session
-export { validateSession } from "./sessionValidator";
+// Session (re-exported from sessionService for backward compatibility)
+export {
+    validateSession,
+    isSessionError,
+    type SessionValidationResult,
+} from "@/lib/services/sessionService";
 
 // Template Renderer (Docxtemplater)
 export { createDocxRenderer, loadTemplate } from "./templateRenderer";

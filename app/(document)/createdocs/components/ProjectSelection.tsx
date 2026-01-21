@@ -9,37 +9,24 @@ import {
     EmptyState as SharedEmptyState,
 } from "@/components/ui";
 import { Building2 } from "lucide-react";
-import type { Project } from "@/type/models";
 import { ROUTES } from "@/lib/constants";
+import { useCreateDocsContext } from "../CreateDocsContext";
 
-interface ProjectSelectionProps {
-    projects: Project[];
-    selectedProjectId: string | null;
-    isLoading: boolean;
-    error: string | null;
-    currentProjects: Project[];
-    currentPage: number;
-    totalPages: number;
-    indexOfFirstProject: number;
-    indexOfLastProject: number;
-    onProjectSelect: (projectId: string) => void;
-    onPageChange: (page: number) => void;
-}
-
-export const ProjectSelection = ({
-    projects,
-    selectedProjectId,
-    isLoading,
-    error,
-    currentProjects,
-    currentPage,
-    totalPages,
-    indexOfFirstProject,
-    indexOfLastProject,
-    onProjectSelect,
-    onPageChange,
-}: ProjectSelectionProps): React.JSX.Element => {
+export const ProjectSelection = (): React.JSX.Element => {
     const router = useRouter();
+    const {
+        projects,
+        selectedProjectId,
+        isLoading,
+        error,
+        currentProjects,
+        currentPage,
+        totalPages,
+        indexOfFirstProject,
+        indexOfLastProject,
+        setSelectedProjectId,
+        setCurrentPage,
+    } = useCreateDocsContext();
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
@@ -53,7 +40,7 @@ export const ProjectSelection = ({
                 <SharedEmptyState
                     title="เกิดข้อผิดพลาด"
                     description={error || "ไม่สามารถโหลดข้อมูลได้"}
-                    icon={Building2} // Fallback icon
+                    icon={Building2}
                 >
                     <Button
                         onClick={() => router.push(ROUTES.DASHBOARD)}
@@ -84,7 +71,7 @@ export const ProjectSelection = ({
                                 key={project.id}
                                 project={project}
                                 selectedProjectId={selectedProjectId}
-                                onProjectSelect={onProjectSelect}
+                                onProjectSelect={setSelectedProjectId}
                             />
                         ))}
                     </div>
@@ -93,7 +80,7 @@ export const ProjectSelection = ({
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
-                            onPageChange={onPageChange}
+                            onPageChange={setCurrentPage}
                         />
                     </div>
 

@@ -1,21 +1,17 @@
+"use client";
+
 import React, { useMemo } from "react";
 import { Building2, FileText, Clock } from "lucide-react";
-import type { Project } from "@/type";
 import { PROJECT_STATUS } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
+import { useUserDashboardContext } from "../UserDashboardContext";
 
 import { StatsCard } from "./StatsCard";
 import { ProjectStatusDetails } from "./ProjectStatusDetails";
 
-interface StatsCardsProps {
-    projects: Project[];
-    totalDocuments: number;
-}
+export const StatsCards: React.FC = () => {
+    const { projects, totalDocuments } = useUserDashboardContext();
 
-export const StatsCards: React.FC<StatsCardsProps> = ({
-    projects,
-    totalDocuments,
-}) => {
     const projectStatusCounts = useMemo(() => {
         const counts = {
             pending: 0,
