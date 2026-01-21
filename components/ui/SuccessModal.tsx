@@ -1,6 +1,11 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 import { Check, X } from "lucide-react";
 
 interface SuccessModalProps {
@@ -46,9 +51,9 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                     >
                         {isError ? "เกิดข้อผิดพลาด" : "ดำเนินการสำเร็จ"}
                     </DialogTitle>
-                    <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
+                    <DialogDescription className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
                         {message}
-                    </p>
+                    </DialogDescription>
                     <Button
                         onClick={onClose}
                         className={`w-full rounded-xl h-12 text-lg font-semibold shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 ${

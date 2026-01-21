@@ -9,21 +9,13 @@ import {
     type PreviewModalState,
 } from "./GlobalModalContext";
 import { SuccessModal, PdfPreviewModal, LoadingSpinner } from "@/components/ui";
-// Note: We might need a generic ConfirmModal or reuse DeleteConfirmModal if generic enough.
-// For now, I will assume we might need to create a generic ConfirmDialog or use existing component if suitable.
-// Current project has DeleteConfirmModal, let's see if we can make it generic or use Shadcn Dialog directly here.
-// Actually, let's reuse SuccessModal (it exists).
-// For Confirm, I'll implement a simple GenericConfirmModal inside this file or separately later if complex.
-// Let's check what UI components we have. We have 'dialog.tsx'.
-// I will build a lightweight internal ConfirmDialog using the existing Dialog component to ensure consistency.
 
-// Let's check what UI components we have. We have 'dialog.tsx'.
-// I will build a lightweight internal ConfirmDialog using the existing Dialog component to ensure consistency.
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -173,9 +165,9 @@ export function GlobalModalProvider({
                             {confirmModal.title}
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="py-4 text-slate-600 dark:text-slate-300">
+                    <DialogDescription className="py-4 text-slate-600 dark:text-slate-300">
                         {confirmModal.description}
-                    </div>
+                    </DialogDescription>
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button
                             variant="outline"

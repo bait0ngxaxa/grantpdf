@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Button, Dialog, DialogContent, DialogTitle } from "@/components/ui";
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui";
 import { FileText, CheckCircle2 } from "lucide-react";
 
 interface CreateDocSuccessModalProps {
@@ -107,30 +113,36 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
                         สร้าง{documentType}สำเร็จ!
                     </DialogTitle>
 
-                    <div className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed w-full">
-                        <p className="mb-4">
-                            {documentType}ของคุณถูกสร้างเรียบร้อยแล้ว
-                        </p>
+                    <DialogDescription
+                        className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed w-full"
+                        asChild
+                    >
+                        <div>
+                            <p className="mb-4">
+                                {documentType}ของคุณถูกสร้างเรียบร้อยแล้ว
+                            </p>
 
-                        {/* File Card info */}
-                        <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 text-left w-full shadow-sm mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                                <FileText className="w-5 h-5" />
+                            {/* File Card info */}
+                            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 text-left w-full shadow-sm mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                                    <FileText className="w-5 h-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">
+                                        {downloadFileName}
+                                    </p>
+                                    <p className="text-xs text-slate-400">
+                                        พร้อมดาวน์โหลด
+                                    </p>
+                                </div>
                             </div>
-                            <div className="min-w-0 flex-1">
-                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">
-                                    {downloadFileName}
-                                </p>
-                                <p className="text-xs text-slate-400">
-                                    พร้อมดาวน์โหลด
-                                </p>
-                            </div>
+
+                            <p className="text-xs text-slate-400 animate-pulse">
+                                กำลังนำทางไปยังหน้าหลักอัตโนมัติภายใน 3
+                                วินาที...
+                            </p>
                         </div>
-
-                        <p className="text-xs text-slate-400 animate-pulse">
-                            กำลังนำทางไปยังหน้าหลักอัตโนมัติภายใน 3 วินาที...
-                        </p>
-                    </div>
+                    </DialogDescription>
 
                     <div className="flex flex-col space-y-3 w-full">
                         <Button
