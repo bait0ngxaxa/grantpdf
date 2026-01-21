@@ -11,7 +11,7 @@ import {
     AdminModals,
 } from "./components";
 
-import { useAdminDashboardContext } from "./AdminDashboardContext";
+import { useAdminDashboardContext } from "./contexts";
 
 const getTitleByTab = (tab: string): string => {
     switch (tab) {

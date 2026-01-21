@@ -18,23 +18,41 @@ import {
     FileText,
 } from "lucide-react";
 
+import { useAdminDashboardContext } from "../../contexts";
+
 interface ProjectCardProps {
     project: AdminProject;
     isExpanded: boolean;
     showNewBadge?: boolean;
-    onToggleExpansion: (projectId: string) => void;
-    onPreviewPdf: (storagePath: string, fileName: string) => void;
-    onEditProjectStatus: (project: AdminProject) => void;
 }
 
 export default function ProjectCard({
     project,
     isExpanded,
     showNewBadge = false,
-    onToggleExpansion,
-    onPreviewPdf,
-    onEditProjectStatus,
 }: ProjectCardProps): React.JSX.Element {
+    const {
+        toggleProjectExpansion,
+        setIsPreviewModalOpen,
+        setPreviewUrl,
+        setPreviewFileName,
+        setIsStatusModalOpen,
+        setSelectedProjectForStatus,
+    } = useAdminDashboardContext();
+
+    // Handlers
+    const onToggleExpansion = toggleProjectExpansion;
+
+    const onPreviewPdf = (storagePath: string, fileName: string) => {
+        setPreviewUrl(storagePath);
+        setPreviewFileName(fileName);
+        setIsPreviewModalOpen(true);
+    };
+
+    const onEditProjectStatus = (project: AdminProject) => {
+        setSelectedProjectForStatus(project);
+        setIsStatusModalOpen(true);
+    };
     const getStatusIcon = (status: string): React.JSX.Element | null => {
         switch (status) {
             case PROJECT_STATUS.APPROVED:

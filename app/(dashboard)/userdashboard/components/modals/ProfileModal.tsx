@@ -3,6 +3,7 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
+    DialogDescription,
     DialogClose,
 } from "@/components/ui/dialog";
 import { X, User, Mail, BadgeCheck } from "lucide-react";
@@ -51,9 +52,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         <DialogTitle className="font-bold text-2xl text-slate-800 dark:text-slate-100 mb-1">
                             ข้อมูลส่วนตัว
                         </DialogTitle>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
                             ข้อมูลบัญชีผู้ใช้งานของคุณ
-                        </p>
+                        </DialogDescription>
                     </div>
 
                     {/* User Information Cards */}

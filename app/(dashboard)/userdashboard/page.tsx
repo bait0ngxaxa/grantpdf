@@ -10,7 +10,7 @@ import {
     CreateProjectTab,
     DashboardModals,
 } from "./components";
-import { useUserDashboardContext } from "./UserDashboardContext";
+import { useUserDashboardContext } from "./contexts";
 
 const getTitleByTab = (tab: string): string => {
     switch (tab) {

@@ -3,17 +3,15 @@
 import React, {
     createContext,
     useContext,
-    useMemo,
     useCallback,
+    useMemo,
     type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { useCreateDocsState, useProjectData } from "./hooks";
-import { usePagination } from "@/lib/hooks";
-import { ROUTES, PAGINATION } from "@/lib/constants";
-import type { Project } from "@/type";
+import { useCreateDocsState } from "../hooks";
+import { ROUTES } from "@/lib/constants";
 
-interface CreateDocsContextType {
+interface CreateDocsUIContextType {
     // State
     selectedProjectId: string | null;
     setSelectedProjectId: (id: string | null) => void;
@@ -21,20 +19,7 @@ interface CreateDocsContextType {
     setSelectedCategory: (category: string | null) => void;
     selectedContractType: string | null;
     setSelectedContractType: (type: string | null) => void;
-
-    // Data
-    projects: Project[];
-    isLoading: boolean;
-    error: string | null;
     isAdmin: boolean;
-
-    // Pagination
-    currentProjects: Project[];
-    currentPage: number;
-    totalPages: number;
-    indexOfFirstProject: number;
-    indexOfLastProject: number;
-    setCurrentPage: (page: number) => void;
 
     // Actions
     goBack: () => void;
@@ -46,13 +31,12 @@ interface CreateDocsContextType {
     handleTorSelection: () => void;
 }
 
-const CreateDocsContext = createContext<CreateDocsContextType | undefined>(
+const CreateDocsUIContext = createContext<CreateDocsUIContextType | undefined>(
     undefined,
 );
 
-export function CreateDocsProvider({ children }: { children: ReactNode }) {
+export function CreateDocsUIProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
-
     const {
         selectedCategory,
         setSelectedCategory,
@@ -60,34 +44,10 @@ export function CreateDocsProvider({ children }: { children: ReactNode }) {
         setSelectedContractType,
         selectedProjectId,
         setSelectedProjectId,
-        projects,
-        setProjects,
-        isLoading,
-        setIsLoading,
-        error,
-        setError,
         isAdmin,
     } = useCreateDocsState();
 
-    // Fetch projects
-    useProjectData(setProjects, setIsLoading, setError, setSelectedProjectId);
-
-    // Pagination
-    const {
-        paginatedItems: currentProjects,
-        totalPages,
-        startIndex: indexOfFirstProject,
-        endIndex: indexOfLastProject,
-        currentPage,
-        goToPage: setCurrentPage,
-    } = usePagination({
-        items: projects,
-        itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
-    });
-
-    // ==========================================================================
     // Navigation Actions
-    // ==========================================================================
     const goBack = useCallback(() => {
         if (selectedContractType) {
             setSelectedContractType(null);
@@ -161,34 +121,15 @@ export function CreateDocsProvider({ children }: { children: ReactNode }) {
         );
     }, [selectedProjectId, router]);
 
-    // ==========================================================================
-    // Context Value
-    // ==========================================================================
     const value = useMemo(
         () => ({
-            // State
             selectedProjectId,
             setSelectedProjectId,
             selectedCategory,
             setSelectedCategory,
             selectedContractType,
             setSelectedContractType,
-
-            // Data
-            projects,
-            isLoading,
-            error,
             isAdmin,
-
-            // Pagination
-            currentProjects,
-            currentPage,
-            totalPages,
-            indexOfFirstProject,
-            indexOfLastProject,
-            setCurrentPage,
-
-            // Actions
             goBack,
             handleCategorySelection,
             handleApprovalSelection,
@@ -198,29 +139,13 @@ export function CreateDocsProvider({ children }: { children: ReactNode }) {
             handleTorSelection,
         }),
         [
-            // State
             selectedProjectId,
             setSelectedProjectId,
             selectedCategory,
             setSelectedCategory,
             selectedContractType,
             setSelectedContractType,
-
-            // Data
-            projects,
-            isLoading,
-            error,
             isAdmin,
-
-            // Pagination
-            currentProjects,
-            currentPage,
-            totalPages,
-            indexOfFirstProject,
-            indexOfLastProject,
-            setCurrentPage,
-
-            // Actions
             goBack,
             handleCategorySelection,
             handleApprovalSelection,
@@ -232,17 +157,17 @@ export function CreateDocsProvider({ children }: { children: ReactNode }) {
     );
 
     return (
-        <CreateDocsContext.Provider value={value}>
+        <CreateDocsUIContext.Provider value={value}>
             {children}
-        </CreateDocsContext.Provider>
+        </CreateDocsUIContext.Provider>
     );
 }
 
-export function useCreateDocsContext() {
-    const context = useContext(CreateDocsContext);
+export function useCreateDocsUI() {
+    const context = useContext(CreateDocsUIContext);
     if (context === undefined) {
         throw new Error(
-            "useCreateDocsContext must be used within a CreateDocsProvider",
+            "useCreateDocsUI must be used within a CreateDocsUIProvider",
         );
     }
     return context;

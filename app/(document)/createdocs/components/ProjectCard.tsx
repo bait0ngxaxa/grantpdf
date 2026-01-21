@@ -1,19 +1,17 @@
 "use client";
 
+import { useCreateDocsContext } from "../contexts";
 import type { Project } from "@/type/models";
 import { Building2, FileText, Calendar, Check } from "lucide-react";
 
 interface ProjectCardProps {
     project: Project;
-    selectedProjectId: string | null;
-    onProjectSelect: (projectId: string) => void;
 }
 
 export const ProjectCard = ({
     project,
-    selectedProjectId,
-    onProjectSelect,
 }: ProjectCardProps): React.JSX.Element => {
+    const { selectedProjectId, setSelectedProjectId } = useCreateDocsContext();
     const isSelected = selectedProjectId === project.id;
 
     return (
@@ -23,7 +21,7 @@ export const ProjectCard = ({
                     ? "bg-blue-50/50 dark:bg-blue-900/30 border-blue-500 shadow-lg shadow-blue-100 dark:shadow-blue-900/30 scale-[1.01]"
                     : "bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 hover:bg-slate-50/50 dark:hover:bg-slate-700/50"
             }`}
-            onClick={() => onProjectSelect(project.id)}
+            onClick={() => setSelectedProjectId(project.id)}
         >
             <div className="flex items-center gap-5">
                 <div

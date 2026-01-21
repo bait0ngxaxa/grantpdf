@@ -1,17 +1,16 @@
 import { API_ROUTES } from "@/lib/constants";
-import { useAdminDashboardContext } from "../AdminDashboardContext";
+import { useAdminDashboardContext } from "../contexts";
 import { useState } from "react";
 import type { AdminProject } from "@/type/models";
 
 export const useProjectStatusActions = (): {
-    // Actions are mainly used here, but we expose state too if needed
     isUpdatingStatus: boolean;
     openStatusModal: (project: AdminProject) => void;
     closeStatusModal: () => void;
     handleUpdateProjectStatus: () => Promise<void>;
 } => {
     const {
-        setProjects,
+        fetchProjects,
         setSuccessMessage,
         setIsSuccessModalOpen,
         selectedProjectForStatus,
@@ -65,18 +64,7 @@ export const useProjectStatusActions = (): {
 
             const result = await response.json();
 
-            setProjects((prev) =>
-                prev.map((project) =>
-                    project.id === selectedProjectForStatus.id
-                        ? {
-                              ...project,
-                              status: newStatus,
-                              statusNote: statusNote,
-                              updated_at: new Date().toISOString(),
-                          }
-                        : project,
-                ),
-            );
+            await fetchProjects(null);
 
             closeStatusModal();
 

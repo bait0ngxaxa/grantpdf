@@ -14,9 +14,6 @@ interface ProjectsListProps {
     totalItems: number;
     startIndex: number;
     endIndex: number;
-    onToggleProjectExpansion: (projectId: string) => void;
-    onPreviewPdf: (storagePath: string, fileName: string) => void;
-    onEditProjectStatus: (project: AdminProject) => void;
 }
 
 export default function ProjectsList({
@@ -27,9 +24,6 @@ export default function ProjectsList({
     totalItems,
     startIndex,
     endIndex,
-    onToggleProjectExpansion,
-    onPreviewPdf,
-    onEditProjectStatus,
 }: ProjectsListProps): React.JSX.Element {
     if (isLoading) {
         return <LoadingSpinner message="กำลังโหลดโครงการ..." />;
@@ -71,9 +65,6 @@ export default function ProjectsList({
                         project={project}
                         isExpanded={expandedProjects.has(project.id)}
                         showNewBadge={!viewedProjects.has(project.id)}
-                        onToggleExpansion={onToggleProjectExpansion}
-                        onPreviewPdf={onPreviewPdf}
-                        onEditProjectStatus={onEditProjectStatus}
                     />
                 ))}
             </div>

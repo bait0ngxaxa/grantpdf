@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CreateDocsProvider } from "./CreateDocsContext";
+import { CreateDocsProvider } from "./contexts";
 import { CreateDocsTopBar } from "./components/CreateDocsTopBar";
 
 export function CreateDocsWrapper({

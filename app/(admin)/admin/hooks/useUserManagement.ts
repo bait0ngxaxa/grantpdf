@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import useSWR from "swr";
 import { API_ROUTES } from "@/lib/constants";
 
 interface UserData {
@@ -14,6 +15,10 @@ interface EditFormData {
     name: string;
     email: string;
     role: string;
+}
+
+interface UsersResponse {
+    users: UserData[];
 }
 
 export interface UserManagementHook {
@@ -33,7 +38,7 @@ export interface UserManagementHook {
     openEditModal: (user: UserData) => void;
     closeEditModal: () => void;
     handleEditFormChange: (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     ) => void;
     handleUpdateUser: (e: React.FormEvent) => Promise<void>;
     openDeleteModal: (user: UserData) => void;
@@ -43,10 +48,22 @@ export interface UserManagementHook {
 }
 
 export function useUserManagement(): UserManagementHook {
-    const [users, setUsers] = useState<UserData[]>([]);
-    const [loadingUsers, setLoadingUsers] = useState(true);
-    const [fetchError, setFetchError] = useState<string | null>(null);
+    // Data Fetching
+    const { data, error, isLoading, mutate } = useSWR<UsersResponse>(
+        API_ROUTES.ADMIN_USERS,
+    );
 
+    const users =
+        data?.users.map((user) => ({
+            ...user,
+            id: user.id.toString(),
+            createdAt: new Date(user.created_at).toLocaleDateString("th-TH"),
+        })) || [];
+
+    const loadingUsers = isLoading;
+    const fetchError = error ? "ไม่สามารถโหลดข้อมูลผู้ใช้งานได้" : null;
+
+    // UI States
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
@@ -64,37 +81,6 @@ export function useUserManagement(): UserManagementHook {
 
     const [resultMessage, setResultMessage] = useState("");
     const [isResultSuccess, setIsResultSuccess] = useState(true);
-
-    const fetchUsers = useCallback(async () => {
-        setLoadingUsers(true);
-        setFetchError(null);
-        try {
-            const res = await fetch(API_ROUTES.ADMIN_USERS);
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || "Failed to fetch users");
-            }
-            const data = await res.json();
-
-            const processedUsers = data.users.map((user: UserData) => ({
-                ...user,
-                id: user.id.toString(),
-                createdAt: new Date(user.created_at).toLocaleDateString(
-                    "th-TH"
-                ),
-            }));
-            setUsers(processedUsers);
-        } catch (error: unknown) {
-            console.error("Error fetching users:", error);
-            setFetchError(
-                error instanceof Error
-                    ? error.message
-                    : "ไม่สามารถโหลดข้อมูลผู้ใช้งานได้"
-            );
-        } finally {
-            setLoadingUsers(false);
-        }
-    }, []);
 
     const openEditModal = useCallback((user: UserData) => {
         setSelectedUser(user);
@@ -120,7 +106,7 @@ export function useUserManagement(): UserManagementHook {
                 [name]: value,
             }));
         },
-        []
+        [],
     );
 
     const handleUpdateUser = useCallback(
@@ -136,7 +122,7 @@ export function useUserManagement(): UserManagementHook {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(editFormData),
-                    }
+                    },
                 );
 
                 if (!res.ok) {
@@ -144,7 +130,7 @@ export function useUserManagement(): UserManagementHook {
                     throw new Error(errorData.error || "Failed to update user");
                 }
 
-                await fetchUsers();
+                await mutate(); // Revalidate
                 closeEditModal();
 
                 setResultMessage("อัปเดตข้อมูลผู้ใช้สำเร็จ!");
@@ -156,7 +142,7 @@ export function useUserManagement(): UserManagementHook {
                 setResultMessage(
                     error instanceof Error
                         ? error.message
-                        : "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้"
+                        : "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้",
                 );
                 setIsResultSuccess(false);
                 setIsResultModalOpen(true);
@@ -164,7 +150,7 @@ export function useUserManagement(): UserManagementHook {
                 setIsSaving(false);
             }
         },
-        [selectedUser, editFormData, fetchUsers, closeEditModal]
+        [selectedUser, editFormData, mutate, closeEditModal],
     );
 
     const openDeleteModal = useCallback((user: UserData) => {
@@ -186,7 +172,7 @@ export function useUserManagement(): UserManagementHook {
                 `${API_ROUTES.ADMIN_USERS}/${selectedUser.id}`,
                 {
                     method: "DELETE",
-                }
+                },
             );
 
             if (!res.ok) {
@@ -194,7 +180,7 @@ export function useUserManagement(): UserManagementHook {
                 throw new Error(errorData.error || "Failed to delete user");
             }
 
-            await fetchUsers();
+            await mutate(); // Revalidate
             closeDeleteModal();
 
             setResultMessage("ลบผู้ใช้สำเร็จ!");
@@ -206,14 +192,14 @@ export function useUserManagement(): UserManagementHook {
             setResultMessage(
                 error instanceof Error
                     ? error.message
-                    : "เกิดข้อผิดพลาดในการลบผู้ใช้"
+                    : "เกิดข้อผิดพลาดในการลบผู้ใช้",
             );
             setIsResultSuccess(false);
             setIsResultModalOpen(true);
         } finally {
             setIsDeleting(false);
         }
-    }, [selectedUser, fetchUsers, closeDeleteModal]);
+    }, [selectedUser, mutate, closeDeleteModal]);
 
     const closeResultModal = useCallback(() => {
         setIsResultModalOpen(false);
@@ -235,7 +221,9 @@ export function useUserManagement(): UserManagementHook {
         resultMessage,
         isResultSuccess,
 
-        fetchUsers,
+        fetchUsers: async () => {
+            await mutate();
+        },
         openEditModal,
         closeEditModal,
         handleEditFormChange,

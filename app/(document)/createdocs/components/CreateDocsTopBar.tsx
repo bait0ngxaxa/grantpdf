@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useCreateDocsContext } from "../CreateDocsContext";
+import { useCreateDocsContext } from "../contexts";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { Button } from "@/components/ui";
 import { useRouter } from "next/navigation";

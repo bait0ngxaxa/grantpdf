@@ -1,4 +1,4 @@
-import { useAdminDashboardContext } from "../AdminDashboardContext";
+import { useAdminDashboardContext } from "../contexts";
 import type { AdminProject } from "@/type/models";
 
 export const useAdminModalStates = () => {

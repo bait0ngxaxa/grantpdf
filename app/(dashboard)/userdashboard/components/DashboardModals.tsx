@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useUserDashboardContext } from "../UserDashboardContext";
+import { useUserDashboardContext } from "../contexts";
 import {
     CreateProjectModal,
     EditProjectModal,

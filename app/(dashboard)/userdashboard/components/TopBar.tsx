@@ -5,7 +5,7 @@ import { ChartBarBig, UserStar, LogOut, Menu } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useUserDashboardContext } from "../UserDashboardContext";
+import { useUserDashboardContext } from "../contexts";
 
 const menuItems = [
     { id: "dashboard", name: "ภาพรวม" },

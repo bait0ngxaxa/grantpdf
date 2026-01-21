@@ -13,6 +13,7 @@ import {
     Eye,
     Trash2,
 } from "lucide-react";
+import { useUserDashboardContext } from "../contexts";
 import { AttachmentList } from "@/components/ui/AttachmentList";
 
 interface FileItemProps {
@@ -24,15 +25,10 @@ interface FileItemProps {
         storagePath: string;
         attachmentFiles?: AttachmentFile[];
     };
-    onPreviewFile: (storagePath: string, fileName: string) => void;
-    onDeleteFile: (fileId: string) => void;
 }
 
-export default function FileItem({
-    file,
-    onPreviewFile,
-    onDeleteFile,
-}: FileItemProps): React.JSX.Element {
+export default function FileItem({ file }: FileItemProps): React.JSX.Element {
+    const { openPreviewModal, handleDeleteFile } = useUserDashboardContext();
     const [isAttachmentExpanded, setIsAttachmentExpanded] = useState(false);
     const { download, isDownloading } = useSignedDownload();
 
@@ -103,7 +99,7 @@ export default function FileItem({
                     {file.fileExtension === "pdf" && (
                         <button
                             onClick={() =>
-                                onPreviewFile(
+                                openPreviewModal(
                                     file.storagePath,
                                     file.originalFileName,
                                 )
@@ -115,7 +111,7 @@ export default function FileItem({
                         </button>
                     )}
                     <button
-                        onClick={() => onDeleteFile(file.id)}
+                        onClick={() => handleDeleteFile(file.id)}
                         className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                         title="ลบไฟล์"
                     >

@@ -3,7 +3,7 @@
 import React from "react";
 import { Building2, Plus } from "lucide-react";
 import { QuickActionCard } from "./QuickActionCard";
-import { useUserDashboardContext } from "../UserDashboardContext";
+import { useUserDashboardContext } from "../contexts";
 
 export const QuickActions: React.FC = () => {
     const { setActiveTab } = useUserDashboardContext();

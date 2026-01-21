@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/constants";
 import { Plus, Building2, FileText, Upload } from "lucide-react";
 
-import { useUserDashboardContext } from "../UserDashboardContext";
+import { useUserDashboardContext } from "../contexts";
 
 export const CreateProjectTab: React.FC = (): React.JSX.Element => {
     const { projects, setShowCreateProjectModal } = useUserDashboardContext();

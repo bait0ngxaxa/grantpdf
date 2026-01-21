@@ -10,13 +10,12 @@ import {
 } from "@/components/ui";
 import { Building2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { useCreateDocsContext } from "../CreateDocsContext";
+import { useCreateDocsContext } from "../contexts";
 
 export const ProjectSelection = (): React.JSX.Element => {
     const router = useRouter();
     const {
         projects,
-        selectedProjectId,
         isLoading,
         error,
         currentProjects,
@@ -24,7 +23,6 @@ export const ProjectSelection = (): React.JSX.Element => {
         totalPages,
         indexOfFirstProject,
         indexOfLastProject,
-        setSelectedProjectId,
         setCurrentPage,
     } = useCreateDocsContext();
 
@@ -67,12 +65,7 @@ export const ProjectSelection = (): React.JSX.Element => {
                 <>
                     <div className="w-full max-w-4xl space-y-4 max-h-[60vh] overflow-y-auto px-2 py-2">
                         {currentProjects.map((project) => (
-                            <ProjectCard
-                                key={project.id}
-                                project={project}
-                                selectedProjectId={selectedProjectId}
-                                onProjectSelect={setSelectedProjectId}
-                            />
+                            <ProjectCard key={project.id} project={project} />
                         ))}
                     </div>
 

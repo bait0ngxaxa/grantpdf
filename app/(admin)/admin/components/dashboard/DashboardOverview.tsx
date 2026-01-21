@@ -6,7 +6,7 @@ import { ProjectStatusStats } from "./ProjectStatusStats";
 import { RecentActivity } from "./RecentActivity";
 import { QuickActions } from "./QuickActions";
 
-import { useAdminDashboardContext } from "../../AdminDashboardContext";
+import { useAdminDashboardContext } from "../../contexts";
 
 export const DashboardOverview: React.FC = (): React.JSX.Element => {
     // Consume Context

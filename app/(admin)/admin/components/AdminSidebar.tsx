@@ -11,7 +11,7 @@ import {
 import { ROUTES } from "@/lib/constants";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useAdminDashboardContext } from "../AdminDashboardContext";
+import { useAdminDashboardContext } from "../contexts";
 
 const menuItems = [
     {

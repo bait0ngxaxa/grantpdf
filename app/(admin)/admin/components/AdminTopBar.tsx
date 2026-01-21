@@ -2,7 +2,7 @@ import React from "react";
 import { Button, ThemeToggle } from "@/components/ui";
 import { ChartBarBig, LogOut, Menu } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useAdminDashboardContext } from "../AdminDashboardContext";
+import { useAdminDashboardContext } from "../contexts";
 
 const menuItems = [
     { id: "dashboard", name: "ภาพรวมระบบ" },

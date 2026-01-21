@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { Project } from "@/type";
-import { useUserDashboardContext } from "../UserDashboardContext";
+import { useUserDashboardContext } from "../contexts";
 
 import { ProjectsListHeader } from "./ProjectsListHeader";
 import { ProjectItem } from "./ProjectItem";
@@ -11,16 +10,11 @@ import { EmptyProjectsState } from "./EmptyProjectsState";
 import { StatusDetailModal } from "./StatusDetailModal";
 
 export const ProjectsList: React.FC = (): React.JSX.Element => {
-    const router = useRouter();
     const {
         paginatedProjects: projects,
         projects: allProjects,
         expandedProjects,
         toggleProjectExpansion,
-        handleEditProject,
-        handleDeleteProject,
-        openPreviewModal,
-        handleDeleteFile,
         setShowCreateProjectModal,
     } = useUserDashboardContext();
 
@@ -90,16 +84,9 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                             onToggleExpand={() =>
                                 toggleProjectExpansion(project.id)
                             }
-                            onEditProject={() => handleEditProject(project)}
-                            onDeleteProject={() =>
-                                handleDeleteProject(project.id)
-                            }
                             onStatusClick={(e) =>
                                 openStatusDetailModal(project, e)
                             }
-                            openPreviewModal={openPreviewModal}
-                            handleDeleteFile={handleDeleteFile}
-                            router={router}
                         />
                     ))
                 ) : (

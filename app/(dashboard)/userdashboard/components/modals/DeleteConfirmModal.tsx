@@ -7,10 +7,11 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { useUserDashboardContext } from "../../UserDashboardContext";
+import { useUserDashboardContext } from "../../contexts";
 
 export const DeleteConfirmModal: React.FC = () => {
     const {
@@ -34,11 +35,11 @@ export const DeleteConfirmModal: React.FC = () => {
                             ยืนยันการลบ
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
+                    <DialogDescription className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
                         {fileToDelete
                             ? "คุณแน่ใจหรือไม่ที่จะลบไฟล์นี้? การกระทำนี้ไม่สามารถย้อนกลับได้"
                             : "คุณแน่ใจหรือไม่ที่จะลบโครงการนี้? การกระทำนี้ไม่สามารถย้อนกลับได้"}
-                    </div>
+                    </DialogDescription>
                 </div>
                 <DialogFooter className="gap-3 sm:gap-0 sm:space-x-4">
                     <div className="flex w-full gap-4">

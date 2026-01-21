@@ -1,10 +1,9 @@
 import { useState, useCallback } from "react";
-import type { Project, UserFile } from "@/type";
+import type { Project } from "@/type";
 import { API_ROUTES } from "@/lib/constants";
 
 interface DashboardActionsParams {
-    setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
-    setOrphanFiles: React.Dispatch<React.SetStateAction<UserFile[]>>;
+    fetchUserData: () => Promise<void>; // Use revalidation instead of state setters
     setSuccessMessage: (msg: string) => void;
     setShowSuccessModal: (show: boolean) => void;
     setShowDeleteModal: (show: boolean) => void;
@@ -28,8 +27,7 @@ interface DashboardActionsParams {
 
 export function useDashboardActions(params: DashboardActionsParams) {
     const {
-        setProjects,
-        setOrphanFiles,
+        fetchUserData,
         setSuccessMessage,
         setShowSuccessModal,
         setShowDeleteModal,
@@ -65,17 +63,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
             });
             if (!res.ok) throw new Error("Failed to delete file");
 
-            setProjects((prev) =>
-                prev.map((project) => ({
-                    ...project,
-                    files: project.files.filter(
-                        (file) => file.id !== fileToDelete,
-                    ),
-                })),
-            );
-            setOrphanFiles((prev) =>
-                prev.filter((file) => file.id !== fileToDelete),
-            );
+            await fetchUserData(); // Revalidate
             setSuccessMessage("ลบไฟล์สำเร็จ");
             setShowSuccessModal(true);
         } catch (err) {
@@ -87,8 +75,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
         }
     }, [
         fileToDelete,
-        setProjects,
-        setOrphanFiles,
+        fetchUserData,
         setSuccessMessage,
         setShowSuccessModal,
         setShowDeleteModal,
@@ -109,9 +96,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
             );
             if (!res.ok) throw new Error("Failed to delete project");
 
-            setProjects((prev) =>
-                prev.filter((project) => project.id !== projectToDelete),
-            );
+            await fetchUserData(); // Revalidate
             setSuccessMessage("ลบโครงการสำเร็จ");
             setShowSuccessModal(true);
         } catch (err) {
@@ -125,7 +110,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
         }
     }, [
         projectToDelete,
-        setProjects,
+        fetchUserData,
         setSuccessMessage,
         setShowSuccessModal,
         setShowDeleteModal,
@@ -151,12 +136,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
             );
             if (!res.ok) throw new Error("Failed to update project");
 
-            const updatedProject: Project = await res.json();
-            setProjects((prev) =>
-                prev.map((project) =>
-                    project.id === updatedProject.id ? updatedProject : project,
-                ),
-            );
+            await fetchUserData(); // Revalidate
             setSuccessMessage("อัปเดตโครงการสำเร็จ");
             setShowSuccessModal(true);
             setShowEditProjectModal(false);
@@ -176,7 +156,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
         projectToEdit,
         editProjectName,
         editProjectDescription,
-        setProjects,
+        fetchUserData,
         setSuccessMessage,
         setShowSuccessModal,
         setShowEditProjectModal,
@@ -201,8 +181,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
             });
             if (!res.ok) throw new Error("Failed to create project");
 
-            const newProject: Project = await res.json();
-            setProjects((prev) => [newProject, ...prev]);
+            await fetchUserData(); // Revalidate
             setSuccessMessage("สร้างโครงการสำเร็จ");
             setShowSuccessModal(true);
             setShowCreateProjectModal(false);
@@ -220,7 +199,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
     }, [
         newProjectName,
         newProjectDescription,
-        setProjects,
+        fetchUserData,
         setSuccessMessage,
         setShowSuccessModal,
         setShowCreateProjectModal,

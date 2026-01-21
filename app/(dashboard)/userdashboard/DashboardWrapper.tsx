@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Sidebar, TopBar } from "./components";
-import { UserDashboardProvider } from "./UserDashboardContext";
+import { UserDashboardProvider } from "./contexts";
 
 export function DashboardWrapper({
     children,

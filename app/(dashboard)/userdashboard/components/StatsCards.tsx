@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { Building2, FileText, Clock } from "lucide-react";
 import { PROJECT_STATUS } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
-import { useUserDashboardContext } from "../UserDashboardContext";
+import { useUserDashboardContext } from "../contexts";
 
 import { StatsCard } from "./StatsCard";
 import { ProjectStatusDetails } from "./ProjectStatusDetails";

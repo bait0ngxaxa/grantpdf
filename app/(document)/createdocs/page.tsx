@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { ROUTES } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useCreateDocsContext } from "./CreateDocsContext";
+import { useCreateDocsContext } from "./contexts";
 
 import {
     ProjectSelection,

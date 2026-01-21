@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useMemo } from "react";
+import useSWR from "swr";
 import type {
     AdminDocumentFile,
     AdminProject,
     LatestUser,
 } from "@/type/models";
-import type { Session } from "next-auth";
+
 import { API_ROUTES } from "@/lib/constants";
 
 interface ProjectsResponse {
@@ -12,137 +13,93 @@ interface ProjectsResponse {
     orphanFiles: AdminDocumentFile[];
 }
 
-export const useAdminData = (): {
-    projects: AdminProject[];
-    setProjects: React.Dispatch<React.SetStateAction<AdminProject[]>>;
-    orphanFiles: AdminDocumentFile[];
-    setOrphanFiles: React.Dispatch<React.SetStateAction<AdminDocumentFile[]>>;
-    isLoading: boolean;
-    error: string | null;
-    totalUsers: number;
-    latestUser: LatestUser | null;
-    todayProjects: number;
-    todayFiles: number;
-    fetchProjects: (session: Session | null) => Promise<void>;
-} => {
-    const [projects, setProjects] = useState<AdminProject[]>([]);
-    const [orphanFiles, setOrphanFiles] = useState<AdminDocumentFile[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [totalUsers, setTotalUsers] = useState(0);
-    const [latestUser, setLatestUser] = useState<LatestUser | null>(null);
-    const [todayProjects, setTodayProjects] = useState(0);
-    const [todayFiles, setTodayFiles] = useState(0);
+interface UsersResponse {
+    users: Array<{
+        name: string;
+        email: string;
+        created_at: string;
+        // other fields...
+    }>;
+}
 
-    // Fetch latest user data
-    const fetchLatestUser = async (): Promise<void> => {
-        try {
-            const response = await fetch(API_ROUTES.ADMIN_USERS, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+export const useAdminData = () => {
+    // 1. Fetch Projects
+    const {
+        data: projectsData,
+        error: projectsError,
+        isLoading: isLoadingProjects,
+        mutate: mutateProjects,
+    } = useSWR<ProjectsResponse>(API_ROUTES.ADMIN_PROJECTS);
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.users && data.users.length > 0) {
-                    const latest = data.users[0];
-                    setLatestUser({
-                        name: latest.name,
-                        email: latest.email,
-                        created_at: latest.created_at,
-                    });
-                } else {
-                    setLatestUser(null);
-                }
-            }
-        } catch (error) {
-            console.error("Error fetching latest user:", error);
-            setLatestUser(null);
+    // 2. Fetch Users (for latest user) - Reuse this key in useUserManagement for deduping!
+    const { data: usersData, isLoading: isLoadingUsers } =
+        useSWR<UsersResponse>(API_ROUTES.ADMIN_USERS);
+
+    // Derived State: Projects & Orphan Files
+    const projects = useMemo(
+        () => projectsData?.projects || [],
+        [projectsData],
+    );
+    const orphanFiles = useMemo(
+        () => projectsData?.orphanFiles || [],
+        [projectsData],
+    );
+
+    // Derived State: Stats
+    const totalUsers = useMemo(() => {
+        const uniqueUserIds = new Set(projects.map((p) => p.userId));
+        return uniqueUserIds.size;
+    }, [projects]);
+
+    const latestUser = useMemo<LatestUser | null>(() => {
+        if (usersData && usersData.users.length > 0) {
+            const latest = usersData.users[0];
+            return {
+                name: latest.name,
+                email: latest.email,
+                created_at: latest.created_at,
+            };
         }
-    };
+        return null;
+    }, [usersData]);
 
-    // Fetch projects data
-    const fetchProjects = useCallback(async (session: Session | null) => {
-        if (!session) return;
+    const { todayProjects, todayFiles } = useMemo(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
-        try {
-            setIsLoading(true);
-            setError(null);
+        const allFiles = [...orphanFiles, ...projects.flatMap((p) => p.files)];
 
-            const response = await fetch(API_ROUTES.ADMIN_PROJECTS, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+        const tFiles = allFiles.filter((file) => {
+            const fileDate = new Date(file.created_at);
+            return fileDate >= today && fileDate < tomorrow;
+        }).length;
 
-            if (!response.ok) {
-                if (response.status === 403) {
-                    throw new Error("คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้");
-                }
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+        const tProjects = projects.filter((project) => {
+            const projectDate = new Date(project.created_at);
+            return projectDate >= today && projectDate < tomorrow;
+        }).length;
 
-            const data: ProjectsResponse = await response.json();
+        return { todayProjects: tProjects, todayFiles: tFiles };
+    }, [projects, orphanFiles]);
 
-            setProjects(data.projects);
-            setOrphanFiles(data.orphanFiles);
-
-            // Calculate total users from projects
-            const uniqueUserIds = new Set(data.projects.map((p) => p.userId));
-            setTotalUsers(uniqueUserIds.size);
-
-            // Fetch latest user data
-            await fetchLatestUser();
-
-            // Calculate files created today
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-
-            const allFiles = [
-                ...data.orphanFiles,
-                ...data.projects.flatMap((p) => p.files),
-            ];
-            const todayFilesCount = allFiles.filter((file) => {
-                const fileDate = new Date(file.created_at);
-                return fileDate >= today && fileDate < tomorrow;
-            }).length;
-
-            // Calculate projects created today
-            const todayProjectsCount = data.projects.filter((project) => {
-                const projectDate = new Date(project.created_at);
-                return projectDate >= today && projectDate < tomorrow;
-            }).length;
-
-            setTodayProjects(todayProjectsCount);
-            setTodayFiles(todayFilesCount);
-        } catch (error) {
-            console.error("Error fetching projects:", error);
-            setError(
-                error instanceof Error
-                    ? error.message
-                    : "ไม่สามารถโหลดข้อมูลโครงการได้ กรุณาลองใหม่อีกครั้ง"
-            );
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    const isLoading = isLoadingProjects || isLoadingUsers;
+    const error = projectsError
+        ? "ไม่สามารถโหลดข้อมูลโครงการได้ กรุณาลองใหม่อีกครั้ง"
+        : null;
 
     return {
         projects,
-        setProjects,
         orphanFiles,
-        setOrphanFiles,
         isLoading,
         error,
         totalUsers,
         latestUser,
         todayProjects,
         todayFiles,
-        fetchProjects,
+        fetchProjects: async () => {
+            await mutateProjects();
+        },
     };
 };

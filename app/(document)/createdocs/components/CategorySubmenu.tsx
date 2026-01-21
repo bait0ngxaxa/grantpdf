@@ -7,7 +7,7 @@ import {
     BookOpen,
     ClipboardCheck,
 } from "lucide-react";
-import { useCreateDocsContext } from "../CreateDocsContext";
+import { useCreateDocsContext } from "../contexts";
 
 export const CategorySubmenu = (): React.JSX.Element | null => {
     const {

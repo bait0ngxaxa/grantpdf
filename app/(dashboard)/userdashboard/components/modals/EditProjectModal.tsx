@@ -7,11 +7,12 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Loader2 } from "lucide-react";
-import { useUserDashboardContext } from "../../UserDashboardContext";
+import { useUserDashboardContext } from "../../contexts";
 
 export const EditProjectModal: React.FC = () => {
     const {
@@ -45,6 +46,9 @@ export const EditProjectModal: React.FC = () => {
                             แก้ไขโครงการ
                         </DialogTitle>
                     </div>
+                    <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+                        แก้ไขข้อมูลโครงการ
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-5 py-4">
                     <div>

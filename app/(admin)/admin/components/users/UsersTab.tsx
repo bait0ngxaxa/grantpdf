@@ -1,11 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
-import { useSession } from "next-auth/react";
-
+import React, { useEffect, useMemo } from "react";
 import { UserStatsCards, UsersTable, EditUserModal, DeleteUserModal } from ".";
 import { SuccessModal } from "@/components/ui";
-
 import { useUserManagement } from "../../hooks/useUserManagement";
 import { usePagination } from "@/lib/hooks";
 import { PAGINATION } from "@/lib/constants";
@@ -16,7 +13,6 @@ interface UsersTabProps {
 }
 
 export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
-    const { data: session, status } = useSession();
     const [searchTerm, setSearchTerm] = React.useState("");
 
     // User management hook
@@ -33,7 +29,7 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
         isResultModalOpen,
         resultMessage,
         isResultSuccess,
-        fetchUsers,
+
         openEditModal,
         closeEditModal,
         handleEditFormChange,
@@ -43,19 +39,6 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
         handleDeleteUser,
         closeResultModal,
     } = useUserManagement();
-
-    const hasFetchedRef = useRef(false);
-
-    useEffect(() => {
-        if (
-            status === "authenticated" &&
-            session?.user?.role === "admin" &&
-            !hasFetchedRef.current
-        ) {
-            hasFetchedRef.current = true;
-            fetchUsers();
-        }
-    }, [status, session, fetchUsers]);
 
     const filteredUsers = useMemo(() => {
         return users.filter(

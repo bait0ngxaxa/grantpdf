@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FileText, FileBarChart, Building2 } from "lucide-react";
-import { useCreateDocsContext } from "../CreateDocsContext";
+import { useCreateDocsContext } from "../contexts";
 
 export const MainMenu = (): React.JSX.Element => {
     const router = useRouter();

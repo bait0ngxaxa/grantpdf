@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AdminSidebar, AdminTopBar } from "./components";
-import { AdminDashboardProvider } from "./AdminDashboardContext";
+import { AdminDashboardProvider } from "./contexts";
 
 export function AdminDashboardWrapper({
     children,

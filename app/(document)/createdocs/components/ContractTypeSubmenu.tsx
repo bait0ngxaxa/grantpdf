@@ -1,7 +1,7 @@
 "use client";
 
 import { FileText } from "lucide-react";
-import { useCreateDocsContext } from "../CreateDocsContext";
+import { useCreateDocsContext } from "../contexts";
 
 export const ContractTypeSubmenu = (): React.JSX.Element => {
     const { handleContractSelection } = useCreateDocsContext();

@@ -1,50 +1,25 @@
-import { useState } from "react";
-import type { Project, UserFile } from "@/type";
+import useSWR from "swr";
 import type { ProjectsApiResponse } from "@/type/api";
 import { API_ROUTES } from "@/lib/constants";
 
 export type { Project, UserFile } from "@/type";
 
-export const useUserData = (): {
-    projects: Project[];
-    setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
-    orphanFiles: UserFile[];
-    setOrphanFiles: React.Dispatch<React.SetStateAction<UserFile[]>>;
-    isLoading: boolean;
-    error: string | null;
-    fetchUserData: () => Promise<void>;
-} => {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [orphanFiles, setOrphanFiles] = useState<UserFile[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    const fetchUserData = async (): Promise<void> => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const res = await fetch(API_ROUTES.PROJECTS);
-            if (!res.ok) {
-                throw new Error("Failed to fetch projects");
-            }
-            const data: ProjectsApiResponse = await res.json();
-            setProjects(data.projects);
-            setOrphanFiles(data.orphanFiles);
-        } catch (err) {
-            console.error("Error fetching projects:", err);
-            setError("ไม่สามารถโหลดข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+export const useUserData = () => {
+    const { data, error, isLoading, mutate } = useSWR<ProjectsApiResponse>(
+        API_ROUTES.PROJECTS,
+    );
 
     return {
-        projects,
-        setProjects,
-        orphanFiles,
-        setOrphanFiles,
+        projects: data?.projects || [],
+
+        orphanFiles: data?.orphanFiles || [],
         isLoading,
-        error,
-        fetchUserData,
+        error: error
+            ? "ไม่สามารถโหลดข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง"
+            : null,
+        fetchUserData: async () => {
+            await mutate();
+        },
+        mutate,
     };
 };

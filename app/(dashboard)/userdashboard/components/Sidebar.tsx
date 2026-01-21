@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, Folder, Building2, Plus, X } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
-import { useUserDashboardContext } from "../UserDashboardContext";
+import { useUserDashboardContext } from "../contexts";
 
 type MenuItemType = {
     id: string;

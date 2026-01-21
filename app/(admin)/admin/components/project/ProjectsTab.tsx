@@ -4,8 +4,8 @@ import React from "react";
 import SearchAndFilter from "../SearchAndFilter";
 import ProjectsList from "./ProjectsList";
 import { Pagination } from "@/components/ui";
-import { useAdminDashboardContext } from "../../AdminDashboardContext";
-import { useAdminProjectFilter, useAdminModalStates } from "../../hooks";
+import { useAdminDashboardContext } from "../../contexts";
+import { useAdminProjectFilter } from "../../hooks";
 import { usePagination } from "@/lib/hooks";
 import { PAGINATION } from "@/lib/constants";
 
@@ -25,10 +25,7 @@ export const ProjectsTab = (): React.JSX.Element => {
         setSelectedStatus,
         expandedProjects,
         viewedProjects,
-        toggleProjectExpansion,
     } = useAdminDashboardContext();
-
-    const { openPreviewModal, openStatusModal } = useAdminModalStates();
 
     const filteredAndSortedProjects = useAdminProjectFilter({
         projects,
@@ -72,9 +69,6 @@ export const ProjectsTab = (): React.JSX.Element => {
                 totalItems={totalItems}
                 startIndex={startIndex}
                 endIndex={endIndex}
-                onToggleProjectExpansion={toggleProjectExpansion}
-                onPreviewPdf={openPreviewModal}
-                onEditProjectStatus={openStatusModal}
             />
 
             <Pagination

@@ -5,6 +5,7 @@ import {
     SessionProvider,
     ThemeProvider,
     GlobalModalProvider,
+    SWRProvider,
 } from "@/components/providers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -34,7 +35,9 @@ export default async function RootLayout({
             >
                 <SessionProvider session={session}>
                     <ThemeProvider>
-                        <GlobalModalProvider>{children}</GlobalModalProvider>
+                        <GlobalModalProvider>
+                            <SWRProvider>{children}</SWRProvider>
+                        </GlobalModalProvider>
                     </ThemeProvider>
                 </SessionProvider>
             </body>

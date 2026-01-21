@@ -1,11 +1,12 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import FileItem from "./FileItem";
-import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useRouter } from "next/navigation";
 import { PROJECT_STATUS } from "@/type/models";
 import { getStatusColor } from "@/lib/utils";
 import type { Project } from "@/type";
 import { ROUTES } from "@/lib/constants";
+import { useUserDashboardContext } from "../contexts";
 import {
     Building2,
     FileText,
@@ -20,12 +21,7 @@ interface ProjectItemProps {
     isExpanded: boolean;
     hasUnreadStatusNote: boolean;
     onToggleExpand: () => void;
-    onEditProject: () => void;
-    onDeleteProject: () => void;
     onStatusClick: (e: React.MouseEvent) => void;
-    openPreviewModal: (url: string, title: string) => void;
-    handleDeleteFile: (fileId: string) => void;
-    router: AppRouterInstance;
 }
 
 export const ProjectItem: React.FC<ProjectItemProps> = ({
@@ -33,13 +29,14 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
     isExpanded,
     hasUnreadStatusNote,
     onToggleExpand,
-    onEditProject,
-    onDeleteProject,
     onStatusClick,
-    openPreviewModal,
-    handleDeleteFile,
-    router,
 }): React.JSX.Element => {
+    const router = useRouter();
+    const { handleEditProject, handleDeleteProject } =
+        useUserDashboardContext();
+
+    const onEditProject = () => handleEditProject(project);
+    const onDeleteProject = () => handleDeleteProject(project.id);
     return (
         <div
             className={`group bg-white dark:bg-slate-800 rounded-3xl shadow-sm border transition-all duration-300 overflow-hidden ${
@@ -220,12 +217,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                             </div>
                             <div className="grid gap-3">
                                 {project.files.map((file) => (
-                                    <FileItem
-                                        key={file.id}
-                                        file={file}
-                                        onPreviewFile={openPreviewModal}
-                                        onDeleteFile={handleDeleteFile}
-                                    />
+                                    <FileItem key={file.id} file={file} />
                                 ))}
                             </div>
                         </div>

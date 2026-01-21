@@ -3,7 +3,7 @@
 import React from "react";
 import { ProjectsList } from "./ProjectsList";
 import { Pagination } from "@/components/ui";
-import { useUserDashboardContext } from "../UserDashboardContext";
+import { useUserDashboardContext } from "../contexts";
 
 export const ProjectsTab = (): React.JSX.Element => {
     const { currentPage, totalPages, setCurrentPage } =
