@@ -4,13 +4,13 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useTitle } from "@/lib/hooks/useTitle";
-
 import {
     DashboardOverview,
     ProjectsTab,
     CreateProjectTab,
     DashboardModals,
 } from "./components";
+import { useUserDashboardContext } from "./UserDashboardContext";
 
 const getTitleByTab = (tab: string): string => {
     switch (tab) {
@@ -25,18 +25,14 @@ const getTitleByTab = (tab: string): string => {
     }
 };
 
-import {
-    useUserDashboardContext,
-    UserDashboardProvider,
-} from "./UserDashboardContext";
-
-const DashboardContent = (): React.JSX.Element => {
+export default function DashboardPage(): React.JSX.Element | null {
     const { status } = useSession();
     const router = useRouter();
     const { activeTab, isLoading, error } = useUserDashboardContext();
 
     useTitle(getTitleByTab(activeTab));
 
+    // Auth Guard
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push("/signin");
@@ -45,8 +41,11 @@ const DashboardContent = (): React.JSX.Element => {
 
     if (status === "loading" || isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-transparent">
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)]">
                 <span className="loading loading-spinner loading-lg text-primary" />
+                <p className="mt-4 text-gray-600 dark:text-gray-400">
+                    กำลังโหลดข้อมูล...
+                </p>
             </div>
         );
     }
@@ -60,7 +59,7 @@ const DashboardContent = (): React.JSX.Element => {
     }
 
     return (
-        <div>
+        <>
             {/* Dashboard Tab */}
             {activeTab === "dashboard" && <DashboardOverview />}
 
@@ -72,14 +71,6 @@ const DashboardContent = (): React.JSX.Element => {
 
             {/* All Modals */}
             <DashboardModals />
-        </div>
-    );
-};
-
-export default function DashboardPage(): React.JSX.Element {
-    return (
-        <UserDashboardProvider>
-            <DashboardContent />
-        </UserDashboardProvider>
+        </>
     );
 }

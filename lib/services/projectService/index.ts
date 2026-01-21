@@ -25,7 +25,12 @@ export {
 } from "./sanitizers";
 
 // Queries
-export { getAllProjects, getProjectsByUserId } from "./queries";
+export {
+    getAllProjects,
+    getProjectsByUserId,
+    findProjectByNameAndUser,
+    findProjectByIdAndUser,
+} from "./queries";
 
 // Mutations
 export { updateProjectStatus, createProject } from "./mutations";

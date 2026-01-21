@@ -1,14 +1,11 @@
 "use client";
 
 import { FileText } from "lucide-react";
+import { useCreateDocsContext } from "../CreateDocsContext";
 
-interface ContractTypeSubmenuProps {
-    onContractSelect: (contractCode: string) => void;
-}
+export const ContractTypeSubmenu = (): React.JSX.Element => {
+    const { handleContractSelection } = useCreateDocsContext();
 
-export const ContractTypeSubmenu = ({
-    onContractSelect,
-}: ContractTypeSubmenuProps): React.JSX.Element => {
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
             <h1 className="text-3xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">
@@ -21,7 +18,7 @@ export const ContractTypeSubmenu = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
                 <div
                     className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                    onClick={() => onContractSelect("ABS")}
+                    onClick={() => handleContractSelection("ABS")}
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -43,7 +40,7 @@ export const ContractTypeSubmenu = ({
 
                 <div
                     className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-green-200 dark:hover:border-green-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                    onClick={() => onContractSelect("DMR")}
+                    onClick={() => handleContractSelection("DMR")}
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-green-50 dark:bg-green-900/50 text-green-600 dark:text-green-400 mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
@@ -65,7 +62,7 @@ export const ContractTypeSubmenu = ({
 
                 <div
                     className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-purple-200 dark:hover:border-purple-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                    onClick={() => onContractSelect("SIP")}
+                    onClick={() => handleContractSelection("SIP")}
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">

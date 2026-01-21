@@ -1,12 +1,13 @@
+"use client";
+
 import React from "react";
 import { Building2, Plus } from "lucide-react";
 import { QuickActionCard } from "./QuickActionCard";
+import { useUserDashboardContext } from "../UserDashboardContext";
 
-interface QuickActionsProps {
-    setActiveTab: (tab: string) => void;
-}
+export const QuickActions: React.FC = () => {
+    const { setActiveTab } = useUserDashboardContext();
 
-export const QuickActions: React.FC<QuickActionsProps> = ({ setActiveTab }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <QuickActionCard

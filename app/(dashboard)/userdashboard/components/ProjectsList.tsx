@@ -1,37 +1,29 @@
+"use client";
+
 import React, { useState } from "react";
-import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useRouter } from "next/navigation";
 import type { Project } from "@/type";
+import { useUserDashboardContext } from "../UserDashboardContext";
 
 import { ProjectsListHeader } from "./ProjectsListHeader";
 import { ProjectItem } from "./ProjectItem";
 import { EmptyProjectsState } from "./EmptyProjectsState";
 import { StatusDetailModal } from "./StatusDetailModal";
 
-interface ProjectsListProps {
-    projects: Project[];
-    totalProjects: number;
-    expandedProjects: Set<string>;
-    toggleProjectExpansion: (projectId: string) => void;
-    handleEditProject: (project: Project) => void;
-    handleDeleteProject: (projectId: string) => void;
-    openPreviewModal: (url: string, title: string) => void;
-    handleDeleteFile: (fileId: string) => void;
-    setShowCreateProjectModal: (show: boolean) => void;
-    router: AppRouterInstance;
-}
+export const ProjectsList: React.FC = (): React.JSX.Element => {
+    const router = useRouter();
+    const {
+        paginatedProjects: projects,
+        projects: allProjects,
+        expandedProjects,
+        toggleProjectExpansion,
+        handleEditProject,
+        handleDeleteProject,
+        openPreviewModal,
+        handleDeleteFile,
+        setShowCreateProjectModal,
+    } = useUserDashboardContext();
 
-export const ProjectsList: React.FC<ProjectsListProps> = ({
-    projects,
-    totalProjects,
-    expandedProjects,
-    toggleProjectExpansion,
-    handleEditProject,
-    handleDeleteProject,
-    openPreviewModal,
-    handleDeleteFile,
-    setShowCreateProjectModal,
-    router,
-}): React.JSX.Element => {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [selectedStatusProject, setSelectedStatusProject] =
         useState<Project | null>(null);
@@ -44,7 +36,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
                 return saved ? new Set(JSON.parse(saved)) : new Set();
             }
             return new Set();
-        }
+        },
     );
 
     // Check if project has unread status note
@@ -56,7 +48,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
 
     const openStatusDetailModal = (
         project: Project,
-        e: React.MouseEvent
+        e: React.MouseEvent,
     ): void => {
         e.stopPropagation();
         setSelectedStatusProject(project);
@@ -70,7 +62,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
             setViewedStatusNotes(newViewed);
             localStorage.setItem(
                 "viewedStatusNotes",
-                JSON.stringify([...newViewed])
+                JSON.stringify([...newViewed]),
             );
         }
     };
@@ -83,7 +75,7 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
     return (
         <div className="animate-fade-in-up">
             <ProjectsListHeader
-                totalProjects={totalProjects}
+                totalProjects={allProjects.length}
                 onCreateProject={() => setShowCreateProjectModal(true)}
             />
 

@@ -5,7 +5,7 @@ import { ChartBarBig, UserStar, LogOut, Menu } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useDashboardContext } from "../DashboardContext";
+import { useUserDashboardContext } from "../UserDashboardContext";
 
 const menuItems = [
     { id: "dashboard", name: "ภาพรวม" },
@@ -16,7 +16,7 @@ const menuItems = [
 export const TopBar: React.FC = (): React.JSX.Element => {
     const { data: session } = useSession();
     const router = useRouter();
-    const { setIsSidebarOpen, activeTab } = useDashboardContext();
+    const { setIsSidebarOpen, activeTab } = useUserDashboardContext();
 
     return (
         <div className="bg-gradient-to-r from-white/80 via-white/80 to-blue-50/30 dark:from-slate-900/80 dark:via-slate-900/80 dark:to-slate-800/30 backdrop-blur-2xl sticky top-0 z-30 px-6 py-4 border-b border-white/60 dark:border-slate-700/60 shadow-sm">

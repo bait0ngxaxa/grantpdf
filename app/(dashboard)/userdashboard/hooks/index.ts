@@ -1,6 +1,5 @@
-export * from "./useUserData";
-export * from "./useProjectActions";
-export * from "./useFileActions";
-export * from "./useModalStates";
-export * from "./useUIStates";
-export * from "./useDashboardHook";
+// Data fetching hook
+export { useUserData } from "./useUserData";
+
+// Dashboard actions hook (API calls for CRUD operations)
+export { useDashboardActions } from "./useDashboardActions";

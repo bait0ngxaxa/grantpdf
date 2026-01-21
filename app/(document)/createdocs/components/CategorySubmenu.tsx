@@ -7,29 +7,22 @@ import {
     BookOpen,
     ClipboardCheck,
 } from "lucide-react";
+import { useCreateDocsContext } from "../CreateDocsContext";
 
-interface CategorySubmenuProps {
-    selectedCategory: string;
-    isAdmin: boolean;
-    onApprovalSelect: () => void;
-    onTorSelect: () => void;
-    onFormProjectSelect: () => void;
-    onContractTypeSelect: (type: string) => void;
-    onCategorySelect: (category: string | null) => void;
-}
+export const CategorySubmenu = (): React.JSX.Element | null => {
+    const {
+        selectedCategory,
+        isAdmin,
+        handleApprovalSelection,
+        handleTorSelection,
+        handleFormProjectSelection,
+        setSelectedContractType,
+        setSelectedCategory,
+    } = useCreateDocsContext();
 
-export const CategorySubmenu = ({
-    selectedCategory,
-    isAdmin,
-    onApprovalSelect,
-    onTorSelect,
-    onFormProjectSelect,
-    onContractTypeSelect,
-    onCategorySelect,
-}: CategorySubmenuProps): React.JSX.Element | null => {
     if (selectedCategory === "general") {
         if (!isAdmin) {
-            onCategorySelect(null);
+            setSelectedCategory(null);
             return null;
         }
 
@@ -47,7 +40,7 @@ export const CategorySubmenu = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() => onApprovalSelect()}
+                        onClick={() => handleApprovalSelection()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -67,7 +60,7 @@ export const CategorySubmenu = ({
 
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() => onTorSelect()}
+                        onClick={() => handleTorSelection()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -100,7 +93,7 @@ export const CategorySubmenu = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() => onFormProjectSelect()}
+                        onClick={() => handleFormProjectSelection()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-pink-50 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">
@@ -117,7 +110,7 @@ export const CategorySubmenu = ({
 
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() => onContractTypeSelect("academic")}
+                        onClick={() => setSelectedContractType("academic")}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-pink-50 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">
@@ -137,7 +130,7 @@ export const CategorySubmenu = ({
 
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() => onTorSelect()}
+                        onClick={() => handleTorSelection()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-pink-50 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">

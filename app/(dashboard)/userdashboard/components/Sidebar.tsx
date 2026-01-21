@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, Folder, Building2, Plus, X } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
-import { useDashboardContext } from "../DashboardContext";
+import { useUserDashboardContext } from "../UserDashboardContext";
 
 type MenuItemType = {
     id: string;
@@ -39,7 +39,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
         setActiveTab,
         setShowCreateProjectModal,
         setShowProfileModal,
-    } = useDashboardContext();
+    } = useUserDashboardContext();
 
     return (
         <>

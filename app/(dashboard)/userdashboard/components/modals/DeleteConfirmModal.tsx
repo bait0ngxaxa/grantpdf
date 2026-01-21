@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
     Dialog,
@@ -8,26 +10,18 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { useUserDashboardContext } from "../../UserDashboardContext";
 
-interface DeleteConfirmModalProps {
-    showDeleteModal: boolean;
-    setShowDeleteModal: (show: boolean) => void;
-    fileToDelete: string | null;
-    projectToDelete: string | null;
-    confirmDeleteFile: () => void;
-    confirmDeleteProject: () => void;
-    cancelDelete: () => void;
-}
+export const DeleteConfirmModal: React.FC = () => {
+    const {
+        showDeleteModal,
+        setShowDeleteModal,
+        fileToDelete,
+        onConfirmDeleteFile,
+        onConfirmDeleteProject,
+        cancelDelete,
+    } = useUserDashboardContext();
 
-export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
-    showDeleteModal,
-    setShowDeleteModal,
-    fileToDelete,
-    projectToDelete: _projectToDelete,
-    confirmDeleteFile,
-    confirmDeleteProject,
-    cancelDelete,
-}) => {
     return (
         <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
             <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-800 border-0 shadow-2xl">
@@ -58,8 +52,8 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
                         <Button
                             onClick={
                                 fileToDelete
-                                    ? confirmDeleteFile
-                                    : confirmDeleteProject
+                                    ? onConfirmDeleteFile
+                                    : onConfirmDeleteProject
                             }
                             className="flex-1 rounded-xl bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 h-12 text-base font-semibold border-0"
                         >

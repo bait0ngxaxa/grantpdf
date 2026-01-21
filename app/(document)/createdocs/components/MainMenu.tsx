@@ -2,21 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { FileText, FileBarChart, Building2 } from "lucide-react";
+import { useCreateDocsContext } from "../CreateDocsContext";
 
-interface MainMenuProps {
-    isAdmin: boolean;
-    selectedProjectId: string | null;
-    onCategorySelect: (category: string) => void;
-    onSummarySelect: () => void;
-}
-
-export const MainMenu = ({
-    isAdmin,
-    selectedProjectId,
-    onCategorySelect,
-    onSummarySelect,
-}: MainMenuProps): React.JSX.Element => {
+export const MainMenu = (): React.JSX.Element => {
     const router = useRouter();
+    const {
+        isAdmin,
+        selectedProjectId,
+        handleCategorySelection,
+        handleSummarySelection,
+    } = useCreateDocsContext();
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
@@ -35,7 +30,7 @@ export const MainMenu = ({
                 {isAdmin && (
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() => onCategorySelect("general")}
+                        onClick={() => handleCategorySelection("general")}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
@@ -63,7 +58,7 @@ export const MainMenu = ({
                 {isAdmin && (
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-amber-200 dark:hover:border-amber-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
-                        onClick={() => onSummarySelect()}
+                        onClick={() => handleSummarySelection()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
                             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 mb-6 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300">
@@ -92,7 +87,7 @@ export const MainMenu = ({
                     className={`group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 transition-all duration-300 cursor-pointer hover:-translate-y-1 ${
                         !isAdmin ? "w-full" : ""
                     }`}
-                    onClick={() => onCategorySelect("project")}
+                    onClick={() => handleCategorySelection("project")}
                 >
                     <div className="flex flex-col items-center text-center h-full">
                         <div className="p-4 rounded-2xl bg-pink-50 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">
