@@ -41,6 +41,8 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
         setShowProfileModal,
     } = useUserDashboardContext();
 
+    const [, startTransition] = React.useTransition();
+
     return (
         <>
             {/* Mobile sidebar overlay */}
@@ -98,7 +100,9 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                         if (item.id === "create-project") {
                                             setShowCreateProjectModal(true);
                                         } else {
-                                            setActiveTab(item.id);
+                                            startTransition(() => {
+                                                setActiveTab(item.id);
+                                            });
                                         }
                                         setIsSidebarOpen(false);
                                     }}

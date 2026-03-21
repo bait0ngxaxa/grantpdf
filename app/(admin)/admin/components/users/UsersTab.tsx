@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo } from "react";
 import { UserStatsCards, UsersTable, EditUserModal, DeleteUserModal } from ".";
-import { SuccessModal } from "@/components/ui";
 import { useUserManagement } from "../../hooks/useUserManagement";
 import { usePagination } from "@/lib/hooks";
 import { PAGINATION } from "@/lib/constants";
@@ -26,9 +25,6 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
         isDeleting,
         isEditModalOpen,
         isDeleteModalOpen,
-        isResultModalOpen,
-        resultMessage,
-        isResultSuccess,
 
         openEditModal,
         closeEditModal,
@@ -37,7 +33,6 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
         openDeleteModal,
         closeDeleteModal,
         handleDeleteUser,
-        closeResultModal,
     } = useUserManagement();
 
     const filteredUsers = useMemo(() => {
@@ -114,15 +109,6 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
                 onConfirm={handleDeleteUser}
             />
 
-            <SuccessModal
-                isOpen={isResultModalOpen}
-                onClose={closeResultModal}
-                message={
-                    isResultSuccess
-                        ? resultMessage
-                        : `ข้อผิดพลาด: ${resultMessage}`
-                }
-            />
         </div>
     );
 };

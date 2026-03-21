@@ -64,7 +64,7 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                                     "th-TH",
                                 )}
                             </span>
-                            <span className="badge badge-outline text-xs">
+                            <span className="inline-flex text-[10px] md:text-xs font-medium px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
                                 {file.fileExtension.toUpperCase()}
                             </span>
                             {file.attachmentFiles &&

@@ -5,23 +5,36 @@ export type {
     DocumentValidationResult,
 } from "./types";
 
-// Field Validators
+// Zod Schemas and Types (ใช้แทน custom validators/types เดิม)
+export type { ApprovalData, ContractData, FormProjectData, SummaryData, TORData } from "./schemas";
+export type { SignupInput, ForgotPasswordInput, ResetPasswordInput } from "./schemas";
 export {
-    validatePhone,
-    validateEmail,
-    validateCitizenId,
-} from "./fieldValidators";
+    approvalSchema,
+    contractSchema,
+    formProjectSchema,
+    summarySchema,
+    torSchema,
+    signupSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema,
+    requiredString,
+    phoneSchema,
+    emailSchema,
+    citizenIdSchema,
+    optionalPhoneSchema,
+    optionalEmailSchema,
+} from "./schemas";
 
-// Input Formatters
+// Adapter
+export { zodValidate, validateRequired } from "./helpers";
+
+// Input Formatters (ยังคงไว้สำหรับ input formatting ใน UI)
 export {
     formatPhoneInput,
     formatCitizenIdInput,
     validateAndFormatPhone,
     validateAndFormatCitizenId,
 } from "./inputFormatters";
-
-// Helpers
-export { validateRequired } from "./helpers";
 
 // Document Validators
 export {
@@ -31,12 +44,3 @@ export {
     validateContract,
     validateApproval,
 } from "./documentValidators";
-
-// Field Labels (for external use if needed)
-export {
-    SUMMARY_LABELS,
-    TOR_LABELS,
-    FORMPROJECT_LABELS,
-    CONTRACT_LABELS,
-    APPROVAL_LABELS,
-} from "./fieldLabels";

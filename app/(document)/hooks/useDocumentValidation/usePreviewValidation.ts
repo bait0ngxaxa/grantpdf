@@ -2,29 +2,17 @@
 
 import { useCallback } from "react";
 import { type UsePreviewValidationProps } from "./types";
-import { scrollToFirstError, runFieldValidations } from "./helpers";
+import { scrollToFirstError } from "./helpers";
 
 export function usePreviewValidation<T extends object>({
     validateForm,
     openPreview,
     formData,
-    phoneFields,
-    emailFields,
-    citizenIdFields,
     setErrors,
 }: UsePreviewValidationProps<T>) {
     const handlePreview = useCallback(
         (data: T) => {
             const result = validateForm(data);
-
-            // Run field-specific validations
-            runFieldValidations(
-                data,
-                result,
-                phoneFields,
-                emailFields,
-                citizenIdFields,
-            );
 
             setErrors(result.errors);
 
@@ -34,14 +22,7 @@ export function usePreviewValidation<T extends object>({
                 scrollToFirstError(Object.keys(result.errors));
             }
         },
-        [
-            validateForm,
-            openPreview,
-            phoneFields,
-            emailFields,
-            citizenIdFields,
-            setErrors,
-        ],
+        [validateForm, openPreview, setErrors],
     );
 
     /**

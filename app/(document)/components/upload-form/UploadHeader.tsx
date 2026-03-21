@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, UploadCloud, FileText } from "lucide-react";

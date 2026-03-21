@@ -2,35 +2,28 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
+import { forgotPasswordSchema } from "@/lib/validation/schemas";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 const JWT_SECRET = process.env.PASSRESET_TOKEN_SECRET;
 
-// 1. **อีเมลผู้ส่ง:** ตั้งค่าข้อมูลผู้ส่งใน .env และดึงมาใช้ที่นี่
-const transporter = nodemailer.createTransport({
-    service: "Gmail",
-    auth: {
-        user: process.env.EMAIL_USER, // อีเมลของเซิร์ฟเวอร์ที่ใช้ส่งเมล
-        pass: process.env.EMAIL_PASS, // รหัสผ่านของอีเมลนั้น
-    },
-});
-
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
-        // 2. **อีเมลผู้รับ:** รับอีเมลที่ผู้ใช้กรอกมาจากฟอร์ม
-        const { email } = await req.json();
+        const body: unknown = await req.json();
 
-        if (!email) {
-            return NextResponse.json(
-                { error: "กรุณากรอกอีเมล" },
-                { status: 400 }
-            );
+        const parsed = forgotPasswordSchema.safeParse(body);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+            return NextResponse.json({ error: firstError }, { status: 400 });
         }
+
+        const { email } = parsed.data;
 
         const user = await prisma.user.findUnique({
             where: { email },
         });
 
+        // คืน 200 เสมอเพื่อป้องกัน user enumeration attack
         if (!user) {
             return NextResponse.json(
                 { message: "ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว" },
@@ -50,19 +43,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER, // อีเมลผู้ส่ง (จาก .env)
-            to: email, // อีเมลผู้รับ (จากฟอร์ม)
-            subject: "คำขอรีเซ็ตรหัสผ่าน",
-            html: `
-                <h1>รีเซ็ตรหัสผ่านของคุณ</h1>
-                <h2>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชีของคุณแล้ว</h2>
-                <h2><a href="${resetLink}">ตั้งรหัสผ่านใหม่</a></h2>
-                <h2>ลิงก์นี้จะหมดอายุใน 1 ชั่วโมง</h2>
-            `,
-        };
-
-        await transporter.sendMail(mailOptions);
+        await sendPasswordResetEmail({ email, resetLink });
 
         return NextResponse.json(
             { message: "ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว" },

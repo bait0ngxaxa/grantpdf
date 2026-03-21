@@ -32,7 +32,7 @@ export const ProjectSelection = (): React.JSX.Element => {
                 เลือกโครงการสำหรับเอกสาร
             </h1>
 
-            {isLoading && <LoadingSpinner message="กำลังโหลดโครงการ..." />}
+            {isLoading ? <LoadingSpinner message="กำลังโหลดโครงการ..." /> : null}
 
             {error && (
                 <SharedEmptyState

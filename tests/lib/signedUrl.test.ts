@@ -68,7 +68,7 @@ import {
     generateSignedToken,
     generateSignedUrl,
     verifySignedToken,
-} from "./signedUrl";
+} from "@/lib/signedUrl";
 
 describe("Signed URL - Security Tests", () => {
     beforeEach(() => {

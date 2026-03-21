@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextResponse } from "next/server";
-import { validateSession } from "./sessionValidator";
-import { isSessionError } from "./types";
+import { validateSession } from "@/lib/services/sessionService/sessionValidator";
+import { isSessionError } from "@/lib/services/sessionService/types";
 
 // Mock next-auth getServerSession
 vi.mock("next-auth", () => ({

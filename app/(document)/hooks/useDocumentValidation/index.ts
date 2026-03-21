@@ -22,9 +22,6 @@ export function useDocumentValidation<T extends object>(
         validateForm,
         openPreview,
         formData,
-        phoneFields = [],
-        emailFields = [],
-        citizenIdFields = [],
     } = config;
 
     const [errors, setErrors] = useState<ValidationErrors<T>>({});
@@ -34,9 +31,6 @@ export function useDocumentValidation<T extends object>(
         validateForm,
         openPreview,
         formData,
-        phoneFields,
-        emailFields,
-        citizenIdFields,
         setErrors,
     });
 
@@ -47,8 +41,6 @@ export function useDocumentValidation<T extends object>(
     // Submit validation
     const { validateBeforeSubmit } = useSubmitValidation({
         validateForm,
-        phoneFields,
-        citizenIdFields,
         setErrors,
     });
 

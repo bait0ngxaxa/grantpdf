@@ -6,8 +6,8 @@ import {
     sanitizeOrphanFiles,
     collectAttachmentPaths,
     filterOutAttachments,
-} from "./sanitizers";
-import type { RawProject, RawFile, RawAttachment } from "./types";
+} from "@/lib/services/projectService/sanitizers";
+import type { RawProject, RawFile, RawAttachment } from "@/lib/services/projectService/types";
 import type { AdminProject, AdminDocumentFile } from "@/type/models";
 
 // Helper to create mock dates
@@ -74,10 +74,10 @@ describe("sanitizeAttachments", () => {
 
         const result = sanitizeAttachments(rawAttachments);
 
-        expect(result).toHaveLength(2);
-        expect(result[0].id).toBe("1");
-        expect(result[0].fileName).toBe("file1.pdf");
-        expect(result[1].filePath).toBeUndefined();
+        expect(result!).toHaveLength(2);
+        expect(result![0].id).toBe("1");
+        expect(result![0].fileName).toBe("file1.pdf");
+        expect(result![1].filePath).toBeUndefined();
     });
 });
 

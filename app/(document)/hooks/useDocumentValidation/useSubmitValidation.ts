@@ -2,12 +2,10 @@
 
 import { useCallback } from "react";
 import { type UseSubmitValidationProps } from "./types";
-import { scrollToFirstError, runFieldValidations } from "./helpers";
+import { scrollToFirstError } from "./helpers";
 
 export function useSubmitValidation<T extends object>({
     validateForm,
-    phoneFields,
-    citizenIdFields,
     setErrors,
 }: UseSubmitValidationProps<T>) {
     const validateBeforeSubmit = useCallback(
@@ -20,15 +18,6 @@ export function useSubmitValidation<T extends object>({
 
             const result = validateForm(formData);
 
-            // Run field-specific validations (phone and citizenId only for submit)
-            runFieldValidations(
-                formData,
-                result,
-                phoneFields,
-                [],
-                citizenIdFields,
-            );
-
             setErrors(result.errors);
 
             if (result.isValid) {
@@ -37,7 +26,7 @@ export function useSubmitValidation<T extends object>({
                 scrollToFirstError(Object.keys(result.errors));
             }
         },
-        [validateForm, phoneFields, citizenIdFields, setErrors],
+        [validateForm, setErrors],
     );
 
     return { validateBeforeSubmit };

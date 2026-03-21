@@ -1,27 +1,15 @@
 // =====================================================
-// TOR Document
+// Re-export types from Zod schemas (SSOT)
 // =====================================================
-export interface TORData {
-    projectName: string;
-    fileName: string;
-    owner: string;
-    address: string;
-    email: string;
-    tel: string;
-    timeline: string;
-    contractnumber: string;
-    cost: string;
-    topic1: string;
-    objective1: string;
+export type { ApprovalData } from "@/lib/validation/schemas";
+export type { ContractData } from "@/lib/validation/schemas";
+export type { FormProjectData } from "@/lib/validation/schemas";
+export type { SummaryData } from "@/lib/validation/schemas";
+export type { TORData } from "@/lib/validation/schemas";
 
-    target: string;
-    zone: string;
-    plan: string;
-    projectmanage: string;
-    partner: string;
-    date: string;
-}
-
+// =====================================================
+// ActivityData (ไม่มี schema เพราะไม่ได้ validate)
+// =====================================================
 export interface ActivityData {
     activity: string;
     manager: string;
@@ -29,6 +17,10 @@ export interface ActivityData {
     duration: string;
 }
 
+// =====================================================
+// Initial Data Constants
+// =====================================================
+import type { TORData } from "@/lib/validation/schemas";
 export const initialTORData: TORData = {
     projectName: "",
     fileName: "",
@@ -42,7 +34,6 @@ export const initialTORData: TORData = {
     cost: "",
     topic1: "",
     objective1: "",
-
     target: "",
     zone: "",
     plan: "",
@@ -57,31 +48,7 @@ export const initialActivity: ActivityData = {
     duration: "",
 };
 
-// =====================================================
-// Summary Document (Excel)
-// =====================================================
-export interface SummaryData {
-    fileName: string;
-    projectName: string;
-    contractNumber: string;
-    organize: string;
-    projectOwner: string;
-    projectReview: string;
-    inspector: string;
-    coordinator: string;
-    projectCode: string;
-    projectActivity: string;
-    projectNhf: string;
-    projectCo: string;
-    month: string;
-    timeline: string;
-    sec1: string;
-    sec2: string;
-    sec3: string;
-    sum: string;
-    funds: string;
-}
-
+import type { SummaryData } from "@/lib/validation/schemas";
 export const initialSummaryData: SummaryData = {
     fileName: "",
     projectName: "",
@@ -104,28 +71,7 @@ export const initialSummaryData: SummaryData = {
     funds: "",
 };
 
-// =====================================================
-// Form Project Document
-// =====================================================
-export interface FormProjectData {
-    fileName: string;
-    projectName: string;
-    person: string;
-    address: string;
-    tel: string;
-    email: string;
-    timeline: string;
-    cost: string;
-    rationale: string;
-    objective: string;
-    goal: string;
-    target: string;
-    product: string;
-    scope: string;
-    result: string;
-    author: string;
-}
-
+import type { FormProjectData } from "@/lib/validation/schemas";
 export const initialFormProjectData: FormProjectData = {
     projectName: "",
     fileName: "",
@@ -145,30 +91,7 @@ export const initialFormProjectData: FormProjectData = {
     author: "",
 };
 
-// =====================================================
-// Contract Document
-// =====================================================
-export interface ContractData {
-    fileName: string;
-    projectName: string;
-    contractnumber: string;
-    projectOffer: string;
-    projectCo: string;
-    owner: string;
-    acceptNum: string;
-    projectCode: string;
-    cost: string;
-    timelineMonth: string;
-    timelineText: string;
-    section: string;
-    date: string;
-    name: string;
-    address: string;
-    citizenid: string;
-    citizenexpire: string;
-    witness: string;
-}
-
+import type { ContractData } from "@/lib/validation/schemas";
 export const initialContractData: ContractData = {
     fileName: "",
     projectName: "",
@@ -190,26 +113,7 @@ export const initialContractData: ContractData = {
     witness: "",
 };
 
-// =====================================================
-// Approval Document
-// =====================================================
-export interface ApprovalData {
-    head: string;
-    fileName: string;
-    projectName: string;
-    date: string;
-    topicdetail: string;
-    todetail: string;
-    attachments: string[];
-    detail: string;
-    name: string;
-    depart: string;
-    coor: string;
-    tel: string;
-    email: string;
-    accept: string;
-}
-
+import type { ApprovalData } from "@/lib/validation/schemas";
 export const initialApprovalData: ApprovalData = {
     head: "",
     fileName: "",

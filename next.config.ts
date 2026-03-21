@@ -34,6 +34,9 @@ const SECURITY_HEADERS = [
 const nextConfig: NextConfig = {
     reactStrictMode: true, // ยังใช้ได้
     poweredByHeader: false,
+    experimental: {
+        optimizePackageImports: ["lucide-react"],
+    },
 
     async headers() {
         return [

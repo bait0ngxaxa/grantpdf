@@ -75,8 +75,6 @@ export function TorForm(): React.JSX.Element {
         validateForm: validateTOR,
         openPreview,
         formData,
-        phoneFields: ["tel"],
-        emailFields: ["email"],
     });
 
     // Create phone change handler

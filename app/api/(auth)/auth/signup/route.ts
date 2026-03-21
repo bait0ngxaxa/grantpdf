@@ -5,10 +5,11 @@ import bcrypt from "bcryptjs";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { rateLimit, getClientIP } from "@/lib/ratelimit";
 import { logAudit } from "@/lib/auditLog";
+import { signupSchema } from "@/lib/validation/schemas";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
-        const { name, email, password } = await req.json();
+        const body: unknown = await req.json();
         const ip = getClientIP(req);
         const rateLimitResult = rateLimit(ip, 5, 60_000);
 
@@ -34,26 +35,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        if (!name || !email || !password) {
-            return NextResponse.json(
-                { error: "กรุณากรอกข้อมูลให้ครบถ้วน" },
-                { status: 400 }
-            );
+        const parsed = signupSchema.safeParse(body);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+            return NextResponse.json({ error: firstError }, { status: 400 });
         }
 
-        const trimmedName = name.trim();
-        const trimmedEmail = email.trim();
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(trimmedEmail)) {
-            return NextResponse.json(
-                { error: "รูปแบบอีเมลไม่ถูกต้อง" },
-                { status: 400 }
-            );
-        }
+        const { name, email, password } = parsed.data;
 
         const existingUser = await prisma.user.findUnique({
-            where: { email: trimmedEmail },
+            where: { email },
         });
 
         if (existingUser) {
@@ -63,19 +54,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        if (password.length < 6) {
-            return NextResponse.json(
-                { error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" },
-                { status: 400 }
-            );
-        }
-
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await prisma.user.create({
             data: {
-                name: trimmedName,
-                email: trimmedEmail,
+                name,
+                email,
                 password: hashedPassword,
             },
         });

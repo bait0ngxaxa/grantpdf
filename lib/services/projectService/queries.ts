@@ -11,16 +11,17 @@ import {
 } from "./sanitizers";
 
 export async function getAllProjects(): Promise<ProjectsResult> {
-    const projects = await prisma.project.findMany({
-        include: PROJECT_INCLUDE,
-        orderBy: { created_at: "desc" },
-    });
-
-    const orphanFiles = await prisma.userFile.findMany({
-        where: { projectId: null },
-        include: ORPHAN_FILES_INCLUDE,
-        orderBy: { created_at: "desc" },
-    });
+    const [projects, orphanFiles] = await Promise.all([
+        prisma.project.findMany({
+            include: PROJECT_INCLUDE,
+            orderBy: { created_at: "desc" },
+        }),
+        prisma.userFile.findMany({
+            where: { projectId: null },
+            include: ORPHAN_FILES_INCLUDE,
+            orderBy: { created_at: "desc" },
+        })
+    ]);
 
     const sanitizedProjects = sanitizeProjects(
         projects as unknown as RawProject[],
@@ -44,48 +45,49 @@ export async function getAllProjects(): Promise<ProjectsResult> {
 export async function getProjectsByUserId(
     userId: number,
 ): Promise<ProjectsResult> {
-    const projects = await prisma.project.findMany({
-        where: { userId },
-        include: {
-            files: {
-                include: {
-                    attachmentFiles: {
-                        select: {
-                            id: true,
-                            fileName: true,
-                            filePath: true,
-                            fileSize: true,
-                            mimeType: true,
+    const [projects, orphanFiles] = await Promise.all([
+        prisma.project.findMany({
+            where: { userId },
+            include: {
+                files: {
+                    include: {
+                        attachmentFiles: {
+                            select: {
+                                id: true,
+                                fileName: true,
+                                filePath: true,
+                                fileSize: true,
+                                mimeType: true,
+                            },
                         },
                     },
+                    orderBy: { created_at: "desc" },
                 },
-                orderBy: { created_at: "desc" },
-            },
-            _count: {
-                select: { files: true },
-            },
-        },
-        orderBy: { created_at: "desc" },
-    });
-
-    const orphanFiles = await prisma.userFile.findMany({
-        where: {
-            userId,
-            projectId: null,
-        },
-        include: {
-            attachmentFiles: {
-                select: {
-                    id: true,
-                    fileName: true,
-                    filePath: true,
-                    fileSize: true,
-                    mimeType: true,
+                _count: {
+                    select: { files: true },
                 },
             },
-        },
-        orderBy: { created_at: "desc" },
-    });
+            orderBy: { created_at: "desc" },
+        }),
+        prisma.userFile.findMany({
+            where: {
+                userId,
+                projectId: null,
+            },
+            include: {
+                attachmentFiles: {
+                    select: {
+                        id: true,
+                        fileName: true,
+                        filePath: true,
+                        fileSize: true,
+                        mimeType: true,
+                    },
+                },
+            },
+            orderBy: { created_at: "desc" },
+        })
+    ]);
 
     // For user's own projects, we don't need user info
     const sanitizedProjects = (projects as unknown as RawProject[]).map(

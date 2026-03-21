@@ -23,7 +23,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <button
-                        className="lg:hidden btn btn-ghost btn-sm btn-circle hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                        className="lg:hidden p-1.5 rounded-full inline-flex items-center justify-center hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 text-slate-600 dark:text-slate-300 transition-colors"
                         onClick={() => setIsSidebarOpen(true)}
                     >
                         <Menu className="h-6 w-6" />

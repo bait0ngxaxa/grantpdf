@@ -1,29 +1,10 @@
-import type { FormProjectData } from "@/config/initialData";
+import type { FormProjectData } from "@/lib/validation/schemas";
 import type { DocumentValidationResult } from "../types";
-import { validateRequired } from "../helpers";
-import { FORMPROJECT_LABELS } from "../fieldLabels";
+import { zodValidate } from "../helpers";
+import { formProjectSchema } from "@/lib/validation/schemas";
 
 export function validateFormProject(
     data: FormProjectData,
 ): DocumentValidationResult<FormProjectData> {
-    const requiredFields: (keyof FormProjectData)[] = [
-        "fileName",
-        "projectName",
-        "person",
-        "address",
-        "tel",
-        "email",
-        "timeline",
-        "cost",
-        "rationale",
-        "objective",
-        "goal",
-        "target",
-        "product",
-        "scope",
-        "result",
-        "author",
-    ];
-
-    return validateRequired(data, requiredFields, FORMPROJECT_LABELS);
+    return zodValidate(formProjectSchema, data);
 }

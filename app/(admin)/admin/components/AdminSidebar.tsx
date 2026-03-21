@@ -46,6 +46,8 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
 
     const totalProjects = projects.length;
 
+    const [, startTransition] = React.useTransition();
+
     return (
         <>
             {/* Mobile sidebar overlay */}
@@ -143,7 +145,9 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                             <li key={item.id}>
                                 <button
                                     onClick={() => {
-                                        setActiveTab(item.id);
+                                        startTransition(() => {
+                                            setActiveTab(item.id);
+                                        });
                                         setIsSidebarOpen(false);
                                     }}
                                     className={`w-full group flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 text-left font-medium relative overflow-hidden ${

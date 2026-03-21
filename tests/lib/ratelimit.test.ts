@@ -5,7 +5,7 @@ import {
     resetRateLimit,
     getRateLimitStats,
     getClientIP,
-} from "./ratelimit";
+} from "@/lib/ratelimit";
 
 describe("Rate Limiting - Security Tests", () => {
     beforeEach(() => {

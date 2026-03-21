@@ -18,9 +18,9 @@ export default function Error({
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 p-4">
-            <div className="card w-full max-w-md bg-white dark:bg-slate-800 shadow-2xl rounded-2xl overflow-hidden">
-                <div className="card-body p-8 text-center">
-                    {/* Error Icon */}
+            <div className="w-full max-w-md bg-white dark:bg-slate-800 shadow-2xl rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700">
+                <div className="flex flex-col gap-4 p-8 text-center">
+                    {/* Error Icon Animation */}
                     <div className="flex justify-center mb-6">
                         <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                             <AlertTriangle className="h-10 w-10 text-red-600 dark:text-red-400" />

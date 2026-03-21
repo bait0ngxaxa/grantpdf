@@ -1,31 +1,10 @@
-import type { SummaryData } from "@/config/initialData";
+import type { SummaryData } from "@/lib/validation/schemas";
 import type { DocumentValidationResult } from "../types";
-import { validateRequired } from "../helpers";
-import { SUMMARY_LABELS } from "../fieldLabels";
+import { zodValidate } from "../helpers";
+import { summarySchema } from "@/lib/validation/schemas";
 
 export function validateSummary(
     data: SummaryData,
 ): DocumentValidationResult<SummaryData> {
-    const requiredFields: (keyof SummaryData)[] = [
-        "fileName",
-        "projectName",
-        "contractNumber",
-        "organize",
-        "projectOwner",
-        "projectReview",
-        "coordinator",
-        "projectCode",
-        "projectActivity",
-        "projectNhf",
-        "projectCo",
-        "month",
-        "timeline",
-        "sec1",
-        "sec2",
-        "sec3",
-        "sum",
-        "funds",
-    ];
-
-    return validateRequired(data, requiredFields, SUMMARY_LABELS);
+    return zodValidate(summarySchema, data);
 }

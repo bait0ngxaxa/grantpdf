@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { Folder, Calendar, ChevronRight } from "lucide-react";

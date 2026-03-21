@@ -40,11 +40,6 @@ interface AdminDashboardContextType {
     setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
 
     // Modal States
-    isSuccessModalOpen: boolean;
-    setIsSuccessModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    successMessage: string;
-    setSuccessMessage: React.Dispatch<React.SetStateAction<string>>;
-
     isPreviewModalOpen: boolean;
     setIsPreviewModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     previewUrl: string;

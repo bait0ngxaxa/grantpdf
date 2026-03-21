@@ -31,8 +31,9 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     return (
         <>
             {isStatusModalOpen && selectedProjectForStatus && (
-                <dialog className="modal modal-open backdrop-blur-sm bg-slate-900/20">
-                    <div className="modal-box bg-white dark:bg-slate-800 p-8 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 backdrop-blur-sm bg-slate-900/20" onClick={closeStatusModal} />
+                    <div className="relative w-full bg-white dark:bg-slate-800 p-8 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 z-10">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center space-x-3">
                                 <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -44,7 +45,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                             </div>
                             <button
                                 onClick={closeStatusModal}
-                                className="btn btn-sm btn-circle btn-ghost text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
+                                className="p-1.5 rounded-full inline-flex items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
                             >
                                 <X className="h-5 w-5" />
                             </button>
@@ -72,14 +73,14 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 </div>
                             </div>
 
-                            <div className="form-control mb-4">
-                                <label className="label pl-0">
-                                    <span className="label-text font-medium text-slate-700 dark:text-slate-300">
+                            <div className="flex flex-col mb-4">
+                                <label className="flex items-center pb-1">
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                         เลือกสถานะใหม่
                                     </span>
                                 </label>
                                 <select
-                                    className="select select-bordered w-full bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 rounded-xl text-slate-700 dark:text-slate-200"
+                                    className="w-full px-3 py-2 border bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-xl text-slate-700 dark:text-slate-200"
                                     value={newStatus}
                                     onChange={(e) =>
                                         setNewStatus(e.target.value)
@@ -99,14 +100,14 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 </select>
                             </div>
 
-                            <div className="form-control">
-                                <label className="label pl-0">
-                                    <span className="label-text font-medium text-slate-700 dark:text-slate-300">
+                            <div className="flex flex-col">
+                                <label className="flex items-center pb-1">
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                         คำอธิบาย/หมายเหตุ (ไม่บังคับ)
                                     </span>
                                 </label>
                                 <textarea
-                                    className="textarea textarea-bordered w-full bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500 rounded-xl text-slate-700 dark:text-slate-200 h-24 resize-none"
+                                    className="w-full p-3 border bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-xl text-slate-700 dark:text-slate-200 h-24 resize-none"
                                     placeholder="เพิ่มคำอธิบายหรือหมายเหตุสำหรับผู้ใช้..."
                                     value={statusNote}
                                     onChange={(e) =>
@@ -150,15 +151,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                             </Button>
                         </div>
                     </div>
-                    <form method="dialog" className="modal-backdrop">
-                        <button
-                            onClick={closeStatusModal}
-                            className="cursor-default"
-                        >
-                            ปิด
-                        </button>
-                    </form>
-                </dialog>
+                </div>
             )}
         </>
     );

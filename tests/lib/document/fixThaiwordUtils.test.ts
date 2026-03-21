@@ -3,7 +3,7 @@ import {
     fixThaiDistributed,
     generateUniqueFilename,
     getMimeType,
-} from "./fixThaiwordUtils";
+} from "@/lib/document/fixThaiwordUtils";
 
 // Mock uuid
 vi.mock("uuid", () => ({

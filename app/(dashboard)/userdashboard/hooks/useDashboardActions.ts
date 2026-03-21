@@ -1,11 +1,10 @@
 import { useState, useCallback } from "react";
 import type { Project } from "@/type";
 import { API_ROUTES } from "@/lib/constants";
+import { toast } from "sonner";
 
 interface DashboardActionsParams {
     fetchUserData: () => Promise<void>; // Use revalidation instead of state setters
-    setSuccessMessage: (msg: string) => void;
-    setShowSuccessModal: (show: boolean) => void;
     setShowDeleteModal: (show: boolean) => void;
     setShowEditProjectModal: (show: boolean) => void;
     setShowCreateProjectModal: (show: boolean) => void;
@@ -28,8 +27,6 @@ interface DashboardActionsParams {
 export function useDashboardActions(params: DashboardActionsParams) {
     const {
         fetchUserData,
-        setSuccessMessage,
-        setShowSuccessModal,
         setShowDeleteModal,
         setShowEditProjectModal,
         setShowCreateProjectModal,
@@ -64,20 +61,18 @@ export function useDashboardActions(params: DashboardActionsParams) {
             if (!res.ok) throw new Error("Failed to delete file");
 
             await fetchUserData(); // Revalidate
-            setSuccessMessage("ลบไฟล์สำเร็จ");
-            setShowSuccessModal(true);
+            toast.success("ลบไฟล์สำเร็จ");
         } catch (err) {
             console.error("Error deleting file:", err);
-            setSuccessMessage("เกิดข้อผิดพลาดในการลบไฟล์ กรุณาลองใหม่อีกครั้ง");
-            setShowSuccessModal(true);
+            toast.error("เกิดข้อผิดพลาด", {
+                description: "เกิดข้อผิดพลาดในการลบไฟล์ กรุณาลองใหม่อีกครั้ง"
+            });
         } finally {
             setFileToDelete(null);
         }
     }, [
         fileToDelete,
         fetchUserData,
-        setSuccessMessage,
-        setShowSuccessModal,
         setShowDeleteModal,
         setFileToDelete,
     ]);
@@ -97,22 +92,18 @@ export function useDashboardActions(params: DashboardActionsParams) {
             if (!res.ok) throw new Error("Failed to delete project");
 
             await fetchUserData(); // Revalidate
-            setSuccessMessage("ลบโครงการสำเร็จ");
-            setShowSuccessModal(true);
+            toast.success("ลบโครงการสำเร็จ");
         } catch (err) {
             console.error("Error deleting project:", err);
-            setSuccessMessage(
-                "เกิดข้อผิดพลาดในการลบโครงการ กรุณาลองใหม่อีกครั้ง",
-            );
-            setShowSuccessModal(true);
+            toast.error("เกิดข้อผิดพลาด", {
+                description: "เกิดข้อผิดพลาดในการลบโครงการ กรุณาลองใหม่อีกครั้ง"
+            });
         } finally {
             setProjectToDelete(null);
         }
     }, [
         projectToDelete,
         fetchUserData,
-        setSuccessMessage,
-        setShowSuccessModal,
         setShowDeleteModal,
         setProjectToDelete,
     ]);
@@ -137,18 +128,16 @@ export function useDashboardActions(params: DashboardActionsParams) {
             if (!res.ok) throw new Error("Failed to update project");
 
             await fetchUserData(); // Revalidate
-            setSuccessMessage("อัปเดตโครงการสำเร็จ");
-            setShowSuccessModal(true);
+            toast.success("อัปเดตโครงการสำเร็จ");
             setShowEditProjectModal(false);
             setProjectToEdit(null);
             setEditProjectName("");
             setEditProjectDescription("");
         } catch (err) {
             console.error("Error updating project:", err);
-            setSuccessMessage(
-                "เกิดข้อผิดพลาดในการอัปเดตโครงการ กรุณาลองใหม่อีกครั้ง",
-            );
-            setShowSuccessModal(true);
+            toast.error("เกิดข้อผิดพลาด", {
+                description: "เกิดข้อผิดพลาดในการอัปเดตโครงการ กรุณาลองใหม่อีกครั้ง"
+            });
         } finally {
             setIsUpdatingProject(false);
         }
@@ -157,8 +146,6 @@ export function useDashboardActions(params: DashboardActionsParams) {
         editProjectName,
         editProjectDescription,
         fetchUserData,
-        setSuccessMessage,
-        setShowSuccessModal,
         setShowEditProjectModal,
         setProjectToEdit,
         setEditProjectName,
@@ -182,17 +169,15 @@ export function useDashboardActions(params: DashboardActionsParams) {
             if (!res.ok) throw new Error("Failed to create project");
 
             await fetchUserData(); // Revalidate
-            setSuccessMessage("สร้างโครงการสำเร็จ");
-            setShowSuccessModal(true);
+            toast.success("สร้างโครงการสำเร็จ");
             setShowCreateProjectModal(false);
             setNewProjectName("");
             setNewProjectDescription("");
         } catch (err) {
             console.error("Error creating project:", err);
-            setSuccessMessage(
-                "เกิดข้อผิดพลาดในการสร้างโครงการ กรุณาลองใหม่อีกครั้ง",
-            );
-            setShowSuccessModal(true);
+            toast.error("เกิดข้อผิดพลาด", {
+                description: "เกิดข้อผิดพลาดในการสร้างโครงการ กรุณาลองใหม่อีกครั้ง"
+            });
         } finally {
             setIsCreatingProject(false);
         }
@@ -200,8 +185,6 @@ export function useDashboardActions(params: DashboardActionsParams) {
         newProjectName,
         newProjectDescription,
         fetchUserData,
-        setSuccessMessage,
-        setShowSuccessModal,
         setShowCreateProjectModal,
         setNewProjectName,
         setNewProjectDescription,

@@ -20,12 +20,8 @@ interface ModalContextType {
     setShowCreateProjectModal: (show: boolean) => void;
     showDeleteModal: boolean;
     setShowDeleteModal: (show: boolean) => void;
-    showSuccessModal: boolean;
-    setShowSuccessModal: (show: boolean) => void;
     showEditProjectModal: boolean;
     setShowEditProjectModal: (show: boolean) => void;
-    successMessage: string;
-    setSuccessMessage: (message: string) => void;
     openPreviewModal: (storagePath: string, title: string) => void;
     setPreviewUrl: (url: string) => void;
     setPreviewTitle: (title: string) => void;
@@ -40,9 +36,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showEditProjectModal, setShowEditProjectModal] = useState(false);
-    const [successMessage, setSuccessMessage] = useState("");
 
     const openPreviewModal = useCallback(
         async (storagePath: string, title: string) => {
@@ -75,12 +69,8 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         setShowCreateProjectModal,
         showDeleteModal,
         setShowDeleteModal,
-        showSuccessModal,
-        setShowSuccessModal,
         showEditProjectModal,
         setShowEditProjectModal,
-        successMessage,
-        setSuccessMessage,
         openPreviewModal,
         setPreviewUrl,
         setPreviewTitle,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateAttachments, validateSignature } from "./helpers";
+import { validateAttachments, validateSignature } from "@/app/(document)/hooks/useApprovalLogic/helpers";
 
 describe("validateAttachments", () => {
     it("should return null when no attachments and no files", () => {

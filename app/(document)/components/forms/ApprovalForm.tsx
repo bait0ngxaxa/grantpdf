@@ -97,8 +97,6 @@ export function ApprovalForm(): React.JSX.Element {
         validateForm: validateApproval,
         openPreview,
         formData,
-        phoneFields: ["tel"],
-        emailFields: ["email"],
     });
 
     // Create phone change handler

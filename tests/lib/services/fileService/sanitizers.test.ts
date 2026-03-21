@@ -3,8 +3,8 @@ import {
     sanitizeAttachments,
     sanitizeFile,
     filterOutAttachmentFiles,
-} from "./sanitizers";
-import type { RawFile, RawAttachment } from "./types";
+} from "@/lib/services/fileService/sanitizers";
+import type { RawFile, RawAttachment } from "@/lib/services/fileService/types";
 import type { AdminDocumentFile } from "@/type/models";
 
 // Helper to create mock dates

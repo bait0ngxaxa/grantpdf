@@ -3,12 +3,6 @@ import type { AdminProject } from "@/type/models";
 
 export const useAdminModalStates = () => {
     const {
-        // Success Modal
-        isSuccessModalOpen,
-        setIsSuccessModalOpen,
-        successMessage,
-        setSuccessMessage,
-
         // Preview Modal
         isPreviewModalOpen,
         setIsPreviewModalOpen,
@@ -58,12 +52,6 @@ export const useAdminModalStates = () => {
     };
 
     return {
-        // Success Modal
-        isSuccessModalOpen,
-        setIsSuccessModalOpen,
-        successMessage,
-        setSuccessMessage,
-
         // Preview
         isPreviewModalOpen,
         previewUrl,

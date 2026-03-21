@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import useSWR from "swr";
 import { API_ROUTES } from "@/lib/constants";
+import { toast } from "sonner";
 
 interface UserData {
     id: string;
@@ -31,9 +32,6 @@ export interface UserManagementHook {
     isDeleting: boolean;
     isEditModalOpen: boolean;
     isDeleteModalOpen: boolean;
-    isResultModalOpen: boolean;
-    resultMessage: string;
-    isResultSuccess: boolean;
     fetchUsers: () => Promise<void>;
     openEditModal: (user: UserData) => void;
     closeEditModal: () => void;
@@ -44,7 +42,6 @@ export interface UserManagementHook {
     openDeleteModal: (user: UserData) => void;
     closeDeleteModal: () => void;
     handleDeleteUser: () => Promise<void>;
-    closeResultModal: () => void;
 }
 
 export function useUserManagement(): UserManagementHook {
@@ -66,7 +63,6 @@ export function useUserManagement(): UserManagementHook {
     // UI States
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
     const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
 
@@ -78,9 +74,6 @@ export function useUserManagement(): UserManagementHook {
 
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-
-    const [resultMessage, setResultMessage] = useState("");
-    const [isResultSuccess, setIsResultSuccess] = useState(true);
 
     const openEditModal = useCallback((user: UserData) => {
         setSelectedUser(user);
@@ -133,19 +126,15 @@ export function useUserManagement(): UserManagementHook {
                 await mutate(); // Revalidate
                 closeEditModal();
 
-                setResultMessage("อัปเดตข้อมูลผู้ใช้สำเร็จ!");
-                setIsResultSuccess(true);
-                setIsResultModalOpen(true);
+                toast.success("อัปเดตข้อมูลผู้ใช้สำเร็จ!");
             } catch (error: unknown) {
                 console.error("Failed to update user:", error);
 
-                setResultMessage(
-                    error instanceof Error
+                toast.error("ข้อผิดพลาด", {
+                    description: error instanceof Error
                         ? error.message
-                        : "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้",
-                );
-                setIsResultSuccess(false);
-                setIsResultModalOpen(true);
+                        : "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้"
+                });
             } finally {
                 setIsSaving(false);
             }
@@ -183,27 +172,19 @@ export function useUserManagement(): UserManagementHook {
             await mutate(); // Revalidate
             closeDeleteModal();
 
-            setResultMessage("ลบผู้ใช้สำเร็จ!");
-            setIsResultSuccess(true);
-            setIsResultModalOpen(true);
+            toast.success("ลบผู้ใช้สำเร็จ!");
         } catch (error: unknown) {
             console.error("Failed to delete user:", error);
 
-            setResultMessage(
-                error instanceof Error
+            toast.error("ข้อผิดพลาด", {
+                description: error instanceof Error
                     ? error.message
-                    : "เกิดข้อผิดพลาดในการลบผู้ใช้",
-            );
-            setIsResultSuccess(false);
-            setIsResultModalOpen(true);
+                    : "เกิดข้อผิดพลาดในการลบผู้ใช้"
+            });
         } finally {
             setIsDeleting(false);
         }
     }, [selectedUser, mutate, closeDeleteModal]);
-
-    const closeResultModal = useCallback(() => {
-        setIsResultModalOpen(false);
-    }, []);
 
     return {
         users,
@@ -217,9 +198,6 @@ export function useUserManagement(): UserManagementHook {
 
         isEditModalOpen,
         isDeleteModalOpen,
-        isResultModalOpen,
-        resultMessage,
-        isResultSuccess,
 
         fetchUsers: async () => {
             await mutate();
@@ -231,6 +209,5 @@ export function useUserManagement(): UserManagementHook {
         openDeleteModal,
         closeDeleteModal,
         handleDeleteUser,
-        closeResultModal,
     };
 }

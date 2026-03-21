@@ -2,6 +2,7 @@ import { API_ROUTES } from "@/lib/constants";
 import { useAdminDashboardContext } from "../contexts";
 import { useState } from "react";
 import type { AdminProject } from "@/type/models";
+import { toast } from "sonner";
 
 export const useProjectStatusActions = (): {
     isUpdatingStatus: boolean;
@@ -11,8 +12,6 @@ export const useProjectStatusActions = (): {
 } => {
     const {
         fetchProjects,
-        setSuccessMessage,
-        setIsSuccessModalOpen,
         selectedProjectForStatus,
         setSelectedProjectForStatus,
         newStatus,
@@ -68,14 +67,12 @@ export const useProjectStatusActions = (): {
 
             closeStatusModal();
 
-            setSuccessMessage(result.message || "อัปเดตสถานะโครงการสำเร็จแล้ว");
-            setIsSuccessModalOpen(true);
+            toast.success(result.message || "อัปเดตสถานะโครงการสำเร็จแล้ว");
         } catch (error) {
             console.error("Failed to update project status:", error);
-            setSuccessMessage(
-                "เกิดข้อผิดพลาดในการอัปเดตสถานะโครงการ กรุณาลองใหม่อีกครั้ง",
-            );
-            setIsSuccessModalOpen(true);
+            toast.error("เกิดข้อผิดพลาด", {
+                description: "เกิดข้อผิดพลาดในการอัปเดตสถานะโครงการ กรุณาลองใหม่อีกครั้ง"
+            });
         } finally {
             setIsUpdatingStatus(false);
         }

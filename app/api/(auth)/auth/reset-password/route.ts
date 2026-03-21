@@ -3,19 +3,21 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { resetPasswordSchema } from "@/lib/validation/schemas";
 
 const JWT_SECRET = process.env.PASSRESET_TOKEN_SECRET;
 
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
-        const { token, newPassword } = await req.json();
+        const body: unknown = await req.json();
 
-        if (!token || !newPassword) {
-            return NextResponse.json(
-                { error: "ไม่พบโทเค็นหรือรหัสผ่านใหม่" },
-                { status: 400 }
-            );
+        const parsed = resetPasswordSchema.safeParse(body);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+            return NextResponse.json({ error: firstError }, { status: 400 });
         }
+
+        const { token, newPassword } = parsed.data;
 
         if (!JWT_SECRET) {
             throw new Error(
@@ -23,7 +25,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        let decodedToken;
+        let decodedToken: JwtPayload;
         try {
             decodedToken = jwt.verify(token, JWT_SECRET) as JwtPayload;
         } catch (err) {
@@ -41,7 +43,6 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        // Find the user by userId from token
         const user = await prisma.user.findUnique({
             where: {
                 id: Number(decodedToken.userId),

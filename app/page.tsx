@@ -1,37 +1,17 @@
-"use client";
-
-import { useSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { type Metadata } from "next";
 
 import HomeNavbar from "@/components/home/HomeNavbar";
 import HeroSection from "@/components/home/HeroSection";
 import TemplateGrid from "@/components/home/TemplateGrid";
-import { useTitle } from "@/lib/hooks/useTitle";
 
-export default function Home(): React.JSX.Element {
-    const { data: session, status } = useSession();
+export const metadata: Metadata = {
+    title: "HOMEPAGE - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ",
+};
 
-    useTitle("HOMEPAGE - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ");
-
-    if (status === "loading") {
-        return (
-            <>
-                <div className="navbar bg-white dark:bg-gray-800 shadow-lg px-4 md:px-8">
-                    <div className="flex-1">
-                        <span className="btn btn-ghost normal-case text-xl text-primary">
-                            HOMEPAGE
-                        </span>
-                    </div>
-                    <div className="flex-none">
-                        <div className="skeleton w-24 h-8 rounded-full mr-2" />
-                        <div className="skeleton w-24 h-8 rounded-full" />
-                    </div>
-                </div>
-                <main className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-                    <div className="loading loading-spinner loading-lg text-primary" />
-                </main>
-            </>
-        );
-    }
+export default async function Home() {
+    const session = await getServerSession(authOptions);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-100 dark:selection:bg-blue-900 selection:text-blue-900 dark:selection:text-blue-100">

@@ -8,7 +8,7 @@ import {
     DeleteConfirmModal,
     ProfileModal,
 } from "./modals";
-import { SuccessModal, PdfPreviewModal } from "@/components/ui";
+import { PdfPreviewModal } from "@/components/ui";
 import { useSession } from "next-auth/react";
 
 export const DashboardModals = () => {
@@ -20,9 +20,6 @@ export const DashboardModals = () => {
         previewTitle,
         showProfileModal,
         setShowProfileModal,
-        showSuccessModal,
-        setShowSuccessModal,
-        successMessage,
     } = useUserDashboardContext();
 
     return (
@@ -44,12 +41,6 @@ export const DashboardModals = () => {
             <DeleteConfirmModal />
             <CreateProjectModal />
             <EditProjectModal />
-
-            <SuccessModal
-                isOpen={showSuccessModal}
-                onClose={() => setShowSuccessModal(false)}
-                message={successMessage}
-            />
         </>
     );
 };

@@ -49,8 +49,6 @@ interface UserDashboardContextType {
     setShowCreateProjectModal: (show: boolean) => void;
     showDeleteModal: boolean;
     setShowDeleteModal: (show: boolean) => void;
-    showSuccessModal: boolean;
-    setShowSuccessModal: (show: boolean) => void;
     showEditProjectModal: boolean;
     setShowEditProjectModal: (show: boolean) => void;
     openPreviewModal: (storagePath: string, title: string) => void;
@@ -60,7 +58,6 @@ interface UserDashboardContextType {
     projectToDelete: string | null;
     projectToEdit: Project | null;
     setProjectToEdit: React.Dispatch<React.SetStateAction<Project | null>>;
-    successMessage: string;
     editProjectName: string;
     setEditProjectName: (name: string) => void;
     editProjectDescription: string;
@@ -96,8 +93,6 @@ function UnifiedProviderValue({ children }: { children: ReactNode }) {
     // Initialize Actions
     const actions = useDashboardActions({
         fetchUserData: data.fetchUserData,
-        setSuccessMessage: modal.setSuccessMessage,
-        setShowSuccessModal: modal.setShowSuccessModal,
         setShowDeleteModal: modal.setShowDeleteModal,
         setShowEditProjectModal: modal.setShowEditProjectModal,
         setShowCreateProjectModal: modal.setShowCreateProjectModal,

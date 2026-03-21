@@ -70,7 +70,6 @@ export function ContractForm(): React.JSX.Element {
         validateForm: validateContract,
         openPreview,
         formData,
-        citizenIdFields: ["citizenid"],
     });
 
     // Create citizen ID change handler

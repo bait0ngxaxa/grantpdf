@@ -1,16 +1,13 @@
 "use client";
 
 import React from "react";
-import { SuccessModal, PdfPreviewModal } from "@/components/ui";
+import { PdfPreviewModal } from "@/components/ui";
 import { ProjectStatusModal } from "./modals";
 import { useAdminModalStates, useProjectStatusActions } from "../hooks";
 import { getStatusColor } from "@/lib/utils";
 
 export const AdminModals = () => {
     const {
-        isSuccessModalOpen,
-        setIsSuccessModalOpen,
-        successMessage,
         isPreviewModalOpen,
         previewUrl,
         previewFileName,
@@ -29,12 +26,6 @@ export const AdminModals = () => {
 
     return (
         <>
-            <SuccessModal
-                isOpen={isSuccessModalOpen}
-                onClose={() => setIsSuccessModalOpen(false)}
-                message={successMessage}
-            />
-
             <PdfPreviewModal
                 isOpen={isPreviewModalOpen}
                 previewUrl={previewUrl}

@@ -1,4 +1,4 @@
-import { validatePhone, validateCitizenId } from "./fieldValidators";
+import { phoneSchema, citizenIdSchema } from "./schemas/shared";
 
 export function formatPhoneInput(value: string): string {
     return value.replace(/\D/g, "").slice(0, 10);
@@ -13,10 +13,14 @@ export function validateAndFormatPhone(value: string): {
     error?: string;
 } {
     const formatted = formatPhoneInput(value);
-    const validation = validatePhone(formatted);
+    // กรณีที่ไม่ได้กรอก ไม่ต้อง validate เพื่อให้ submit validation เป็นคนเตือน required เอง
+    if (!formatted) {
+        return { value: formatted };
+    }
+    const result = phoneSchema.safeParse(formatted);
     return {
         value: formatted,
-        error: validation.error,
+        error: result.success ? undefined : result.error.issues[0].message,
     };
 }
 
@@ -25,9 +29,12 @@ export function validateAndFormatCitizenId(value: string): {
     error?: string;
 } {
     const formatted = formatCitizenIdInput(value);
-    const validation = validateCitizenId(formatted);
+    if (!formatted) {
+        return { value: formatted };
+    }
+    const result = citizenIdSchema.safeParse(formatted);
     return {
         value: formatted,
-        error: validation.error,
+        error: result.success ? undefined : result.error.issues[0].message,
     };
 }

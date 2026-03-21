@@ -9,9 +9,10 @@ import {
 } from "@/components/providers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { Toaster } from "sonner";
 
 const googleSans = localFont({
-    src: "../public/font/GoogleSans-VariableFont.ttf",
+    src: "../public/font/GoogleSans-VariableFont.woff2",
     variable: "--font-google-sans",
     display: "swap",
 });
@@ -40,6 +41,7 @@ export default async function RootLayout({
                         </GlobalModalProvider>
                     </ThemeProvider>
                 </SessionProvider>
+                <Toaster position="top-center" richColors />
             </body>
         </html>
     );

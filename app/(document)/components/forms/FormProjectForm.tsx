@@ -65,8 +65,6 @@ export function FormProjectForm(): React.JSX.Element {
         validateForm: validateFormProject,
         openPreview,
         formData,
-        phoneFields: ["tel"],
-        emailFields: ["email"],
     });
 
     // Create phone change handler

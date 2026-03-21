@@ -1,0 +1,293 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Input, Button } from "@/components/ui";
+import { toast } from "sonner";
+import { CheckCircle2 } from "lucide-react";
+import { ROUTES } from "@/lib/constants";
+import { AlertCircle } from "lucide-react";
+
+export default function SignupClient(): React.JSX.Element {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    const router = useRouter();
+
+    const handleOpenConfirm = (e: React.FormEvent): void => {
+        e.preventDefault();
+        setError("");
+
+        if (password !== confirmPassword) {
+            setError("รหัสผ่านไม่ตรงกัน กรุณากรอกรหัสผ่านให้เหมือนกัน");
+            return;
+        }
+
+        if (password.length < 6) {
+            setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+            return;
+        }
+
+        setShowConfirmModal(true);
+    };
+
+    const handleSignup = async (): Promise<void> => {
+        setError("");
+        setIsSubmitting(true);
+
+        try {
+            const res = await fetch("/api/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password }),
+            });
+
+            if (res.ok) {
+                setShowConfirmModal(false);
+                toast.success("สร้างบัญชีผู้ใช้เรียบร้อยแล้ว", {
+                    description: "กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...",
+                });
+                setTimeout(() => {
+                    router.push(ROUTES.SIGNIN);
+                }, 2000);
+            } else {
+                const data = await res.json();
+
+                setError(data.error || "เกิดข้อผิดพลาดในการสมัครสมาชิก");
+                console.error("Signup failed:", data.error);
+                toast.error("การสมัครสมาชิกไม่สำเร็จ", {
+                    description: data.error || "เกิดข้อผิดพลาดในการสมัครสมาชิก",
+                });
+            }
+        } catch (err) {
+            setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+            console.error("Network error during signup:", err);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+            <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                {/* Left Side - Hero Content */}
+                <div className="hidden md:flex flex-col space-y-8 p-8">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/50 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-medium text-sm self-start animate-fade-in-up">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                        </span>
+                        GRANT ONLINE
+                    </div>
+
+                    <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                        เริ่มต้นใช้งาน <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600">
+                            สร้างบัญชีใหม่
+                        </span>
+                    </h1>
+                </div>
+
+                {/* Right Side - Signup Form */}
+                <div className="w-full max-w-md mx-auto">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-blue-100/50 dark:shadow-slate-900/50 p-8 border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                        {/* Decorative background blob */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/30 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
+
+                        <div className="mb-8 relative z-10">
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                                สมัครสมาชิก
+                            </h2>
+                            <p className="text-slate-500 dark:text-slate-400">
+                                กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้ใหม่
+                            </p>
+                        </div>
+
+                        <form
+                            onSubmit={handleOpenConfirm}
+                            className="space-y-4 relative z-10"
+                        >
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    ชื่อ-นามสกุล
+                                </label>
+                                <Input
+                                    type="text"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    placeholder="ชื่อ-นามสกุล"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    อีเมล
+                                </label>
+                                <Input
+                                    type="email"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    placeholder="name@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    รหัสผ่าน
+                                </label>
+                                <Input
+                                    type="password"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    placeholder="อย่างน้อย 6 ตัวอักษร"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    ยืนยันรหัสผ่าน
+                                </label>
+                                <Input
+                                    type="password"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    placeholder="กรอกรหัสผ่านอีกครั้ง"
+                                    value={confirmPassword}
+                                    onChange={(e) =>
+                                        setConfirmPassword(e.target.value)
+                                    }
+                                    required
+                                />
+                            </div>
+
+                            {error && (
+                                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake">
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                    {error}
+                                </div>
+                            )}
+
+                            <Button
+                                type="submit"
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 mt-2"
+                            >
+                                ดำเนินการต่อ
+                            </Button>
+                        </form>
+
+                        <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400 relative z-10">
+                            มีบัญชีอยู่แล้ว?{" "}
+                            <Link
+                                href={ROUTES.SIGNIN}
+                                className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                            >
+                                เข้าสู่ระบบ
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Confirm Modal */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => { setError(""); setShowConfirmModal(false); }} />
+                    <div className="relative bg-white p-0 rounded-3xl overflow-hidden shadow-2xl w-11/12 max-w-md z-10">
+                        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white text-center">
+                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+                                <CheckCircle2 className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold">
+                                ยืนยันข้อมูลการสมัคร
+                            </h3>
+                            <p className="text-blue-100 text-sm">
+                                กรุณาตรวจสอบข้อมูลก่อนยืนยัน
+                            </p>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                                    <span className="text-sm text-slate-500">
+                                        ชื่อ
+                                    </span>
+                                    <span className="text-sm font-semibold text-slate-800">
+                                        {name}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                                    <span className="text-sm text-slate-500">
+                                        อีเมล
+                                    </span>
+                                    <span className="text-sm font-semibold text-slate-800">
+                                        {email}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                                    <span className="text-sm text-slate-500">
+                                        รหัสผ่าน
+                                    </span>
+                                    <span className="text-sm font-semibold text-slate-800">
+                                        {"•".repeat(password.length)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Error display inside modal */}
+                            {error && (
+                                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake">
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                    {error}
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setError("");
+                                        setShowConfirmModal(false);
+                                    }}
+                                    className="flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                >
+                                    แก้ไข
+                                </Button>
+                                <Button
+                                    onClick={handleSignup}
+                                    disabled={isSubmitting}
+                                    className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-500/20"
+                                >
+                                    {isSubmitting ? (
+                                        <div className="flex items-center gap-2">
+                                            <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            <span>กำลังยืนยัน...</span>
+                                        </div>
+                                    ) : (
+                                        "ยืนยันการสมัคร"
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+        </div>
+    );
+}

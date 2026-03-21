@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useFileHandlers } from "./useFileHandlers";
+import { useFileHandlers } from "@/app/(document)/hooks/useUploadDoc/useFileHandlers";
 import { FILE_UPLOAD } from "@/lib/constants";
 
 describe("useFileHandlers - Security Tests", () => {

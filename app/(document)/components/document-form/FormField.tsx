@@ -41,7 +41,7 @@ export function FormField({
     return (
         <div className="group">
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 ml-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                {label} {required && <span className="text-red-500">*</span>}
+                {label} {required ? <span className="text-red-500">*</span> : null}
             </label>
             {type === "textarea" ? (
                 <Textarea

@@ -9,10 +9,6 @@ import React, {
 import type { AdminProject } from "@/type/models";
 
 interface AdminModalContextType {
-    isSuccessModalOpen: boolean;
-    setIsSuccessModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    successMessage: string;
-    setSuccessMessage: React.Dispatch<React.SetStateAction<string>>;
     isPreviewModalOpen: boolean;
     setIsPreviewModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     previewUrl: string;
@@ -36,10 +32,6 @@ const AdminModalContext = createContext<AdminModalContextType | undefined>(
 );
 
 export function AdminModalProvider({ children }: { children: ReactNode }) {
-    // 1. Success Modal
-    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-    const [successMessage, setSuccessMessage] = useState("");
-
     // 2. Preview Modal
     const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
     const [previewUrl, setPreviewUrl] = useState("");
@@ -53,10 +45,6 @@ export function AdminModalProvider({ children }: { children: ReactNode }) {
     const [statusNote, setStatusNote] = useState("");
 
     const value = {
-        isSuccessModalOpen,
-        setIsSuccessModalOpen,
-        successMessage,
-        setSuccessMessage,
         isPreviewModalOpen,
         setIsPreviewModalOpen,
         previewUrl,

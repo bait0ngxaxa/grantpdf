@@ -1,6 +1,7 @@
-"use client";
-
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { ROUTES } from "@/lib/constants";
 import {
     ApprovalForm,
     ContractForm,
@@ -8,7 +9,6 @@ import {
     SummaryForm,
     TorForm,
 } from "@/app/(document)/components";
-import { use } from "react";
 
 const DOCUMENT_FORMS: Record<string, React.ComponentType> = {
     approval: ApprovalForm,
@@ -18,12 +18,37 @@ const DOCUMENT_FORMS: Record<string, React.ComponentType> = {
     tor: TorForm,
 };
 
-export default function CreateDocumentPage({
+export async function generateMetadata({
     params,
 }: {
     params: Promise<{ type: string }>;
-}): React.JSX.Element {
-    const { type } = use(params);
+}) {
+    const { type } = await params;
+    const validTypes: Record<string, string> = {
+        approval: "สร้างหนังสือขออนุมัติ",
+        contract: "สร้างหนังสือสัญญา",
+        formproject: "สร้างเอกสารเสนอโครงการ",
+        summary: "สร้างรายงานสรุปผล",
+        tor: "สร้าง TOR",
+    };
+
+    return {
+        title: `${validTypes[type] || "สร้างเอกสาร"} | ระบบจัดการเอกสาร`,
+    };
+}
+
+export default async function CreateDocumentPage({
+    params,
+}: {
+    params: Promise<{ type: string }>;
+}) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        redirect(ROUTES.SIGNIN);
+    }
+
+    const { type } = await params;
     const FormComponent = DOCUMENT_FORMS[type];
 
     if (!FormComponent) {

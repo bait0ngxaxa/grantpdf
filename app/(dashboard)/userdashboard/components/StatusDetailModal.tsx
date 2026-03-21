@@ -19,8 +19,9 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
     if (!isOpen || !project) return null;
 
     return (
-        <dialog className="modal modal-open backdrop-blur-sm bg-slate-900/40 dark:bg-slate-900/60">
-            <div className="modal-box bg-white dark:bg-slate-900 p-6 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 backdrop-blur-sm bg-slate-900/40 dark:bg-slate-900/60" onClick={onClose} />
+            <div className="relative w-full bg-white dark:bg-slate-900 p-6 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 z-10">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -32,7 +33,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-sm btn-circle btn-ghost text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                        className="p-1.5 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                     >
                         <X className="h-5 w-5" />
                     </button>
@@ -87,11 +88,6 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                     </Button>
                 </div>
             </div>
-            <form method="dialog" className="modal-backdrop">
-                <button onClick={onClose} className="cursor-default">
-                    ปิด
-                </button>
-            </form>
-        </dialog>
+        </div>
     );
 };

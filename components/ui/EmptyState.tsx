@@ -49,7 +49,7 @@ export function EmptyState({
             <p className="mt-1 text-slate-500 dark:text-slate-400">
                 {description}
             </p>
-            {children && <div className="mt-6">{children}</div>}
+            {children ? <div className="mt-6">{children}</div> : null}
         </div>
     );
 }
