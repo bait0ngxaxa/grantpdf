@@ -34,7 +34,7 @@ export const ProjectCard = ({
                     <Building2 className="h-8 w-8" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100 truncate">
+                    <h3 className="text-lg font-bold mb-1 text-slate-900 dark:text-slate-100 truncate text-balance">
                         {project.name}
                     </h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 line-clamp-1">

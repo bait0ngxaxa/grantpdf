@@ -45,7 +45,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 
     return (
         <div
-            className={`group bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl ${colors.hover} hover:-translate-y-1 transition-all duration-300 relative overflow-hidden`}
+            className={`group bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl ${colors.hover} hover:-translate-y-1 duration-300 relative overflow-hidden transition`}
         >
             <div
                 className={`absolute top-0 right-0 w-24 h-24 ${colors.accent} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}

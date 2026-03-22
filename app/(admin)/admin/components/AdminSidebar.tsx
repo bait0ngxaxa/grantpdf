@@ -68,11 +68,11 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                 <div className="p-6 pb-2">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center space-x-3.5 group cursor-default">
-                            <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 transition-all duration-300">
+                            <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 duration-300 transition">
                                 <ShieldCheck className="h-6 w-6 text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-none mb-1">
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-none mb-1 text-balance">
                                     Admin Panel
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
@@ -94,7 +94,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                     {/* Quick Stats Section */}
                     <div className="mt-6 mb-6 p-4 rounded-xl bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 border border-slate-100/60 dark:border-slate-700/60 shadow-inner">
                         <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                            <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-balance">
                                 สถิติวันนี้
                             </h4>
                             <span className="flex h-1.5 w-1.5 relative">
@@ -193,7 +193,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
 
                 {/* User Info */}
                 <div className="p-4 mt-auto">
-                    <div className="relative overflow-hidden rounded-2xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/60 dark:border-slate-700/60 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 p-4 group hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 transition-all duration-300">
+                    <div className="relative overflow-hidden rounded-2xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/60 dark:border-slate-700/60 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 p-4 group hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 duration-300 transition">
                         {/* Decorativr background blur */}
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-400/10 dark:bg-orange-400/5 rounded-full blur-2xl group-hover:bg-orange-400/20 dark:group-hover:bg-orange-400/10 transition-colors" />
 
@@ -218,7 +218,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                             <Button
                                 onClick={() => router.push(ROUTES.DASHBOARD)}
                                 variant="outline"
-                                className="w-full h-9 text-xs font-semibold rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-white dark:hover:bg-slate-700 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-200 dark:hover:border-orange-800 hover:shadow-md hover:shadow-orange-500/10 transition-all duration-300"
+                                className="w-full h-9 text-xs font-semibold rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-white dark:hover:bg-slate-700 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-200 dark:hover:border-orange-800 hover:shadow-md hover:shadow-orange-500/10 duration-300 transition"
                             >
                                 <ArrowLeft className="w-3.5 h-3.5 mr-2" />
                                 กลับ User Dashboard

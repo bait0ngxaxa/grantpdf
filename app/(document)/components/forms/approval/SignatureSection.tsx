@@ -14,7 +14,7 @@ const SignatureCanvasComponent = dynamic(() => import("./SignatureCanvas"), {
     ssr: false,
     loading: () => (
         <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-            <p className="text-gray-500">กำลังโหลดพื้นที่วาดลายเซ็น...</p>
+            <p className="text-gray-500">กำลังโหลดพื้นที่วาดลายเซ็น…</p>
         </div>
     ),
 });

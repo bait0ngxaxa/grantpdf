@@ -42,7 +42,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
             <div className="p-6 border-b border-slate-100 dark:border-slate-700">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
                             รายการผู้ใช้งาน
                         </h2>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
@@ -54,10 +54,10 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                         <div className="relative w-full sm:w-80">
                             <input
                                 type="text"
-                                placeholder="ค้นหาผู้ใช้งาน..."
+                                placeholder="ค้นหาผู้ใช้งาน…"
                                 value={searchTerm}
                                 onChange={(e) => onSearchChange(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                className="pl-10 pr-4 py-2.5 w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium"
                             />
                             <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                         </div>

@@ -30,7 +30,7 @@ export function ProjectList({
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2 text-balance">
                     <Folder className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     เลือกโครงการ
                 </h3>
@@ -81,7 +81,7 @@ export function ProjectList({
                                         <Folder className="w-5 h-5" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-1 truncate group-hover:text-blue-700 dark:group-hover:text-blue-400">
+                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-1 truncate group-hover:text-blue-700 dark:group-hover:text-blue-400 text-balance">
                                             {project.name}
                                         </h4>
                                         {project.description && (
@@ -121,7 +121,7 @@ export function ProjectList({
             </div>
 
             <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5 border border-blue-100 dark:border-blue-800">
-                <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2 text-balance">
                     <span className="w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 flex items-center justify-center text-xs">
                         i
                     </span>

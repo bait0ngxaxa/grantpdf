@@ -70,7 +70,7 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                                 <ShieldCheck className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+                                <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent text-balance">
                                     Admin Panel
                                 </h2>
                                 <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
@@ -135,7 +135,7 @@ export const UsersSidebar: React.FC<UsersSidebarProps> = ({
                     </div>
                     <Button
                         variant="outline"
-                        className="w-full justify-center rounded-xl border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200"
+                        className="w-full justify-center rounded-xl border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors duration-200"
                         onClick={() => router.push(ROUTES.DASHBOARD)}
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" />

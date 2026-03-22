@@ -1,18 +1,21 @@
 import useSWR from "swr";
 import type { ProjectsApiResponse } from "@/type/api";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES, PAGINATION } from "@/lib/constants";
 
 export type { Project, UserFile } from "@/type";
 
-export const useUserData = () => {
-    const { data, error, isLoading, mutate } = useSWR<ProjectsApiResponse>(
-        API_ROUTES.PROJECTS,
-    );
+export const useUserData = (page: number = 1) => {
+    const limit = PAGINATION.PROJECTS_PER_PAGE;
+    const swrKey = `${API_ROUTES.PROJECTS}?page=${page}&limit=${limit}`;
+
+    const { data, error, isLoading, mutate } = useSWR<ProjectsApiResponse>(swrKey);
 
     return {
         projects: data?.projects || [],
-
-        orphanFiles: data?.orphanFiles || [],
+        totalFiles: data?.totalFiles ?? 0,
+        total: data?.total ?? 0,
+        totalPages: data?.totalPages ?? 0,
+        statusCounts: data?.statusCounts ?? { pending: 0, approved: 0, rejected: 0, editing: 0, closed: 0 },
         isLoading,
         error: error
             ? "ไม่สามารถโหลดข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง"

@@ -63,7 +63,7 @@ export const CreateProjectModal: React.FC = () => {
                             value={newProjectName}
                             onChange={(e) => setNewProjectName(e.target.value)}
                             placeholder="ระบุชื่อโครงการของคุณ"
-                            className="rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus:border-blue-500 focus:ring-blue-500/20 h-11"
+                            className="rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus-visible:border-blue-500 focus-visible:ring-blue-500/20 h-11"
                         />
                     </div>
                     <div>
@@ -75,7 +75,7 @@ export const CreateProjectModal: React.FC = () => {
                             onChange={(e) =>
                                 setNewProjectDescription(e.target.value)
                             }
-                            className="w-full p-4 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-2xl h-32 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none text-slate-700 text-sm"
+                            className="w-full p-4 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-2xl h-32 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/10 transition-colors resize-none text-slate-700 text-sm"
                             placeholder="ระบุคำอธิบายเกี่ยวกับโครงการนี้ (ถ้ามี)"
                         />
                     </div>
@@ -96,7 +96,7 @@ export const CreateProjectModal: React.FC = () => {
                         {isCreatingProject ? (
                             <>
                                 <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                                กำลังสร้าง...
+                                กำลังสร้าง…
                             </>
                         ) : (
                             "ยืนยันสร้างโครงการ"

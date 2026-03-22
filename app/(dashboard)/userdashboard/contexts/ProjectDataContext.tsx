@@ -3,26 +3,23 @@
 import React, {
     createContext,
     useContext,
-    useMemo,
     useState,
     type ReactNode,
 } from "react";
-import { usePagination } from "@/lib/hooks";
-import { PAGINATION } from "@/lib/constants";
 import { useUserData } from "../hooks/useUserData";
 import type { Project } from "@/type";
 
 interface ProjectDataContextType {
     // Data State (from useUserData)
     projects: Project[];
-    paginatedProjects: Project[];
-    orphanFiles: ReturnType<typeof useUserData>["orphanFiles"];
+    totalProjects: number;
     totalDocuments: number;
+    statusCounts: { pending: number; approved: number; rejected: number; editing: number; closed: number };
     isLoading: boolean;
     error: string | null;
     fetchUserData: () => Promise<void>;
 
-    // Pagination
+    // Pagination — driven server-side, page state lives here
     currentPage: number;
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     totalPages: number;
@@ -50,35 +47,21 @@ const ProjectDataContext = createContext<ProjectDataContextType | undefined>(
 
 export function ProjectDataProvider({ children }: { children: ReactNode }) {
     // =========================================================================
-    // Data (from useUserData hook)
+    // Pagination state — page number lives here, hook uses it for SWR key
     // =========================================================================
-    const { projects, orphanFiles, isLoading, error, fetchUserData } =
-        useUserData();
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // =========================================================================
+    // Data (from useUserData hook — SWR key changes when page changes)
+    // =========================================================================
+    const { projects, totalFiles, total, totalPages, statusCounts, isLoading, error, fetchUserData } =
+        useUserData(currentPage);
 
     // =========================================================================
     // Derived State
     // =========================================================================
-    const totalDocuments = useMemo(
-        () =>
-            projects.reduce(
-                (total, project) => total + project.files.length,
-                0,
-            ) + orphanFiles.length,
-        [projects, orphanFiles],
-    );
-
-    // =========================================================================
-    // Pagination
-    // =========================================================================
-    const {
-        currentPage,
-        setCurrentPage,
-        totalPages,
-        paginatedItems: paginatedProjects,
-    } = usePagination({
-        items: projects,
-        itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
-    });
+    const totalDocuments = totalFiles;
+    const totalProjects = total;
 
     // =========================================================================
     // Form States
@@ -93,9 +76,9 @@ export function ProjectDataProvider({ children }: { children: ReactNode }) {
 
     const value = {
         projects,
-        paginatedProjects,
-        orphanFiles,
+        totalProjects,
         totalDocuments,
+        statusCounts,
         isLoading,
         error,
         fetchUserData,

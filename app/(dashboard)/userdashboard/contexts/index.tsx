@@ -12,7 +12,6 @@ import type { Project } from "@/type";
 import { DashboardUIProvider, useDashboardUI } from "./DashboardUIContext";
 import { ModalProvider, useModalContext } from "./ModalContext";
 import { ProjectDataProvider, useProjectDataData } from "./ProjectDataContext";
-import type { useUserData } from "../hooks/useUserData";
 
 // Unified Interface to match the old one
 interface UserDashboardContextType {
@@ -24,11 +23,11 @@ interface UserDashboardContextType {
     expandedProjects: Set<string>;
     toggleProjectExpansion: (projectId: string) => void;
 
-    // Data State
+    // Data State — `projects` is already the current page from the server
     projects: Project[];
-    paginatedProjects: Project[];
-    orphanFiles: ReturnType<typeof useUserData>["orphanFiles"];
+    totalProjects: number;
     totalDocuments: number;
+    statusCounts: { pending: number; approved: number; rejected: number; editing: number; closed: number };
     isLoading: boolean;
     error: string | null;
     fetchUserData: () => Promise<void>;
@@ -42,7 +41,9 @@ interface UserDashboardContextType {
     isModalOpen: boolean;
     setIsModalOpen: (open: boolean) => void;
     previewUrl: string;
+    setPreviewUrl: (url: string) => void;
     previewTitle: string;
+    setPreviewTitle: (title: string) => void;
     showProfileModal: boolean;
     setShowProfileModal: (show: boolean) => void;
     showCreateProjectModal: boolean;

@@ -2,14 +2,14 @@ import { prisma } from "@/lib/prisma";
 import type { AdminProject } from "@/type/models";
 import type { Project } from "@prisma/client";
 import type { UpdateProjectStatusParams } from "./types";
-import { VALID_STATUSES } from "./constants";
+import { VALID_STATUSES, VALID_STATUSES_SET } from "./constants";
 
 export async function updateProjectStatus({
     projectId,
     status,
     statusNote,
 }: UpdateProjectStatusParams): Promise<Partial<AdminProject>> {
-    if (!VALID_STATUSES.includes(status as (typeof VALID_STATUSES)[number])) {
+    if (!VALID_STATUSES_SET.has(status)) {
         throw new Error(
             `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`,
         );

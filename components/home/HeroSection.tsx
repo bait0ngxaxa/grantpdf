@@ -22,7 +22,7 @@ export default function HeroSection({
                     GRANT ONLINE
                 </div>
 
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6 leading-tight">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6 leading-tight text-balance">
                     สร้างและจัดการเอกสาร <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 animate-gradient-x">
                         GRANT ONLINE
@@ -38,12 +38,12 @@ export default function HeroSection({
                 {!isLoggedIn && (
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link href="/signup">
-                            <button className="h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 w-full sm:w-auto">
+                            <button className="h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 w-full sm:w-auto transition">
                                 ลงทะเบียน
                             </button>
                         </Link>
                         <Link href="/signin">
-                            <button className="h-12 px-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 font-semibold hover:bg-slate-100 dark:hover:bg-slate-600 hover:border-slate-300 dark:hover:border-slate-500 transition-all duration-300 w-full sm:w-auto">
+                            <button className="h-12 px-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 font-semibold hover:bg-slate-100 dark:hover:bg-slate-600 hover:border-slate-300 dark:hover:border-slate-500 transition-colors duration-300 w-full sm:w-auto">
                                 เข้าสู่ระบบ
                             </button>
                         </Link>

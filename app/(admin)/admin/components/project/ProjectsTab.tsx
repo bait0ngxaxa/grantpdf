@@ -5,50 +5,23 @@ import SearchAndFilter from "../SearchAndFilter";
 import ProjectsList from "./ProjectsList";
 import { Pagination } from "@/components/ui";
 import { useAdminDashboardContext } from "../../contexts";
-import { useAdminProjectFilter } from "../../hooks";
-import { usePagination } from "@/lib/hooks";
-import { PAGINATION } from "@/lib/constants";
-
-const itemsPerPage = PAGINATION.ITEMS_PER_PAGE;
 
 export const ProjectsTab = (): React.JSX.Element => {
     const {
         projects,
-        orphanFiles,
         isLoading,
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        expandedProjects,
+        viewedProjects,
         searchTerm,
         setSearchTerm,
         sortBy,
         setSortBy,
-        selectedFileType,
         selectedStatus,
         setSelectedStatus,
-        expandedProjects,
-        viewedProjects,
     } = useAdminDashboardContext();
-
-    const filteredAndSortedProjects = useAdminProjectFilter({
-        projects,
-        orphanFiles,
-        searchTerm,
-        selectedFileType,
-        selectedStatus,
-        sortBy,
-    });
-
-    // Pagination
-    const {
-        currentPage,
-        setCurrentPage,
-        totalPages,
-        paginatedItems: paginatedProjects,
-        startIndex,
-        endIndex,
-        totalItems,
-    } = usePagination({
-        items: filteredAndSortedProjects.projects,
-        itemsPerPage,
-    });
 
     return (
         <div>
@@ -62,13 +35,13 @@ export const ProjectsTab = (): React.JSX.Element => {
             />
 
             <ProjectsList
-                projects={paginatedProjects}
+                projects={projects}
                 isLoading={isLoading}
                 expandedProjects={expandedProjects}
                 viewedProjects={viewedProjects}
-                totalItems={totalItems}
-                startIndex={startIndex}
-                endIndex={endIndex}
+                totalItems={projects.length}
+                startIndex={(currentPage - 1) * 5}
+                endIndex={Math.min(currentPage * 5, projects.length)}
             />
 
             <Pagination

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { Building2, FileText, Clock } from "lucide-react";
-import { PROJECT_STATUS } from "@/type/models";
 import { truncateFileName } from "@/lib/utils";
 import { useUserDashboardContext } from "../contexts";
 
@@ -10,40 +9,10 @@ import { StatsCard } from "./StatsCard";
 import { ProjectStatusDetails } from "./ProjectStatusDetails";
 
 export const StatsCards: React.FC = () => {
-    const { projects, totalDocuments } = useUserDashboardContext();
+    const { projects, totalProjects, totalDocuments, statusCounts } = useUserDashboardContext();
 
-    const projectStatusCounts = useMemo(() => {
-        const counts = {
-            pending: 0,
-            approved: 0,
-            rejected: 0,
-            editing: 0,
-            closed: 0,
-        };
-
-        projects.forEach((project) => {
-            const status = project.status || PROJECT_STATUS.IN_PROGRESS;
-            switch (status) {
-                case PROJECT_STATUS.IN_PROGRESS:
-                    counts.pending++;
-                    break;
-                case PROJECT_STATUS.APPROVED:
-                    counts.approved++;
-                    break;
-                case PROJECT_STATUS.REJECTED:
-                    counts.rejected++;
-                    break;
-                case PROJECT_STATUS.EDIT:
-                    counts.editing++;
-                    break;
-                case PROJECT_STATUS.CLOSED:
-                    counts.closed++;
-                    break;
-            }
-        });
-
-        return counts;
-    }, [projects]);
+    // statusCounts now comes directly from the server via context
+    const projectStatusCounts = statusCounts;
 
     const latestProject = projects.length > 0 ? projects[0] : null;
 
@@ -52,7 +21,7 @@ export const StatsCards: React.FC = () => {
             {/* Total Projects Card */}
             <StatsCard
                 title="โครงการทั้งหมด"
-                value={projects.length}
+                value={totalProjects}
                 subtitle="โครงการที่คุณสร้าง"
                 icon={<Building2 className="h-7 w-7" />}
                 colorTheme="blue"

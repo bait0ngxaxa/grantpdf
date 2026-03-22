@@ -4,7 +4,7 @@ export default function Loading(): React.JSX.Element {
             <div className="flex flex-col items-center space-y-4">
                 <span className="loading loading-spinner loading-lg text-primary" />
                 <p className="text-slate-600 dark:text-slate-400">
-                    กำลังโหลด...
+                    กำลังโหลด…
                 </p>
             </div>
         </div>

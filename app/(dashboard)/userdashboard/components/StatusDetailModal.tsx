@@ -27,7 +27,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                         <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                             <CheckCircle className="h-6 w-6" />
                         </div>
-                        <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100">
+                        <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 text-balance">
                             รายละเอียดสถานะ
                         </h3>
                     </div>

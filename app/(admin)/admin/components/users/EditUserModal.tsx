@@ -42,7 +42,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100 dark:border-slate-700">
                 <div className="mb-6">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
                         แก้ไขผู้ใช้งาน
                     </h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -58,7 +58,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                         <Input
                             type="text"
                             name="name"
-                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-900 dark:text-slate-100"
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-900 dark:text-slate-100"
                             value={editFormData.name}
                             onChange={onFormChange}
                             required
@@ -92,7 +92,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                         <div className="relative">
                             <select
                                 name="role"
-                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none font-medium cursor-pointer"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors appearance-none font-medium cursor-pointer"
                                 value={editFormData.role}
                                 onChange={onFormChange}
                                 required
@@ -120,9 +120,9 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                         <Button
                             type="submit"
                             disabled={isSaving}
-                            className="px-6 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md shadow-blue-200 font-medium transition-all"
+                            className="px-6 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md shadow-blue-200 font-medium transition"
                         >
-                            {isSaving ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+                            {isSaving ? "กำลังบันทึก…" : "บันทึกการแก้ไข"}
                         </Button>
                     </div>
                 </form>

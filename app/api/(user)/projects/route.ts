@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getProjectsByUserId, createProject } from "@/lib/services";
+import { getProjectsByUserIdPaginated } from "@/lib/services";
+import { PAGINATION } from "@/lib/constants";
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
@@ -14,8 +15,12 @@ export async function GET(): Promise<NextResponse> {
             );
         }
 
+        const { searchParams } = new URL(req.url);
+        const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
+        const limit = Math.max(1, Number(searchParams.get("limit") ?? PAGINATION.PROJECTS_PER_PAGE));
+
         const userId = Number(session.user.id);
-        const result = await getProjectsByUserId(userId);
+        const result = await getProjectsByUserIdPaginated({ userId, page, limit });
 
         return NextResponse.json(result);
     } catch (error) {
@@ -49,6 +54,8 @@ export async function POST(req: Request): Promise<NextResponse> {
         }
 
         const userId = Number(session.user.id);
+
+        const { createProject } = await import("@/lib/services");
         const project = await createProject(userId, name, description);
 
         return NextResponse.json(project);

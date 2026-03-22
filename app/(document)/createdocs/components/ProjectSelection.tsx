@@ -28,11 +28,11 @@ export const ProjectSelection = (): React.JSX.Element => {
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
-            <h1 className="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100">
+            <h1 className="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100 text-balance">
                 เลือกโครงการสำหรับเอกสาร
             </h1>
 
-            {isLoading ? <LoadingSpinner message="กำลังโหลดโครงการ..." /> : null}
+            {isLoading ? <LoadingSpinner message="กำลังโหลดโครงการ…" /> : null}
 
             {error && (
                 <SharedEmptyState
@@ -96,7 +96,7 @@ export const ProjectSelection = (): React.JSX.Element => {
                         </Button>
                         <Button
                             onClick={() => router.push(ROUTES.DASHBOARD)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition-all"
+                            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition"
                         >
                             สร้างโครงการใหม่
                         </Button>

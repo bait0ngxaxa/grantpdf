@@ -25,10 +25,10 @@ export default function HomeNavbar({
     };
 
     return (
-        <nav className="flex items-center w-full sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50 px-4 md:px-8 h-20 transition-all duration-300">
+        <nav className="flex items-center w-full sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50 px-4 md:px-8 h-20 transition-colors duration-300">
             <div className="flex-1">
                 <Link href="/" className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 transform group-hover:scale-110 group-hover:rotate-3 duration-300 transition">
                         <FileText className="w-6 h-6" />
                     </div>
                     <div className="flex flex-col">
@@ -85,7 +85,7 @@ function LoggedInMenu({
             <ThemeToggle />
             <Button
                 onClick={() => onNavigate("/userdashboard")}
-                className="hidden sm:flex bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow active:scale-95 transition-all duration-200"
+                className="hidden sm:flex bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow active:scale-95 duration-200 transition"
                 variant="ghost"
             >
                 <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -95,7 +95,7 @@ function LoggedInMenu({
             <div className="relative" ref={dropdownRef}>
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="p-1 rounded-full cursor-pointer ring-2 ring-slate-100 dark:ring-slate-700 hover:ring-blue-100 dark:hover:ring-blue-800 transition-all duration-300 focus:outline-none"
+                    className="p-1 rounded-full cursor-pointer ring-2 ring-slate-100 dark:ring-slate-700 hover:ring-blue-100 dark:hover:ring-blue-800 transition-colors duration-300 focus:outline-none"
                 >
                     {session.user?.image ? (
                         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden">
@@ -160,7 +160,7 @@ function UserDropdownMenu({
             <li className="mt-2 text-slate-700 dark:text-slate-200">
                 <button
                     onClick={() => onNavigate("/userdashboard")}
-                    className="flex w-full items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 rounded-xl transition-all"
+                    className="flex w-full items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 rounded-xl transition-colors"
                 >
                     <LayoutDashboard className="w-4 h-4" />
                     Dashboard
@@ -169,7 +169,7 @@ function UserDropdownMenu({
             <li>
                 <button
                     onClick={onLogout}
-                    className="flex w-full items-center gap-3 px-3 py-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
+                    className="flex w-full items-center gap-3 px-3 py-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors"
                 >
                     <LogOut className="w-4 h-4" />
                     Sign Out
@@ -192,7 +192,7 @@ function LoggedOutMenu(): React.ReactElement {
                 </Button>
             </Link>
             <Link href="/signup">
-                <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-full px-6 shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95">
+                <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-full px-6 shadow-lg shadow-blue-500/30 hover:scale-105 active:scale-95 transition">
                     เริ่มต้นใช้งาน
                 </Button>
             </Link>

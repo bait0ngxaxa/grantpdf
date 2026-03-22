@@ -9,8 +9,8 @@ interface QuickActionsProps {
 export const QuickActions: React.FC<QuickActionsProps> = ({ setActiveTab }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
-                <h3 className="text-lg font-bold mb-4 flex items-center text-slate-800 dark:text-slate-100">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 transition">
+                <h3 className="text-lg font-bold mb-4 flex items-center text-slate-800 dark:text-slate-100 text-balance">
                     <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-lg mr-3 text-blue-600 dark:text-blue-400">
                         <FileText className="h-5 w-5" />
                     </div>
@@ -26,8 +26,8 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ setActiveTab }) => {
                     เข้าสู่การจัดการเอกสาร
                 </Button>
             </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
-                <h3 className="text-lg font-bold mb-4 flex items-center text-slate-800 dark:text-slate-100">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 transition">
+                <h3 className="text-lg font-bold mb-4 flex items-center text-slate-800 dark:text-slate-100 text-balance">
                     <div className="p-2 bg-indigo-50 dark:bg-indigo-900/50 rounded-lg mr-3 text-indigo-600 dark:text-indigo-400">
                         <User className="h-5 w-5" />
                     </div>

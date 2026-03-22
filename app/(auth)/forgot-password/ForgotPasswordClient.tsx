@@ -65,7 +65,7 @@ export default function ForgotPasswordClient(): React.JSX.Element {
                         GRANT ONLINE Password Recovery
                     </div>
 
-                    <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                    <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight text-balance">
                         ลืมรหัสผ่าน? <br />
                     </h1>
 
@@ -82,7 +82,7 @@ export default function ForgotPasswordClient(): React.JSX.Element {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/30 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                         <div className="mb-8 relative z-10">
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
                                 กู้คืนรหัสผ่าน
                             </h2>
                             <p className="text-slate-500 dark:text-slate-400">
@@ -100,7 +100,7 @@ export default function ForgotPasswordClient(): React.JSX.Element {
                                 </label>
                                 <Input
                                     type="email"
-                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="your@email.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -119,12 +119,12 @@ export default function ForgotPasswordClient(): React.JSX.Element {
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 mt-2"
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 mt-2 transition"
                             >
                                 {loading ? (
                                     <div className="flex items-center gap-2">
                                         <span className="loading loading-spinner loading-sm" />
-                                        <span>กำลังส่งคำขอ...</span>
+                                        <span>กำลังส่งคำขอ…</span>
                                     </div>
                                 ) : (
                                     "ส่งคำขอรีเซ็ตรหัสผ่าน"

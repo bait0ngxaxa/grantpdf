@@ -32,14 +32,29 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 // Projects API
 // ============================================
 
+export interface StatusCounts {
+    pending: number;
+    approved: number;
+    rejected: number;
+    editing: number;
+    closed: number;
+}
+
 export interface ProjectsApiResponse {
     projects: Project[];
-    orphanFiles: UserFile[];
+    totalFiles: number;
+    total: number;
+    page: number;
+    totalPages: number;
+    statusCounts?: StatusCounts;
 }
 
 export interface AdminProjectsApiResponse {
     projects: AdminProject[];
-    orphanFiles: AdminDocumentFile[];
+    totalFiles: number;
+    total: number;
+    page: number;
+    totalPages: number;
 }
 
 // ============================================
@@ -56,6 +71,9 @@ export interface UserApiData {
 
 export interface UsersApiResponse {
     users: UserApiData[];
+    total: number;
+    page: number;
+    totalPages: number;
 }
 
 // ============================================

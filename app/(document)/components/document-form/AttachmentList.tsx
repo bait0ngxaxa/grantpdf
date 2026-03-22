@@ -28,7 +28,7 @@ export function AttachmentList({
                     <Input
                         type="text"
                         placeholder={`รายละเอียดสิ่งที่ส่งมาด้วย ${index + 1}`}
-                        className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                         value={attachment}
                         onChange={(e) => onUpdate(index, e.target.value)}
                     />

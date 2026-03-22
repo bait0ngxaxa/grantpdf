@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { PROJECT_STATUS } from "@/type/models";
 
 import { StatsCards } from "./StatsCards";
 import { ProjectStatusStats } from "./ProjectStatusStats";
@@ -12,10 +11,12 @@ export const DashboardOverview: React.FC = (): React.JSX.Element => {
     // Consume Context
     const {
         projects,
-        allFiles,
+        totalProjects,
+        totalFiles,
         totalUsers,
         todayProjects,
         todayFiles,
+        statusCounts,
         setActiveTab,
     } = useAdminDashboardContext();
     // Calculate latest project
@@ -29,46 +30,16 @@ export const DashboardOverview: React.FC = (): React.JSX.Element => {
     }, [projects]);
 
     // Calculate project status statistics
-    const projectStatusStats = useMemo(() => {
-        const stats = {
-            pending: 0,
-            approved: 0,
-            rejected: 0,
-            editing: 0,
-            closed: 0,
-        };
-
-        projects.forEach((project) => {
-            const status = project.status || PROJECT_STATUS.IN_PROGRESS;
-            switch (status) {
-                case PROJECT_STATUS.IN_PROGRESS:
-                    stats.pending++;
-                    break;
-                case PROJECT_STATUS.APPROVED:
-                    stats.approved++;
-                    break;
-                case PROJECT_STATUS.REJECTED:
-                    stats.rejected++;
-                    break;
-                case PROJECT_STATUS.EDIT:
-                    stats.editing++;
-                    break;
-                case PROJECT_STATUS.CLOSED:
-                    stats.closed++;
-                    break;
-            }
-        });
-
-        return stats;
-    }, [projects]);
+    // statusCounts comes directly from the server via context
+    const projectStatusStats = statusCounts;
 
     return (
         <div className="space-y-6">
             {/* System Overview Cards */}
             <StatsCards
-                projects={projects}
+                totalProjects={totalProjects}
                 todayProjects={todayProjects}
-                allFiles={allFiles}
+                totalFiles={totalFiles}
                 todayFiles={todayFiles}
                 setActiveTab={setActiveTab}
             />

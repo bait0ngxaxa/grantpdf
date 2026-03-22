@@ -148,7 +148,7 @@ export function GlobalModalProvider({
                     <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl flex flex-col items-center">
                         <LoadingSpinner className="w-10 h-10 text-primary mb-4" />
                         <p className="text-slate-600 dark:text-slate-300 font-medium">
-                            {loadingModal.message || "กำลังดำเนินการ..."}
+                            {loadingModal.message || "กำลังดำเนินการ…"}
                         </p>
                     </div>
                 </div>

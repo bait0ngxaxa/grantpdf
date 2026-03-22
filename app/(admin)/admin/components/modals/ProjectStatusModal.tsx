@@ -39,7 +39,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                                     <ClipboardList className="h-6 w-6" />
                                 </div>
-                                <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100">
+                                <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 text-balance">
                                     จัดการสถานะ
                                 </h3>
                             </div>
@@ -80,7 +80,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                     </span>
                                 </label>
                                 <select
-                                    className="w-full px-3 py-2 border bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-xl text-slate-700 dark:text-slate-200"
+                                    className="w-full px-3 py-2 border bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none rounded-xl text-slate-700 dark:text-slate-200"
                                     value={newStatus}
                                     onChange={(e) =>
                                         setNewStatus(e.target.value)
@@ -107,8 +107,8 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                     </span>
                                 </label>
                                 <textarea
-                                    className="w-full p-3 border bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-xl text-slate-700 dark:text-slate-200 h-24 resize-none"
-                                    placeholder="เพิ่มคำอธิบายหรือหมายเหตุสำหรับผู้ใช้..."
+                                    className="w-full p-3 border bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none rounded-xl text-slate-700 dark:text-slate-200 h-24 resize-none"
+                                    placeholder="เพิ่มคำอธิบายหรือหมายเหตุสำหรับผู้ใช้…"
                                     value={statusNote}
                                     onChange={(e) =>
                                         setStatusNote(e.target.value)
@@ -146,7 +146,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 }`}
                             >
                                 {isUpdatingStatus
-                                    ? "กำลังอัปเดต..."
+                                    ? "กำลังอัปเดต…"
                                     : "บันทึกการเปลี่ยนแปลง"}
                             </Button>
                         </div>

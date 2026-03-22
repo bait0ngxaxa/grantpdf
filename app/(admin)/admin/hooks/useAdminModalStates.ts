@@ -23,6 +23,8 @@ export const useAdminModalStates = () => {
     } = useAdminDashboardContext();
 
     const openPreviewModal = (storagePath: string, fileName: string) => {
+        // Use the main preview route which handles both owner and admin access correctly
+        // and correctly resolves the full storagePath (e.g. storage/documents/...)
         const previewApiUrl = `/api/preview?path=${encodeURIComponent(
             storagePath,
         )}`;

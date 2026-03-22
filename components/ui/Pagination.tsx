@@ -28,7 +28,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         pages.push(1);
 
         if (currentPage > 3) {
-            pages.push("...");
+            pages.push("…");
         }
 
         // Show pages around current
@@ -40,7 +40,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         }
 
         if (currentPage < totalPages - 2) {
-            pages.push("...");
+            pages.push("…");
         }
 
         // Always show last page
@@ -73,7 +73,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                 {/* Page Numbers */}
                 <div className="flex items-center gap-1 px-1">
                     {pageNumbers.map((page, index) =>
-                        page === "..." ? (
+                        page === "…" ? (
                             <span
                                 key={`ellipsis-${index}`}
                                 className="w-10 h-10 flex items-center justify-center text-slate-400 text-sm"

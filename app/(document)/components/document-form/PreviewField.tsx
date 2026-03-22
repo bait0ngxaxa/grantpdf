@@ -17,7 +17,7 @@ export function PreviewField({
 }: PreviewFieldProps): React.JSX.Element {
     return (
         <div className={className}>
-            <h4 className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">
+            <h4 className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1 text-balance">
                 {label}
             </h4>
             {children ? (
@@ -63,7 +63,7 @@ export function PreviewList({
 }: PreviewListProps): React.JSX.Element {
     return (
         <div>
-            <h4 className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2 text-balance">
                 {label}
             </h4>
             {items.length > 0 ? (

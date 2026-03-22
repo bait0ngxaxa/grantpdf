@@ -1,7 +1,7 @@
-import { LayoutTemplate } from "lucide-react";
+import { LayoutTemplate, ClipboardCheck, FileText, BarChart3, Edit } from "lucide-react";
 
 interface TemplateCardProps {
-    emoji: string;
+    icon: React.ReactNode;
     title: string;
     subtitle: string;
     colorScheme: "blue" | "green" | "purple" | "orange";
@@ -39,7 +39,7 @@ const COLOR_SCHEMES = {
 } as const;
 
 function TemplateCard({
-    emoji,
+    icon,
     title,
     subtitle,
     colorScheme,
@@ -48,18 +48,18 @@ function TemplateCard({
 
     return (
         <div
-            className={`group relative bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 hover:shadow-xl ${colors.bgHover} hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden`}
+            className={`group relative bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 hover:shadow-xl ${colors.bgHover} hover:-translate-y-1 duration-300 cursor-pointer overflow-hidden transition`}
         >
             <div
                 className={`absolute top-0 right-0 w-24 h-24 ${colors.accent} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}
             />
             <div className="relative">
                 <div
-                    className={`w-12 h-12 ${colors.iconBg} rounded-xl flex items-center justify-center text-2xl mb-4 ${colors.iconHover} group-hover:text-white transition-colors duration-300`}
+                    className={`w-12 h-12 ${colors.iconBg} ${colors.text} rounded-xl flex items-center justify-center text-2xl mb-4 ${colors.iconHover} group-hover:text-white transition-colors duration-300`}
                 >
-                    {emoji}
+                    {icon}
                 </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-1">
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-1 text-balance">
                     {title}
                 </h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
@@ -77,20 +77,25 @@ function TemplateCard({
 
 const TEMPLATES: TemplateCardProps[] = [
     {
-        emoji: "📋",
+        icon: <ClipboardCheck className="w-6 h-6" />,
         title: "ใบอนุมัติ",
         subtitle: "Approval Form",
         colorScheme: "blue",
     },
-    { emoji: "📄", title: "สัญญา", subtitle: "Contract", colorScheme: "green" },
+    { 
+        icon: <FileText className="w-6 h-6" />, 
+        title: "สัญญา", 
+        subtitle: "Contract", 
+        colorScheme: "green",
+    },
     {
-        emoji: "📊",
+        icon: <BarChart3 className="w-6 h-6" />,
         title: "โครงการ",
         subtitle: "Project",
         colorScheme: "purple",
     },
     {
-        emoji: "📝",
+        icon: <Edit className="w-6 h-6" />,
         title: "TOR",
         subtitle: "Terms of Reference",
         colorScheme: "orange",
@@ -102,7 +107,7 @@ export default function TemplateGrid(): React.ReactElement {
         <div className="w-full">
             <div className="w-full space-y-6">
                 <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 text-balance">
                         <LayoutTemplate className="h-5 w-5 text-blue-500" />
                         เทมเพลตเอกสาร
                     </h2>

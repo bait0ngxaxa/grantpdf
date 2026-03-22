@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import useSWR from "swr";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES, PAGINATION } from "@/lib/constants";
 import { toast } from "sonner";
 
 interface UserData {
@@ -20,10 +20,19 @@ interface EditFormData {
 
 interface UsersResponse {
     users: UserData[];
+    total: number;
+    page: number;
+    totalPages: number;
 }
 
 export interface UserManagementHook {
     users: UserData[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+    setPage: (page: number) => void;
+    searchTerm: string;
+    setSearchTerm: (value: string) => void;
     loadingUsers: boolean;
     fetchError: string | null;
     selectedUser: UserData | null;
@@ -45,10 +54,25 @@ export interface UserManagementHook {
 }
 
 export function useUserManagement(): UserManagementHook {
-    // Data Fetching
-    const { data, error, isLoading, mutate } = useSWR<UsersResponse>(
-        API_ROUTES.ADMIN_USERS,
-    );
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTermState] = useState("");
+
+    // Reset to page 1 after search changes — ensures correct results
+    const setSearchTerm = useCallback((value: string) => {
+        setSearchTermState(value);
+        setCurrentPage(1);
+    }, []);
+
+    const setPage = useCallback((page: number) => {
+        setCurrentPage(page);
+    }, []);
+
+    const limit = PAGINATION.USERS_PER_PAGE;
+
+    // SWR key includes page + search so server handles filtering/pagination
+    const swrKey = `${API_ROUTES.ADMIN_USERS}?page=${currentPage}&limit=${limit}${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ""}`;
+
+    const { data, error, isLoading, mutate } = useSWR<UsersResponse>(swrKey);
 
     const users =
         data?.users.map((user) => ({
@@ -56,6 +80,9 @@ export function useUserManagement(): UserManagementHook {
             id: user.id.toString(),
             createdAt: new Date(user.created_at).toLocaleDateString("th-TH"),
         })) || [];
+
+    const total = data?.total ?? 0;
+    const totalPages = data?.totalPages ?? 0;
 
     const loadingUsers = isLoading;
     const fetchError = error ? "ไม่สามารถโหลดข้อมูลผู้ใช้งานได้" : null;
@@ -123,7 +150,7 @@ export function useUserManagement(): UserManagementHook {
                     throw new Error(errorData.error || "Failed to update user");
                 }
 
-                await mutate(); // Revalidate
+                await mutate();
                 closeEditModal();
 
                 toast.success("อัปเดตข้อมูลผู้ใช้สำเร็จ!");
@@ -169,7 +196,7 @@ export function useUserManagement(): UserManagementHook {
                 throw new Error(errorData.error || "Failed to delete user");
             }
 
-            await mutate(); // Revalidate
+            await mutate();
             closeDeleteModal();
 
             toast.success("ลบผู้ใช้สำเร็จ!");
@@ -188,6 +215,12 @@ export function useUserManagement(): UserManagementHook {
 
     return {
         users,
+        total,
+        totalPages,
+        currentPage,
+        setPage,
+        searchTerm,
+        setSearchTerm,
         loadingUsers,
         fetchError,
         selectedUser,

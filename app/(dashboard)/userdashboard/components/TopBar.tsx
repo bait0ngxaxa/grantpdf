@@ -32,7 +32,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                         <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-lg shadow-sm">
                             <ChartBarBig className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 drop-shadow-sm">
+                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 drop-shadow-sm text-balance">
                             {menuItems.find((item) => item.id === activeTab)
                                 ?.name || "Dashboard"}
                         </h1>
@@ -52,7 +52,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
 
                     {session?.user?.role === "admin" && (
                         <Button
-                            className="font-semibold cursor-pointer transform hover:scale-105 active:scale-95 transition-all duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 border-0"
+                            className="font-semibold cursor-pointer transform hover:scale-105 active:scale-95 duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 border-0 transition"
                             onClick={() => router.push(ROUTES.ADMIN)}
                         >
                             <UserStar className="w-4 h-4 mr-2" />
@@ -62,7 +62,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="hidden sm:flex items-center gap-2 px-4 rounded-full text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:shadow-md hover:shadow-red-500/10 transition-all duration-300 group border border-transparent hover:border-red-100 dark:hover:border-red-900"
+                        className="hidden sm:flex items-center gap-2 px-4 rounded-full text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:shadow-md hover:shadow-red-500/10 duration-300 group border border-transparent hover:border-red-100 dark:hover:border-red-900 transition"
                         onClick={() => signOut()}
                     >
                         <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />

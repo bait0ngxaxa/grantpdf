@@ -7,7 +7,7 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({
-    message = "กำลังโหลด...",
+    message = "กำลังโหลด…",
     className = "",
 }: LoadingSpinnerProps): React.JSX.Element {
     return (

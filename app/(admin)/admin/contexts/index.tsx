@@ -6,10 +6,8 @@ import React, {
     useMemo,
     type ReactNode,
 } from "react";
-import type { Session } from "next-auth";
 import type {
     AdminProject,
-    AdminDocumentFile,
     LatestUser,
 } from "@/type/models";
 
@@ -29,7 +27,7 @@ interface AdminDashboardContextType {
     toggleProjectExpansion: (projectId: string) => void;
     toggleRowExpansion: (fileId: string) => void;
 
-    // Search & Filter (from UI Context now)
+    // Search & Filter (from UI Context)
     searchTerm: string;
     setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
     sortBy: string;
@@ -60,15 +58,19 @@ interface AdminDashboardContextType {
 
     // Data State
     projects: AdminProject[];
-    orphanFiles: AdminDocumentFile[];
+    totalFiles: number;
     isLoading: boolean;
     error: string | null;
+    totalProjects: number;
+    totalPages: number;
+    currentPage: number;
+    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     totalUsers: number;
     latestUser: LatestUser | null;
     todayProjects: number;
     todayFiles: number;
-    allFiles: AdminDocumentFile[];
-    fetchProjects: (session: Session | null) => Promise<void>;
+    statusCounts: { pending: number; approved: number; rejected: number; editing: number; closed: number };
+    fetchProjects: () => Promise<void>;
 }
 
 const AdminDashboardContext = createContext<
@@ -98,6 +100,7 @@ function UnifiedProviderValue({ children }: { children: ReactNode }) {
 
 export function AdminDashboardProvider({ children }: { children: ReactNode }) {
     return (
+        // AdminUIProvider must be outermost so AdminDataContext can read its state
         <AdminUIProvider>
             <AdminDataProvider>
                 <AdminModalProvider>

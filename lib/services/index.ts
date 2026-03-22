@@ -1,14 +1,17 @@
 // Project Service
 export {
-    getAllProjects,
-    getProjectsByUserId,
+    getAllProjectsPaginated,
+    getProjectsByUserIdPaginated,
     updateProjectStatus,
     createProject,
+    getUserFilesPaginated,
+    getAllFilesPaginated,
 } from "./projectService";
 
 // User Service
 export {
     getAllUsers,
+    getAllUsersPaginated,
     getUserById,
     userExists,
     isValidRole,

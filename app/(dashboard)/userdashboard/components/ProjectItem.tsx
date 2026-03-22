@@ -61,7 +61,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                         <Building2 className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors break-words">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors break-words text-balance">
                             {project.name}
                         </h3>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mb-3 break-words line-clamp-2 sm:line-clamp-1">
@@ -140,7 +140,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                             }}
                             size="sm"
                             variant="outline"
-                            className="hidden md:flex rounded-xl border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all font-semibold"
+                            className="hidden md:flex rounded-xl border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-semibold"
                         >
                             จัดการ/เพิ่มเอกสาร
                         </Button>
@@ -226,7 +226,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                             <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <FileText className="h-8 w-8 text-slate-300 dark:text-slate-500" />
                             </div>
-                            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 text-balance">
                                 ยังไม่มีเอกสารในโครงการ
                             </h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 mt-1">

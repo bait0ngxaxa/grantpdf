@@ -150,7 +150,7 @@ function Textarea({
             }}
             onChange={handleInput}
             // **เพิ่ม placeholder แนะนำสำหรับ Thai text**
-            placeholder={props.placeholder || "กรุณาพิมพ์ข้อความภาษาไทย..."}
+            placeholder={props.placeholder || "กรุณาพิมพ์ข้อความภาษาไทย…"}
             {...props}
         />
     );

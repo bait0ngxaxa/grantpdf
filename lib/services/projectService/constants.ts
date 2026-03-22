@@ -51,3 +51,6 @@ export const VALID_STATUSES = [
     "แก้ไข",
     "ปิดโครงการ",
 ] as const;
+
+/** O(1) lookup Set derived from VALID_STATUSES */
+export const VALID_STATUSES_SET: ReadonlySet<string> = new Set(VALID_STATUSES);

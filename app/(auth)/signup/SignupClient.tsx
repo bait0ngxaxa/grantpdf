@@ -51,7 +51,7 @@ export default function SignupClient(): React.JSX.Element {
             if (res.ok) {
                 setShowConfirmModal(false);
                 toast.success("สร้างบัญชีผู้ใช้เรียบร้อยแล้ว", {
-                    description: "กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...",
+                    description: "กำลังนำคุณไปยังหน้าเข้าสู่ระบบ…",
                 });
                 setTimeout(() => {
                     router.push(ROUTES.SIGNIN);
@@ -86,7 +86,7 @@ export default function SignupClient(): React.JSX.Element {
                         GRANT ONLINE
                     </div>
 
-                    <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                    <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight text-balance">
                         เริ่มต้นใช้งาน <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600">
                             สร้างบัญชีใหม่
@@ -101,7 +101,7 @@ export default function SignupClient(): React.JSX.Element {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/30 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                         <div className="mb-8 relative z-10">
-                            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
                                 สมัครสมาชิก
                             </h2>
                             <p className="text-slate-500 dark:text-slate-400">
@@ -119,7 +119,9 @@ export default function SignupClient(): React.JSX.Element {
                                 </label>
                                 <Input
                                     type="text"
-                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    name="name"
+                                    autoComplete="name"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="ชื่อ-นามสกุล"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
@@ -133,7 +135,9 @@ export default function SignupClient(): React.JSX.Element {
                                 </label>
                                 <Input
                                     type="email"
-                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    name="email"
+                                    autoComplete="email"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="name@example.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -147,7 +151,9 @@ export default function SignupClient(): React.JSX.Element {
                                 </label>
                                 <Input
                                     type="password"
-                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    name="password"
+                                    autoComplete="new-password"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="อย่างน้อย 6 ตัวอักษร"
                                     value={password}
                                     onChange={(e) =>
@@ -163,7 +169,9 @@ export default function SignupClient(): React.JSX.Element {
                                 </label>
                                 <Input
                                     type="password"
-                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                                    name="confirmPassword"
+                                    autoComplete="new-password"
+                                    className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="กรอกรหัสผ่านอีกครั้ง"
                                     value={confirmPassword}
                                     onChange={(e) =>
@@ -182,7 +190,7 @@ export default function SignupClient(): React.JSX.Element {
 
                             <Button
                                 type="submit"
-                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 mt-2"
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 mt-2 transition-all"
                             >
                                 ดำเนินการต่อ
                             </Button>
@@ -210,7 +218,7 @@ export default function SignupClient(): React.JSX.Element {
                             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
                                 <CheckCircle2 className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-xl font-bold">
+                            <h3 className="text-xl font-bold text-balance">
                                 ยืนยันข้อมูลการสมัคร
                             </h3>
                             <p className="text-blue-100 text-sm">
@@ -276,7 +284,7 @@ export default function SignupClient(): React.JSX.Element {
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                             </svg>
-                                            <span>กำลังยืนยัน...</span>
+                                            <span>กำลังยืนยัน…</span>
                                         </div>
                                     ) : (
                                         "ยืนยันการสมัคร"

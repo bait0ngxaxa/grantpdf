@@ -8,6 +8,7 @@ export { VALID_ROLES, isValidRole } from "./constants";
 export {
     checkAdminPermission,
     getAllUsers,
+    getAllUsersPaginated,
     getUserById,
     userExists,
     getUserCount,

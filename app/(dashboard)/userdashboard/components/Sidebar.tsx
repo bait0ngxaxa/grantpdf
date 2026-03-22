@@ -63,11 +63,11 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                 <div className="p-6 pb-2">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center space-x-3.5 group cursor-default">
-                            <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 transition-all duration-300">
+                            <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 duration-300 transition">
                                 <Folder className="h-6 w-6 text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-none mb-1">
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-none mb-1 text-balance">
                                     Dashboard
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
@@ -149,7 +149,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
 
                 {/* User Info */}
                 <div className="p-4 mt-auto">
-                    <div className="relative overflow-hidden rounded-2xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/60 dark:border-slate-700/60 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 p-4 group hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 transition-all duration-300">
+                    <div className="relative overflow-hidden rounded-2xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/60 dark:border-slate-700/60 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 p-4 group hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 duration-300 transition">
                         {/* Decorativr background blur */}
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-400/10 dark:bg-blue-400/5 rounded-full blur-2xl group-hover:bg-blue-400/20 dark:group-hover:bg-blue-400/10 transition-colors" />
 
@@ -174,14 +174,14 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                             <Button
                                 onClick={() => setShowProfileModal(true)}
                                 variant="outline"
-                                className="flex-1 h-9 text-xs font-semibold rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-white dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md hover:shadow-blue-500/10 transition-all duration-300"
+                                className="flex-1 h-9 text-xs font-semibold rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-white dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md hover:shadow-blue-500/10 duration-300 transition"
                             >
                                 ข้อมูลส่วนตัว
                             </Button>
                             <Button
                                 onClick={() => signOut()}
                                 variant="outline"
-                                className="w-9 h-9 p-0 rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 hover:shadow-md hover:shadow-red-500/10 transition-all duration-300"
+                                className="w-9 h-9 p-0 rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 hover:shadow-md hover:shadow-red-500/10 duration-300 transition"
                                 title="ออกจากระบบ"
                             >
                                 <LogOut className="w-4 h-4" />

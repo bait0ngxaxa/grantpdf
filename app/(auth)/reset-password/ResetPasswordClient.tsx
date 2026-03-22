@@ -74,7 +74,7 @@ function ResetPasswordForm(): React.JSX.Element {
                     GRANT ONLINE Security
                 </div>
 
-                <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight text-balance">
                     ตั้งรหัสผ่านใหม่ <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600">
                         เพื่อความปลอดภัย
@@ -92,7 +92,7 @@ function ResetPasswordForm(): React.JSX.Element {
                             <CheckCircleIcon className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-slate-800 dark:text-slate-100">
+                            <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-balance">
                                 รหัสผ่านที่แข็งแกร่ง
                             </h3>
                             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -110,7 +110,7 @@ function ResetPasswordForm(): React.JSX.Element {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/30 rounded-bl-full -mr-8 -mt-8 opacity-50 pointer-events-none" />
 
                     <div className="mb-8 relative z-10">
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
                             ตั้งรหัสผ่านใหม่
                         </h2>
                         <p className="text-slate-500 dark:text-slate-400">
@@ -135,7 +135,7 @@ function ResetPasswordForm(): React.JSX.Element {
                             </label>
                             <input
                                 type="password"
-                                className="w-full h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 outline-none"
+                                className="w-full h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 outline-none"
                                 placeholder="รหัสผ่านใหม่"
                                 value={newPassword}
                                 onChange={(e) =>
@@ -152,7 +152,7 @@ function ResetPasswordForm(): React.JSX.Element {
                             </label>
                             <input
                                 type="password"
-                                className="w-full h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 outline-none"
+                                className="w-full h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 outline-none"
                                 placeholder="ยืนยันรหัสผ่านอีกครั้ง"
                                 value={confirmPassword}
                                 onChange={(e) =>
@@ -165,7 +165,7 @@ function ResetPasswordForm(): React.JSX.Element {
 
                         <Button
                             type="submit"
-                            className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-300 mt-4"
+                            className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 mt-4 transition"
                             disabled={
                                 loading ||
                                 !token ||
@@ -176,7 +176,7 @@ function ResetPasswordForm(): React.JSX.Element {
                             {loading ? (
                                 <div className="flex items-center gap-2">
                                     <span className="loading loading-spinner loading-sm" />
-                                    <span>กำลังบันทึก...</span>
+                                    <span>กำลังบันทึก…</span>
                                 </div>
                             ) : (
                                 "บันทึกรหัสผ่านใหม่"
@@ -192,7 +192,7 @@ function ResetPasswordForm(): React.JSX.Element {
 export default function ResetPasswordClient(): React.JSX.Element {
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div>Loading…</div>}>
                 <ResetPasswordForm />
             </Suspense>
         </div>

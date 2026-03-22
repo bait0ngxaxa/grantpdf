@@ -43,7 +43,7 @@ export function EmptyState({
     return (
         <div className="text-center py-12">
             {renderIcon()}
-            <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-slate-100">
+            <h3 className="mt-2 text-lg font-medium text-slate-900 dark:text-slate-100 text-balance">
                 {title}
             </h3>
             <p className="mt-1 text-slate-500 dark:text-slate-400">

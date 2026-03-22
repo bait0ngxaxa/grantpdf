@@ -17,7 +17,9 @@ export const DashboardModals = () => {
         isModalOpen,
         setIsModalOpen,
         previewUrl,
+        setPreviewUrl,
         previewTitle,
+        setPreviewTitle,
         showProfileModal,
         setShowProfileModal,
     } = useUserDashboardContext();
@@ -32,7 +34,11 @@ export const DashboardModals = () => {
 
             <PdfPreviewModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setPreviewUrl("");
+                    setPreviewTitle("");
+                }}
                 previewUrl={previewUrl}
                 previewFileName={previewTitle}
             />

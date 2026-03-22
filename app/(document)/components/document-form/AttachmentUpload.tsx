@@ -20,7 +20,7 @@ export function AttachmentUpload({
 }: AttachmentUploadProps): React.JSX.Element {
     return (
         <div className="mt-6 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-900/50">
-            <h4 className="text-md font-semibold text-slate-800 dark:text-slate-200 mb-3 flex items-center">
+            <h4 className="text-md font-semibold text-slate-800 dark:text-slate-200 mb-3 flex items-center text-balance">
                 <Upload className="w-5 h-5 mr-2 text-orange-600 dark:text-orange-400" />
                 อัปโหลดไฟล์แนบ
             </h4>
@@ -50,7 +50,7 @@ export function AttachmentUpload({
                 {/* รายการไฟล์ที่เลือก */}
                 {files.length > 0 && (
                     <div className="mt-4">
-                        <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <h5 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 text-balance">
                             ไฟล์ที่เลือก ({files.length} ไฟล์):
                         </h5>
                         <div className="space-y-2">

@@ -17,7 +17,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         <div className="space-y-6">
             {/* Users Card */}
             <div
-                className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group h-fit"
+                className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 cursor-pointer group h-fit transition"
                 onClick={() => setActiveTab("users")}
             >
                 <div className="flex items-center space-x-4">
@@ -39,7 +39,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
             </div>
 
             {/* Latest Project Card */}
-            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 h-fit">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 h-fit transition">
                 <div className="flex items-center space-x-4 mb-4">
                     <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/50 rounded-xl flex items-center justify-center text-teal-600 dark:text-teal-400">
                         <Archive className="h-6 w-6" />

@@ -26,7 +26,7 @@ export default function ProjectsList({
     endIndex,
 }: ProjectsListProps): React.JSX.Element {
     if (isLoading) {
-        return <LoadingSpinner message="กำลังโหลดโครงการ..." />;
+        return <LoadingSpinner message="กำลังโหลดโครงการ…" />;
     }
 
     if (projects.length === 0) {
@@ -46,7 +46,7 @@ export default function ProjectsList({
                     <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                         <Archive className="h-6 w-6" />
                     </div>
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
                         โครงการทั้งหมด
                     </h2>
                 </div>

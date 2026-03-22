@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { useAdminDashboardContext } from "../../contexts";
+import { useAdminModalStates } from "../../hooks";
 
 interface ProjectCardProps {
     project: AdminProject;
@@ -33,20 +34,17 @@ export default function ProjectCard({
 }: ProjectCardProps): React.JSX.Element {
     const {
         toggleProjectExpansion,
-        setIsPreviewModalOpen,
-        setPreviewUrl,
-        setPreviewFileName,
         setIsStatusModalOpen,
         setSelectedProjectForStatus,
     } = useAdminDashboardContext();
+
+    const { openPreviewModal } = useAdminModalStates();
 
     // Handlers
     const onToggleExpansion = toggleProjectExpansion;
 
     const onPreviewPdf = (storagePath: string, fileName: string) => {
-        setPreviewUrl(storagePath);
-        setPreviewFileName(fileName);
-        setIsPreviewModalOpen(true);
+        openPreviewModal(storagePath, fileName);
     };
 
     const onEditProjectStatus = (project: AdminProject) => {
@@ -70,7 +68,7 @@ export default function ProjectCard({
     };
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden mb-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 overflow-hidden mb-4 transition">
             {/* Project Header */}
             <div
                 className={`p-5 cursor-pointer transition-colors duration-200 ${
@@ -89,13 +87,18 @@ export default function ProjectCard({
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center flex-wrap gap-2 mb-1">
-                                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 break-words">
+                                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 break-words text-balance">
                                     {project.name}
                                 </h3>
                                 {showNewBadge && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-sm ring-1 ring-white animate-pulse">
-                                        NEW
-                                    </span>
+                                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-rose-500/10 to-pink-500/10 dark:from-rose-400/10 dark:to-pink-400/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full border border-rose-200/50 dark:border-rose-800/50 shadow-sm relative group overflow-hidden">
+                                        <div className="absolute inset-0 bg-rose-400/20 dark:bg-rose-500/20 rounded-full blur-md group-hover:bg-rose-400/30 transition-all duration-300" />
+                                        <span className="relative flex h-1.5 w-1.5 z-10">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75" />
+                                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-600 dark:bg-rose-400" />
+                                        </span>
+                                        <span className="text-[10px] uppercase font-bold tracking-wider relative z-10">New</span>
+                                    </div>
                                 )}
                             </div>
 
@@ -158,7 +161,7 @@ export default function ProjectCard({
                                 e.stopPropagation();
                                 onEditProjectStatus(project);
                             }}
-                            className="h-10 px-4 rounded-xl text-sm bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 hover:text-slate-900 dark:hover:text-slate-100 shadow-sm font-medium transition-all"
+                            className="h-10 px-4 rounded-xl text-sm bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 hover:text-slate-900 dark:hover:text-slate-100 shadow-sm font-medium transition"
                         >
                             <Pencil className="h-4 w-4 sm:mr-2 text-slate-400 dark:text-slate-400" />
                             <span className="hidden sm:inline">
@@ -214,7 +217,7 @@ export default function ProjectCard({
                                         <FileText className="h-6 w-6 text-slate-400 dark:text-slate-500" />
                                     </div>
                                     <div className="text-center">
-                                        <h4 className="text-base font-semibold text-slate-600 dark:text-slate-300">
+                                        <h4 className="text-base font-semibold text-slate-600 dark:text-slate-300 text-balance">
                                             ยังไม่มีไฟล์ในโครงการ
                                         </h4>
                                         <p className="text-sm text-slate-400 dark:text-slate-500">

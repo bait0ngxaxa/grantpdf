@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { logAudit } from "@/lib/auditLog";
 import {
-    getAllProjects,
+    getAllProjectsPaginated,
     updateProjectStatus,
     checkAdminPermission,
 } from "@/lib/services";
+import { PAGINATION } from "@/lib/constants";
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
@@ -19,7 +20,15 @@ export async function GET(): Promise<NextResponse> {
             );
         }
 
-        const result = await getAllProjects();
+        const { searchParams } = new URL(req.url);
+        const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
+        const limit = Math.max(1, Number(searchParams.get("limit") ?? PAGINATION.ITEMS_PER_PAGE));
+        const search = searchParams.get("search") ?? undefined;
+        const status = searchParams.get("status") ?? undefined;
+        const fileType = searchParams.get("fileType") ?? undefined;
+        const sortBy = searchParams.get("sortBy") ?? undefined;
+
+        const result = await getAllProjectsPaginated({ page, limit, search, status, fileType, sortBy });
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching admin projects:", error);

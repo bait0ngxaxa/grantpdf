@@ -15,7 +15,7 @@ export function DashboardWrapper({
                 <Sidebar />
 
                 {/* Main Content */}
-                <div className="lg:ml-72 min-h-screen transition-all duration-300">
+                <div className="lg:ml-72 min-h-screen transition duration-300">
                     <TopBar />
 
                     {/* Content Area */}

@@ -1,33 +1,34 @@
-// เส้นดึงข้อมูล user จาก table user ทั้งหมด (paginated)
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getAllUsersPaginated } from "@/lib/services";
+import { getAllFilesPaginated } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session || session.user?.role !== "admin") {
+        if (!session || !session.user?.id || session.user?.role !== "admin") {
             return NextResponse.json(
                 { error: "Unauthorized" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
         const { searchParams } = new URL(req.url);
         const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
-        const limit = Math.max(1, Number(searchParams.get("limit") ?? PAGINATION.USERS_PER_PAGE));
+        const limit = Math.max(1, Number(searchParams.get("limit") ?? PAGINATION.ITEMS_PER_PAGE));
         const search = searchParams.get("search") ?? undefined;
+        const status = searchParams.get("status") ?? undefined;
+        const fileType = searchParams.get("fileType") ?? undefined;
 
-        const result = await getAllUsersPaginated({ page, limit, search });
-        return NextResponse.json(result, { status: 200 });
+        const result = await getAllFilesPaginated({ page, limit, search, status, fileType });
+        return NextResponse.json(result);
     } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching admin files:", error);
         return NextResponse.json(
-            { error: "เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้งาน" },
-            { status: 500 }
+            { error: "Failed to fetch files" },
+            { status: 500 },
         );
     }
 }

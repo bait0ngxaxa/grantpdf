@@ -3,14 +3,13 @@ export type {
     RawProject,
     RawFile,
     RawAttachment,
-    ProjectsResult,
+    PaginatedProjectsResult,
     UpdateProjectStatusParams,
 } from "./types";
 
 // Constants
 export {
     PROJECT_INCLUDE,
-    ORPHAN_FILES_INCLUDE,
     VALID_STATUSES,
 } from "./constants";
 
@@ -26,10 +25,12 @@ export {
 
 // Queries
 export {
-    getAllProjects,
-    getProjectsByUserId,
+    getAllProjectsPaginated,
+    getProjectsByUserIdPaginated,
     findProjectByNameAndUser,
     findProjectByIdAndUser,
+    getUserFilesPaginated,
+    getAllFilesPaginated,
 } from "./queries";
 
 // Mutations

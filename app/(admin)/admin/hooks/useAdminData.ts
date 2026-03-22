@@ -1,103 +1,107 @@
 import { useMemo } from "react";
 import useSWR from "swr";
 import type {
-    AdminDocumentFile,
     AdminProject,
     LatestUser,
 } from "@/type/models";
 
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES, PAGINATION } from "@/lib/constants";
+
+interface AdminStatsResponse {
+    totalProjects: number;
+    totalUsers: number;
+    todayProjects: number;
+    todayFiles: number;
+    latestUser: LatestUser | null;
+    statusCounts?: {
+        pending: number;
+        approved: number;
+        rejected: number;
+        editing: number;
+        closed: number;
+    };
+}
 
 interface ProjectsResponse {
     projects: AdminProject[];
-    orphanFiles: AdminDocumentFile[];
+    totalFiles: number;
+    total: number;
+    page: number;
+    totalPages: number;
 }
 
-interface UsersResponse {
-    users: Array<{
-        name: string;
-        email: string;
-        created_at: string;
-        // other fields...
-    }>;
+interface UseAdminDataParams {
+    page?: number;
+    search?: string;
+    status?: string;
+    fileType?: string;
+    sortBy?: string;
 }
 
-export const useAdminData = () => {
-    // 1. Fetch Projects
+export const useAdminData = ({
+    page = 1,
+    search,
+    status,
+    fileType,
+    sortBy,
+}: UseAdminDataParams = {}) => {
+    const limit = PAGINATION.ITEMS_PER_PAGE;
+
+    // Build paginated + filtered SWR key for projects
+    const projectsKey = useMemo(() => {
+        const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+        if (search) params.set("search", search);
+        if (status) params.set("status", status);
+        if (fileType) params.set("fileType", fileType);
+        if (sortBy) params.set("sortBy", sortBy);
+        return `${API_ROUTES.ADMIN_PROJECTS}?${params.toString()}`;
+    }, [page, limit, search, status, fileType, sortBy]);
+
+    // Stats endpoint — separate SWR key so it does not re-fetch on filter changes
+    const statsKey = `${API_ROUTES.ADMIN_PROJECTS}/stats`;
+
     const {
         data: projectsData,
         error: projectsError,
         isLoading: isLoadingProjects,
         mutate: mutateProjects,
-    } = useSWR<ProjectsResponse>(API_ROUTES.ADMIN_PROJECTS);
+    } = useSWR<ProjectsResponse>(projectsKey);
 
-    // 2. Fetch Users (for latest user) - Reuse this key in useUserManagement for deduping!
-    const { data: usersData, isLoading: isLoadingUsers } =
-        useSWR<UsersResponse>(API_ROUTES.ADMIN_USERS);
+    const {
+        data: statsData,
+        isLoading: isLoadingStats,
+    } = useSWR<AdminStatsResponse>(statsKey);
 
-    // Derived State: Projects & Orphan Files
-    const projects = useMemo(
-        () => projectsData?.projects || [],
-        [projectsData],
-    );
-    const orphanFiles = useMemo(
-        () => projectsData?.orphanFiles || [],
-        [projectsData],
-    );
+    // Derived Data
+    const projects = useMemo(() => projectsData?.projects || [], [projectsData]);
+    const totalFiles = projectsData?.totalFiles ?? 0;
+    const totalProjects = projectsData?.total ?? 0;
+    const totalPages = projectsData?.totalPages ?? 0;
 
-    // Derived State: Stats
-    const totalUsers = useMemo(() => {
-        const uniqueUserIds = new Set(projects.map((p) => p.userId));
-        return uniqueUserIds.size;
-    }, [projects]);
+    // Use stats endpoint for overview numbers
+    const totalUsers = statsData?.totalUsers ?? 0;
+    const latestUser = statsData?.latestUser ?? null;
+    const todayProjects = statsData?.todayProjects ?? 0;
+    const todayFiles = statsData?.todayFiles ?? 0;
+    const statusCounts = statsData?.statusCounts ?? { pending: 0, approved: 0, rejected: 0, editing: 0, closed: 0 };
 
-    const latestUser = useMemo<LatestUser | null>(() => {
-        if (usersData && usersData.users.length > 0) {
-            const latest = usersData.users[0];
-            return {
-                name: latest.name,
-                email: latest.email,
-                created_at: latest.created_at,
-            };
-        }
-        return null;
-    }, [usersData]);
-
-    const { todayProjects, todayFiles } = useMemo(() => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        const allFiles = [...orphanFiles, ...projects.flatMap((p) => p.files)];
-
-        const tFiles = allFiles.filter((file) => {
-            const fileDate = new Date(file.created_at);
-            return fileDate >= today && fileDate < tomorrow;
-        }).length;
-
-        const tProjects = projects.filter((project) => {
-            const projectDate = new Date(project.created_at);
-            return projectDate >= today && projectDate < tomorrow;
-        }).length;
-
-        return { todayProjects: tProjects, todayFiles: tFiles };
-    }, [projects, orphanFiles]);
-
-    const isLoading = isLoadingProjects || isLoadingUsers;
+    const isLoading = isLoadingProjects || isLoadingStats;
     const error = projectsError
         ? "ไม่สามารถโหลดข้อมูลโครงการได้ กรุณาลองใหม่อีกครั้ง"
         : null;
 
     return {
         projects,
-        orphanFiles,
+        totalFiles,
         isLoading,
         error,
+        totalProjects,
+        totalPages,
         totalUsers,
         latestUser,
         todayProjects,
         todayFiles,
+        statusCounts,
         fetchProjects: async () => {
             await mutateProjects();
         },

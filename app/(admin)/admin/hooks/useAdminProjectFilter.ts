@@ -12,6 +12,36 @@ interface UseAdminProjectFilterProps {
     sortBy: string;
 }
 
+/**
+ * Pre-compute a count of files matching a status per project.
+ * Returns a Map<projectId, count> for O(1) lookup during sort.
+ */
+function buildFileCountMap(
+    projects: AdminProject[],
+    predicate: (status: string) => boolean,
+): Map<string, number> {
+    const map = new Map<string, number>();
+    for (const project of projects) {
+        let count = 0;
+        for (const file of project.files) {
+            if (predicate(file.downloadStatus)) count++;
+        }
+        map.set(project.id, count);
+    }
+    return map;
+}
+
+/** Status sort priority: matched status → top, then by date desc */
+function statusComparator(
+    a: AdminProject,
+    b: AdminProject,
+    targetStatus: string,
+): number {
+    const aMatch = a.status === targetStatus ? 1 : 0;
+    const bMatch = b.status === targetStatus ? 1 : 0;
+    return bMatch - aMatch;
+}
+
 export function useAdminProjectFilter({
     projects,
     orphanFiles,
@@ -24,93 +54,100 @@ export function useAdminProjectFilter({
     orphanFiles: AdminDocumentFile[];
 } {
     const filteredAndSortedProjects = useMemo(() => {
+        // Fix #2: Compute lowercased search term once — O(1) instead of O(3n)
+        const lowerSearch = searchTerm.toLowerCase();
+        const lowerFileType = selectedFileType.toLowerCase();
+
         const filteredProjects = projects.filter((project) => {
+            // Search: name, userName, or any file name
             const matchesSearch =
-                project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                !lowerSearch ||
+                project.name.toLowerCase().includes(lowerSearch) ||
                 (project.userName || "")
                     .toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
+                    .includes(lowerSearch) ||
                 project.files.some((file) =>
                     file.originalFileName
                         .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
+                        .includes(lowerSearch),
                 );
 
-            let matchesFileType = true;
-            if (selectedFileType !== FILE_TYPES.ALL) {
-                matchesFileType = project.files.some(
+            // File type filter
+            const matchesFileType =
+                selectedFileType === FILE_TYPES.ALL ||
+                project.files.some(
                     (file) =>
-                        file.fileExtension.toLowerCase() ===
-                        selectedFileType.toLowerCase()
+                        file.fileExtension.toLowerCase() === lowerFileType,
                 );
-            }
 
-            let matchesStatus = true;
-            if (selectedStatus !== STATUS_FILTER.ALL) {
-                matchesStatus = project.status === selectedStatus;
-            }
+            // Status filter
+            const matchesStatus =
+                selectedStatus === STATUS_FILTER.ALL ||
+                project.status === selectedStatus;
 
             return matchesSearch && matchesFileType && matchesStatus;
         });
 
-        filteredProjects.sort((a, b) => {
+        // Fix #1: Pre-compute file status counts into Map — O(n × m) once
+        // instead of O(n log n × m) inside sort comparator
+        const sortedProjects = [...filteredProjects];
+
+        if (sortBy === "statusDoneFirst" || sortBy === "statusPendingFirst") {
+            const countMap = buildFileCountMap(
+                sortedProjects,
+                sortBy === "statusDoneFirst"
+                    ? (s) => s === "done"
+                    : (s) => s !== "done",
+            );
+            sortedProjects.sort(
+                (a, b) => (countMap.get(b.id) ?? 0) - (countMap.get(a.id) ?? 0),
+            );
+        } else {
             switch (sortBy) {
                 case "createdAtAsc":
-                    return (
-                        new Date(a.created_at).getTime() -
-                        new Date(b.created_at).getTime()
+                    sortedProjects.sort(
+                        (a, b) =>
+                            new Date(a.created_at).getTime() -
+                            new Date(b.created_at).getTime(),
                     );
+                    break;
+                case "statusApproved":
+                    sortedProjects.sort((a, b) =>
+                        statusComparator(a, b, PROJECT_STATUS.APPROVED),
+                    );
+                    break;
+                case "statusPending":
+                    sortedProjects.sort((a, b) =>
+                        statusComparator(a, b, PROJECT_STATUS.IN_PROGRESS),
+                    );
+                    break;
+                case "statusRejected":
+                    sortedProjects.sort((a, b) =>
+                        statusComparator(a, b, PROJECT_STATUS.REJECTED),
+                    );
+                    break;
+                case "statusEdit":
+                    sortedProjects.sort((a, b) =>
+                        statusComparator(a, b, PROJECT_STATUS.EDIT),
+                    );
+                    break;
+                case "statusClosed":
+                    sortedProjects.sort((a, b) =>
+                        statusComparator(a, b, PROJECT_STATUS.CLOSED),
+                    );
+                    break;
                 case "createdAtDesc":
                 default:
-                    return (
-                        new Date(b.created_at).getTime() -
-                        new Date(a.created_at).getTime()
+                    sortedProjects.sort(
+                        (a, b) =>
+                            new Date(b.created_at).getTime() -
+                            new Date(a.created_at).getTime(),
                     );
-                case "statusDoneFirst":
-                    const aDoneCount = a.files.filter(
-                        (f) => f.downloadStatus === "done"
-                    ).length;
-                    const bDoneCount = b.files.filter(
-                        (f) => f.downloadStatus === "done"
-                    ).length;
-                    return bDoneCount - aDoneCount;
-                case "statusPendingFirst":
-                    const aPendingCount = a.files.filter(
-                        (f) => f.downloadStatus !== "done"
-                    ).length;
-                    const bPendingCount = b.files.filter(
-                        (f) => f.downloadStatus !== "done"
-                    ).length;
-                    return bPendingCount - aPendingCount;
-                case "statusApproved":
-                    return (
-                        (b.status === PROJECT_STATUS.APPROVED ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.APPROVED ? 1 : 0)
-                    );
-                case "statusPending":
-                    return (
-                        (b.status === PROJECT_STATUS.IN_PROGRESS ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.IN_PROGRESS ? 1 : 0)
-                    );
-                case "statusRejected":
-                    return (
-                        (b.status === PROJECT_STATUS.REJECTED ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.REJECTED ? 1 : 0)
-                    );
-                case "statusEdit":
-                    return (
-                        (b.status === PROJECT_STATUS.EDIT ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.EDIT ? 1 : 0)
-                    );
-                case "statusClosed":
-                    return (
-                        (b.status === PROJECT_STATUS.CLOSED ? 1 : 0) -
-                        (a.status === PROJECT_STATUS.CLOSED ? 1 : 0)
-                    );
+                    break;
             }
-        });
+        }
 
-        return { projects: filteredProjects, orphanFiles };
+        return { projects: sortedProjects, orphanFiles };
     }, [
         projects,
         orphanFiles,

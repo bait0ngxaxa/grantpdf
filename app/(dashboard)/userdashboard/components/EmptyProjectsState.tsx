@@ -14,7 +14,7 @@ export const EmptyProjectsState: React.FC<EmptyProjectsStateProps> = ({
             <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
                 <FolderPlus className="h-10 w-10 text-blue-500 dark:text-blue-400" />
             </div>
-            <h3 className="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">
+            <h3 className="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100 text-balance">
                 ยังไม่มีโครงการ
             </h3>
             <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">

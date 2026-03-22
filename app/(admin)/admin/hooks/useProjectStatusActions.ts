@@ -63,7 +63,7 @@ export const useProjectStatusActions = (): {
 
             const result = await response.json();
 
-            await fetchProjects(null);
+            await fetchProjects();
 
             closeStatusModal();
 

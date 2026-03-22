@@ -33,7 +33,7 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                     <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mb-4 shadow-sm">
                         <Trash2 className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
                         ยืนยันการลบผู้ใช้งาน
                     </h3>
                     <p className="text-slate-500 dark:text-slate-400 mt-2">
@@ -51,7 +51,7 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                             <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
                         </div>
                         <div className="ml-3">
-                            <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
+                            <h3 className="text-sm font-medium text-red-800 dark:text-red-400 text-balance">
                                 คำเตือน
                             </h3>
                             <div className="mt-2 text-sm text-red-700 dark:text-red-400/80">
@@ -76,9 +76,9 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                     <Button
                         onClick={onConfirm}
                         disabled={isDeleting}
-                        className="px-6 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-200 font-medium transition-all"
+                        className="px-6 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-200 font-medium transition"
                     >
-                        {isDeleting ? "กำลังลบ..." : "ยืนยันการลบ"}
+                        {isDeleting ? "กำลังลบ…" : "ยืนยันการลบ"}
                     </Button>
                 </div>
             </div>

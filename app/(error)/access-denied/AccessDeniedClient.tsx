@@ -32,7 +32,7 @@ export default function AccessDeniedClient(): React.JSX.Element {
 
             {/* Main Content */}
             <div className="relative w-full max-w-xl z-10">
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/50 border border-white/50 overflow-hidden ring-1 ring-slate-900/5 transform transition-all duration-500 hover:scale-[1.01]">
+                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/50 border border-white/50 overflow-hidden ring-1 ring-slate-900/5 transform duration-500 hover:scale-[1.01] transition">
                     {/* Header with Icon */}
                     <div className="bg-gradient-to-r from-red-500 to-orange-500 p-8 text-white relative overflow-hidden">
                         <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
@@ -40,7 +40,7 @@ export default function AccessDeniedClient(): React.JSX.Element {
                             <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md mb-6 shadow-inner ring-1 ring-white/30">
                                 <Lock className="h-10 w-10 text-white drop-shadow-sm" />
                             </div>
-                            <h1 className="text-3xl font-bold text-center mb-1 tracking-tight drop-shadow-sm">
+                            <h1 className="text-3xl font-bold text-center mb-1 tracking-tight drop-shadow-sm text-balance">
                                 การเข้าถึงถูกปฏิเสธ
                             </h1>
                             <p className="text-red-50 text-center font-medium tracking-wide bg-white/10 px-4 py-1 rounded-full text-sm">
@@ -53,7 +53,7 @@ export default function AccessDeniedClient(): React.JSX.Element {
                     <div className="p-8 md:p-10 text-center space-y-8">
                         {/* Alert Message */}
                         <div className="bg-red-50/50 border border-red-100 rounded-2xl p-6">
-                            <h2 className="text-xl font-bold text-slate-800 mb-3">
+                            <h2 className="text-xl font-bold text-slate-800 mb-3 text-balance">
                                 คุณไม่มีสิทธิ์เข้าถึงหน้านี้
                             </h2>
                             <p className="text-slate-600 leading-relaxed">
@@ -81,7 +81,7 @@ export default function AccessDeniedClient(): React.JSX.Element {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
                             <Button
                                 onClick={() => router.push(ROUTES.HOME)}
-                                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-6 rounded-xl text-base font-semibold shadow-lg shadow-blue-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+                                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-6 rounded-xl text-base font-semibold shadow-lg shadow-blue-200 hover:shadow-xl duration-300 hover:-translate-y-0.5 transition"
                             >
                                 <Home className="h-5 w-5 mr-3" />
                                 กลับหน้าหลัก
@@ -89,7 +89,7 @@ export default function AccessDeniedClient(): React.JSX.Element {
                             <Button
                                 variant="outline"
                                 onClick={() => router.push(ROUTES.SIGNIN)}
-                                className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 px-8 py-6 rounded-xl text-base font-semibold shadow-sm hover:shadow-md transition-all duration-300"
+                                className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 px-8 py-6 rounded-xl text-base font-semibold shadow-sm hover:shadow-md duration-300 transition"
                             >
                                 เข้าสู่ระบบ
                             </Button>

@@ -74,3 +74,59 @@ export async function userExists(id: number): Promise<boolean> {
 export async function getUserCount(): Promise<number> {
     return prisma.user.count();
 }
+
+interface GetAllUsersPaginatedParams {
+    page: number;
+    limit: number;
+    search?: string;
+}
+
+export interface PaginatedUsersResult {
+    users: SafeUser[];
+    total: number;
+    page: number;
+    totalPages: number;
+}
+
+/**
+ * Paginated + searchable admin users list. Search filters by name or email.
+ */
+export async function getAllUsersPaginated({
+    page,
+    limit,
+    search,
+}: GetAllUsersPaginatedParams): Promise<PaginatedUsersResult> {
+    const skip = (page - 1) * limit;
+    const where = search
+        ? {
+              OR: [
+                  { name: { contains: search } },
+                  { email: { contains: search } },
+              ],
+          }
+        : {};
+
+    const [total, users] = await Promise.all([
+        prisma.user.count({ where }),
+        prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                created_at: true,
+            },
+            orderBy: { created_at: "desc" },
+            skip,
+            take: limit,
+        }),
+    ]);
+
+    return {
+        users: users.map((user) => ({ ...user, id: user.id.toString() })),
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+    };
+}

@@ -28,7 +28,7 @@ export default function Error({
                     </div>
 
                     {/* Error Title */}
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 text-balance">
                         เกิดข้อผิดพลาด
                     </h2>
 

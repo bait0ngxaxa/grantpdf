@@ -7,7 +7,6 @@ import React, {
     useCallback,
     type ReactNode,
 } from "react";
-import { API_ROUTES } from "@/lib/constants";
 
 interface ModalContextType {
     isModalOpen: boolean;
@@ -39,21 +38,11 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     const [showEditProjectModal, setShowEditProjectModal] = useState(false);
 
     const openPreviewModal = useCallback(
-        async (storagePath: string, title: string) => {
-            try {
-                const res = await fetch(API_ROUTES.FILE_GENERATE_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ storagePath }),
-                });
-                if (!res.ok) throw new Error("Failed to generate preview URL");
-                const data = await res.json();
-                setPreviewUrl(data.url);
-                setPreviewTitle(title);
-                setIsModalOpen(true);
-            } catch (error) {
-                console.error("Error opening preview modal:", error);
-            }
+        (storagePath: string, title: string) => {
+            const previewUrl = `/api/preview?path=${encodeURIComponent(storagePath)}`;
+            setPreviewUrl(previewUrl);
+            setPreviewTitle(title);
+            setIsModalOpen(true);
         },
         [],
     );

@@ -16,7 +16,7 @@ export default function NotFound(): React.JSX.Element {
             <section className="relative z-10 w-full max-w-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-white/50 dark:border-slate-800/50 p-8 md:p-12 text-center ring-1 ring-slate-900/5 dark:ring-white/5">
                 {/* 404 Large Display */}
                 <div className="mb-6 relative">
-                    <h1 className="text-[10rem] leading-none font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 animate-gradient-x select-none drop-shadow-2xl">
+                    <h1 className="text-[10rem] leading-none font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 animate-gradient-x select-none drop-shadow-2xl text-balance">
                         404
                     </h1>
                     <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-full">

@@ -36,7 +36,7 @@ export const UploadHeader = ({
                             <UploadCloud className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 flex items-center gap-2 text-balance">
                                 อัพโหลดเอกสาร
                                 <span className="text-sm font-normal text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full border border-gray-200 dark:border-slate-600">
                                     Upload Documents

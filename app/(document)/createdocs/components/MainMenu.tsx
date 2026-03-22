@@ -15,7 +15,7 @@ export const MainMenu = (): React.JSX.Element => {
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
-            <h1 className="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100">
+            <h1 className="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100 text-balance">
                 สร้างเอกสาร
             </h1>
 
@@ -29,7 +29,7 @@ export const MainMenu = (): React.JSX.Element => {
                 {/* สัญญาจ้างทั่วไป Card - แสดงเฉพาะแอดมิน */}
                 {isAdmin && (
                     <div
-                        className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                        className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 duration-300 cursor-pointer hover:-translate-y-1 transition"
                         onClick={() => handleCategorySelection("general")}
                     >
                         <div className="flex flex-col items-center text-center h-full">
@@ -39,7 +39,7 @@ export const MainMenu = (): React.JSX.Element => {
                                     strokeWidth={1.5}
                                 />
                             </div>
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
                                 เอกสารสัญญาจ้างทั่วไป
                             </h2>
                             <p className="text-slate-500 dark:text-slate-400 mb-6">
@@ -57,7 +57,7 @@ export const MainMenu = (): React.JSX.Element => {
                 {/* แบบสรุปโครงการ Card - แสดงเฉพาะแอดมิน */}
                 {isAdmin && (
                     <div
-                        className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-amber-200 dark:hover:border-amber-800 transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                        className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-amber-200 dark:hover:border-amber-800 duration-300 cursor-pointer hover:-translate-y-1 transition"
                         onClick={() => handleSummarySelection()}
                     >
                         <div className="flex flex-col items-center text-center h-full">
@@ -67,7 +67,7 @@ export const MainMenu = (): React.JSX.Element => {
                                     strokeWidth={1.5}
                                 />
                             </div>
-                            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
                                 แบบสรุปโครงการ
                             </h2>
                             <p className="text-slate-500 dark:text-slate-400 mb-6">
@@ -96,7 +96,7 @@ export const MainMenu = (): React.JSX.Element => {
                                 strokeWidth={1.5}
                             />
                         </div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
                             เอกสารยื่นโครงการ
                         </h2>
                         <p className="text-slate-500 dark:text-slate-400 mb-6">

@@ -49,7 +49,45 @@ export interface RawAttachment {
 
 export interface ProjectsResult {
     projects: AdminProject[];
-    orphanFiles: AdminDocumentFile[];
+    orphanFiles?: AdminDocumentFile[];
+}
+
+export interface StatusCounts {
+    pending: number;
+    approved: number;
+    rejected: number;
+    editing: number;
+    closed: number;
+}
+
+export interface PaginatedProjectsResult {
+    projects: AdminProject[];
+    totalFiles: number;
+    total: number;
+    page: number;
+    totalPages: number;
+    statusCounts?: StatusCounts;
+}
+
+export interface PaginatedFilesResult {
+    files: AdminDocumentFile[];
+    total: number;
+    page: number;
+    totalPages: number;
+}
+
+export interface GetUserFilesPaginatedParams {
+    userId: number;
+    page: number;
+    limit: number;
+}
+
+export interface GetAllFilesPaginatedParams {
+    page: number;
+    limit: number;
+    search?: string;
+    status?: string;
+    fileType?: string;
 }
 
 export interface UpdateProjectStatusParams {

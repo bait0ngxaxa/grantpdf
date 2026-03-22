@@ -14,7 +14,7 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
     const { setIsSidebarOpen, activeTab } = useAdminDashboardContext();
 
     return (
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-slate-200/60 dark:border-slate-700/60 transition-all duration-300">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-md sticky top-0 z-30 px-6 py-4 border-b border-slate-200/60 dark:border-slate-700/60 transition-colors duration-300">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <button
@@ -26,7 +26,7 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
                     <div className="bg-blue-50 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
                         <ChartBarBig className="h-6 w-6" />
                     </div>
-                    <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                    <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 text-balance">
                         {menuItems.find((item) => item.id === activeTab)
                             ?.name || "Admin Dashboard"}
                     </h1>

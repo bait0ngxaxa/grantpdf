@@ -27,7 +27,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 className="sm:max-w-[450px] rounded-3xl p-0 bg-white dark:bg-slate-800 border-0 shadow-2xl overflow-hidden"
             >
                 {/* Custom Close Button */}
-                <DialogClose className="absolute right-4 top-4 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all z-50 focus:outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                <DialogClose className="absolute right-4 top-4 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-50 focus:outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                     <X className="h-4 w-4" />
                     <span className="sr-only">Close</span>
                 </DialogClose>

@@ -68,7 +68,7 @@ export function PageLayout({
                 <Button
                     onClick={handleBack}
                     variant="ghost"
-                    className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-slate-100 transition-all duration-300 rounded-2xl px-5 py-6"
+                    className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-slate-100 duration-300 rounded-2xl px-5 py-6 transition"
                 >
                     <div className="p-1 rounded-lg bg-slate-100 dark:bg-slate-700 group-hover:bg-slate-50 dark:group-hover:bg-slate-600 border border-slate-200 dark:border-slate-600 group-hover:border-slate-300 dark:group-hover:border-slate-500 transition-colors mr-3">
                         <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-0.5" />
@@ -83,7 +83,7 @@ export function PageLayout({
                 >
                     <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
                     <div className="relative z-10">
-                        <h2 className="text-3xl md:text-4xl font-bold text-center tracking-tight text-white drop-shadow-sm">
+                        <h2 className="text-3xl md:text-4xl font-bold text-center tracking-tight text-white drop-shadow-sm text-balance">
                             {title}
                         </h2>
                         {subtitle && (

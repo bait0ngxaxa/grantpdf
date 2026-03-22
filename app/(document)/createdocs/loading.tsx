@@ -5,7 +5,7 @@ export default function Loading(): React.JSX.Element {
                 <div className="text-center">
                     <span className="loading loading-spinner loading-lg text-primary" />
                     <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-                        กำลังโหลด...
+                        กำลังโหลด…
                     </p>
                 </div>
             </div>

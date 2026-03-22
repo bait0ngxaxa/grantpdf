@@ -19,7 +19,7 @@ export function FormSection({
 }: FormSectionProps): React.JSX.Element {
     return (
         <div
-            className={`group ${bgColor} p-6 md:p-8 rounded-3xl border ${borderColor} hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-sm transition-all duration-300`}
+            className={`group ${bgColor} p-6 md:p-8 rounded-3xl border ${borderColor} hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-sm duration-300 transition`}
         >
             <div
                 className={`flex items-center gap-3 mb-6 pb-4 border-b ${headerBorderColor}`}
@@ -29,7 +29,7 @@ export function FormSection({
                         {icon}
                     </div>
                 )}
-                <h3 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                <h3 className="text-lg md:text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight text-balance">
                     {title}
                 </h3>
             </div>

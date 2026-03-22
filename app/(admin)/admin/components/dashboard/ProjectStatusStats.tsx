@@ -15,7 +15,7 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
     projectStatusStats,
 }) => {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 transition">
             <div className="flex items-center space-x-4 mb-6">
                 <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                     <BarChart3 className="h-6 w-6" />

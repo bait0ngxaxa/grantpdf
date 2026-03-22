@@ -46,7 +46,7 @@ export function UploadArea({
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2 text-balance">
                     <UploadCloud className="w-5 h-5 text-green-600 dark:text-green-400" />
                     อัปโหลดไฟล์เอกสาร
                 </h3>
@@ -66,7 +66,7 @@ export function UploadArea({
                                 <FileText className="w-8 h-8 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
-                                <h4 className="text-lg font-medium text-gray-900 dark:text-slate-100 break-all px-4">
+                                <h4 className="text-lg font-medium text-gray-900 dark:text-slate-100 break-all px-4 text-balance">
                                     {selectedFile.name}
                                 </h4>
                                 <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
@@ -88,7 +88,7 @@ export function UploadArea({
                                 <UploadCloud className="w-8 h-8 text-blue-500" />
                             </div>
                             <div>
-                                <h4 className="text-lg font-medium text-gray-900 dark:text-slate-100">
+                                <h4 className="text-lg font-medium text-gray-900 dark:text-slate-100 text-balance">
                                     ลากไฟล์มาวางที่นี่
                                 </h4>
                                 <p className="text-sm text-gray-500 dark:text-slate-400 mt-2">
@@ -135,7 +135,7 @@ export function UploadArea({
                         {isUploading ? (
                             <>
                                 <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                                กำลังอัพโหลด...
+                                กำลังอัพโหลด…
                             </>
                         ) : (
                             <>

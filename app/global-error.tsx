@@ -23,7 +23,7 @@ export default function GlobalError({
                             </div>
 
                             {/* Error Title */}
-                            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+                            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 text-balance">
                                 ข้อผิดพลาดร้ายแรง
                             </h1>
 

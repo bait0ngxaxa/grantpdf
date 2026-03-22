@@ -9,6 +9,7 @@ import { UsersTab } from "./components/users/UsersTab";
 import { ProjectsTab } from "./components/project/ProjectsTab";
 import { AdminModals } from "./components/AdminModals";
 import { useAdminDashboardContext } from "./contexts";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const getTitleByTab = (tab: string): string => {
     switch (tab) {
@@ -41,14 +42,7 @@ export default function AdminDashboardClient(): React.JSX.Element | null {
     }, [session, status, router]);
 
     if (status === "loading" || isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)]">
-                <span className="loading loading-spinner loading-lg text-primary" />
-                <p className="mt-4 text-gray-600 dark:text-gray-400">
-                    กำลังโหลดข้อมูล...
-                </p>
-            </div>
-        );
+        return <LoadingSpinner className="h-[calc(100vh-100px)]" />;
     }
 
     if (!session || session.user?.role !== "admin") {

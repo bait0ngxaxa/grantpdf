@@ -9,6 +9,7 @@ import { ProjectsTab } from "./components/ProjectsTab";
 import { CreateProjectTab } from "./components/CreateProjectTab";
 import { DashboardModals } from "./components/DashboardModals";
 import { useUserDashboardContext } from "./contexts";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const getTitleByTab = (tab: string): string => {
     switch (tab) {
@@ -38,14 +39,7 @@ export default function UserDashboardClient(): React.JSX.Element | null {
     }, [status, router]);
 
     if (status === "loading" || isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)]">
-                <span className="loading loading-spinner loading-lg text-primary" />
-                <p className="mt-4 text-gray-600 dark:text-gray-400">
-                    กำลังโหลดข้อมูล...
-                </p>
-            </div>
-        );
+        return <LoadingSpinner className="h-[calc(100vh-100px)]" />;
     }
 
     if (error) {

@@ -139,7 +139,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
 
                             <p className="text-xs text-slate-400 animate-pulse">
                                 กำลังนำทางไปยังหน้าหลักอัตโนมัติภายใน 3
-                                วินาที...
+                                วินาที…
                             </p>
                         </div>
                     </DialogDescription>
@@ -147,7 +147,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
                     <div className="flex flex-col space-y-3 w-full">
                         <Button
                             onClick={handleRedirect}
-                            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-200 dark:shadow-none h-12 text-base font-semibold transition-all duration-300 transform hover:-translate-y-0.5"
+                            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-200 dark:shadow-none h-12 text-base font-semibold duration-300 transform hover:-translate-y-0.5 transition"
                         >
                             กลับไปหน้าหลัก
                         </Button>

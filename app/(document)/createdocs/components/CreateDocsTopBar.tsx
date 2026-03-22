@@ -44,7 +44,7 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                         <div className="flex flex-col">
-                            <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-none">
+                            <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-none text-balance">
                                 สร้างเอกสาร
                             </h1>
                             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">

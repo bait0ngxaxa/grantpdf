@@ -1,22 +1,20 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React from "react";
 import { UserStatsCards, UsersTable, EditUserModal, DeleteUserModal } from ".";
 import { useUserManagement } from "../../hooks/useUserManagement";
-import { usePagination } from "@/lib/hooks";
-import { PAGINATION } from "@/lib/constants";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { XCircle } from "lucide-react";
 
-interface UsersTabProps {
-    totalUsers?: number;
-}
-
-export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
-    const [searchTerm, setSearchTerm] = React.useState("");
-
-    // User management hook
+export const UsersTab: React.FC = (): React.JSX.Element => {
     const {
         users,
+        total,
+        totalPages,
+        currentPage,
+        setPage,
+        searchTerm,
+        setSearchTerm,
         loadingUsers,
         fetchError,
         selectedUser,
@@ -35,29 +33,8 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
         handleDeleteUser,
     } = useUserManagement();
 
-    const filteredUsers = useMemo(() => {
-        return users.filter(
-            (user) =>
-                user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-        );
-    }, [users, searchTerm]);
-
-    const pagination = usePagination({
-        items: filteredUsers,
-        itemsPerPage: PAGINATION.USERS_PER_PAGE,
-    });
-
-    useEffect(() => {
-        pagination.resetPage();
-    }, [searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
-
     if (loadingUsers) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <span className="loading loading-spinner loading-lg text-primary" />
-            </div>
-        );
+        return <LoadingSpinner className="py-20" />;
     }
 
     return (
@@ -78,16 +55,16 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
 
             {/* Users Table */}
             <UsersTable
-                users={pagination.paginatedItems}
-                filteredCount={filteredUsers.length}
+                users={users}
+                filteredCount={total}
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 onEdit={openEditModal}
                 onDelete={openDeleteModal}
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
-                itemsPerPage={pagination.itemsPerPage}
-                onPageChange={pagination.goToPage}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={10}
+                onPageChange={setPage}
             />
 
             {/* Modals */}
@@ -108,7 +85,6 @@ export const UsersTab: React.FC<UsersTabProps> = (): React.JSX.Element => {
                 isDeleting={isDeleting}
                 onConfirm={handleDeleteUser}
             />
-
         </div>
     );
 };

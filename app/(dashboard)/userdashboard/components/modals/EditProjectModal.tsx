@@ -58,7 +58,7 @@ export const EditProjectModal: React.FC = () => {
                         <Input
                             value={editProjectName}
                             onChange={(e) => setEditProjectName(e.target.value)}
-                            className="rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus:border-blue-500 focus:ring-blue-500/20 h-11"
+                            className="rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus-visible:border-blue-500 focus-visible:ring-blue-500/20 h-11"
                             placeholder="ระบุชื่อโครงการ"
                         />
                     </div>
@@ -71,7 +71,7 @@ export const EditProjectModal: React.FC = () => {
                             onChange={(e) =>
                                 setEditProjectDescription(e.target.value)
                             }
-                            className="w-full p-4 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-2xl h-32 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none text-slate-700 text-sm"
+                            className="w-full p-4 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-2xl h-32 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/10 transition-colors resize-none text-slate-700 text-sm"
                             placeholder="ระบุคำอธิบายเกี่ยวกับโครงการนี้ (ถ้ามี)"
                         />
                     </div>
@@ -92,7 +92,7 @@ export const EditProjectModal: React.FC = () => {
                         {isUpdatingProject ? (
                             <>
                                 <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                                กำลังอัปเดต...
+                                กำลังอัปเดต…
                             </>
                         ) : (
                             "บันทึกการแก้ไข"
