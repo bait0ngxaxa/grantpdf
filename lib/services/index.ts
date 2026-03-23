@@ -1,6 +1,7 @@
 // Project Service
 export {
     getAllProjectsPaginated,
+    getProjectsByUserId,
     getProjectsByUserIdPaginated,
     updateProjectStatus,
     createProject,

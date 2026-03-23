@@ -65,7 +65,9 @@ export const useAdminData = ({
         error: projectsError,
         isLoading: isLoadingProjects,
         mutate: mutateProjects,
-    } = useSWR<ProjectsResponse>(projectsKey);
+    } = useSWR<ProjectsResponse>(projectsKey, {
+        keepPreviousData: true,
+    });
 
     const {
         data: statsData,

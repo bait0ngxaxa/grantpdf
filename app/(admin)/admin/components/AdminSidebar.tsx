@@ -41,10 +41,8 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
         setActiveTab,
         todayProjects,
         todayFiles,
-        projects,
+        totalProjects,
     } = useAdminDashboardContext();
-
-    const totalProjects = projects.length;
 
     const [, startTransition] = React.useTransition();
 

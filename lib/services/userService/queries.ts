@@ -86,6 +86,10 @@ export interface PaginatedUsersResult {
     total: number;
     page: number;
     totalPages: number;
+    roleCounts: {
+        admin: number;
+        member: number;
+    };
 }
 
 /**
@@ -106,7 +110,7 @@ export async function getAllUsersPaginated({
           }
         : {};
 
-    const [total, users] = await Promise.all([
+    const [total, users, roleGroups] = await Promise.all([
         prisma.user.count({ where }),
         prisma.user.findMany({
             where,
@@ -121,12 +125,26 @@ export async function getAllUsersPaginated({
             skip,
             take: limit,
         }),
+        prisma.user.groupBy({
+            by: ["role"],
+            where,
+            _count: { _all: true },
+        }),
     ]);
+
+    const roleCountMap = new Map<string, number>();
+    for (const group of roleGroups) {
+        roleCountMap.set(group.role ?? "", group._count._all);
+    }
 
     return {
         users: users.map((user) => ({ ...user, id: user.id.toString() })),
         total,
         page,
         totalPages: Math.ceil(total / limit),
+        roleCounts: {
+            admin: roleCountMap.get("admin") ?? 0,
+            member: roleCountMap.get("member") ?? 0,
+        },
     };
 }

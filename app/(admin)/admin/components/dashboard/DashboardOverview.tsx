@@ -21,12 +21,22 @@ export const DashboardOverview: React.FC = (): React.JSX.Element => {
     } = useAdminDashboardContext();
     // Calculate latest project
     const latestProject = useMemo(() => {
-        const sortedProjects = projects.sort(
-            (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-        );
-        return sortedProjects.length > 0 ? sortedProjects[0] : null;
+        if (projects.length === 0) {
+            return null;
+        }
+
+        let latest = projects[0];
+        let latestTimestamp = new Date(latest.created_at).getTime();
+
+        for (let i = 1; i < projects.length; i += 1) {
+            const currentTimestamp = new Date(projects[i].created_at).getTime();
+            if (currentTimestamp > latestTimestamp) {
+                latest = projects[i];
+                latestTimestamp = currentTimestamp;
+            }
+        }
+
+        return latest;
     }, [projects]);
 
     // Calculate project status statistics

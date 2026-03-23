@@ -1,22 +1,17 @@
 import React from "react";
 import { Users, Shield } from "lucide-react";
 
-interface UserData {
-    id: string;
-    name: string;
-    email: string;
-    role: "member" | "admin";
-}
-
 interface UserStatsCardsProps {
-    users: UserData[];
+    totalUsers: number;
+    adminCount: number;
+    memberCount: number;
 }
 
-export const UserStatsCards: React.FC<UserStatsCardsProps> = ({ users }) => {
-    const totalUsers = users.length;
-    const adminCount = users.filter((user) => user.role === "admin").length;
-    const memberCount = users.filter((user) => user.role === "member").length;
-
+export const UserStatsCards: React.FC<UserStatsCardsProps> = ({
+    totalUsers,
+    adminCount,
+    memberCount,
+}) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {/* Total Users Card */}

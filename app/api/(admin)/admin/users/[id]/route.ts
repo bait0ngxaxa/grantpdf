@@ -1,5 +1,5 @@
-// เส้นแก้ไขและลบข้อมูลแต่ละ id ระบบ admin
 import { type NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import {
     userExists,
     isValidRole,
@@ -7,6 +7,14 @@ import {
     deleteUser,
     checkAdminPermission,
 } from "@/lib/services";
+
+function parseUserIdParam(rawId: string): number | null {
+    const parsed = Number(rawId);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+        return null;
+    }
+    return parsed;
+}
 
 export async function PUT(
     req: NextRequest,
@@ -21,7 +29,15 @@ export async function PUT(
 
         const awaitParams = await params;
         const userId = awaitParams.id;
+        const parsedUserId = parseUserIdParam(userId);
         const { name, role } = await req.json();
+
+        if (parsedUserId === null) {
+            return NextResponse.json(
+                { error: "Invalid user id" },
+                { status: 400 },
+            );
+        }
 
         if (!name || !role) {
             return NextResponse.json(
@@ -37,7 +53,7 @@ export async function PUT(
             );
         }
 
-        const exists = await userExists(Number(userId));
+        const exists = await userExists(parsedUserId);
         if (!exists) {
             return NextResponse.json(
                 { error: "ไม่พบผู้ใช้งาน" },
@@ -52,13 +68,23 @@ export async function PUT(
             );
         }
 
-        const updatedUser = await updateUser(Number(userId), { name, role });
+        const updatedUser = await updateUser(parsedUserId, { name, role });
 
         return NextResponse.json(
             { message: "อัปเดตผู้ใช้งานสำเร็จ", user: updatedUser },
             { status: 200 },
         );
     } catch (error) {
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2025"
+        ) {
+            return NextResponse.json(
+                { error: "ไม่พบผู้ใช้งาน" },
+                { status: 404 },
+            );
+        }
+
         console.error("Error updating user:", error);
         return NextResponse.json(
             { error: "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้งาน" },
@@ -80,6 +106,14 @@ export async function DELETE(
 
         const awaitParams = await params;
         const userId = awaitParams.id;
+        const parsedUserId = parseUserIdParam(userId);
+
+        if (parsedUserId === null) {
+            return NextResponse.json(
+                { error: "Invalid user id" },
+                { status: 400 },
+            );
+        }
 
         if (userId === session.user.id) {
             return NextResponse.json(
@@ -88,7 +122,7 @@ export async function DELETE(
             );
         }
 
-        const exists = await userExists(Number(userId));
+        const exists = await userExists(parsedUserId);
         if (!exists) {
             return NextResponse.json(
                 { error: "ไม่พบผู้ใช้งาน" },
@@ -96,13 +130,23 @@ export async function DELETE(
             );
         }
 
-        await deleteUser(Number(userId));
+        await deleteUser(parsedUserId);
 
         return NextResponse.json(
             { message: "ลบผู้ใช้งานสำเร็จ" },
             { status: 200 },
         );
     } catch (error) {
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2025"
+        ) {
+            return NextResponse.json(
+                { error: "ไม่พบผู้ใช้งาน" },
+                { status: 404 },
+            );
+        }
+
         console.error("Error deleting user:", error);
         return NextResponse.json(
             { error: "เกิดข้อผิดพลาดในการลบผู้ใช้งาน" },

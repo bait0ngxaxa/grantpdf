@@ -1,4 +1,9 @@
-import { useState, useCallback } from "react";
+import {
+    useState,
+    useCallback,
+    useDeferredValue,
+    useMemo,
+} from "react";
 import useSWR from "swr";
 import { API_ROUTES, PAGINATION } from "@/lib/constants";
 import { toast } from "sonner";
@@ -9,7 +14,11 @@ interface UserData {
     email: string;
     role: "member" | "admin";
     created_at: string;
-    createdAt?: string;
+}
+
+interface RoleCounts {
+    admin: number;
+    member: number;
 }
 
 interface EditFormData {
@@ -23,11 +32,13 @@ interface UsersResponse {
     total: number;
     page: number;
     totalPages: number;
+    roleCounts?: RoleCounts;
 }
 
 export interface UserManagementHook {
     users: UserData[];
     total: number;
+    roleCounts: RoleCounts;
     totalPages: number;
     currentPage: number;
     setPage: (page: number) => void;
@@ -56,6 +67,7 @@ export interface UserManagementHook {
 export function useUserManagement(): UserManagementHook {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTermState] = useState("");
+    const deferredSearchTerm = useDeferredValue(searchTerm);
 
     // Reset to page 1 after search changes — ensures correct results
     const setSearchTerm = useCallback((value: string) => {
@@ -70,18 +82,31 @@ export function useUserManagement(): UserManagementHook {
     const limit = PAGINATION.USERS_PER_PAGE;
 
     // SWR key includes page + search so server handles filtering/pagination
-    const swrKey = `${API_ROUTES.ADMIN_USERS}?page=${currentPage}&limit=${limit}${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ""}`;
+    const swrKey = useMemo(() => {
+        const params = new URLSearchParams({
+            page: String(currentPage),
+            limit: String(limit),
+        });
 
-    const { data, error, isLoading, mutate } = useSWR<UsersResponse>(swrKey);
+        if (deferredSearchTerm) {
+            params.set("search", deferredSearchTerm);
+        }
+
+        return `${API_ROUTES.ADMIN_USERS}?${params.toString()}`;
+    }, [currentPage, limit, deferredSearchTerm]);
+
+    const { data, error, isLoading, mutate } = useSWR<UsersResponse>(swrKey, {
+        keepPreviousData: true,
+    });
 
     const users =
         data?.users.map((user) => ({
             ...user,
             id: user.id.toString(),
-            createdAt: new Date(user.created_at).toLocaleDateString("th-TH"),
         })) || [];
 
     const total = data?.total ?? 0;
+    const roleCounts = data?.roleCounts ?? { admin: 0, member: 0 };
     const totalPages = data?.totalPages ?? 0;
 
     const loadingUsers = isLoading;
@@ -216,6 +241,7 @@ export function useUserManagement(): UserManagementHook {
     return {
         users,
         total,
+        roleCounts,
         totalPages,
         currentPage,
         setPage,

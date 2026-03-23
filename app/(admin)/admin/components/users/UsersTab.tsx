@@ -1,15 +1,18 @@
 "use client";
 
 import React from "react";
-import { UserStatsCards, UsersTable, EditUserModal, DeleteUserModal } from ".";
+import { UserStatsCards } from "./UserStatsCards";
+import { UsersTable } from "./UsersTable";
+import { EditUserModal } from "./EditUserModal";
+import { DeleteUserModal } from "./DeleteUserModal";
 import { useUserManagement } from "../../hooks/useUserManagement";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { XCircle } from "lucide-react";
 
 export const UsersTab: React.FC = (): React.JSX.Element => {
     const {
-        users,
         total,
+        roleCounts,
+        users,
         totalPages,
         currentPage,
         setPage,
@@ -33,10 +36,6 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
         handleDeleteUser,
     } = useUserManagement();
 
-    if (loadingUsers) {
-        return <LoadingSpinner className="py-20" />;
-    }
-
     return (
         <div>
             {/* Error Alert */}
@@ -51,7 +50,17 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
             )}
 
             {/* Statistics Cards */}
-            <UserStatsCards users={users} />
+            <UserStatsCards
+                totalUsers={total}
+                adminCount={roleCounts.admin}
+                memberCount={roleCounts.member}
+            />
+
+            {loadingUsers ? (
+                <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+                    Loading users...
+                </div>
+            ) : null}
 
             {/* Users Table */}
             <UsersTable

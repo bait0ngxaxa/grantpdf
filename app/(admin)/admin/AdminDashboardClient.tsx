@@ -8,7 +8,7 @@ import { DashboardOverview } from "./components/dashboard/DashboardOverview";
 import { UsersTab } from "./components/users/UsersTab";
 import { ProjectsTab } from "./components/project/ProjectsTab";
 import { AdminModals } from "./components/AdminModals";
-import { useAdminDashboardContext } from "./contexts";
+import { useAdminUI } from "./contexts/AdminUIContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const getTitleByTab = (tab: string): string => {
@@ -29,7 +29,7 @@ export default function AdminDashboardClient(): React.JSX.Element | null {
     const router = useRouter();
 
     // Consume Context
-    const { activeTab, isLoading } = useAdminDashboardContext();
+    const { activeTab } = useAdminUI();
 
     useTitle(getTitleByTab(activeTab));
 
@@ -41,7 +41,7 @@ export default function AdminDashboardClient(): React.JSX.Element | null {
         }
     }, [session, status, router]);
 
-    if (status === "loading" || isLoading) {
+    if (status === "loading") {
         return <LoadingSpinner className="h-[calc(100vh-100px)]" />;
     }
 

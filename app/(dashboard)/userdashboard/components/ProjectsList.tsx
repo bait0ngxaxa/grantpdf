@@ -12,6 +12,7 @@ import { StatusDetailModal } from "./StatusDetailModal";
 export const ProjectsList: React.FC = (): React.JSX.Element => {
     const {
         projects,
+        totalProjects,
         expandedProjects,
         toggleProjectExpansion,
         setShowCreateProjectModal,
@@ -68,7 +69,7 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
     return (
         <div className="animate-fade-in-up">
             <ProjectsListHeader
-                totalProjects={projects.length}
+                totalProjects={totalProjects}
                 onCreateProject={() => setShowCreateProjectModal(true)}
             />
 

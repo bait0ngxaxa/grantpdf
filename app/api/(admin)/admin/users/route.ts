@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getAllUsersPaginated } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
+import { parsePositiveInt } from "@/lib/queryParams";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -17,8 +18,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
 
         const { searchParams } = new URL(req.url);
-        const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
-        const limit = Math.max(1, Number(searchParams.get("limit") ?? PAGINATION.USERS_PER_PAGE));
+        const page = parsePositiveInt(searchParams.get("page"), 1);
+        const limit = parsePositiveInt(
+            searchParams.get("limit"),
+            PAGINATION.USERS_PER_PAGE,
+        );
         const search = searchParams.get("search") ?? undefined;
 
         const result = await getAllUsersPaginated({ page, limit, search });

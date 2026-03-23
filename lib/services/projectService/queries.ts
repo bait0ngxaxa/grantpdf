@@ -1,5 +1,13 @@
 import { prisma } from "@/lib/prisma";
-import type { AdminProject } from "@/type/models";
+import { Prisma } from "@prisma/client";
+import {
+    PROJECT_STATUS,
+    type AdminProject,
+} from "@/type/models";
+import {
+    FILE_TYPES,
+    STATUS_FILTER,
+} from "@/lib/constants";
 import type {
     RawProject,
     RawFile,
@@ -47,6 +55,74 @@ interface GetProjectsByUserIdPaginatedParams {
     userId: number;
     page: number;
     limit: number;
+}
+
+export async function getProjectsByUserId(
+    userId: number,
+): Promise<PaginatedProjectsResult["projects"]> {
+    const projects = await prisma.project.findMany({
+        where: { userId },
+        include: {
+            files: {
+                include: {
+                    attachmentFiles: {
+                        select: {
+                            id: true,
+                            fileName: true,
+                            filePath: true,
+                            fileSize: true,
+                            mimeType: true,
+                        },
+                    },
+                },
+                orderBy: { created_at: "desc" },
+            },
+            _count: { select: { files: true } },
+        },
+        orderBy: { created_at: "desc" },
+    });
+
+    const sanitizedProjects = (projects as unknown as RawProject[]).map(
+        (project) => ({
+            id: project.id.toString(),
+            name: project.name,
+            description: project.description || undefined,
+            status: project.status,
+            statusNote: project.statusNote || undefined,
+            created_at: project.created_at.toISOString(),
+            updated_at: project.updated_at.toISOString(),
+            userId: project.userId.toString(),
+            userName: "",
+            userEmail: "",
+            files: project.files.map((file) => ({
+                id: file.id.toString(),
+                userId: file.userId.toString(),
+                originalFileName: file.originalFileName,
+                storagePath: file.storagePath,
+                fileExtension: file.fileExtension,
+                downloadStatus: file.downloadStatus || "pending",
+                downloadedAt: file.downloadedAt?.toISOString(),
+                created_at: file.created_at.toISOString(),
+                updated_at: file.updated_at.toISOString(),
+                fileName: file.originalFileName,
+                createdAt: file.created_at.toISOString(),
+                lastModified: file.updated_at.toISOString(),
+                userName: "",
+                userEmail: "",
+                attachmentFiles: sanitizeAttachments(file.attachmentFiles),
+            })),
+            _count: project._count,
+        }),
+    ) as AdminProject[];
+
+    const attachmentPaths = collectAttachmentPaths(sanitizedProjects, []);
+    const filteredResult = filterOutAttachments(
+        sanitizedProjects,
+        [],
+        attachmentPaths,
+    );
+
+    return filteredResult.projects;
 }
 
 /**
@@ -166,19 +242,121 @@ type AdminSortKey =
     | "statusDoneFirst"
     | "statusPendingFirst";
 
-// Prisma-compatible sort orders. For status-based sorts we use created_at
-// as secondary to ensure consistent ordering within each status bucket.
-const SORT_ORDER_MAP: Record<AdminSortKey, object> = {
+type StatusSortKey =
+    | "statusApproved"
+    | "statusPending"
+    | "statusRejected"
+    | "statusEdit"
+    | "statusClosed"
+    | "statusDoneFirst"
+    | "statusPendingFirst";
+
+type DateSortKey = "createdAtDesc" | "createdAtAsc";
+
+const SORT_ORDER_MAP: Record<DateSortKey, object> = {
     createdAtDesc: { created_at: "desc" },
     createdAtAsc: { created_at: "asc" },
-    statusApproved: [{ status: "asc" }, { created_at: "desc" }],
-    statusPending: [{ status: "asc" }, { created_at: "desc" }],
-    statusRejected: [{ status: "asc" }, { created_at: "desc" }],
-    statusEdit: [{ status: "asc" }, { created_at: "desc" }],
-    statusClosed: [{ status: "asc" }, { created_at: "desc" }],
-    statusDoneFirst: [{ status: "asc" }, { created_at: "desc" }],
-    statusPendingFirst: [{ status: "asc" }, { created_at: "desc" }],
 };
+
+const DEFAULT_STATUS_PRIORITY = [
+    PROJECT_STATUS.IN_PROGRESS,
+    PROJECT_STATUS.APPROVED,
+    PROJECT_STATUS.REJECTED,
+    PROJECT_STATUS.EDIT,
+    PROJECT_STATUS.CLOSED,
+] as const;
+
+const STATUS_SORT_TARGET_MAP: Record<StatusSortKey, string> = {
+    statusApproved: PROJECT_STATUS.APPROVED,
+    statusPending: PROJECT_STATUS.IN_PROGRESS,
+    statusRejected: PROJECT_STATUS.REJECTED,
+    statusEdit: PROJECT_STATUS.EDIT,
+    statusClosed: PROJECT_STATUS.CLOSED,
+    statusDoneFirst: PROJECT_STATUS.APPROVED,
+    statusPendingFirst: PROJECT_STATUS.IN_PROGRESS,
+};
+
+function isStatusSortKey(sortBy: string): sortBy is StatusSortKey {
+    return sortBy in STATUS_SORT_TARGET_MAP;
+}
+
+function getStatusPriority(sortBy: StatusSortKey): readonly string[] {
+    const targetStatus = STATUS_SORT_TARGET_MAP[sortBy];
+
+    return [
+        targetStatus,
+        ...DEFAULT_STATUS_PRIORITY.filter((status) => status !== targetStatus),
+    ];
+}
+
+function buildAdminProjectsWhereSql(params: {
+    search?: string;
+    status?: string;
+    fileType?: string;
+}): Prisma.Sql {
+    const conditions: Prisma.Sql[] = [];
+
+    if (params.search) {
+        const keyword = `%${params.search}%`;
+        conditions.push(
+            Prisma.sql`(
+                p.name LIKE ${keyword}
+                OR u.name LIKE ${keyword}
+                OR u.email LIKE ${keyword}
+            )`,
+        );
+    }
+
+    if (params.status && params.status !== STATUS_FILTER.ALL) {
+        conditions.push(Prisma.sql`p.status = ${params.status}`);
+    }
+
+    if (params.fileType && params.fileType !== FILE_TYPES.ALL) {
+        conditions.push(
+            Prisma.sql`EXISTS (
+                SELECT 1
+                FROM \`UserFile\` uf
+                WHERE uf.projectId = p.id
+                  AND uf.fileExtension = ${params.fileType}
+            )`,
+        );
+    }
+
+    if (conditions.length === 0) {
+        return Prisma.sql`1 = 1`;
+    }
+
+    return Prisma.sql`${Prisma.join(conditions, " AND ")}`;
+}
+
+async function findProjectIdsByStatusSort(params: {
+    page: number;
+    limit: number;
+    sortBy: StatusSortKey;
+    search?: string;
+    status?: string;
+    fileType?: string;
+}): Promise<number[]> {
+    const skip = (params.page - 1) * params.limit;
+    const whereSql = buildAdminProjectsWhereSql(params);
+    const statusPriority = getStatusPriority(params.sortBy);
+    const statusRankSql = Prisma.sql`FIELD(
+        p.status,
+        ${Prisma.join(statusPriority)}
+    )`;
+
+    const rows = await prisma.$queryRaw<Array<{ id: number }>>(Prisma.sql`
+        SELECT p.id
+        FROM \`Project\` p
+        LEFT JOIN \`User\` u ON u.id = p.userId
+        WHERE ${whereSql}
+        ORDER BY (${statusRankSql} = 0) ASC, ${statusRankSql} ASC, p.created_at DESC
+        LIMIT ${params.limit}
+        OFFSET ${skip}
+    `);
+
+    return rows.map((row) => row.id);
+}
 
 interface GetAllProjectsPaginatedParams {
     page: number;
@@ -202,9 +380,7 @@ export async function getAllProjectsPaginated({
     sortBy = "createdAtDesc",
 }: GetAllProjectsPaginatedParams): Promise<PaginatedProjectsResult> {
     const skip = (page - 1) * limit;
-    const orderBy = SORT_ORDER_MAP[sortBy as AdminSortKey] ?? {
-        created_at: "desc",
-    };
+    const safeSortBy = sortBy as AdminSortKey;
 
     const where = {
         ...(search
@@ -224,21 +400,55 @@ export async function getAllProjectsPaginated({
             : {}),
     };
 
-    const [total, projects, totalFiles] = await Promise.all([
+    const [total, totalFiles] = await Promise.all([
         prisma.project.count({ where }),
-        prisma.project.findMany({
+        prisma.userFile.count(), // System-wide total files
+    ]);
+
+    let projects: RawProject[] = [];
+
+    if (isStatusSortKey(safeSortBy)) {
+        const projectIds = await findProjectIdsByStatusSort({
+            page,
+            limit,
+            sortBy: safeSortBy,
+            search,
+            status,
+            fileType,
+        });
+
+        if (projectIds.length > 0) {
+            const idPositionMap = new Map<number, number>(
+                projectIds.map((id, index) => [id, index]),
+            );
+
+            const unorderedProjects = await prisma.project.findMany({
+                where: { id: { in: projectIds } },
+                include: PROJECT_INCLUDE,
+            });
+
+            projects = (unorderedProjects as unknown as RawProject[]).sort(
+                (a, b) =>
+                    (idPositionMap.get(Number(a.id)) ?? 0) -
+                    (idPositionMap.get(Number(b.id)) ?? 0),
+            );
+        }
+    } else {
+        const orderBy = SORT_ORDER_MAP[safeSortBy as DateSortKey] ?? {
+            created_at: "desc",
+        };
+        const paginatedProjects = await prisma.project.findMany({
             where,
             include: PROJECT_INCLUDE,
             orderBy,
             skip,
             take: limit,
-        }),
-        prisma.userFile.count(), // System-wide total files
-    ]);
+        });
 
-    const sanitizedProjects = sanitizeProjects(
-        projects as unknown as RawProject[],
-    );
+        projects = paginatedProjects as unknown as RawProject[];
+    }
+
+    const sanitizedProjects = sanitizeProjects(projects);
     const attachmentPaths = collectAttachmentPaths(sanitizedProjects, []);
     const filteredResult = filterOutAttachments(
         sanitizedProjects,

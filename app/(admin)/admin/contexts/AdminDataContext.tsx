@@ -39,16 +39,6 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
     const ui = useAdminUI();
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Build a stable key from filter values to detect changes
-    const filterKey = `${ui.searchTerm}|${ui.selectedStatus}|${ui.selectedFileType}|${ui.sortBy}`;
-    const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
-
-    // React-recommended pattern: adjust state during render when inputs change
-    if (filterKey !== prevFilterKey) {
-        setPrevFilterKey(filterKey);
-        setCurrentPage(1);
-    }
-
     const adminData = useAdminData({
         page: currentPage,
         search: ui.searchTerm || undefined,

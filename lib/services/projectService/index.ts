@@ -26,6 +26,7 @@ export {
 // Queries
 export {
     getAllProjectsPaginated,
+    getProjectsByUserId,
     getProjectsByUserIdPaginated,
     findProjectByNameAndUser,
     findProjectByIdAndUser,
