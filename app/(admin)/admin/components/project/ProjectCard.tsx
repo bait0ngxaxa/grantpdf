@@ -34,11 +34,9 @@ export default function ProjectCard({
 }: ProjectCardProps): React.JSX.Element {
     const {
         toggleProjectExpansion,
-        setIsStatusModalOpen,
-        setSelectedProjectForStatus,
     } = useAdminDashboardContext();
 
-    const { openPreviewModal } = useAdminModalStates();
+    const { openPreviewModal, openStatusModal } = useAdminModalStates();
 
     // Handlers
     const onToggleExpansion = toggleProjectExpansion;
@@ -47,9 +45,8 @@ export default function ProjectCard({
         openPreviewModal(storagePath, fileName);
     };
 
-    const onEditProjectStatus = (project: AdminProject) => {
-        setSelectedProjectForStatus(project);
-        setIsStatusModalOpen(true);
+    const onEditProjectStatus = (targetProject: AdminProject) => {
+        openStatusModal(targetProject);
     };
     const getStatusIcon = (status: string): React.JSX.Element | null => {
         switch (status) {

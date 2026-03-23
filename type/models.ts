@@ -67,6 +67,13 @@ export interface LatestUser {
     created_at: string;
 }
 
+export interface LatestProject {
+    id: string;
+    name: string;
+    created_at: string;
+    userName?: string;
+}
+
 export const PROJECT_STATUS = {
     IN_PROGRESS: "กำลังดำเนินการ",
     APPROVED: "อนุมัติ",

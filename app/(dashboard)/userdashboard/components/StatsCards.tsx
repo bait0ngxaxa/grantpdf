@@ -9,12 +9,11 @@ import { StatsCard } from "./StatsCard";
 import { ProjectStatusDetails } from "./ProjectStatusDetails";
 
 export const StatsCards: React.FC = () => {
-    const { projects, totalProjects, totalDocuments, statusCounts } = useUserDashboardContext();
+    const { totalProjects, totalDocuments, statusCounts, latestProject } =
+        useUserDashboardContext();
 
     // statusCounts now comes directly from the server via context
     const projectStatusCounts = statusCounts;
-
-    const latestProject = projects.length > 0 ? projects[0] : null;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -26,7 +25,7 @@ export const StatsCards: React.FC = () => {
                 icon={<Building2 className="h-7 w-7" />}
                 colorTheme="blue"
             >
-                {projects.length > 0 && (
+                {totalProjects > 0 && (
                     <ProjectStatusDetails counts={projectStatusCounts} />
                 )}
             </StatsCard>

@@ -2,17 +2,19 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import type {
     AdminProject,
+    LatestProject,
     LatestUser,
 } from "@/type/models";
-
 import { API_ROUTES, PAGINATION } from "@/lib/constants";
 
 interface AdminStatsResponse {
     totalProjects: number;
+    totalFiles: number;
     totalUsers: number;
     todayProjects: number;
     todayFiles: number;
     latestUser: LatestUser | null;
+    latestProject: LatestProject | null;
     statusCounts?: {
         pending: number;
         approved: number;
@@ -36,6 +38,7 @@ interface UseAdminDataParams {
     status?: string;
     fileType?: string;
     sortBy?: string;
+    shouldLoadProjects?: boolean;
 }
 
 export const useAdminData = ({
@@ -44,20 +47,26 @@ export const useAdminData = ({
     status,
     fileType,
     sortBy,
+    shouldLoadProjects = true,
 }: UseAdminDataParams = {}) => {
     const limit = PAGINATION.ITEMS_PER_PAGE;
 
-    // Build paginated + filtered SWR key for projects
     const projectsKey = useMemo(() => {
-        const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+        if (!shouldLoadProjects) return null;
+
+        const params = new URLSearchParams({
+            page: String(page),
+            limit: String(limit),
+        });
+
         if (search) params.set("search", search);
         if (status) params.set("status", status);
         if (fileType) params.set("fileType", fileType);
         if (sortBy) params.set("sortBy", sortBy);
-        return `${API_ROUTES.ADMIN_PROJECTS}?${params.toString()}`;
-    }, [page, limit, search, status, fileType, sortBy]);
 
-    // Stats endpoint — separate SWR key so it does not re-fetch on filter changes
+        return `${API_ROUTES.ADMIN_PROJECTS}?${params.toString()}`;
+    }, [page, limit, search, status, fileType, sortBy, shouldLoadProjects]);
+
     const statsKey = `${API_ROUTES.ADMIN_PROJECTS}/stats`;
 
     const {
@@ -69,26 +78,33 @@ export const useAdminData = ({
         keepPreviousData: true,
     });
 
-    const {
-        data: statsData,
-        isLoading: isLoadingStats,
-    } = useSWR<AdminStatsResponse>(statsKey);
+    const { data: statsData, isLoading: isLoadingStats } =
+        useSWR<AdminStatsResponse>(statsKey);
 
-    // Derived Data
     const projects = useMemo(() => projectsData?.projects || [], [projectsData]);
-    const totalFiles = projectsData?.totalFiles ?? 0;
-    const totalProjects = projectsData?.total ?? 0;
+    const totalFiles = shouldLoadProjects
+        ? projectsData?.totalFiles ?? statsData?.totalFiles ?? 0
+        : statsData?.totalFiles ?? 0;
+    const totalProjects = shouldLoadProjects
+        ? projectsData?.total ?? statsData?.totalProjects ?? 0
+        : statsData?.totalProjects ?? 0;
     const totalPages = projectsData?.totalPages ?? 0;
 
-    // Use stats endpoint for overview numbers
     const totalUsers = statsData?.totalUsers ?? 0;
     const latestUser = statsData?.latestUser ?? null;
+    const latestProject = statsData?.latestProject ?? null;
     const todayProjects = statsData?.todayProjects ?? 0;
     const todayFiles = statsData?.todayFiles ?? 0;
-    const statusCounts = statsData?.statusCounts ?? { pending: 0, approved: 0, rejected: 0, editing: 0, closed: 0 };
+    const statusCounts = statsData?.statusCounts ?? {
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+        editing: 0,
+        closed: 0,
+    };
 
-    const isLoading = isLoadingProjects || isLoadingStats;
-    const hasInitialDataLoaded = Boolean(projectsData) && Boolean(statsData);
+    const isLoading = isLoadingStats || (shouldLoadProjects && isLoadingProjects);
+    const hasInitialDataLoaded = Boolean(statsData);
     const error = projectsError
         ? "ไม่สามารถโหลดข้อมูลโครงการได้ กรุณาลองใหม่อีกครั้ง"
         : null;
@@ -103,6 +119,7 @@ export const useAdminData = ({
         totalPages,
         totalUsers,
         latestUser,
+        latestProject,
         todayProjects,
         todayFiles,
         statusCounts,

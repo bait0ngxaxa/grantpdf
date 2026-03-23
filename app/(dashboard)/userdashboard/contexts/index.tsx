@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { useDashboardActions } from "../hooks/useDashboardActions";
 import type { Project } from "@/type";
+import type { LatestProject } from "@/type/models";
 
 import { DashboardUIProvider, useDashboardUI } from "./DashboardUIContext";
 import { ModalProvider, useModalContext } from "./ModalContext";
@@ -28,7 +29,9 @@ interface UserDashboardContextType {
     totalProjects: number;
     totalDocuments: number;
     statusCounts: { pending: number; approved: number; rejected: number; editing: number; closed: number };
+    latestProject: LatestProject | null;
     isLoading: boolean;
+    hasInitialDataLoaded: boolean;
     error: string | null;
     fetchUserData: () => Promise<void>;
 

@@ -46,6 +46,7 @@ export const ROUTES = {
 
 export const API_ROUTES = {
     PROJECTS: "/api/projects",
+    PROJECTS_STATS: "/api/projects/stats",
     USER_DOCS: "/api/user-docs",
     FILE_GENERATE_URL: "/api/file/generate-url",
     ADMIN_PROJECTS: "/api/admin/projects",

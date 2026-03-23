@@ -8,11 +8,13 @@ import { ProjectsListHeader } from "./ProjectsListHeader";
 import { ProjectItem } from "./ProjectItem";
 import { EmptyProjectsState } from "./EmptyProjectsState";
 import { StatusDetailModal } from "./StatusDetailModal";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export const ProjectsList: React.FC = (): React.JSX.Element => {
     const {
         projects,
         totalProjects,
+        isLoading,
         expandedProjects,
         toggleProjectExpansion,
         setShowCreateProjectModal,
@@ -74,7 +76,9 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
             />
 
             <div className="space-y-6">
-                {projects.length > 0 ? (
+                {isLoading && projects.length === 0 ? (
+                    <LoadingSpinner className="py-16" />
+                ) : projects.length > 0 ? (
                     projects.map((project) => (
                         <ProjectItem
                             key={project.id}

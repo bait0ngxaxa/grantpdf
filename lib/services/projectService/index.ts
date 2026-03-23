@@ -27,6 +27,7 @@ export {
 export {
     getAllProjectsPaginated,
     getProjectsByUserId,
+    getUserProjectStats,
     getProjectsByUserIdPaginated,
     findProjectByNameAndUser,
     findProjectByIdAndUser,

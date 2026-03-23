@@ -57,6 +57,32 @@ describe("fixThaiDistributed", () => {
         const result = fixThaiDistributed(input);
         expect(result).toBe("Hello World");
     });
+
+    it("should preserve URL tokens without inserting ZWSP inside", () => {
+        const input = "\u0E17\u0E14\u0E2A\u0E2D\u0E1A https://example.com/docs";
+        const result = fixThaiDistributed(input);
+        expect(result).toContain("https://example.com/docs");
+    });
+
+    it("should preserve email tokens without inserting ZWSP inside", () => {
+        const input =
+            "\u0E2A\u0E48\u0E07\u0E2D\u0E35\u0E40\u0E21\u0E25 user.name+tag@example.com";
+        const result = fixThaiDistributed(input);
+        expect(result).toContain("user.name+tag@example.com");
+    });
+
+    it("should preserve code-like tokens in mixed Thai text", () => {
+        const input = "\u0E23\u0E2B\u0E31\u0E2A DOC-2026-0001 \u0E16\u0E39\u0E01\u0E15\u0E49\u0E2D\u0E07";
+        const result = fixThaiDistributed(input);
+        expect(result).toContain("DOC-2026-0001");
+    });
+
+    it("should preserve number-unit tokens in mixed Thai text", () => {
+        const input = "\u0E02\u0E19\u0E32\u0E14 10MB \u0E41\u0E25\u0E30 20%";
+        const result = fixThaiDistributed(input);
+        expect(result).toContain("10MB");
+        expect(result).toContain("20%");
+    });
 });
 
 describe("generateUniqueFilename", () => {

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 
 import { StatsCards } from "./StatsCards";
 import { ProjectStatusStats } from "./ProjectStatusStats";
@@ -10,34 +10,15 @@ import { useAdminDashboardContext } from "../../contexts";
 export const DashboardOverview: React.FC = (): React.JSX.Element => {
     // Consume Context
     const {
-        projects,
         totalProjects,
         totalFiles,
         totalUsers,
+        latestProject,
         todayProjects,
         todayFiles,
         statusCounts,
         setActiveTab,
     } = useAdminDashboardContext();
-    // Calculate latest project
-    const latestProject = useMemo(() => {
-        if (projects.length === 0) {
-            return null;
-        }
-
-        let latest = projects[0];
-        let latestTimestamp = new Date(latest.created_at).getTime();
-
-        for (let i = 1; i < projects.length; i += 1) {
-            const currentTimestamp = new Date(projects[i].created_at).getTime();
-            if (currentTimestamp > latestTimestamp) {
-                latest = projects[i];
-                latestTimestamp = currentTimestamp;
-            }
-        }
-
-        return latest;
-    }, [projects]);
 
     // Calculate project status statistics
     // statusCounts comes directly from the server via context

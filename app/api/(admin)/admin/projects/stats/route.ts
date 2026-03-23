@@ -19,8 +19,19 @@ export async function GET(): Promise<NextResponse> {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        const [totalUsers, todayProjects, todayFiles, latestUserRaw, statusGroups] = await Promise.all([
+        const [
+            totalUsers,
+            totalProjects,
+            totalFiles,
+            todayProjects,
+            todayFiles,
+            latestUserRaw,
+            latestProjectRaw,
+            statusGroups,
+        ] = await Promise.all([
             prisma.user.count(),
+            prisma.project.count(),
+            prisma.userFile.count(),
             prisma.project.count({
                 where: { created_at: { gte: today, lt: tomorrow } },
             }),
@@ -30,6 +41,19 @@ export async function GET(): Promise<NextResponse> {
             prisma.user.findFirst({
                 orderBy: { created_at: "desc" },
                 select: { name: true, email: true, created_at: true },
+            }),
+            prisma.project.findFirst({
+                orderBy: { created_at: "desc" },
+                select: {
+                    id: true,
+                    name: true,
+                    created_at: true,
+                    user: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
             }),
             prisma.project.groupBy({
                 by: ["status"],
@@ -42,6 +66,15 @@ export async function GET(): Promise<NextResponse> {
                   name: latestUserRaw.name ?? "",
                   email: latestUserRaw.email,
                   created_at: latestUserRaw.created_at.toISOString(),
+              }
+            : null;
+
+        const latestProject = latestProjectRaw
+            ? {
+                  id: latestProjectRaw.id.toString(),
+                  name: latestProjectRaw.name,
+                  created_at: latestProjectRaw.created_at.toISOString(),
+                  userName: latestProjectRaw.user.name,
               }
             : null;
 
@@ -60,10 +93,13 @@ export async function GET(): Promise<NextResponse> {
         };
 
         return NextResponse.json({
+            totalProjects,
+            totalFiles,
             totalUsers,
             todayProjects,
             todayFiles,
             latestUser,
+            latestProject,
             statusCounts,
         });
     } catch (error) {

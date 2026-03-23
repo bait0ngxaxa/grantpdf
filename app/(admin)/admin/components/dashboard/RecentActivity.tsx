@@ -1,10 +1,10 @@
 import React from "react";
 import { Users, Archive } from "lucide-react";
-import type { AdminProject } from "@/type/models";
+import type { LatestProject } from "@/type/models";
 
 interface RecentActivityProps {
     totalUsers: number;
-    latestProject: AdminProject | null;
+    latestProject: LatestProject | null;
     setActiveTab: (tab: string) => void;
 }
 

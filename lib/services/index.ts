@@ -2,6 +2,7 @@
 export {
     getAllProjectsPaginated,
     getProjectsByUserId,
+    getUserProjectStats,
     getProjectsByUserIdPaginated,
     updateProjectStatus,
     createProject,

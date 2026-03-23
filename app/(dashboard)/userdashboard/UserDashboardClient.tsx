@@ -27,7 +27,8 @@ const getTitleByTab = (tab: string): string => {
 export default function UserDashboardClient(): React.JSX.Element | null {
     const { status } = useSession();
     const router = useRouter();
-    const { activeTab, isLoading, error } = useUserDashboardContext();
+    const { activeTab, isLoading, hasInitialDataLoaded, error } =
+        useUserDashboardContext();
 
     useTitle(getTitleByTab(activeTab));
 
@@ -38,7 +39,7 @@ export default function UserDashboardClient(): React.JSX.Element | null {
         }
     }, [status, router]);
 
-    if (status === "loading" || isLoading) {
+    if (status === "loading" || (!hasInitialDataLoaded && isLoading)) {
         return <LoadingSpinner className="h-[calc(100vh-100px)]" />;
     }
 

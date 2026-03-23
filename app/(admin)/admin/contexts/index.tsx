@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import type {
     AdminProject,
+    LatestProject,
     LatestUser,
 } from "@/type/models";
 
@@ -68,6 +69,7 @@ interface AdminDashboardContextType {
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     totalUsers: number;
     latestUser: LatestUser | null;
+    latestProject: LatestProject | null;
     todayProjects: number;
     todayFiles: number;
     statusCounts: { pending: number; approved: number; rejected: number; editing: number; closed: number };

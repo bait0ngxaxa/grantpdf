@@ -8,23 +8,28 @@ import React, {
 } from "react";
 import { useUserData } from "../hooks/useUserData";
 import type { Project } from "@/type";
+import type { LatestProject } from "@/type/models";
+import { useDashboardUI } from "./DashboardUIContext";
 
 interface ProjectDataContextType {
-    // Data State (from useUserData)
     projects: Project[];
     totalProjects: number;
     totalDocuments: number;
-    statusCounts: { pending: number; approved: number; rejected: number; editing: number; closed: number };
+    statusCounts: {
+        pending: number;
+        approved: number;
+        rejected: number;
+        editing: number;
+        closed: number;
+    };
+    latestProject: LatestProject | null;
     isLoading: boolean;
+    hasInitialDataLoaded: boolean;
     error: string | null;
     fetchUserData: () => Promise<void>;
-
-    // Pagination — driven server-side, page state lives here
     currentPage: number;
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     totalPages: number;
-
-    // Form States
     fileToDelete: string | null;
     setFileToDelete: React.Dispatch<React.SetStateAction<string | null>>;
     projectToDelete: string | null;
@@ -46,26 +51,23 @@ const ProjectDataContext = createContext<ProjectDataContextType | undefined>(
 );
 
 export function ProjectDataProvider({ children }: { children: ReactNode }) {
-    // =========================================================================
-    // Pagination state — page number lives here, hook uses it for SWR key
-    // =========================================================================
+    const { activeTab } = useDashboardUI();
     const [currentPage, setCurrentPage] = useState(1);
+    const shouldLoadProjects = activeTab === "projects";
 
-    // =========================================================================
-    // Data (from useUserData hook — SWR key changes when page changes)
-    // =========================================================================
-    const { projects, totalFiles, total, totalPages, statusCounts, isLoading, error, fetchUserData } =
-        useUserData(currentPage);
+    const {
+        projects,
+        totalFiles,
+        total,
+        totalPages,
+        statusCounts,
+        latestProject,
+        isLoading,
+        hasInitialDataLoaded,
+        error,
+        fetchUserData,
+    } = useUserData(currentPage, shouldLoadProjects);
 
-    // =========================================================================
-    // Derived State
-    // =========================================================================
-    const totalDocuments = totalFiles;
-    const totalProjects = total;
-
-    // =========================================================================
-    // Form States
-    // =========================================================================
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
     const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
@@ -76,10 +78,12 @@ export function ProjectDataProvider({ children }: { children: ReactNode }) {
 
     const value = {
         projects,
-        totalProjects,
-        totalDocuments,
+        totalProjects: total,
+        totalDocuments: totalFiles,
         statusCounts,
+        latestProject,
         isLoading,
+        hasInitialDataLoaded,
         error,
         fetchUserData,
         currentPage,

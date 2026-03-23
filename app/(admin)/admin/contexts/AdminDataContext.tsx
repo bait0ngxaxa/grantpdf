@@ -11,6 +11,7 @@ import { useAdminData } from "../hooks";
 import { useAdminUI } from "./AdminUIContext";
 import type {
     AdminProject,
+    LatestProject,
     LatestUser,
 } from "@/type/models";
 
@@ -25,6 +26,7 @@ interface AdminDataContextType {
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     totalUsers: number;
     latestUser: LatestUser | null;
+    latestProject: LatestProject | null;
     todayProjects: number;
     todayFiles: number;
     totalFiles: number;
@@ -46,6 +48,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         status: ui.selectedStatus || undefined,
         fileType: ui.selectedFileType || undefined,
         sortBy: ui.sortBy || undefined,
+        shouldLoadProjects: ui.activeTab === "documents",
     });
 
     // Remove the allFiles array calculation

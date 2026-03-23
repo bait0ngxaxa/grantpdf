@@ -57,6 +57,42 @@ interface GetProjectsByUserIdPaginatedParams {
     limit: number;
 }
 
+interface ProjectStatusCounts {
+    pending: number;
+    approved: number;
+    rejected: number;
+    editing: number;
+    closed: number;
+}
+
+interface UserProjectStatsResult {
+    total: number;
+    totalFiles: number;
+    statusCounts: ProjectStatusCounts;
+    latestProject: {
+        id: string;
+        name: string;
+        created_at: string;
+    } | null;
+}
+
+function mapStatusGroupsToCounts(
+    statusGroups: Array<{ status: string; _count: { _all: number } }>,
+): ProjectStatusCounts {
+    const statusCountMap = new Map<string, number>();
+    for (const group of statusGroups) {
+        statusCountMap.set(group.status, group._count._all);
+    }
+
+    return {
+        pending: statusCountMap.get(PROJECT_STATUS.IN_PROGRESS) ?? 0,
+        approved: statusCountMap.get(PROJECT_STATUS.APPROVED) ?? 0,
+        rejected: statusCountMap.get(PROJECT_STATUS.REJECTED) ?? 0,
+        editing: statusCountMap.get(PROJECT_STATUS.EDIT) ?? 0,
+        closed: statusCountMap.get(PROJECT_STATUS.CLOSED) ?? 0,
+    };
+}
+
 export async function getProjectsByUserId(
     userId: number,
 ): Promise<PaginatedProjectsResult["projects"]> {
@@ -123,6 +159,42 @@ export async function getProjectsByUserId(
     );
 
     return filteredResult.projects;
+}
+
+export async function getUserProjectStats(
+    userId: number,
+): Promise<UserProjectStatsResult> {
+    const [total, totalFiles, statusGroups, latestProjectRaw] = await Promise.all([
+        prisma.project.count({ where: { userId } }),
+        prisma.userFile.count({ where: { userId } }),
+        prisma.project.groupBy({
+            by: ["status"],
+            where: { userId },
+            _count: { _all: true },
+        }),
+        prisma.project.findFirst({
+            where: { userId },
+            orderBy: { created_at: "desc" },
+            select: {
+                id: true,
+                name: true,
+                created_at: true,
+            },
+        }),
+    ]);
+
+    return {
+        total,
+        totalFiles,
+        statusCounts: mapStatusGroupsToCounts(statusGroups),
+        latestProject: latestProjectRaw
+            ? {
+                  id: latestProjectRaw.id.toString(),
+                  name: latestProjectRaw.name,
+                  created_at: latestProjectRaw.created_at.toISOString(),
+              }
+            : null,
+    };
 }
 
 /**

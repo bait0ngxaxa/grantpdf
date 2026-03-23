@@ -1,17 +1,61 @@
 import { v4 as uuidv4 } from "uuid";
 
 const ZWSP = "\u200B";
+const THAI_CHAR_REGEX = /[\u0E00-\u0E7F]/;
+const INVISIBLE_CHAR_REGEX = /[\u200B-\u200D\uFEFF\u00AD\u2060-\u206F\u034F\u061C]/g;
+const SPECIAL_SPACE_REGEX = /[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g;
+const URL_TOKEN_REGEX = /\b(?:https?:\/\/|www\.)[^\s]+/gi;
+const EMAIL_TOKEN_REGEX =
+    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
+const CODE_TOKEN_REGEX =
+    /\b(?=[A-Za-z0-9/_-]*\d)(?=[A-Za-z0-9/_-]*[A-Za-z])[A-Za-z0-9]+(?:[-_/][A-Za-z0-9]+)+\b/g;
+const NUMBER_UNIT_TOKEN_REGEX = /\b\d[\d,]*(?:\.\d+)?(?:%|[A-Za-z]{1,8})?\b/g;
+const PROTECTED_TOKEN_REGEX = new RegExp(
+    [
+        URL_TOKEN_REGEX.source,
+        EMAIL_TOKEN_REGEX.source,
+        CODE_TOKEN_REGEX.source,
+        NUMBER_UNIT_TOKEN_REGEX.source,
+    ].join("|"),
+    "gi"
+);
+
+const normalizeText = (text: string): string =>
+    text
+        .replace(INVISIBLE_CHAR_REGEX, "")
+        .replace(SPECIAL_SPACE_REGEX, " ")
+        .normalize("NFC");
+
+const segmentThaiText = (text: string, segmenter: Intl.Segmenter): string =>
+    Array.from(segmenter.segment(text), (segment) => segment.segment).join(ZWSP);
+
+const segmentThaiPreservingTokens = (
+    line: string,
+    segmenter: Intl.Segmenter
+): string => {
+    if (!THAI_CHAR_REGEX.test(line)) return line;
+
+    let cursor = 0;
+    const chunks: string[] = [];
+    const tokenMatches = line.matchAll(PROTECTED_TOKEN_REGEX);
+
+    for (const tokenMatch of tokenMatches) {
+        const token = tokenMatch[0];
+        const tokenStart = tokenMatch.index ?? 0;
+        const beforeToken = line.slice(cursor, tokenStart);
+        chunks.push(segmentThaiText(beforeToken, segmenter), token);
+        cursor = tokenStart + token.length;
+    }
+
+    chunks.push(segmentThaiText(line.slice(cursor), segmenter));
+    return chunks.join("");
+};
 
 export const fixThaiDistributed = (text: string): string => {
     if (!text || typeof text !== "string") return "";
 
     // Step 1: Remove existing invisible characters that might cause issues
-    let result = text
-        .replace(/[\u200B-\u200D\uFEFF\u00AD\u2060-\u206F\u034F\u061C]/g, "")
-        // Convert special spaces to normal space
-        .replace(/[\u00A0\u2000-\u200A\u202F\u205F\u3000]/g, " ")
-        // Unicode NFC normalization (important for Thai combining characters)
-        .normalize("NFC");
+    let result = normalizeText(text);
 
     // Step 2: Normalize line breaks
     result = result
@@ -29,17 +73,10 @@ export const fixThaiDistributed = (text: string): string => {
         if (!line.trim()) return line;
 
         // Check if line contains Thai characters
-        const hasThaiChars = /[\u0E00-\u0E7F]/.test(line);
+        const hasThaiChars = THAI_CHAR_REGEX.test(line);
 
         if (hasThaiChars) {
-            // Use Intl.Segmenter to segment text
-            const segments = segmenter.segment(line);
-
-            // Map segments to their string representation
-            const words = Array.from(segments).map((s) => s.segment);
-
-            // Join words with Zero-Width Space
-            return words.join(ZWSP);
+            return segmentThaiPreservingTokens(line, segmenter);
         }
 
         return line;
