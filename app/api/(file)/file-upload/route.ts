@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import path from "path";
 import { writeFile } from "fs/promises";
@@ -35,7 +34,7 @@ const generateUniqueFilename = (originalName: string): string => {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json(
                 { error: "Unauthorized" },

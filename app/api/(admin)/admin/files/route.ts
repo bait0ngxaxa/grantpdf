@@ -1,13 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { getAllFilesPaginated } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         if (!session || !session.user?.id || session.user?.role !== "admin") {
             return NextResponse.json(

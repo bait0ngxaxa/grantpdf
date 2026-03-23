@@ -88,6 +88,7 @@ export const useAdminData = ({
     const statusCounts = statsData?.statusCounts ?? { pending: 0, approved: 0, rejected: 0, editing: 0, closed: 0 };
 
     const isLoading = isLoadingProjects || isLoadingStats;
+    const hasInitialDataLoaded = Boolean(projectsData) && Boolean(statsData);
     const error = projectsError
         ? "ไม่สามารถโหลดข้อมูลโครงการได้ กรุณาลองใหม่อีกครั้ง"
         : null;
@@ -96,6 +97,7 @@ export const useAdminData = ({
         projects,
         totalFiles,
         isLoading,
+        hasInitialDataLoaded,
         error,
         totalProjects,
         totalPages,

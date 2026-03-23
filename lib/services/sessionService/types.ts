@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { type getServerSession } from "next-auth";
+import type { Session } from "next-auth";
 
 export interface SessionValidationResult {
     userId: number;
-    session: NonNullable<Awaited<ReturnType<typeof getServerSession>>>;
+    session: Session;
 }
 
 export function isSessionError(

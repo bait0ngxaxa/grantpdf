@@ -45,6 +45,7 @@ export interface UserManagementHook {
     searchTerm: string;
     setSearchTerm: (value: string) => void;
     loadingUsers: boolean;
+    isInitialUsersLoading: boolean;
     fetchError: string | null;
     selectedUser: UserData | null;
     editFormData: EditFormData;
@@ -110,6 +111,7 @@ export function useUserManagement(): UserManagementHook {
     const totalPages = data?.totalPages ?? 0;
 
     const loadingUsers = isLoading;
+    const isInitialUsersLoading = isLoading && !data;
     const fetchError = error ? "ไม่สามารถโหลดข้อมูลผู้ใช้งานได้" : null;
 
     // UI States
@@ -248,6 +250,7 @@ export function useUserManagement(): UserManagementHook {
         searchTerm,
         setSearchTerm,
         loadingUsers,
+        isInitialUsersLoading,
         fetchError,
         selectedUser,
         editFormData,

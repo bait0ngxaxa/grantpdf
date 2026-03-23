@@ -7,8 +7,7 @@ import {
     GlobalModalProvider,
     SWRProvider,
 } from "@/components/providers";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { Toaster } from "sonner";
 
 const googleSans = localFont({
@@ -27,7 +26,7 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>): Promise<React.JSX.Element> {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     return (
         <html lang="en" suppressHydrationWarning>

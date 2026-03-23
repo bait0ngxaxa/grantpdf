@@ -9,6 +9,7 @@ import { UsersTab } from "./components/users/UsersTab";
 import { ProjectsTab } from "./components/project/ProjectsTab";
 import { AdminModals } from "./components/AdminModals";
 import { useAdminUI } from "./contexts/AdminUIContext";
+import { useAdminDataData } from "./contexts/AdminDataContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const getTitleByTab = (tab: string): string => {
@@ -30,6 +31,7 @@ export default function AdminDashboardClient(): React.JSX.Element | null {
 
     // Consume Context
     const { activeTab } = useAdminUI();
+    const { isLoading, hasInitialDataLoaded } = useAdminDataData();
 
     useTitle(getTitleByTab(activeTab));
 
@@ -41,7 +43,7 @@ export default function AdminDashboardClient(): React.JSX.Element | null {
         }
     }, [session, status, router]);
 
-    if (status === "loading") {
+    if (status === "loading" || (!hasInitialDataLoaded && isLoading)) {
         return <LoadingSpinner className="h-[calc(100vh-100px)]" />;
     }
 

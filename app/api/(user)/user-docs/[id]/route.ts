@@ -1,8 +1,7 @@
 // User file deletion endpoint
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { getFileForDeletion, deleteFileRecord } from "@/lib/services";
 import fs from "fs";
 import path from "path";
@@ -13,7 +12,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json(
                 { error: "Unauthorized" },

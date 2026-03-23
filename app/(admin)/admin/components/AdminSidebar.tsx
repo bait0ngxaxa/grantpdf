@@ -58,7 +58,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-white via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/30 backdrop-blur-2xl border-r border-slate-100 dark:border-slate-700 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] dark:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.3)] transform transition-transform duration-300 z-50 ${
+                className={`fixed left-0 top-0 h-full w-72 bg-linear-to-b from-white via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/30 backdrop-blur-2xl border-r border-slate-100 dark:border-slate-700 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] dark:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.3)] transform transition-transform duration-300 z-50 ${
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 } lg:translate-x-0 flex flex-col`}
             >
@@ -66,7 +66,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                 <div className="p-6 pb-2">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center space-x-3.5 group cursor-default">
-                            <div className="w-11 h-11 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 duration-300 transition">
+                            <div className="w-11 h-11 bg-linear-to-br from-blue-600 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 duration-300 transition">
                                 <ShieldCheck className="h-6 w-6 text-white" />
                             </div>
                             <div className="flex flex-col">
@@ -90,7 +90,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                     </div>
 
                     {/* Quick Stats Section */}
-                    <div className="mt-6 mb-6 p-4 rounded-xl bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 border border-slate-100/60 dark:border-slate-700/60 shadow-inner">
+                    <div className="mt-6 mb-6 p-4 rounded-xl bg-linear-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 border border-slate-100/60 dark:border-slate-700/60 shadow-inner">
                         <div className="flex items-center justify-between mb-3">
                             <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-balance">
                                 สถิติวันนี้
@@ -156,12 +156,12 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                 >
                                     {/* Active Background Gradient */}
                                     {activeTab === item.id && (
-                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl" />
+                                        <div className="absolute inset-0 bg-linear-to-r from-blue-600 to-indigo-600 rounded-xl" />
                                     )}
 
                                     {/* Hover slide effect for inactive items */}
                                     {activeTab !== item.id && (
-                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/80 dark:from-slate-800/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                                        <div className="absolute inset-0 bg-linear-to-r from-blue-50/80 dark:from-slate-800/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
                                     )}
 
                                     <span
@@ -196,7 +196,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-400/10 dark:bg-orange-400/5 rounded-full blur-2xl group-hover:bg-orange-400/20 dark:group-hover:bg-orange-400/10 transition-colors" />
 
                         <div className="flex items-center space-x-3 mb-3 relative z-10">
-                            <div className="w-10 h-10 bg-gradient-to-br from-orange-100 via-amber-50 to-white dark:from-orange-900 dark:via-amber-900 dark:to-slate-800 rounded-xl flex items-center justify-center border border-white dark:border-slate-700 shadow-sm ring-2 ring-white dark:ring-slate-700 group-hover:scale-105 transition-transform duration-300">
+                            <div className="w-10 h-10 bg-linear-to-br from-orange-100 via-amber-50 to-white dark:from-orange-900 dark:via-amber-900 dark:to-slate-800 rounded-xl flex items-center justify-center border border-white dark:border-slate-700 shadow-sm ring-2 ring-white dark:ring-slate-700 group-hover:scale-105 transition-transform duration-300">
                                 <span className="text-base font-bold text-orange-600 dark:text-orange-400">
                                     {session?.user?.name?.charAt(0) ||
                                         session?.user?.email?.charAt(0) ||

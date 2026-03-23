@@ -1,13 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { getProjectsByUserId, getProjectsByUserIdPaginated } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
@@ -47,7 +46,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 // POST: สร้างโครงการใหม่
 export async function POST(req: Request): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         if (!session || !session.user?.id) {
             return NextResponse.json(

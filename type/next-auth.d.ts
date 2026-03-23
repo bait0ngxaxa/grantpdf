@@ -1,11 +1,11 @@
-// next-auth.d.ts
+// next-auth.d.ts — Auth.js v5 type augmentation
 import "next-auth";
 import "next-auth/jwt";
-import { type DefaultSession, type DefaultUser } from "next-auth";
+import type { DefaultSession } from "next-auth";
 
 // Extend the built-in 'User' type
 declare module "next-auth" {
-    interface User extends DefaultUser {
+    interface User {
         id: string;
         role?: string;
     }

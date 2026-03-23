@@ -6,6 +6,7 @@ import { UsersTable } from "./UsersTable";
 import { EditUserModal } from "./EditUserModal";
 import { DeleteUserModal } from "./DeleteUserModal";
 import { useUserManagement } from "../../hooks/useUserManagement";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { XCircle } from "lucide-react";
 
 export const UsersTab: React.FC = (): React.JSX.Element => {
@@ -19,6 +20,7 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
         searchTerm,
         setSearchTerm,
         loadingUsers,
+        isInitialUsersLoading,
         fetchError,
         selectedUser,
         editFormData,
@@ -35,6 +37,10 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
         closeDeleteModal,
         handleDeleteUser,
     } = useUserManagement();
+
+    if (isInitialUsersLoading) {
+        return <LoadingSpinner className="py-20" />;
+    }
 
     return (
         <div>

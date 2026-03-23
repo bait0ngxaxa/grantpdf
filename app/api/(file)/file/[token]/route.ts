@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import fs from "fs";
 import { Readable } from "stream";
 import { verifySignedToken } from "@/lib/signedUrl";
@@ -29,7 +28,7 @@ export async function GET(
         const { fileId, userId, type, fromAdminPanel } = verification.payload;
 
         // Get current session (optional - for additional permission check)
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         // Fetch file from database based on type
         let file: {

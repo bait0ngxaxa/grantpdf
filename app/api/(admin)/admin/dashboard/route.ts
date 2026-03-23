@@ -1,13 +1,12 @@
 //เส้นดึงข้อมูลจาก table userFile มาแสดงผล dashboard admin
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { getAllFilesForAdmin } from "@/lib/services";
 
 export async function GET(): Promise<NextResponse> {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         if (!session || !session.user?.id) {
             return NextResponse.json(

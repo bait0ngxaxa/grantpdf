@@ -1,23 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("next-auth", () => ({
-    getServerSession: vi.fn(),
-}));
-
 vi.mock("@/lib/auth", () => ({
-    authOptions: {},
+    auth: vi.fn(),
 }));
 
 vi.mock("@/lib/services", () => ({
     getAllUsersPaginated: vi.fn(),
 }));
 
-import { getServerSession } from "next-auth";
+import { auth } from "@/lib/auth";
 import { getAllUsersPaginated } from "@/lib/services";
 import { GET } from "@/app/api/(admin)/admin/users/route";
 import { PAGINATION } from "@/lib/constants";
 
-const mockedGetServerSession = vi.mocked(getServerSession);
+const mockedAuth = vi.mocked(auth);
 const mockedGetAllUsersPaginated = vi.mocked(getAllUsersPaginated);
 
 describe("admin users route GET", () => {
@@ -26,7 +22,7 @@ describe("admin users route GET", () => {
     });
 
     it("returns 401 when session is missing", async () => {
-        mockedGetServerSession.mockResolvedValue(null);
+        mockedAuth.mockResolvedValue(null as never);
 
         const request = new Request("http://localhost/api/admin/users");
         const response = await GET(request as never);
@@ -38,7 +34,7 @@ describe("admin users route GET", () => {
     });
 
     it("returns 401 when session role is not admin", async () => {
-        mockedGetServerSession.mockResolvedValue({
+        mockedAuth.mockResolvedValue({
             user: { role: "member" },
         } as never);
 
@@ -50,7 +46,7 @@ describe("admin users route GET", () => {
     });
 
     it("calls service with default pagination values", async () => {
-        mockedGetServerSession.mockResolvedValue({
+        mockedAuth.mockResolvedValue({
             user: { role: "admin" },
         } as never);
         mockedGetAllUsersPaginated.mockResolvedValue({
@@ -73,7 +69,7 @@ describe("admin users route GET", () => {
     });
 
     it("clamps page/limit and forwards search", async () => {
-        mockedGetServerSession.mockResolvedValue({
+        mockedAuth.mockResolvedValue({
             user: { role: "admin" },
         } as never);
         mockedGetAllUsersPaginated.mockResolvedValue({
@@ -98,7 +94,7 @@ describe("admin users route GET", () => {
     });
 
     it("returns 500 when service throws", async () => {
-        mockedGetServerSession.mockResolvedValue({
+        mockedAuth.mockResolvedValue({
             user: { role: "admin" },
         } as never);
         mockedGetAllUsersPaginated.mockRejectedValue(

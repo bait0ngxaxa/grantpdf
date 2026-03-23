@@ -1,14 +1,13 @@
-// /app/api/auth/[...nextauth]/route.ts
+// lib/auth.ts — Auth.js v5 configuration
 import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
+import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import type { NextAuthOptions, User } from "next-auth";
+import type { User } from "next-auth";
 
-export const authOptions: NextAuthOptions = {
+export const { auth, handlers, signIn, signOut } = NextAuth({
     providers: [
-        CredentialsProvider({
-            name: "Credentials",
+        Credentials({
             credentials: {
                 email: {
                     label: "Email",
@@ -17,7 +16,7 @@ export const authOptions: NextAuthOptions = {
                 },
                 password: { label: "Password", type: "password" },
             },
-            async authorize(credentials, _req) {
+            async authorize(credentials) {
                 if (
                     !credentials?.email ||
                     typeof credentials.email !== "string" ||
@@ -70,7 +69,7 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         jwt: async ({ token, user }) => {
             if (user) {
-                token.id = user.id;
+                token.id = user.id as string;
                 token.role = user.role;
             }
             return token;
@@ -83,8 +82,4 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
     },
-};
-
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST };
+});

@@ -82,9 +82,11 @@ export async function middleware(
         }
     }
 
+    // Auth.js v5: use getToken (still works in Edge middleware)
+    // auth() wrapper uses Node.js runtime, so getToken is preferred in middleware
     const token = await getToken({
         req,
-        secret: process.env.NEXTAUTH_SECRET,
+        secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
     });
 
     if (token && AUTH_PAGES.includes(pathname)) {

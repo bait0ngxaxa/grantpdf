@@ -17,6 +17,7 @@ import type {
 interface AdminDataContextType {
     projects: AdminProject[];
     isLoading: boolean;
+    hasInitialDataLoaded: boolean;
     error: string | null;
     totalProjects: number;
     totalPages: number;

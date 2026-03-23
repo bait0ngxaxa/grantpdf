@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { type Metadata } from "next";
 import UploadDocClient from "./UploadDocClient";
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function UploadDocPage() {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session) {
         redirect(ROUTES.SIGNIN);

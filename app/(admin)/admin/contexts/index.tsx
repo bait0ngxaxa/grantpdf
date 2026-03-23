@@ -60,6 +60,7 @@ interface AdminDashboardContextType {
     projects: AdminProject[];
     totalFiles: number;
     isLoading: boolean;
+    hasInitialDataLoaded: boolean;
     error: string | null;
     totalProjects: number;
     totalPages: number;
