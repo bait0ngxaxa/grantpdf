@@ -20,7 +20,13 @@ export default async function AdminDashboardLayout({
         redirect("/access-denied");
     }
 
-    const initialStats = await getAdminDashboardStats();
+    let initialStats: Awaited<ReturnType<typeof getAdminDashboardStats>> | undefined;
+    try {
+        initialStats = await getAdminDashboardStats();
+    } catch (error) {
+        console.error("Failed to prefetch admin dashboard stats:", error);
+        initialStats = undefined;
+    }
 
     return <AdminDashboardWrapper initialStats={initialStats}>{children}</AdminDashboardWrapper>;
 }

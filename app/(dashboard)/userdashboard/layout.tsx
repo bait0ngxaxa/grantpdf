@@ -20,8 +20,17 @@ export default async function UserDashboardLayout({
         redirect("/signin");
     }
 
-    const userId = session?.user?.id ? Number(session.user.id) : null;
-    const initialStats = userId ? await getUserProjectStats(userId) : undefined;
+    const userId = session.user?.id ? Number(session.user.id) : null;
+    let initialStats: Awaited<ReturnType<typeof getUserProjectStats>> | undefined;
+
+    if (userId) {
+        try {
+            initialStats = await getUserProjectStats(userId);
+        } catch (error) {
+            console.error("Failed to prefetch user dashboard stats:", error);
+            initialStats = undefined;
+        }
+    }
 
     return <DashboardWrapper initialStats={initialStats}>{children}</DashboardWrapper>;
 }
