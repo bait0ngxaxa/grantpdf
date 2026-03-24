@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 import { Button, Pagination } from "@/components/ui";
 import { Edit, Trash2, Search, Users } from "lucide-react";
 
@@ -103,11 +104,12 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                                     </td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide ${
+                                            className={cn(
+                                                "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide",
                                                 user.role === "admin"
                                                     ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400"
-                                                    : "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400"
-                                            }`}
+                                                    : "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400",
+                                            )}
                                         >
                                             {user.role === "admin"
                                                 ? "Admin"

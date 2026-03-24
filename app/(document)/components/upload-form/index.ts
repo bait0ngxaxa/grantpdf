@@ -1,3 +1,3 @@
-export * from "./ProjectList";
-export * from "./UploadArea";
-export * from "./UploadHeader";
+export { ProjectList } from "./ProjectList";
+export { UploadArea } from "./UploadArea";
+export { UploadHeader } from "./UploadHeader";

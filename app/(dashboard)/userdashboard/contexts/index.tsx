@@ -7,6 +7,7 @@ import React, {
     type ReactNode,
 } from "react";
 import { useDashboardActions } from "../hooks/useDashboardActions";
+import type { UserProjectStats } from "../hooks/useUserData";
 import type { Project } from "@/type";
 import type { LatestProject } from "@/type/models";
 
@@ -133,11 +134,17 @@ function UnifiedProviderValue({ children }: { children: ReactNode }) {
     );
 }
 
-export function UserDashboardProvider({ children }: { children: ReactNode }) {
+export function UserDashboardProvider({
+    children,
+    initialStats,
+}: {
+    children: ReactNode;
+    initialStats?: UserProjectStats;
+}) {
     return (
         <DashboardUIProvider>
             <ModalProvider>
-                <ProjectDataProvider>
+                <ProjectDataProvider initialStats={initialStats}>
                     <UnifiedProviderValue>{children}</UnifiedProviderValue>
                 </ProjectDataProvider>
             </ModalProvider>

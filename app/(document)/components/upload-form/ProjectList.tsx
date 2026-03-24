@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Folder, Calendar, ChevronRight } from "lucide-react";
 import type { Project } from "@/type";
+import { cn } from "@/lib/utils";
 
 type ProjectListItem = Pick<
     Project,
@@ -25,8 +26,6 @@ export function ProjectList({
     isLoading,
     error,
 }: ProjectListProps): React.JSX.Element {
-    const router = useRouter();
-
     return (
         <div className="space-y-6">
             <div>
@@ -51,11 +50,11 @@ export function ProjectList({
                             ไม่พบโครงการ กรุณาสร้างโครงการก่อน
                         </p>
                         <Button
-                            onClick={() => router.push("/createproject")}
+                            asChild
                             className="cursor-pointer bg-yellow-600 hover:bg-yellow-700 text-white"
                             size="sm"
                         >
-                            สร้างโครงการใหม่
+                            <Link href="/createproject">สร้างโครงการใหม่</Link>
                         </Button>
                     </div>
                 ) : (
@@ -63,20 +62,22 @@ export function ProjectList({
                         {projects.map((project) => (
                             <div
                                 key={project.id}
-                                className={`group relative bg-white dark:bg-slate-800 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                                className={cn(
+                                    "group relative bg-white dark:bg-slate-800 rounded-lg p-4 cursor-pointer transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200",
                                     selectedProjectId === project.id
                                         ? "ring-2 ring-blue-500 shadow-md bg-blue-50/30 dark:bg-blue-900/30"
-                                        : "hover:shadow-md border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700"
-                                }`}
+                                        : "hover:shadow-md border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700",
+                                )}
                                 onClick={() => onSelectProject(project.id)}
                             >
                                 <div className="flex items-start gap-3">
                                     <div
-                                        className={`p-2 rounded-lg flex-shrink-0 transition-colors ${
+                                        className={cn(
+                                            "p-2 rounded-lg flex-shrink-0 transition-colors",
                                             selectedProjectId === project.id
                                                 ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400"
-                                                : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-500 dark:group-hover:text-blue-400"
-                                        }`}
+                                                : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-500 dark:group-hover:text-blue-400",
+                                        )}
                                     >
                                         <Folder className="w-5 h-5" />
                                     </div>
@@ -149,3 +150,4 @@ export function ProjectList({
         </div>
     );
 }
+

@@ -1,4 +1,5 @@
 import { LayoutTemplate, ClipboardCheck, FileText, BarChart3, Edit } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface TemplateCardProps {
     icon: React.ReactNode;
@@ -48,14 +49,14 @@ function TemplateCard({
 
     return (
         <div
-            className={`group relative bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 hover:shadow-xl ${colors.bgHover} hover:-translate-y-1 duration-300 cursor-pointer overflow-hidden transition`}
+            className={cn("group relative bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 hover:shadow-xl hover:-translate-y-1 duration-300 cursor-pointer overflow-hidden transition", colors.bgHover)}
         >
             <div
-                className={`absolute top-0 right-0 w-24 h-24 ${colors.accent} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}
+                className={cn("absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110", colors.accent)}
             />
             <div className="relative">
                 <div
-                    className={`w-12 h-12 ${colors.iconBg} ${colors.text} rounded-xl flex items-center justify-center text-2xl mb-4 ${colors.iconHover} group-hover:text-white transition-colors duration-300`}
+                    className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:text-white transition-colors duration-300", colors.iconBg, colors.text, colors.iconHover)}
                 >
                     {icon}
                 </div>
@@ -66,7 +67,7 @@ function TemplateCard({
                     {subtitle}
                 </p>
                 <div
-                    className={`flex items-center ${colors.text} text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300`}
+                    className={cn("flex items-center text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300", colors.text)}
                 >
                     สร้างเลย <span className="ml-1">→</span>
                 </div>

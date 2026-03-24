@@ -10,6 +10,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PreviewModalProps {
     isOpen: boolean;
@@ -40,7 +41,7 @@ export function PreviewModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className={`${maxWidth} max-h-[85vh] flex flex-col`}>
+            <DialogContent className={cn(maxWidth, "max-h-[85vh] flex flex-col")}>
                 <DialogHeader className="flex-shrink-0">
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>{description}</DialogDescription>

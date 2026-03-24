@@ -4,8 +4,9 @@ import React from "react";
 import { useCreateDocsContext } from "../contexts";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { Button } from "@/components/ui";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ROUTES } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 export const CreateDocsTopBar = (): React.JSX.Element => {
     const {
@@ -14,7 +15,6 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
         selectedContractType,
         goBack,
     } = useCreateDocsContext();
-    const router = useRouter();
 
     // Determine current step
     let currentStep = 1;
@@ -64,24 +64,26 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
                                     {/* Connector Line */}
                                     {index > 0 && (
                                         <div
-                                            className={`w-8 h-0.5 rounded-full ${
+                                            className={cn(
+                                                "w-8 h-0.5 rounded-full",
                                                 isCompleted
                                                     ? "bg-blue-600 dark:bg-blue-500"
-                                                    : "bg-slate-200 dark:bg-slate-700"
-                                            }`}
+                                                    : "bg-slate-200 dark:bg-slate-700",
+                                            )}
                                         />
                                     )}
 
                                     {/* Step Circle & Label */}
                                     <div className="flex items-center space-x-2">
                                         <div
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                                            className={cn(
+                                                "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300",
                                                 isCompleted
                                                     ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
                                                     : isActive
                                                       ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border-2 border-blue-600 dark:border-blue-400 shadow-md"
-                                                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700"
-                                            }`}
+                                                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700",
+                                            )}
                                         >
                                             {isCompleted ? (
                                                 <Check className="h-4 w-4" />
@@ -90,11 +92,12 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
                                             )}
                                         </div>
                                         <span
-                                            className={`text-sm font-medium transition-colors duration-300 ${
+                                            className={cn(
+                                                "text-sm font-medium transition-colors duration-300",
                                                 isActive || isCompleted
                                                     ? "text-slate-900 dark:text-slate-100"
-                                                    : "text-slate-400 dark:text-slate-600"
-                                            }`}
+                                                    : "text-slate-400 dark:text-slate-600",
+                                            )}
                                         >
                                             {step.label}
                                         </span>
@@ -106,13 +109,15 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
 
                     {/* Right: Exit */}
                     <Button
+                        asChild
                         variant="ghost"
                         size="sm"
-                        onClick={() => router.push(ROUTES.DASHBOARD)}
                         className="text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                     >
-                        <X className="h-5 w-5 mr-1" />
-                        <span className="hidden sm:inline">ยกเลิก</span>
+                        <Link href={ROUTES.DASHBOARD}>
+                            <X className="h-5 w-5 mr-1" />
+                            <span className="hidden sm:inline">ยกเลิก</span>
+                        </Link>
                     </Button>
                 </div>
 
@@ -129,3 +134,4 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
         </div>
     );
 };
+

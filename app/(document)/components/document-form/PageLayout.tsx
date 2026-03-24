@@ -5,6 +5,7 @@ import { Button } from "@/components/ui";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGlobalModal } from "@/lib/hooks/useGlobalModal";
+import { cn } from "@/lib/utils";
 
 interface PageLayoutProps {
     children: ReactNode;
@@ -62,7 +63,7 @@ export function PageLayout({
 
     return (
         <div
-            className={`min-h-screen flex flex-col items-center bg-gradient-to-br ${gradientFrom} ${gradientTo} p-4 sm:p-6 lg:p-8 font-sans antialiased`}
+            className={cn("min-h-screen flex flex-col items-center bg-gradient-to-br p-4 sm:p-6 lg:p-8 font-sans antialiased", gradientFrom, gradientTo)}
         >
             <div className="w-full max-w-5xl mb-6">
                 <Button
@@ -79,7 +80,7 @@ export function PageLayout({
 
             <div className="w-full max-w-5xl bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 border border-white/50 dark:border-slate-700 overflow-hidden ring-1 ring-slate-900/5 dark:ring-white/5">
                 <div
-                    className={`bg-gradient-to-r ${headerGradientFrom} ${headerGradientTo} p-8 text-white relative overflow-hidden`}
+                    className={cn("bg-gradient-to-r p-8 text-white relative overflow-hidden", headerGradientFrom, headerGradientTo)}
                 >
                     <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
                     <div className="relative z-10">
@@ -89,7 +90,7 @@ export function PageLayout({
                         {subtitle && (
                             <div className="flex justify-center mt-3">
                                 <span
-                                    className={`inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-sm font-medium tracking-wide ${headerTextColor}`}
+                                    className={cn("inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-sm font-medium tracking-wide", headerTextColor)}
                                 >
                                     {subtitle}
                                 </span>

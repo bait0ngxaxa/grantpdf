@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { PROJECT_STATUS } from "@/type/models";
-import { getStatusColor } from "@/lib/utils";
+import { getStatusColor, cn } from "@/lib/utils";
 import type { Project } from "@/type";
 import { CheckCircle, X } from "lucide-react";
 
@@ -20,18 +20,33 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 backdrop-blur-sm bg-slate-900/40 dark:bg-slate-900/60" onClick={onClose} />
-            <div className="relative w-full bg-white dark:bg-slate-900 p-6 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 z-10">
+            <button
+                type="button"
+                aria-label="ปิดหน้าต่างรายละเอียดสถานะ"
+                className="absolute inset-0 backdrop-blur-sm bg-slate-900/40 dark:bg-slate-900/60"
+                onClick={onClose}
+            />
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="status-detail-modal-title"
+                className="relative w-full bg-white dark:bg-slate-900 p-6 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 z-10"
+            >
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                             <CheckCircle className="h-6 w-6" />
                         </div>
-                        <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 text-balance">
+                        <h3
+                            id="status-detail-modal-title"
+                            className="font-bold text-xl text-slate-800 dark:text-slate-100 text-balance"
+                        >
                             รายละเอียดสถานะ
                         </h3>
                     </div>
                     <button
+                        type="button"
+                        aria-label="ปิดหน้าต่างรายละเอียดสถานะ"
                         onClick={onClose}
                         className="p-1.5 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                     >
@@ -54,9 +69,10 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                             สถานะปัจจุบัน
                         </p>
                         <span
-                            className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold border shadow-sm ${getStatusColor(
-                                project.status || PROJECT_STATUS.IN_PROGRESS,
-                            )}`}
+                            className={cn(
+                                "inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold border shadow-sm",
+                                getStatusColor(project.status || PROJECT_STATUS.IN_PROGRESS),
+                            )}
                         >
                             <span className="w-2 h-2 rounded-full bg-current mr-2 opacity-75" />
                             {project.status || PROJECT_STATUS.IN_PROGRESS}

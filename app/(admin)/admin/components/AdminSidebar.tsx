@@ -1,4 +1,6 @@
 import React from "react";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { Button } from "@/components/ui";
 import {
     Users,
@@ -10,7 +12,6 @@ import {
 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useAdminDashboardContext } from "../contexts";
 
 const menuItems = [
@@ -33,7 +34,6 @@ const menuItems = [
 
 export const AdminSidebar: React.FC = (): React.JSX.Element => {
     const { data: session } = useSession();
-    const router = useRouter();
     const {
         isSidebarOpen,
         setIsSidebarOpen,
@@ -58,9 +58,10 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full w-72 bg-linear-to-b from-white via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/30 backdrop-blur-2xl border-r border-slate-100 dark:border-slate-700 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] dark:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.3)] transform transition-transform duration-300 z-50 ${
-                    isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-                } lg:translate-x-0 flex flex-col`}
+                className={cn(
+                    "fixed left-0 top-0 h-full w-72 bg-linear-to-b from-white via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/30 backdrop-blur-2xl border-r border-slate-100 dark:border-slate-700 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] dark:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.3)] transform transition-transform duration-300 z-50 lg:translate-x-0 flex flex-col",
+                    isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+                )}
             >
                 {/* Header */}
                 <div className="p-6 pb-2">
@@ -96,7 +97,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                 สถิติวันนี้
                             </h4>
                             <span className="flex h-1.5 w-1.5 relative">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                                <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
                                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500" />
                             </span>
                         </div>
@@ -148,11 +149,12 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                         });
                                         setIsSidebarOpen(false);
                                     }}
-                                    className={`w-full group flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 text-left font-medium relative overflow-hidden ${
+                                    className={cn(
+                                        "w-full group flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300 text-left font-medium relative overflow-hidden",
                                         activeTab === item.id
                                             ? "text-white shadow-lg shadow-blue-500/25"
-                                            : "text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800/50"
-                                    }`}
+                                            : "text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800/50",
+                                    )}
                                 >
                                     {/* Active Background Gradient */}
                                     {activeTab === item.id && (
@@ -165,11 +167,12 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                     )}
 
                                     <span
-                                        className={`relative z-10 transition-transform duration-300 group-hover:scale-110 ${
+                                        className={cn(
+                                            "relative z-10 transition-transform duration-300 group-hover:scale-110",
                                             activeTab === item.id
                                                 ? "text-white"
-                                                : "text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                                        }`}
+                                                : "text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400",
+                                        )}
                                     >
                                         {item.icon}
                                     </span>
@@ -214,12 +217,14 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                         </div>
                         <div className="flex gap-2 relative z-10">
                             <Button
-                                onClick={() => router.push(ROUTES.DASHBOARD)}
+                                asChild
                                 variant="outline"
                                 className="w-full h-9 text-xs font-semibold rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-white dark:hover:bg-slate-700 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-200 dark:hover:border-orange-800 hover:shadow-md hover:shadow-orange-500/10 duration-300 transition"
                             >
-                                <ArrowLeft className="w-3.5 h-3.5 mr-2" />
-                                กลับ User Dashboard
+                                <Link href={ROUTES.DASHBOARD}>
+                                    <ArrowLeft className="w-3.5 h-3.5 mr-2" />
+                                    กลับ User Dashboard
+                                </Link>
                             </Button>
                         </div>
                     </div>
@@ -228,3 +233,4 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
         </>
     );
 };
+

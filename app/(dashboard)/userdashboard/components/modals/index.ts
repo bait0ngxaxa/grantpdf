@@ -1,4 +1,4 @@
-export * from "./CreateProjectModal";
-export * from "./DeleteConfirmModal";
-export * from "./EditProjectModal";
-export * from "./ProfileModal";
+export { CreateProjectModal } from "./CreateProjectModal";
+export { DeleteConfirmModal } from "./DeleteConfirmModal";
+export { EditProjectModal } from "./EditProjectModal";
+export { ProfileModal } from "./ProfileModal";

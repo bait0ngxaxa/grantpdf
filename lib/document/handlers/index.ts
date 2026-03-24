@@ -1,5 +1,6 @@
-export * from "./approvalHandler";
-export * from "./contractHandler";
-export * from "./formProjectHandler";
-export * from "./summaryHandler";
-export * from "./torHandler";
+
+export { handleApprovalGeneration } from "./approvalHandler";
+export { handleContractGeneration } from "./contractHandler";
+export { handleFormProjectGeneration } from "./formProjectHandler";
+export { handleSummaryGeneration } from "./summaryHandler";
+export { handleTorGeneration } from "./torHandler";

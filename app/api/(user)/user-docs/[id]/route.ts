@@ -8,7 +8,7 @@ import path from "path";
 import { logAudit } from "@/lib/auditLog";
 
 export async function DELETE(
-    req: NextRequest,
+    _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {

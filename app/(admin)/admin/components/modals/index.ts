@@ -1,1 +1,1 @@
-export * from "./ProjectStatusModal";
+export { ProjectStatusModal } from "./ProjectStatusModal";

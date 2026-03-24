@@ -59,7 +59,7 @@ export default function SigninClient(): React.JSX.Element {
                 <div className="hidden md:flex flex-col space-y-8 p-8">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/50 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-medium text-sm self-start animate-fade-in-up">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                         </span>
                         GRANT ONLINE
@@ -93,10 +93,14 @@ export default function SigninClient(): React.JSX.Element {
                             className="space-y-5 relative z-10"
                         >
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                <label
+                                    htmlFor="signin-email"
+                                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                                >
                                     อีเมล
                                 </label>
                                 <Input
+                                    id="signin-email"
                                     type="email"
                                     name="email"
                                     autoComplete="email"
@@ -110,7 +114,10 @@ export default function SigninClient(): React.JSX.Element {
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <label
+                                        htmlFor="signin-password"
+                                        className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                                    >
                                         รหัสผ่าน
                                     </label>
                                     <Link
@@ -121,6 +128,7 @@ export default function SigninClient(): React.JSX.Element {
                                     </Link>
                                 </div>
                                 <Input
+                                    id="signin-password"
                                     type="password"
                                     name="password"
                                     autoComplete="current-password"
@@ -135,7 +143,10 @@ export default function SigninClient(): React.JSX.Element {
                             </div>
 
                             {error && (
-                                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake">
+                                <div
+                                    aria-live="polite"
+                                    className="p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake"
+                                >
                                     <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>
@@ -144,7 +155,7 @@ export default function SigninClient(): React.JSX.Element {
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 transition-all"
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 transition-[transform,box-shadow,background-image]"
                             >
                                 {isLoading ? (
                                     <div className="flex items-center gap-2">

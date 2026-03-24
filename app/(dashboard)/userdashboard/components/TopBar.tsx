@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/ui";
 import { ChartBarBig, UserStar, LogOut, Menu } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useUserDashboardContext } from "../contexts";
 
 const menuItems = [
@@ -15,7 +15,6 @@ const menuItems = [
 
 export const TopBar: React.FC = (): React.JSX.Element => {
     const { data: session } = useSession();
-    const router = useRouter();
     const { setIsSidebarOpen, activeTab } = useUserDashboardContext();
 
     return (
@@ -52,11 +51,13 @@ export const TopBar: React.FC = (): React.JSX.Element => {
 
                     {session?.user?.role === "admin" && (
                         <Button
+                            asChild
                             className="font-semibold cursor-pointer transform hover:scale-105 active:scale-95 duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 border-0 transition"
-                            onClick={() => router.push(ROUTES.ADMIN)}
                         >
-                            <UserStar className="w-4 h-4 mr-2" />
-                            ระบบแอดมิน
+                            <Link href={ROUTES.ADMIN}>
+                                <UserStar className="w-4 h-4 mr-2" />
+                                ระบบแอดมิน
+                            </Link>
                         </Button>
                     )}
                     <Button

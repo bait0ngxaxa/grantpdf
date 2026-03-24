@@ -7,6 +7,7 @@ import {
     CheckCircle,
     AlertCircle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface UploadAreaProps {
     fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -52,11 +53,12 @@ export function UploadArea({
                 </h3>
 
                 <div
-                    className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+                    className={cn(
+                        "relative border-2 border-dashed rounded-xl p-8 text-center transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200",
                         selectedFile
                             ? "border-green-400 dark:border-green-600 bg-green-50/50 dark:bg-green-900/20"
-                            : "border-gray-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800"
-                    }`}
+                            : "border-gray-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800",
+                    )}
                     onDragOver={onDragOver}
                     onDrop={onDrop}
                 >
@@ -160,11 +162,12 @@ export function UploadArea({
             {/* Status Message */}
             {uploadMessage && (
                 <div
-                    className={`p-4 rounded-lg flex items-start gap-3 animate-in fade-in ${
+                    className={cn(
+                        "p-4 rounded-lg flex items-start gap-3 animate-in fade-in",
                         uploadSuccess
                             ? "bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-900/50 text-green-800 dark:text-green-400"
-                            : "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-400"
-                    }`}
+                            : "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-400",
+                    )}
                 >
                     {uploadSuccess ? (
                         <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -177,3 +180,4 @@ export function UploadArea({
         </div>
     );
 }
+

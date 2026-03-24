@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface StatusCount {
     pending: number;
@@ -51,7 +52,7 @@ export const ProjectStatusDetails: React.FC<ProjectStatusDetailsProps> = ({
                 >
                     <div className="flex items-center">
                         <div
-                            className={`w-1.5 h-1.5 ${color} rounded-full mr-2.5`}
+                            className={cn("w-1.5 h-1.5 rounded-full mr-2.5", color)}
                         />
                         <span className="text-xs font-medium text-slate-500 dark:text-slate-400 group-hover/item:text-slate-700 dark:group-hover/item:text-slate-300 transition-colors">
                             {label}

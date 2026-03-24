@@ -9,6 +9,7 @@ import {
     type PreviewModalState,
 } from "./GlobalModalContext";
 import { SuccessModal, PdfPreviewModal, LoadingSpinner } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 import {
     Dialog,
@@ -178,11 +179,12 @@ export function GlobalModalProvider({
                         </Button>
                         <Button
                             onClick={handleConfirm}
-                            className={`rounded-xl text-white shadow-md transition-all ${
+                            className={cn(
+                                "rounded-xl text-white shadow-md transition-[color,background-color,border-color,opacity,box-shadow,transform,filter]",
                                 confirmModal.isDestructive
                                     ? "bg-red-500 hover:bg-red-600 shadow-red-200 dark:shadow-none"
-                                    : "bg-blue-600 hover:bg-blue-700 shadow-blue-200 dark:shadow-none"
-                            }`}
+                                    : "bg-blue-600 hover:bg-blue-700 shadow-blue-200 dark:shadow-none",
+                            )}
                         >
                             {confirmModal.confirmText || "ยืนยัน"}
                         </Button>
@@ -192,3 +194,4 @@ export function GlobalModalProvider({
         </GlobalModalContext.Provider>
     );
 }
+

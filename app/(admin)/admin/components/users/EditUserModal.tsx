@@ -40,9 +40,17 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100 dark:border-slate-700">
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="edit-user-modal-title"
+                className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100 dark:border-slate-700"
+            >
                 <div className="mb-6">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
+                    <h3
+                        id="edit-user-modal-title"
+                        className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance"
+                    >
                         แก้ไขผู้ใช้งาน
                     </h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -128,7 +136,12 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                 </form>
             </div>
             {/* Backdrop click to close */}
-            <div className="absolute inset-0 z-[-1]" onClick={onClose} />
+            <button
+                type="button"
+                aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
+                className="absolute inset-0 z-[-1]"
+                onClick={onClose}
+            />
         </div>
     );
 };

@@ -1,16 +1,25 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React from "react";
+import dynamic from "next/dynamic";
 import { useTitle } from "@/lib/hooks/useTitle";
 import { DashboardOverview } from "./components/dashboard/DashboardOverview";
-import { UsersTab } from "./components/users/UsersTab";
-import { ProjectsTab } from "./components/project/ProjectsTab";
-import { AdminModals } from "./components/AdminModals";
 import { useAdminUI } from "./contexts/AdminUIContext";
 import { useAdminDataData } from "./contexts/AdminDataContext";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+
+// P1: Lazy-load tabs that are not visible on first render
+const UsersTab = dynamic(
+    () => import("./components/users/UsersTab").then((m) => ({ default: m.UsersTab })),
+    { loading: () => <LoadingSpinner className="h-64" /> },
+);
+const ProjectsTab = dynamic(
+    () => import("./components/project/ProjectsTab").then((m) => ({ default: m.ProjectsTab })),
+    { loading: () => <LoadingSpinner className="h-64" /> },
+);
+const AdminModals = dynamic(
+    () => import("./components/AdminModals").then((m) => ({ default: m.AdminModals })),
+);
 
 const getTitleByTab = (tab: string): string => {
     switch (tab) {
@@ -26,29 +35,14 @@ const getTitleByTab = (tab: string): string => {
 };
 
 export default function AdminDashboardClient(): React.JSX.Element | null {
-    const { data: session, status } = useSession();
-    const router = useRouter();
-
-    // Consume Context
+    // P0: Server component (page.tsx) already verifies admin role — no need for useSession() here
     const { activeTab } = useAdminUI();
     const { isLoading, hasInitialDataLoaded } = useAdminDataData();
 
     useTitle(getTitleByTab(activeTab));
 
-    // Fallback UI Auth Guard (Server component should catch this first)
-    useEffect(() => {
-        if (status === "loading") return;
-        if (!session || session.user?.role !== "admin") {
-            router.push("/access-denied");
-        }
-    }, [session, status, router]);
-
-    if (status === "loading" || (!hasInitialDataLoaded && isLoading)) {
+    if (!hasInitialDataLoaded && isLoading) {
         return <LoadingSpinner className="h-[calc(100vh-100px)]" />;
-    }
-
-    if (!session || session.user?.role !== "admin") {
-        return null;
     }
 
     return (

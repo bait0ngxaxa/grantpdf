@@ -15,6 +15,7 @@ import type {
 import { AdminUIProvider, useAdminUI } from "./AdminUIContext";
 import { AdminDataProvider, useAdminDataData } from "./AdminDataContext";
 import { AdminModalProvider, useAdminModal } from "./AdminModalContext";
+import type { AdminStatsResponse } from "../hooks/useAdminData";
 
 interface AdminDashboardContextType {
     // UI State
@@ -101,11 +102,17 @@ function UnifiedProviderValue({ children }: { children: ReactNode }) {
     );
 }
 
-export function AdminDashboardProvider({ children }: { children: ReactNode }) {
+export function AdminDashboardProvider({
+    children,
+    initialStats,
+}: {
+    children: ReactNode;
+    initialStats?: AdminStatsResponse;
+}) {
     return (
         // AdminUIProvider must be outermost so AdminDataContext can read its state
         <AdminUIProvider>
-            <AdminDataProvider>
+            <AdminDataProvider initialStats={initialStats}>
                 <AdminModalProvider>
                     <UnifiedProviderValue>{children}</UnifiedProviderValue>
                 </AdminModalProvider>

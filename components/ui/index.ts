@@ -1,14 +1,23 @@
-export * from "./CreateDocSuccessModal";
-
-export * from "./Pagination";
-export * from "./PdfPreviewModal";
-
-export * from "./SuccessModal";
-export * from "./LoadingSpinner";
-export * from "./EmptyState";
-export * from "./AttachmentList";
-export * from "./button";
-export * from "./dialog";
-export * from "./input";
-export * from "./textarea";
-export * from "./ThemeToggle";
+export { CreateDocSuccessModal } from "./CreateDocSuccessModal";
+export { Pagination } from "./Pagination";
+export { PdfPreviewModal } from "./PdfPreviewModal";
+export { SuccessModal } from "./SuccessModal";
+export { LoadingSpinner } from "./LoadingSpinner";
+export { EmptyState } from "./EmptyState";
+export { AttachmentList } from "./AttachmentList";
+export { Button, buttonVariants } from "./button";
+export {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogOverlay,
+    DialogPortal,
+    DialogTitle,
+    DialogTrigger,
+} from "./dialog";
+export { Input } from "./input";
+export { Textarea } from "./textarea";
+export { ThemeToggle } from "./ThemeToggle";

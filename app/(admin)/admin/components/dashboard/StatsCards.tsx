@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Archive, Plus, FilePlus, Clock } from "lucide-react";
 
 interface StatsCardsProps {
@@ -42,7 +42,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
             <div className="relative bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 transition overflow-hidden group">
                 {/* Background Glowing Orb Effect */}
                 {todayProjects > 0 && (
-                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 dark:bg-green-400/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-all duration-500" />
+                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 dark:bg-green-400/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-500" />
                 )}
                 
                 <div className="flex items-center space-x-4 relative z-10">
@@ -63,7 +63,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
                             {todayProjects > 0 && (
                                 <div className="flex items-center gap-1.5 bg-gradient-to-r from-green-500/10 to-emerald-500/10 dark:from-green-400/10 dark:to-emerald-400/10 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-full border border-green-200/50 dark:border-green-800/50 shadow-sm">
                                     <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600 dark:bg-green-400" />
                                     </span>
                                     <span className="text-[10px] uppercase font-bold tracking-wider">New</span>
@@ -104,7 +104,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
             <div className="relative bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 transition overflow-hidden group">
                 {/* Background Glowing Orb Effect */}
                 {todayFiles > 0 && (
-                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 dark:bg-orange-400/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-all duration-500" />
+                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 dark:bg-orange-400/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-500" />
                 )}
 
                 <div className="flex items-center space-x-4 relative z-10">
@@ -125,7 +125,7 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
                             {todayFiles > 0 && (
                                 <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500/10 to-amber-500/10 dark:from-orange-400/10 dark:to-amber-400/10 text-orange-600 dark:text-orange-400 px-2.5 py-1 rounded-full border border-orange-200/50 dark:border-orange-800/50 shadow-sm">
                                     <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75" />
+                                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75" />
                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-600 dark:bg-orange-400" />
                                     </span>
                                     <span className="text-[10px] uppercase font-bold tracking-wider">New</span>
@@ -141,3 +141,4 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
         </div>
     );
 };
+

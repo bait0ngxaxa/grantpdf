@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { ClipboardList, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ProjectStatusModalProps {
     isStatusModalOpen: boolean;
@@ -32,18 +33,33 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
         <>
             {isStatusModalOpen && selectedProjectForStatus && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 backdrop-blur-sm bg-slate-900/20" onClick={closeStatusModal} />
-                    <div className="relative w-full bg-white dark:bg-slate-800 p-8 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 z-10">
+                    <button
+                        type="button"
+                        aria-label="ปิดหน้าต่างจัดการสถานะ"
+                        className="absolute inset-0 backdrop-blur-sm bg-slate-900/20"
+                        onClick={closeStatusModal}
+                    />
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="project-status-modal-title"
+                        className="relative w-full bg-white dark:bg-slate-800 p-8 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 z-10"
+                    >
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center space-x-3">
                                 <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                                     <ClipboardList className="h-6 w-6" />
                                 </div>
-                                <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 text-balance">
+                                <h3
+                                    id="project-status-modal-title"
+                                    className="font-bold text-xl text-slate-800 dark:text-slate-100 text-balance"
+                                >
                                     จัดการสถานะ
                                 </h3>
                             </div>
                             <button
+                                type="button"
+                                aria-label="ปิดหน้าต่างจัดการสถานะ"
                                 onClick={closeStatusModal}
                                 className="p-1.5 rounded-full inline-flex items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700"
                             >
@@ -64,9 +80,10 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                         สถานะปัจจุบัน
                                     </span>
                                     <span
-                                        className={`px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(
-                                            selectedProjectForStatus.status,
-                                        )}`}
+                                        className={cn(
+                                            "px-3 py-1 rounded-lg text-xs font-semibold border",
+                                            getStatusColor(selectedProjectForStatus.status),
+                                        )}
                                     >
                                         {selectedProjectForStatus.status}
                                     </span>
@@ -135,15 +152,13 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                             (selectedProjectForStatus.statusNote ||
                                                 ""))
                                 }
-                                className={`cursor-pointer px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 transition-all transform active:scale-95 ${
-                                    newStatus ===
-                                        selectedProjectForStatus.status &&
-                                    statusNote ===
-                                        (selectedProjectForStatus.statusNote ||
-                                            "")
+                                className={cn(
+                                    "cursor-pointer px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] transform active:scale-95",
+                                    newStatus === selectedProjectForStatus.status &&
+                                    statusNote === (selectedProjectForStatus.statusNote || "")
                                         ? "opacity-50 cursor-not-allowed"
-                                        : ""
-                                }`}
+                                        : "",
+                                )}
                             >
                                 {isUpdatingStatus
                                     ? "กำลังอัปเดต…"
@@ -156,3 +171,4 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
         </>
     );
 };
+

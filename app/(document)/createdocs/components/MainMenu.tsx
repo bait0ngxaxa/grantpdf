@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FileText, FileBarChart, Building2 } from "lucide-react";
 import { useCreateDocsContext } from "../contexts";
+import { cn } from "@/lib/utils";
 
 export const MainMenu = (): React.JSX.Element => {
-    const router = useRouter();
     const {
         isAdmin,
         selectedProjectId,
@@ -20,11 +20,11 @@ export const MainMenu = (): React.JSX.Element => {
             </h1>
 
             <div
-                className={`${
+                className={cn(
                     isAdmin
                         ? "grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl"
-                        : "flex justify-center w-full max-w-lg"
-                }`}
+                        : "flex justify-center w-full max-w-lg",
+                )}
             >
                 {/* สัญญาจ้างทั่วไป Card - แสดงเฉพาะแอดมิน */}
                 {isAdmin && (
@@ -84,9 +84,10 @@ export const MainMenu = (): React.JSX.Element => {
 
                 {/* ยื่นโครงการ Card - แสดงสำหรับทุกคน */}
                 <div
-                    className={`group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 transition-all duration-300 cursor-pointer hover:-translate-y-1 ${
-                        !isAdmin ? "w-full" : ""
-                    }`}
+                    className={cn(
+                        "group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300 cursor-pointer hover:-translate-y-1",
+                        !isAdmin && "w-full",
+                    )}
                     onClick={() => handleCategorySelection("project")}
                 >
                     <div className="flex flex-col items-center text-center h-full">
@@ -115,21 +116,18 @@ export const MainMenu = (): React.JSX.Element => {
                 <div className="text-center mt-12">
                     <p className="text-slate-500 dark:text-slate-400">
                         หรือ{" "}
-                        <button
-                            onClick={() => {
-                                router.push(
-                                    `/uploads-doc?projectId=${encodeURIComponent(
-                                        selectedProjectId,
-                                    )}`,
-                                );
-                            }}
+                        <Link
+                            href={`/uploads-doc?projectId=${encodeURIComponent(
+                                selectedProjectId,
+                            )}`}
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold hover:underline transition-colors"
                         >
                             อัพโหลดเอกสาร
-                        </button>
+                        </Link>
                     </p>
                 </div>
             )}
         </div>
     );
 };
+

@@ -16,7 +16,12 @@ export async function GET(): Promise<NextResponse> {
         const userId = Number(session.user.id);
         const stats = await getUserProjectStats(userId);
 
-        return NextResponse.json(stats, { status: 200 });
+        return NextResponse.json(stats, {
+            status: 200,
+            headers: {
+                "Cache-Control": "private, max-age=15, stale-while-revalidate=30",
+            },
+        });
     } catch (error) {
         console.error("Error fetching user project stats:", error);
         return NextResponse.json(

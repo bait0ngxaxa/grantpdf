@@ -8,6 +8,7 @@ import React, {
     type ReactNode,
 } from "react";
 import { useAdminData } from "../hooks";
+import type { AdminStatsResponse } from "../hooks/useAdminData";
 import { useAdminUI } from "./AdminUIContext";
 import type {
     AdminProject,
@@ -38,7 +39,13 @@ const AdminDataContext = createContext<AdminDataContextType | undefined>(
     undefined,
 );
 
-export function AdminDataProvider({ children }: { children: ReactNode }) {
+export function AdminDataProvider({
+    children,
+    initialStats,
+}: {
+    children: ReactNode;
+    initialStats?: AdminStatsResponse;
+}) {
     const ui = useAdminUI();
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -49,6 +56,7 @@ export function AdminDataProvider({ children }: { children: ReactNode }) {
         fileType: ui.selectedFileType || undefined,
         sortBy: ui.sortBy || undefined,
         shouldLoadProjects: ui.activeTab === "documents",
+        initialStats,
     });
 
     // Remove the allFiles array calculation

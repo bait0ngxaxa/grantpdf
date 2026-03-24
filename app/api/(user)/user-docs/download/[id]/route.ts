@@ -6,7 +6,7 @@ import fs from "fs";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 
 export async function GET(
-    req: NextRequest,
+    _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {

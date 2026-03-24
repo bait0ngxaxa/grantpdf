@@ -3,6 +3,7 @@
 import { type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface FormFieldProps {
     label: string;
@@ -32,11 +33,13 @@ export function FormField({
     maxLength,
 }: FormFieldProps): React.JSX.Element {
     const hasError = !!error;
-    const baseClassName = `w-full px-4 py-3 bg-white dark:bg-slate-800 border rounded-xl focus:ring-4 transition-all duration-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-800 dark:text-slate-100 ${
+    const baseClassName = cn(
+        "w-full px-4 py-3 bg-white dark:bg-slate-800 border rounded-xl focus:ring-4 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-800 dark:text-slate-100",
         hasError
             ? "border-red-400 focus:ring-red-100 dark:focus:ring-red-900/30 focus:border-red-400"
-            : "border-slate-200 dark:border-slate-700 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 dark:focus:border-blue-500 hover:border-blue-200 dark:hover:border-blue-600"
-    } ${className}`;
+            : "border-slate-200 dark:border-slate-700 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 dark:focus:border-blue-500 hover:border-blue-200 dark:hover:border-blue-600",
+        className,
+    );
 
     return (
         <div className="group">
@@ -47,7 +50,7 @@ export function FormField({
                 <Textarea
                     name={name}
                     placeholder={placeholder}
-                    className={`${baseClassName} min-h-[120px] resize-y`}
+                    className={cn(baseClassName, "min-h-[120px] resize-y")}
                     value={value}
                     onChange={onChange}
                     rows={rows}
@@ -73,3 +76,4 @@ export function FormField({
         </div>
     );
 }
+

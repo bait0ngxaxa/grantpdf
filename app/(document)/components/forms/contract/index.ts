@@ -1,3 +1,3 @@
-export * from "./ProjectDetailsSection";
-export * from "./ContractorInfoSection";
-export * from "./BudgetSection";
+export { ProjectDetailsSection } from "./ProjectDetailsSection";
+export { ContractorInfoSection } from "./ContractorInfoSection";
+export { BudgetSection } from "./BudgetSection";

@@ -1,5 +1,6 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {
     message?: string;
@@ -11,7 +12,7 @@ export function LoadingSpinner({
     className = "",
 }: LoadingSpinnerProps): React.JSX.Element {
     return (
-        <div className={`flex items-center justify-center py-12 ${className}`}>
+        <div className={cn("flex items-center justify-center py-12", className)}>
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             {message && (
                 <span className="ml-4 text-gray-600 dark:text-gray-400">

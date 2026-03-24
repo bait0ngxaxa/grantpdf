@@ -28,12 +28,20 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100 dark:border-slate-700">
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-user-modal-title"
+                className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100 dark:border-slate-700"
+            >
                 <div className="flex flex-col items-center justify-center text-center mb-6">
                     <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mb-4 shadow-sm">
                         <Trash2 className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
+                    <h3
+                        id="delete-user-modal-title"
+                        className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance"
+                    >
                         ยืนยันการลบผู้ใช้งาน
                     </h3>
                     <p className="text-slate-500 dark:text-slate-400 mt-2">
@@ -83,7 +91,12 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                 </div>
             </div>
             {/* Backdrop click to close */}
-            <div className="absolute inset-0 z-[-1]" onClick={onClose} />
+            <button
+                type="button"
+                aria-label="ปิดหน้าต่างยืนยันการลบผู้ใช้งาน"
+                className="absolute inset-0 z-[-1]"
+                onClick={onClose}
+            />
         </div>
     );
 };

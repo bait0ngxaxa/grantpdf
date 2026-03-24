@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -68,7 +68,7 @@ function ResetPasswordForm(): React.JSX.Element {
             <div className="hidden md:flex flex-col space-y-8 p-8">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/50 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-medium text-sm self-start animate-fade-in-up">
                     <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                     </span>
                     GRANT ONLINE Security
@@ -198,3 +198,4 @@ export default function ResetPasswordClient(): React.JSX.Element {
         </div>
     );
 }
+

@@ -9,7 +9,7 @@ import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 import { logAudit } from "@/lib/auditLog";
 
 export async function GET(
-    req: NextRequest,
+    _req: NextRequest,
     { params }: { params: Promise<{ token: string }> }
 ): Promise<NextResponse> {
     try {

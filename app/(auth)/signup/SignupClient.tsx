@@ -80,7 +80,7 @@ export default function SignupClient(): React.JSX.Element {
                 <div className="hidden md:flex flex-col space-y-8 p-8">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/50 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-medium text-sm self-start animate-fade-in-up">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
                         </span>
                         GRANT ONLINE
@@ -114,10 +114,14 @@ export default function SignupClient(): React.JSX.Element {
                             className="space-y-4 relative z-10"
                         >
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                <label
+                                    htmlFor="signup-name"
+                                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                                >
                                     ชื่อ-นามสกุล
                                 </label>
                                 <Input
+                                    id="signup-name"
                                     type="text"
                                     name="name"
                                     autoComplete="name"
@@ -130,10 +134,14 @@ export default function SignupClient(): React.JSX.Element {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                <label
+                                    htmlFor="signup-email"
+                                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                                >
                                     อีเมล
                                 </label>
                                 <Input
+                                    id="signup-email"
                                     type="email"
                                     name="email"
                                     autoComplete="email"
@@ -146,10 +154,14 @@ export default function SignupClient(): React.JSX.Element {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                <label
+                                    htmlFor="signup-password"
+                                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                                >
                                     รหัสผ่าน
                                 </label>
                                 <Input
+                                    id="signup-password"
                                     type="password"
                                     name="password"
                                     autoComplete="new-password"
@@ -164,10 +176,14 @@ export default function SignupClient(): React.JSX.Element {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                <label
+                                    htmlFor="signup-confirm-password"
+                                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                                >
                                     ยืนยันรหัสผ่าน
                                 </label>
                                 <Input
+                                    id="signup-confirm-password"
                                     type="password"
                                     name="confirmPassword"
                                     autoComplete="new-password"
@@ -182,7 +198,10 @@ export default function SignupClient(): React.JSX.Element {
                             </div>
 
                             {error && (
-                                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake">
+                                <div
+                                    aria-live="polite"
+                                    className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake"
+                                >
                                     <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>
@@ -190,7 +209,7 @@ export default function SignupClient(): React.JSX.Element {
 
                             <Button
                                 type="submit"
-                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 mt-2 transition-all"
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 mt-2 transition-[transform,box-shadow,background-image]"
                             >
                                 ดำเนินการต่อ
                             </Button>
@@ -212,13 +231,29 @@ export default function SignupClient(): React.JSX.Element {
             {/* Confirm Modal */}
             {showConfirmModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => { setError(""); setShowConfirmModal(false); }} />
-                    <div className="relative bg-white p-0 rounded-3xl overflow-hidden shadow-2xl w-11/12 max-w-md z-10">
+                    <button
+                        type="button"
+                        aria-label="ปิดหน้าต่างยืนยันการสมัคร"
+                        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                        onClick={() => {
+                            setError("");
+                            setShowConfirmModal(false);
+                        }}
+                    />
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="signup-confirm-modal-title"
+                        className="relative bg-white p-0 rounded-3xl overflow-hidden shadow-2xl w-11/12 max-w-md z-10"
+                    >
                         <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white text-center">
                             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
                                 <CheckCircle2 className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-xl font-bold text-balance">
+                            <h3
+                                id="signup-confirm-modal-title"
+                                className="text-xl font-bold text-balance"
+                            >
                                 ยืนยันข้อมูลการสมัคร
                             </h3>
                             <p className="text-blue-100 text-sm">
@@ -256,7 +291,10 @@ export default function SignupClient(): React.JSX.Element {
 
                             {/* Error display inside modal */}
                             {error && (
-                                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake">
+                                <div
+                                    aria-live="polite"
+                                    className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake"
+                                >
                                     <AlertCircle className="w-5 h-5 shrink-0" />
                                     {error}
                                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface PreviewFieldProps {
     label: string;
@@ -47,7 +48,7 @@ export function PreviewGrid({
               ? "grid-cols-2"
               : "grid-cols-3";
 
-    return <div className={`grid ${gridClass} gap-4`}>{children}</div>;
+    return <div className={cn("grid gap-4", gridClass)}>{children}</div>;
 }
 
 interface PreviewListProps {

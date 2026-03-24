@@ -1,4 +1,4 @@
-export * from "./usePagination";
-export * from "./useTitle";
-export * from "./useModalStates";
-export * from "./useGlobalModal";
+export { usePagination } from "./usePagination";
+export { useTitle } from "./useTitle";
+export { useModalStates } from "./useModalStates";
+export { useGlobalModal } from "./useGlobalModal";

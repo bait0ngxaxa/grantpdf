@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProjectCard } from "./ProjectCard";
 import {
@@ -13,7 +13,6 @@ import { ROUTES } from "@/lib/constants";
 import { useCreateDocsContext } from "../contexts";
 
 export const ProjectSelection = (): React.JSX.Element => {
-    const router = useRouter();
     const {
         projects,
         isLoading,
@@ -41,10 +40,10 @@ export const ProjectSelection = (): React.JSX.Element => {
                     icon={Building2}
                 >
                     <Button
-                        onClick={() => router.push(ROUTES.DASHBOARD)}
+                        asChild
                         className="mt-4"
                     >
-                        กลับไปแดชบอร์ด
+                        <Link href={ROUTES.DASHBOARD}>กลับไปแดชบอร์ด</Link>
                     </Button>
                 </SharedEmptyState>
             )}
@@ -55,8 +54,8 @@ export const ProjectSelection = (): React.JSX.Element => {
                     description="กรุณาสร้างโครงการก่อนสร้างเอกสาร"
                     icon={Building2}
                 >
-                    <Button onClick={() => router.push(ROUTES.DASHBOARD)}>
-                        สร้างโครงการใหม่
+                    <Button asChild>
+                        <Link href={ROUTES.DASHBOARD}>สร้างโครงการใหม่</Link>
                     </Button>
                 </SharedEmptyState>
             )}
@@ -88,17 +87,17 @@ export const ProjectSelection = (): React.JSX.Element => {
 
                     <div className="flex justify-center mt-8 gap-4">
                         <Button
-                            onClick={() => router.push(ROUTES.DASHBOARD)}
+                            asChild
                             variant="outline"
                             className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl"
                         >
-                            กลับไปแดชบอร์ด
+                            <Link href={ROUTES.DASHBOARD}>กลับไปแดชบอร์ด</Link>
                         </Button>
                         <Button
-                            onClick={() => router.push(ROUTES.DASHBOARD)}
+                            asChild
                             className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition"
                         >
-                            สร้างโครงการใหม่
+                            <Link href={ROUTES.DASHBOARD}>สร้างโครงการใหม่</Link>
                         </Button>
                     </div>
                 </>

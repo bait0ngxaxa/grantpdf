@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogOut, Folder, Building2, Plus, X } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
@@ -55,9 +56,10 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
 
             {/* Sidebar */}
             <div
-                className={`fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-white via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/30 backdrop-blur-2xl border-r border-slate-100 dark:border-slate-700 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] dark:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.3)] transform transition-transform duration-300 z-50 ${
-                    isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-                } lg:translate-x-0 flex flex-col`}
+                className={cn(
+                    "fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-white via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/30 backdrop-blur-2xl border-r border-slate-100 dark:border-slate-700 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] dark:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.3)] transform transition-transform duration-300 z-50 lg:translate-x-0 flex flex-col",
+                    isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+                )}
             >
                 {/* Header */}
                 <div className="p-6 pb-2">
@@ -106,11 +108,12 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                         }
                                         setIsSidebarOpen(false);
                                     }}
-                                    className={`w-full group flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-all duration-300 text-left font-medium relative overflow-hidden ${
+                                    className={cn(
+                                        "w-full group flex items-center space-x-3 px-4 py-3.5 rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300 text-left font-medium relative overflow-hidden",
                                         activeTab === item.id
                                             ? "text-white shadow-lg shadow-blue-500/25"
-                                            : "text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800/50"
-                                    }`}
+                                            : "text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800/50",
+                                    )}
                                 >
                                     {/* Active Background Gradient */}
                                     {activeTab === item.id && (
@@ -123,11 +126,12 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     )}
 
                                     <span
-                                        className={`relative z-10 transition-transform duration-300 group-hover:scale-110 ${
+                                        className={cn(
+                                            "relative z-10 transition-transform duration-300 group-hover:scale-110",
                                             activeTab === item.id
                                                 ? "text-white"
-                                                : "text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                                        }`}
+                                                : "text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400",
+                                        )}
                                     >
                                         {item.icon}
                                     </span>
@@ -193,3 +197,4 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
         </>
     );
 };
+

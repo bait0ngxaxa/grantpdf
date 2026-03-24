@@ -9,6 +9,7 @@ import React, {
 import { useUserData } from "../hooks/useUserData";
 import type { Project } from "@/type";
 import type { LatestProject } from "@/type/models";
+import type { UserProjectStats } from "../hooks/useUserData";
 import { useDashboardUI } from "./DashboardUIContext";
 
 interface ProjectDataContextType {
@@ -50,7 +51,13 @@ const ProjectDataContext = createContext<ProjectDataContextType | undefined>(
     undefined,
 );
 
-export function ProjectDataProvider({ children }: { children: ReactNode }) {
+export function ProjectDataProvider({
+    children,
+    initialStats,
+}: {
+    children: ReactNode;
+    initialStats?: UserProjectStats;
+}) {
     const { activeTab } = useDashboardUI();
     const [currentPage, setCurrentPage] = useState(1);
     const shouldLoadProjects = activeTab === "projects";
@@ -66,7 +73,7 @@ export function ProjectDataProvider({ children }: { children: ReactNode }) {
         hasInitialDataLoaded,
         error,
         fetchUserData,
-    } = useUserData(currentPage, shouldLoadProjects);
+    } = useUserData(currentPage, shouldLoadProjects, initialStats);
 
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const [projectToDelete, setProjectToDelete] = useState<string | null>(null);

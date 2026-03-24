@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button, AttachmentList } from "@/components/ui";
 import type { AdminDocumentFile } from "@/type/models";
-import { truncateFileName } from "@/lib/utils";
+import { truncateFileName, cn } from "@/lib/utils";
 import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 import {
     File,
@@ -71,9 +71,9 @@ export default function FileItem({
                                 </span>
                             ) : (
                                 <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 dark:from-amber-400/10 dark:to-orange-400/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-200/50 dark:border-amber-800/50 shadow-sm relative group overflow-hidden flex-shrink-0">
-                                    <div className="absolute inset-0 bg-amber-400/20 dark:bg-amber-500/20 rounded-full blur-md group-hover:bg-amber-400/30 transition-all duration-300" />
+                                    <div className="absolute inset-0 bg-amber-400/20 dark:bg-amber-500/20 rounded-full blur-md group-hover:bg-amber-400/30 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300" />
                                     <span className="relative flex h-1.5 w-1.5 z-10">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
+                                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
                                         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-600 dark:bg-amber-400" />
                                     </span>
                                     <span className="text-[10px] font-bold tracking-wider relative z-10">ใหม่</span>
@@ -99,11 +99,10 @@ export default function FileItem({
                                         <Paperclip className="w-3.5 h-3.5 mr-1" />
                                         {file.attachmentFiles.length} ไฟล์แนบ
                                         <ChevronDown
-                                            className={`w-3.5 h-3.5 ml-1 transform transition-transform duration-200 ${
-                                                isAttachmentExpanded
-                                                    ? "rotate-180"
-                                                    : ""
-                                            }`}
+                                            className={cn(
+                                                "w-3.5 h-3.5 ml-1 transform transition-transform duration-200",
+                                                isAttachmentExpanded && "rotate-180",
+                                            )}
                                         />
                                     </button>
                                 )}
@@ -164,3 +163,4 @@ export default function FileItem({
         </React.Fragment>
     );
 }
+

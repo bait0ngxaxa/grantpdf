@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui";
 import { ROUTES } from "@/lib/constants";
 import { Lock, Home, Circle } from "lucide-react";
@@ -80,18 +81,20 @@ export default function AccessDeniedClient(): React.JSX.Element {
                         {/* Actions */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
                             <Button
-                                onClick={() => router.push(ROUTES.HOME)}
+                                asChild
                                 className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-6 rounded-xl text-base font-semibold shadow-lg shadow-blue-200 hover:shadow-xl duration-300 hover:-translate-y-0.5 transition"
                             >
-                                <Home className="h-5 w-5 mr-3" />
-                                กลับหน้าหลัก
+                                <Link href={ROUTES.HOME}>
+                                    <Home className="h-5 w-5 mr-3" />
+                                    กลับหน้าหลัก
+                                </Link>
                             </Button>
                             <Button
                                 variant="outline"
-                                onClick={() => router.push(ROUTES.SIGNIN)}
+                                asChild
                                 className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 px-8 py-6 rounded-xl text-base font-semibold shadow-sm hover:shadow-md duration-300 transition"
                             >
-                                เข้าสู่ระบบ
+                                <Link href={ROUTES.SIGNIN}>เข้าสู่ระบบ</Link>
                             </Button>
                         </div>
                     </div>

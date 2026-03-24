@@ -5,7 +5,7 @@ import { API_ROUTES, PAGINATION } from "@/lib/constants";
 
 export type { Project, UserFile } from "@/type";
 
-interface UserProjectStatsResponse {
+export interface UserProjectStats {
     total: number;
     totalFiles: number;
     statusCounts?: {
@@ -21,6 +21,7 @@ interface UserProjectStatsResponse {
 export const useUserData = (
     page: number = 1,
     shouldLoadProjects: boolean = true,
+    initialStats?: UserProjectStats,
 ) => {
     const limit = PAGINATION.PROJECTS_PER_PAGE;
     const projectsKey = shouldLoadProjects
@@ -38,7 +39,11 @@ export const useUserData = (
     });
 
     const { data: statsData, isLoading: isLoadingStats } =
-        useSWR<UserProjectStatsResponse>(statsKey);
+        useSWR<UserProjectStats>(statsKey, {
+            fallbackData: initialStats,
+            revalidateOnMount: initialStats ? false : undefined,
+            revalidateIfStale: initialStats ? false : true,
+        });
 
     return {
         projects: projectsData?.projects || [],

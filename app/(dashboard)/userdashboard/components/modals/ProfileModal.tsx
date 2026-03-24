@@ -7,6 +7,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { X, User, Mail, BadgeCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Session } from "next-auth";
 
 interface ProfileModalProps {
@@ -103,11 +104,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                                 </p>
                                 <div className="mt-1">
                                     <span
-                                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
+                                        className={cn(
+                                            "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border",
                                             session?.user?.role === "admin"
                                                 ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-100 dark:border-red-800"
-                                                : "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-800"
-                                        }`}
+                                                : "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-800",
+                                        )}
                                     >
                                         {session?.user?.role === "admin"
                                             ? "ผู้ดูแลระบบ"

@@ -1,4 +1,4 @@
-export * from "./BasicInfoSection";
-export * from "./ProjectDetailSection";
-export * from "./ScopeSection";
-export * from "./ActivitySection";
+export { BasicInfoSection } from "./BasicInfoSection";
+export { ProjectDetailSection } from "./ProjectDetailSection";
+export { ScopeSection } from "./ScopeSection";
+export { ActivitySection } from "./ActivitySection";

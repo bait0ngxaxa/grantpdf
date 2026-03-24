@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { ROUTES } from "@/lib/constants";
 import { Plus, Building2, FileText, Upload } from "lucide-react";
@@ -9,7 +9,7 @@ import { useUserDashboardContext } from "../contexts";
 
 export const CreateProjectTab: React.FC = (): React.JSX.Element => {
     const { projects, setShowCreateProjectModal } = useUserDashboardContext();
-    const router = useRouter(); // Router still needed or provided by component?
+
     return (
         <div className="animate-fade-in-up">
             <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-10 text-center transition-colors duration-200">
@@ -59,20 +59,24 @@ export const CreateProjectTab: React.FC = (): React.JSX.Element => {
                                 สร้างโครงการใหม่
                             </Button>
                             <Button
+                                asChild
                                 size="lg"
                                 className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 cursor-pointer transform hover:scale-105 duration-300 h-14 rounded-xl px-8 transition"
-                                onClick={() => router.push(ROUTES.CREATE_DOCS)}
                             >
-                                <FileText className="h-5 w-5 mr-2" />
-                                สร้างเอกสารในโครงการ
+                                <Link href={ROUTES.CREATE_DOCS}>
+                                    <FileText className="h-5 w-5 mr-2" />
+                                    สร้างเอกสารในโครงการ
+                                </Link>
                             </Button>
                             <Button
+                                asChild
                                 size="lg"
                                 className="bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-sm cursor-pointer transform hover:scale-105 duration-300 h-14 rounded-xl px-8 transition"
-                                onClick={() => router.push("/uploads-doc")}
                             >
-                                <Upload className="h-5 w-5 mr-2" />
-                                อัพโหลดเอกสาร
+                                <Link href="/uploads-doc">
+                                    <Upload className="h-5 w-5 mr-2" />
+                                    อัพโหลดเอกสาร
+                                </Link>
                             </Button>
                         </div>
                     </>

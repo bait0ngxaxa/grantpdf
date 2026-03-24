@@ -2,6 +2,7 @@
 
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PaginationProps {
     currentPage: number;
@@ -60,11 +61,12 @@ export const Pagination: React.FC<PaginationProps> = ({
                 <button
                     onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 ${
+                    className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200",
                         currentPage === 1
                             ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
-                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
-                    }`}
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer",
+                    )}
                     aria-label="Previous page"
                 >
                     <ChevronLeft className="w-5 h-5" />
@@ -84,11 +86,12 @@ export const Pagination: React.FC<PaginationProps> = ({
                             <button
                                 key={page}
                                 onClick={() => onPageChange(page as number)}
-                                className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                                className={cn(
+                                    "w-10 h-10 rounded-xl text-sm font-semibold transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 cursor-pointer",
                                     currentPage === page
                                         ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-200 dark:shadow-none"
-                                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200"
-                                }`}
+                                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200",
+                                )}
                             >
                                 {page}
                             </button>
@@ -102,11 +105,12 @@ export const Pagination: React.FC<PaginationProps> = ({
                         onPageChange(Math.min(totalPages, currentPage + 1))
                     }
                     disabled={currentPage === totalPages}
-                    className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 ${
+                    className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200",
                         currentPage === totalPages
                             ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
-                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
-                    }`}
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer",
+                    )}
                     aria-label="Next page"
                 >
                     <ChevronRight className="w-5 h-5" />
@@ -115,3 +119,4 @@ export const Pagination: React.FC<PaginationProps> = ({
         </div>
     );
 };
+

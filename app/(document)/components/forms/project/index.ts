@@ -1,2 +1,2 @@
-export * from "./BasicInfoSection";
-export * from "./ProjectDetailSection";
+export { BasicInfoSection } from "./BasicInfoSection";
+export { ProjectDetailSection } from "./ProjectDetailSection";

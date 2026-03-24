@@ -1,6 +1,5 @@
 import type {
     Project,
-    UserFile,
     AdminProject,
     AdminDocumentFile,
 } from "./models";

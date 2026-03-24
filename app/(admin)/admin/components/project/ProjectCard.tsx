@@ -5,7 +5,7 @@ import { Button } from "@/components/ui";
 import FileItem from "./FileItem";
 import type { AdminProject } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
-import { getStatusColor } from "@/lib/utils";
+import { getStatusColor, cn } from "@/lib/utils";
 import {
     Archive,
     User,
@@ -68,11 +68,12 @@ export default function ProjectCard({
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 overflow-hidden mb-4 transition">
             {/* Project Header */}
             <div
-                className={`p-5 cursor-pointer transition-colors duration-200 ${
+                className={cn(
+                    "p-5 cursor-pointer transition-colors duration-200",
                     isExpanded
                         ? "bg-slate-50/80 dark:bg-slate-700/50"
-                        : "hover:bg-slate-50/50 dark:hover:bg-slate-700/30"
-                }`}
+                        : "hover:bg-slate-50/50 dark:hover:bg-slate-700/30",
+                )}
                 onClick={() => onToggleExpansion(project.id)}
             >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -89,9 +90,9 @@ export default function ProjectCard({
                                 </h3>
                                 {showNewBadge && (
                                     <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-rose-500/10 to-pink-500/10 dark:from-rose-400/10 dark:to-pink-400/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full border border-rose-200/50 dark:border-rose-800/50 shadow-sm relative group overflow-hidden">
-                                        <div className="absolute inset-0 bg-rose-400/20 dark:bg-rose-500/20 rounded-full blur-md group-hover:bg-rose-400/30 transition-all duration-300" />
+                                        <div className="absolute inset-0 bg-rose-400/20 dark:bg-rose-500/20 rounded-full blur-md group-hover:bg-rose-400/30 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300" />
                                         <span className="relative flex h-1.5 w-1.5 z-10">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75" />
+                                            <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75" />
                                             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-600 dark:bg-rose-400" />
                                         </span>
                                         <span className="text-[10px] uppercase font-bold tracking-wider relative z-10">New</span>
@@ -131,9 +132,10 @@ export default function ProjectCard({
                             <div className="flex flex-col gap-2 mt-3">
                                 <div className="flex items-center space-x-3">
                                     <span
-                                        className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(
-                                            project.status,
-                                        )}`}
+                                        className={cn(
+                                            "inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold border",
+                                            getStatusColor(project.status),
+                                        )}
                                     >
                                         {getStatusIcon(project.status)}
                                         สถานะ: {project.status}
@@ -167,16 +169,18 @@ export default function ProjectCard({
                             <span className="sm:hidden ml-2">จัดการ</span>
                         </Button>
                         <div
-                            className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
+                            className={cn(
+                                "p-2 rounded-lg transition-colors flex-shrink-0",
                                 isExpanded
                                     ? "bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
-                                    : "text-slate-400 dark:text-slate-500"
-                            }`}
+                                    : "text-slate-400 dark:text-slate-500",
+                            )}
                         >
                             <ChevronDown
-                                className={`h-5 w-5 transform transition-transform duration-300 ${
-                                    isExpanded ? "rotate-180" : ""
-                                }`}
+                                className={cn(
+                                    "h-5 w-5 transform transition-transform duration-300",
+                                    isExpanded && "rotate-180",
+                                )}
                             />
                         </div>
                     </div>
@@ -230,3 +234,4 @@ export default function ProjectCard({
         </div>
     );
 }
+

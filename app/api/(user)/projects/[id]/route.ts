@@ -76,7 +76,7 @@ export async function PUT(
 
 // DELETE: ลบโครงการ
 export async function DELETE(
-    req: Request,
+    _req: Request,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
