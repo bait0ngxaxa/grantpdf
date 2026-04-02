@@ -58,7 +58,47 @@ export const TEXT_LIMITS = {
 } as const;
 
 export const FILE_UPLOAD = {
-    MAX_SIZE_MB: 10,
-    MAX_SIZE_BYTES: 10 * 1024 * 1024,
     ALLOWED_EXTENSIONS: [".docx", ".pdf"],
+    SERVER_ALLOWED_EXTENSIONS: [
+        ".docx",
+        ".pdf",
+        ".doc",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".txt",
+        ".xlsx",
+        ".xls",
+    ],
+    MAX_SIZE_MB_BY_EXTENSION: {
+        ".pdf": 5,
+        ".docx": 3,
+        ".doc": 3,
+        ".xlsx": 3,
+        ".xls": 3,
+        ".jpg": 1,
+        ".jpeg": 1,
+        ".png": 1,
+        ".txt": 1,
+    },
+    DEFAULT_MAX_SIZE_MB: 3,
 } as const;
+
+export function getFileExtension(fileName: string): string {
+    const dotIndex = fileName.lastIndexOf(".");
+    if (dotIndex < 0) return "";
+    return fileName.substring(dotIndex).toLowerCase();
+}
+
+export function getMaxUploadSizeMbByFileName(fileName: string): number {
+    const extension = getFileExtension(fileName);
+    return (
+        FILE_UPLOAD.MAX_SIZE_MB_BY_EXTENSION[
+            extension as keyof typeof FILE_UPLOAD.MAX_SIZE_MB_BY_EXTENSION
+        ] ?? FILE_UPLOAD.DEFAULT_MAX_SIZE_MB
+    );
+}
+
+export function getMaxUploadSizeBytesByFileName(fileName: string): number {
+    return getMaxUploadSizeMbByFileName(fileName) * 1024 * 1024;
+}

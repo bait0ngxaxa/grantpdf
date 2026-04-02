@@ -2,6 +2,120 @@
  * Convert data URL (base64) to File object
  * Used for canvas signature conversion
  */
+export const SIGNATURE_ALLOWED_MIME_TYPES = [
+    "image/png",
+    "image/jpeg",
+] as const;
+
+export const SIGNATURE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
+
+export function isAllowedSignatureMimeType(mimeType: string): boolean {
+    return SIGNATURE_ALLOWED_MIME_TYPES.includes(
+        mimeType as (typeof SIGNATURE_ALLOWED_MIME_TYPES)[number],
+    );
+}
+
+async function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        image.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            resolve(image);
+        };
+        image.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error("ไม่สามารถอ่านไฟล์ภาพลายเซ็นได้"));
+        };
+        image.src = objectUrl;
+    });
+}
+
+async function canvasToJpegBlob(
+    canvas: HTMLCanvasElement,
+    quality: number,
+): Promise<Blob | null> {
+    return new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", quality);
+    });
+}
+
+function drawResizedSignatureToCanvas(
+    image: HTMLImageElement,
+    width: number,
+    height: number,
+): HTMLCanvasElement {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+        throw new Error("ไม่สามารถประมวลผลภาพลายเซ็นได้");
+    }
+
+    // Use white background to avoid transparent artifacts after JPEG encoding.
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, width, height);
+    context.drawImage(image, 0, 0, width, height);
+
+    return canvas;
+}
+
+export async function optimizeSignatureImageFile(file: File): Promise<File> {
+    const image = await loadImageFromFile(file);
+
+    const maxWidth = 800;
+    const maxHeight = 400;
+    const widthRatio = maxWidth / image.width;
+    const heightRatio = maxHeight / image.height;
+    const scale = Math.min(widthRatio, heightRatio, 1);
+
+    const targetWidth = Math.max(1, Math.round(image.width * scale));
+    const targetHeight = Math.max(1, Math.round(image.height * scale));
+
+    let workingWidth = targetWidth;
+    let workingHeight = targetHeight;
+    let quality = 0.82;
+    let blob: Blob | null = null;
+    let attempts = 0;
+
+    while (attempts < 8) {
+        const canvas = drawResizedSignatureToCanvas(
+            image,
+            workingWidth,
+            workingHeight,
+        );
+        blob = await canvasToJpegBlob(canvas, quality);
+
+        if (!blob) {
+            break;
+        }
+
+        if (blob.size <= SIGNATURE_MAX_SIZE_BYTES) {
+            break;
+        }
+
+        if (quality > 0.56) {
+            quality = Math.max(0.56, quality - 0.08);
+        } else {
+            workingWidth = Math.max(240, Math.round(workingWidth * 0.85));
+            workingHeight = Math.max(120, Math.round(workingHeight * 0.85));
+        }
+        attempts += 1;
+    }
+
+    if (!blob) {
+        throw new Error("ไม่สามารถบีบอัดไฟล์ลายเซ็นได้");
+    }
+
+    const originalName = file.name.replace(/\.[^.]+$/, "");
+    return new File([blob], `${originalName || "signature"}.jpg`, {
+        type: "image/jpeg",
+    });
+}
+
 export function dataURLtoFile(dataURL: string, filename: string): File | null {
     try {
         if (!dataURL.startsWith("data:image/")) {
@@ -90,6 +204,16 @@ export function validateSignature(
 
     if (!signatureFile && !signatureCanvasData) {
         return "กรุณาเพิ่มลายเซ็นโดยการอัปโหลดไฟล์ หรือ วาดลายเซ็นบนหน้าจอ";
+    }
+
+    if (signatureFile) {
+        if (!isAllowedSignatureMimeType(signatureFile.type)) {
+            return "ไฟล์ลายเซ็นต้องเป็น PNG หรือ JPEG เท่านั้น";
+        }
+
+        if (signatureFile.size > SIGNATURE_MAX_SIZE_BYTES) {
+            return "ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 5MB)";
+        }
     }
 
     return null;

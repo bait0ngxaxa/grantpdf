@@ -1,7 +1,15 @@
-import { phoneSchema, citizenIdSchema } from "./schemas/shared";
+import {
+    phoneSchema,
+    citizenIdSchema,
+    normalizePhoneNumber,
+} from "./schemas/shared";
 
 export function formatPhoneInput(value: string): string {
-    return value.replace(/\D/g, "").slice(0, 10);
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+    if (digits.length <= 3) {
+        return digits;
+    }
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
 }
 
 export function formatCitizenIdInput(value: string): string {
@@ -19,7 +27,7 @@ export function validateAndFormatPhone(value: string): {
     }
     const result = phoneSchema.safeParse(formatted);
     return {
-        value: formatted,
+        value: result.success ? normalizePhoneNumber(result.data) : formatted,
         error: result.success ? undefined : result.error.issues[0].message,
     };
 }

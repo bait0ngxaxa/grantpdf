@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { getFileForDeletion, deleteFileRecord } from "@/lib/services";
-import fs from "fs";
-import path from "path";
+import { stat, unlink } from "fs/promises";
 import { logAudit } from "@/lib/auditLog";
+import { getFullPathFromStoragePath } from "@/lib/fileStorage";
 
 export async function DELETE(
     _req: NextRequest,
@@ -47,14 +47,11 @@ export async function DELETE(
         }
 
         if (document.storagePath) {
-            const fullPath = path.join(
-                process.cwd(),
-                "storage",
-                document.storagePath
-            );
-            if (fs.existsSync(fullPath)) {
-                fs.unlinkSync(fullPath);
-            } else {
+            const fullPath = getFullPathFromStoragePath(document.storagePath);
+            try {
+                await stat(fullPath);
+                await unlink(fullPath);
+            } catch {
                 console.warn(`File not found: ${fullPath}`);
             }
         }

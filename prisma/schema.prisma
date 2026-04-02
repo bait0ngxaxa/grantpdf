@@ -99,9 +99,12 @@ model AttachmentFile {
 
 model ContractCounter {
   id            Int      @id @default(autoincrement())
-  contractType  String   @unique 
+  contractType  String
+  buddhistYear  Int
   currentNumber Int      @default(1) 
   
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
+
+  @@unique([contractType, buddhistYear])
 }

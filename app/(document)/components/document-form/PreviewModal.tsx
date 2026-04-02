@@ -41,10 +41,19 @@ export function PreviewModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className={cn(maxWidth, "max-h-[85vh] flex flex-col")}>
-                <DialogHeader className="flex-shrink-0">
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
+            <DialogContent
+                className={cn(
+                    maxWidth,
+                    "max-h-[85vh] flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700",
+                )}
+            >
+                <DialogHeader className="flex-shrink-0 pb-3 border-b border-slate-200 dark:border-slate-700">
+                    <DialogTitle className="text-slate-900 dark:text-slate-100">
+                        {title}
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-600 dark:text-slate-300">
+                        {description}
+                    </DialogDescription>
                 </DialogHeader>
 
                 {/* Error Alert */}
@@ -62,7 +71,7 @@ export function PreviewModal({
 
                 {/* Scrollable content area with word break */}
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-0">
-                    <div className="break-words overflow-hidden">
+                    <div className="break-words overflow-hidden space-y-4">
                         {children}
                     </div>
                 </div>

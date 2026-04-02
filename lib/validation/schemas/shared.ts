@@ -8,20 +8,42 @@ export function requiredString(label: string) {
         .min(1, { message: `กรุณาระบุ${label}` });
 }
 
+const PHONE_DIGIT_ONLY_REGEX = /^\d{10}$/;
+const PHONE_DASHED_REGEX = /^\d{3}-\d{7}$/;
+
+export function normalizePhoneNumber(value: string): string {
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+    if (digits.length !== 10) {
+        return value.trim();
+    }
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+}
+
 // เบอร์โทรศัพท์ 10 หลัก ตัวเลขเท่านั้น
 export const phoneSchema = z
     .string()
     .trim()
     .min(1, { message: "กรุณาระบุเบอร์โทร" })
-    .regex(/^\d{10}$/, { message: "เบอร์โทรต้องเป็นตัวเลข 10 หลักเท่านั้น" });
+    .refine(
+        (val) => PHONE_DIGIT_ONLY_REGEX.test(val) || PHONE_DASHED_REGEX.test(val),
+        { message: "เบอร์โทรต้องเป็นรูปแบบ 10 หลัก หรือ xxx-xxxxxxx" },
+    )
+    .transform((val) => normalizePhoneNumber(val));
 
 // เบอร์โทรแบบ optional (ไม่บังคับ)
 export const optionalPhoneSchema = z
     .string()
     .trim()
-    .refine((val) => val === "" || /^\d{10}$/.test(val), {
-        message: "เบอร์โทรต้องเป็นตัวเลข 10 หลักเท่านั้น",
-    });
+    .refine(
+        (val) =>
+            val === "" ||
+            PHONE_DIGIT_ONLY_REGEX.test(val) ||
+            PHONE_DASHED_REGEX.test(val),
+        {
+            message: "เบอร์โทรต้องเป็นรูปแบบ 10 หลัก หรือ xxx-xxxxxxx",
+        },
+    )
+    .transform((val) => (val === "" ? "" : normalizePhoneNumber(val)));
 
 // อีเมลพร้อม error ภาษาไทย
 export const emailSchema = z

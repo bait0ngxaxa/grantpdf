@@ -1,7 +1,11 @@
 "use client";
 
 import { useCallback, type ChangeEvent, type DragEvent } from "react";
-import { FILE_UPLOAD } from "@/lib/constants";
+import {
+    FILE_UPLOAD,
+    getMaxUploadSizeBytesByFileName,
+    getMaxUploadSizeMbByFileName,
+} from "@/lib/constants";
 import { type FileHandlersProps } from "./types";
 
 export function useFileHandlers({
@@ -22,9 +26,12 @@ export function useFileHandlers({
                 return false;
             }
 
-            if (file.size > FILE_UPLOAD.MAX_SIZE_BYTES) {
+            const maxSizeBytes = getMaxUploadSizeBytesByFileName(file.name);
+            const maxSizeMb = getMaxUploadSizeMbByFileName(file.name);
+
+            if (file.size > maxSizeBytes) {
                 setUploadMessage(
-                    `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${FILE_UPLOAD.MAX_SIZE_MB}MB)`,
+                    `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${maxSizeMb}MB)`,
                 );
                 setUploadSuccess(false);
                 return false;

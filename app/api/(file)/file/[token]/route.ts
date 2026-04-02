@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import fs from "fs";
+import { createReadStream } from "fs";
+import { stat } from "fs/promises";
 import { Readable } from "stream";
 import { verifySignedToken } from "@/lib/signedUrl";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
@@ -93,7 +94,10 @@ export async function GET(
         // Get full path and check file exists
         const fullPath = getFullPathFromStoragePath(file.storagePath);
 
-        if (!fs.existsSync(fullPath)) {
+        let fileStat: Awaited<ReturnType<typeof stat>>;
+        try {
+            fileStat = await stat(fullPath);
+        } catch {
             return NextResponse.json(
                 { error: "File not found on disk" },
                 { status: 404 }
@@ -101,8 +105,7 @@ export async function GET(
         }
 
         // Phase 4: Stream the file instead of reading all at once
-        const stat = fs.statSync(fullPath);
-        const stream = fs.createReadStream(fullPath);
+        const stream = createReadStream(fullPath);
         const contentType = getMimeType(file.originalFileName);
 
         // Update downloadStatus ONLY when downloaded from Admin Panel
@@ -138,7 +141,7 @@ export async function GET(
                 "Content-Disposition": `attachment; filename="${encodeURIComponent(
                     file.originalFileName
                 )}"`,
-                "Content-Length": stat.size.toString(),
+                "Content-Length": fileStat.size.toString(),
                 "Cache-Control": "private, no-cache",
             },
         });

@@ -31,6 +31,7 @@ export function ScopeSection({
                     label="พื้นที่/เขต"
                     name="zone"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="พื้นที่หรือเขตดำเนินการ"
                     value={formData.zone}
                     onChange={handleChange}
@@ -42,6 +43,7 @@ export function ScopeSection({
                     label="แผนการดำเนินงาน"
                     name="plan"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="แผนการดำเนินงานโครงการ"
                     value={formData.plan}
                     onChange={handleChange}
@@ -53,6 +55,7 @@ export function ScopeSection({
                     label="การจัดการโครงการ"
                     name="projectmanage"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="วิธีการจัดการและบริหารโครงการ"
                     value={formData.projectmanage}
                     onChange={handleChange}
@@ -64,6 +67,7 @@ export function ScopeSection({
                     label="องค์กร ภาคี ร่วมงาน"
                     name="partner"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="องค์กร ภาค ร่วมงาน"
                     value={formData.partner}
                     error={errors.partner}

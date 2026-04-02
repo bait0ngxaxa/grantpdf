@@ -68,11 +68,16 @@ const needsThaiPreprocessing = (text: string): boolean => {
     );
 };
 
+interface TextareaProps extends React.ComponentProps<"textarea"> {
+    constrainToA4?: boolean;
+}
+
 function Textarea({
     className,
     style,
+    constrainToA4 = true,
     ...props
-}: React.ComponentProps<"textarea">): React.JSX.Element {
+}: TextareaProps): React.JSX.Element {
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
     const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
@@ -100,7 +105,7 @@ function Textarea({
         }
 
         // ตรวจสอบความสูงของเนื้อหา
-        if (textareaRef.current) {
+        if (constrainToA4 && textareaRef.current) {
             const maxHeight = CONTENT_HEIGHT_PX;
             if (textareaRef.current.scrollHeight > maxHeight) {
                 // ถ้าเกินความสูงของหน้ากระดาษ A4 ให้ตัดข้อความออก
@@ -133,8 +138,12 @@ function Textarea({
                 className
             )}
             style={{
-                maxWidth: `${CONTENT_WIDTH_PX}px`,
-                maxHeight: `${CONTENT_HEIGHT_PX}px`,
+                ...(constrainToA4
+                    ? {
+                          maxWidth: `${CONTENT_WIDTH_PX}px`,
+                          maxHeight: `${CONTENT_HEIGHT_PX}px`,
+                      }
+                    : {}),
                 fontFamily: "'TH Sarabun New', Arial, sans-serif",
                 fontSize: "22px",
                 lineHeight: "1.6",

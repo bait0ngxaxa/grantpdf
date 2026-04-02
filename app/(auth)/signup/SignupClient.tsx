@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input, Button } from "@/components/ui";
 import { toast } from "sonner";
-import { CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { AlertCircle } from "lucide-react";
 
 export default function SignupClient(): React.JSX.Element {
     const [name, setName] = useState("");
@@ -17,8 +17,16 @@ export default function SignupClient(): React.JSX.Element {
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [isPasswordVisibleInConfirm, setIsPasswordVisibleInConfirm] =
+        useState(false);
 
     const router = useRouter();
+
+    const handleCloseConfirmModal = (): void => {
+        setError("");
+        setShowConfirmModal(false);
+        setIsPasswordVisibleInConfirm(false);
+    };
 
     const handleOpenConfirm = (e: React.FormEvent): void => {
         e.preventDefault();
@@ -34,6 +42,7 @@ export default function SignupClient(): React.JSX.Element {
             return;
         }
 
+        setIsPasswordVisibleInConfirm(false);
         setShowConfirmModal(true);
     };
 
@@ -50,12 +59,27 @@ export default function SignupClient(): React.JSX.Element {
 
             if (res.ok) {
                 setShowConfirmModal(false);
-                toast.success("สร้างบัญชีผู้ใช้เรียบร้อยแล้ว", {
-                    description: "กำลังนำคุณไปยังหน้าเข้าสู่ระบบ…",
+                setIsPasswordVisibleInConfirm(false);
+                const signinResult = await signIn("credentials", {
+                    redirect: false,
+                    email,
+                    password,
                 });
-                setTimeout(() => {
+
+                if (signinResult?.error) {
+                    toast.success("สร้างบัญชีผู้ใช้เรียบร้อยแล้ว", {
+                        description:
+                            "ไม่สามารถเข้าสู่ระบบอัตโนมัติได้ กรุณาเข้าสู่ระบบด้วยตนเอง",
+                    });
                     router.push(ROUTES.SIGNIN);
-                }, 2000);
+                    return;
+                }
+
+                toast.success("สมัครสมาชิกและเข้าสู่ระบบสำเร็จ", {
+                    description: "กำลังนำคุณไปยังหน้าหลัก…",
+                });
+                router.replace(ROUTES.DASHBOARD);
+                router.refresh();
             } else {
                 const data = await res.json();
 
@@ -235,10 +259,7 @@ export default function SignupClient(): React.JSX.Element {
                         type="button"
                         aria-label="ปิดหน้าต่างยืนยันการสมัคร"
                         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-                        onClick={() => {
-                            setError("");
-                            setShowConfirmModal(false);
-                        }}
+                        onClick={handleCloseConfirmModal}
                     />
                     <div
                         role="dialog"
@@ -283,9 +304,33 @@ export default function SignupClient(): React.JSX.Element {
                                     <span className="text-sm text-slate-500">
                                         รหัสผ่าน
                                     </span>
-                                    <span className="text-sm font-semibold text-slate-800">
-                                        {"•".repeat(password.length)}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-semibold text-slate-800">
+                                            {isPasswordVisibleInConfirm
+                                                ? password
+                                                : "•".repeat(password.length)}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            aria-label={
+                                                isPasswordVisibleInConfirm
+                                                    ? "ซ่อนรหัสผ่าน"
+                                                    : "แสดงรหัสผ่าน"
+                                            }
+                                            onClick={() =>
+                                                setIsPasswordVisibleInConfirm(
+                                                    (prev) => !prev,
+                                                )
+                                            }
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+                                        >
+                                            {isPasswordVisibleInConfirm ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -303,10 +348,7 @@ export default function SignupClient(): React.JSX.Element {
                             <div className="flex gap-3 pt-2">
                                 <Button
                                     variant="outline"
-                                    onClick={() => {
-                                        setError("");
-                                        setShowConfirmModal(false);
-                                    }}
+                                    onClick={handleCloseConfirmModal}
                                     className="flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                 >
                                     แก้ไข

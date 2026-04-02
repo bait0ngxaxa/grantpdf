@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { cn, formatNumericWithCommas } from "@/lib/utils";
 
 interface PreviewFieldProps {
     label: string;
@@ -16,16 +16,30 @@ export function PreviewField({
     children,
     className = "",
 }: PreviewFieldProps): React.JSX.Element {
+    const shouldFormatCurrencyLike =
+        /งบประมาณ|มูลค่า|ราคา|ค่าใช้จ่าย|จำนวนเงิน|ยอด|รวม|งวด/.test(label);
+    const normalizedValue =
+        value && shouldFormatCurrencyLike
+            ? formatNumericWithCommas(value)
+            : value;
+
     return (
-        <div className={className}>
-            <h4 className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1 text-balance">
+        <div
+            className={cn(
+                "rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70 px-4 py-3",
+                className,
+            )}
+        >
+            <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-2 text-balance">
                 {label}
             </h4>
             {children ? (
-                children
+                <div className="text-sm font-medium text-slate-800 dark:text-slate-100 leading-relaxed break-words">
+                    {children}
+                </div>
             ) : (
-                <p className="text-base font-semibold text-slate-800 dark:text-slate-100">
-                    {value || "-"}
+                <p className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-50 break-words">
+                    {normalizedValue || "-"}
                 </p>
             )}
         </div>
@@ -45,8 +59,8 @@ export function PreviewGrid({
         columns === 1
             ? "grid-cols-1"
             : columns === 2
-              ? "grid-cols-2"
-              : "grid-cols-3";
+              ? "grid-cols-1 md:grid-cols-2"
+              : "grid-cols-1 md:grid-cols-3";
 
     return <div className={cn("grid gap-4", gridClass)}>{children}</div>;
 }
@@ -63,12 +77,12 @@ export function PreviewList({
     emptyMessage = "ไม่มีข้อมูล",
 }: PreviewListProps): React.JSX.Element {
     return (
-        <div>
-            <h4 className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2 text-balance">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70 px-4 py-3">
+            <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-2 text-balance">
                 {label}
             </h4>
             {items.length > 0 ? (
-                <ul className="text-base font-semibold text-slate-800 dark:text-slate-100 list-disc list-inside space-y-1">
+                <ul className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-50 list-disc list-inside space-y-1">
                     {items.map((item, index) => (
                         <li key={index}>
                             {item || `รายการที่ ${index + 1} (ยังไม่ได้กรอก)`}
@@ -76,7 +90,7 @@ export function PreviewList({
                     ))}
                 </ul>
             ) : (
-                <p className="text-sm text-slate-400 dark:text-slate-500 italic">
+                <p className="text-sm text-slate-500 dark:text-slate-400 italic">
                     {emptyMessage}
                 </p>
             )}

@@ -24,6 +24,8 @@ export function useApprovalLogic(
         signatureCanvasData,
         handleFileChange,
         handleSignatureCanvasChange,
+        clearSignatureFile,
+        clearSignatureCanvas,
     } = useSignatureHandlers();
 
     // Attachment handling
@@ -66,6 +68,8 @@ export function useApprovalLogic(
         updateAttachment,
         handleFileChange,
         handleSignatureCanvasChange,
+        clearSignatureFile,
+        clearSignatureCanvas,
         handleAttachmentFilesChange,
         removeAttachmentFile,
         handleApprovalSubmit,

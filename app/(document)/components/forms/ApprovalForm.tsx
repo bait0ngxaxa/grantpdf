@@ -72,6 +72,8 @@ export function ApprovalForm(): React.JSX.Element {
         updateAttachment,
         handleFileChange,
         handleSignatureCanvasChange,
+        clearSignatureFile,
+        clearSignatureCanvas,
         handleAttachmentFilesChange,
         removeAttachmentFile,
         handleApprovalSubmit,
@@ -307,6 +309,8 @@ export function ApprovalForm(): React.JSX.Element {
                 signatureCanvasData={signatureCanvasData}
                 onFileChange={handleFileChange}
                 onCanvasChange={handleSignatureCanvasChange}
+                onClearSignatureFile={clearSignatureFile}
+                onClearSignatureCanvas={clearSignatureCanvas}
                 signatureCanvasRef={signatureCanvasRef}
                 uploadTitle="อัปโหลดลายเซ็นผู้ขออนุมัติ"
                 canvasTitle="วาดลายเซ็นผู้ขออนุมัติ"

@@ -262,7 +262,7 @@ describe("useFileHandlers - Security Tests", () => {
             const { result } = renderFileHandlers();
             const file = createMockFile(
                 "exact.pdf",
-                FILE_UPLOAD.MAX_SIZE_BYTES,
+                FILE_UPLOAD.MAX_SIZE_MB_BY_EXTENSION[".pdf"] * 1024 * 1024,
             );
 
             const mockEvent = {
@@ -280,7 +280,7 @@ describe("useFileHandlers - Security Tests", () => {
             const { result } = renderFileHandlers();
             const file = createMockFile(
                 "large.pdf",
-                FILE_UPLOAD.MAX_SIZE_BYTES + 1,
+                FILE_UPLOAD.MAX_SIZE_MB_BY_EXTENSION[".pdf"] * 1024 * 1024 + 1,
             );
 
             const mockEvent = {
@@ -293,9 +293,30 @@ describe("useFileHandlers - Security Tests", () => {
 
             expect(mockSetSelectedFile).not.toHaveBeenCalled();
             expect(mockSetUploadMessage).toHaveBeenCalledWith(
-                `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${FILE_UPLOAD.MAX_SIZE_MB}MB)`,
+                `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${FILE_UPLOAD.MAX_SIZE_MB_BY_EXTENSION[".pdf"]}MB)`,
             );
             expect(mockSetUploadSuccess).toHaveBeenCalledWith(false);
+        });
+
+        it("should REJECT docx file over 3MB based on extension policy", () => {
+            const { result } = renderFileHandlers();
+            const file = createMockFile(
+                "large.docx",
+                FILE_UPLOAD.MAX_SIZE_MB_BY_EXTENSION[".docx"] * 1024 * 1024 + 1,
+            );
+
+            const mockEvent = {
+                target: { files: [file] },
+            } as unknown as React.ChangeEvent<HTMLInputElement>;
+
+            act(() => {
+                result.current.handleFileSelect(mockEvent);
+            });
+
+            expect(mockSetSelectedFile).not.toHaveBeenCalled();
+            expect(mockSetUploadMessage).toHaveBeenCalledWith(
+                `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${FILE_UPLOAD.MAX_SIZE_MB_BY_EXTENSION[".docx"]}MB)`,
+            );
         });
 
         it("should REJECT very large file (100MB)", () => {

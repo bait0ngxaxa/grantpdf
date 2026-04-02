@@ -31,6 +31,7 @@ export function ProjectDetailSection({
                     label="หลักการและเหตุผล"
                     name="topic1"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="หลักการและเหตุผล"
                     value={formData.topic1}
                     onChange={handleChange}
@@ -42,6 +43,7 @@ export function ProjectDetailSection({
                     label="วัตถุประสงค์"
                     name="objective1"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="วัตถุประสงค์โครงการ"
                     value={formData.objective1}
                     onChange={handleChange}
@@ -53,6 +55,7 @@ export function ProjectDetailSection({
                     label="กลุ่มเป้าหมาย"
                     name="target"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="กลุ่มเป้าหมายของโครงการ"
                     value={formData.target}
                     onChange={handleChange}

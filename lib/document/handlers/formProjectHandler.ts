@@ -9,6 +9,8 @@ import {
     buildSuccessResponse,
 } from "@/lib/document";
 import { fixThaiDistributed } from "../fixThaiwordUtils";
+import { formatNumericWithCommas } from "@/lib/utils";
+import { normalizePhoneNumber } from "@/lib/validation/schemas";
 
 export async function handleFormProjectGeneration(
     formData: FormData,
@@ -61,9 +63,9 @@ export async function handleFormProjectGeneration(
         person: fixThaiDistributed(person || ""),
         address: fixThaiDistributed(address || ""),
         email: email || "",
-        tel: tel || "",
+        tel: normalizePhoneNumber(tel || ""),
         timeline: fixThaiDistributed(timeline || ""),
-        cost: cost || "",
+        cost: formatNumericWithCommas(cost || ""),
         rationale: fixThaiDistributed(rationale || ""),
         objective: fixThaiDistributed(objective || ""),
         goal: fixThaiDistributed(goal || ""),

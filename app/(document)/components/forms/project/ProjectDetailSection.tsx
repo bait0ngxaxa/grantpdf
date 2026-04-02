@@ -31,6 +31,7 @@ export function ProjectDetailSection({
                     label="ความเป็นมาและแนวคิดการจัดโครงการ"
                     name="rationale"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="ระบุเหตุผลความจำเป็นในการดำเนินโครงการ"
                     value={formData.rationale}
                     onChange={handleChange}
@@ -42,6 +43,7 @@ export function ProjectDetailSection({
                     label="เป้าประสงค์"
                     name="goal"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="ระบุเป้าประสงค์โครงการ"
                     value={formData.goal}
                     onChange={handleChange}
@@ -53,6 +55,7 @@ export function ProjectDetailSection({
                     label="วัตถุประสงค์"
                     name="objective"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="ระบุวัตถุประสงค์โครงการ"
                     value={formData.objective}
                     onChange={handleChange}
@@ -64,6 +67,7 @@ export function ProjectDetailSection({
                     label="เป้าหมายโครงการ"
                     name="target"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="ระบุเป้าหมายโครงการ"
                     value={formData.target}
                     onChange={handleChange}
@@ -75,6 +79,7 @@ export function ProjectDetailSection({
                     label="กรอบการดำเนินงาน"
                     name="scope"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="ระบุกรอบการดำเนินงาน"
                     value={formData.scope}
                     onChange={handleChange}
@@ -86,6 +91,7 @@ export function ProjectDetailSection({
                     label="ผลผลิต"
                     name="product"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="ระบุผลผลิตโครงการ"
                     value={formData.product}
                     onChange={handleChange}
@@ -97,6 +103,7 @@ export function ProjectDetailSection({
                     label="ผลลัพธ์"
                     name="result"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="ระบุผลลัพธ์โครงการ"
                     value={formData.result}
                     onChange={handleChange}
@@ -108,6 +115,7 @@ export function ProjectDetailSection({
                     label="ประวัติผู้ช่วยวิทยากรกระบวนการถอดบทเรียน"
                     name="author"
                     type="textarea"
+                    constrainToA4={false}
                     placeholder="กรอกประวัติส่วนตัว"
                     value={formData.author}
                     onChange={handleChange}

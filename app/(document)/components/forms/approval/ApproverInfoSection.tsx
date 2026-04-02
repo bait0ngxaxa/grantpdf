@@ -68,7 +68,7 @@ export function ApproverInfoSection({
                         value={formData.tel}
                         onChange={handlePhoneChange}
                         required
-                        maxLength={10}
+                        maxLength={11}
                         error={errors.tel}
                     />
                     <div className="lg:col-span-2">

@@ -53,6 +53,7 @@ export function ActivitySection({
                             <Textarea
                                 placeholder="กิจกรรม"
                                 value={activity.activity}
+                                constrainToA4={false}
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>,
                                 ) =>
@@ -72,6 +73,7 @@ export function ActivitySection({
                             <Textarea
                                 placeholder="ผู้ติดตามโครงการ"
                                 value={activity.manager}
+                                constrainToA4={false}
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>,
                                 ) =>
@@ -91,6 +93,7 @@ export function ActivitySection({
                             <Textarea
                                 placeholder="วิธีการประเมินผล"
                                 value={activity.evaluation2}
+                                constrainToA4={false}
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>,
                                 ) =>
@@ -110,6 +113,7 @@ export function ActivitySection({
                             <Textarea
                                 placeholder="ระยะเวลา"
                                 value={activity.duration}
+                                constrainToA4={false}
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>,
                                 ) =>

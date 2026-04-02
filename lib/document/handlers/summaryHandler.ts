@@ -14,6 +14,7 @@ import {
     getStoragePath,
     getRelativeStoragePath,
 } from "@/lib/fileStorage";
+import { formatNumericWithCommas } from "@/lib/utils";
 
 export async function handleSummaryGeneration(
     formData: FormData,
@@ -87,10 +88,10 @@ export async function handleSummaryGeneration(
         projectCo: projectCo || "",
         month: month || "",
         timeline: timeline || "",
-        sec1: sec1 || "",
-        sec2: sec2 || "",
-        sec3: sec3 || "",
-        sum: sum || "",
+        sec1: formatNumericWithCommas(sec1 || ""),
+        sec2: formatNumericWithCommas(sec2 || ""),
+        sec3: formatNumericWithCommas(sec3 || ""),
+        sum: formatNumericWithCommas(sum || ""),
         funds: funds || "",
         currentDate: currentDate,
         currentYear: new Date().getFullYear() + 543,

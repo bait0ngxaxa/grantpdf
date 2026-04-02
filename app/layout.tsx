@@ -7,7 +7,6 @@ import {
     GlobalModalProvider,
     SWRProvider,
 } from "@/components/providers";
-import { auth } from "@/lib/auth";
 import { Toaster } from "sonner";
 
 const googleSans = localFont({
@@ -21,19 +20,17 @@ export const metadata: Metadata = {
     description: "Generated Documents,By Grant Online",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
-}>): Promise<React.JSX.Element> {
-    const session = await auth();
-
+}>): React.JSX.Element {
     return (
         <html lang="en" suppressHydrationWarning>
             <body
                 className={`${googleSans.variable} antialiased bg-background text-foreground font-sans`}
             >
-                <SessionProvider session={session}>
+                <SessionProvider>
                     <ThemeProvider>
                         <GlobalModalProvider>
                             <SWRProvider>{children}</SWRProvider>

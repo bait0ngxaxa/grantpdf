@@ -33,6 +33,8 @@ export interface UseApprovalLogicReturn {
     updateAttachment: (index: number, value: string) => void;
     handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
     handleSignatureCanvasChange: (signatureDataURL: string | null) => void;
+    clearSignatureFile: () => void;
+    clearSignatureCanvas: () => void;
     handleAttachmentFilesChange: (e: ChangeEvent<HTMLInputElement>) => void;
     removeAttachmentFile: (index: number) => void;
     handleApprovalSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
@@ -45,6 +47,8 @@ export interface UseSignatureHandlersReturn {
     signatureCanvasData: string | null;
     handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
     handleSignatureCanvasChange: (signatureDataURL: string | null) => void;
+    clearSignatureFile: () => void;
+    clearSignatureCanvas: () => void;
 }
 
 export interface UseAttachmentHandlersReturn {

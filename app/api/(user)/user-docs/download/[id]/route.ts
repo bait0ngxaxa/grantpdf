@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import fs from "fs";
+import { readFile, stat } from "fs/promises";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 
 export async function GET(
@@ -40,14 +40,16 @@ export async function GET(
         // ใช้ storage path ใหม่
         const fullPath = getFullPathFromStoragePath(file.storagePath);
 
-        if (!fs.existsSync(fullPath)) {
+        try {
+            await stat(fullPath);
+        } catch {
             return NextResponse.json(
                 { error: "File not found on disk" },
                 { status: 404 }
             );
         }
 
-        const fileBuffer = fs.readFileSync(fullPath);
+        const fileBuffer = await readFile(fullPath);
         const contentType = getMimeType(file.originalFileName);
 
         return new NextResponse(fileBuffer, {

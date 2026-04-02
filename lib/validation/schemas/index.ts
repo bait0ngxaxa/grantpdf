@@ -19,6 +19,7 @@ export {
 export {
     requiredString,
     phoneSchema,
+    normalizePhoneNumber,
     emailSchema,
     citizenIdSchema,
     optionalPhoneSchema,

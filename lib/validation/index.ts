@@ -19,6 +19,7 @@ export {
     resetPasswordSchema,
     requiredString,
     phoneSchema,
+    normalizePhoneNumber,
     emailSchema,
     citizenIdSchema,
     optionalPhoneSchema,

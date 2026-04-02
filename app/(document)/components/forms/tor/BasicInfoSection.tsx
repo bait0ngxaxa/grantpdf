@@ -100,7 +100,7 @@ export function BasicInfoSection({
                     value={formData.tel}
                     onChange={handlePhoneChange}
                     required
-                    maxLength={10}
+                    maxLength={11}
                     error={errors.tel}
                 />
                 <FormField

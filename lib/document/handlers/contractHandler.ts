@@ -9,7 +9,10 @@ import {
     buildSuccessResponse,
 } from "@/lib/document";
 import { fixThaiDistributed } from "../fixThaiwordUtils";
-import { prisma } from "@/lib/prisma";
+import { formatNumericWithCommas } from "@/lib/utils";
+import { getNextContractNumber } from "./contractNumber";
+
+const AUTO_CONTRACT_TYPES = new Set(["ABS", "DMR", "SIP"]);
 
 export async function handleContractGeneration(
     formData: FormData,
@@ -51,35 +54,8 @@ export async function handleContractGeneration(
 
     // Handle contract number generation for specific types
     let finalContractNumber = contractnumber;
-    if (contractnumber && ["ABS", "DMR", "SIP"].includes(contractnumber)) {
-        // Step 1: Find or create the counter record
-        let counter = await prisma.contractCounter.findUnique({
-            where: { contractType: contractnumber },
-        });
-
-        if (!counter) {
-            // Create new counter starting at 1
-            counter = await prisma.contractCounter.create({
-                data: {
-                    contractType: contractnumber,
-                    currentNumber: 1,
-                },
-            });
-        }
-
-        // Step 2: Use current number for this contract
-        const paddedNumber = counter.currentNumber.toString().padStart(2, "0");
-        finalContractNumber = `${contractnumber}${paddedNumber}`;
-
-        // Step 3: Increment for next usage
-        await prisma.contractCounter.update({
-            where: { contractType: contractnumber },
-            data: {
-                currentNumber: {
-                    increment: 1,
-                },
-            },
-        });
+    if (contractnumber && AUTO_CONTRACT_TYPES.has(contractnumber)) {
+        finalContractNumber = await getNextContractNumber(contractnumber);
     }
 
     // Load template
@@ -103,7 +79,7 @@ export async function handleContractGeneration(
         projectCo: fixThaiDistributed(projectCo || ""),
         projectCode: projectCode || "",
         acceptNum: acceptNum || "",
-        cost: cost || "",
+        cost: formatNumericWithCommas(cost || ""),
         timelineMonth: timelineMonth || "",
         timelineText: fixThaiDistributed(timelineText || ""),
         section: fixThaiDistributed(section || ""),

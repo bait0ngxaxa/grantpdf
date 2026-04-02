@@ -139,7 +139,12 @@ export function ProjectList({
                     </li>
                     <li className="flex items-start gap-2">
                         <span className="text-blue-400 mt-1">•</span>
-                        ขนาดไฟล์สูงสุด 10MB
+                        ขนาดไฟล์สูงสุด: .docx ไม่เกิน 3MB และ .pdf ไม่เกิน
+                        5MB
+                    </li>
+                    <li className="flex items-start gap-2">
+                        <span className="text-blue-400 mt-1">•</span>
+                        ระบบตรวจสอบชนิดไฟล์จริงก่อนอัปโหลดทุกครั้ง
                     </li>
                     <li className="flex items-start gap-2">
                         <span className="text-blue-400 mt-1">•</span>

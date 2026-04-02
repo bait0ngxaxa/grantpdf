@@ -9,6 +9,8 @@ import {
 } from "@/lib/document";
 import { fixThaiDistributed } from "../fixThaiwordUtils";
 import { NextResponse } from "next/server";
+import { formatNumericWithCommas } from "@/lib/utils";
+import { normalizePhoneNumber } from "@/lib/validation/schemas";
 
 export async function handleTorGeneration(
     formData: FormData,
@@ -94,10 +96,10 @@ export async function handleTorGeneration(
         owner: fixThaiDistributed(owner || ""),
         address: fixThaiDistributed(address || ""),
         email: email || "",
-        tel: tel || "",
+        tel: normalizePhoneNumber(tel || ""),
         timeline: fixThaiDistributed(timeline || ""),
         contractnumber: contractnumber || "",
-        cost: cost || "",
+        cost: formatNumericWithCommas(cost || ""),
         topic1: fixThaiDistributed(topic1 || ""),
         objective1: fixThaiDistributed(objective1 || ""),
         target: fixThaiDistributed(target || ""),

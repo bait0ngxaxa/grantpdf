@@ -17,6 +17,42 @@ import { prisma } from "@/lib/prisma";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import { getFullPathFromStoragePath } from "@/lib/fileStorage";
+import { fileTypeFromBuffer } from "file-type";
+import { normalizePhoneNumber } from "@/lib/validation/schemas";
+
+const ALLOWED_SIGNATURE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
+const MAX_SIGNATURE_SIZE_BYTES = 5 * 1024 * 1024;
+
+async function parseAndValidateSignatureFile(
+    file: File,
+): Promise<Buffer | NextResponse> {
+    if (file.size <= 0) {
+        return NextResponse.json(
+            { error: "ไฟล์ลายเซ็นไม่ถูกต้อง" },
+            { status: 400 },
+        );
+    }
+
+    if (file.size > MAX_SIGNATURE_SIZE_BYTES) {
+        return NextResponse.json(
+            { error: "ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 5MB)" },
+            { status: 400 },
+        );
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const detectedType = await fileTypeFromBuffer(buffer);
+
+    if (!detectedType || !ALLOWED_SIGNATURE_MIME_TYPES.has(detectedType.mime)) {
+        return NextResponse.json(
+            { error: "ชนิดไฟล์ลายเซ็นไม่ถูกต้อง (รองรับเฉพาะ PNG/JPEG)" },
+            { status: 400 },
+        );
+    }
+
+    return buffer;
+}
 
 export async function handleApprovalGeneration(
     formData: FormData,
@@ -71,11 +107,21 @@ export async function handleApprovalGeneration(
     // Process signature
     let signatureImageBuffer: Buffer | null = null;
     if (canvasSignatureFile && canvasSignatureFile.size > 0) {
-        const arrayBuffer = await canvasSignatureFile.arrayBuffer();
-        signatureImageBuffer = Buffer.from(arrayBuffer);
+        const parsedSignature = await parseAndValidateSignatureFile(
+            canvasSignatureFile,
+        );
+        if (parsedSignature instanceof NextResponse) {
+            return parsedSignature;
+        }
+        signatureImageBuffer = parsedSignature;
     } else if (signatureFile && signatureFile.size > 0) {
-        const arrayBuffer = await signatureFile.arrayBuffer();
-        signatureImageBuffer = Buffer.from(arrayBuffer);
+        const parsedSignature = await parseAndValidateSignatureFile(
+            signatureFile,
+        );
+        if (parsedSignature instanceof NextResponse) {
+            return parsedSignature;
+        }
+        signatureImageBuffer = parsedSignature;
     }
 
     // Load template
@@ -176,7 +222,7 @@ export async function handleApprovalGeneration(
         name: fixThaiDistributed(name || ""),
         depart: fixThaiDistributed(depart || ""),
         coor: coor || "",
-        tel: tel || "",
+        tel: normalizePhoneNumber(tel || ""),
         email: email || "",
         signature: signatureImageBuffer
             ? "signature"

@@ -17,6 +17,7 @@ interface FormFieldProps {
     className?: string;
     error?: string;
     maxLength?: number;
+    constrainToA4?: boolean;
 }
 
 export function FormField({
@@ -31,6 +32,7 @@ export function FormField({
     className = "",
     error,
     maxLength,
+    constrainToA4 = true,
 }: FormFieldProps): React.JSX.Element {
     const hasError = !!error;
     const baseClassName = cn(
@@ -55,6 +57,7 @@ export function FormField({
                     onChange={onChange}
                     rows={rows}
                     required={required}
+                    constrainToA4={constrainToA4}
                 />
             ) : (
                 <Input

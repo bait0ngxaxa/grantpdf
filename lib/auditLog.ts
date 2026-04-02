@@ -1,4 +1,5 @@
-import fs from "fs";
+import { access, appendFile, mkdir, readFile, readdir } from "fs/promises";
+import { constants as fsConstants } from "fs";
 import path from "path";
 
 const LOG_DIR = path.join(process.cwd(), "logs");
@@ -51,10 +52,8 @@ interface AuditLogEntry {
     details?: Record<string, unknown>;
 }
 
-function ensureLogDir(): void {
-    if (!fs.existsSync(LOG_DIR)) {
-        fs.mkdirSync(LOG_DIR, { recursive: true });
-    }
+async function ensureLogDir(): Promise<void> {
+    await mkdir(LOG_DIR, { recursive: true });
 }
 
 function getLogFilePath(): string {
@@ -77,24 +76,26 @@ export function logAudit(
         details?: Record<string, unknown>;
     }
 ): void {
-    try {
-        ensureLogDir();
+    const entry: AuditLogEntry = {
+        timestamp: formatThailandTimestamp(),
+        action,
+        userId,
+        userEmail: options?.userEmail,
+        ip: options?.ip,
+        details: options?.details,
+    };
+    const logLine = JSON.stringify(entry) + "\n";
 
-        const entry: AuditLogEntry = {
-            timestamp: formatThailandTimestamp(),
-            action,
-            userId,
-            userEmail: options?.userEmail,
-            ip: options?.ip,
-            details: options?.details,
-        };
-
-        const logLine = JSON.stringify(entry) + "\n";
-        fs.appendFileSync(getLogFilePath(), logLine, "utf8");
-    } catch (error) {
-        // Silent fail - don't break the app if logging fails
-        console.error("Audit log error:", error);
-    }
+    // Non-blocking write: don't hold request-response cycle for audit logging.
+    void (async () => {
+        try {
+            await ensureLogDir();
+            await appendFile(getLogFilePath(), logLine, "utf8");
+        } catch (error) {
+            // Silent fail - don't break the app if logging fails
+            console.error("Audit log error:", error);
+        }
+    })();
 }
 
 /**
@@ -102,16 +103,18 @@ export function logAudit(
  * @param date - Date in YYYY-MM-DD format (default: today)
  * @returns Array of log entries
  */
-export function readAuditLogs(date?: string): AuditLogEntry[] {
+export async function readAuditLogs(date?: string): Promise<AuditLogEntry[]> {
     try {
         const targetDate = date || getThailandDate();
         const logFile = path.join(LOG_DIR, `audit-${targetDate}.log`);
 
-        if (!fs.existsSync(logFile)) {
+        try {
+            await access(logFile, fsConstants.F_OK);
+        } catch {
             return [];
         }
 
-        const content = fs.readFileSync(logFile, "utf8");
+        const content = await readFile(logFile, "utf8");
         const lines = content.trim().split("\n").filter(Boolean);
 
         return lines.map((line) => JSON.parse(line) as AuditLogEntry);
@@ -124,13 +127,15 @@ export function readAuditLogs(date?: string): AuditLogEntry[] {
  * Get list of available log dates
  * @returns Array of date strings (YYYY-MM-DD)
  */
-export function getAvailableLogDates(): string[] {
+export async function getAvailableLogDates(): Promise<string[]> {
     try {
-        if (!fs.existsSync(LOG_DIR)) {
+        try {
+            await access(LOG_DIR, fsConstants.F_OK);
+        } catch {
             return [];
         }
 
-        const files = fs.readdirSync(LOG_DIR);
+        const files = await readdir(LOG_DIR);
         return files
             .filter((f) => f.startsWith("audit-") && f.endsWith(".log"))
             .map((f) => f.replace("audit-", "").replace(".log", ""))

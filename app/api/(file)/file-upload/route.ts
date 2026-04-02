@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import path from "path";
-import { writeFile } from "fs/promises";
+import { rename, unlink, writeFile } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
 import {
     ensureStorageDir,
@@ -11,7 +11,11 @@ import {
     validateFileMime,
 } from "@/lib/fileStorage";
 import { logAudit } from "@/lib/auditLog";
-import { FILE_UPLOAD } from "@/lib/constants";
+import {
+    FILE_UPLOAD,
+    getMaxUploadSizeBytesByFileName,
+    getMaxUploadSizeMbByFileName,
+} from "@/lib/constants";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -75,17 +79,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         const fileName = file.name.toLowerCase();
-        const allowedExtensions = [
-            ".docx",
-            ".pdf",
-            ".doc",
-            ".jpg",
-            ".jpeg",
-            ".png",
-            ".txt",
-            ".xlsx",
-            ".xls",
-        ];
+        const allowedExtensions = FILE_UPLOAD.SERVER_ALLOWED_EXTENSIONS;
         const isAllowed = allowedExtensions.some((ext) =>
             fileName.endsWith(ext)
         );
@@ -101,16 +95,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             );
         }
 
-        if (file.size > FILE_UPLOAD.MAX_SIZE_BYTES) {
+        const maxSizeBytes = getMaxUploadSizeBytesByFileName(file.name);
+        const maxSizeMb = getMaxUploadSizeMbByFileName(file.name);
+
+        if (file.size > maxSizeBytes) {
             return NextResponse.json(
                 {
-                    error: `File size too large (max ${FILE_UPLOAD.MAX_SIZE_MB}MB)`,
+                    error: `File size too large (max ${maxSizeMb}MB)`,
                 },
                 { status: 400 }
             );
         }
 
         const uniqueFileName = generateUniqueFilename(file.name);
+        const tempFileName = `tmp_${uuidv4()}_${uniqueFileName}`;
         const fileExtension = path
             .extname(file.name)
             .substring(1)
@@ -131,25 +129,51 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             );
         }
 
-        // ใช้ storage directory นอก public/
+        // 2-phase file write:
+        // 1) write to tmp
+        // 2) atomically move to final path
+        // 3) create DB record
+        // If DB create fails, remove moved file as compensation.
+        let tempFilePath: string | null = null;
+        let finalFilePath: string | null = null;
+
+        await ensureStorageDir("tmp");
         await ensureStorageDir("attachments");
-        const filePath = getStoragePath("attachments", uniqueFileName);
+        tempFilePath = getStoragePath("tmp", tempFileName);
+        finalFilePath = getStoragePath("attachments", uniqueFileName);
         const relativeStoragePath = getRelativeStoragePath(
             "attachments",
             uniqueFileName
         );
 
-        await writeFile(filePath, buffer);
+        await writeFile(tempFilePath, buffer);
+        await rename(tempFilePath, finalFilePath);
 
-        const userFile = await prisma.userFile.create({
-            data: {
-                originalFileName: file.name,
-                storagePath: relativeStoragePath,
-                fileExtension: fileExtension,
-                userId: parseInt(session.user.id),
-                projectId: parseInt(projectId),
-            },
-        });
+        let userFile: Awaited<ReturnType<typeof prisma.userFile.create>>;
+        try {
+            userFile = await prisma.userFile.create({
+                data: {
+                    originalFileName: file.name,
+                    storagePath: relativeStoragePath,
+                    fileExtension: fileExtension,
+                    userId: parseInt(session.user.id),
+                    projectId: parseInt(projectId),
+                },
+            });
+        } catch (dbError) {
+            if (finalFilePath) {
+                await unlink(finalFilePath).catch(() => {
+                    console.warn(
+                        `Failed to cleanup moved file after DB error: ${finalFilePath}`
+                    );
+                });
+            }
+            throw dbError;
+        } finally {
+            if (tempFilePath) {
+                await unlink(tempFilePath).catch(() => undefined);
+            }
+        }
 
         // Log file upload
         logAudit("FILE_UPLOAD", session.user.id, {

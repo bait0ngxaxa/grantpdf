@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { validateAttachments, validateSignature } from "@/app/(document)/hooks/useApprovalLogic/helpers";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+    optimizeSignatureImageFile,
+    validateAttachments,
+    validateSignature,
+} from "@/app/(document)/hooks/useApprovalLogic/helpers";
+
+const FIVE_MB_PLUS_ONE_BYTE = 5 * 1024 * 1024 + 1;
 
 describe("validateAttachments", () => {
     it("should return null when no attachments and no files", () => {
@@ -79,5 +85,140 @@ describe("validateSignature", () => {
     it("should return null when only canvas data provided", () => {
         const result = validateSignature(null, "data:image/png;base64,abc");
         expect(result).toBeNull();
+    });
+
+    it("should return error when file mime is not allowed", () => {
+        const invalidMimeFile = new File(["fake"], "signature.gif", {
+            type: "image/gif",
+        });
+        const result = validateSignature(invalidMimeFile, null);
+        expect(result).toBe("ไฟล์ลายเซ็นต้องเป็น PNG หรือ JPEG เท่านั้น");
+    });
+
+    it("should return error when file size exceeds 5MB", () => {
+        const oversizedFile = new File(
+            [new Uint8Array(FIVE_MB_PLUS_ONE_BYTE)],
+            "signature.png",
+            { type: "image/png" },
+        );
+        const result = validateSignature(oversizedFile, null);
+        expect(result).toBe("ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 5MB)");
+    });
+});
+
+describe("optimizeSignatureImageFile", () => {
+    const originalImage = global.Image;
+    const originalCreateElement = document.createElement;
+    const originalCreateObjectURL = URL.createObjectURL;
+    const originalRevokeObjectURL = URL.revokeObjectURL;
+
+    let blobQueue: Array<number | null> = [];
+    let toBlobCallCount = 0;
+
+    class MockImage {
+        width = 1600;
+        height = 800;
+        onload: null | (() => void) = null;
+        onerror: null | (() => void) = null;
+
+        set src(_value: string) {
+            setTimeout(() => {
+                this.onload?.();
+            }, 0);
+        }
+    }
+
+    beforeEach(() => {
+        blobQueue = [];
+        toBlobCallCount = 0;
+
+        Object.defineProperty(global, "Image", {
+            value: MockImage,
+            configurable: true,
+        });
+
+        vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock-signature");
+        vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+
+        vi.spyOn(document, "createElement").mockImplementation(
+            (tagName: string): HTMLElement => {
+                if (tagName === "canvas") {
+                    const canvasMock = {
+                        width: 0,
+                        height: 0,
+                        getContext: () => ({
+                            fillStyle: "#ffffff",
+                            fillRect: vi.fn(),
+                            drawImage: vi.fn(),
+                        }),
+                        toBlob: (
+                            callback: (blob: Blob | null) => void,
+                            _type?: string,
+                            _quality?: number,
+                        ) => {
+                            toBlobCallCount += 1;
+                            const next = blobQueue.shift();
+                            if (next === null || next === undefined) {
+                                callback(null);
+                                return;
+                            }
+                            callback(
+                                new Blob([new Uint8Array(next)], {
+                                    type: "image/jpeg",
+                                }),
+                            );
+                        },
+                    } as unknown as HTMLCanvasElement;
+                    return canvasMock as unknown as HTMLElement;
+                }
+
+                return originalCreateElement.call(document, tagName);
+            },
+        );
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        Object.defineProperty(global, "Image", {
+            value: originalImage,
+            configurable: true,
+        });
+        URL.createObjectURL = originalCreateObjectURL;
+        URL.revokeObjectURL = originalRevokeObjectURL;
+    });
+
+    it("should return optimized jpeg file when conversion succeeds on first try", async () => {
+        blobQueue = [120_000];
+        const sourceFile = new File(["raw"], "signature.png", {
+            type: "image/png",
+        });
+
+        const optimizedFile = await optimizeSignatureImageFile(sourceFile);
+
+        expect(optimizedFile.type).toBe("image/jpeg");
+        expect(optimizedFile.name).toBe("signature.jpg");
+        expect(optimizedFile.size).toBe(120_000);
+        expect(toBlobCallCount).toBe(1);
+    });
+
+    it("should retry compression until size drops below 5MB", async () => {
+        blobQueue = [6_000_000, 5_700_000, 4_200_000];
+        const sourceFile = new File(["raw"], "sig.png", { type: "image/png" });
+
+        const optimizedFile = await optimizeSignatureImageFile(sourceFile);
+
+        expect(optimizedFile.size).toBe(4_200_000);
+        expect(toBlobCallCount).toBe(3);
+    });
+
+    it("should throw when jpeg conversion fails", async () => {
+        blobQueue = [null];
+        const sourceFile = new File(["raw"], "signature.png", {
+            type: "image/png",
+        });
+
+        await expect(optimizeSignatureImageFile(sourceFile)).rejects.toThrow(
+            "ไม่สามารถบีบอัดไฟล์ลายเซ็นได้",
+        );
     });
 });
