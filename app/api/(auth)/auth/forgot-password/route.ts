@@ -4,12 +4,32 @@ import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { forgotPasswordSchema } from "@/lib/validation/schemas";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { applyRateLimit, getStringField } from "@/lib/ratelimit";
+import { RATE_LIMIT } from "@/lib/constants";
 
 const JWT_SECRET = process.env.PASSRESET_TOKEN_SECRET;
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const body: unknown = await req.json();
+        const emailIdentifier = getStringField(body, "email");
+        const rateLimitResult = applyRateLimit({
+            request: req,
+            routeKey: RATE_LIMIT.AUTH.FORGOT_PASSWORD.ROUTE_KEY,
+            limit: RATE_LIMIT.AUTH.FORGOT_PASSWORD.LIMIT,
+            windowMs: RATE_LIMIT.AUTH.FORGOT_PASSWORD.WINDOW_MS,
+            identifier: emailIdentifier,
+        });
+
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                {
+                    error: "มีการร้องขอมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
+                    retryAfter: rateLimitResult.retryAfter,
+                },
+                { status: 429, headers: rateLimitResult.headers }
+            );
+        }
 
         const parsed = forgotPasswordSchema.safeParse(body);
         if (!parsed.success) {
@@ -27,7 +47,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         if (!user) {
             return NextResponse.json(
                 { message: "ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว" },
-                { status: 200 }
+                { status: 200, headers: rateLimitResult.headers }
             );
         }
 
@@ -47,7 +67,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         return NextResponse.json(
             { message: "ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว" },
-            { status: 200 }
+            { status: 200, headers: rateLimitResult.headers }
         );
     } catch (error) {
         console.error("เกิดข้อผิดพลาดในกระบวนการรีเซ็ตรหัสผ่าน:", error);

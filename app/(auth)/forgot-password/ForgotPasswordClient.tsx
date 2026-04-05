@@ -14,6 +14,29 @@ export default function ForgotPasswordClient(): React.JSX.Element {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const getRetryAfterSeconds = (
+        data: unknown,
+        headers: Headers
+    ): number | undefined => {
+        if (typeof data === "object" && data !== null && "retryAfter" in data) {
+            const value = (data as { retryAfter?: unknown }).retryAfter;
+            if (typeof value === "number" && Number.isFinite(value)) {
+                return value;
+            }
+            if (typeof value === "string") {
+                const parsed = Number(value);
+                if (Number.isFinite(parsed)) {
+                    return parsed;
+                }
+            }
+        }
+
+        const retryAfterHeader = headers.get("Retry-After");
+        if (!retryAfterHeader) return undefined;
+        const parsed = Number(retryAfterHeader);
+        return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
     const handleForgotPassword = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setLoading(true);
@@ -38,10 +61,27 @@ export default function ForgotPasswordClient(): React.JSX.Element {
                     router.push(ROUTES.SIGNIN);
                 }, 2000);
             } else {
-                setError(data.error || "เกิดข้อผิดพลาดในการส่งคำขอ");
-                console.error("Forgot password failed:", data.error);
-                toast.error("ส่งคำขอไม่สำเร็จ", {
-                    description: data.error || "เกิดข้อผิดพลาดในการส่งคำขอ",
+                const message =
+                    typeof data === "object" &&
+                    data !== null &&
+                    "error" in data &&
+                    typeof (data as { error?: unknown }).error === "string"
+                        ? (data as { error: string }).error
+                        : "เกิดข้อผิดพลาดในการส่งคำขอ";
+                const retryAfter = getRetryAfterSeconds(data, res.headers);
+                const toastTitle =
+                    res.status === 429
+                        ? "ส่งคำขอชั่วคราวไม่ได้"
+                        : "ส่งคำขอไม่สำเร็จ";
+                const toastDescription =
+                    res.status === 429 && retryAfter
+                        ? `${message} (ลองใหม่ใน ${retryAfter} วินาที)`
+                        : message;
+
+                setError(message);
+                console.error("Forgot password failed:", message);
+                toast.error(toastTitle, {
+                    description: toastDescription,
                 });
             }
         } catch (err) {
@@ -95,11 +135,18 @@ export default function ForgotPasswordClient(): React.JSX.Element {
                             className="space-y-4 relative z-10"
                         >
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                <label
+                                    htmlFor="forgot-password-email"
+                                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                                >
                                     อีเมล
                                 </label>
                                 <Input
+                                    id="forgot-password-email"
                                     type="email"
+                                    name="email"
+                                    autoComplete="email"
+                                    spellCheck={false}
                                     className="h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     placeholder="your@email.com"
                                     value={email}
@@ -110,8 +157,14 @@ export default function ForgotPasswordClient(): React.JSX.Element {
                             </div>
 
                             {error && (
-                                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake">
-                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                <div
+                                    aria-live="polite"
+                                    className="p-3 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake"
+                                >
+                                    <AlertCircle
+                                        aria-hidden="true"
+                                        className="w-5 h-5 shrink-0"
+                                    />
                                     {error}
                                 </div>
                             )}

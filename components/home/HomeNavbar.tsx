@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
@@ -18,8 +17,6 @@ interface HomeNavbarProps {
 export default function HomeNavbar({
     session,
 }: HomeNavbarProps): React.ReactElement {
-    const router = useRouter();
-
     const handleLogout = (): void => {
         signOut({ callbackUrl: "/" });
     };
@@ -46,7 +43,6 @@ export default function HomeNavbar({
                     <LoggedInMenu
                         session={session}
                         onLogout={handleLogout}
-                        onNavigate={(path) => router.push(path)}
                     />
                 ) : (
                     <LoggedOutMenu />
@@ -59,13 +55,11 @@ export default function HomeNavbar({
 interface LoggedInMenuProps {
     session: Session;
     onLogout: () => void;
-    onNavigate: (path: string) => void;
 }
 
 function LoggedInMenu({
     session,
     onLogout,
-    onNavigate,
 }: LoggedInMenuProps): React.ReactElement {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -84,18 +78,21 @@ function LoggedInMenu({
         <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
             <Button
-                onClick={() => onNavigate("/userdashboard")}
+                asChild
                 className="hidden sm:flex bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow active:scale-95 duration-200 transition"
                 variant="ghost"
             >
-                <LayoutDashboard className="w-4 h-4 mr-2" />
-                Dashboard
+                <Link href="/userdashboard">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                </Link>
             </Button>
 
             <div className="relative" ref={dropdownRef}>
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="p-1 rounded-full cursor-pointer ring-2 ring-slate-100 dark:ring-slate-700 hover:ring-blue-100 dark:hover:ring-blue-800 transition-colors duration-300 focus:outline-none"
+                    aria-label={isOpen ? "ปิดเมนูผู้ใช้" : "เปิดเมนูผู้ใช้"}
+                    className="p-1 rounded-full cursor-pointer ring-2 ring-slate-100 dark:ring-slate-700 hover:ring-blue-100 dark:hover:ring-blue-800 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                 >
                     {session.user?.image ? (
                         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden">
@@ -121,10 +118,7 @@ function LoggedInMenu({
                     <UserDropdownMenu
                         session={session}
                         onLogout={onLogout}
-                        onNavigate={(path) => {
-                            setIsOpen(false);
-                            onNavigate(path);
-                        }}
+                        onClose={() => setIsOpen(false)}
                     />
                 )}
             </div>
@@ -135,13 +129,13 @@ function LoggedInMenu({
 interface UserDropdownMenuProps {
     session: Session;
     onLogout: () => void;
-    onNavigate: (path: string) => void;
+    onClose: () => void;
 }
 
 function UserDropdownMenu({
     session,
     onLogout,
-    onNavigate,
+    onClose,
 }: UserDropdownMenuProps): React.ReactElement {
     return (
         <ul
@@ -158,13 +152,14 @@ function UserDropdownMenu({
                 </div>
             </li>
             <li className="mt-2 text-slate-700 dark:text-slate-200">
-                <button
-                    onClick={() => onNavigate("/userdashboard")}
+                <Link
+                    href="/userdashboard"
+                    onClick={onClose}
                     className="flex w-full items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 rounded-xl transition-colors"
                 >
                     <LayoutDashboard className="w-4 h-4" />
                     Dashboard
-                </button>
+                </Link>
             </li>
             <li>
                 <button

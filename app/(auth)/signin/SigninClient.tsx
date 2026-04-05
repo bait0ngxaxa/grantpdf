@@ -15,12 +15,67 @@ export default function SigninClient(): React.JSX.Element {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+
+    const getRetryAfterSeconds = (
+        data: unknown,
+        headers: Headers
+    ): number | undefined => {
+        if (typeof data === "object" && data !== null && "retryAfter" in data) {
+            const value = (data as { retryAfter?: unknown }).retryAfter;
+            if (typeof value === "number" && Number.isFinite(value)) {
+                return value;
+            }
+            if (typeof value === "string") {
+                const parsed = Number(value);
+                if (Number.isFinite(parsed)) {
+                    return parsed;
+                }
+            }
+        }
+
+        const retryAfterHeader = headers.get("Retry-After");
+        if (!retryAfterHeader) return undefined;
+
+        const parsed = Number(retryAfterHeader);
+        return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
     const handleLogin = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
 
         try {
+            const preflightResponse = await fetch("/api/auth/signin-rate-limit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            const preflightData: unknown = await preflightResponse.json();
+
+            if (preflightResponse.status === 429) {
+                const retryAfter = getRetryAfterSeconds(
+                    preflightData,
+                    preflightResponse.headers
+                );
+                const message =
+                    typeof preflightData === "object" &&
+                    preflightData !== null &&
+                    "error" in preflightData &&
+                    typeof (preflightData as { error?: unknown }).error ===
+                        "string"
+                        ? (preflightData as { error: string }).error
+                        : "มีการพยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง";
+
+                setError(message);
+                toast.error("เข้าสู่ระบบไม่สำเร็จ", {
+                    description: retryAfter
+                        ? `${message} (ลองใหม่ใน ${retryAfter} วินาที)`
+                        : message,
+                });
+                return;
+            }
+
             const result = await signIn("credentials", {
                 redirect: false,
                 email,
@@ -147,7 +202,10 @@ export default function SigninClient(): React.JSX.Element {
                                     aria-live="polite"
                                     className="p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake"
                                 >
-                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                    <AlertCircle
+                                        aria-hidden="true"
+                                        className="w-5 h-5 shrink-0"
+                                    />
                                     {error}
                                 </div>
                             )}

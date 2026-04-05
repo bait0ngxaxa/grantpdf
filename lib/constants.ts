@@ -84,6 +84,31 @@ export const FILE_UPLOAD = {
     DEFAULT_MAX_SIZE_MB: 3,
 } as const;
 
+export const RATE_LIMIT = {
+    AUTH: {
+        SIGNUP: {
+            ROUTE_KEY: "auth:signup",
+            LIMIT: 5,
+            WINDOW_MS: 60_000,
+        },
+        SIGNIN: {
+            ROUTE_KEY: "auth:signin",
+            LIMIT: 10,
+            WINDOW_MS: 60_000,
+        },
+        FORGOT_PASSWORD: {
+            ROUTE_KEY: "auth:forgot-password",
+            LIMIT: 3,
+            WINDOW_MS: 15 * 60_000,
+        },
+        RESET_PASSWORD: {
+            ROUTE_KEY: "auth:reset-password",
+            LIMIT: 5,
+            WINDOW_MS: 15 * 60_000,
+        },
+    },
+} as const;
+
 export function getFileExtension(fileName: string): string {
     const dotIndex = fileName.lastIndexOf(".");
     if (dotIndex < 0) return "";

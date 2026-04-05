@@ -1,0 +1,51 @@
+import { type NextRequest, NextResponse } from "next/server";
+import { RATE_LIMIT } from "@/lib/constants";
+import {
+    createRateLimitKey,
+    getRateLimitHeaders,
+    getRateLimitStatus,
+    getStringField,
+} from "@/lib/ratelimit";
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+    const body: unknown = await req.json().catch(() => null);
+    const email = getStringField(body, "email");
+    const key = createRateLimitKey(
+        req,
+        RATE_LIMIT.AUTH.SIGNIN.ROUTE_KEY,
+        email
+    );
+    const status = getRateLimitStatus(
+        key,
+        RATE_LIMIT.AUTH.SIGNIN.LIMIT,
+        RATE_LIMIT.AUTH.SIGNIN.WINDOW_MS
+    );
+    const blocked = status.remaining <= 0;
+    const headers = getRateLimitHeaders(
+        {
+            success: !blocked,
+            remaining: status.remaining,
+            resetTime: status.resetTime,
+            retryAfter: status.retryAfter,
+        },
+        RATE_LIMIT.AUTH.SIGNIN.LIMIT
+    );
+
+    if (blocked) {
+        return NextResponse.json(
+            {
+                error: "มีการพยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
+                retryAfter: status.retryAfter ?? 1,
+            },
+            { status: 429, headers }
+        );
+    }
+
+    return NextResponse.json(
+        {
+            ok: true,
+            remaining: status.remaining,
+        },
+        { status: 200, headers }
+    );
+}

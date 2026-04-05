@@ -22,6 +22,63 @@ export default function SignupClient(): React.JSX.Element {
 
     const router = useRouter();
 
+    const parseResponseSafely = async (
+        response: Response
+    ): Promise<{
+        ok: boolean;
+        status: number;
+        headers: Headers;
+        data: unknown;
+    }> => {
+        const responseLike = response as unknown as {
+            ok?: boolean;
+            status?: number;
+            headers?: Headers;
+            json?: () => Promise<unknown>;
+        };
+
+        const ok = responseLike.ok === true;
+        const status =
+            typeof responseLike.status === "number"
+                ? responseLike.status
+                : ok
+                  ? 200
+                  : 500;
+        const headers =
+            responseLike.headers instanceof Headers
+                ? responseLike.headers
+                : new Headers();
+        const data =
+            typeof responseLike.json === "function"
+                ? await responseLike.json()
+                : {};
+
+        return { ok, status, headers, data };
+    };
+
+    const getRetryAfterSeconds = (
+        data: unknown,
+        headers: Headers
+    ): number | undefined => {
+        if (typeof data === "object" && data !== null && "retryAfter" in data) {
+            const value = (data as { retryAfter?: unknown }).retryAfter;
+            if (typeof value === "number" && Number.isFinite(value)) {
+                return value;
+            }
+            if (typeof value === "string") {
+                const parsed = Number(value);
+                if (Number.isFinite(parsed)) {
+                    return parsed;
+                }
+            }
+        }
+
+        const retryAfterHeader = headers.get("Retry-After");
+        if (!retryAfterHeader) return undefined;
+        const parsed = Number(retryAfterHeader);
+        return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
     const handleCloseConfirmModal = (): void => {
         setError("");
         setShowConfirmModal(false);
@@ -56,8 +113,9 @@ export default function SignupClient(): React.JSX.Element {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, email, password }),
             });
+            const { ok, status, headers, data } = await parseResponseSafely(res);
 
-            if (res.ok) {
+            if (ok) {
                 setShowConfirmModal(false);
                 setIsPasswordVisibleInConfirm(false);
                 const signinResult = await signIn("credentials", {
@@ -81,12 +139,27 @@ export default function SignupClient(): React.JSX.Element {
                 router.replace(ROUTES.DASHBOARD);
                 router.refresh();
             } else {
-                const data = await res.json();
+                const message =
+                    typeof data === "object" &&
+                    data !== null &&
+                    "error" in data &&
+                    typeof (data as { error?: unknown }).error === "string"
+                        ? (data as { error: string }).error
+                        : "เกิดข้อผิดพลาดในการสมัครสมาชิก";
+                const retryAfter = getRetryAfterSeconds(data, headers);
+                const toastTitle =
+                    status === 429
+                        ? "สมัครสมาชิกชั่วคราวไม่ได้"
+                        : "การสมัครสมาชิกไม่สำเร็จ";
+                const toastDescription =
+                    status === 429 && retryAfter
+                        ? `${message} (ลองใหม่ใน ${retryAfter} วินาที)`
+                        : message;
 
-                setError(data.error || "เกิดข้อผิดพลาดในการสมัครสมาชิก");
-                console.error("Signup failed:", data.error);
-                toast.error("การสมัครสมาชิกไม่สำเร็จ", {
-                    description: data.error || "เกิดข้อผิดพลาดในการสมัครสมาชิก",
+                setError(message);
+                console.error("Signup failed:", message);
+                toast.error(toastTitle, {
+                    description: toastDescription,
                 });
             }
         } catch (err) {

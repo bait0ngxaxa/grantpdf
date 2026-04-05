@@ -1,8 +1,8 @@
 // lib/ratelimit.ts
 interface RateLimitRecord {
-    count: number;
+    tokens: number;
+    lastRefill: number;
     lastRequest: number;
-    firstRequest: number;
 }
 
 interface RateLimitResult {
@@ -12,6 +12,14 @@ interface RateLimitResult {
     retryAfter?: number;
 }
 
+interface ApplyRateLimitOptions {
+    request: Request;
+    routeKey: string;
+    limit: number;
+    windowMs: number;
+    identifier?: string;
+}
+
 const rateLimitMap = new Map<string, RateLimitRecord>();
 
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
@@ -19,9 +27,9 @@ const cleanupTimer = setInterval(() => {
     const now = Date.now();
     const maxAge = 60 * 60 * 1000;
 
-    for (const [ip, record] of rateLimitMap.entries()) {
+    for (const [key, record] of rateLimitMap.entries()) {
         if (now - record.lastRequest > maxAge) {
-            rateLimitMap.delete(ip);
+            rateLimitMap.delete(key);
         }
     }
 
@@ -41,57 +49,70 @@ process.on("SIGINT", () => {
 });
 
 /**
- * Rate limiting function with sliding window algorithm
- * @param ip - Client IP address
+ * Rate limiting function using token bucket algorithm
+ * @param key - Unique rate limit key
  * @param limit - Maximum number of requests allowed (default: 5)
  * @param windowMs - Time window in milliseconds (default: 60000 = 1 minute)
  * @returns RateLimitResult with success status and metadata
  */
 export function rateLimit(
-    ip: string,
+    key: string,
     limit: number = 5,
     windowMs: number = 60_000
 ): RateLimitResult {
     const now = Date.now();
-    const record = rateLimitMap.get(ip);
+    const refillRate = limit / windowMs;
+    const record = rateLimitMap.get(key);
 
-    if (!record || now - record.firstRequest > windowMs) {
+    if (!record) {
         const newRecord: RateLimitRecord = {
-            count: 1,
+            tokens: Math.max(0, limit - 1),
+            lastRefill: now,
             lastRequest: now,
-            firstRequest: now,
         };
 
-        rateLimitMap.set(ip, newRecord);
+        rateLimitMap.set(key, newRecord);
 
         return {
             success: true,
-            remaining: limit - 1,
+            remaining: Math.floor(newRecord.tokens),
             resetTime: now + windowMs,
         };
     }
 
-    if (record.count >= limit) {
-        const resetTime = record.firstRequest + windowMs;
-        const retryAfter = Math.ceil((resetTime - now) / 1000); // seconds until reset
+    const elapsedMs = Math.max(0, now - record.lastRefill);
+    const refilledTokens = elapsedMs * refillRate;
+    const availableTokens = Math.min(limit, record.tokens + refilledTokens);
+
+    if (availableTokens < 1) {
+        const missingTokens = 1 - availableTokens;
+        const waitMs = Math.ceil(missingTokens / refillRate);
+        const retryAfter = Math.max(1, Math.ceil(waitMs / 1000));
+        const resetTime = now + waitMs;
+        record.tokens = availableTokens;
+        record.lastRefill = now;
+        record.lastRequest = now;
+        rateLimitMap.set(key, record);
 
         return {
             success: false,
             remaining: 0,
             resetTime,
-            retryAfter: retryAfter > 0 ? retryAfter : 1,
+            retryAfter,
         };
     }
 
-    record.count++;
+    record.tokens = availableTokens - 1;
+    record.lastRefill = now;
     record.lastRequest = now;
-    rateLimitMap.set(ip, record);
+    rateLimitMap.set(key, record);
 
-    const resetTime = record.firstRequest + windowMs;
+    const missingToFull = Math.max(0, limit - record.tokens);
+    const resetTime = now + Math.ceil(missingToFull / refillRate);
 
     return {
         success: true,
-        remaining: Math.max(0, limit - record.count),
+        remaining: Math.max(0, Math.floor(record.tokens)),
         resetTime,
     };
 }
@@ -104,26 +125,32 @@ export function rateLimit(
  * @returns Current status without affecting the counter
  */
 export function getRateLimitStatus(
-    ip: string,
+    key: string,
     limit: number = 5,
     windowMs: number = 60_000
 ): Omit<RateLimitResult, "success"> {
     const now = Date.now();
-    const record = rateLimitMap.get(ip);
+    const refillRate = limit / windowMs;
+    const record = rateLimitMap.get(key);
 
-    if (!record || now - record.firstRequest > windowMs) {
+    if (!record) {
         return {
             remaining: limit,
             resetTime: now + windowMs,
         };
     }
 
-    const resetTime = record.firstRequest + windowMs;
+    const elapsedMs = Math.max(0, now - record.lastRefill);
+    const availableTokens = Math.min(limit, record.tokens + elapsedMs * refillRate);
+    const missingToFull = Math.max(0, limit - availableTokens);
+    const resetTime = now + Math.ceil(missingToFull / refillRate);
     const retryAfter =
-        record.count >= limit ? Math.ceil((resetTime - now) / 1000) : undefined;
+        availableTokens < 1
+            ? Math.max(1, Math.ceil((1 - availableTokens) / refillRate / 1000))
+            : undefined;
 
     return {
-        remaining: Math.max(0, limit - record.count),
+        remaining: Math.max(0, Math.floor(availableTokens)),
         resetTime,
         ...(retryAfter && { retryAfter }),
     };
@@ -167,4 +194,94 @@ export function getClientIP(request: Request): string {
     if (cfConnectingIP) return cfConnectingIP;
 
     return "unknown";
+}
+
+function normalizeIdentifier(identifier: string): string {
+    return identifier.trim().toLowerCase();
+}
+
+function hashText(text: string): string {
+    let hash = 5381;
+    for (const char of text) {
+        hash = (hash * 33) ^ char.charCodeAt(0);
+    }
+    return (hash >>> 0).toString(36);
+}
+
+function getUnknownIPFallbackKey(request: Request): string {
+    const userAgent = request.headers.get("user-agent") ?? "";
+    const acceptLanguage = request.headers.get("accept-language") ?? "";
+    const forwardedProto = request.headers.get("x-forwarded-proto") ?? "";
+    return hashText(`${userAgent}|${acceptLanguage}|${forwardedProto}`);
+}
+
+export function getRateLimitSubject(request: Request): string {
+    const ip = getClientIP(request);
+    if (ip !== "unknown") {
+        return ip;
+    }
+    return `unknown:${getUnknownIPFallbackKey(request)}`;
+}
+
+export function createRateLimitKey(
+    request: Request,
+    routeKey: string,
+    identifier?: string
+): string {
+    const subject = getRateLimitSubject(request);
+    if (!identifier) {
+        return `${routeKey}:${subject}`;
+    }
+    const normalized = normalizeIdentifier(identifier);
+    return `${routeKey}:${subject}:${hashText(normalized)}`;
+}
+
+export function getRateLimitHeaders(
+    result: RateLimitResult,
+    limit: number
+): Record<string, string> {
+    const headers: Record<string, string> = {
+        "X-RateLimit-Limit": limit.toString(),
+        "X-RateLimit-Remaining": result.remaining.toString(),
+        "X-RateLimit-Reset": new Date(result.resetTime).toISOString(),
+    };
+
+    if (!result.success) {
+        headers["Retry-After"] = result.retryAfter?.toString() ?? "1";
+    }
+
+    return headers;
+}
+
+export function applyRateLimit(
+    options: ApplyRateLimitOptions
+): RateLimitResult & { headers: Record<string, string> } {
+    const key = createRateLimitKey(
+        options.request,
+        options.routeKey,
+        options.identifier
+    );
+    const result = rateLimit(key, options.limit, options.windowMs);
+    return {
+        ...result,
+        headers: getRateLimitHeaders(result, options.limit),
+    };
+}
+
+export function getStringField(
+    data: unknown,
+    fieldName: string
+): string | undefined {
+    if (typeof data !== "object" || data === null) {
+        return undefined;
+    }
+    if (!(fieldName in data)) {
+        return undefined;
+    }
+    const value = (data as Record<string, unknown>)[fieldName];
+    if (typeof value !== "string") {
+        return undefined;
+    }
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
 }

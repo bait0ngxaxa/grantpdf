@@ -17,6 +17,29 @@ function ResetPasswordForm(): React.JSX.Element {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const getRetryAfterSeconds = (
+        data: unknown,
+        headers: Headers
+    ): number | undefined => {
+        if (typeof data === "object" && data !== null && "retryAfter" in data) {
+            const value = (data as { retryAfter?: unknown }).retryAfter;
+            if (typeof value === "number" && Number.isFinite(value)) {
+                return value;
+            }
+            if (typeof value === "string") {
+                const parsed = Number(value);
+                if (Number.isFinite(parsed)) {
+                    return parsed;
+                }
+            }
+        }
+
+        const retryAfterHeader = headers.get("Retry-After");
+        if (!retryAfterHeader) return undefined;
+        const parsed = Number(retryAfterHeader);
+        return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
     if (!token && !error) {
         setError("ไม่พบโทเค็นสำหรับรีเซ็ตรหัสผ่าน กรุณาตรวจสอบลิงก์อีกครั้ง");
     }
@@ -51,8 +74,28 @@ function ResetPasswordForm(): React.JSX.Element {
                     router.push(ROUTES.SIGNIN);
                 }, 2000);
             } else {
-                setError(data.error || "เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน");
-                console.error("Password reset failed:", data.error);
+                const message =
+                    typeof data === "object" &&
+                    data !== null &&
+                    "error" in data &&
+                    typeof (data as { error?: unknown }).error === "string"
+                        ? (data as { error: string }).error
+                        : "เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน";
+                const retryAfter = getRetryAfterSeconds(data, res.headers);
+
+                setError(message);
+                console.error("Password reset failed:", message);
+                toast.error(
+                    res.status === 429
+                        ? "รีเซ็ตรหัสผ่านชั่วคราวไม่ได้"
+                        : "รีเซ็ตรหัสผ่านไม่สำเร็จ",
+                    {
+                        description:
+                            res.status === 429 && retryAfter
+                                ? `${message} (ลองใหม่ใน ${retryAfter} วินาที)`
+                                : message,
+                    }
+                );
             }
         } catch (err) {
             console.error("An unexpected error occurred:", err);
@@ -89,7 +132,10 @@ function ResetPasswordForm(): React.JSX.Element {
                 <div className="space-y-4 max-w-lg">
                     <div className="flex items-center gap-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm p-4 rounded-2xl border border-white dark:border-slate-700 shadow-sm">
                         <div className="w-12 h-12 bg-green-50 dark:bg-green-900/50 rounded-xl flex items-center justify-center text-green-600 dark:text-green-400 shrink-0">
-                            <CheckCircleIcon className="w-6 h-6" />
+                            <CheckCircleIcon
+                                aria-hidden="true"
+                                className="w-6 h-6"
+                            />
                         </div>
                         <div>
                             <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-balance">
@@ -119,8 +165,14 @@ function ResetPasswordForm(): React.JSX.Element {
                     </div>
 
                     {error && (
-                        <div className="p-3 mb-6 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake">
-                            <AlertCircle className="w-5 h-5 shrink-0" />
+                        <div
+                            aria-live="polite"
+                            className="p-3 mb-6 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2 animate-shake"
+                        >
+                            <AlertCircle
+                                aria-hidden="true"
+                                className="w-5 h-5 shrink-0"
+                            />
                             {error}
                         </div>
                     )}
@@ -130,11 +182,17 @@ function ResetPasswordForm(): React.JSX.Element {
                         className="space-y-4 relative z-10"
                     >
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <label
+                                htmlFor="reset-password-new"
+                                className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                            >
                                 รหัสผ่านใหม่
                             </label>
                             <input
+                                id="reset-password-new"
                                 type="password"
+                                name="newPassword"
+                                autoComplete="new-password"
                                 className="w-full h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 outline-none"
                                 placeholder="รหัสผ่านใหม่"
                                 value={newPassword}
@@ -147,11 +205,17 @@ function ResetPasswordForm(): React.JSX.Element {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <label
+                                htmlFor="reset-password-confirm"
+                                className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                            >
                                 ยืนยันรหัสผ่านใหม่
                             </label>
                             <input
+                                id="reset-password-confirm"
                                 type="password"
+                                name="confirmPassword"
+                                autoComplete="new-password"
                                 className="w-full h-11 rounded-xl bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus:bg-white dark:focus:bg-slate-600 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 transition-colors font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 outline-none"
                                 placeholder="ยืนยันรหัสผ่านอีกครั้ง"
                                 value={confirmPassword}

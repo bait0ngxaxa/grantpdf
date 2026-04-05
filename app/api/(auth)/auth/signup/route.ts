@@ -3,15 +3,23 @@ import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { rateLimit, getClientIP } from "@/lib/ratelimit";
+import { applyRateLimit, getClientIP, getStringField } from "@/lib/ratelimit";
 import { logAudit } from "@/lib/auditLog";
 import { signupSchema } from "@/lib/validation/schemas";
+import { RATE_LIMIT } from "@/lib/constants";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const body: unknown = await req.json();
         const ip = getClientIP(req);
-        const rateLimitResult = rateLimit(ip, 5, 60_000);
+        const emailIdentifier = getStringField(body, "email");
+        const rateLimitResult = applyRateLimit({
+            request: req,
+            routeKey: RATE_LIMIT.AUTH.SIGNUP.ROUTE_KEY,
+            limit: RATE_LIMIT.AUTH.SIGNUP.LIMIT,
+            windowMs: RATE_LIMIT.AUTH.SIGNUP.WINDOW_MS,
+            identifier: emailIdentifier,
+        });
 
         if (!rateLimitResult.success) {
             return NextResponse.json(
@@ -21,16 +29,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 },
                 {
                     status: 429,
-                    headers: {
-                        "X-RateLimit-Limit": "5",
-                        "X-RateLimit-Remaining":
-                            rateLimitResult.remaining.toString(),
-                        "X-RateLimit-Reset": new Date(
-                            rateLimitResult.resetTime
-                        ).toISOString(),
-                        "Retry-After":
-                            rateLimitResult.retryAfter?.toString() || "60",
-                    },
+                    headers: rateLimitResult.headers,
                 }
             );
         }
@@ -83,14 +82,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             },
             {
                 status: 201,
-                headers: {
-                    "X-RateLimit-Limit": "5",
-                    "X-RateLimit-Remaining":
-                        rateLimitResult.remaining.toString(),
-                    "X-RateLimit-Reset": new Date(
-                        rateLimitResult.resetTime
-                    ).toISOString(),
-                },
+                headers: rateLimitResult.headers,
             }
         );
     } catch (e) {

@@ -4,6 +4,8 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import type { User } from "next-auth";
+import { createRateLimitKey, getClientIP, rateLimit } from "@/lib/ratelimit";
+import { RATE_LIMIT } from "@/lib/constants";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
     providers: [
@@ -16,7 +18,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 },
                 password: { label: "Password", type: "password" },
             },
-            async authorize(credentials) {
+            async authorize(credentials, request) {
                 if (
                     !credentials?.email ||
                     typeof credentials.email !== "string" ||
@@ -28,6 +30,27 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
                 // Dynamic import to avoid issues with server-side module
                 const { logAudit } = await import("@/lib/auditLog");
+                const ip = getClientIP(request);
+                const signInRateLimit = rateLimit(
+                    createRateLimitKey(
+                        request,
+                        RATE_LIMIT.AUTH.SIGNIN.ROUTE_KEY,
+                        credentials.email
+                    ),
+                    RATE_LIMIT.AUTH.SIGNIN.LIMIT,
+                    RATE_LIMIT.AUTH.SIGNIN.WINDOW_MS
+                );
+
+                if (!signInRateLimit.success) {
+                    logAudit("LOGIN_FAILED", null, {
+                        details: {
+                            attemptedEmail: credentials.email,
+                            reason: "rate_limited",
+                        },
+                        ip,
+                    });
+                    return null;
+                }
 
                 const user = await prisma.user.findUnique({
                     where: { email: credentials.email },
@@ -40,6 +63,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     // Log successful login
                     logAudit("LOGIN_SUCCESS", String(user.id), {
                         userEmail: user.email,
+                        ip,
                     });
 
                     const authorizedUser: User = {
@@ -53,6 +77,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     // Log failed login attempt
                     logAudit("LOGIN_FAILED", null, {
                         details: { attemptedEmail: credentials.email },
+                        ip,
                     });
                     return null;
                 }

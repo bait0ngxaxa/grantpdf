@@ -26,7 +26,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>): React.JSX.Element {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="th" suppressHydrationWarning>
             <body
                 className={`${googleSans.variable} antialiased bg-background text-foreground font-sans`}
             >
