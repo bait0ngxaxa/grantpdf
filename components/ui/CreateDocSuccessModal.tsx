@@ -9,6 +9,7 @@ import {
     DialogDescription,
 } from "@/components/ui";
 import { FileText, CheckCircle2 } from "lucide-react";
+import { ROUTES } from "@/lib/constants";
 
 interface CreateDocSuccessModalProps {
     isOpen: boolean;
@@ -73,7 +74,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
         }
 
         // Always use window.location for guaranteed redirect
-        window.location.href = "/userdashboard";
+        window.location.href = ROUTES.DASHBOARD;
     };
 
     // Auto-redirect after 3 seconds

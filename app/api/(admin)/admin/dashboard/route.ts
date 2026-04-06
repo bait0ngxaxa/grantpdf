@@ -1,26 +1,13 @@
 //เส้นดึงข้อมูลจาก table userFile มาแสดงผล dashboard admin
 
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { getAllFilesForAdmin } from "@/lib/services";
+import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 
 export async function GET(): Promise<NextResponse> {
     try {
-        const session = await auth();
-
-        if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 }
-            );
-        }
-
-        if (session.user?.role !== "admin") {
-            return NextResponse.json(
-                { error: "Forbidden - Admin access required" },
-                { status: 403 }
-            );
-        }
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const files = await getAllFilesForAdmin();
         return NextResponse.json(files, { status: 200 });
@@ -28,7 +15,7 @@ export async function GET(): Promise<NextResponse> {
         console.error("Error fetching all documents:", error);
         return NextResponse.json(
             { error: "Failed to fetch all documents" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }

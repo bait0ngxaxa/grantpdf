@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth";
 import { getProjectsByUserId, getProjectsByUserIdPaginated } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
+import { createProjectSchema } from "@/lib/validation/schemas";
+import { parsePositiveIntId } from "@/lib/id";
+import { publicApiError, toPublicApiError } from "@/lib/apiError";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -15,7 +18,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        const userId = Number(session.user.id);
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) {
+            throw publicApiError(401, "Unauthorized");
+        }
         const { searchParams } = new URL(req.url);
         const hasPaginationParams =
             searchParams.has("page") || searchParams.has("limit");
@@ -36,9 +42,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching projects:", error);
+        const mappedError = toPublicApiError(error, "Failed to fetch projects");
         return NextResponse.json(
-            { error: "Failed to fetch projects" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }
@@ -55,26 +62,31 @@ export async function POST(req: Request): Promise<NextResponse> {
             );
         }
 
-        const { name, description } = await req.json();
-
-        if (!name) {
-            return NextResponse.json(
-                { error: "Project name is required" },
-                { status: 400 }
-            );
+        const body: unknown = await req.json();
+        const parsed = createProjectSchema.safeParse(body);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+            return NextResponse.json({ error: firstError }, { status: 400 });
         }
 
-        const userId = Number(session.user.id);
+        const { name, description } = parsed.data;
+
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) {
+            throw publicApiError(401, "Unauthorized");
+        }
 
         const { createProject } = await import("@/lib/services");
-        const project = await createProject(userId, name, description);
+        const safeDescription = description && description.trim() !== "" ? description : undefined;
+        const project = await createProject(userId, name, safeDescription);
 
         return NextResponse.json(project);
     } catch (error) {
         console.error("Error creating project:", error);
+        const mappedError = toPublicApiError(error, "Failed to create project");
         return NextResponse.json(
-            { error: "Failed to create project" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

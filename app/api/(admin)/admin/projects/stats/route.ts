@@ -1,18 +1,12 @@
 // Admin dashboard stats: todayProjects, todayFiles, totalUsers, latestUser
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { getAdminDashboardStats } from "@/lib/services/adminService";
+import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 
 export async function GET(): Promise<NextResponse> {
     try {
-        const session = await auth();
-
-        if (!session || !session.user?.id || session.user?.role !== "admin") {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const stats = await getAdminDashboardStats();
         return NextResponse.json(stats, {
@@ -28,4 +22,3 @@ export async function GET(): Promise<NextResponse> {
         );
     }
 }
-

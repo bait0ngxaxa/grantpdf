@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import { STATUS_CONFIG, STATUS_ORDER } from "@/lib/constants";
 
 interface StatusCount {
     pending: number;
@@ -12,42 +13,25 @@ interface StatusCount {
 interface ProjectStatusDetailsProps {
     counts: StatusCount;
 }
-const statusItems = [
-    {
-        key: "pending" as const,
-        label: "รอดำเนินการ",
-        color: "bg-yellow-400 dark:bg-yellow-500",
-    },
-    {
-        key: "approved" as const,
-        label: "อนุมัติแล้ว",
-        color: "bg-green-400 dark:bg-green-500",
-    },
-    {
-        key: "rejected" as const,
-        label: "ไม่อนุมัติ",
-        color: "bg-red-400 dark:bg-red-500",
-    },
-    {
-        key: "editing" as const,
-        label: "ต้องแก้ไข",
-        color: "bg-orange-400 dark:bg-orange-500",
-    },
-    {
-        key: "closed" as const,
-        label: "ปิดโครงการ",
-        color: "bg-slate-400 dark:bg-slate-500",
-    },
-];
 
 export const ProjectStatusDetails: React.FC<ProjectStatusDetailsProps> = ({
     counts,
 }): React.JSX.Element => {
+    const statusItems = STATUS_ORDER.map((status) => {
+        const config = STATUS_CONFIG[status];
+        return {
+            status,
+            key: config.key,
+            label: config.label,
+            color: config.dotColor,
+        };
+    });
+
     return (
         <div className="space-y-2.5 pt-2 border-t border-slate-50 dark:border-slate-700 mt-4">
-            {statusItems.map(({ key, label, color }) => (
+            {statusItems.map(({ status, key, label, color }) => (
                 <div
-                    key={key}
+                    key={status}
                     className="flex items-center justify-between group/item"
                 >
                     <div className="flex items-center">

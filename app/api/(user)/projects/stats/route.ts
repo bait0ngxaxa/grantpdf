@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getUserProjectStats } from "@/lib/services";
+import { parsePositiveIntId } from "@/lib/id";
+import { publicApiError, toPublicApiError } from "@/lib/apiError";
 
 export async function GET(): Promise<NextResponse> {
     try {
@@ -13,7 +15,10 @@ export async function GET(): Promise<NextResponse> {
             );
         }
 
-        const userId = Number(session.user.id);
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) {
+            throw publicApiError(401, "Unauthorized");
+        }
         const stats = await getUserProjectStats(userId);
 
         return NextResponse.json(stats, {
@@ -24,9 +29,10 @@ export async function GET(): Promise<NextResponse> {
         });
     } catch (error) {
         console.error("Error fetching user project stats:", error);
+        const mappedError = toPublicApiError(error, "Failed to fetch user project stats");
         return NextResponse.json(
-            { error: "Failed to fetch user project stats" },
-            { status: 500 },
+            { error: mappedError.publicMessage },
+            { status: mappedError.status },
         );
     }
 }

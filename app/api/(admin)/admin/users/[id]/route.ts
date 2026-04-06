@@ -1,20 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import {
     userExists,
-    isValidRole,
     updateUser,
     deleteUser,
     checkAdminPermission,
 } from "@/lib/services";
-
-function parseUserIdParam(rawId: string): number | null {
-    const parsed = Number(rawId);
-    if (!Number.isInteger(parsed) || parsed <= 0) {
-        return null;
-    }
-    return parsed;
-}
+import { updateAdminUserSchema } from "@/lib/validation/schemas";
+import { parsePositiveIntId } from "@/lib/id";
+import { toPublicApiError } from "@/lib/apiError";
+import { ROLES } from "@/lib/constants";
 
 export async function PUT(
     req: NextRequest,
@@ -29,8 +23,8 @@ export async function PUT(
 
         const awaitParams = await params;
         const userId = awaitParams.id;
-        const parsedUserId = parseUserIdParam(userId);
-        const { name, role } = await req.json();
+        const parsedUserId = parsePositiveIntId(userId);
+        const body: unknown = await req.json();
 
         if (parsedUserId === null) {
             return NextResponse.json(
@@ -39,19 +33,12 @@ export async function PUT(
             );
         }
 
-        if (!name || !role) {
-            return NextResponse.json(
-                { error: "กรุณากรอกข้อมูลให้ครบถ้วน" },
-                { status: 400 },
-            );
+        const parsedBody = updateAdminUserSchema.safeParse(body);
+        if (!parsedBody.success) {
+            const firstError = parsedBody.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+            return NextResponse.json({ error: firstError }, { status: 400 });
         }
-
-        if (!isValidRole(role)) {
-            return NextResponse.json(
-                { error: "บทบาทไม่ถูกต้อง" },
-                { status: 400 },
-            );
-        }
+        const { name, role } = parsedBody.data;
 
         const exists = await userExists(parsedUserId);
         if (!exists) {
@@ -61,7 +48,7 @@ export async function PUT(
             );
         }
 
-        if (userId === session.user.id && role !== "admin") {
+        if (userId === session.user.id && role !== ROLES.ADMIN) {
             return NextResponse.json(
                 { error: "ไม่สามารถเปลี่ยนบทบาทของตัวเองได้" },
                 { status: 403 },
@@ -75,20 +62,11 @@ export async function PUT(
             { status: 200 },
         );
     } catch (error) {
-        if (
-            error instanceof Prisma.PrismaClientKnownRequestError &&
-            error.code === "P2025"
-        ) {
-            return NextResponse.json(
-                { error: "ไม่พบผู้ใช้งาน" },
-                { status: 404 },
-            );
-        }
-
         console.error("Error updating user:", error);
+        const mappedError = toPublicApiError(error, "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้งาน");
         return NextResponse.json(
-            { error: "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้งาน" },
-            { status: 500 },
+            { error: mappedError.publicMessage },
+            { status: mappedError.status },
         );
     }
 }
@@ -106,7 +84,7 @@ export async function DELETE(
 
         const awaitParams = await params;
         const userId = awaitParams.id;
-        const parsedUserId = parseUserIdParam(userId);
+        const parsedUserId = parsePositiveIntId(userId);
 
         if (parsedUserId === null) {
             return NextResponse.json(
@@ -137,20 +115,11 @@ export async function DELETE(
             { status: 200 },
         );
     } catch (error) {
-        if (
-            error instanceof Prisma.PrismaClientKnownRequestError &&
-            error.code === "P2025"
-        ) {
-            return NextResponse.json(
-                { error: "ไม่พบผู้ใช้งาน" },
-                { status: 404 },
-            );
-        }
-
         console.error("Error deleting user:", error);
+        const mappedError = toPublicApiError(error, "เกิดข้อผิดพลาดในการลบผู้ใช้งาน");
         return NextResponse.json(
-            { error: "เกิดข้อผิดพลาดในการลบผู้ใช้งาน" },
-            { status: 500 },
+            { error: mappedError.publicMessage },
+            { status: mappedError.status },
         );
     }
 }

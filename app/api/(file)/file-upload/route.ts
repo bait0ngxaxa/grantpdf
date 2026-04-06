@@ -16,6 +16,8 @@ import {
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
 } from "@/lib/constants";
+import { toPublicApiError } from "@/lib/apiError";
+import { parsePositiveIntId } from "@/lib/id";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -47,27 +49,45 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         const formData = await request.formData();
-        const file = formData.get("file") as File;
-        const projectId = formData.get("projectId") as string;
+        const fileEntry = formData.get("file");
+        const projectIdEntry = formData.get("projectId");
 
-        if (!file) {
+        if (!(fileEntry instanceof File)) {
             return NextResponse.json(
                 { error: "No file provided" },
                 { status: 400 }
             );
         }
 
-        if (!projectId) {
+        if (typeof projectIdEntry !== "string") {
             return NextResponse.json(
                 { error: "Project ID is required" },
                 { status: 400 }
             );
         }
 
+        const projectId = parsePositiveIntId(projectIdEntry);
+        if (projectId === null) {
+            return NextResponse.json(
+                { error: "Project ID is invalid" },
+                { status: 400 }
+            );
+        }
+
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
+        const file = fileEntry;
+
         const project = await prisma.project.findFirst({
             where: {
-                id: parseInt(projectId),
-                userId: parseInt(session.user.id),
+                id: projectId,
+                userId,
             },
         });
 
@@ -156,8 +176,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                     originalFileName: file.name,
                     storagePath: relativeStoragePath,
                     fileExtension: fileExtension,
-                    userId: parseInt(session.user.id),
-                    projectId: parseInt(projectId),
+                    userId,
+                    projectId,
                 },
             });
         } catch (dbError) {
@@ -181,7 +201,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             details: {
                 fileName: file.name,
                 fileId: userFile.id.toString(),
-                projectId,
+                projectId: projectId.toString(),
             },
         });
 
@@ -201,9 +221,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         });
     } catch (error) {
         console.error("File upload error:", error);
+        const mappedError = toPublicApiError(error, "Failed to upload file");
         return NextResponse.json(
-            { error: "Failed to upload file" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

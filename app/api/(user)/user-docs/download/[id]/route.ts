@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { readFile, stat } from "fs/promises";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
+import { parsePositiveIntId } from "@/lib/id";
+import { publicApiError, toPublicApiError } from "@/lib/apiError";
 
 export async function GET(
     _req: NextRequest,
@@ -19,7 +21,10 @@ export async function GET(
         }
 
         const { id } = await params;
-        const fileId = Number(id);
+        const fileId = parsePositiveIntId(id);
+        if (fileId === null) {
+            throw publicApiError(400, "รหัสไฟล์ไม่ถูกต้อง");
+        }
 
         const file = await prisma.userFile.findUnique({
             where: { id: fileId },
@@ -63,9 +68,10 @@ export async function GET(
         });
     } catch (error: unknown) {
         console.error("Error downloading file:", error);
+        const mappedError = toPublicApiError(error, "Failed to download file");
         return NextResponse.json(
-            { error: "Failed to download file" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

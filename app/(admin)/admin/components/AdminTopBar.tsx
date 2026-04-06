@@ -3,6 +3,7 @@ import { Button, ThemeToggle } from "@/components/ui";
 import { ChartBarBig, LogOut, Menu } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useAdminDashboardContext } from "../contexts";
+import { SIGNOUT_CALLBACK } from "@/lib/constants";
 
 const menuItems = [
     { id: "dashboard", name: "ภาพรวมระบบ" },
@@ -36,7 +37,7 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => signOut({ callbackUrl: "/signin" })}
+                        onClick={() => signOut({ callbackUrl: SIGNOUT_CALLBACK })}
                         className="cursor-pointer text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl"
                     >
                         <LogOut className="h-4 w-4 mr-2" />

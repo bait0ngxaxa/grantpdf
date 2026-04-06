@@ -3,6 +3,10 @@ import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { generateSignedUrl } from "@/lib/signedUrl";
+import { parsePositiveIntId } from "@/lib/id";
+import { publicApiError, toPublicApiError } from "@/lib/apiError";
+import { generateSignedUrlSchema } from "@/lib/validation/schemas";
+import { ROLES } from "@/lib/constants";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
@@ -14,28 +18,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        const body = await req.json();
-        const {
-            fileId,
-            type = "userFile",
-            expiresIn = 3600,
-            fromAdminPanel = false,
-        } = body;
-
-        if (!fileId) {
-            return NextResponse.json(
-                { error: "File ID is required" },
-                { status: 400 }
-            );
+        const sessionUserId = parsePositiveIntId(session.user.id);
+        if (sessionUserId === null) {
+            throw publicApiError(401, "Unauthorized");
         }
 
-        const userId = parseInt(session.user.id);
-        const isAdmin = session.user.role === "admin";
+        const body: unknown = await req.json();
+        const parsed = generateSignedUrlSchema.safeParse(body);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+            return NextResponse.json({ error: firstError }, { status: 400 });
+        }
+        const { fileId, type, expiresIn, fromAdminPanel } = parsed.data;
+
+        const isAdmin = session.user.role === ROLES.ADMIN;
 
         // Verify user has access to this file
         if (type === "userFile") {
             const file = await prisma.userFile.findUnique({
-                where: { id: Number(fileId) },
+                where: { id: fileId },
                 select: { userId: true },
             });
 
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             }
 
             // Only owner or admin can generate URL
-            if (file.userId !== userId && !isAdmin) {
+            if (file.userId !== sessionUserId && !isAdmin) {
                 return NextResponse.json(
                     { error: "Access denied" },
                     { status: 403 }
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             }
         } else if (type === "attachment") {
             const attachment = await prisma.attachmentFile.findUnique({
-                where: { id: Number(fileId) },
+                where: { id: fileId },
                 include: {
                     userFile: {
                         select: { userId: true },
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 );
             }
 
-            if (attachment.userFile.userId !== userId && !isAdmin) {
+            if (attachment.userFile.userId !== sessionUserId && !isAdmin) {
                 return NextResponse.json(
                     { error: "Access denied" },
                     { status: 403 }
@@ -80,8 +81,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         // Generate signed URL - only pass fromAdminPanel if user is actually admin
         const signedUrl = await generateSignedUrl(
-            Number(fileId),
-            userId,
+            fileId,
+            sessionUserId,
             type,
             expiresIn,
             isAdmin && fromAdminPanel
@@ -94,9 +95,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         });
     } catch (error) {
         console.error("Error generating signed URL:", error);
+        const mappedError = toPublicApiError(error, "Failed to generate signed URL");
         return NextResponse.json(
-            { error: "Failed to generate signed URL" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

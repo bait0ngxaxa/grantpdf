@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+import Link from "next/link";
+import { ROUTES } from "@/lib/constants";
 
 interface HeroSectionProps {
     isLoggedIn: boolean;
@@ -38,13 +39,13 @@ export default function HeroSection({
                 {!isLoggedIn && (
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
-                            href="/signup"
+                            href={ROUTES.SIGNUP}
                             className="inline-flex h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 w-full sm:w-auto transition items-center justify-center"
                         >
                             ลงทะเบียน
                         </Link>
                         <Link
-                            href="/signin"
+                            href={ROUTES.SIGNIN}
                             className="inline-flex h-12 px-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 font-semibold hover:bg-slate-100 dark:hover:bg-slate-600 hover:border-slate-300 dark:hover:border-slate-500 transition-colors duration-300 w-full sm:w-auto items-center justify-center"
                         >
                             เข้าสู่ระบบ

@@ -1,5 +1,13 @@
 "use client";
 
+import { Search } from "lucide-react";
+import {
+    PROJECT_STATUS,
+    SORT_OPTIONS,
+    STATUS_FILTER,
+    STATUS_ORDER,
+} from "@/lib/constants";
+
 interface SearchAndFilterProps {
     searchTerm: string;
     setSearchTerm: (value: string) => void;
@@ -9,7 +17,13 @@ interface SearchAndFilterProps {
     setSelectedStatus: (value: string) => void;
 }
 
-import { Search } from "lucide-react";
+const statusSortOptions = [
+    { value: SORT_OPTIONS.STATUS_EDIT, label: `สถานะ: ${PROJECT_STATUS.EDIT}` },
+    { value: SORT_OPTIONS.STATUS_APPROVED, label: `สถานะ: ${PROJECT_STATUS.APPROVED}` },
+    { value: SORT_OPTIONS.STATUS_PENDING, label: "สถานะ: ดำเนินการ" },
+    { value: SORT_OPTIONS.STATUS_REJECTED, label: `สถานะ: ${PROJECT_STATUS.REJECTED}` },
+    { value: SORT_OPTIONS.STATUS_CLOSED, label: `สถานะ: ${PROJECT_STATUS.CLOSED}` },
+] as const;
 
 export default function SearchAndFilter({
     searchTerm,
@@ -41,15 +55,17 @@ export default function SearchAndFilter({
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                     >
-                        <option value="createdAtDesc">ล่าสุดมาก่อน</option>
-                        <option value="createdAtAsc">เก่าสุดมาก่อน</option>
-                        <option value="statusEdit">สถานะ: แก้ไข</option>
-                        <option value="statusApproved">สถานะ: อนุมัติ</option>
-                        <option value="statusPending">สถานะ: ดำเนินการ</option>
-                        <option value="statusRejected">
-                            สถานะ: ไม่อนุมัติ
+                        <option value={SORT_OPTIONS.CREATED_AT_DESC}>
+                            ล่าสุดมาก่อน
                         </option>
-                        <option value="statusClosed">สถานะ: ปิดโครงการ</option>
+                        <option value={SORT_OPTIONS.CREATED_AT_ASC}>
+                            เก่าสุดมาก่อน
+                        </option>
+                        {statusSortOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
@@ -59,12 +75,12 @@ export default function SearchAndFilter({
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
                     >
-                        <option value="สถานะทั้งหมด">ทุกสถานะ</option>
-                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
-                        <option value="อนุมัติ">อนุมัติ</option>
-                        <option value="ไม่อนุมัติ">ไม่อนุมัติ</option>
-                        <option value="แก้ไข">แก้ไข</option>
-                        <option value="ปิดโครงการ">ปิดโครงการ</option>
+                        <option value={STATUS_FILTER.ALL}>ทุกสถานะ</option>
+                        {STATUS_ORDER.map((status) => (
+                            <option key={status} value={status}>
+                                {status}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </div>

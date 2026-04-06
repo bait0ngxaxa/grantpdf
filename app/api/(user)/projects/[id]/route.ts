@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { updateProjectSchema } from "@/lib/validation/schemas";
+import { parsePositiveIntId } from "@/lib/id";
+import { publicApiError, toPublicApiError } from "@/lib/apiError";
 
 // PUT: อัพเดตโครงการ
 export async function PUT(
@@ -18,23 +21,29 @@ export async function PUT(
         }
 
         const resolvedParams = await params;
-        const projectId = resolvedParams.id;
-        const { name, description } = await req.json();
-
-        if (!name) {
-            return NextResponse.json(
-                { error: "Project name is required" },
-                { status: 400 }
-            );
+        const projectId = parsePositiveIntId(resolvedParams.id);
+        if (projectId === null) {
+            throw publicApiError(400, "รหัสโครงการไม่ถูกต้อง");
         }
 
-        const userId = Number(session.user.id);
+        const body: unknown = await req.json();
+        const parsed = updateProjectSchema.safeParse(body);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+            return NextResponse.json({ error: firstError }, { status: 400 });
+        }
+        const { name, description } = parsed.data;
+
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) {
+            throw publicApiError(401, "Unauthorized");
+        }
 
         // ตรวจสอบว่าโครงการเป็นของผู้ใช้หรือไม่
         const existingProject = await prisma.project.findFirst({
             where: {
-                id: Number(projectId),
-                userId: userId,
+                id: projectId,
+                userId,
             },
         });
 
@@ -47,11 +56,12 @@ export async function PUT(
 
         const updatedProject = await prisma.project.update({
             where: {
-                id: Number(projectId),
+                id: projectId,
             },
             data: {
                 name,
-                description,
+                description:
+                    description && description.trim() !== "" ? description : null,
             },
             include: {
                 files: true,
@@ -67,9 +77,10 @@ export async function PUT(
         });
     } catch (error) {
         console.error("Error updating project:", error);
+        const mappedError = toPublicApiError(error, "Failed to update project");
         return NextResponse.json(
-            { error: "Failed to update project" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }
@@ -90,14 +101,21 @@ export async function DELETE(
         }
 
         const resolvedParams = await params;
-        const projectId = resolvedParams.id;
-        const userId = Number(session.user.id);
+        const projectId = parsePositiveIntId(resolvedParams.id);
+        if (projectId === null) {
+            throw publicApiError(400, "รหัสโครงการไม่ถูกต้อง");
+        }
+
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) {
+            throw publicApiError(401, "Unauthorized");
+        }
 
         // ตรวจสอบว่าโครงการเป็นของผู้ใช้หรือไม่
         const existingProject = await prisma.project.findFirst({
             where: {
-                id: Number(projectId),
-                userId: userId,
+                id: projectId,
+                userId,
             },
         });
 
@@ -111,16 +129,17 @@ export async function DELETE(
         // ลบโครงการ (จะลบไฟล์ที่เกี่ยวข้องด้วยเนื่องจาก onDelete: Cascade ใน schema)
         await prisma.project.delete({
             where: {
-                id: Number(projectId),
+                id: projectId,
             },
         });
 
         return NextResponse.json({ message: "Project deleted successfully" });
     } catch (error) {
         console.error("Error deleting project:", error);
+        const mappedError = toPublicApiError(error, "Failed to delete project");
         return NextResponse.json(
-            { error: "Failed to delete project" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

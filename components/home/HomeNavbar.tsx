@@ -7,6 +7,7 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import type { Session } from "next-auth";
 
+import { ROUTES, SIGNOUT_CALLBACK } from "@/lib/constants";
 import { Button, ThemeToggle } from "@/components/ui";
 import { FileText, LayoutDashboard, LogOut } from "lucide-react";
 
@@ -18,7 +19,7 @@ export default function HomeNavbar({
     session,
 }: HomeNavbarProps): React.ReactElement {
     const handleLogout = (): void => {
-        signOut({ callbackUrl: "/" });
+        signOut({ callbackUrl: SIGNOUT_CALLBACK });
     };
 
     return (
@@ -82,7 +83,7 @@ function LoggedInMenu({
                 className="hidden sm:flex bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow active:scale-95 duration-200 transition"
                 variant="ghost"
             >
-                <Link href="/userdashboard">
+                <Link href={ROUTES.DASHBOARD}>
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
                 </Link>
@@ -153,7 +154,7 @@ function UserDropdownMenu({
             </li>
             <li className="mt-2 text-slate-700 dark:text-slate-200">
                 <Link
-                    href="/userdashboard"
+                    href={ROUTES.DASHBOARD}
                     onClick={onClose}
                     className="flex w-full items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 rounded-xl transition-colors"
                 >
@@ -178,7 +179,7 @@ function LoggedOutMenu(): React.ReactElement {
     return (
         <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Link href="/signin">
+            <Link href={ROUTES.SIGNIN}>
                 <Button
                     variant="ghost"
                     className="hidden sm:flex text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full px-6"
@@ -186,7 +187,7 @@ function LoggedOutMenu(): React.ReactElement {
                     เข้าสู่ระบบ
                 </Button>
             </Link>
-            <Link href="/signup">
+            <Link href={ROUTES.SIGNUP}>
                 <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-full px-6 shadow-lg shadow-blue-500/30 hover:scale-105 active:scale-95 transition">
                     เริ่มต้นใช้งาน
                 </Button>

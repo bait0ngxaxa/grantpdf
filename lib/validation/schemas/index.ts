@@ -15,6 +15,24 @@ export {
     type ResetPasswordInput,
 } from "./auth.schema";
 
+// Project/API mutation schemas + types
+export {
+    createProjectSchema,
+    updateProjectStatusSchema,
+    updateAdminUserSchema,
+    updateProjectSchema,
+    type CreateProjectInput,
+    type UpdateProjectStatusInput,
+    type UpdateAdminUserInput,
+    type UpdateProjectInput,
+} from "./project.schema";
+
+// File/API mutation schemas + types
+export {
+    generateSignedUrlSchema,
+    type GenerateSignedUrlInput,
+} from "./file.schema";
+
 // Shared helpers
 export {
     requiredString,

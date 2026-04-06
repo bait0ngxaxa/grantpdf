@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserProjectStats } from "@/lib/services";
 import { redirect } from "next/navigation";
 import { DashboardWrapper } from "./DashboardWrapper";
+import { ROUTES } from "@/lib/constants";
 
 export const metadata: Metadata = {
     title: "Dashboard - ระบบจัดการเอกสาร",
@@ -17,7 +18,7 @@ export default async function UserDashboardLayout({
     // P3: Prefetch stats on server to eliminate client-side waterfall
     const session = await auth();
     if (!session) {
-        redirect("/signin");
+        redirect(ROUTES.SIGNIN);
     }
 
     const userId = session.user?.id ? Number(session.user.id) : null;

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import type { User } from "next-auth";
 import { createRateLimitKey, getClientIP, rateLimit } from "@/lib/ratelimit";
-import { RATE_LIMIT } from "@/lib/constants";
+import { RATE_LIMIT, SESSION } from "@/lib/constants";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
     providers: [
@@ -88,7 +88,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     // Use JWT strategy for session management
     session: {
         strategy: "jwt",
-        maxAge: 60 * 60, // กำหนดอายุของ session เป็น 1 ชั่วโมง
+        maxAge: SESSION.MAX_AGE_SECONDS,
     },
 
     callbacks: {

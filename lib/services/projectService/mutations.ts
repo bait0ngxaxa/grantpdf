@@ -2,22 +2,26 @@ import { prisma } from "@/lib/prisma";
 import type { AdminProject } from "@/type/models";
 import type { Project } from "@prisma/client";
 import type { UpdateProjectStatusParams } from "./types";
-import { VALID_STATUSES, VALID_STATUSES_SET } from "./constants";
+import { VALID_STATUSES_SET, PROJECT_STATUS } from "@/lib/constants";
 
 export async function updateProjectStatus({
     projectId,
     status,
     statusNote,
 }: UpdateProjectStatusParams): Promise<Partial<AdminProject>> {
+    if (!Number.isInteger(projectId) || projectId <= 0) {
+        throw new Error("Invalid projectId");
+    }
+
     if (!VALID_STATUSES_SET.has(status)) {
         throw new Error(
-            `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`,
+            `Invalid status. Must be one of: ${Object.values(PROJECT_STATUS).join(", ")}`,
         );
     }
 
     const updatedProject = await prisma.project.update({
         where: {
-            id: parseInt(projectId),
+            id: projectId,
         },
         data: {
             status,

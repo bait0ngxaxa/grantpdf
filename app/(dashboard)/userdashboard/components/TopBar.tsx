@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui";
 import { ChartBarBig, UserStar, LogOut, Menu } from "lucide-react";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES, ROLES } from "@/lib/constants";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useUserDashboardContext } from "../contexts";
@@ -43,13 +43,13 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                             {session?.user?.name}
                         </span>
                         <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-                            {session?.user?.role || "member"}
+                            {session?.user?.role || ROLES.MEMBER}
                         </span>
                     </div>
 
                     <ThemeToggle />
 
-                    {session?.user?.role === "admin" && (
+                    {session?.user?.role === ROLES.ADMIN && (
                         <Button
                             asChild
                             className="font-semibold cursor-pointer transform hover:scale-105 active:scale-95 duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 border-0 transition"

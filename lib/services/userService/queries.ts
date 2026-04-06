@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { ROLES } from "@/lib/constants";
 import type { SafeUser, CheckAdminResult } from "./types";
 
 export async function checkAdminPermission(): Promise<CheckAdminResult> {
@@ -16,7 +17,7 @@ export async function checkAdminPermission(): Promise<CheckAdminResult> {
     });
 
     return {
-        isAdmin: user?.role === "admin",
+        isAdmin: user?.role === ROLES.ADMIN,
         userId,
         session,
     };
@@ -142,8 +143,8 @@ export async function getAllUsersPaginated({
         page,
         totalPages: Math.ceil(total / limit),
         roleCounts: {
-            admin: roleCountMap.get("admin") ?? 0,
-            member: roleCountMap.get("member") ?? 0,
+            admin: roleCountMap.get(ROLES.ADMIN) ?? 0,
+            member: roleCountMap.get(ROLES.MEMBER) ?? 0,
         },
     };
 }

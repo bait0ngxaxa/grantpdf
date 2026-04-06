@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { readFile, stat } from "fs/promises";
 
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
+import { parsePositiveIntId } from "@/lib/id";
+import { publicApiError, toPublicApiError } from "@/lib/apiError";
 
 export async function GET(
     _req: NextRequest,
@@ -20,7 +22,14 @@ export async function GET(
         }
 
         const { id } = await params;
-        const attachmentId = Number(id);
+        const attachmentId = parsePositiveIntId(id);
+        if (attachmentId === null) {
+            throw publicApiError(400, "รหัสไฟล์แนบไม่ถูกต้อง");
+        }
+        const sessionUserId = parsePositiveIntId(session.user.id);
+        if (sessionUserId === null) {
+            throw publicApiError(401, "Unauthorized");
+        }
 
         const attachment = await prisma.attachmentFile.findUnique({
             where: { id: attachmentId },
@@ -40,7 +49,7 @@ export async function GET(
             );
         }
 
-        if (attachment.userFile.userId !== Number(session.user.id)) {
+        if (attachment.userFile.userId !== sessionUserId) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 403 }
@@ -75,9 +84,10 @@ export async function GET(
         });
     } catch (error) {
         console.error("Error downloading attachment:", error);
+        const mappedError = toPublicApiError(error, "Failed to download attachment");
         return NextResponse.json(
-            { error: "Failed to download attachment" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

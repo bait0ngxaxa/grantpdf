@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { PROJECT_STATUS } from "@/lib/constants";
 
 interface AdminStatusCounts {
     pending: number;
@@ -107,11 +108,11 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         latestUser,
         latestProject,
         statusCounts: {
-            pending: statusCountMap.get("กำลังดำเนินการ") ?? 0,
-            approved: statusCountMap.get("อนุมัติ") ?? 0,
-            rejected: statusCountMap.get("ไม่อนุมัติ") ?? 0,
-            editing: statusCountMap.get("แก้ไข") ?? 0,
-            closed: statusCountMap.get("ปิดโครงการ") ?? 0,
+            pending: statusCountMap.get(PROJECT_STATUS.IN_PROGRESS) ?? 0,
+            approved: statusCountMap.get(PROJECT_STATUS.APPROVED) ?? 0,
+            rejected: statusCountMap.get(PROJECT_STATUS.REJECTED) ?? 0,
+            editing: statusCountMap.get(PROJECT_STATUS.EDIT) ?? 0,
+            closed: statusCountMap.get(PROJECT_STATUS.CLOSED) ?? 0,
         },
     };
 }

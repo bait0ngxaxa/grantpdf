@@ -8,6 +8,9 @@ import { prisma } from "@/lib/prisma";
 import { stat } from "fs/promises";
 import { createReadStream } from "fs";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
+import { parsePositiveIntId } from "@/lib/id";
+import { publicApiError, toPublicApiError } from "@/lib/apiError";
+import { ROLES } from "@/lib/constants";
 
 const SAFE_PATH_PREFIX = "storage/";
 
@@ -74,9 +77,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
 
         // 4. Permission check — must be owner or admin
-        const userId = parseInt(session.user.id);
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) {
+            throw publicApiError(401, "Unauthorized");
+        }
         const isOwner = ownership.ownerId === userId;
-        const isAdmin = session.user.role === "admin";
+        const isAdmin = session.user.role === ROLES.ADMIN;
 
         if (!isOwner && !isAdmin) {
             return NextResponse.json(
@@ -129,9 +135,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         });
     } catch (error: unknown) {
         console.error("Error previewing file:", error);
+        const mappedError = toPublicApiError(error, "Failed to preview file");
         return NextResponse.json(
-            { error: "Failed to preview file" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

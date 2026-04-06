@@ -1,26 +1,34 @@
-// middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { ROUTES, ROLES } from "@/lib/constants";
 
-const ADMIN_PAGES = ["/admin", "/admin/dashboard", "/admin/users"];
+const ADMIN_PREFIXES = [ROUTES.ADMIN];
 
-const AUTH_PAGES = ["/signin", "/signup"];
+const AUTH_PAGES: string[] = [ROUTES.SIGNIN, ROUTES.SIGNUP];
 
-const PROTECTED_PAGES = [
+const PROTECTED_PREFIXES = [
     "/form",
     "/uploads-doc",
-    "/userdashboard",
+    ROUTES.DASHBOARD,
     "/create-word",
-    "/createdocs",
+    ROUTES.CREATE_DOCS,
 ];
 
-const RESET_PASSWORD_PAGES = ["/reset-password"];
+const RESET_PASSWORD_PAGES: string[] = [ROUTES.RESET_PASSWORD];
 
 const CSRF_PROTECTED_METHODS = ["POST", "PUT", "DELETE", "PATCH"];
 
 // Routes ที่ไม่ต้องตรวจสอบ CSRF (NextAuth จัดการเอง)
 const CSRF_EXEMPT_ROUTES = ["/api/auth/"];
+
+function isExactOrSubpath(pathname: string, route: string): boolean {
+    return pathname === route || pathname.startsWith(`${route}/`);
+}
+
+function matchesAnyPrefix(pathname: string, prefixes: readonly string[]): boolean {
+    return prefixes.some((prefix) => isExactOrSubpath(pathname, prefix));
+}
 
 function validateCSRF(req: NextRequest): boolean {
     const origin = req.headers.get("origin");
@@ -93,22 +101,22 @@ export async function middleware(
         console.warn(
             "User already authenticated. Redirecting from auth page to dashboard."
         );
-        return NextResponse.redirect(new URL("/userdashboard", req.url));
+        return NextResponse.redirect(new URL(ROUTES.DASHBOARD, req.url));
     }
 
-    if (ADMIN_PAGES.includes(pathname)) {
-        if (!token || token.role !== "admin") {
+    if (matchesAnyPrefix(pathname, ADMIN_PREFIXES)) {
+        if (!token || token.role !== ROLES.ADMIN) {
             console.warn(
                 `User with role '${token?.role}' tried to access admin page. Redirecting to /access-denied...`
             );
-            return NextResponse.redirect(new URL("/access-denied", req.url));
+            return NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, req.url));
         }
-    } else if (PROTECTED_PAGES.includes(pathname)) {
+    } else if (matchesAnyPrefix(pathname, PROTECTED_PREFIXES)) {
         if (!token) {
             console.warn(
                 `User is not authenticated. Redirecting from '${pathname}' to /signin...`
             );
-            const url = new URL("/signin", req.url);
+            const url = new URL(ROUTES.SIGNIN, req.url);
             url.searchParams.set("callbackUrl", pathname);
             return NextResponse.redirect(url);
         }
@@ -120,7 +128,7 @@ export async function middleware(
             console.warn(
                 "User tried to access reset password page without a token. Redirecting to forgot password..."
             );
-            return NextResponse.redirect(new URL("/forgot-password", req.url));
+            return NextResponse.redirect(new URL(ROUTES.FORGOT_PASSWORD, req.url));
         }
     }
 

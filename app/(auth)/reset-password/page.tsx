@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { ROUTES } from "@/lib/constants";
 import { type Metadata } from "next";
 import ResetPasswordClient from "./ResetPasswordClient";
 
@@ -11,7 +12,7 @@ export default async function ResetPasswordPage() {
     const session = await auth();
 
     if (session) {
-        redirect("/userdashboard");
+        redirect(ROUTES.DASHBOARD);
     }
 
     return <ResetPasswordClient />;

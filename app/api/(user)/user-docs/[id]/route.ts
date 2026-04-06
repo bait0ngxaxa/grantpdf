@@ -6,6 +6,8 @@ import { getFileForDeletion, deleteFileRecord } from "@/lib/services";
 import { stat, unlink } from "fs/promises";
 import { logAudit } from "@/lib/auditLog";
 import { getFullPathFromStoragePath } from "@/lib/fileStorage";
+import { parsePositiveIntId } from "@/lib/id";
+import { publicApiError, toPublicApiError } from "@/lib/apiError";
 
 export async function DELETE(
     _req: NextRequest,
@@ -21,14 +23,11 @@ export async function DELETE(
         }
 
         const { id } = await params;
-        if (!id) {
-            return NextResponse.json(
-                { error: "Document ID is required" },
-                { status: 400 }
-            );
+        const docId = parsePositiveIntId(id);
+        if (docId === null) {
+            throw publicApiError(400, "รหัสเอกสารไม่ถูกต้อง");
         }
 
-        const docId = Number(id);
         const document = await getFileForDeletion(docId);
 
         if (!document) {
@@ -80,22 +79,10 @@ export async function DELETE(
         );
     } catch (error: unknown) {
         console.error("Error deleting document:", error);
-
-        if (
-            error &&
-            typeof error === "object" &&
-            "code" in error &&
-            error.code === "P2025"
-        ) {
-            return NextResponse.json(
-                { error: "Document not found" },
-                { status: 404 }
-            );
-        }
-
+        const mappedError = toPublicApiError(error, "Failed to delete document");
         return NextResponse.json(
-            { error: "Failed to delete document" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

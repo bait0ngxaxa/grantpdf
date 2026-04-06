@@ -91,7 +91,7 @@ export interface GetAllFilesPaginatedParams {
 }
 
 export interface UpdateProjectStatusParams {
-    projectId: string;
+    projectId: number;
     status: string;
     statusNote?: string | null;
 }

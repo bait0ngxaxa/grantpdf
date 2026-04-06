@@ -1,5 +1,6 @@
 import React from "react";
 import { BarChart3 } from "lucide-react";
+import { STATUS_CONFIG, STATUS_ORDER } from "@/lib/constants";
 
 interface ProjectStatusStatsProps {
     projectStatusStats: {
@@ -14,6 +15,16 @@ interface ProjectStatusStatsProps {
 export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
     projectStatusStats,
 }) => {
+    const statusItems = STATUS_ORDER.map((status) => {
+        const config = STATUS_CONFIG[status];
+        return {
+            status,
+            label: config.label,
+            dotColor: config.dotColor,
+            count: projectStatusStats[config.key],
+        };
+    });
+
     return (
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 transition">
             <div className="flex items-center space-x-4 mb-6">
@@ -32,65 +43,24 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
 
             {/* Status Breakdown */}
             <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-sm shadow-yellow-200" />
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                            กำลังดำเนินการ
+                {statusItems.map((item) => (
+                    <div
+                        key={item.status}
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl"
+                    >
+                        <div className="flex items-center space-x-3">
+                            <div
+                                className={`w-2.5 h-2.5 rounded-full ${item.dotColor}`}
+                            />
+                            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                                {item.label}
+                            </span>
+                        </div>
+                        <span className="font-bold text-slate-800 dark:text-slate-100">
+                            {item.count}
                         </span>
                     </div>
-                    <span className="font-bold text-slate-800 dark:text-slate-100">
-                        {projectStatusStats.pending}
-                    </span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-sm shadow-green-200" />
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                            อนุมัติแล้ว
-                        </span>
-                    </div>
-                    <span className="font-bold text-slate-800 dark:text-slate-100">
-                        {projectStatusStats.approved}
-                    </span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm shadow-red-200" />
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                            ไม่อนุมัติ
-                        </span>
-                    </div>
-                    <span className="font-bold text-slate-800 dark:text-slate-100">
-                        {projectStatusStats.rejected}
-                    </span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-orange-500 rounded-full shadow-sm shadow-orange-200" />
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                            แก้ไข
-                        </span>
-                    </div>
-                    <span className="font-bold text-slate-800 dark:text-slate-100">
-                        {projectStatusStats.editing}
-                    </span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-2.5 h-2.5 bg-slate-500 rounded-full shadow-sm shadow-slate-200" />
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                            ปิดโครงการ
-                        </span>
-                    </div>
-                    <span className="font-bold text-slate-800 dark:text-slate-100">
-                        {projectStatusStats.closed}
-                    </span>
-                </div>
+                ))}
             </div>
         </div>
     );

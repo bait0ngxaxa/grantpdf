@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ROUTES } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -93,7 +94,7 @@ export default function SigninClient(): React.JSX.Element {
                     description: `ยินดีต้อนรับ ${email} กำลังนำคุณไปยังหน้าหลัก…`,
                 });
                 setTimeout(() => {
-                    router.push("/userdashboard");
+                    router.push(ROUTES.DASHBOARD);
                 }, 1500);
             }
         } catch (err) {
@@ -176,7 +177,7 @@ export default function SigninClient(): React.JSX.Element {
                                         รหัสผ่าน
                                     </label>
                                     <Link
-                                        href="/forgot-password"
+                                        href={ROUTES.FORGOT_PASSWORD}
                                         className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                                     >
                                         ลืมรหัสผ่าน?
@@ -229,7 +230,7 @@ export default function SigninClient(): React.JSX.Element {
                         <div className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400 relative z-10">
                             ยังไม่มีบัญชี?{" "}
                             <Link
-                                href="/signup"
+                                href={ROUTES.SIGNUP}
                                 className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                             >
                                 สมัครสมาชิก

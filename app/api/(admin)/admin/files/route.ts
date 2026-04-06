@@ -1,19 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { getAllFilesPaginated } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
+import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
-        const session = await auth();
-
-        if (!session || !session.user?.id || session.user?.role !== "admin") {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const { searchParams } = new URL(req.url);
         const page = parsePositiveInt(searchParams.get("page"), 1);

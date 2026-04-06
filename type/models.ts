@@ -74,13 +74,6 @@ export interface LatestProject {
     userName?: string;
 }
 
-export const PROJECT_STATUS = {
-    IN_PROGRESS: "กำลังดำเนินการ",
-    APPROVED: "อนุมัติ",
-    REJECTED: "ไม่อนุมัติ",
-    EDIT: "แก้ไข",
-    CLOSED: "ปิดโครงการ",
-} as const;
-
-export type ProjectStatus =
-    (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS];
+// Re-export from SSOT (lib/constants.ts)
+export { PROJECT_STATUS } from "@/lib/constants";
+export type { ProjectStatus } from "@/lib/constants";

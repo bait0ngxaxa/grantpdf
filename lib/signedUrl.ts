@@ -1,4 +1,4 @@
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 
 // Secret key for signing (should be in environment variables)
 const getSecretKey = (): Uint8Array => {
@@ -20,6 +20,37 @@ export interface VerifyResult {
     valid: boolean;
     payload?: SignedUrlPayload;
     error?: string;
+}
+
+function parseSignedPayload(payload: JWTPayload): SignedUrlPayload | null {
+    if (
+        typeof payload.fileId !== "number" ||
+        !Number.isInteger(payload.fileId) ||
+        payload.fileId <= 0
+    ) {
+        return null;
+    }
+
+    if (
+        typeof payload.userId !== "number" ||
+        !Number.isInteger(payload.userId) ||
+        payload.userId <= 0
+    ) {
+        return null;
+    }
+
+    if (payload.type !== "userFile" && payload.type !== "attachment") {
+        return null;
+    }
+
+    const fromAdminPanel = payload.fromAdminPanel === true;
+
+    return {
+        fileId: payload.fileId,
+        userId: payload.userId,
+        type: payload.type,
+        fromAdminPanel,
+    };
 }
 
 export async function generateSignedToken(
@@ -58,30 +89,23 @@ export async function generateSignedUrl(
 export async function verifySignedToken(token: string): Promise<VerifyResult> {
     try {
         const { payload } = await jwtVerify(token, getSecretKey());
-
-        if (
-            typeof payload.fileId !== "number" ||
-            typeof payload.userId !== "number"
-        ) {
+        const parsedPayload = parseSignedPayload(payload);
+        if (!parsedPayload) {
             return { valid: false, error: "Invalid token payload" };
         }
 
         return {
             valid: true,
-            payload: {
-                fileId: payload.fileId as number,
-                userId: payload.userId as number,
-                type: (payload.type as "userFile" | "attachment") || "userFile",
-                fromAdminPanel: (payload.fromAdminPanel as boolean) || false,
-            },
+            payload: parsedPayload,
         };
     } catch (error) {
-        if (error instanceof Error) {
-            if (error.message.includes("expired")) {
-                return { valid: false, error: "Token expired" };
-            }
-            return { valid: false, error: error.message };
+        if (
+            error instanceof Error &&
+            error.message.toLowerCase().includes("expired")
+        ) {
+            return { valid: false, error: "Token expired" };
         }
+
         return { valid: false, error: "Invalid token" };
     }
 }

@@ -8,6 +8,9 @@ import { Readable } from "stream";
 import { verifySignedToken } from "@/lib/signedUrl";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 import { logAudit } from "@/lib/auditLog";
+import { parsePositiveIntId } from "@/lib/id";
+import { toPublicApiError } from "@/lib/apiError";
+import { ROLES } from "@/lib/constants";
 
 export async function GET(
     _req: NextRequest,
@@ -21,7 +24,7 @@ export async function GET(
 
         if (!verification.valid || !verification.payload) {
             return NextResponse.json(
-                { error: verification.error || "Invalid or expired token" },
+                { error: "Invalid or expired token" },
                 { status: 401 }
             );
         }
@@ -80,9 +83,11 @@ export async function GET(
 
         // Permission check: user must be owner OR admin OR the token was issued for this user
         const isOwner = file.userId === userId;
-        const isAdmin = session?.user?.role === "admin";
-        const isTokenUser =
-            session?.user?.id && parseInt(session.user.id) === userId;
+        const isAdmin = session?.user?.role === ROLES.ADMIN;
+        const sessionUserId = session?.user?.id
+            ? parsePositiveIntId(session.user.id)
+            : null;
+        const isTokenUser = sessionUserId !== null && sessionUserId === userId;
 
         if (!isOwner && !isAdmin && !isTokenUser) {
             return NextResponse.json(
@@ -147,9 +152,10 @@ export async function GET(
         });
     } catch (error: unknown) {
         console.error("Error downloading file:", error);
+        const mappedError = toPublicApiError(error, "Failed to download file");
         return NextResponse.json(
-            { error: "Failed to download file" },
-            { status: 500 }
+            { error: mappedError.publicMessage },
+            { status: mappedError.status }
         );
     }
 }

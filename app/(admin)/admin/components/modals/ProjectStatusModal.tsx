@@ -3,6 +3,7 @@ import { Button } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { ClipboardList, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { STATUS_ORDER } from "@/lib/constants";
 
 interface ProjectStatusModalProps {
     isStatusModalOpen: boolean;
@@ -103,17 +104,11 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                         setNewStatus(e.target.value)
                                     }
                                 >
-                                    <option value="กำลังดำเนินการ">
-                                        กำลังดำเนินการ
-                                    </option>
-                                    <option value="อนุมัติ">อนุมัติ</option>
-                                    <option value="ไม่อนุมัติ">
-                                        ไม่อนุมัติ
-                                    </option>
-                                    <option value="แก้ไข">แก้ไข</option>
-                                    <option value="ปิดโครงการ">
-                                        ปิดโครงการ
-                                    </option>
+                                    {STATUS_ORDER.map((status) => (
+                                        <option key={status} value={status}>
+                                            {status}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 

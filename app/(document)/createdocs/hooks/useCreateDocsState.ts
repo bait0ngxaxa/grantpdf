@@ -3,6 +3,7 @@ import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import type { Project } from "@/type/models";
+import { ROLES } from "@/lib/constants";
 
 export interface UseCreateDocsStateReturn {
     selectedCategory: string | null;
@@ -39,7 +40,7 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
     const [error, setError] = useState<string | null>(null);
 
     // Check if user is admin
-    const isAdmin = session?.user?.role === "admin";
+    const isAdmin = session?.user?.role === ROLES.ADMIN;
 
     return {
         selectedCategory,

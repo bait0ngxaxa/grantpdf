@@ -1,24 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { logAudit } from "@/lib/auditLog";
 import {
     getAllProjectsPaginated,
     updateProjectStatus,
-    checkAdminPermission,
 } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
+import { updateProjectStatusSchema } from "@/lib/validation/schemas";
+import { toPublicApiError } from "@/lib/apiError";
+import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
-        const session = await auth();
-
-        if (!session || !session.user?.id || session.user?.role !== "admin") {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
-        }
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const { searchParams } = new URL(req.url);
         const page = parsePositiveInt(searchParams.get("page"), 1);
@@ -35,25 +30,28 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching admin projects:", error);
+        const mappedError = toPublicApiError(error, "Failed to fetch projects");
         return NextResponse.json(
-            { error: "Failed to fetch projects" },
-            { status: 500 },
+            { error: mappedError.publicMessage },
+            { status: mappedError.status },
         );
     }
 }
 
 export async function PUT(req: Request): Promise<NextResponse> {
     try {
-        const { isAdmin, session } = await checkAdminPermission();
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
+        const { session } = guard;
 
-        if (!isAdmin || !session) {
-            return NextResponse.json(
-                { error: "Unauthorized" },
-                { status: 401 },
-            );
+        const body: unknown = await req.json();
+        const parsed = updateProjectStatusSchema.safeParse(body);
+        if (!parsed.success) {
+            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+            return NextResponse.json({ error: firstError }, { status: 400 });
         }
 
-        const { projectId, status, statusNote } = await req.json();
+        const { projectId, status, statusNote } = parsed.data;
 
         const updatedProject = await updateProjectStatus({
             projectId,
@@ -61,7 +59,6 @@ export async function PUT(req: Request): Promise<NextResponse> {
             statusNote,
         });
 
-        // Log admin project status update
         logAudit("ADMIN_PROJECT_UPDATE", session.user.id, {
             userEmail: session.user.email || undefined,
             details: {
@@ -81,16 +78,17 @@ export async function PUT(req: Request): Promise<NextResponse> {
     } catch (error) {
         console.error("Error updating project status:", error);
 
-        if (
-            error instanceof Error &&
-            error.message.includes("Invalid status")
-        ) {
-            return NextResponse.json({ error: error.message }, { status: 400 });
+        if (error instanceof Error && error.message.includes("Invalid")) {
+            return NextResponse.json(
+                { error: "ข้อมูลสำหรับอัปเดตสถานะไม่ถูกต้อง" },
+                { status: 400 },
+            );
         }
 
+        const mappedError = toPublicApiError(error, "Failed to update project status");
         return NextResponse.json(
-            { error: "Failed to update project status" },
-            { status: 500 },
+            { error: mappedError.publicMessage },
+            { status: mappedError.status },
         );
     }
 }
