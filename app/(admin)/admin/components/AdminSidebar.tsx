@@ -7,6 +7,7 @@ import {
     Folder,
     Archive,
     ShieldCheck,
+    ScrollText,
     X,
     ArrowLeft,
 } from "lucide-react";
@@ -29,6 +30,11 @@ const menuItems = [
         id: "users",
         name: "จัดการผู้ใช้งาน",
         icon: <Users className="h-5 w-5" />,
+    },
+    {
+        id: "audit",
+        name: "Audit Logs",
+        icon: <ScrollText className="h-5 w-5" />,
     },
 ];
 

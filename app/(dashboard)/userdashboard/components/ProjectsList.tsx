@@ -8,7 +8,7 @@ import { ProjectsListHeader } from "./ProjectsListHeader";
 import { ProjectItem } from "./ProjectItem";
 import { EmptyProjectsState } from "./EmptyProjectsState";
 import { StatusDetailModal } from "./StatusDetailModal";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Skeleton } from "@/components/ui";
 
 export const ProjectsList: React.FC = (): React.JSX.Element => {
     const {
@@ -77,7 +77,11 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
 
             <div className="space-y-6">
                 {isLoading && projects.length === 0 ? (
-                    <LoadingSpinner className="py-16" />
+                    <div className="space-y-4">
+                        <Skeleton className="h-36 w-full rounded-3xl" />
+                        <Skeleton className="h-36 w-full rounded-3xl" />
+                        <Skeleton className="h-36 w-full rounded-3xl" />
+                    </div>
                 ) : projects.length > 0 ? (
                     projects.map((project) => (
                         <ProjectItem

@@ -2,14 +2,13 @@
 
 import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTitle } from "@/lib/hooks/useTitle";
 
 import {
     PreviewField,
     PreviewGrid,
     DocumentEditorLayout,
 } from "@/app/(document)/components";
-import { LoadingSpinner } from "@/components/ui";
+import { FormSkeleton } from "@/components/ui";
 import {
     useDocumentForm,
     usePreviewModal,
@@ -28,8 +27,6 @@ export function ContractForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const contractCode = searchParams.get("contractCode") || "";
     const projectId = searchParams.get("projectId") || "";
-
-    useTitle("สร้างหนังสือสัญญาเพื่อรับรองการลงนาม | ระบบจัดการเอกสาร");
 
     const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
         usePreviewModal();
@@ -88,7 +85,7 @@ export function ContractForm(): React.JSX.Element {
     });
 
     if (!isClient) {
-        return <LoadingSpinner />;
+        return <FormSkeleton />;
     }
 
     return (

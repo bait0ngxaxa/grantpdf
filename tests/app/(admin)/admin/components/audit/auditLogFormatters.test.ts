@@ -1,0 +1,169 @@
+import { describe, expect, it } from "vitest";
+import {
+    ACTION_OPTIONS,
+    formatAuditDetails,
+    getActionLabel,
+} from "@/app/(admin)/admin/components/audit/auditLogFormatters";
+
+describe("auditLogFormatters", () => {
+    it("contains all known actions in ACTION_OPTIONS", () => {
+        const expected = [
+            "LOGIN_SUCCESS",
+            "LOGIN_FAILED",
+            "LOGOUT",
+            "SIGNUP",
+            "PASSWORD_RESET_REQUEST",
+            "PASSWORD_RESET_SUCCESS",
+            "FILE_UPLOAD",
+            "FILE_DOWNLOAD",
+            "FILE_DELETE",
+            "PROJECT_CREATE",
+            "PROJECT_UPDATE",
+            "PROJECT_DELETE",
+            "DOCUMENT_GENERATE",
+            "ADMIN_USER_DELETE",
+            "ADMIN_USER_UPDATE",
+            "ADMIN_PROJECT_UPDATE",
+            "ADMIN_FILE_DOWNLOAD",
+        ];
+
+        expect(ACTION_OPTIONS).toEqual(["", ...expected]);
+    });
+
+    it("maps every action label and falls back for unknown action", () => {
+        expect(getActionLabel("LOGIN_SUCCESS")).toBe("เข้าสู่ระบบสำเร็จ");
+        expect(getActionLabel("DOCUMENT_GENERATE")).toBe("สร้างเอกสาร");
+        expect(getActionLabel("UNKNOWN_ACTION")).toBe("UNKNOWN_ACTION");
+    });
+
+    it("formats login/signup/reset actions", () => {
+        expect(formatAuditDetails("LOGIN_SUCCESS", {})).toBe("เข้าสู่ระบบสำเร็จ");
+        expect(
+            formatAuditDetails("LOGIN_FAILED", {
+                attemptedEmail: "user@example.com",
+                reason: "rate_limited",
+            }),
+        ).toContain("ถูกจำกัดจำนวนครั้ง");
+        expect(formatAuditDetails("LOGOUT", {})).toBe("ออกจากระบบสำเร็จ");
+        expect(formatAuditDetails("SIGNUP", {})).toBe("สมัครสมาชิกสำเร็จ");
+        expect(formatAuditDetails("PASSWORD_RESET_REQUEST", {})).toBe(
+            "ส่งคำขอรีเซ็ตรหัสผ่าน",
+        );
+        expect(formatAuditDetails("PASSWORD_RESET_SUCCESS", {})).toBe(
+            "รีเซ็ตรหัสผ่านสำเร็จ",
+        );
+    });
+
+    it("formats file actions", () => {
+        expect(
+            formatAuditDetails("FILE_UPLOAD", {
+                fileName: "ไฟล์A.pdf",
+                projectId: "12",
+            }),
+        ).toBe("อัปโหลดไฟล์ ไฟล์A.pdf เข้าโครงการ #12");
+
+        expect(
+            formatAuditDetails("FILE_DOWNLOAD", {
+                fileId: 69,
+                fileName: "สัญญา.docx",
+                fileType: "userFile",
+            }),
+        ).toBe("ดาวน์โหลดไฟล์เอกสาร สัญญา.docx (ID: 69)");
+
+        expect(
+            formatAuditDetails("ADMIN_FILE_DOWNLOAD", {
+                fileId: 3,
+                fileName: "แนบ.pdf",
+                fileType: "attachment",
+            }),
+        ).toBe("ดาวน์โหลดไฟล์แนบ แนบ.pdf (ID: 3)");
+
+        expect(
+            formatAuditDetails("FILE_DELETE", {
+                deletedFileId: "100",
+                deletedFileName: "ลบแล้ว.pdf",
+            }),
+        ).toBe("ลบไฟล์ ลบแล้ว.pdf (ID: 100)");
+    });
+
+    it("formats user and project actions", () => {
+        expect(
+            formatAuditDetails("ADMIN_USER_UPDATE", {
+                targetUserEmail: "target@example.com",
+                before: { name: "เดิม", role: "member" },
+                after: { name: "ใหม่", role: "admin" },
+            }),
+        ).toBe(
+            "แก้ไขข้อมูล target@example.com | ชื่อ: เดิม -> ใหม่ | สิทธิ์: ผู้ใช้งานทั่วไป -> ผู้ดูแลระบบ",
+        );
+
+        expect(
+            formatAuditDetails("ADMIN_USER_DELETE", {
+                targetUserEmail: "remove@example.com",
+                deletedUser: { role: "member" },
+            }),
+        ).toBe("ลบผู้ใช้งาน remove@example.com (สิทธิ์: ผู้ใช้งานทั่วไป)");
+
+        expect(
+            formatAuditDetails("PROJECT_CREATE", {
+                projectId: 7,
+                projectName: "โครงการใหม่",
+            }),
+        ).toBe("สร้างโครงการ โครงการใหม่ (ID: 7)");
+
+        expect(
+            formatAuditDetails("PROJECT_UPDATE", {
+                projectId: 7,
+                previousName: "เก่า",
+                nextName: "ใหม่",
+            }),
+        ).toBe("โครงการ #7 | ชื่อ: เก่า -> ใหม่");
+
+        expect(
+            formatAuditDetails("PROJECT_DELETE", {
+                projectId: 8,
+                projectName: "โครงการลบ",
+            }),
+        ).toBe("ลบโครงการ โครงการลบ (ID: 8)");
+
+        expect(
+            formatAuditDetails("ADMIN_PROJECT_UPDATE", {
+                projectName: "A",
+                newStatus: "APPROVED",
+                statusNote: "ผ่านแล้ว",
+            }),
+        ).toBe("อัปเดตโครงการ A | สถานะใหม่: อนุมัติ | หมายเหตุ: ผ่านแล้ว");
+    });
+
+    it("formats DOCUMENT_GENERATE with thai document type mapping", () => {
+        expect(
+            formatAuditDetails("DOCUMENT_GENERATE", {
+                documentType: "approval",
+                replayed: true,
+            }),
+        ).toBe("ใช้ผลลัพธ์เดิมของการสร้างเอกสาร (หนังสือขออนุมัติ)");
+
+        expect(
+            formatAuditDetails("DOCUMENT_GENERATE", {
+                documentType: "summary",
+                responseStatus: 200,
+            }),
+        ).toBe("สร้างเอกสาร (สรุปโครงการ) สำเร็จ (สถานะ 200)");
+
+        expect(
+            formatAuditDetails("DOCUMENT_GENERATE", {
+                documentType: "tor",
+                error: "template_error",
+            }),
+        ).toBe("สร้างเอกสาร (TOR) ไม่สำเร็จ: template_error");
+    });
+
+    it("falls back to key-value format for unknown action and detail object", () => {
+        expect(
+            formatAuditDetails("SOMETHING_NEW", {
+                a: "1",
+                b: "2",
+            }),
+        ).toBe("a: 1, b: 2");
+    });
+});

@@ -10,7 +10,6 @@ import {
 } from "@/lib/document";
 import {
     fixThaiDistributed,
-    generateUniqueFilename,
     getMimeType,
 } from "../fixThaiwordUtils";
 import { prisma } from "@/lib/prisma";
@@ -238,14 +237,6 @@ export async function handleApprovalGeneration(
         compression: "DEFLATE",
     });
 
-    // Save document
-    const uniqueFileName = generateUniqueFilename(projectName + ".docx");
-    const { relativeStoragePath } = await saveDocumentToStorage(
-        outputBuffer,
-        uniqueFileName.replace(".docx", ""),
-        "docx",
-    );
-
     // Find or create project
     const projectResult = await findOrCreateProject(
         userId,
@@ -257,68 +248,75 @@ export async function handleApprovalGeneration(
         return projectResult;
     }
 
-    // Create main file record
-    const savedFile = await prisma.userFile.create({
-        data: {
-            originalFileName: projectName + ".docx",
-            storagePath: relativeStoragePath,
-            fileExtension: "docx",
-            userId: userId,
-            projectId: projectResult.id,
-        },
-    });
+    const { relativeStoragePath } = await saveDocumentToStorage(
+        outputBuffer,
+        projectName,
+        "docx",
+        async (storagePath: string): Promise<void> => {
+            // Create main file record
+            const savedFile = await prisma.userFile.create({
+                data: {
+                    originalFileName: projectName + ".docx",
+                    storagePath: storagePath,
+                    fileExtension: "docx",
+                    userId: userId,
+                    projectId: projectResult.id,
+                },
+            });
 
-    // Link attachment files
-    if (attachmentFileIds.length > 0) {
-        for (const fileId of attachmentFileIds) {
-            try {
-                const attachmentFile = await prisma.userFile.findUnique({
-                    where: { id: Number(fileId) },
-                    select: {
-                        originalFileName: true,
-                        storagePath: true,
-                        fileExtension: true,
-                    },
-                });
-
-                if (attachmentFile) {
-                    let actualFileSize = 0;
+            // Link attachment files
+            if (attachmentFileIds.length > 0) {
+                for (const fileId of attachmentFileIds) {
                     try {
-                        const fullFilePath = getFullPathFromStoragePath(
-                            attachmentFile.storagePath,
-                        );
-                        const fileStats = await fs.stat(fullFilePath);
-                        actualFileSize = fileStats.size;
-                    } catch (sizeError) {
-                        console.error(
-                            `Error reading file size for ${attachmentFile.originalFileName}:`,
-                            sizeError,
-                        );
-                        actualFileSize = 0;
-                    }
+                        const attachmentFile = await prisma.userFile.findUnique({
+                            where: { id: Number(fileId) },
+                            select: {
+                                originalFileName: true,
+                                storagePath: true,
+                                fileExtension: true,
+                            },
+                        });
 
-                    await prisma.attachmentFile.create({
-                        data: {
-                            fileName: attachmentFile.originalFileName,
-                            filePath: attachmentFile.storagePath,
-                            fileSize: actualFileSize,
-                            mimeType: getMimeType(attachmentFile.fileExtension),
-                            userFileId: savedFile.id,
-                        },
-                    });
-                } else {
-                    console.error(
-                        `Attachment file not found with ID: ${fileId}`,
-                    );
+                        if (attachmentFile) {
+                            let actualFileSize = 0;
+                            try {
+                                const fullFilePath = getFullPathFromStoragePath(
+                                    attachmentFile.storagePath,
+                                );
+                                const fileStats = await fs.stat(fullFilePath);
+                                actualFileSize = fileStats.size;
+                            } catch (sizeError) {
+                                console.error(
+                                    `Error reading file size for ${attachmentFile.originalFileName}:`,
+                                    sizeError,
+                                );
+                                actualFileSize = 0;
+                            }
+
+                            await prisma.attachmentFile.create({
+                                data: {
+                                    fileName: attachmentFile.originalFileName,
+                                    filePath: attachmentFile.storagePath,
+                                    fileSize: actualFileSize,
+                                    mimeType: getMimeType(attachmentFile.fileExtension),
+                                    userFileId: savedFile.id,
+                                },
+                            });
+                        } else {
+                            console.error(
+                                `Attachment file not found with ID: ${fileId}`,
+                            );
+                        }
+                    } catch (error) {
+                        console.error(
+                            `Error linking attachment file ${fileId}:`,
+                            error,
+                        );
+                    }
                 }
-            } catch (error) {
-                console.error(
-                    `Error linking attachment file ${fileId}:`,
-                    error,
-                );
             }
-        }
-    }
+        },
+    );
 
     return buildSuccessResponse(relativeStoragePath, projectResult);
 }

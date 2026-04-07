@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui";
-import { ChartBarBig, UserStar, LogOut, Menu } from "lucide-react";
+import { ChartBarBig, UserStar, LogOut, Menu, Loader2 } from "lucide-react";
 import { ROUTES, ROLES } from "@/lib/constants";
 import { useSession, signOut } from "next-auth/react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
 
 const menuItems = [
@@ -15,7 +15,14 @@ const menuItems = [
 
 export const TopBar: React.FC = (): React.JSX.Element => {
     const { data: session } = useSession();
+    const router = useRouter();
     const { setIsSidebarOpen, activeTab } = useUserDashboardContext();
+    const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
+
+    const handleGoToAdmin = (): void => {
+        setIsNavigatingAdmin(true);
+        router.push(ROUTES.ADMIN);
+    };
 
     return (
         <div className="bg-gradient-to-r from-white/80 via-white/80 to-blue-50/30 dark:from-slate-900/80 dark:via-slate-900/80 dark:to-slate-800/30 backdrop-blur-2xl sticky top-0 z-30 px-6 py-4 border-b border-white/60 dark:border-slate-700/60 shadow-sm">
@@ -51,13 +58,22 @@ export const TopBar: React.FC = (): React.JSX.Element => {
 
                     {session?.user?.role === ROLES.ADMIN && (
                         <Button
-                            asChild
+                            type="button"
+                            onClick={handleGoToAdmin}
+                            disabled={isNavigatingAdmin}
                             className="font-semibold cursor-pointer transform hover:scale-105 active:scale-95 duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 border-0 transition"
                         >
-                            <Link href={ROUTES.ADMIN}>
-                                <UserStar className="w-4 h-4 mr-2" />
-                                ระบบแอดมิน
-                            </Link>
+                            {isNavigatingAdmin ? (
+                                <React.Fragment>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    กำลังเข้าสู่ระบบแอดมิน…
+                                </React.Fragment>
+                            ) : (
+                                <React.Fragment>
+                                    <UserStar className="w-4 h-4 mr-2" />
+                                    ระบบแอดมิน
+                                </React.Fragment>
+                            )}
                         </Button>
                     )}
                     <Button

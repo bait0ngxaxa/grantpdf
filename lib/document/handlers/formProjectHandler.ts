@@ -90,13 +90,6 @@ export async function handleFormProjectGeneration(
         compression: "DEFLATE",
     });
 
-    // Save document
-    const { relativeStoragePath } = await saveDocumentToStorage(
-        outputBuffer,
-        fileName,
-        "docx",
-    );
-
     // Find or create project
     const projectResult = await findOrCreateProject(
         userId,
@@ -108,13 +101,20 @@ export async function handleFormProjectGeneration(
         return projectResult;
     }
 
-    // Create database record
-    await createUserFileRecord(
-        userId,
-        projectResult.id,
+    // Save document + create database record (with cleanup on DB failure)
+    const { relativeStoragePath } = await saveDocumentToStorage(
+        outputBuffer,
         fileName,
-        relativeStoragePath,
         "docx",
+        async (storagePath: string): Promise<void> => {
+            await createUserFileRecord(
+                userId,
+                projectResult.id,
+                fileName,
+                storagePath,
+                "docx",
+            );
+        },
     );
 
     return buildSuccessResponse(relativeStoragePath, projectResult);

@@ -1,13 +1,7 @@
-import { access, appendFile, mkdir, readFile, readdir } from "fs/promises";
-import { constants as fsConstants } from "fs";
-import path from "path";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const LOG_DIR = path.join(process.cwd(), "logs");
 const TIMEZONE = "Asia/Bangkok"; // Thailand UTC+7
-
-function getThailandTime(): Date {
-    return new Date(new Date().toLocaleString("en-US", { timeZone: TIMEZONE }));
-}
 
 function formatThailandTimestamp(): string {
     const now = new Date();
@@ -15,10 +9,6 @@ function formatThailandTimestamp(): string {
         now.toLocaleString("sv-SE", { timeZone: TIMEZONE }).replace(" ", "T") +
         "+07:00"
     );
-}
-
-function getThailandDate(): string {
-    return getThailandTime().toISOString().split("T")[0];
 }
 
 export type AuditAction =
@@ -37,32 +27,78 @@ export type AuditAction =
     | "PROJECT_CREATE"
     | "PROJECT_UPDATE"
     | "PROJECT_DELETE"
+    | "DOCUMENT_GENERATE"
     // Admin operations
     | "ADMIN_USER_DELETE"
     | "ADMIN_USER_UPDATE"
     | "ADMIN_PROJECT_UPDATE"
     | "ADMIN_FILE_DOWNLOAD";
 
-interface AuditLogEntry {
+export type AuditOutcome = "success" | "failure";
+
+export interface AuditLogEntry {
     timestamp: string;
     action: AuditAction;
+    outcome: AuditOutcome;
     userId: string | null;
     userEmail?: string;
+    targetType?: string;
+    targetId?: string;
+    requestId?: string;
+    userAgent?: string;
     ip?: string;
     details?: Record<string, unknown>;
 }
 
-async function ensureLogDir(): Promise<void> {
-    await mkdir(LOG_DIR, { recursive: true });
+interface AuditLogOptions {
+    userEmail?: string;
+    ip?: string;
+    details?: Record<string, unknown>;
+    outcome?: AuditOutcome;
+    targetType?: string;
+    targetId?: string;
+    requestId?: string;
+    userAgent?: string;
 }
 
-function getLogFilePath(): string {
-    const today = getThailandDate();
-    return path.join(LOG_DIR, `audit-${today}.log`);
+function inferOutcome(action: AuditAction, outcome?: AuditOutcome): AuditOutcome {
+    if (outcome) return outcome;
+    return action.endsWith("_FAILED") ? "failure" : "success";
+}
+
+function toActorUserId(userId: string | null): number | null {
+    if (!userId) return null;
+    const parsed = Number(userId);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function toJsonValue(
+    details?: Record<string, unknown>,
+): Prisma.InputJsonValue | undefined {
+    if (!details) return undefined;
+    return JSON.parse(JSON.stringify(details)) as Prisma.InputJsonValue;
+}
+
+async function writeAuditLogToDatabase(entry: AuditLogEntry): Promise<void> {
+    await prisma.auditLog.create({
+        data: {
+            action: entry.action,
+            outcome: entry.outcome,
+            actorUserId: toActorUserId(entry.userId),
+            actorEmail: entry.userEmail,
+            targetType: entry.targetType,
+            targetId: entry.targetId,
+            ip: entry.ip,
+            userAgent: entry.userAgent,
+            requestId: entry.requestId,
+            details: toJsonValue(entry.details),
+            created_at: new Date(entry.timestamp),
+        },
+    });
 }
 
 /**
- * Log an audit entry to file
+ * Log an audit entry to database (non-blocking)
  * @param action - The action being logged
  * @param userId - The user performing the action (null for anonymous)
  * @param options - Additional options
@@ -70,78 +106,29 @@ function getLogFilePath(): string {
 export function logAudit(
     action: AuditAction,
     userId: string | null,
-    options?: {
-        userEmail?: string;
-        ip?: string;
-        details?: Record<string, unknown>;
-    }
+    options?: AuditLogOptions,
 ): void {
     const entry: AuditLogEntry = {
         timestamp: formatThailandTimestamp(),
         action,
+        outcome: inferOutcome(action, options?.outcome),
         userId,
         userEmail: options?.userEmail,
+        targetType: options?.targetType,
+        targetId: options?.targetId,
+        requestId: options?.requestId,
+        userAgent: options?.userAgent,
         ip: options?.ip,
         details: options?.details,
     };
-    const logLine = JSON.stringify(entry) + "\n";
 
     // Non-blocking write: don't hold request-response cycle for audit logging.
     void (async () => {
         try {
-            await ensureLogDir();
-            await appendFile(getLogFilePath(), logLine, "utf8");
+            await writeAuditLogToDatabase(entry);
         } catch (error) {
             // Silent fail - don't break the app if logging fails
             console.error("Audit log error:", error);
         }
     })();
-}
-
-/**
- * Read audit logs for a specific date
- * @param date - Date in YYYY-MM-DD format (default: today)
- * @returns Array of log entries
- */
-export async function readAuditLogs(date?: string): Promise<AuditLogEntry[]> {
-    try {
-        const targetDate = date || getThailandDate();
-        const logFile = path.join(LOG_DIR, `audit-${targetDate}.log`);
-
-        try {
-            await access(logFile, fsConstants.F_OK);
-        } catch {
-            return [];
-        }
-
-        const content = await readFile(logFile, "utf8");
-        const lines = content.trim().split("\n").filter(Boolean);
-
-        return lines.map((line) => JSON.parse(line) as AuditLogEntry);
-    } catch {
-        return [];
-    }
-}
-
-/**
- * Get list of available log dates
- * @returns Array of date strings (YYYY-MM-DD)
- */
-export async function getAvailableLogDates(): Promise<string[]> {
-    try {
-        try {
-            await access(LOG_DIR, fsConstants.F_OK);
-        } catch {
-            return [];
-        }
-
-        const files = await readdir(LOG_DIR);
-        return files
-            .filter((f) => f.startsWith("audit-") && f.endsWith(".log"))
-            .map((f) => f.replace("audit-", "").replace(".log", ""))
-            .sort()
-            .reverse(); // Most recent first
-    } catch {
-        return [];
-    }
 }

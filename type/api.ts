@@ -76,6 +76,32 @@ export interface UsersApiResponse {
 }
 
 // ============================================
+// Audit Logs API
+// ============================================
+
+export interface AuditLogApiData {
+    id: string;
+    action: string;
+    outcome: "success" | "failure";
+    actorUserId: string | null;
+    actorEmail: string | null;
+    targetType: string | null;
+    targetId: string | null;
+    ip: string | null;
+    userAgent: string | null;
+    requestId: string | null;
+    details: Record<string, unknown> | null;
+    created_at: string;
+}
+
+export interface AuditLogsApiResponse {
+    logs: AuditLogApiData[];
+    total: number;
+    page: number;
+    totalPages: number;
+}
+
+// ============================================
 // Dashboard Stats API
 // ============================================
 

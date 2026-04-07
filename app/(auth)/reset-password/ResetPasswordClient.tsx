@@ -109,14 +109,6 @@ function ResetPasswordForm(): React.JSX.Element {
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             {/* Left Side - Hero Content */}
             <div className="hidden md:flex flex-col space-y-8 p-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/50 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-medium text-sm self-start animate-fade-in-up">
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                    </span>
-                    GRANT ONLINE Security
-                </div>
-
                 <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight text-balance">
                     ตั้งรหัสผ่านใหม่ <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600">

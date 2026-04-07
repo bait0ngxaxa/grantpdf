@@ -1,6 +1,27 @@
 import { prisma } from "@/lib/prisma";
 import type { SafeUser, UpdateUserData } from "./types";
 import { isValidRole } from "./constants";
+import type { Prisma } from "@prisma/client";
+
+interface AuditContext {
+    actorUserId: string | null;
+    actorEmail?: string;
+    ip?: string;
+    userAgent?: string;
+    requestId?: string;
+}
+
+function parseActorUserId(actorUserId: string | null): number | null {
+    if (!actorUserId) return null;
+    const parsed = Number(actorUserId);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function toJsonValue(
+    value: Record<string, unknown>,
+): Prisma.InputJsonValue {
+    return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
 
 export async function updateUser(
     id: number,
@@ -34,5 +55,125 @@ export async function updateUser(
 export async function deleteUser(id: number): Promise<void> {
     await prisma.user.delete({
         where: { id },
+    });
+}
+
+export async function updateUserWithAudit(
+    id: number,
+    data: UpdateUserData,
+    audit: AuditContext,
+): Promise<SafeUser> {
+    if (data.role && !isValidRole(data.role)) {
+        throw new Error("INVALID_ROLE");
+    }
+
+    return prisma.$transaction(async (tx) => {
+        const beforeUser = await tx.user.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                created_at: true,
+            },
+        });
+
+        if (!beforeUser) {
+            throw new Error("USER_NOT_FOUND");
+        }
+
+        const updatedUser = await tx.user.update({
+            where: { id },
+            data: {
+                ...data,
+                updated_at: new Date(),
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                created_at: true,
+            },
+        });
+
+        await tx.auditLog.create({
+            data: {
+                action: "ADMIN_USER_UPDATE",
+                outcome: "success",
+                actorUserId: parseActorUserId(audit.actorUserId),
+                actorEmail: audit.actorEmail ?? null,
+                targetType: "user",
+                targetId: updatedUser.id.toString(),
+                ip: audit.ip ?? null,
+                userAgent: audit.userAgent ?? null,
+                requestId: audit.requestId ?? null,
+                details: toJsonValue({
+                    targetUserId: updatedUser.id.toString(),
+                    targetUserEmail: updatedUser.email,
+                    before: {
+                        name: beforeUser.name,
+                        role: beforeUser.role,
+                    },
+                    after: {
+                        name: updatedUser.name,
+                        role: updatedUser.role,
+                    },
+                }),
+            },
+        });
+
+        return {
+            ...updatedUser,
+            id: updatedUser.id.toString(),
+        };
+    });
+}
+
+export async function deleteUserWithAudit(
+    id: number,
+    audit: AuditContext,
+): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+        const targetUser = await tx.user.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+            },
+        });
+
+        if (!targetUser) {
+            throw new Error("USER_NOT_FOUND");
+        }
+
+        await tx.user.delete({
+            where: { id },
+        });
+
+        await tx.auditLog.create({
+            data: {
+                action: "ADMIN_USER_DELETE",
+                outcome: "success",
+                actorUserId: parseActorUserId(audit.actorUserId),
+                actorEmail: audit.actorEmail ?? null,
+                targetType: "user",
+                targetId: targetUser.id.toString(),
+                ip: audit.ip ?? null,
+                userAgent: audit.userAgent ?? null,
+                requestId: audit.requestId ?? null,
+                details: toJsonValue({
+                    targetUserId: targetUser.id.toString(),
+                    targetUserEmail: targetUser.email,
+                    deletedUser: {
+                        name: targetUser.name,
+                        role: targetUser.role,
+                    },
+                }),
+            },
+        });
     });
 }

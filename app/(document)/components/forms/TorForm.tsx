@@ -2,14 +2,13 @@
 
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTitle } from "@/lib/hooks/useTitle";
 
 import {
     PreviewField,
     PreviewGrid,
     DocumentEditorLayout,
 } from "@/app/(document)/components";
-import { LoadingSpinner } from "@/components/ui";
+import { FormSkeleton } from "@/components/ui";
 import {
     useDocumentForm,
     usePreviewModal,
@@ -34,8 +33,6 @@ import {
 export function TorForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
-
-    useTitle("สร้างเอกสาร TOR | ระบบจัดการเอกสาร");
 
     const [activities, setActivities] = useState<ActivityData[]>([
         { ...initialActivity },
@@ -126,7 +123,7 @@ export function TorForm(): React.JSX.Element {
     });
 
     if (!isClient) {
-        return <LoadingSpinner />;
+        return <FormSkeleton />;
     }
 
     return (

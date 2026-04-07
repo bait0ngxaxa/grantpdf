@@ -1,5 +1,5 @@
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { DashboardSkeleton } from "@/components/ui";
 
 export default function Loading(): React.JSX.Element {
-    return <LoadingSpinner className="min-h-screen" message="กำลังโหลดข้อมูล…" />;
+    return <DashboardSkeleton className="min-h-screen" />;
 }

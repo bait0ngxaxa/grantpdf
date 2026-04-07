@@ -139,7 +139,7 @@ export default function FileItem({
                                 }
                             }}
                             size="sm"
-                            className="h-8 w-8 p-0 rounded-xl bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 hover:text-green-700 dark:hover:text-green-300 border-none shadow-none"
+                            className="h-8 w-8 p-0 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-500 hover:bg-green-100 dark:hover:bg-green-900/50 hover:text-green-700 dark:hover:text-green-300 border-none shadow-none"
                             title="พรีวิว PDF"
                         >
                             <Eye className="h-4 w-4" />

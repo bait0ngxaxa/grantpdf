@@ -8,7 +8,7 @@ import {
     type LoadingModalState,
     type PreviewModalState,
 } from "./GlobalModalContext";
-import { SuccessModal, PdfPreviewModal, LoadingSpinner } from "@/components/ui";
+import { SuccessModal, PdfPreviewModal, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 import {
@@ -147,7 +147,7 @@ export function GlobalModalProvider({
             {loadingModal.isOpen && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl flex flex-col items-center">
-                        <LoadingSpinner className="w-10 h-10 text-primary mb-4" />
+                        <Skeleton className="w-10 h-10 rounded-full mb-4" />
                         <p className="text-slate-600 dark:text-slate-300 font-medium">
                             {loadingModal.message || "กำลังดำเนินการ…"}
                         </p>

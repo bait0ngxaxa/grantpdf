@@ -35,4 +35,10 @@ export {
 } from "./queries";
 
 // Mutations
-export { updateProjectStatus, createProject } from "./mutations";
+export {
+    updateProjectStatus,
+    createProject,
+    createProjectWithAudit,
+    updateProjectWithAudit,
+    deleteProjectWithAudit,
+} from "./mutations";

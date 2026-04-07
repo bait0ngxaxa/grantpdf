@@ -2,26 +2,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, PUT } from "@/app/api/(admin)/admin/users/[id]/route";
 
 vi.mock("@/lib/services", () => ({
-    userExists: vi.fn(),
-    isValidRole: vi.fn(() => true),
-    updateUser: vi.fn(),
-    deleteUser: vi.fn(),
     checkAdminPermission: vi.fn(),
+    updateUserWithAudit: vi.fn(),
+    deleteUserWithAudit: vi.fn(),
 }));
 
 import {
     checkAdminPermission,
-    deleteUser,
-    isValidRole,
-    updateUser,
-    userExists,
+    deleteUserWithAudit,
+    updateUserWithAudit,
 } from "@/lib/services";
 
 const mockedCheckAdminPermission = vi.mocked(checkAdminPermission);
-const mockedDeleteUser = vi.mocked(deleteUser);
-const mockedIsValidRole = vi.mocked(isValidRole);
-const mockedUpdateUser = vi.mocked(updateUser);
-const mockedUserExists = vi.mocked(userExists);
+const mockedDeleteUserWithAudit = vi.mocked(deleteUserWithAudit);
+const mockedUpdateUserWithAudit = vi.mocked(updateUserWithAudit);
 
 function buildParams(id: string): Promise<{ id: string }> {
     return Promise.resolve({ id });
@@ -45,8 +39,6 @@ describe("admin users [id] route", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockedCheckAdminPermission.mockResolvedValue(buildAdminPermission());
-        mockedIsValidRole.mockReturnValue(true);
-        mockedUserExists.mockResolvedValue(true);
     });
 
     describe("PUT", () => {
@@ -68,7 +60,7 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(403);
-            expect(mockedUserExists).not.toHaveBeenCalled();
+            expect(mockedUpdateUserWithAudit).not.toHaveBeenCalled();
         });
 
         it.each(["abc", "0", "-1"])(
@@ -90,8 +82,7 @@ describe("admin users [id] route", () => {
 
                 expect(response.status).toBe(400);
                 expect(body).toEqual({ error: "Invalid user id" });
-                expect(mockedUserExists).not.toHaveBeenCalled();
-                expect(mockedUpdateUser).not.toHaveBeenCalled();
+                expect(mockedUpdateUserWithAudit).not.toHaveBeenCalled();
             },
         );
 
@@ -107,12 +98,10 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(400);
-            expect(mockedIsValidRole).not.toHaveBeenCalled();
-            expect(mockedUpdateUser).not.toHaveBeenCalled();
+            expect(mockedUpdateUserWithAudit).not.toHaveBeenCalled();
         });
 
         it("returns 400 when role is invalid", async () => {
-            mockedIsValidRole.mockReturnValue(false);
             const request = new Request("http://localhost/api/admin/users/2", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -124,12 +113,13 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(400);
-            expect(mockedUserExists).not.toHaveBeenCalled();
-            expect(mockedUpdateUser).not.toHaveBeenCalled();
+            expect(mockedUpdateUserWithAudit).not.toHaveBeenCalled();
         });
 
         it("returns 404 when target user does not exist", async () => {
-            mockedUserExists.mockResolvedValue(false);
+            mockedUpdateUserWithAudit.mockRejectedValue(
+                new Error("USER_NOT_FOUND"),
+            );
             const request = new Request("http://localhost/api/admin/users/2", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -141,7 +131,7 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(404);
-            expect(mockedUpdateUser).not.toHaveBeenCalled();
+            expect(mockedUpdateUserWithAudit).toHaveBeenCalledOnce();
         });
 
         it("returns 403 when admin tries to downgrade own role", async () => {
@@ -156,11 +146,11 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(403);
-            expect(mockedUpdateUser).not.toHaveBeenCalled();
+            expect(mockedUpdateUserWithAudit).not.toHaveBeenCalled();
         });
 
         it("returns 200 and updates user on success", async () => {
-            mockedUpdateUser.mockResolvedValue({
+            mockedUpdateUserWithAudit.mockResolvedValue({
                 id: "2",
                 name: "Alice",
                 email: "alice@example.com",
@@ -179,10 +169,16 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(200);
-            expect(mockedUpdateUser).toHaveBeenCalledWith(2, {
-                name: "Alice",
-                role: "member",
-            });
+            expect(mockedUpdateUserWithAudit).toHaveBeenCalledWith(
+                2,
+                {
+                    name: "Alice",
+                    role: "member",
+                },
+                expect.objectContaining({
+                    actorUserId: "1",
+                }),
+            );
         });
     });
 
@@ -203,7 +199,7 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(403);
-            expect(mockedDeleteUser).not.toHaveBeenCalled();
+            expect(mockedDeleteUserWithAudit).not.toHaveBeenCalled();
         });
 
         it.each(["abc", "0", "-1"])(
@@ -223,8 +219,7 @@ describe("admin users [id] route", () => {
 
                 expect(response.status).toBe(400);
                 expect(body).toEqual({ error: "Invalid user id" });
-                expect(mockedUserExists).not.toHaveBeenCalled();
-                expect(mockedDeleteUser).not.toHaveBeenCalled();
+                expect(mockedDeleteUserWithAudit).not.toHaveBeenCalled();
             },
         );
 
@@ -238,11 +233,13 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(403);
-            expect(mockedDeleteUser).not.toHaveBeenCalled();
+            expect(mockedDeleteUserWithAudit).not.toHaveBeenCalled();
         });
 
         it("returns 404 when target user does not exist", async () => {
-            mockedUserExists.mockResolvedValue(false);
+            mockedDeleteUserWithAudit.mockRejectedValue(
+                new Error("USER_NOT_FOUND"),
+            );
             const request = new Request("http://localhost/api/admin/users/2", {
                 method: "DELETE",
             });
@@ -252,10 +249,11 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(404);
-            expect(mockedDeleteUser).not.toHaveBeenCalled();
+            expect(mockedDeleteUserWithAudit).toHaveBeenCalledOnce();
         });
 
         it("returns 200 and deletes user on success", async () => {
+            mockedDeleteUserWithAudit.mockResolvedValue(undefined);
             const request = new Request("http://localhost/api/admin/users/2", {
                 method: "DELETE",
             });
@@ -265,7 +263,12 @@ describe("admin users [id] route", () => {
             });
 
             expect(response.status).toBe(200);
-            expect(mockedDeleteUser).toHaveBeenCalledWith(2);
+            expect(mockedDeleteUserWithAudit).toHaveBeenCalledWith(
+                2,
+                expect.objectContaining({
+                    actorUserId: "1",
+                }),
+            );
         });
     });
 });

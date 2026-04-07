@@ -2,14 +2,13 @@
 
 import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTitle } from "@/lib/hooks/useTitle";
 
 import {
     PreviewField,
     PreviewGrid,
     DocumentEditorLayout,
 } from "@/app/(document)/components";
-import { LoadingSpinner } from "@/components/ui";
+import { FormSkeleton } from "@/components/ui";
 import {
     useDocumentForm,
     usePreviewModal,
@@ -30,8 +29,6 @@ import {
 export function FormProjectForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
-
-    useTitle("สร้างหนังสือข้อเสนอโครงการ | ระบบจัดการเอกสาร");
 
     const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
         usePreviewModal();
@@ -84,7 +81,7 @@ export function FormProjectForm(): React.JSX.Element {
     });
 
     if (!isClient) {
-        return <LoadingSpinner />;
+        return <FormSkeleton />;
     }
 
     return (

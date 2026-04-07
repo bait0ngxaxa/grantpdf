@@ -2,13 +2,14 @@
 
 import React, { useState } from "react";
 import type { AttachmentFile } from "@/type/models";
-import { truncateFileName } from "@/lib/utils";
+import { truncateFileName, cn } from "@/lib/utils";
 import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 import {
     FileText,
     File,
     Calendar,
     Paperclip,
+    ChevronDown,
     Download,
     Eye,
     Trash2,
@@ -75,10 +76,16 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                                                 !isAttachmentExpanded,
                                             )
                                         }
-                                        className="flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                        className="flex items-center text-xs text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full"
                                     >
                                         <Paperclip className="w-3 h-3 mr-1" />
                                         {file.attachmentFiles.length} ไฟล์แนบ
+                                        <ChevronDown
+                                            className={cn(
+                                                "w-3.5 h-3.5 ml-1 transform transition-transform duration-200",
+                                                isAttachmentExpanded && "rotate-180",
+                                            )}
+                                        />
                                     </button>
                                 )}
                         </div>
@@ -124,7 +131,7 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
             {file.attachmentFiles &&
                 file.attachmentFiles.length > 0 &&
                 isAttachmentExpanded && (
-                    <div className="mt-2 sm:ml-11">
+                    <div className="mt-2 w-full">
                         <AttachmentList
                             attachmentFiles={file.attachmentFiles}
                         />

@@ -225,24 +225,6 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                                     </span>
                                     รายการเอกสารในโครงการ
                                 </div>
-                                <Button
-                                    asChild
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                    }}
-                                    size="sm"
-                                    className="h-8 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-700 shadow-sm"
-                                >
-                                    <Link
-                                        href={`${
-                                            ROUTES.CREATE_DOCS
-                                        }?projectId=${encodeURIComponent(
-                                            project.id,
-                                        )}`}
-                                    >
-                                        + เพิ่มเอกสาร
-                                    </Link>
-                                </Button>
                             </div>
                             <div className="grid gap-3">
                                 {project.files.map((file) => (

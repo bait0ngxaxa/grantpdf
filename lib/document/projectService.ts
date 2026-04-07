@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parsePositiveIntId } from "@/lib/id";
 import {
     findProjectByIdAndUser,
     findProjectByNameAndUser,
@@ -21,8 +22,16 @@ export async function findOrCreateProject(
 
     if (projectIdFromForm) {
         // Find existing project by ID
+        const projectId = parsePositiveIntId(projectIdFromForm);
+        if (projectId === null) {
+            return new NextResponse(
+                "Project not found. Please select a valid project.",
+                { status: 400 },
+            );
+        }
+
         project = await findProjectByIdAndUser(
-            parseInt(projectIdFromForm),
+            projectId,
             userId,
         );
 

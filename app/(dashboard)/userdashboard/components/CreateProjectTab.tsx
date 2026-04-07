@@ -8,7 +8,9 @@ import { Plus, Building2, FileText, Upload } from "lucide-react";
 import { useUserDashboardContext } from "../contexts";
 
 export const CreateProjectTab: React.FC = (): React.JSX.Element => {
-    const { projects, setShowCreateProjectModal } = useUserDashboardContext();
+    const { totalProjects, setShowCreateProjectModal } =
+        useUserDashboardContext();
+    const hasProjects = totalProjects > 0;
 
     return (
         <div className="animate-fade-in-up">
@@ -18,7 +20,7 @@ export const CreateProjectTab: React.FC = (): React.JSX.Element => {
                 </div>
 
                 {/* แสดงเนื้อหาแตกต่างกันตามว่ามีโครงการหรือไม่ */}
-                {projects.length === 0 ? (
+                {!hasProjects ? (
                     // กรณียังไม่มีโครงการ - แสดงเฉพาะปุ่มสร้างโครงการ
                     <>
                         <h3 className="text-2xl font-bold mb-3 text-slate-800 dark:text-slate-100 text-balance">

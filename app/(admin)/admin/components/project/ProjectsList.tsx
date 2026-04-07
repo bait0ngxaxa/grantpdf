@@ -2,7 +2,7 @@
 
 import React from "react";
 import ProjectCard from "./ProjectCard";
-import { LoadingSpinner, EmptyState } from "@/components/ui";
+import { Skeleton, EmptyState } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { Archive } from "lucide-react";
 
@@ -26,7 +26,17 @@ export default function ProjectsList({
     endIndex,
 }: ProjectsListProps): React.JSX.Element {
     if (isLoading) {
-        return <LoadingSpinner message="กำลังโหลดโครงการ…" />;
+        return (
+            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                    <Skeleton className="h-7 w-44 rounded-lg" />
+                    <Skeleton className="h-8 w-36 rounded-lg" />
+                </div>
+                <Skeleton className="h-28 w-full rounded-2xl" />
+                <Skeleton className="h-28 w-full rounded-2xl" />
+                <Skeleton className="h-28 w-full rounded-2xl" />
+            </div>
+        );
     }
 
     if (projects.length === 0) {

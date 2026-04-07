@@ -9,6 +9,7 @@ const menuItems = [
     { id: "dashboard", name: "ภาพรวมระบบ" },
     { id: "documents", name: "จัดการโครงการและเอกสาร" },
     { id: "users", name: "จัดการผู้ใช้งาน" },
+    { id: "audit", name: "Audit Logs" },
 ];
 
 export const AdminTopBar: React.FC = (): React.JSX.Element => {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ProjectCard } from "./ProjectCard";
 import {
     Pagination,
-    LoadingSpinner,
+    Skeleton,
     EmptyState as SharedEmptyState,
 } from "@/components/ui";
 import { Building2 } from "lucide-react";
@@ -31,7 +31,13 @@ export const ProjectSelection = (): React.JSX.Element => {
                 เลือกโครงการสำหรับเอกสาร
             </h1>
 
-            {isLoading ? <LoadingSpinner message="กำลังโหลดโครงการ…" /> : null}
+            {isLoading ? (
+                <div className="w-full max-w-4xl space-y-4">
+                    <Skeleton className="h-28 w-full rounded-2xl" />
+                    <Skeleton className="h-28 w-full rounded-2xl" />
+                    <Skeleton className="h-28 w-full rounded-2xl" />
+                </div>
+            ) : null}
 
             {error && (
                 <SharedEmptyState

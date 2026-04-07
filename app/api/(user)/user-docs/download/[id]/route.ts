@@ -25,9 +25,13 @@ export async function GET(
         if (fileId === null) {
             throw publicApiError(400, "รหัสไฟล์ไม่ถูกต้อง");
         }
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) {
+            throw publicApiError(401, "Unauthorized");
+        }
 
-        const file = await prisma.userFile.findUnique({
-            where: { id: fileId },
+        const file = await prisma.userFile.findFirst({
+            where: { id: fileId, userId },
             select: {
                 id: true,
                 originalFileName: true,

@@ -1,22 +1,57 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { updateProjectSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
 import { publicApiError, toPublicApiError } from "@/lib/apiError";
+import {
+    updateProjectWithAudit,
+    deleteProjectWithAudit,
+} from "@/lib/services";
+import { applyRateLimit } from "@/lib/ratelimit";
+import { RATE_LIMIT } from "@/lib/constants";
+
+function getClientIp(req: NextRequest): string | undefined {
+    const forwarded = req.headers.get("x-forwarded-for");
+    if (forwarded) {
+        const [firstIp] = forwarded.split(",");
+        return firstIp?.trim() || undefined;
+    }
+    return req.headers.get("x-real-ip") || undefined;
+}
+
+function getRequestId(req: NextRequest): string | undefined {
+    return req.headers.get("x-request-id") || undefined;
+}
 
 // PUT: อัพเดตโครงการ
 export async function PUT(
-    req: Request,
+    req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
+        const rateLimitResult = applyRateLimit({
+            request: req,
+            routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
+            limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
+            windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
+        });
+
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                {
+                    error: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
+                    retryAfter: rateLimitResult.retryAfter,
+                },
+                { status: 429, headers: rateLimitResult.headers },
+            );
+        }
+
         const session = await auth();
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
                 { error: "Unauthorized" },
-                { status: 401 }
+                { status: 401, headers: rateLimitResult.headers },
             );
         }
 
@@ -39,43 +74,38 @@ export async function PUT(
             throw publicApiError(401, "Unauthorized");
         }
 
-        // ตรวจสอบว่าโครงการเป็นของผู้ใช้หรือไม่
-        const existingProject = await prisma.project.findFirst({
-            where: {
-                id: projectId,
-                userId,
+        const updatedProject = await updateProjectWithAudit(
+            projectId,
+            userId,
+            name,
+            description && description.trim() !== "" ? description : undefined,
+            {
+                actorUserId: session.user.id,
+                actorEmail: session.user.email ?? undefined,
+                ip: getClientIp(req),
+                userAgent: req.headers.get("user-agent") ?? undefined,
+                requestId: getRequestId(req),
             },
-        });
-
-        if (!existingProject) {
-            return NextResponse.json(
-                { error: "Project not found" },
-                { status: 404 }
-            );
-        }
-
-        const updatedProject = await prisma.project.update({
-            where: {
-                id: projectId,
-            },
-            data: {
-                name,
-                description:
-                    description && description.trim() !== "" ? description : null,
-            },
-            include: {
-                files: true,
-                _count: {
-                    select: { files: true },
-                },
-            },
-        });
+        );
 
         return NextResponse.json({
             ...updatedProject,
             id: updatedProject.id.toString(),
-        });
+        }, { headers: rateLimitResult.headers });
     } catch (error) {
+        if (error instanceof Error && error.message === "PROJECT_NOT_FOUND") {
+            return NextResponse.json(
+                { error: "Project not found" },
+                { status: 404 },
+            );
+        }
+        if (error instanceof Error && error.message === "PROJECT_NAME_CONFLICT") {
+            return NextResponse.json(
+                { error: "มีชื่อโครงการนี้อยู่แล้ว" },
+                { status: 409 },
+            );
+        }
+
         console.error("Error updating project:", error);
         const mappedError = toPublicApiError(error, "Failed to update project");
         return NextResponse.json(
@@ -87,16 +117,33 @@ export async function PUT(
 
 // DELETE: ลบโครงการ
 export async function DELETE(
-    _req: Request,
+    req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
+        const rateLimitResult = applyRateLimit({
+            request: req,
+            routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
+            limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
+            windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
+        });
+
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                {
+                    error: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
+                    retryAfter: rateLimitResult.retryAfter,
+                },
+                { status: 429, headers: rateLimitResult.headers },
+            );
+        }
+
         const session = await auth();
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
                 { error: "Unauthorized" },
-                { status: 401 }
+                { status: 401, headers: rateLimitResult.headers },
             );
         }
 
@@ -111,30 +158,26 @@ export async function DELETE(
             throw publicApiError(401, "Unauthorized");
         }
 
-        // ตรวจสอบว่าโครงการเป็นของผู้ใช้หรือไม่
-        const existingProject = await prisma.project.findFirst({
-            where: {
-                id: projectId,
-                userId,
-            },
+        await deleteProjectWithAudit(projectId, userId, {
+            actorUserId: session.user.id,
+            actorEmail: session.user.email ?? undefined,
+            ip: getClientIp(req),
+            userAgent: req.headers.get("user-agent") ?? undefined,
+            requestId: getRequestId(req),
         });
 
-        if (!existingProject) {
+        return NextResponse.json(
+            { message: "Project deleted successfully" },
+            { headers: rateLimitResult.headers },
+        );
+    } catch (error) {
+        if (error instanceof Error && error.message === "PROJECT_NOT_FOUND") {
             return NextResponse.json(
                 { error: "Project not found" },
-                { status: 404 }
+                { status: 404 },
             );
         }
 
-        // ลบโครงการ (จะลบไฟล์ที่เกี่ยวข้องด้วยเนื่องจาก onDelete: Cascade ใน schema)
-        await prisma.project.delete({
-            where: {
-                id: projectId,
-            },
-        });
-
-        return NextResponse.json({ message: "Project deleted successfully" });
-    } catch (error) {
         console.error("Error deleting project:", error);
         const mappedError = toPublicApiError(error, "Failed to delete project");
         return NextResponse.json(

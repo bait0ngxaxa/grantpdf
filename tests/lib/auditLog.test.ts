@@ -1,56 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("fs/promises", () => {
-    const access = vi.fn();
-    const appendFile = vi.fn();
-    const mkdir = vi.fn();
-    const readFile = vi.fn();
-    const readdir = vi.fn();
-    return {
-        default: { access, appendFile, mkdir, readFile, readdir },
-        access,
-        appendFile,
-        mkdir,
-        readFile,
-        readdir,
-    };
-});
-
-vi.mock("fs", () => ({
-    default: {
-        constants: {
-            F_OK: 0,
+vi.mock("@/lib/prisma", () => ({
+    prisma: {
+        auditLog: {
+            create: vi.fn(),
         },
-    },
-    constants: {
-        F_OK: 0,
     },
 }));
 
-import {
-    access,
-    appendFile,
-    mkdir,
-    readFile,
-    readdir,
-} from "fs/promises";
-import { logAudit, readAuditLogs, getAvailableLogDates } from "@/lib/auditLog";
+import { prisma } from "@/lib/prisma";
+import { logAudit } from "@/lib/auditLog";
 
-const mockedAccess = vi.mocked(access);
-const mockedAppendFile = vi.mocked(appendFile);
-const mockedMkdir = vi.mocked(mkdir);
-const mockedReadFile = vi.mocked(readFile);
-const mockedReaddir = vi.mocked(readdir);
+const mockedAuditCreate = vi.mocked(prisma.auditLog.create);
 
 describe("auditLog", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockedMkdir.mockResolvedValue(undefined);
-        mockedAppendFile.mockResolvedValue(undefined);
-        mockedAccess.mockResolvedValue(undefined);
+        mockedAuditCreate.mockResolvedValue({} as never);
     });
 
-    it("writes audit log asynchronously without throwing", async () => {
+    it("writes audit log to database asynchronously", async () => {
         expect(() => {
             logAudit("FILE_UPLOAD", "1", {
                 userEmail: "tester@example.com",
@@ -60,54 +29,44 @@ describe("auditLog", () => {
 
         await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(mockedMkdir).toHaveBeenCalledOnce();
-        expect(mockedAppendFile).toHaveBeenCalledOnce();
-        expect(mockedAppendFile.mock.calls[0]?.[0]).toEqual(
-            expect.stringContaining("logs"),
-        );
+        expect(mockedAuditCreate).toHaveBeenCalledOnce();
+        expect(mockedAuditCreate.mock.calls[0]?.[0]).toMatchObject({
+            data: expect.objectContaining({
+                action: "FILE_UPLOAD",
+                outcome: "success",
+                actorUserId: 1,
+                actorEmail: "tester@example.com",
+            }),
+        });
     });
 
-    it("returns empty logs when file does not exist", async () => {
-        mockedAccess.mockRejectedValue(new Error("ENOENT"));
+    it("infers failure outcome for *_FAILED action", async () => {
+        logAudit("LOGIN_FAILED", null, {
+            userEmail: "unknown@example.com",
+        });
 
-        const result = await readAuditLogs("2026-01-01");
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(result).toEqual([]);
-        expect(mockedReadFile).not.toHaveBeenCalled();
+        expect(mockedAuditCreate).toHaveBeenCalledOnce();
+        expect(mockedAuditCreate.mock.calls[0]?.[0]).toMatchObject({
+            data: expect.objectContaining({
+                action: "LOGIN_FAILED",
+                outcome: "failure",
+                actorUserId: null,
+            }),
+        });
     });
 
-    it("parses log lines from file content", async () => {
-        mockedReadFile.mockResolvedValue(
-            [
-                JSON.stringify({
-                    timestamp: "2026-01-01T10:00:00+07:00",
-                    action: "FILE_UPLOAD",
-                    userId: "1",
-                }),
-                JSON.stringify({
-                    timestamp: "2026-01-01T10:05:00+07:00",
-                    action: "FILE_DELETE",
-                    userId: "1",
-                }),
-            ].join("\n"),
-        );
+    it("does not throw even when db insert fails", async () => {
+        mockedAuditCreate.mockRejectedValue(new Error("db_down"));
 
-        const result = await readAuditLogs("2026-01-01");
+        expect(() => {
+            logAudit("FILE_DELETE", "2", {
+                details: { fileId: "10" },
+            });
+        }).not.toThrow();
 
-        expect(result).toHaveLength(2);
-        expect(result[0]?.action).toBe("FILE_UPLOAD");
-        expect(result[1]?.action).toBe("FILE_DELETE");
-    });
-
-    it("returns available audit dates sorted descending", async () => {
-        mockedReaddir.mockResolvedValue([
-            "audit-2026-01-01.log",
-            "ignore.txt",
-            "audit-2026-02-01.log",
-        ] as never);
-
-        const result = await getAvailableLogDates();
-
-        expect(result).toEqual(["2026-02-01", "2026-01-01"]);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(mockedAuditCreate).toHaveBeenCalledOnce();
     });
 });

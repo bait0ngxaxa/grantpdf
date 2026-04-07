@@ -4,3 +4,4 @@ export { useUIStates } from "./useUIStates";
 export { useAdminProjectFilter } from "./useAdminProjectFilter";
 export { useProjectStatusActions } from "./useProjectStatusActions";
 export { useAdminModalStates } from "./useAdminModalStates";
+export { useAuditLogs } from "./useAuditLogs";

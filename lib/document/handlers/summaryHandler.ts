@@ -1,19 +1,14 @@
 import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
-import fsPromises from "fs/promises";
 import ExcelJS from "exceljs";
 import {
     findOrCreateProject,
     isProjectError,
     createUserFileRecord,
+    saveDocumentToStorage,
+    buildSuccessResponse,
 } from "@/lib/document";
-import { generateUniqueFilename } from "../fixThaiwordUtils";
-import {
-    ensureStorageDir,
-    getStoragePath,
-    getRelativeStoragePath,
-} from "@/lib/fileStorage";
 import { formatNumericWithCommas } from "@/lib/utils";
 
 export async function handleSummaryGeneration(
@@ -163,19 +158,6 @@ export async function handleSummaryGeneration(
         });
     });
 
-    // Generate output
-    const buffer = await workbook.xlsx.writeBuffer();
-    const uniqueFileName = generateUniqueFilename(fileName + ".xlsx");
-
-    // Save to storage
-    await ensureStorageDir("documents");
-    const filePath = getStoragePath("documents", uniqueFileName);
-    const relativeStoragePath = getRelativeStoragePath(
-        "documents",
-        uniqueFileName,
-    );
-    await fsPromises.writeFile(filePath, Buffer.from(buffer));
-
     // Find or create project
     const projectResult = await findOrCreateProject(
         userId,
@@ -187,22 +169,25 @@ export async function handleSummaryGeneration(
         return projectResult;
     }
 
-    // Create database record
-    await createUserFileRecord(
-        userId,
-        projectResult.id,
+    // Generate output
+    const buffer = await workbook.xlsx.writeBuffer();
+    const outputBuffer = Buffer.from(buffer);
+
+    // Save document + create database record (with cleanup on DB failure)
+    const { relativeStoragePath } = await saveDocumentToStorage(
+        outputBuffer,
         fileName,
-        relativeStoragePath,
         "xlsx",
+        async (storagePath: string): Promise<void> => {
+            await createUserFileRecord(
+                userId,
+                projectResult.id,
+                fileName,
+                storagePath,
+                "xlsx",
+            );
+        },
     );
 
-    return NextResponse.json({
-        success: true,
-        storagePath: relativeStoragePath,
-        project: {
-            id: projectResult.id.toString(),
-            name: projectResult.name,
-            description: projectResult.description,
-        },
-    });
+    return buildSuccessResponse(relativeStoragePath, projectResult);
 }

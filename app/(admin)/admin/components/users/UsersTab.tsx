@@ -6,7 +6,7 @@ import { UsersTable } from "./UsersTable";
 import { EditUserModal } from "./EditUserModal";
 import { DeleteUserModal } from "./DeleteUserModal";
 import { useUserManagement } from "../../hooks/useUserManagement";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Skeleton } from "@/components/ui";
 import { XCircle } from "lucide-react";
 
 export const UsersTab: React.FC = (): React.JSX.Element => {
@@ -39,7 +39,22 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
     } = useUserManagement();
 
     if (isInitialUsersLoading) {
-        return <LoadingSpinner className="py-20" />;
+        return (
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Skeleton className="h-28 rounded-2xl" />
+                    <Skeleton className="h-28 rounded-2xl" />
+                    <Skeleton className="h-28 rounded-2xl" />
+                </div>
+                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 space-y-4">
+                    <Skeleton className="h-10 w-full rounded-xl" />
+                    <Skeleton className="h-12 w-full rounded-xl" />
+                    <Skeleton className="h-12 w-full rounded-xl" />
+                    <Skeleton className="h-12 w-full rounded-xl" />
+                    <Skeleton className="h-12 w-full rounded-xl" />
+                </div>
+            </div>
+        );
     }
 
     return (

@@ -1,7 +1,6 @@
 "use client";
 
-import { LoadingSpinner } from "@/components/ui";
-import { useTitle } from "@/lib/hooks/useTitle";
+import { CreateDocsSkeleton } from "@/components/ui";
 import { useSession } from "next-auth/react";
 import { ROUTES } from "@/lib/constants";
 import { useRouter } from "next/navigation";
@@ -21,8 +20,6 @@ export default function CreateDocsClient(): React.JSX.Element | null {
     const { selectedProjectId, selectedCategory, selectedContractType } =
         useCreateDocsContext();
 
-    useTitle("เลือกเอกสารที่สร้าง | ระบบจัดการเอกสาร");
-
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push(ROUTES.SIGNIN);
@@ -30,11 +27,7 @@ export default function CreateDocsClient(): React.JSX.Element | null {
     }, [status, router]);
 
     if (status === "loading") {
-        return (
-            <div className="min-h-[50vh] flex items-center justify-center">
-                <LoadingSpinner />
-            </div>
-        );
+        return <CreateDocsSkeleton />;
     }
 
     if (status === "unauthenticated") {

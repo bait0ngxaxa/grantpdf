@@ -15,4 +15,9 @@ export {
 } from "./queries";
 
 // Mutations
-export { updateUser, deleteUser } from "./mutations";
+export {
+    updateUser,
+    deleteUser,
+    updateUserWithAudit,
+    deleteUserWithAudit,
+} from "./mutations";

@@ -128,6 +128,7 @@ export const API_ROUTES = {
     FILE_GENERATE_URL: "/api/file/generate-url",
     ADMIN_PROJECTS: "/api/admin/projects",
     ADMIN_USERS: "/api/admin/users",
+    ADMIN_AUDIT: "/api/admin/audit",
 } as const;
 
 export const TEXT_LIMITS = {
@@ -182,6 +183,18 @@ export const RATE_LIMIT = {
             ROUTE_KEY: "auth:reset-password",
             LIMIT: 5,
             WINDOW_MS: 15 * 60_000,
+        },
+    },
+    USER: {
+        PROJECT_MUTATION: {
+            ROUTE_KEY: "user:project-mutation",
+            LIMIT: 20,
+            WINDOW_MS: 60_000,
+        },
+        DOCUMENT_GENERATE: {
+            ROUTE_KEY: "user:document-generate",
+            LIMIT: 12,
+            WINDOW_MS: 60_000,
         },
     },
 } as const;

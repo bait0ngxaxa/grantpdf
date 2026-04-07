@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { useTitle } from "@/lib/hooks/useTitle";
 import {
     useDocumentForm,
     usePreviewModal,
@@ -18,7 +17,7 @@ import {
     PreviewList,
     DocumentEditorLayout,
 } from "@/app/(document)/components";
-import { LoadingSpinner } from "@/components/ui";
+import { FormSkeleton } from "@/components/ui";
 import { FileText } from "lucide-react";
 import { type ApprovalData, initialApprovalData } from "@/config/initialData";
 import { validateApproval } from "@/lib/validation";
@@ -36,8 +35,6 @@ export function ApprovalForm(): React.JSX.Element {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
     const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
-
-    useTitle("สร้างหนังสือขอนุมัติ | ระบบจัดการเอกสาร");
 
     const { isPreviewOpen, openPreview, closePreview, confirmPreview } =
         usePreviewModal();
@@ -122,7 +119,7 @@ export function ApprovalForm(): React.JSX.Element {
     });
 
     if (!isClient) {
-        return <LoadingSpinner />;
+        return <FormSkeleton />;
     }
 
     return (
