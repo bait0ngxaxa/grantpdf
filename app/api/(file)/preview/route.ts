@@ -71,7 +71,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const ownership = await resolveFileOwnership(storagePath);
         if (!ownership) {
             return NextResponse.json(
-                { error: "File not found in database" },
+                { error: "ไม่พบไฟล์" },
                 { status: 404 }
             );
         }
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             fileSize = fileStat.size;
         } catch {
             return NextResponse.json(
-                { error: "File not found on disk" },
+                { error: "ไม่พบไฟล์" },
                 { status: 404 }
             );
         }

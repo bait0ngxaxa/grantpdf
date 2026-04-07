@@ -246,10 +246,10 @@ export async function POST(
             type !== "formproject" &&
             type !== "summary"
         ) {
-            return new NextResponse("Invalid document type", {
-                status: 400,
-                headers: rateLimitResult.headers,
-            });
+            return NextResponse.json(
+                { error: "ประเภทเอกสารไม่ถูกต้อง" },
+                { status: 400, headers: rateLimitResult.headers },
+            );
         }
 
         const formData = await req.formData();

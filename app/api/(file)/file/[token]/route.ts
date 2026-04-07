@@ -104,7 +104,7 @@ export async function GET(
             fileStat = await stat(fullPath);
         } catch {
             return NextResponse.json(
-                { error: "File not found on disk" },
+                { error: "ไม่พบไฟล์" },
                 { status: 404 }
             );
         }

@@ -29,7 +29,7 @@ function validateCSRF(
         }
     }
 
-    return true;
+    return false;
 }
 
 // Route protection logic
@@ -132,9 +132,9 @@ describe("Middleware Security - CSRF Protection", () => {
             expect(result).toBe(false);
         });
 
-        it("should ALLOW when no origin/referer (same-origin tools)", () => {
+        it("should BLOCK when no origin/referer", () => {
             const result = validateCSRF(null, null, "example.com");
-            expect(result).toBe(true);
+            expect(result).toBe(false);
         });
 
         it("should ALLOW when host is missing", () => {

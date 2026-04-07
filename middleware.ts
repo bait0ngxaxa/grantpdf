@@ -60,9 +60,9 @@ function validateCSRF(req: NextRequest): boolean {
         }
     }
 
-    // ถ้าไม่มีทั้ง origin และ referer อาจเป็น request จาก same-origin
-    // หรือ tools เช่น Postman - ให้ผ่าน (เพราะมี auth check อยู่แล้ว)
-    return true;
+    // Policy เข้ม: ถ้าไม่มีทั้ง origin และ referer ให้บล็อก
+    // เพื่อลดความเสี่ยง CSRF สำหรับ production mutation endpoints
+    return false;
 }
 
 export async function middleware(

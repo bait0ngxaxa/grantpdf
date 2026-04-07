@@ -3,14 +3,9 @@ import type { ProjectResult } from "./types";
 
 export function handleDocumentError(error: unknown): NextResponse {
     console.error("Error generating document:", error);
-
-    let errorMessage = "Internal Server Error";
-    if (error && typeof error === "object" && "properties" in error) {
-        errorMessage =
-            "Docxtemplater template error. Please check your template file placeholders.";
-    }
-
-    return new NextResponse(errorMessage, { status: 500 });
+    return new NextResponse("ไม่สามารถสร้างเอกสารได้ กรุณาลองใหม่อีกครั้ง", {
+        status: 500,
+    });
 }
 
 export function buildSuccessResponse(

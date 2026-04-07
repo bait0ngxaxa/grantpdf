@@ -46,7 +46,7 @@ export async function handleSummaryGeneration(
     if (!fs.existsSync(templatePath)) {
         return NextResponse.json(
             {
-                error: "Template file not found at public/summary.xlsx. Please ensure the template is in .xlsx format (not .xls)",
+                error: "ไม่พบไฟล์แม่แบบเอกสาร",
             },
             { status: 404 },
         );
@@ -58,7 +58,7 @@ export async function handleSummaryGeneration(
     const worksheet = workbook.getWorksheet(1);
     if (!worksheet) {
         return NextResponse.json(
-            { error: "No worksheet found in template" },
+            { error: "ไม่สามารถอ่านไฟล์แม่แบบเอกสารได้" },
             { status: 400 },
         );
     }
