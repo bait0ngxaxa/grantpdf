@@ -15,9 +15,22 @@ export async function saveDocumentToStorage(
     extension: string = "docx",
     persistRecord?: PersistRecordCallback,
 ): Promise<DocumentSaveResult> {
-    const fileNameWithExt = fileName.endsWith(`.${extension}`)
-        ? fileName
-        : `${fileName}.${extension}`;
+    const trimmedFileName = fileName.trim();
+    const normalizedExtension = extension.trim().replace(/^\./, "").toLowerCase();
+
+    if (!trimmedFileName) {
+        throw new Error("DOCUMENT_FILE_NAME_REQUIRED");
+    }
+
+    if (!/^[a-z0-9]+$/.test(normalizedExtension)) {
+        throw new Error("DOCUMENT_EXTENSION_INVALID");
+    }
+
+    const fileNameWithExt = trimmedFileName
+        .toLowerCase()
+        .endsWith(`.${normalizedExtension}`)
+        ? trimmedFileName
+        : `${trimmedFileName}.${normalizedExtension}`;
 
     const uniqueFileName = generateUniqueFilename(fileNameWithExt);
     const tempFileName = `tmp_${Date.now()}_${uniqueFileName}`;

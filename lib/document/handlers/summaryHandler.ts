@@ -36,9 +36,10 @@ export async function handleSummaryGeneration(
     const funds = formData.get("funds") as string;
 
     if (!projectName) {
-        return new NextResponse("Project name is required", {
-            status: 400,
-        });
+        return NextResponse.json(
+            { error: "กรุณาระบุชื่อโครงการ" },
+            { status: 400 },
+        );
     }
 
     // Load Excel template
@@ -140,19 +141,6 @@ export async function handleSummaryGeneration(
                             }
                         },
                     );
-                }
-                if (
-                    "formula" in cell.value &&
-                    typeof cell.value.formula === "string"
-                ) {
-                    const originalFormula = cell.value.formula;
-                    const newFormula = replacePlaceholders(
-                        originalFormula,
-                        templateData,
-                    );
-                    if (originalFormula !== newFormula) {
-                        cell.value = { ...cell.value, formula: newFormula };
-                    }
                 }
             }
         });

@@ -67,7 +67,7 @@ function ResetPasswordForm(): React.JSX.Element {
             const data = await res.json();
 
             if (res.ok) {
-                toast.success("สำเร็จ!", {
+                toast.success("รีเซ็ตรหัสผ่านสำเร็จ", {
                     description: data.message || "รีเซ็ตรหัสผ่านสำเร็จ! กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่",
                 });
                 setTimeout(() => {

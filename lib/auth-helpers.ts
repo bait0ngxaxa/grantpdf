@@ -27,14 +27,14 @@ export async function requireAdminSession(): Promise<
 
     if (!session?.user?.id) {
         return NextResponse.json(
-            { error: "Unauthorized" },
+            { error: "กรุณาเข้าสู่ระบบ" },
             { status: 401 },
         );
     }
 
     if (session.user.role !== ROLES.ADMIN) {
         return NextResponse.json(
-            { error: "Forbidden - Admin access required" },
+            { error: "ไม่มีสิทธิ์เข้าถึง: สำหรับผู้ดูแลระบบเท่านั้น" },
             { status: 403 },
         );
     }

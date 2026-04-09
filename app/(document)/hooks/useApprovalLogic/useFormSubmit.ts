@@ -158,8 +158,12 @@ export function useFormSubmit({
                     );
                     setIsError(true);
                 }
-            } catch {
-                setMessage("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+            } catch (error: unknown) {
+                setMessage(
+                    error instanceof Error
+                        ? error.message
+                        : "เกิดข้อผิดพลาดในการเชื่อมต่อ",
+                );
                 setIsError(true);
             } finally {
                 setIsSubmitting(false);

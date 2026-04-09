@@ -160,6 +160,7 @@ export const FILE_UPLOAD = {
         ".txt": 1,
     },
     DEFAULT_MAX_SIZE_MB: 3,
+    TIMEOUT_MS: 60_000,
 } as const;
 
 export const RATE_LIMIT = {

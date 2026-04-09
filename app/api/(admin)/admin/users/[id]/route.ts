@@ -30,7 +30,7 @@ export async function PUT(
         const { isAdmin, session } = await checkAdminPermission();
 
         if (!isAdmin || !session) {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+            return NextResponse.json({ error: "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้" }, { status: 403 });
         }
 
         const awaitParams = await params;
@@ -40,7 +40,7 @@ export async function PUT(
 
         if (parsedUserId === null) {
             return NextResponse.json(
-                { error: "Invalid user id" },
+                { error: "รหัสผู้ใช้งานไม่ถูกต้อง" },
                 { status: 400 },
             );
         }
@@ -103,7 +103,7 @@ export async function DELETE(
         const { isAdmin, session } = await checkAdminPermission();
 
         if (!isAdmin || !session) {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+            return NextResponse.json({ error: "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้" }, { status: 403 });
         }
 
         const awaitParams = await params;
@@ -112,7 +112,7 @@ export async function DELETE(
 
         if (parsedUserId === null) {
             return NextResponse.json(
-                { error: "Invalid user id" },
+                { error: "รหัสผู้ใช้งานไม่ถูกต้อง" },
                 { status: 400 },
             );
         }

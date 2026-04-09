@@ -17,7 +17,7 @@ export async function DELETE(
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
@@ -32,7 +32,7 @@ export async function DELETE(
 
         if (!document) {
             return NextResponse.json(
-                { error: "Document not found" },
+                { error: "ไม่พบเอกสาร" },
                 { status: 404 }
             );
         }
@@ -40,7 +40,7 @@ export async function DELETE(
         // User can only delete their own files
         if (document.userId !== session.user.id) {
             return NextResponse.json(
-                { error: "Permission denied" },
+                { error: "ไม่มีสิทธิ์ลบเอกสารนี้" },
                 { status: 403 }
             );
         }
@@ -69,7 +69,7 @@ export async function DELETE(
         return NextResponse.json(
             {
                 success: true,
-                message: "Document deleted successfully",
+                message: "ลบเอกสารสำเร็จ",
                 deletedDocument: {
                     id: document.id,
                     fileName: document.originalFileName,
@@ -79,7 +79,7 @@ export async function DELETE(
         );
     } catch (error: unknown) {
         console.error("Error deleting document:", error);
-        const mappedError = toPublicApiError(error, "Failed to delete document");
+        const mappedError = toPublicApiError(error, "ไม่สามารถลบเอกสารได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

@@ -99,9 +99,9 @@ export default function SigninClient(): React.JSX.Element {
             }
         } catch (err) {
             console.error("An unexpected error occurred:", err);
-            setError("เกิดข้อผิดพลาดบางอย่าง กรุณาลองใหม่อีกครั้ง");
-            toast.error("เกิดข้อผิดพลาด", {
-                description: "กรุณาลองใหม่อีกครั้ง",
+            setError("ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
+            toast.error("เข้าสู่ระบบไม่สำเร็จ", {
+                description: "ไม่สามารถเชื่อมต่อกับระบบได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
             setIsLoading(false);

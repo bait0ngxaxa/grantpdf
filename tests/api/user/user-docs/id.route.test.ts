@@ -69,7 +69,7 @@ describe("user-docs [id] route DELETE", () => {
         const body = await response.json();
 
         expect(response.status).toBe(401);
-        expect(body).toEqual({ error: "Unauthorized" });
+        expect(body).toEqual({ error: "กรุณาเข้าสู่ระบบ" });
         expect(mockedGetFileForDeletion).not.toHaveBeenCalled();
     });
 
@@ -90,7 +90,7 @@ describe("user-docs [id] route DELETE", () => {
         const body = await response.json();
 
         expect(response.status).toBe(403);
-        expect(body).toEqual({ error: "Permission denied" });
+        expect(body).toEqual({ error: "ไม่มีสิทธิ์ลบเอกสารนี้" });
         expect(mockedDeleteFileRecord).not.toHaveBeenCalled();
     });
 

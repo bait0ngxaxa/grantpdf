@@ -23,6 +23,19 @@ export const useProjectStatusActions = (): {
 
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
+    const getErrorMessage = (data: unknown, fallback: string): string => {
+        if (
+            typeof data === "object" &&
+            data !== null &&
+            "error" in data &&
+            typeof (data as { error?: unknown }).error === "string"
+        ) {
+            return (data as { error: string }).error;
+        }
+
+        return fallback;
+    };
+
     // Open status modal
     const openStatusModal = (project: AdminProject): void => {
         setSelectedProjectForStatus(project);
@@ -58,7 +71,13 @@ export const useProjectStatusActions = (): {
             });
 
             if (!response.ok) {
-                throw new Error("ไม่สามารถอัปเดตสถานะโครงการได้");
+                const data: unknown = await response.json().catch(() => null);
+                throw new Error(
+                    getErrorMessage(
+                        data,
+                        "ไม่สามารถอัปเดตสถานะโครงการได้ กรุณาลองใหม่อีกครั้ง",
+                    ),
+                );
             }
 
             const result = await response.json();
@@ -68,10 +87,13 @@ export const useProjectStatusActions = (): {
             closeStatusModal();
 
             toast.success(result.message || "อัปเดตสถานะโครงการสำเร็จแล้ว");
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Failed to update project status:", error);
-            toast.error("เกิดข้อผิดพลาด", {
-                description: "เกิดข้อผิดพลาดในการอัปเดตสถานะโครงการ กรุณาลองใหม่อีกครั้ง"
+            toast.error("อัปเดตสถานะโครงการไม่สำเร็จ", {
+                description:
+                    error instanceof Error
+                        ? error.message
+                        : "ไม่สามารถอัปเดตสถานะโครงการได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
             setIsUpdatingStatus(false);

@@ -81,7 +81,7 @@ describe("admin users [id] route", () => {
                 const body = await response.json();
 
                 expect(response.status).toBe(400);
-                expect(body).toEqual({ error: "Invalid user id" });
+                expect(body).toEqual({ error: "รหัสผู้ใช้งานไม่ถูกต้อง" });
                 expect(mockedUpdateUserWithAudit).not.toHaveBeenCalled();
             },
         );
@@ -218,7 +218,7 @@ describe("admin users [id] route", () => {
                 const body = await response.json();
 
                 expect(response.status).toBe(400);
-                expect(body).toEqual({ error: "Invalid user id" });
+                expect(body).toEqual({ error: "รหัสผู้ใช้งานไม่ถูกต้อง" });
                 expect(mockedDeleteUserWithAudit).not.toHaveBeenCalled();
             },
         );

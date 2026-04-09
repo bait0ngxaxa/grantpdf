@@ -16,7 +16,7 @@ export async function GET(
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
@@ -28,7 +28,7 @@ export async function GET(
         }
         const sessionUserId = parsePositiveIntId(session.user.id);
         if (sessionUserId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
 
         const attachment = await prisma.attachmentFile.findUnique({
@@ -44,14 +44,14 @@ export async function GET(
 
         if (!attachment) {
             return NextResponse.json(
-                { error: "Attachment not found" },
+                { error: "ไม่พบไฟล์แนบ" },
                 { status: 404 }
             );
         }
 
         if (attachment.userFile.userId !== sessionUserId) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "ไม่มีสิทธิ์เข้าถึงไฟล์แนบนี้" },
                 { status: 403 }
             );
         }
@@ -84,7 +84,7 @@ export async function GET(
         });
     } catch (error) {
         console.error("Error downloading attachment:", error);
-        const mappedError = toPublicApiError(error, "Failed to download attachment");
+        const mappedError = toPublicApiError(error, "ไม่สามารถดาวน์โหลดไฟล์แนบได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

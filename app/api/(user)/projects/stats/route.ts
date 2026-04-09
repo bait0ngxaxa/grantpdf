@@ -10,14 +10,14 @@ export async function GET(): Promise<NextResponse> {
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 },
             );
         }
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
         const stats = await getUserProjectStats(userId);
 
@@ -29,7 +29,7 @@ export async function GET(): Promise<NextResponse> {
         });
     } catch (error) {
         console.error("Error fetching user project stats:", error);
-        const mappedError = toPublicApiError(error, "Failed to fetch user project stats");
+        const mappedError = toPublicApiError(error, "ไม่สามารถดึงข้อมูลสถิติโครงการได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status },

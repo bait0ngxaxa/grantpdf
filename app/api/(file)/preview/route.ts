@@ -53,7 +53,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const session = await auth();
         if (!session?.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const storagePath = req.nextUrl.searchParams.get("path");
         if (!storagePath || !isValidStoragePath(storagePath)) {
             return NextResponse.json(
-                { error: "Invalid or missing storage path" },
+                { error: "พาธไฟล์ไม่ถูกต้องหรือไม่ได้ระบุพาธไฟล์" },
                 { status: 400 }
             );
         }
@@ -79,14 +79,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         // 4. Permission check — must be owner or admin
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
         const isOwner = ownership.ownerId === userId;
         const isAdmin = session.user.role === ROLES.ADMIN;
 
         if (!isOwner && !isAdmin) {
             return NextResponse.json(
-                { error: "Forbidden" },
+                { error: "ไม่มีสิทธิ์เข้าถึงไฟล์นี้" },
                 { status: 403 }
             );
         }
@@ -135,7 +135,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         });
     } catch (error: unknown) {
         console.error("Error previewing file:", error);
-        const mappedError = toPublicApiError(error, "Failed to preview file");
+        const mappedError = toPublicApiError(error, "ไม่สามารถแสดงตัวอย่างไฟล์ได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

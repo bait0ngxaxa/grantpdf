@@ -42,8 +42,15 @@ export function useSignedDownload(): UseSignedDownloadReturn {
                 });
 
                 if (!response.ok) {
-                    const data = await response.json();
-                    throw new Error(data.error || "Failed to get download URL");
+                    const data: unknown = await response.json().catch(() => null);
+                    const message =
+                        typeof data === "object" &&
+                        data !== null &&
+                        "error" in data &&
+                        typeof (data as { error?: unknown }).error === "string"
+                            ? (data as { error: string }).error
+                            : "ไม่สามารถสร้างลิงก์ดาวน์โหลดได้";
+                    throw new Error(message);
                 }
 
                 const { signedUrl } = await response.json();
@@ -52,7 +59,9 @@ export function useSignedDownload(): UseSignedDownloadReturn {
                 window.open(signedUrl, "_blank");
             } catch (err) {
                 const message =
-                    err instanceof Error ? err.message : "Download failed";
+                    err instanceof Error
+                        ? err.message
+                        : "ไม่สามารถดาวน์โหลดไฟล์ได้";
                 setError(message);
                 console.error("Download error:", err);
             } finally {
@@ -81,8 +90,15 @@ export async function downloadWithSignedUrl(
     });
 
     if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to get download URL");
+        const data: unknown = await response.json().catch(() => null);
+        const message =
+            typeof data === "object" &&
+            data !== null &&
+            "error" in data &&
+            typeof (data as { error?: unknown }).error === "string"
+                ? (data as { error: string }).error
+                : "ไม่สามารถสร้างลิงก์ดาวน์โหลดได้";
+        throw new Error(message);
     }
 
     const { signedUrl } = await response.json();

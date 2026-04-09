@@ -31,14 +31,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
         const { searchParams } = new URL(req.url);
         const hasPaginationParams =
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching projects:", error);
-        const mappedError = toPublicApiError(error, "Failed to fetch projects");
+        const mappedError = toPublicApiError(error, "ไม่สามารถดึงข้อมูลโครงการได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }
@@ -92,7 +92,7 @@ export async function POST(req: Request): Promise<NextResponse> {
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401, headers: rateLimitResult.headers },
             );
         }
@@ -108,7 +108,7 @@ export async function POST(req: Request): Promise<NextResponse> {
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
 
         const safeDescription = description && description.trim() !== "" ? description : undefined;
@@ -128,7 +128,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         return NextResponse.json(project, { headers: rateLimitResult.headers });
     } catch (error) {
         console.error("Error creating project:", error);
-        const mappedError = toPublicApiError(error, "Failed to create project");
+        const mappedError = toPublicApiError(error, "ไม่สามารถสร้างโครงการได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

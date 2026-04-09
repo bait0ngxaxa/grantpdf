@@ -24,7 +24,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         if (!rateLimitResult.success) {
             return NextResponse.json(
                 {
-                    error: "Too many requests. Please try again later.",
+                    error: "มีการร้องขอมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
                     retryAfter: rateLimitResult.retryAfter,
                 },
                 {

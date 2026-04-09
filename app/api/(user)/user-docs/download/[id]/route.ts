@@ -15,7 +15,7 @@ export async function GET(
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
@@ -27,7 +27,7 @@ export async function GET(
         }
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
 
         const file = await prisma.userFile.findFirst({
@@ -41,7 +41,7 @@ export async function GET(
 
         if (!file) {
             return NextResponse.json(
-                { error: "File not found" },
+                { error: "ไม่พบไฟล์" },
                 { status: 404 }
             );
         }
@@ -72,7 +72,7 @@ export async function GET(
         });
     } catch (error: unknown) {
         console.error("Error downloading file:", error);
-        const mappedError = toPublicApiError(error, "Failed to download file");
+        const mappedError = toPublicApiError(error, "ไม่สามารถดาวน์โหลดไฟล์ได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

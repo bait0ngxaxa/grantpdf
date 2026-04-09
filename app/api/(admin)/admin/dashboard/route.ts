@@ -14,7 +14,7 @@ export async function GET(): Promise<NextResponse> {
     } catch (error) {
         console.error("Error fetching all documents:", error);
         return NextResponse.json(
-            { error: "Failed to fetch all documents" },
+            { error: "ไม่สามารถดึงข้อมูลเอกสารทั้งหมดได้" },
             { status: 500 },
         );
     }

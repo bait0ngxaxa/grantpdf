@@ -13,8 +13,18 @@ services:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
       --default-authentication-plugin=caching_sha2_password
-      --max-connections=150
-      --innodb-buffer-pool-size=512M
+      --max-connections=200
+      --innodb-buffer-pool-size=2G
+      --innodb-log-file-size=256M
+      --innodb-flush-log-at-trx-commit=2
+      --innodb-flush-method=O_DIRECT
+      --innodb-buffer-pool-instances=2
+      --thread-cache-size=16
+      --table-open-cache=2000
+      --tmp-table-size=64M
+      --max-heap-table-size=64M
+      --slow-query-log=1
+      --long-query-time=2
     ports:
       - "127.0.0.1:3307:3306"
     volumes:
@@ -30,11 +40,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: 2G
+          cpus: "1.5"
+          memory: 3584M
         reservations:
           cpus: "0.25"
-          memory: 512M
+          memory: 1G
     security_opt:
       - no-new-privileges:true
     logging:

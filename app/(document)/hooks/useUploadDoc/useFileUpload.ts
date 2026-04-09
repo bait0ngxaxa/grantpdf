@@ -2,6 +2,13 @@
 
 import { useCallback } from "react";
 import { type FileUploadProps } from "./types";
+import {
+    fetchWithUploadTimeout,
+    isUploadTimeoutError,
+} from "../uploadRequest";
+
+const UPLOAD_TIMEOUT_MESSAGE =
+    "อัปโหลดไฟล์ไม่สำเร็จภายในเวลาที่กำหนด กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง";
 
 export function useFileUpload({
     selectedFile,
@@ -33,7 +40,7 @@ export function useFileUpload({
             formData.append("file", selectedFile);
             formData.append("projectId", selectedProjectId);
 
-            const response = await fetch("/api/file-upload", {
+            const response = await fetchWithUploadTimeout("/api/file-upload", {
                 method: "POST",
                 body: formData,
             });
@@ -53,7 +60,11 @@ export function useFileUpload({
             }
         } catch (error) {
             console.error("Upload error:", error);
-            setUploadMessage("เกิดข้อผิดพลาดในการอัพโหลด");
+            setUploadMessage(
+                isUploadTimeoutError(error)
+                    ? UPLOAD_TIMEOUT_MESSAGE
+                    : "เกิดข้อผิดพลาดในการอัพโหลด",
+            );
             setUploadSuccess(false);
         } finally {
             setIsUploading(false);

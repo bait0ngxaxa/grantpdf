@@ -50,7 +50,7 @@ export async function PUT(
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401, headers: rateLimitResult.headers },
             );
         }
@@ -71,7 +71,7 @@ export async function PUT(
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
 
         const updatedProject = await updateProjectWithAudit(
@@ -95,7 +95,7 @@ export async function PUT(
     } catch (error) {
         if (error instanceof Error && error.message === "PROJECT_NOT_FOUND") {
             return NextResponse.json(
-                { error: "Project not found" },
+                { error: "ไม่พบโครงการ" },
                 { status: 404 },
             );
         }
@@ -107,7 +107,7 @@ export async function PUT(
         }
 
         console.error("Error updating project:", error);
-        const mappedError = toPublicApiError(error, "Failed to update project");
+        const mappedError = toPublicApiError(error, "ไม่สามารถอัปเดตโครงการได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }
@@ -142,7 +142,7 @@ export async function DELETE(
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401, headers: rateLimitResult.headers },
             );
         }
@@ -155,7 +155,7 @@ export async function DELETE(
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
 
         await deleteProjectWithAudit(projectId, userId, {
@@ -167,19 +167,19 @@ export async function DELETE(
         });
 
         return NextResponse.json(
-            { message: "Project deleted successfully" },
+            { message: "ลบโครงการสำเร็จ" },
             { headers: rateLimitResult.headers },
         );
     } catch (error) {
         if (error instanceof Error && error.message === "PROJECT_NOT_FOUND") {
             return NextResponse.json(
-                { error: "Project not found" },
+                { error: "ไม่พบโครงการ" },
                 { status: 404 },
             );
         }
 
         console.error("Error deleting project:", error);
-        const mappedError = toPublicApiError(error, "Failed to delete project");
+        const mappedError = toPublicApiError(error, "ไม่สามารถลบโครงการได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

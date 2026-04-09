@@ -12,6 +12,49 @@ import { NextResponse } from "next/server";
 import { formatNumericWithCommas } from "@/lib/utils";
 import { normalizePhoneNumber } from "@/lib/validation/schemas";
 
+function parseActivitiesData(
+    raw: FormDataEntryValue | null,
+): Record<string, unknown>[] | NextResponse {
+    if (raw === null || raw === "") return [];
+
+    if (typeof raw !== "string") {
+        return NextResponse.json(
+            { error: "ข้อมูลกิจกรรมไม่ถูกต้อง" },
+            { status: 400 },
+        );
+    }
+
+    let parsed: unknown;
+    try {
+        parsed = JSON.parse(raw);
+    } catch {
+        return NextResponse.json(
+            { error: "ข้อมูลกิจกรรมไม่ถูกต้อง" },
+            { status: 400 },
+        );
+    }
+
+    if (!Array.isArray(parsed)) {
+        return NextResponse.json(
+            { error: "ข้อมูลกิจกรรมต้องเป็นรายการ" },
+            { status: 400 },
+        );
+    }
+
+    const hasInvalidItem = parsed.some(
+        (item) =>
+            typeof item !== "object" || item === null || Array.isArray(item),
+    );
+    if (hasInvalidItem) {
+        return NextResponse.json(
+            { error: "รายการกิจกรรมไม่ถูกต้อง" },
+            { status: 400 },
+        );
+    }
+
+    return parsed as Record<string, unknown>[];
+}
+
 export async function handleTorGeneration(
     formData: FormData,
     userId: number,
@@ -36,21 +79,15 @@ export async function handleTorGeneration(
     const fileName = formData.get("fileName") as string;
 
     if (!projectName) {
-        return new NextResponse("Project name is required.", {
-            status: 400,
-        });
+        return NextResponse.json(
+            { error: "กรุณาระบุชื่อโครงการ" },
+            { status: 400 },
+        );
     }
 
-    // Parse activities data
-    const activitiesData = formData.get("activities") as string;
-    let activities: Record<string, unknown>[] = [];
-    if (activitiesData) {
-        try {
-            activities = JSON.parse(activitiesData);
-        } catch (error) {
-            console.error("Error parsing activities data:", error);
-            activities = [];
-        }
+    const activities = parseActivitiesData(formData.get("activities"));
+    if (activities instanceof NextResponse) {
+        return activities;
     }
 
     // Load template

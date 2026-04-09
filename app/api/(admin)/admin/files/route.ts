@@ -24,7 +24,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     } catch (error) {
         console.error("Error fetching admin files:", error);
         return NextResponse.json(
-            { error: "Failed to fetch files" },
+            { error: "ไม่สามารถดึงข้อมูลไฟล์ได้" },
             { status: 500 },
         );
     }

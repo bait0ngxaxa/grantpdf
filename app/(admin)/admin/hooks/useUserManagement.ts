@@ -173,8 +173,15 @@ export function useUserManagement(): UserManagementHook {
                 );
 
                 if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || "Failed to update user");
+                    const errorData: unknown = await res.json().catch(() => null);
+                    const message =
+                        typeof errorData === "object" &&
+                        errorData !== null &&
+                        "error" in errorData &&
+                        typeof (errorData as { error?: unknown }).error === "string"
+                            ? (errorData as { error: string }).error
+                            : "ไม่สามารถอัปเดตผู้ใช้งานได้ กรุณาลองใหม่อีกครั้ง";
+                    throw new Error(message);
                 }
 
                 await mutate();
@@ -184,10 +191,10 @@ export function useUserManagement(): UserManagementHook {
             } catch (error: unknown) {
                 console.error("Failed to update user:", error);
 
-                toast.error("ข้อผิดพลาด", {
+                toast.error("อัปเดตผู้ใช้งานไม่สำเร็จ", {
                     description: error instanceof Error
                         ? error.message
-                        : "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้"
+                        : "ไม่สามารถอัปเดตผู้ใช้งานได้ กรุณาลองใหม่อีกครั้ง",
                 });
             } finally {
                 setIsSaving(false);
@@ -219,8 +226,15 @@ export function useUserManagement(): UserManagementHook {
             );
 
             if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || "Failed to delete user");
+                const errorData: unknown = await res.json().catch(() => null);
+                const message =
+                    typeof errorData === "object" &&
+                    errorData !== null &&
+                    "error" in errorData &&
+                    typeof (errorData as { error?: unknown }).error === "string"
+                        ? (errorData as { error: string }).error
+                        : "ไม่สามารถลบผู้ใช้งานได้ กรุณาลองใหม่อีกครั้ง";
+                throw new Error(message);
             }
 
             await mutate();
@@ -230,10 +244,10 @@ export function useUserManagement(): UserManagementHook {
         } catch (error: unknown) {
             console.error("Failed to delete user:", error);
 
-            toast.error("ข้อผิดพลาด", {
+            toast.error("ลบผู้ใช้งานไม่สำเร็จ", {
                 description: error instanceof Error
                     ? error.message
-                    : "เกิดข้อผิดพลาดในการลบผู้ใช้"
+                    : "ไม่สามารถลบผู้ใช้งานได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
             setIsDeleting(false);

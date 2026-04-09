@@ -24,7 +24,7 @@ export async function GET(
 
         if (!verification.valid || !verification.payload) {
             return NextResponse.json(
-                { error: "Invalid or expired token" },
+                { error: "ลิงก์ดาวน์โหลดไม่ถูกต้องหรือหมดอายุแล้ว" },
                 { status: 401 }
             );
         }
@@ -76,7 +76,7 @@ export async function GET(
 
         if (!file) {
             return NextResponse.json(
-                { error: "File not found" },
+                { error: "ไม่พบไฟล์" },
                 { status: 404 }
             );
         }
@@ -91,7 +91,7 @@ export async function GET(
 
         if (!isOwner && !isAdmin && !isTokenUser) {
             return NextResponse.json(
-                { error: "Access denied" },
+                { error: "ไม่มีสิทธิ์เข้าถึงไฟล์นี้" },
                 { status: 403 }
             );
         }
@@ -152,7 +152,7 @@ export async function GET(
         });
     } catch (error: unknown) {
         console.error("Error downloading file:", error);
-        const mappedError = toPublicApiError(error, "Failed to download file");
+        const mappedError = toPublicApiError(error, "ไม่สามารถดาวน์โหลดไฟล์ได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

@@ -17,7 +17,7 @@ export async function GET(): Promise<NextResponse> {
     } catch (error) {
         console.error("Error fetching admin stats:", error);
         return NextResponse.json(
-            { error: "Failed to fetch admin stats" },
+            { error: "ไม่สามารถดึงข้อมูลสถิติผู้ดูแลระบบได้" },
             { status: 500 },
         );
     }

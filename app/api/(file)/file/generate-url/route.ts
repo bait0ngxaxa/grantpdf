@@ -13,14 +13,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
 
         const sessionUserId = parsePositiveIntId(session.user.id);
         if (sessionUserId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
 
         const body: unknown = await req.json();
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
             if (!file) {
                 return NextResponse.json(
-                    { error: "File not found" },
+                    { error: "ไม่พบไฟล์" },
                     { status: 404 }
                 );
             }
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             // Only owner or admin can generate URL
             if (file.userId !== sessionUserId && !isAdmin) {
                 return NextResponse.json(
-                    { error: "Access denied" },
+                    { error: "ไม่มีสิทธิ์เข้าถึงไฟล์นี้" },
                     { status: 403 }
                 );
             }
@@ -66,14 +66,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
             if (!attachment) {
                 return NextResponse.json(
-                    { error: "Attachment not found" },
+                    { error: "ไม่พบไฟล์แนบ" },
                     { status: 404 }
                 );
             }
 
             if (attachment.userFile.userId !== sessionUserId && !isAdmin) {
                 return NextResponse.json(
-                    { error: "Access denied" },
+                    { error: "ไม่มีสิทธิ์เข้าถึงไฟล์แนบนี้" },
                     { status: 403 }
                 );
             }
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         });
     } catch (error) {
         console.error("Error generating signed URL:", error);
-        const mappedError = toPublicApiError(error, "Failed to generate signed URL");
+        const mappedError = toPublicApiError(error, "ไม่สามารถสร้างลิงก์ดาวน์โหลดได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

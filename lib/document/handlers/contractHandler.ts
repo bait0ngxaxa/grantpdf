@@ -47,9 +47,10 @@ export async function handleContractGeneration(
     const witness = formData.get("witness") as string;
 
     if (!projectName) {
-        return new NextResponse("Project name is required.", {
-            status: 400,
-        });
+        return NextResponse.json(
+            { error: "กรุณาระบุชื่อโครงการ" },
+            { status: 400 },
+        );
     }
 
     // Handle contract number generation for specific types

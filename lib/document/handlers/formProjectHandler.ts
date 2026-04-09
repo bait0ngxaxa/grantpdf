@@ -35,9 +35,10 @@ export async function handleFormProjectGeneration(
     const author = formData.get("author") as string;
 
     if (!projectName) {
-        return new NextResponse("Project name is required.", {
-            status: 400,
-        });
+        return NextResponse.json(
+            { error: "กรุณาระบุชื่อโครงการ" },
+            { status: 400 },
+        );
     }
 
     // Load template

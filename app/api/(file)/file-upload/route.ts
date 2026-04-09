@@ -43,7 +43,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const session = await auth();
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
@@ -54,14 +54,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         if (!(fileEntry instanceof File)) {
             return NextResponse.json(
-                { error: "No file provided" },
+                { error: "กรุณาเลือกไฟล์ที่ต้องการอัปโหลด" },
                 { status: 400 }
             );
         }
 
         if (typeof projectIdEntry !== "string") {
             return NextResponse.json(
-                { error: "Project ID is required" },
+                { error: "กรุณาระบุรหัสโครงการ" },
                 { status: 400 }
             );
         }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const projectId = parsePositiveIntId(projectIdEntry);
         if (projectId === null) {
             return NextResponse.json(
-                { error: "Project ID is invalid" },
+                { error: "รหัสโครงการไม่ถูกต้อง" },
                 { status: 400 }
             );
         }
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         if (!project) {
             return NextResponse.json(
-                { error: "Project not found or you don't have permission" },
+                { error: "ไม่พบโครงการหรือคุณไม่มีสิทธิ์เข้าถึง" },
                 { status: 404 }
             );
         }
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             return NextResponse.json(
                 {
                     error:
-                        "File type not supported. Allowed: " +
+                        "ไม่รองรับประเภทไฟล์นี้ รองรับเฉพาะ: " +
                         allowedExtensions.join(", "),
                 },
                 { status: 400 }
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         if (file.size > maxSizeBytes) {
             return NextResponse.json(
                 {
-                    error: `File size too large (max ${maxSizeMb}MB)`,
+                    error: `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${maxSizeMb}MB)`,
                 },
                 { status: 400 }
             );
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         if (!mimeValidation.valid) {
             return NextResponse.json(
                 {
-                    error: mimeValidation.error || "Invalid file type",
+                    error: mimeValidation.error || "ประเภทไฟล์ไม่ถูกต้อง",
                     detectedMime: mimeValidation.detectedMime,
                 },
                 { status: 400 }
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         return NextResponse.json({
             success: true,
-            message: "File uploaded successfully",
+            message: "อัปโหลดไฟล์สำเร็จ",
             file: {
                 id: userFile.id.toString(),
                 originalFileName: userFile.originalFileName,
@@ -221,7 +221,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         });
     } catch (error) {
         console.error("File upload error:", error);
-        const mappedError = toPublicApiError(error, "Failed to upload file");
+        const mappedError = toPublicApiError(error, "ไม่สามารถอัปโหลดไฟล์ได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

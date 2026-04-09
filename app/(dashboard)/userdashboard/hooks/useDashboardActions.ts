@@ -49,6 +49,19 @@ export function useDashboardActions(params: DashboardActionsParams) {
     const [isCreatingProject, setIsCreatingProject] = useState(false);
     const [isUpdatingProject, setIsUpdatingProject] = useState(false);
 
+    const getApiErrorMessage = (data: unknown, fallback: string): string => {
+        if (
+            typeof data === "object" &&
+            data !== null &&
+            "error" in data &&
+            typeof (data as { error?: unknown }).error === "string"
+        ) {
+            return (data as { error: string }).error;
+        }
+
+        return fallback;
+    };
+
     // Delete file action
     const onConfirmDeleteFile = useCallback(async () => {
         if (!fileToDelete) return;
@@ -58,14 +71,25 @@ export function useDashboardActions(params: DashboardActionsParams) {
             const res = await fetch(`${API_ROUTES.USER_DOCS}/${fileToDelete}`, {
                 method: "DELETE",
             });
-            if (!res.ok) throw new Error("Failed to delete file");
+            if (!res.ok) {
+                const data: unknown = await res.json().catch(() => null);
+                throw new Error(
+                    getApiErrorMessage(
+                        data,
+                        "ไม่สามารถลบไฟล์ได้ กรุณาลองใหม่อีกครั้ง",
+                    ),
+                );
+            }
 
             await fetchUserData(); // Revalidate
             toast.success("ลบไฟล์สำเร็จ");
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error deleting file:", err);
-            toast.error("เกิดข้อผิดพลาด", {
-                description: "เกิดข้อผิดพลาดในการลบไฟล์ กรุณาลองใหม่อีกครั้ง"
+            toast.error("ลบไฟล์ไม่สำเร็จ", {
+                description:
+                    err instanceof Error
+                        ? err.message
+                        : "ไม่สามารถลบไฟล์ได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
             setFileToDelete(null);
@@ -89,14 +113,25 @@ export function useDashboardActions(params: DashboardActionsParams) {
                     method: "DELETE",
                 },
             );
-            if (!res.ok) throw new Error("Failed to delete project");
+            if (!res.ok) {
+                const data: unknown = await res.json().catch(() => null);
+                throw new Error(
+                    getApiErrorMessage(
+                        data,
+                        "ไม่สามารถลบโครงการได้ กรุณาลองใหม่อีกครั้ง",
+                    ),
+                );
+            }
 
             await fetchUserData(); // Revalidate
             toast.success("ลบโครงการสำเร็จ");
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error deleting project:", err);
-            toast.error("เกิดข้อผิดพลาด", {
-                description: "เกิดข้อผิดพลาดในการลบโครงการ กรุณาลองใหม่อีกครั้ง"
+            toast.error("ลบโครงการไม่สำเร็จ", {
+                description:
+                    err instanceof Error
+                        ? err.message
+                        : "ไม่สามารถลบโครงการได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
             setProjectToDelete(null);
@@ -125,7 +160,15 @@ export function useDashboardActions(params: DashboardActionsParams) {
                     }),
                 },
             );
-            if (!res.ok) throw new Error("Failed to update project");
+            if (!res.ok) {
+                const data: unknown = await res.json().catch(() => null);
+                throw new Error(
+                    getApiErrorMessage(
+                        data,
+                        "ไม่สามารถอัปเดตโครงการได้ กรุณาลองใหม่อีกครั้ง",
+                    ),
+                );
+            }
 
             await fetchUserData(); // Revalidate
             toast.success("อัปเดตโครงการสำเร็จ");
@@ -133,10 +176,13 @@ export function useDashboardActions(params: DashboardActionsParams) {
             setProjectToEdit(null);
             setEditProjectName("");
             setEditProjectDescription("");
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error updating project:", err);
-            toast.error("เกิดข้อผิดพลาด", {
-                description: "เกิดข้อผิดพลาดในการอัปเดตโครงการ กรุณาลองใหม่อีกครั้ง"
+            toast.error("อัปเดตโครงการไม่สำเร็จ", {
+                description:
+                    err instanceof Error
+                        ? err.message
+                        : "ไม่สามารถอัปเดตโครงการได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
             setIsUpdatingProject(false);
@@ -166,17 +212,28 @@ export function useDashboardActions(params: DashboardActionsParams) {
                     description: newProjectDescription.trim() || null,
                 }),
             });
-            if (!res.ok) throw new Error("Failed to create project");
+            if (!res.ok) {
+                const data: unknown = await res.json().catch(() => null);
+                throw new Error(
+                    getApiErrorMessage(
+                        data,
+                        "ไม่สามารถสร้างโครงการได้ กรุณาลองใหม่อีกครั้ง",
+                    ),
+                );
+            }
 
             await fetchUserData(); // Revalidate
             toast.success("สร้างโครงการสำเร็จ");
             setShowCreateProjectModal(false);
             setNewProjectName("");
             setNewProjectDescription("");
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("Error creating project:", err);
-            toast.error("เกิดข้อผิดพลาด", {
-                description: "เกิดข้อผิดพลาดในการสร้างโครงการ กรุณาลองใหม่อีกครั้ง"
+            toast.error("สร้างโครงการไม่สำเร็จ", {
+                description:
+                    err instanceof Error
+                        ? err.message
+                        : "ไม่สามารถสร้างโครงการได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
             setIsCreatingProject(false);

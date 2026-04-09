@@ -34,7 +34,7 @@ export default function Error({
 
                     {/* Error Message */}
                     <p className="text-slate-600 dark:text-slate-400 mb-6">
-                        ขออภัย เกิดข้อผิดพลาดบางอย่าง กรุณาลองอีกครั้ง
+                        ระบบไม่สามารถโหลดหน้านี้ได้ในขณะนี้ กรุณาลองใหม่อีกครั้งหรือกลับหน้าหลัก
                     </p>
 
                     {/* Error Details (Development only) */}

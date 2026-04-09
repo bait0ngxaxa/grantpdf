@@ -24,8 +24,8 @@ export async function findOrCreateProject(
         // Find existing project by ID
         const projectId = parsePositiveIntId(projectIdFromForm);
         if (projectId === null) {
-            return new NextResponse(
-                "Project not found. Please select a valid project.",
+            return NextResponse.json(
+                { error: "รหัสโครงการไม่ถูกต้อง กรุณาเลือกโครงการอีกครั้ง" },
                 { status: 400 },
             );
         }
@@ -36,8 +36,8 @@ export async function findOrCreateProject(
         );
 
         if (!project) {
-            return new NextResponse(
-                "Project not found. Please select a valid project.",
+            return NextResponse.json(
+                { error: "ไม่พบโครงการหรือคุณไม่มีสิทธิ์เข้าถึงโครงการนี้" },
                 { status: 400 },
             );
         }
@@ -76,15 +76,28 @@ export async function createUserFileRecord(
     storagePath: string,
     extension: string = "docx",
 ): Promise<{ id: number }> {
-    const fileNameWithExt = originalFileName.endsWith(`.${extension}`)
-        ? originalFileName
-        : `${originalFileName}.${extension}`;
+    const trimmedFileName = originalFileName.trim();
+    const normalizedExtension = extension.trim().replace(/^\./, "").toLowerCase();
+
+    if (!trimmedFileName) {
+        throw new Error("DOCUMENT_FILE_NAME_REQUIRED");
+    }
+
+    if (!/^[a-z0-9]+$/.test(normalizedExtension)) {
+        throw new Error("DOCUMENT_EXTENSION_INVALID");
+    }
+
+    const fileNameWithExt = trimmedFileName
+        .toLowerCase()
+        .endsWith(`.${normalizedExtension}`)
+        ? trimmedFileName
+        : `${trimmedFileName}.${normalizedExtension}`;
 
     return await prisma.userFile.create({
         data: {
             originalFileName: fileNameWithExt,
             storagePath: storagePath,
-            fileExtension: extension,
+            fileExtension: normalizedExtension,
             userId: userId,
             projectId: projectId,
         },

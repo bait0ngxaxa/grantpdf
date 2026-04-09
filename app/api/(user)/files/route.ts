@@ -12,7 +12,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
-                { error: "Unauthorized" },
+                { error: "กรุณาเข้าสู่ระบบ" },
                 { status: 401 }
             );
         }
@@ -26,14 +26,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "Unauthorized");
+            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
         const result = await getUserFilesPaginated({ userId, page, limit });
 
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching user files:", error);
-        const mappedError = toPublicApiError(error, "Failed to fetch files");
+        const mappedError = toPublicApiError(error, "ไม่สามารถดึงข้อมูลไฟล์ได้");
         return NextResponse.json(
             { error: mappedError.publicMessage },
             { status: mappedError.status }

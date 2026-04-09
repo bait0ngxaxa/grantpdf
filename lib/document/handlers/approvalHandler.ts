@@ -18,6 +18,7 @@ import Docxtemplater from "docxtemplater";
 import { getFullPathFromStoragePath } from "@/lib/fileStorage";
 import { fileTypeFromBuffer } from "file-type";
 import { normalizePhoneNumber } from "@/lib/validation/schemas";
+import { parsePositiveIntId } from "@/lib/id";
 
 const ALLOWED_SIGNATURE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
 const MAX_SIGNATURE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -53,6 +54,105 @@ async function parseAndValidateSignatureFile(
     return buffer;
 }
 
+interface OwnedAttachmentFile {
+    originalFileName: string;
+    storagePath: string;
+    fileExtension: string;
+    fileSize: number;
+    mimeType: string;
+}
+
+function parseAttachmentFileIds(raw: FormDataEntryValue | null): number[] | NextResponse {
+    if (raw === null || raw === "") return [];
+
+    if (typeof raw !== "string") {
+        return NextResponse.json(
+            { error: "รายการไฟล์แนบไม่ถูกต้อง" },
+            { status: 400 },
+        );
+    }
+
+    let parsed: unknown;
+    try {
+        parsed = JSON.parse(raw);
+    } catch {
+        return NextResponse.json(
+            { error: "รายการไฟล์แนบไม่ถูกต้อง" },
+            { status: 400 },
+        );
+    }
+
+    if (!Array.isArray(parsed)) {
+        return NextResponse.json(
+            { error: "รายการไฟล์แนบต้องเป็นรายการของรหัสไฟล์" },
+            { status: 400 },
+        );
+    }
+
+    const ids = parsed.map((item) => parsePositiveIntId(item));
+    if (ids.some((id): id is null => id === null)) {
+        return NextResponse.json(
+            { error: "รหัสไฟล์แนบไม่ถูกต้อง" },
+            { status: 400 },
+        );
+    }
+
+    return Array.from(new Set(ids.filter((id): id is number => id !== null)));
+}
+
+async function resolveOwnedAttachmentFiles(
+    attachmentFileIds: number[],
+    userId: number,
+): Promise<OwnedAttachmentFile[] | NextResponse> {
+    if (attachmentFileIds.length === 0) return [];
+
+    const files = await prisma.userFile.findMany({
+        where: {
+            id: { in: attachmentFileIds },
+            userId,
+        },
+        select: {
+            id: true,
+            originalFileName: true,
+            storagePath: true,
+            fileExtension: true,
+        },
+    });
+
+    const fileById = new Map(files.map((file) => [file.id, file]));
+    if (attachmentFileIds.some((id) => !fileById.has(id))) {
+        return NextResponse.json(
+            { error: "ไม่พบไฟล์แนบหรือคุณไม่มีสิทธิ์ใช้ไฟล์แนบนี้" },
+            { status: 403 },
+        );
+    }
+
+    return await Promise.all(
+        attachmentFileIds.map(async (id) => {
+            const file = fileById.get(id);
+            if (!file) {
+                throw new Error("ATTACHMENT_FILE_NOT_FOUND");
+            }
+
+            const fullFilePath = getFullPathFromStoragePath(file.storagePath);
+            const fileStats = await fs.stat(fullFilePath);
+
+            return {
+                originalFileName: file.originalFileName,
+                storagePath: file.storagePath,
+                fileExtension: file.fileExtension,
+                fileSize: fileStats.size,
+                mimeType: getMimeType(file.fileExtension),
+            };
+        }),
+    ).catch(() =>
+        NextResponse.json(
+            { error: "ไม่พบไฟล์แนบในระบบจัดเก็บไฟล์" },
+            { status: 404 },
+        ),
+    );
+}
+
 export async function handleApprovalGeneration(
     formData: FormData,
     userId: number,
@@ -81,14 +181,19 @@ export async function handleApprovalGeneration(
         attachments = [];
     }
 
-    // Parse attachment file IDs
-    const attachmentFileIdsJson = formData.get("attachmentFileIds") as string;
-    let attachmentFileIds: string[] = [];
-    try {
-        attachmentFileIds = JSON.parse(attachmentFileIdsJson || "[]");
-    } catch (error) {
-        console.error("Error parsing attachment file IDs:", error);
-        attachmentFileIds = [];
+    const attachmentFileIds = parseAttachmentFileIds(
+        formData.get("attachmentFileIds"),
+    );
+    if (attachmentFileIds instanceof NextResponse) {
+        return attachmentFileIds;
+    }
+
+    const attachmentFiles = await resolveOwnedAttachmentFiles(
+        attachmentFileIds,
+        userId,
+    );
+    if (attachmentFiles instanceof NextResponse) {
+        return attachmentFiles;
     }
 
     // Handle signature files
@@ -98,9 +203,10 @@ export async function handleApprovalGeneration(
     ) as File | null;
 
     if (!projectName) {
-        return new NextResponse("Project name is required.", {
-            status: 400,
-        });
+        return NextResponse.json(
+            { error: "กรุณาระบุชื่อโครงการ" },
+            { status: 400 },
+        );
     }
 
     // Process signature
@@ -253,68 +359,29 @@ export async function handleApprovalGeneration(
         projectName,
         "docx",
         async (storagePath: string): Promise<void> => {
-            // Create main file record
-            const savedFile = await prisma.userFile.create({
-                data: {
-                    originalFileName: projectName + ".docx",
-                    storagePath: storagePath,
-                    fileExtension: "docx",
-                    userId: userId,
-                    projectId: projectResult.id,
-                },
+            await prisma.$transaction(async (tx) => {
+                const savedFile = await tx.userFile.create({
+                    data: {
+                        originalFileName: projectName + ".docx",
+                        storagePath: storagePath,
+                        fileExtension: "docx",
+                        userId: userId,
+                        projectId: projectResult.id,
+                    },
+                });
+
+                if (attachmentFiles.length === 0) return;
+
+                await tx.attachmentFile.createMany({
+                    data: attachmentFiles.map((attachmentFile) => ({
+                        fileName: attachmentFile.originalFileName,
+                        filePath: attachmentFile.storagePath,
+                        fileSize: attachmentFile.fileSize,
+                        mimeType: attachmentFile.mimeType,
+                        userFileId: savedFile.id,
+                    })),
+                });
             });
-
-            // Link attachment files
-            if (attachmentFileIds.length > 0) {
-                for (const fileId of attachmentFileIds) {
-                    try {
-                        const attachmentFile = await prisma.userFile.findUnique({
-                            where: { id: Number(fileId) },
-                            select: {
-                                originalFileName: true,
-                                storagePath: true,
-                                fileExtension: true,
-                            },
-                        });
-
-                        if (attachmentFile) {
-                            let actualFileSize = 0;
-                            try {
-                                const fullFilePath = getFullPathFromStoragePath(
-                                    attachmentFile.storagePath,
-                                );
-                                const fileStats = await fs.stat(fullFilePath);
-                                actualFileSize = fileStats.size;
-                            } catch (sizeError) {
-                                console.error(
-                                    `Error reading file size for ${attachmentFile.originalFileName}:`,
-                                    sizeError,
-                                );
-                                actualFileSize = 0;
-                            }
-
-                            await prisma.attachmentFile.create({
-                                data: {
-                                    fileName: attachmentFile.originalFileName,
-                                    filePath: attachmentFile.storagePath,
-                                    fileSize: actualFileSize,
-                                    mimeType: getMimeType(attachmentFile.fileExtension),
-                                    userFileId: savedFile.id,
-                                },
-                            });
-                        } else {
-                            console.error(
-                                `Attachment file not found with ID: ${fileId}`,
-                            );
-                        }
-                    } catch (error) {
-                        console.error(
-                            `Error linking attachment file ${fileId}:`,
-                            error,
-                        );
-                    }
-                }
-            }
         },
     );
 
