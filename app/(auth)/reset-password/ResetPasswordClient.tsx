@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -254,4 +254,5 @@ export default function ResetPasswordClient(): React.JSX.Element {
         </div>
     );
 }
+
 

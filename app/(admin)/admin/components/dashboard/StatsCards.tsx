@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Archive, Plus, FilePlus, Clock } from "lucide-react";
 
 interface StatsCardsProps {
@@ -141,4 +141,5 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
         </div>
     );
 };
+
 
