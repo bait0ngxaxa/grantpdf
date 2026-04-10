@@ -7,7 +7,10 @@ import { resetPasswordSchema } from "@/lib/validation/schemas";
 import { applyRateLimit } from "@/lib/ratelimit";
 import { RATE_LIMIT } from "@/lib/constants";
 
-const JWT_SECRET = process.env.PASSRESET_TOKEN_SECRET;
+const RESET_TOKEN_SECRET =
+    process.env.PASSRESET_TOKEN_SECRET ??
+    process.env.AUTH_SECRET ??
+    process.env.NEXTAUTH_SECRET;
 
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
@@ -38,7 +41,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
         const { token, newPassword } = parsed.data;
 
-        if (!JWT_SECRET) {
+        if (!RESET_TOKEN_SECRET) {
             throw new Error(
                 "SECRET is not defined in the environment variables."
             );
@@ -46,7 +49,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
         let decodedToken: JwtPayload;
         try {
-            decodedToken = jwt.verify(token, JWT_SECRET) as JwtPayload;
+            decodedToken = jwt.verify(token, RESET_TOKEN_SECRET) as JwtPayload;
         } catch (err) {
             console.error("Token verification failed:", err);
             return NextResponse.json(
