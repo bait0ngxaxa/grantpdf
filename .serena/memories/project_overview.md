@@ -1,0 +1,4 @@
+Project: grant_online (GRANT ONLINE). Purpose: online project/document management for members and admins, document generation (TOR, contract, approvals, summary), file upload/preview, dashboards.
+Tech stack: Next.js 15 App Router, React 19, TypeScript, Tailwind CSS v4, Prisma ORM, MySQL/MariaDB, NextAuth v5 beta credentials + JWT session, Zod validation, SWR, Vitest, ESLint.
+Architecture highlights: app routes under app/(auth), app/(dashboard), app/(admin), app/(document), API routes under app/api segmented by domain, business logic in lib/services/* and lib/validation/*, middleware.ts for route protection + CSRF check.
+Important runtime notes: session strategy is JWT (no DB sessions), auth route at app/api/(auth)/auth/[...nextauth]/route.ts, route constants in lib/constants.ts.

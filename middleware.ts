@@ -65,6 +65,20 @@ function validateCSRF(req: NextRequest): boolean {
     return false;
 }
 
+function isSecureAuthRequest(req: NextRequest): boolean {
+    const forwardedProto = req.headers.get("x-forwarded-proto");
+    if (forwardedProto) {
+        return forwardedProto.split(",")[0].trim() === "https";
+    }
+
+    if (req.nextUrl.protocol === "https:") {
+        return true;
+    }
+
+    const authUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL;
+    return typeof authUrl === "string" && authUrl.startsWith("https://");
+}
+
 export async function middleware(
     req: NextRequest
 ): Promise<NextResponse | Response> {
@@ -92,10 +106,21 @@ export async function middleware(
 
     // Auth.js v5: use getToken (still works in Edge middleware)
     // auth() wrapper uses Node.js runtime, so getToken is preferred in middleware
-    const token = await getToken({
+    const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+    const isSecureRequest = isSecureAuthRequest(req);
+
+    let token = await getToken({
         req,
-        secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+        secret,
+        secureCookie: isSecureRequest,
     });
+    if (!token) {
+        token = await getToken({
+            req,
+            secret,
+            secureCookie: !isSecureRequest,
+        });
+    }
 
     if (token && AUTH_PAGES.includes(pathname)) {
         console.warn(
