@@ -3,14 +3,9 @@ import { cn } from "@/lib/utils";
 import { Button, Pagination } from "@/components/ui";
 import { Edit, Trash2, Search, Users } from "lucide-react";
 import { ROLES } from "@/lib/constants";
+import type { UserApiData } from "@/type";
 
-interface UserData {
-    id: string;
-    name: string;
-    email: string;
-    role: "member" | "admin";
-    created_at: string;
-}
+type UserData = UserApiData;
 
 interface UsersTableProps {
     users: UserData[];

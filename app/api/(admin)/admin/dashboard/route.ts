@@ -9,7 +9,7 @@ export async function GET(): Promise<NextResponse> {
         const guard = await requireAdminSession();
         if (isGuardError(guard)) return guard;
 
-        const files = await getAllFilesForAdmin();
+        const files = await getAllFilesForAdmin(50);
         return NextResponse.json(files, { status: 200 });
     } catch (error) {
         console.error("Error fetching all documents:", error);

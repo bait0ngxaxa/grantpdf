@@ -36,21 +36,24 @@ export interface AdminDocumentFile extends UserFile {
     downloadStatus: string;
 }
 
-export interface Project {
+export interface ProjectSummary {
     id: string;
     name: string;
     description?: string;
+    created_at: string;
+    _count: {
+        files: number;
+    };
+}
+
+export interface Project extends ProjectSummary {
     status: string;
     statusNote?: string;
-    created_at: string;
     updated_at: string;
     userId?: string;
     userName?: string;
     userEmail?: string;
     files: UserFile[];
-    _count: {
-        files: number;
-    };
 }
 
 export interface AdminProject

@@ -1,22 +1,19 @@
 import useSWR from "swr";
-import type { Project } from "@/type/models";
+import type { ProjectSummariesApiResponse, ProjectSummary } from "@/type";
 import { API_ROUTES } from "@/lib/constants";
 
-interface ProjectResponse {
-    projects: Project[];
-}
-
 export interface UseProjectDataReturn {
-    projects: Project[];
+    projects: ProjectSummary[];
     isLoading: boolean;
     error: string | null;
-    mutate: () => Promise<ProjectResponse | undefined>;
+    mutate: () => Promise<ProjectSummariesApiResponse | undefined>;
 }
 
 export const useProjectData = (): UseProjectDataReturn => {
-    const { data, error, isLoading, mutate } = useSWR<ProjectResponse>(
-        API_ROUTES.PROJECTS,
-    );
+    const { data, error, isLoading, mutate } =
+        useSWR<ProjectSummariesApiResponse>(
+            API_ROUTES.PROJECTS_SUMMARY,
+        );
 
     return {
         projects: data?.projects || [],

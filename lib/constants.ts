@@ -123,6 +123,7 @@ export const SIGNOUT_CALLBACK = ROUTES.SIGNIN;
 
 export const API_ROUTES = {
     PROJECTS: "/api/projects",
+    PROJECTS_SUMMARY: "/api/projects?view=summary",
     PROJECTS_STATS: "/api/projects/stats",
     USER_DOCS: "/api/user-docs",
     FILE_GENERATE_URL: "/api/file/generate-url",

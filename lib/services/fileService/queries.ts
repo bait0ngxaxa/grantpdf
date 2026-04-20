@@ -3,11 +3,26 @@ import type { AdminDocumentFile } from "@/type/models";
 import type { RawFile, FileForDeletion } from "./types";
 import { sanitizeFile, filterOutAttachmentFiles } from "./sanitizers";
 
-export async function getAllFilesForAdmin(): Promise<AdminDocumentFile[]> {
+const DEFAULT_ADMIN_FILE_LIMIT = 50;
+const MAX_ADMIN_FILE_LIMIT = 100;
+
+function normalizeAdminFileLimit(limit?: number): number {
+    if (limit === undefined) {
+        return DEFAULT_ADMIN_FILE_LIMIT;
+    }
+
+    return Math.min(Math.max(1, Math.trunc(limit)), MAX_ADMIN_FILE_LIMIT);
+}
+
+export async function getAllFilesForAdmin(
+    limit?: number,
+): Promise<AdminDocumentFile[]> {
+    const safeLimit = normalizeAdminFileLimit(limit);
     const allUserFiles = await prisma.userFile.findMany({
         orderBy: {
             created_at: "desc",
         },
+        take: safeLimit,
         select: {
             id: true,
             originalFileName: true,

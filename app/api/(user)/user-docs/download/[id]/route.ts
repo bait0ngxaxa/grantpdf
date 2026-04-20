@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { readFile, stat } from "fs/promises";
+import { createReadStream } from "fs";
+import { stat } from "fs/promises";
+import { Readable } from "stream";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 import { parsePositiveIntId } from "@/lib/id";
 import { publicApiError, toPublicApiError } from "@/lib/apiError";
@@ -48,9 +50,10 @@ export async function GET(
 
         // ใช้ storage path ใหม่
         const fullPath = getFullPathFromStoragePath(file.storagePath);
+        let fileStat: Awaited<ReturnType<typeof stat>>;
 
         try {
-            await stat(fullPath);
+            fileStat = await stat(fullPath);
         } catch {
             return NextResponse.json(
                 { error: "ไม่พบไฟล์" },
@@ -58,16 +61,18 @@ export async function GET(
             );
         }
 
-        const fileBuffer = await readFile(fullPath);
+        const stream = createReadStream(fullPath);
+        const webStream = Readable.toWeb(stream) as ReadableStream;
         const contentType = getMimeType(file.originalFileName);
 
-        return new NextResponse(fileBuffer, {
+        return new NextResponse(webStream, {
             headers: {
                 "Content-Type": contentType,
                 "Content-Disposition": `attachment; filename="${encodeURIComponent(
                     file.originalFileName
                 )}"`,
-                "Content-Length": fileBuffer.length.toString(),
+                "Content-Length": fileStat.size.toString(),
+                "Cache-Control": "private, no-cache",
             },
         });
     } catch (error: unknown) {

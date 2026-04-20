@@ -1,10 +1,11 @@
 export {
     findProjectByNameAndUser,
     findProjectByIdAndUser,
-    getProjectsByUserId,
     getUserProjectStats,
     getProjectsByUserIdPaginated,
 } from "./projectQueries";
+
+export { getProjectSummariesByUserId } from "./projectSummaryQueries";
 
 export { getAllProjectsPaginated } from "./adminProjectQueries";
 

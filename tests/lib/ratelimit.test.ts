@@ -183,6 +183,24 @@ describe("Rate Limiting - Security Tests", () => {
             expect(stats.totalIPs).toBeGreaterThanOrEqual(3);
             expect(stats.memoryUsage).toMatch(/\d+KB/);
         });
+
+        it("should cap the number of tracked subjects to avoid unbounded growth", () => {
+            const insertedKeys: string[] = [];
+
+            for (let index = 0; index < 5_200; index += 1) {
+                const key = `overflow-ip-${index}`;
+                insertedKeys.push(key);
+                rateLimit(key, 1, 60_000);
+            }
+
+            const stats = getRateLimitStats();
+
+            expect(stats.totalIPs).toBeLessThanOrEqual(5_000);
+
+            for (const key of insertedKeys) {
+                resetRateLimit(key);
+            }
+        });
     });
 
     // ============================================

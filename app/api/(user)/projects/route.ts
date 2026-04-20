@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import {
-    getProjectsByUserId,
+    getProjectSummariesByUserId,
     getProjectsByUserIdPaginated,
     createProjectWithAudit,
 } from "@/lib/services";
@@ -11,6 +11,9 @@ import { createProjectSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
 import { publicApiError, toPublicApiError } from "@/lib/apiError";
 import { applyRateLimit } from "@/lib/ratelimit";
+
+const PROJECT_SUMMARY_VIEW = "summary";
+const MAX_PROJECTS_PAGE_LIMIT = 25;
 
 function getClientIp(req: Request): string | undefined {
     const forwarded = req.headers.get("x-forwarded-for");
@@ -41,20 +44,19 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
         const { searchParams } = new URL(req.url);
-        const hasPaginationParams =
-            searchParams.has("page") || searchParams.has("limit");
-
-        if (!hasPaginationParams) {
-            const projects = await getProjectsByUserId(userId);
+        const view = searchParams.get("view");
+        if (view === PROJECT_SUMMARY_VIEW) {
+            const projects = await getProjectSummariesByUserId(userId);
 
             return NextResponse.json({ projects });
         }
 
         const page = parsePositiveInt(searchParams.get("page"), 1);
-        const limit = parsePositiveInt(
+        const requestedLimit = parsePositiveInt(
             searchParams.get("limit"),
             PAGINATION.PROJECTS_PER_PAGE,
         );
+        const limit = Math.min(requestedLimit, MAX_PROJECTS_PAGE_LIMIT);
         const result = await getProjectsByUserIdPaginated({ userId, page, limit });
 
         return NextResponse.json(result);

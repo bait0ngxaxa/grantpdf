@@ -1,16 +1,13 @@
 import { type ChangeEvent, type DragEvent } from "react";
 import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { type Session } from "next-auth";
-import type { Project } from "@/type";
+import type { ProjectSummary } from "@/type";
 
 // =====================================================
 // Project Types
 // =====================================================
 
-export type ProjectListItem = Pick<
-    Project,
-    "id" | "name" | "description" | "created_at"
->;
+export type ProjectListItem = ProjectSummary;
 
 // =====================================================
 // Return Types

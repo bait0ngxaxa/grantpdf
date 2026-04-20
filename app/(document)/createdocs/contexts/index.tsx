@@ -6,7 +6,7 @@ import React, {
     useMemo,
     type ReactNode,
 } from "react";
-import type { Project } from "@/type";
+import type { ProjectSummary } from "@/type";
 
 import { CreateDocsUIProvider, useCreateDocsUI } from "./CreateDocsUIContext";
 import {
@@ -25,13 +25,13 @@ interface CreateDocsContextType {
     setSelectedContractType: (type: string | null) => void;
 
     // Data
-    projects: Project[];
+    projects: ProjectSummary[];
     isLoading: boolean;
     error: string | null;
     isAdmin: boolean;
 
     // Pagination
-    currentProjects: Project[];
+    currentProjects: ProjectSummary[];
     currentPage: number;
     totalPages: number;
     indexOfFirstProject: number;

@@ -20,33 +20,113 @@ interface ApplyRateLimitOptions {
     identifier?: string;
 }
 
-const rateLimitMap = new Map<string, RateLimitRecord>();
+interface RateLimitState {
+    records: Map<string, RateLimitRecord>;
+    cleanupTimer: ReturnType<typeof setInterval> | null;
+    listenersRegistered: boolean;
+}
 
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
-const cleanupTimer = setInterval(() => {
-    const now = Date.now();
-    const maxAge = 60 * 60 * 1000;
+const MAX_ENTRY_AGE_MS = 60 * 60 * 1000;
+const MAX_RATE_LIMIT_ENTRIES = 5_000;
 
+declare global {
+    var __grantOnlineRateLimitState: RateLimitState | undefined;
+}
+
+function createRateLimitState(): RateLimitState {
+    return {
+        records: new Map<string, RateLimitRecord>(),
+        cleanupTimer: null,
+        listenersRegistered: false,
+    };
+}
+
+const rateLimitState =
+    globalThis.__grantOnlineRateLimitState ??
+    createRateLimitState();
+globalThis.__grantOnlineRateLimitState = rateLimitState;
+
+const rateLimitMap = rateLimitState.records;
+
+function cleanupExpiredEntries(now: number): void {
     for (const [key, record] of rateLimitMap.entries()) {
-        if (now - record.lastRequest > maxAge) {
+        if (now - record.lastRequest > MAX_ENTRY_AGE_MS) {
             rateLimitMap.delete(key);
         }
     }
+}
+
+function evictOverflowEntries(targetSize: number): void {
+    if (rateLimitMap.size <= targetSize) {
+        return;
+    }
+
+    const overflow = rateLimitMap.size - targetSize;
+    const entriesByAge = [...rateLimitMap.entries()].sort(
+        (left, right) => left[1].lastRequest - right[1].lastRequest,
+    );
+
+    for (let index = 0; index < overflow; index += 1) {
+        const oldestEntry = entriesByAge[index];
+        if (!oldestEntry) {
+            break;
+        }
+        rateLimitMap.delete(oldestEntry[0]);
+    }
+}
+
+function cleanupRateLimitMap(now: number = Date.now()): void {
+    cleanupExpiredEntries(now);
+    evictOverflowEntries(MAX_RATE_LIMIT_ENTRIES);
 
     if (process.env.NODE_ENV === "development") {
         console.warn(
             `[RateLimit] Cleanup completed. Active IPs: ${rateLimitMap.size}`
         );
     }
-}, CLEANUP_INTERVAL);
+}
 
-process.on("SIGTERM", () => {
-    clearInterval(cleanupTimer);
-});
+function clearCleanupTimer(): void {
+    if (!rateLimitState.cleanupTimer) {
+        return;
+    }
 
-process.on("SIGINT", () => {
-    clearInterval(cleanupTimer);
-});
+    clearInterval(rateLimitState.cleanupTimer);
+    rateLimitState.cleanupTimer = null;
+}
+
+function ensureRateLimitStateInitialized(): void {
+    if (!rateLimitState.cleanupTimer) {
+        const cleanupTimer = setInterval(() => {
+            cleanupRateLimitMap();
+        }, CLEANUP_INTERVAL);
+
+        cleanupTimer.unref?.();
+        rateLimitState.cleanupTimer = cleanupTimer;
+    }
+
+    if (!rateLimitState.listenersRegistered) {
+        process.once("SIGTERM", clearCleanupTimer);
+        process.once("SIGINT", clearCleanupTimer);
+        rateLimitState.listenersRegistered = true;
+    }
+}
+
+function makeRoomForRateLimitKey(now: number): void {
+    if (rateLimitMap.size < MAX_RATE_LIMIT_ENTRIES) {
+        return;
+    }
+
+    cleanupRateLimitMap(now);
+    if (rateLimitMap.size < MAX_RATE_LIMIT_ENTRIES) {
+        return;
+    }
+
+    evictOverflowEntries(MAX_RATE_LIMIT_ENTRIES - 1);
+}
+
+ensureRateLimitStateInitialized();
 
 /**
  * Rate limiting function using token bucket algorithm
@@ -65,6 +145,8 @@ export function rateLimit(
     const record = rateLimitMap.get(key);
 
     if (!record) {
+        makeRoomForRateLimitKey(now);
+
         const newRecord: RateLimitRecord = {
             tokens: Math.max(0, limit - 1),
             lastRefill: now,

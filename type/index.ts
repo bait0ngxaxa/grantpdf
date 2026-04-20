@@ -8,6 +8,7 @@ export type {
     LatestProject,
     LatestUser,
     Project,
+    ProjectSummary,
     ProjectStatus,
     UserFile,
 } from "./models";
@@ -21,6 +22,7 @@ export type {
     DashboardStatsApiResponse,
     FileUploadApiResponse,
     ProjectsApiResponse,
+    ProjectSummariesApiResponse,
     ProjectStatusUpdateRequest,
     ProjectStatusUpdateResponse,
     StatusCounts,

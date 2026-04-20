@@ -3,16 +3,11 @@
 import { Button } from "@/components/ui";
 import Link from "next/link";
 import { Folder, Calendar, ChevronRight } from "lucide-react";
-import type { Project } from "@/type";
+import type { ProjectSummary } from "@/type";
 import { cn } from "@/lib/utils";
 
-type ProjectListItem = Pick<
-    Project,
-    "id" | "name" | "description" | "created_at"
->;
-
 interface ProjectListProps {
-    projects: ProjectListItem[];
+    projects: ProjectSummary[];
     selectedProjectId: string | null;
     onSelectProject: (id: string) => void;
     isLoading: boolean;

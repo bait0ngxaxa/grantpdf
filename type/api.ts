@@ -1,5 +1,7 @@
+import type { UserRole } from "@/lib/constants";
 import type {
     Project,
+    ProjectSummary,
     AdminProject,
     AdminDocumentFile,
 } from "./models";
@@ -48,6 +50,10 @@ export interface ProjectsApiResponse {
     statusCounts?: StatusCounts;
 }
 
+export interface ProjectSummariesApiResponse {
+    projects: ProjectSummary[];
+}
+
 export interface AdminProjectsApiResponse {
     projects: AdminProject[];
     totalFiles: number;
@@ -64,7 +70,7 @@ export interface UserApiData {
     id: string;
     name: string;
     email: string;
-    role: string;
+    role: UserRole;
     created_at: string;
 }
 

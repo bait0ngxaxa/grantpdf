@@ -1,12 +1,12 @@
 "use client";
 
 import { useCreateDocsContext } from "../contexts";
-import type { Project } from "@/type/models";
+import type { ProjectSummary } from "@/type/models";
 import { Building2, FileText, Calendar, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProjectCardProps {
-    project: Project;
+    project: ProjectSummary;
 }
 
 export const ProjectCard = ({
@@ -46,7 +46,7 @@ export const ProjectCard = ({
                     <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-400 dark:text-slate-500">
                         <span className="flex items-center gap-1.5">
                             <FileText className="h-4 w-4" />
-                            {project.files.length} รายการ
+                            {project._count.files} รายการ
                         </span>
                         <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
                         <span className="flex items-center gap-1.5">

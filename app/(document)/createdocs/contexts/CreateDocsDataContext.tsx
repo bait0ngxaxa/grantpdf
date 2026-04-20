@@ -9,15 +9,15 @@ import React, {
 import { useProjectData } from "../hooks";
 import { usePagination } from "@/lib/hooks";
 import { PAGINATION } from "@/lib/constants";
-import type { Project } from "@/type";
+import type { ProjectSummary } from "@/type";
 
 interface CreateDocsDataContextType {
-    projects: Project[];
+    projects: ProjectSummary[];
     isLoading: boolean;
     error: string | null;
 
     // Pagination
-    currentProjects: Project[];
+    currentProjects: ProjectSummary[];
     currentPage: number;
     totalPages: number;
     indexOfFirstProject: number;

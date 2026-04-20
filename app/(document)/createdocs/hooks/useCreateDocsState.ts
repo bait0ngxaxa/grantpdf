@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-import type { Project } from "@/type/models";
+import type { ProjectSummary } from "@/type/models";
 import { ROLES } from "@/lib/constants";
 
 export interface UseCreateDocsStateReturn {
@@ -12,8 +12,8 @@ export interface UseCreateDocsStateReturn {
     setSelectedContractType: (type: string | null) => void;
     selectedProjectId: string | null;
     setSelectedProjectId: (id: string | null) => void;
-    projects: Project[];
-    setProjects: (projects: Project[]) => void;
+    projects: ProjectSummary[];
+    setProjects: (projects: ProjectSummary[]) => void;
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
     error: string | null;
@@ -31,7 +31,7 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
     const [selectedContractType, setSelectedContractType] = useState<
         string | null
     >(null);
-    const [projects, setProjects] = useState<Project[]>([]);
+    const [projects, setProjects] = useState<ProjectSummary[]>([]);
 
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
         searchParams.get("projectId")

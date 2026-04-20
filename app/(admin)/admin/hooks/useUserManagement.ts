@@ -5,16 +5,16 @@ import {
     useMemo,
 } from "react";
 import useSWR from "swr";
-import { API_ROUTES, PAGINATION } from "@/lib/constants";
+import {
+    API_ROUTES,
+    PAGINATION,
+    type UserRole,
+} from "@/lib/constants";
+import type { UserApiData } from "@/type";
 import { toast } from "sonner";
 
-interface UserData {
-    id: string;
-    name: string;
-    email: string;
-    role: "member" | "admin";
-    created_at: string;
-}
+type UserData = UserApiData;
+type EditableRole = UserRole | "";
 
 interface RoleCounts {
     admin: number;
@@ -24,7 +24,7 @@ interface RoleCounts {
 interface EditFormData {
     name: string;
     email: string;
-    role: string;
+    role: EditableRole;
 }
 
 interface UsersResponse {
@@ -148,10 +148,19 @@ export function useUserManagement(): UserManagementHook {
     const handleEditFormChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
             const { name, value } = e.target;
-            setEditFormData((prevData) => ({
-                ...prevData,
-                [name]: value,
-            }));
+            setEditFormData((prevData) => {
+                if (name === "role") {
+                    return {
+                        ...prevData,
+                        role: value as EditableRole,
+                    };
+                }
+
+                return {
+                    ...prevData,
+                    [name]: value,
+                };
+            });
         },
         [],
     );

@@ -1,13 +1,9 @@
 import React from "react";
 import { Button } from "@/components/ui";
 import { Trash2, AlertTriangle } from "lucide-react";
+import type { UserApiData } from "@/type";
 
-interface UserData {
-    id: string;
-    name: string;
-    email: string;
-    role: "member" | "admin";
-}
+type UserData = UserApiData;
 
 interface DeleteUserModalProps {
     isOpen: boolean;

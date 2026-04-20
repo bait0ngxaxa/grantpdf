@@ -5,22 +5,18 @@ import { type Session } from "next-auth";
 import { type ProjectListReturn } from "./types";
 import { API_ROUTES } from "@/lib/constants";
 import useSWR from "swr";
-import type { Project } from "@/type/models";
+import type { ProjectSummariesApiResponse } from "@/type";
 
 interface UseProjectListProps {
     session: Session | null;
     initialProjectId: string | null;
 }
 
-interface ProjectsResponse {
-    projects: Project[];
-}
-
 export function useProjectList({
     initialProjectId,
 }: UseProjectListProps): ProjectListReturn {
-    const { data, error, isLoading } = useSWR<ProjectsResponse>(
-        API_ROUTES.PROJECTS,
+    const { data, error, isLoading } = useSWR<ProjectSummariesApiResponse>(
+        API_ROUTES.PROJECTS_SUMMARY,
     );
 
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(

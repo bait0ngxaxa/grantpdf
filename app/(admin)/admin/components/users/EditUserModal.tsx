@@ -1,18 +1,16 @@
 import React, { type FormEvent } from "react";
 import { Button, Input } from "@/components/ui";
 import { ChevronDown } from "lucide-react";
+import { ROLES, type UserRole } from "@/lib/constants";
+import type { UserApiData } from "@/type";
 
-interface UserData {
-    id: string;
-    name: string;
-    email: string;
-    role: "member" | "admin";
-}
+type UserData = UserApiData;
+type EditableRole = UserRole | "";
 
 interface EditFormData {
     name: string;
     email: string;
-    role: string;
+    role: EditableRole;
 }
 
 interface EditUserModalProps {
@@ -105,8 +103,10 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                                 onChange={onFormChange}
                                 required
                             >
-                                <option value="member">สมาชิก (Member)</option>
-                                <option value="admin">
+                                <option value={ROLES.MEMBER}>
+                                    สมาชิก (Member)
+                                </option>
+                                <option value={ROLES.ADMIN}>
                                     ผู้ดูแลระบบ (Admin)
                                 </option>
                             </select>
