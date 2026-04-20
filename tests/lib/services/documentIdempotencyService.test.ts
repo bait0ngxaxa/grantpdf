@@ -52,7 +52,7 @@ describe("documentIdempotencyService", () => {
 
     describe("startDocumentIdempotency", () => {
         it("returns started when create succeeds", async () => {
-            mockedCreate.mockResolvedValue({ id: 123n } as never);
+            mockedCreate.mockResolvedValue({ id: BigInt(123) } as never);
 
             const result = await startDocumentIdempotency({
                 userId: 1,
@@ -60,7 +60,10 @@ describe("documentIdempotencyService", () => {
                 idempotencyKey: "idem-key-001",
             });
 
-            expect(result).toEqual({ type: "started", recordId: 123n });
+            expect(result).toEqual({
+                type: "started",
+                recordId: BigInt(123),
+            });
             expect(mockedFindUnique).not.toHaveBeenCalled();
         });
 
@@ -145,14 +148,14 @@ describe("documentIdempotencyService", () => {
             mockedUpdate.mockResolvedValue({} as never);
 
             await completeDocumentIdempotency({
-                recordId: 10n,
+                recordId: BigInt(10),
                 statusCode: 200,
                 responseBody: { success: true },
             });
 
             expect(mockedUpdate).toHaveBeenCalledOnce();
             expect(mockedUpdate.mock.calls[0]?.[0]).toMatchObject({
-                where: { id: 10n },
+                where: { id: BigInt(10) },
                 data: expect.objectContaining({
                     status: "completed",
                     responseStatus: 200,
@@ -169,13 +172,13 @@ describe("documentIdempotencyService", () => {
             const longMessage = "x".repeat(300);
 
             await failDocumentIdempotency({
-                recordId: 11n,
+                recordId: BigInt(11),
                 errorMessage: longMessage,
             });
 
             expect(mockedUpdate).toHaveBeenCalledOnce();
             const called = mockedUpdate.mock.calls[0]?.[0];
-            expect(called?.where).toEqual({ id: 11n });
+            expect(called?.where).toEqual({ id: BigInt(11) });
             expect(called?.data.status).toBe("failed");
             expect((called?.data.errorMessage as string).length).toBe(191);
         });

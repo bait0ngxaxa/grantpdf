@@ -121,7 +121,7 @@ describe("document generate route idempotency", () => {
 
         mockedStartDocumentIdempotency.mockResolvedValue({
             type: "started",
-            recordId: 1n,
+            recordId: BigInt(1),
         } as never);
 
         mockedHandleTorGeneration.mockResolvedValue(
@@ -209,7 +209,7 @@ describe("document generate route idempotency", () => {
     it("marks idempotency as failed when handler throws", async () => {
         mockedStartDocumentIdempotency.mockResolvedValue({
             type: "started",
-            recordId: 99n,
+            recordId: BigInt(99),
         } as never);
         mockedHandleTorGeneration.mockRejectedValue(
             new Error("generate_failed"),
@@ -223,7 +223,7 @@ describe("document generate route idempotency", () => {
         expect(response.status).toBe(500);
         expect(body.error).toBe("generate_failed");
         expect(mockedFailDocumentIdempotency).toHaveBeenCalledWith({
-            recordId: 99n,
+            recordId: BigInt(99),
             errorMessage: "generate_failed",
         });
         expect(mockedCompleteDocumentIdempotency).not.toHaveBeenCalled();

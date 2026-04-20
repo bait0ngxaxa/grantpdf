@@ -1,0 +1,3 @@
+ALTER TABLE `User`
+    ADD COLUMN `passwordResetVersion` INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN `sessionVersion` INTEGER NOT NULL DEFAULT 0;

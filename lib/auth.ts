@@ -3,11 +3,12 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import type { User } from "next-auth";
+import type { Session, User } from "next-auth";
 import { createRateLimitKey, getClientIP, rateLimit } from "@/lib/ratelimit";
 import { RATE_LIMIT, SESSION } from "@/lib/constants";
+import { ensureActiveSession } from "@/lib/services/sessionService/activeSession";
 
-export const { auth, handlers, signIn, signOut } = NextAuth({
+const { auth: nextAuthAuth, handlers, signIn, signOut } = NextAuth({
     providers: [
         Credentials({
             credentials: {
@@ -71,6 +72,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                         name: user.name,
                         email: user.email,
                         role: user.role,
+                        sessionVersion: user.sessionVersion,
                     };
                     return authorizedUser;
                 } else {
@@ -96,15 +98,30 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
             if (user) {
                 token.id = user.id as string;
                 token.role = user.role;
+                token.sessionVersion =
+                    typeof user.sessionVersion === "number"
+                        ? user.sessionVersion
+                        : 0;
             }
             return token;
         },
         session: async ({ session, token }) => {
-            if (session.user) {
-                session.user.id = token.id as string;
+            if (session.user && typeof token.id === "string") {
+                session.user.id = token.id;
                 session.user.role = token.role as string;
+                session.user.sessionVersion =
+                    typeof token.sessionVersion === "number"
+                        ? token.sessionVersion
+                        : 0;
             }
             return session;
         },
     },
 });
+
+export { handlers, signIn, signOut };
+
+export async function auth(): Promise<Session | null> {
+    const session = await nextAuthAuth();
+    return ensureActiveSession(session);
+}

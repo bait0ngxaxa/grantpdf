@@ -5,8 +5,6 @@ import { ROUTES, ROLES } from "@/lib/constants";
 
 const ADMIN_PREFIXES = [ROUTES.ADMIN];
 
-const AUTH_PAGES: string[] = [ROUTES.SIGNIN, ROUTES.SIGNUP];
-
 const PROTECTED_PREFIXES = [
     "/form",
     "/uploads-doc",
@@ -122,12 +120,9 @@ export async function middleware(
         });
     }
 
-    if (token && AUTH_PAGES.includes(pathname)) {
-        console.warn(
-            "User already authenticated. Redirecting from auth page to dashboard."
-        );
-        return NextResponse.redirect(new URL(ROUTES.DASHBOARD, req.url));
-    }
+    // Auth pages perform their own server-side redirect via auth().
+    // Avoid redirecting from middleware because stale JWTs may already be
+    // revoked in the database and must be allowed to reach the sign-in page.
 
     if (matchesAnyPrefix(pathname, ADMIN_PREFIXES)) {
         if (!token || token.role !== ROLES.ADMIN) {

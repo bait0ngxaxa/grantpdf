@@ -1,16 +1,14 @@
 // app/api/auth/reset-password/route.ts
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import jwt, { type JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { resetPasswordSchema } from "@/lib/validation/schemas";
 import { applyRateLimit } from "@/lib/ratelimit";
 import { RATE_LIMIT } from "@/lib/constants";
-
-const RESET_TOKEN_SECRET =
-    process.env.PASSRESET_TOKEN_SECRET ??
-    process.env.AUTH_SECRET ??
-    process.env.NEXTAUTH_SECRET;
+import {
+    type PasswordResetTokenPayload,
+    verifyPasswordResetToken,
+} from "@/lib/passwordReset";
 
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
@@ -41,15 +39,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
         const { token, newPassword } = parsed.data;
 
-        if (!RESET_TOKEN_SECRET) {
-            throw new Error(
-                "SECRET is not defined in the environment variables."
-            );
-        }
-
-        let decodedToken: JwtPayload;
+        let decodedToken: PasswordResetTokenPayload;
         try {
-            decodedToken = jwt.verify(token, RESET_TOKEN_SECRET) as JwtPayload;
+            decodedToken = verifyPasswordResetToken(token);
         } catch (err) {
             console.error("Token verification failed:", err);
             return NextResponse.json(
@@ -58,34 +50,30 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        if (typeof decodedToken !== "object" || !decodedToken.userId) {
-            return NextResponse.json(
-                { error: "โทเค็นไม่ถูกต้อง" },
-                { status: 400 }
-            );
-        }
-
-        const user = await prisma.user.findUnique({
-            where: {
-                id: Number(decodedToken.userId),
-            },
-        });
-
-        if (!user) {
-            return NextResponse.json(
-                { error: "ไม่พบผู้ใช้งาน" },
-                { status: 400 }
-            );
-        }
-
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        await prisma.user.update({
-            where: { id: user.id },
+        const updateResult = await prisma.user.updateMany({
+            where: {
+                id: Number(decodedToken.userId),
+                passwordResetVersion: decodedToken.resetVersion,
+            },
             data: {
                 password: hashedPassword,
+                passwordResetVersion: {
+                    increment: 1,
+                },
+                sessionVersion: {
+                    increment: 1,
+                },
             },
         });
+
+        if (updateResult.count === 0) {
+            return NextResponse.json(
+                { error: "ลิงก์หมดอายุหรือไม่ถูกต้อง" },
+                { status: 400 }
+            );
+        }
 
         return NextResponse.json(
             {

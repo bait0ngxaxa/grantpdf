@@ -34,7 +34,6 @@ function validateCSRF(
 
 // Route protection logic
 const ADMIN_PAGES = ["/admin", "/admin/dashboard", "/admin/users"];
-const AUTH_PAGES = ["/signin", "/signup"];
 const PROTECTED_PAGES = [
     "/form",
     "/uploads-doc",
@@ -47,19 +46,8 @@ function isAdminPage(pathname: string): boolean {
     return ADMIN_PAGES.includes(pathname);
 }
 
-function isAuthPage(pathname: string): boolean {
-    return AUTH_PAGES.includes(pathname);
-}
-
 function isProtectedPage(pathname: string): boolean {
     return PROTECTED_PAGES.includes(pathname);
-}
-
-function shouldRedirectLoggedInUser(
-    pathname: string,
-    isAuthenticated: boolean,
-): boolean {
-    return isAuthenticated && isAuthPage(pathname);
 }
 
 function shouldBlockNonAdmin(pathname: string, role: string | null): boolean {
@@ -181,24 +169,6 @@ describe("Middleware Security - CSRF Protection", () => {
 
             it("should allow admin users to access admin pages", () => {
                 expect(shouldBlockNonAdmin("/admin", "admin")).toBe(false);
-            });
-        });
-
-        describe("Auth Pages", () => {
-            it("should identify auth pages", () => {
-                expect(isAuthPage("/signin")).toBe(true);
-                expect(isAuthPage("/signup")).toBe(true);
-            });
-
-            it("should redirect logged-in users from auth pages", () => {
-                expect(shouldRedirectLoggedInUser("/signin", true)).toBe(true);
-                expect(shouldRedirectLoggedInUser("/signup", true)).toBe(true);
-            });
-
-            it("should not redirect non-authenticated users from auth pages", () => {
-                expect(shouldRedirectLoggedInUser("/signin", false)).toBe(
-                    false,
-                );
             });
         });
 
