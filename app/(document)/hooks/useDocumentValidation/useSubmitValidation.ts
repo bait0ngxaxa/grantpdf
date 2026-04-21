@@ -9,14 +9,14 @@ export function useSubmitValidation<T extends object>({
     setErrors,
 }: UseSubmitValidationProps<T>) {
     const validateBeforeSubmit = useCallback(
-        (
+        async (
             e: React.FormEvent<HTMLFormElement>,
             formData: T,
             onValid: (e: React.FormEvent<HTMLFormElement>) => void,
-        ) => {
+        ): Promise<void> => {
             e.preventDefault();
 
-            const result = validateForm(formData);
+            const result = await validateForm(formData);
 
             setErrors(result.errors);
 

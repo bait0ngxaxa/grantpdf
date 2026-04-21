@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
-
 import type { ProjectSummary } from "@/type/models";
-import { ROLES } from "@/lib/constants";
+import { useDocumentAuth } from "../../contexts/DocumentAuthContext";
 
 export interface UseCreateDocsStateReturn {
     selectedCategory: string | null;
@@ -22,8 +20,8 @@ export interface UseCreateDocsStateReturn {
 }
 
 export const useCreateDocsState = (): UseCreateDocsStateReturn => {
-    const { data: session } = useSession();
     const searchParams = useSearchParams();
+    const { isAdmin } = useDocumentAuth();
 
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
         null
@@ -38,9 +36,6 @@ export const useCreateDocsState = (): UseCreateDocsStateReturn => {
     );
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    // Check if user is admin
-    const isAdmin = session?.user?.role === ROLES.ADMIN;
 
     return {
         selectedCategory,

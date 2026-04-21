@@ -4,7 +4,7 @@ import { useCallback, type ChangeEvent } from "react";
 import {
     validateAndFormatPhone,
     validateAndFormatCitizenId,
-} from "@/lib/validation";
+} from "@/lib/validation/inputFormatters";
 import { type UseInputFormattersProps } from "./types";
 
 export function useInputFormatters<T extends object>({

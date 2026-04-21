@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui";
 import { ChartBarBig, UserStar, LogOut, Menu, Loader2 } from "lucide-react";
 import { ROUTES, ROLES } from "@/lib/constants";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
 
@@ -14,9 +14,8 @@ const menuItems = [
 ];
 
 export const TopBar: React.FC = (): React.JSX.Element => {
-    const { data: session } = useSession();
     const router = useRouter();
-    const { setIsSidebarOpen, activeTab } = useUserDashboardContext();
+    const { session, setIsSidebarOpen, activeTab } = useUserDashboardContext();
     const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
 
     const handleGoToAdmin = (): void => {

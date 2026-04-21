@@ -24,6 +24,11 @@ interface DashboardActionsParams {
     setNewProjectDescription: (desc: string) => void;
 }
 
+function normalizeOptionalText(value: string): string | undefined {
+    const trimmedValue = value.trim();
+    return trimmedValue === "" ? undefined : trimmedValue;
+}
+
 export function useDashboardActions(params: DashboardActionsParams) {
     const {
         fetchUserData,
@@ -156,7 +161,9 @@ export function useDashboardActions(params: DashboardActionsParams) {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         name: editProjectName.trim(),
-                        description: editProjectDescription.trim() || null,
+                        description: normalizeOptionalText(
+                            editProjectDescription,
+                        ),
                     }),
                 },
             );
@@ -209,7 +216,9 @@ export function useDashboardActions(params: DashboardActionsParams) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: newProjectName.trim(),
-                    description: newProjectDescription.trim() || null,
+                    description: normalizeOptionalText(
+                        newProjectDescription,
+                    ),
                 }),
             });
             if (!res.ok) {

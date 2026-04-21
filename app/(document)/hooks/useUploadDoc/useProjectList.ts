@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { type Session } from "next-auth";
 import { type ProjectListReturn } from "./types";
 import { API_ROUTES } from "@/lib/constants";
 import useSWR from "swr";
 import type { ProjectSummariesApiResponse } from "@/type";
 
 interface UseProjectListProps {
-    session: Session | null;
     initialProjectId: string | null;
 }
 

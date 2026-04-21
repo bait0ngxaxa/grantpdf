@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import {
     PROJECT_DESCRIPTION_MAX_LENGTH,
     PROJECT_NAME_MAX_LENGTH,
-} from "@/lib/validation/schemas";
+} from "@/lib/validation/constants";
 import { Pencil, Loader2 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
 

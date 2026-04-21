@@ -2,26 +2,30 @@
 
 import { useSearchParams } from "next/navigation";
 
-import {
-    PreviewField,
-    PreviewGrid,
-    DocumentEditorLayout,
-} from "@/app/(document)/components";
+import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
 import { FormSkeleton } from "@/components/ui";
-import {
-    useDocumentForm,
-    usePreviewModal,
-    useDocumentValidation,
-    useExitConfirmation,
-} from "@/app/(document)/hooks";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
 
 import { type SummaryData, initialSummaryData } from "@/config/initialData";
-import { validateSummary } from "@/lib/validation";
+import { type DocumentValidationResult } from "@/lib/validation";
 import {
     BasicInfoSection,
     PersonInfoSection,
     BudgetSection,
 } from "@/app/(document)/components/forms/summary";
+
+async function validateSummaryForm(
+    data: SummaryData,
+): Promise<DocumentValidationResult<SummaryData>> {
+    return (
+        await import("@/lib/validation/documentValidators/validateSummary")
+    ).validateSummary(data);
+}
 
 export function SummaryForm(): React.JSX.Element {
     const searchParams = useSearchParams();
@@ -59,7 +63,7 @@ export function SummaryForm(): React.JSX.Element {
         getHandlePreview: handlePreview,
         validateBeforeSubmit,
     } = useDocumentValidation<SummaryData>({
-        validateForm: validateSummary,
+        validateForm: validateSummaryForm,
         openPreview,
         formData,
     });

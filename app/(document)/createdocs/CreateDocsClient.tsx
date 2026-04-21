@@ -1,10 +1,5 @@
 "use client";
 
-import { CreateDocsSkeleton } from "@/components/ui";
-import { useSession } from "next-auth/react";
-import { ROUTES } from "@/lib/constants";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useCreateDocsContext } from "./contexts";
 
 import {
@@ -15,24 +10,8 @@ import {
 } from "./components";
 
 export default function CreateDocsClient(): React.JSX.Element | null {
-    const router = useRouter();
-    const { status } = useSession();
     const { selectedProjectId, selectedCategory, selectedContractType } =
         useCreateDocsContext();
-
-    useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push(ROUTES.SIGNIN);
-        }
-    }, [status, router]);
-
-    if (status === "loading") {
-        return <CreateDocsSkeleton />;
-    }
-
-    if (status === "unauthenticated") {
-        return null;
-    }
 
     return (
         <div className="w-full">

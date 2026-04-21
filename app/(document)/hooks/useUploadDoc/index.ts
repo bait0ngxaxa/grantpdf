@@ -1,7 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { type UseUploadDocReturn } from "./types";
 import { useUploadState } from "./useUploadState";
 import { useProjectList } from "./useProjectList";
@@ -11,8 +10,6 @@ import { useFileUpload } from "./useFileUpload";
 export type { UseUploadDocReturn } from "./types";
 
 export function useUploadDoc(): UseUploadDocReturn {
-    const { data: session, status } = useSession();
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     // Upload state
@@ -36,7 +33,6 @@ export function useUploadDoc(): UseUploadDocReturn {
         isLoadingProjects,
         projectError,
     } = useProjectList({
-        session,
         initialProjectId: searchParams.get("projectId"),
     });
 
@@ -59,8 +55,6 @@ export function useUploadDoc(): UseUploadDocReturn {
     });
 
     return {
-        session,
-        status,
         fileInputRef,
         selectedFile,
         isUploading,
@@ -75,7 +69,6 @@ export function useUploadDoc(): UseUploadDocReturn {
         handleDragOver,
         handleDrop,
         handleUpload,
-        router,
         setSelectedFile,
     };
 }

@@ -14,7 +14,7 @@ export const SWRProvider = ({ children }: { children: ReactNode }) => {
                         }
                         return res.json();
                     }),
-                revalidateOnFocus: true,
+                revalidateOnFocus: false,
                 dedupingInterval: 5000,
             }}
         >

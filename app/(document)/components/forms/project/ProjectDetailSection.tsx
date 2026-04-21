@@ -1,11 +1,12 @@
 import { FileText } from "lucide-react";
-import { FormField, FormSection } from "@/app/(document)/components";
+import { FormField } from "@/app/(document)/components/document-form/FormField";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
 import { type FormProjectData } from "@/config/initialData";
 import {
     DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH,
     DOCUMENT_TEXTAREA_MAX_LENGTH,
     DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH,
-} from "@/lib/validation/schemas";
+} from "@/lib/validation/constants";
 import { type ChangeEvent } from "react";
 
 interface ProjectDetailSectionProps {

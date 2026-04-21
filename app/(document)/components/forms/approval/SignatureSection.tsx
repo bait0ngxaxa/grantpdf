@@ -4,7 +4,7 @@ import { type ChangeEvent, forwardRef, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { FormSection } from "@/app/(document)/components";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
 import { Image as ImageIcon, PenTool, Upload } from "lucide-react";
 
 import type { SignatureCanvasRef } from "./SignatureCanvas";

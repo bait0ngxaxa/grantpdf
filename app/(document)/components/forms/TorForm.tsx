@@ -3,18 +3,14 @@
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
-import {
-    PreviewField,
-    PreviewGrid,
-    DocumentEditorLayout,
-} from "@/app/(document)/components";
+import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
 import { FormSkeleton } from "@/components/ui";
-import {
-    useDocumentForm,
-    usePreviewModal,
-    useDocumentValidation,
-    useExitConfirmation,
-} from "@/app/(document)/hooks";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
 
 import {
     type TORData,
@@ -22,13 +18,20 @@ import {
     initialTORData,
     initialActivity,
 } from "@/config/initialData";
-import { validateTOR } from "@/lib/validation";
+import { type DocumentValidationResult } from "@/lib/validation";
 import {
     BasicInfoSection,
     ProjectDetailSection,
     ScopeSection,
     ActivitySection,
 } from "@/app/(document)/components/forms/tor";
+
+async function validateTorForm(
+    data: TORData,
+): Promise<DocumentValidationResult<TORData>> {
+    return (await import("@/lib/validation/documentValidators/validateTOR"))
+        .validateTOR(data);
+}
 
 export function TorForm(): React.JSX.Element {
     const searchParams = useSearchParams();
@@ -69,7 +72,7 @@ export function TorForm(): React.JSX.Element {
         createPhoneChangeHandler,
         validateBeforeSubmit,
     } = useDocumentValidation<TORData>({
-        validateForm: validateTOR,
+        validateForm: validateTorForm,
         openPreview,
         formData,
     });

@@ -10,6 +10,7 @@ import { useDashboardActions } from "../hooks/useDashboardActions";
 import type { UserProjectStats } from "../hooks/useUserData";
 import type { Project } from "@/type";
 import type { LatestProject } from "@/type/models";
+import type { Session } from "next-auth";
 
 import { DashboardUIProvider, useDashboardUI } from "./DashboardUIContext";
 import { ModalProvider, useModalContext } from "./ModalContext";
@@ -17,6 +18,8 @@ import { ProjectDataProvider, useProjectDataData } from "./ProjectDataContext";
 
 // Unified Interface to match the old one
 interface UserDashboardContextType {
+    session: Session;
+
     // UI State
     activeTab: string;
     setActiveTab: (tab: string) => void;
@@ -90,7 +93,13 @@ const UserDashboardContext = createContext<
 >(undefined);
 
 // Inner component to consume the sub-contexts and merge them
-function UnifiedProviderValue({ children }: { children: ReactNode }) {
+function UnifiedProviderValue({
+    children,
+    session,
+}: {
+    children: ReactNode;
+    session: Session;
+}) {
     const ui = useDashboardUI();
     const modal = useModalContext();
     const data = useProjectDataData();
@@ -119,12 +128,13 @@ function UnifiedProviderValue({ children }: { children: ReactNode }) {
 
     const value = useMemo(
         () => ({
+            session,
             ...ui,
             ...modal,
             ...data,
             ...actions,
         }),
-        [ui, modal, data, actions],
+        [session, ui, modal, data, actions],
     );
 
     return (
@@ -137,15 +147,19 @@ function UnifiedProviderValue({ children }: { children: ReactNode }) {
 export function UserDashboardProvider({
     children,
     initialStats,
+    session,
 }: {
     children: ReactNode;
     initialStats?: UserProjectStats;
+    session: Session;
 }) {
     return (
         <DashboardUIProvider>
             <ModalProvider>
                 <ProjectDataProvider initialStats={initialStats}>
-                    <UnifiedProviderValue>{children}</UnifiedProviderValue>
+                    <UnifiedProviderValue session={session}>
+                        {children}
+                    </UnifiedProviderValue>
                 </ProjectDataProvider>
             </ModalProvider>
         </DashboardUIProvider>

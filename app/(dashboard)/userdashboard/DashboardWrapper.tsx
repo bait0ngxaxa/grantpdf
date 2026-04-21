@@ -5,10 +5,12 @@ import { Sidebar } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
 import { UserDashboardProvider } from "./contexts";
 import type { UserProjectStats } from "./hooks/useUserData";
+import type { Session } from "next-auth";
 
 interface DashboardWrapperProps {
     children: React.ReactNode;
     initialStats?: UserProjectStats;
+    session: Session;
 }
 
 // P3: pass server-prefetched stats down to hooks as initial data
@@ -16,9 +18,10 @@ interface DashboardWrapperProps {
 export function DashboardWrapper({
     children,
     initialStats,
+    session,
 }: DashboardWrapperProps): React.JSX.Element {
     return (
-        <UserDashboardProvider initialStats={initialStats}>
+        <UserDashboardProvider initialStats={initialStats} session={session}>
             <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-100 dark:selection:bg-blue-900 selection:text-blue-900 dark:selection:text-blue-100">
                 <Sidebar />
 

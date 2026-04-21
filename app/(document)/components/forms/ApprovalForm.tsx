@@ -2,25 +2,19 @@
 
 import { useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
-import {
-    useDocumentForm,
-    usePreviewModal,
-    useDocumentValidation,
-    useExitConfirmation,
-    useApprovalLogic,
-} from "@/app/(document)/hooks";
-import {
-    PreviewField,
-    PreviewGrid,
-    PreviewList,
-    DocumentEditorLayout,
-} from "@/app/(document)/components";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
+import { useApprovalLogic } from "@/app/(document)/hooks/useApprovalLogic";
+import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
+import { PreviewList } from "@/app/(document)/components/document-form/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
 import { FormSkeleton } from "@/components/ui";
 import { FileText } from "lucide-react";
 import { type ApprovalData, initialApprovalData } from "@/config/initialData";
-import { validateApproval } from "@/lib/validation";
+import { type DocumentValidationResult } from "@/lib/validation";
 import {
     BasicInfoSection,
     DocumentDetailSection,
@@ -29,9 +23,18 @@ import {
     SignatureSection,
     type SignatureCanvasRef,
 } from "@/app/(document)/components/forms/approval";
+import { useDocumentAuth } from "../../contexts/DocumentAuthContext";
+
+async function validateApprovalForm(
+    data: ApprovalData,
+): Promise<DocumentValidationResult<ApprovalData>> {
+    return (
+        await import("@/lib/validation/documentValidators/validateApproval")
+    ).validateApproval(data);
+}
 
 export function ApprovalForm(): React.JSX.Element {
-    const { data: session } = useSession();
+    const { session } = useDocumentAuth();
     const searchParams = useSearchParams();
     const projectId = searchParams.get("projectId") || "";
     const signatureCanvasRef = useRef<SignatureCanvasRef>(null);
@@ -93,7 +96,7 @@ export function ApprovalForm(): React.JSX.Element {
         createPhoneChangeHandler,
         validateBeforeSubmit,
     } = useDocumentValidation<ApprovalData>({
-        validateForm: validateApproval,
+        validateForm: validateApprovalForm,
         openPreview,
         formData,
     });
@@ -205,11 +208,10 @@ export function ApprovalForm(): React.JSX.Element {
                                     <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
                                         จากการอัปโหลดไฟล์:
                                     </p>
-                                    <Image
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
                                         src={signaturePreview}
                                         alt="Signature Preview"
-                                        width={320}
-                                        height={200}
                                         className="max-w-xs h-auto object-contain mt-2 border dark:border-slate-600 rounded"
                                     />
                                 </div>
@@ -219,11 +221,10 @@ export function ApprovalForm(): React.JSX.Element {
                                     <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
                                         จากการวาดออนไลน์:
                                     </p>
-                                    <Image
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
                                         src={signatureCanvasData}
                                         alt="Canvas Signature Preview"
-                                        width={320}
-                                        height={200}
                                         className="max-w-xs h-auto object-contain mt-2 border dark:border-slate-600 rounded"
                                     />
                                 </div>

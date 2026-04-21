@@ -11,6 +11,7 @@ import type {
     LatestProject,
     LatestUser,
 } from "@/type/models";
+import type { Session } from "next-auth";
 
 import { AdminUIProvider, useAdminUI } from "./AdminUIContext";
 import { AdminDataProvider, useAdminDataData } from "./AdminDataContext";
@@ -18,6 +19,8 @@ import { AdminModalProvider, useAdminModal } from "./AdminModalContext";
 import type { AdminStatsResponse } from "../hooks/useAdminData";
 
 interface AdminDashboardContextType {
+    session: Session;
+
     // UI State
     activeTab: string;
     setActiveTab: React.Dispatch<React.SetStateAction<string>>;
@@ -81,18 +84,25 @@ const AdminDashboardContext = createContext<
     AdminDashboardContextType | undefined
 >(undefined);
 
-function UnifiedProviderValue({ children }: { children: ReactNode }) {
+function UnifiedProviderValue({
+    children,
+    session,
+}: {
+    children: ReactNode;
+    session: Session;
+}) {
     const ui = useAdminUI();
     const data = useAdminDataData();
     const modal = useAdminModal();
 
     const value = useMemo(
         () => ({
+            session,
             ...ui,
             ...data,
             ...modal,
         }),
-        [ui, data, modal],
+        [session, ui, data, modal],
     );
 
     return (
@@ -105,16 +115,20 @@ function UnifiedProviderValue({ children }: { children: ReactNode }) {
 export function AdminDashboardProvider({
     children,
     initialStats,
+    session,
 }: {
     children: ReactNode;
     initialStats?: AdminStatsResponse;
+    session: Session;
 }) {
     return (
         // AdminUIProvider must be outermost so AdminDataContext can read its state
         <AdminUIProvider>
             <AdminDataProvider initialStats={initialStats}>
                 <AdminModalProvider>
-                    <UnifiedProviderValue>{children}</UnifiedProviderValue>
+                    <UnifiedProviderValue session={session}>
+                        {children}
+                    </UnifiedProviderValue>
                 </AdminModalProvider>
             </AdminDataProvider>
         </AdminUIProvider>

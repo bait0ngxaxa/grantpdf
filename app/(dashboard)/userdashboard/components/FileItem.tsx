@@ -12,6 +12,7 @@ import {
     ChevronDown,
     Download,
     Eye,
+    Loader2,
     Trash2,
 } from "lucide-react";
 import { useUserDashboardContext } from "../contexts";
@@ -101,7 +102,11 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                         className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors disabled:opacity-50"
                         title="ดาวน์โหลด"
                     >
-                        <Download className="h-5 w-5" />
+                        {isDownloading ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                            <Download className="h-5 w-5" />
+                        )}
                     </button>
                     {file.fileExtension === "pdf" && (
                         <button

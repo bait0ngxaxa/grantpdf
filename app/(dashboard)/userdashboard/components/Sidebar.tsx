@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogOut, Folder, Building2, Plus, X } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useUserDashboardContext } from "../contexts";
 
 type MenuItemType = {
@@ -32,8 +32,8 @@ const menuItems: MenuItemType[] = [
 ];
 
 export const Sidebar: React.FC = (): React.JSX.Element => {
-    const { data: session } = useSession();
     const {
+        session,
         isSidebarOpen,
         setIsSidebarOpen,
         activeTab,

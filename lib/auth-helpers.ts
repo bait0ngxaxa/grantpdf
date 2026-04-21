@@ -7,7 +7,9 @@ import type { Session } from "next-auth";
  * Check if a session belongs to an admin user.
  * Works with both server components and route handlers.
  */
-export function isAdmin(session: Session | null): boolean {
+export function isAdmin(
+    session: Session | null,
+): session is Session & { user: Session["user"] & { role: "admin" } } {
     return session?.user?.role === ROLES.ADMIN;
 }
 

@@ -3,25 +3,29 @@
 import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
-import {
-    PreviewField,
-    PreviewGrid,
-    DocumentEditorLayout,
-} from "@/app/(document)/components";
+import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
 import { FormSkeleton } from "@/components/ui";
-import {
-    useDocumentForm,
-    usePreviewModal,
-    useDocumentValidation,
-    useExitConfirmation,
-} from "@/app/(document)/hooks";
+import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
+import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
+import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
+import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
 import { type ContractData, initialContractData } from "@/config/initialData";
-import { validateContract } from "@/lib/validation";
+import { type DocumentValidationResult } from "@/lib/validation";
 import {
     ProjectDetailsSection,
     ContractorInfoSection,
     BudgetSection,
 } from "@/app/(document)/components/forms/contract";
+
+async function validateContractForm(
+    data: ContractData,
+): Promise<DocumentValidationResult<ContractData>> {
+    return (
+        await import("@/lib/validation/documentValidators/validateContract")
+    ).validateContract(data);
+}
 
 export function ContractForm(): React.JSX.Element {
     const searchParams = useSearchParams();
@@ -64,7 +68,7 @@ export function ContractForm(): React.JSX.Element {
         createCitizenIdChangeHandler,
         validateBeforeSubmit,
     } = useDocumentValidation<ContractData>({
-        validateForm: validateContract,
+        validateForm: validateContractForm,
         openPreview,
         formData,
     });

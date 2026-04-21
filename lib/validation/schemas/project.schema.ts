@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { PROJECT_STATUS } from "@/type/models";
-import { PROJECT_NAME_MAX_LENGTH } from "./shared";
+import {
+    PROJECT_DESCRIPTION_MAX_LENGTH,
+    PROJECT_NAME_MAX_LENGTH,
+    PROJECT_STATUS_NOTE_MAX_LENGTH,
+} from "../constants";
 
 const projectStatusValues = [
     PROJECT_STATUS.IN_PROGRESS,
@@ -9,9 +13,6 @@ const projectStatusValues = [
     PROJECT_STATUS.EDIT,
     PROJECT_STATUS.CLOSED,
 ] as const;
-export const PROJECT_DESCRIPTION_MAX_LENGTH = 1000;
-export const PROJECT_STATUS_NOTE_MAX_LENGTH = 1000;
-
 export const createProjectSchema = z.object({
     name: z
         .string("กรุณาระบุชื่อโครงการ")

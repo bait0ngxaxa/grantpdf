@@ -10,7 +10,9 @@ import {
 
 export interface UseDocumentValidationConfig<T extends object> {
     /** Function to validate all form fields */
-    validateForm: (data: T) => DocumentValidationResult<T>;
+    validateForm: (
+        data: T,
+    ) => Promise<DocumentValidationResult<T>> | DocumentValidationResult<T>;
     /** Function to open preview modal */
     openPreview: () => void;
     /** Optional: current form data for bound preview handler */
@@ -27,7 +29,7 @@ export interface UseDocumentValidationReturn<T extends object> {
     /** Set validation errors manually */
     setErrors: React.Dispatch<React.SetStateAction<ValidationErrors<T>>>;
     /** Handle preview button click with validation (requires formData param) */
-    handlePreview: (formData: T) => void;
+    handlePreview: (formData: T) => Promise<void>;
     /** Get a bound handlePreview function (use when formData is passed in config) */
     getHandlePreview: () => void;
     /** Create a phone input change handler for a specific field */
@@ -46,7 +48,7 @@ export interface UseDocumentValidationReturn<T extends object> {
         e: React.FormEvent<HTMLFormElement>,
         formData: T,
         onValid: (e: React.FormEvent<HTMLFormElement>) => void,
-    ) => void;
+    ) => Promise<void>;
 }
 
 // =====================================================
@@ -54,7 +56,9 @@ export interface UseDocumentValidationReturn<T extends object> {
 // =====================================================
 
 export interface UsePreviewValidationProps<T extends object> {
-    validateForm: (data: T) => DocumentValidationResult<T>;
+    validateForm: (
+        data: T,
+    ) => Promise<DocumentValidationResult<T>> | DocumentValidationResult<T>;
     openPreview: () => void;
     formData?: T;
     setErrors: React.Dispatch<React.SetStateAction<ValidationErrors<T>>>;
@@ -65,6 +69,8 @@ export interface UseInputFormattersProps<T extends object> {
 }
 
 export interface UseSubmitValidationProps<T extends object> {
-    validateForm: (data: T) => DocumentValidationResult<T>;
+    validateForm: (
+        data: T,
+    ) => Promise<DocumentValidationResult<T>> | DocumentValidationResult<T>;
     setErrors: React.Dispatch<React.SetStateAction<ValidationErrors<T>>>;
 }

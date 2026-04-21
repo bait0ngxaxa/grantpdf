@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { AdminDashboardWrapper } from "./AdminDashboardWrapper";
 import { isAdmin } from "@/lib/auth-helpers";
 import { ROUTES } from "@/lib/constants";
+import { SWRProvider } from "@/components/providers";
 
 export const metadata: Metadata = {
     title: "Admin Dashboard - ระบบจัดการเอกสาร",
@@ -30,6 +31,12 @@ export default async function AdminDashboardLayout({
         initialStats = undefined;
     }
 
-    return <AdminDashboardWrapper initialStats={initialStats}>{children}</AdminDashboardWrapper>;
+    return (
+        <SWRProvider>
+            <AdminDashboardWrapper initialStats={initialStats} session={session}>
+                {children}
+            </AdminDashboardWrapper>
+        </SWRProvider>
+    );
 }
 

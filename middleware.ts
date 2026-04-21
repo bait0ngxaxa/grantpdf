@@ -81,9 +81,10 @@ export async function middleware(
     req: NextRequest
 ): Promise<NextResponse | Response> {
     const { pathname } = req.nextUrl;
+    const isApiRequest = pathname.startsWith("/api/");
 
     if (
-        pathname.startsWith("/api/") &&
+        isApiRequest &&
         CSRF_PROTECTED_METHODS.includes(req.method) &&
         !CSRF_EXEMPT_ROUTES.some((route) => pathname.startsWith(route))
     ) {
@@ -100,6 +101,10 @@ export async function middleware(
                 { status: 403 }
             );
         }
+    }
+
+    if (isApiRequest) {
+        return NextResponse.next();
     }
 
     // Auth.js v5: use getToken (still works in Edge middleware)
@@ -159,14 +164,11 @@ export const config = {
     matcher: [
         "/api/:path*",
         "/admin/:path*",
-        "/signin",
-        "/signup",
         "/form",
         "/userdashboard",
         "/uploads-doc",
         "/create-word/:path*",
         "/reset-password",
         "/createdocs",
-        "/",
     ],
 };

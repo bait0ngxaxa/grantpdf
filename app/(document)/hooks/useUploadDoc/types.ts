@@ -1,6 +1,4 @@
 import { type ChangeEvent, type DragEvent } from "react";
-import { type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { type Session } from "next-auth";
 import type { ProjectSummary } from "@/type";
 
 // =====================================================
@@ -14,8 +12,6 @@ export type ProjectListItem = ProjectSummary;
 // =====================================================
 
 export interface UseUploadDocReturn {
-    session: Session | null;
-    status: string;
     fileInputRef: React.RefObject<HTMLInputElement | null>;
     selectedFile: File | null;
     isUploading: boolean;
@@ -30,7 +26,6 @@ export interface UseUploadDocReturn {
     handleDragOver: (event: DragEvent<HTMLDivElement>) => void;
     handleDrop: (event: DragEvent<HTMLDivElement>) => void;
     handleUpload: () => Promise<void>;
-    router: AppRouterInstance;
     setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>;
 }
 

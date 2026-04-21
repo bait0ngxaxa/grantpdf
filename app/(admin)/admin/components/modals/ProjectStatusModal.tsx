@@ -1,10 +1,10 @@
 import React from "react";
 import { Button } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
-import { ClipboardList, X } from "lucide-react";
+import { ClipboardList, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STATUS_ORDER } from "@/lib/constants";
-import { PROJECT_STATUS_NOTE_MAX_LENGTH } from "@/lib/validation/schemas";
+import { PROJECT_STATUS_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
 
 interface ProjectStatusModalProps {
     isStatusModalOpen: boolean;
@@ -161,9 +161,14 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                         : "",
                                 )}
                             >
-                                {isUpdatingStatus
-                                    ? "กำลังอัปเดต…"
-                                    : "บันทึกการเปลี่ยนแปลง"}
+                                {isUpdatingStatus ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        กำลังอัปเดต…
+                                    </>
+                                ) : (
+                                    "บันทึกการเปลี่ยนแปลง"
+                                )}
                             </Button>
                         </div>
                     </div>

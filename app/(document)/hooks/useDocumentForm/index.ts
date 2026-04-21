@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import {
     type UseDocumentFormOptions,
     type UseDocumentFormReturn,
@@ -9,6 +8,7 @@ import { useFormState } from "./useFormState";
 import { useFormHandlers } from "./useFormHandlers";
 import { useFormSubmit } from "./useFormSubmit";
 import { checkIsDirty } from "./helpers";
+import { useDocumentAuth } from "../../contexts/DocumentAuthContext";
 
 export type { UseDocumentFormOptions, UseDocumentFormReturn } from "./types";
 
@@ -20,7 +20,7 @@ export function useDocumentForm<T extends object>({
     prepareFormData,
     onSuccess,
 }: UseDocumentFormOptions<T>): UseDocumentFormReturn<T> {
-    const { data: session } = useSession();
+    const { session } = useDocumentAuth();
 
     // Form state
     const {

@@ -1,5 +1,6 @@
 import { Users } from "lucide-react";
-import { FormField, FormSection } from "@/app/(document)/components";
+import { FormField } from "@/app/(document)/components/document-form/FormField";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
 import { type SummaryData } from "@/config/initialData";
 import { type ChangeEvent } from "react";
 

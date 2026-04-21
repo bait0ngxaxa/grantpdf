@@ -168,4 +168,31 @@ describe("projects route", () => {
         expect(body.error).toBe("ชื่อโครงการยาวเกินไป");
         expect(mockedCreateProjectWithAudit).not.toHaveBeenCalled();
     });
+
+    it("accepts project creation when description is omitted", async () => {
+        mockedAuth.mockResolvedValue({
+            user: { id: "7", email: "tester@example.com" },
+        } as never);
+        mockedCreateProjectWithAudit.mockResolvedValue({
+            id: "12",
+            name: "โครงการทดสอบ",
+            description: null,
+        } as never);
+
+        const request = buildPostRequest({
+            name: "โครงการทดสอบ",
+        });
+        const response = await POST(request);
+
+        expect(response.status).toBe(200);
+        expect(mockedCreateProjectWithAudit).toHaveBeenCalledWith(
+            7,
+            "โครงการทดสอบ",
+            undefined,
+            expect.objectContaining({
+                actorUserId: "7",
+                actorEmail: "tester@example.com",
+            }),
+        );
+    });
 });

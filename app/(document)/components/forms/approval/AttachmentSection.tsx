@@ -1,13 +1,11 @@
 import { Folder } from "lucide-react";
-import {
-    AttachmentList,
-    AttachmentUpload,
-    FormSection,
-} from "@/app/(document)/components";
+import { AttachmentList } from "@/app/(document)/components/document-form/AttachmentList";
+import { AttachmentUpload } from "@/app/(document)/components/document-form/AttachmentUpload";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
 import { type ApprovalData } from "@/config/initialData";
 import { type ChangeEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { DOCUMENT_TEXTAREA_MAX_LENGTH } from "@/lib/validation/schemas";
+import { DOCUMENT_TEXTAREA_MAX_LENGTH } from "@/lib/validation/constants";
 
 interface AttachmentSectionProps {
     formData: ApprovalData;

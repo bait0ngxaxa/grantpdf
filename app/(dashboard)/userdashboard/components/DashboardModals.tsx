@@ -9,11 +9,10 @@ import {
     ProfileModal,
 } from "./modals";
 import { PdfPreviewModal } from "@/components/ui";
-import { useSession } from "next-auth/react";
 
 export const DashboardModals = () => {
-    const { data: session } = useSession();
     const {
+        session,
         isModalOpen,
         setIsModalOpen,
         previewUrl,

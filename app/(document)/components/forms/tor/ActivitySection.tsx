@@ -1,8 +1,8 @@
 import { BarChart, Plus, Trash2 } from "lucide-react";
 import { Button, Textarea } from "@/components/ui";
-import { FormSection } from "@/app/(document)/components";
+import { FormSection } from "@/app/(document)/components/document-form/FormSection";
 import { type ActivityData } from "@/config/initialData";
-import { DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH } from "@/lib/validation/schemas";
+import { DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH } from "@/lib/validation/constants";
 import { type ChangeEvent } from "react";
 
 interface ActivitySectionProps {

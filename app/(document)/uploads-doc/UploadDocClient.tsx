@@ -1,11 +1,9 @@
 "use client";
 
+import { UploadHeader } from "@/app/(document)/components/upload-form/UploadHeader";
+import { ProjectList } from "@/app/(document)/components/upload-form/ProjectList";
+import { UploadArea } from "@/app/(document)/components/upload-form/UploadArea";
 import { useUploadDoc } from "@/app/(document)/hooks/useUploadDoc";
-import {
-    UploadHeader,
-    ProjectList,
-    UploadArea,
-} from "@/app/(document)/components";
 
 export default function UploadDocClient(): React.JSX.Element {
     const {

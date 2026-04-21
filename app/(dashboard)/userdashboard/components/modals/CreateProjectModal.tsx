@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import {
     PROJECT_DESCRIPTION_MAX_LENGTH,
     PROJECT_NAME_MAX_LENGTH,
-} from "@/lib/validation/schemas";
+} from "@/lib/validation/constants";
 import { Plus, Loader2 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
 
@@ -76,7 +76,10 @@ export const CreateProjectModal: React.FC = () => {
                     </div>
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                            คำอธิบาย
+                            คำอธิบายโครงการ{" "}
+                            <span className="text-slate-500 dark:text-slate-400 font-normal">
+                                (ไม่บังคับ)
+                            </span>
                         </label>
                         <textarea
                             value={newProjectDescription}
@@ -85,7 +88,7 @@ export const CreateProjectModal: React.FC = () => {
                             }
                             maxLength={PROJECT_DESCRIPTION_MAX_LENGTH}
                             className="w-full p-4 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-2xl h-32 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/10 transition-colors resize-none text-slate-700 text-sm"
-                            placeholder="ระบุคำอธิบายเกี่ยวกับโครงการนี้ (ถ้ามี)"
+                            placeholder="ระบุคำอธิบายเกี่ยวกับโครงการนี้ (ไม่บังคับ)"
                         />
                         <p className="mt-2 text-right text-xs text-slate-500 dark:text-slate-400">
                             {newProjectDescription.length}/

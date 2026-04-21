@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui";
-import { Trash2, AlertTriangle } from "lucide-react";
+import { Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import type { UserApiData } from "@/type";
 
 type UserData = UserApiData;
@@ -82,7 +82,14 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                         disabled={isDeleting}
                         className="px-6 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-200 font-medium transition"
                     >
-                        {isDeleting ? "กำลังลบ…" : "ยืนยันการลบ"}
+                        {isDeleting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                กำลังลบ…
+                            </>
+                        ) : (
+                            "ยืนยันการลบ"
+                        )}
                     </Button>
                 </div>
             </div>

@@ -18,8 +18,6 @@ export {
 // Project/API mutation schemas + types
 export {
     createProjectSchema,
-    PROJECT_DESCRIPTION_MAX_LENGTH,
-    PROJECT_STATUS_NOTE_MAX_LENGTH,
     updateProjectStatusSchema,
     updateAdminUserSchema,
     updateProjectSchema,
@@ -28,6 +26,16 @@ export {
     type UpdateAdminUserInput,
     type UpdateProjectInput,
 } from "./project.schema";
+
+export {
+    PROJECT_NAME_MAX_LENGTH,
+    PROJECT_DESCRIPTION_MAX_LENGTH,
+    PROJECT_STATUS_NOTE_MAX_LENGTH,
+    DOCUMENT_FILE_NAME_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH,
+} from "../constants";
 
 // File/API mutation schemas + types
 export {
@@ -45,9 +53,4 @@ export {
     citizenIdSchema,
     optionalPhoneSchema,
     optionalEmailSchema,
-    PROJECT_NAME_MAX_LENGTH,
-    DOCUMENT_FILE_NAME_MAX_LENGTH,
-    DOCUMENT_TEXTAREA_MAX_LENGTH,
-    DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH,
-    DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH,
 } from "./shared";

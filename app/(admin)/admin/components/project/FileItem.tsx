@@ -13,6 +13,7 @@ import {
     ChevronDown,
     Download,
     Eye,
+    Loader2,
 } from "lucide-react";
 
 interface FileItemProps {
@@ -125,7 +126,11 @@ export default function FileItem({
                             className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:opacity-50"
                             title="ดาวน์โหลด"
                         >
-                            <Download className="h-4 w-4" />
+                            {isDownloading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Download className="h-4 w-4" />
+                            )}
                         </button>
                     )}
                     {file.fileExtension === "pdf" && (

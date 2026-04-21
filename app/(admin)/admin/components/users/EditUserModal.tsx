@@ -1,6 +1,6 @@
 import React, { type FormEvent } from "react";
 import { Button, Input } from "@/components/ui";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { ROLES, type UserRole } from "@/lib/constants";
 import type { UserApiData } from "@/type";
 
@@ -130,7 +130,14 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                             disabled={isSaving}
                             className="px-6 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md shadow-blue-200 font-medium transition"
                         >
-                            {isSaving ? "กำลังบันทึก…" : "บันทึกการแก้ไข"}
+                            {isSaving ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    กำลังบันทึก…
+                                </>
+                            ) : (
+                                "บันทึกการแก้ไข"
+                            )}
                         </Button>
                     </div>
                 </form>

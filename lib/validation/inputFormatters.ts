@@ -1,8 +1,8 @@
 import {
-    phoneSchema,
-    citizenIdSchema,
     normalizePhoneNumber,
-} from "./schemas/shared";
+    isValidPhoneNumber,
+    isValidCitizenId,
+} from "./formatUtils";
 
 export function formatPhoneInput(value: string): string {
     const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -25,10 +25,13 @@ export function validateAndFormatPhone(value: string): {
     if (!formatted) {
         return { value: formatted };
     }
-    const result = phoneSchema.safeParse(formatted);
     return {
-        value: result.success ? normalizePhoneNumber(result.data) : formatted,
-        error: result.success ? undefined : result.error.issues[0].message,
+        value: isValidPhoneNumber(formatted)
+            ? normalizePhoneNumber(formatted)
+            : formatted,
+        error: isValidPhoneNumber(formatted)
+            ? undefined
+            : "เบอร์โทรต้องเป็นรูปแบบ 10 หลัก หรือ xxx-xxxxxxx",
     };
 }
 
@@ -40,9 +43,10 @@ export function validateAndFormatCitizenId(value: string): {
     if (!formatted) {
         return { value: formatted };
     }
-    const result = citizenIdSchema.safeParse(formatted);
     return {
         value: formatted,
-        error: result.success ? undefined : result.error.issues[0].message,
+        error: isValidCitizenId(formatted)
+            ? undefined
+            : "เลขบัตรประชาชนต้องเป็นตัวเลข 13 หลักเท่านั้น",
     };
 }

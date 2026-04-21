@@ -11,8 +11,8 @@ export function usePreviewValidation<T extends object>({
     setErrors,
 }: UsePreviewValidationProps<T>) {
     const handlePreview = useCallback(
-        (data: T) => {
-            const result = validateForm(data);
+        async (data: T): Promise<void> => {
+            const result = await validateForm(data);
 
             setErrors(result.errors);
 
@@ -30,7 +30,7 @@ export function usePreviewValidation<T extends object>({
      */
     const getHandlePreview = useCallback((): void => {
         if (formData) {
-            handlePreview(formData);
+            void handlePreview(formData);
         } else {
             console.warn(
                 "getHandlePreview called but formData is not provided in config",

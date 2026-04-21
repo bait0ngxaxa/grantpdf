@@ -12,7 +12,6 @@ import {
     ArrowLeft,
 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { useSession } from "next-auth/react";
 import { useAdminDashboardContext } from "../contexts";
 
 const menuItems = [
@@ -39,8 +38,8 @@ const menuItems = [
 ];
 
 export const AdminSidebar: React.FC = (): React.JSX.Element => {
-    const { data: session } = useSession();
     const {
+        session,
         isSidebarOpen,
         setIsSidebarOpen,
         activeTab,
