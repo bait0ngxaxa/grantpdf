@@ -47,5 +47,12 @@ export function toPublicApiError(
         return publicApiError(404, "ไม่พบข้อมูล");
     }
 
+    if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2000"
+    ) {
+        return publicApiError(400, "ข้อมูลยาวเกินกว่าที่ระบบรองรับ");
+    }
+
     return publicApiError(500, fallbackMessage);
 }

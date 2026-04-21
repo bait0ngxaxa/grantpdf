@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PROJECT_STATUS } from "@/type/models";
+import { PROJECT_NAME_MAX_LENGTH } from "./shared";
 
 const projectStatusValues = [
     PROJECT_STATUS.IN_PROGRESS,
@@ -8,17 +9,21 @@ const projectStatusValues = [
     PROJECT_STATUS.EDIT,
     PROJECT_STATUS.CLOSED,
 ] as const;
+export const PROJECT_DESCRIPTION_MAX_LENGTH = 1000;
+export const PROJECT_STATUS_NOTE_MAX_LENGTH = 1000;
 
 export const createProjectSchema = z.object({
     name: z
         .string("กรุณาระบุชื่อโครงการ")
         .trim()
         .min(1, { message: "กรุณาระบุชื่อโครงการ" })
-        .max(255, { message: "ชื่อโครงการยาวเกินไป" }),
+        .max(PROJECT_NAME_MAX_LENGTH, { message: "ชื่อโครงการยาวเกินไป" }),
     description: z
         .string()
         .trim()
-        .max(2000, { message: "รายละเอียดโครงการยาวเกินไป" })
+        .max(PROJECT_DESCRIPTION_MAX_LENGTH, {
+            message: "รายละเอียดโครงการยาวเกินไป",
+        })
         .optional()
         .or(z.literal("")),
 });
@@ -34,7 +39,9 @@ export const updateProjectStatusSchema = z.object({
     statusNote: z
         .string()
         .trim()
-        .max(1000, { message: "หมายเหตุสถานะยาวเกินไป" })
+        .max(PROJECT_STATUS_NOTE_MAX_LENGTH, {
+            message: "หมายเหตุสถานะยาวเกินไป",
+        })
         .optional()
         .or(z.literal("")),
 });
@@ -55,11 +62,13 @@ export const updateProjectSchema = z.object({
         .string("กรุณาระบุชื่อโครงการ")
         .trim()
         .min(1, { message: "กรุณาระบุชื่อโครงการ" })
-        .max(255, { message: "ชื่อโครงการยาวเกินไป" }),
+        .max(PROJECT_NAME_MAX_LENGTH, { message: "ชื่อโครงการยาวเกินไป" }),
     description: z
         .string()
         .trim()
-        .max(2000, { message: "รายละเอียดโครงการยาวเกินไป" })
+        .max(PROJECT_DESCRIPTION_MAX_LENGTH, {
+            message: "รายละเอียดโครงการยาวเกินไป",
+        })
         .optional()
         .or(z.literal("")),
 });

@@ -1,11 +1,23 @@
 import { z } from "zod";
 
+export const PROJECT_NAME_MAX_LENGTH = 255;
+export const DOCUMENT_FILE_NAME_MAX_LENGTH = 250;
+export const DOCUMENT_TEXTAREA_MAX_LENGTH = 4000;
+export const DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH = 2000;
+export const DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH = 1000;
+
 // สร้าง required string ที่มี error message ภาษาไทย
 export function requiredString(label: string) {
     return z
         .string(`กรุณาระบุ${label}`)
         .trim()
         .min(1, { message: `กรุณาระบุ${label}` });
+}
+
+export function requiredBoundedString(label: string, maxLength: number) {
+    return requiredString(label).max(maxLength, {
+        message: `${label}ยาวเกินไป`,
+    });
 }
 
 const PHONE_DIGIT_ONLY_REGEX = /^\d{10}$/;

@@ -1,9 +1,15 @@
 import { z } from "zod";
-import { requiredString, citizenIdSchema } from "./shared";
+import {
+    requiredString,
+    citizenIdSchema,
+    requiredBoundedString,
+    DOCUMENT_FILE_NAME_MAX_LENGTH,
+    PROJECT_NAME_MAX_LENGTH,
+} from "./shared";
 
 export const contractSchema = z.object({
-    fileName: requiredString("ชื่อไฟล์"),
-    projectName: requiredString("ชื่อโครงการ"),
+    fileName: requiredBoundedString("ชื่อไฟล์", DOCUMENT_FILE_NAME_MAX_LENGTH),
+    projectName: requiredBoundedString("ชื่อโครงการ", PROJECT_NAME_MAX_LENGTH),
     contractnumber: z.string().trim().optional().default(""),
     projectOffer: requiredString("ข้อเสนอโครงการ"),
     projectCo: requiredString("ชุดโครงการ"),

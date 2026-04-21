@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import { prisma } from "@/lib/prisma";
 
 const TIMEZONE = "Asia/Bangkok"; // Thailand UTC+7
@@ -66,32 +66,19 @@ function inferOutcome(action: AuditAction, outcome?: AuditOutcome): AuditOutcome
     return action.endsWith("_FAILED") ? "failure" : "success";
 }
 
-function toActorUserId(userId: string | null): number | null {
-    if (!userId) return null;
-    const parsed = Number(userId);
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
-
-function toJsonValue(
-    details?: Record<string, unknown>,
-): Prisma.InputJsonValue | undefined {
-    if (!details) return undefined;
-    return JSON.parse(JSON.stringify(details)) as Prisma.InputJsonValue;
-}
-
 async function writeAuditLogToDatabase(entry: AuditLogEntry): Promise<void> {
     await prisma.auditLog.create({
         data: {
             action: entry.action,
             outcome: entry.outcome,
-            actorUserId: toActorUserId(entry.userId),
+            actorUserId: parseActorUserId(entry.userId),
             actorEmail: entry.userEmail,
             targetType: entry.targetType,
             targetId: entry.targetId,
             ip: entry.ip,
             userAgent: entry.userAgent,
             requestId: entry.requestId,
-            details: toJsonValue(entry.details),
+            details: toPrismaJsonValue(entry.details),
             created_at: new Date(entry.timestamp),
         },
     });

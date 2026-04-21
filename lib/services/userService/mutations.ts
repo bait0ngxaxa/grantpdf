@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import type { SafeUser, UpdateUserData } from "./types";
 import { isValidRole } from "./constants";
-import type { Prisma } from "@prisma/client";
 
 interface AuditContext {
     actorUserId: string | null;
@@ -9,18 +9,6 @@ interface AuditContext {
     ip?: string;
     userAgent?: string;
     requestId?: string;
-}
-
-function parseActorUserId(actorUserId: string | null): number | null {
-    if (!actorUserId) return null;
-    const parsed = Number(actorUserId);
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
-
-function toJsonValue(
-    value: Record<string, unknown>,
-): Prisma.InputJsonValue {
-    return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 }
 
 export async function updateUser(
@@ -109,7 +97,7 @@ export async function updateUserWithAudit(
                 ip: audit.ip ?? null,
                 userAgent: audit.userAgent ?? null,
                 requestId: audit.requestId ?? null,
-                details: toJsonValue({
+                details: toPrismaJsonValue({
                     targetUserId: updatedUser.id.toString(),
                     targetUserEmail: updatedUser.email,
                     before: {
@@ -165,7 +153,7 @@ export async function deleteUserWithAudit(
                 ip: audit.ip ?? null,
                 userAgent: audit.userAgent ?? null,
                 requestId: audit.requestId ?? null,
-                details: toJsonValue({
+                details: toPrismaJsonValue({
                     targetUserId: targetUser.id.toString(),
                     targetUserEmail: targetUser.email,
                     deletedUser: {

@@ -7,6 +7,24 @@ export function cn(...inputs: ClassValue[]): string {
     return twMerge(clsx(inputs));
 }
 
+export function getStringField(
+    data: unknown,
+    fieldName: string
+): string | undefined {
+    if (typeof data !== "object" || data === null) {
+        return undefined;
+    }
+    if (!(fieldName in data)) {
+        return undefined;
+    }
+    const value = (data as Record<string, unknown>)[fieldName];
+    if (typeof value !== "string") {
+        return undefined;
+    }
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+}
+
 const DEFAULT_BADGE_COLOR =
     "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-900/20 dark:text-slate-400 dark:border-slate-800";
 

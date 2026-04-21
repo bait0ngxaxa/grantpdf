@@ -1,6 +1,10 @@
 import { FileText } from "lucide-react";
 import { FormField, FormSection } from "@/app/(document)/components";
 import { type TORData } from "@/config/initialData";
+import {
+    DOCUMENT_TEXTAREA_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH,
+} from "@/lib/validation/schemas";
 import { type ChangeEvent } from "react";
 
 interface ProjectDetailSectionProps {
@@ -35,6 +39,7 @@ export function ProjectDetailSection({
                     placeholder="หลักการและเหตุผล"
                     value={formData.topic1}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MAX_LENGTH}
                     error={errors.topic1}
                     rows={12}
                     className="h-96"
@@ -47,6 +52,7 @@ export function ProjectDetailSection({
                     placeholder="วัตถุประสงค์โครงการ"
                     value={formData.objective1}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.objective1}
                     rows={6}
                     className="h-40"
@@ -59,6 +65,7 @@ export function ProjectDetailSection({
                     placeholder="กลุ่มเป้าหมายของโครงการ"
                     value={formData.target}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.target}
                     rows={6}
                     className="h-40"

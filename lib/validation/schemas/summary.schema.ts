@@ -1,9 +1,14 @@
 import { z } from "zod";
-import { requiredString } from "./shared";
+import {
+    requiredString,
+    requiredBoundedString,
+    DOCUMENT_FILE_NAME_MAX_LENGTH,
+    PROJECT_NAME_MAX_LENGTH,
+} from "./shared";
 
 export const summarySchema = z.object({
-    fileName: requiredString("ชื่อไฟล์"),
-    projectName: requiredString("ชื่อโครงการ"),
+    fileName: requiredBoundedString("ชื่อไฟล์", DOCUMENT_FILE_NAME_MAX_LENGTH),
+    projectName: requiredBoundedString("ชื่อโครงการ", PROJECT_NAME_MAX_LENGTH),
     contractNumber: requiredString("เลขที่สัญญา"),
     organize: requiredString("หน่วยงานที่เสนอโครงการ"),
     projectOwner: requiredString("ผู้เสนอโครงการ"),

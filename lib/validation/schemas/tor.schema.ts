@@ -1,9 +1,16 @@
 import { z } from "zod";
-import { requiredString, phoneSchema, emailSchema } from "./shared";
+import {
+    requiredString,
+    phoneSchema,
+    emailSchema,
+    requiredBoundedString,
+    DOCUMENT_FILE_NAME_MAX_LENGTH,
+    PROJECT_NAME_MAX_LENGTH,
+} from "./shared";
 
 export const torSchema = z.object({
-    projectName: requiredString("ชื่อโครงการ"),
-    fileName: requiredString("ชื่อไฟล์"),
+    projectName: requiredBoundedString("ชื่อโครงการ", PROJECT_NAME_MAX_LENGTH),
+    fileName: requiredBoundedString("ชื่อไฟล์", DOCUMENT_FILE_NAME_MAX_LENGTH),
     owner: requiredString("ผู้รับผิดชอบ"),
     address: requiredString("ที่อยู่"),
     email: emailSchema,

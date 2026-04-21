@@ -76,7 +76,7 @@ export default function ProjectCard({
                 )}
                 onClick={() => onToggleExpansion(project.id)}
             >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex items-start space-x-4">
                         <div className="flex-shrink-0">
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 rounded-xl flex items-center justify-center shadow-md shadow-blue-200 dark:shadow-blue-900/30">
@@ -124,7 +124,7 @@ export default function ProjectCard({
                             </div>
 
                             {project.description && (
-                                <p className="text-sm text-slate-400 dark:text-slate-500 mt-2 break-words pl-1">
+                                <p className="max-w-3xl text-sm text-slate-400 dark:text-slate-500 mt-2 break-words line-clamp-2 pl-1">
                                     {project.description}
                                 </p>
                             )}
@@ -142,7 +142,7 @@ export default function ProjectCard({
                                     </span>
                                 </div>
                                 {project.statusNote && (
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 pl-1 break-words">
+                                    <p className="max-w-3xl text-xs text-slate-500 dark:text-slate-400 pl-1 break-words line-clamp-2">
                                         <span className="font-medium text-slate-600 dark:text-slate-300">
                                             หมายเหตุ:
                                         </span>{" "}
@@ -153,7 +153,7 @@ export default function ProjectCard({
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between sm:justify-end space-x-3 pl-16 sm:pl-0">
+                    <div className="flex items-start justify-between sm:justify-end space-x-3 pl-16 sm:pl-0 sm:flex-shrink-0">
                         <Button
                             size="sm"
                             onClick={(e) => {

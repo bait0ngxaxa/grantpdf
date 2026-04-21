@@ -18,6 +18,8 @@ export {
 // Project/API mutation schemas + types
 export {
     createProjectSchema,
+    PROJECT_DESCRIPTION_MAX_LENGTH,
+    PROJECT_STATUS_NOTE_MAX_LENGTH,
     updateProjectStatusSchema,
     updateAdminUserSchema,
     updateProjectSchema,
@@ -36,10 +38,16 @@ export {
 // Shared helpers
 export {
     requiredString,
+    requiredBoundedString,
     phoneSchema,
     normalizePhoneNumber,
     emailSchema,
     citizenIdSchema,
     optionalPhoneSchema,
     optionalEmailSchema,
+    PROJECT_NAME_MAX_LENGTH,
+    DOCUMENT_FILE_NAME_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH,
 } from "./shared";

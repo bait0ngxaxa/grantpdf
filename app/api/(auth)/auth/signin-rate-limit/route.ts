@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { RATE_LIMIT } from "@/lib/constants";
+import { getStringField } from "@/lib/utils";
 import {
     createRateLimitKey,
     getRateLimitHeaders,
     getRateLimitStatus,
-    getStringField,
 } from "@/lib/ratelimit";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

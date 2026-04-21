@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import type { AdminProject } from "@/type/models";
 import { Prisma, type Project } from "@prisma/client";
 import type { UpdateProjectStatusParams } from "./types";
@@ -103,17 +104,6 @@ interface ProjectAuditContext {
     requestId?: string;
 }
 
-function parseActorUserId(actorUserId: string): number | null {
-    const parsed = Number(actorUserId);
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
-
-function normalizeProjectAuditDetails(
-    details: Record<string, unknown>,
-): Prisma.InputJsonValue {
-    return JSON.parse(JSON.stringify(details)) as Prisma.InputJsonValue;
-}
-
 export async function createProjectWithAudit(
     userId: number,
     name: string,
@@ -157,7 +147,7 @@ export async function createProjectWithAudit(
                 ip: audit.ip ?? null,
                 userAgent: audit.userAgent ?? null,
                 requestId: audit.requestId ?? null,
-                details: normalizeProjectAuditDetails({
+                details: toPrismaJsonValue({
                     projectId: created.id,
                     projectName: created.name,
                     description: created.description,
@@ -223,7 +213,7 @@ export async function updateProjectWithAudit(
                     ip: audit.ip ?? null,
                     userAgent: audit.userAgent ?? null,
                     requestId: audit.requestId ?? null,
-                    details: normalizeProjectAuditDetails({
+                    details: toPrismaJsonValue({
                         projectId: updated.id,
                         previousName: existing.name,
                         previousDescription: existing.description,
@@ -281,7 +271,7 @@ export async function deleteProjectWithAudit(
                 ip: audit.ip ?? null,
                 userAgent: audit.userAgent ?? null,
                 requestId: audit.requestId ?? null,
-                details: normalizeProjectAuditDetails({
+                details: toPrismaJsonValue({
                     projectId: existing.id,
                     projectName: existing.name,
                     description: existing.description,

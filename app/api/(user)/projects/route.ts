@@ -10,19 +10,10 @@ import { parsePositiveInt } from "@/lib/queryParams";
 import { createProjectSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
 import { publicApiError, toPublicApiError } from "@/lib/apiError";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
 
 const PROJECT_SUMMARY_VIEW = "summary";
 const MAX_PROJECTS_PAGE_LIMIT = 25;
-
-function getClientIp(req: Request): string | undefined {
-    const forwarded = req.headers.get("x-forwarded-for");
-    if (forwarded) {
-        const [firstIp] = forwarded.split(",");
-        return firstIp?.trim() || undefined;
-    }
-    return req.headers.get("x-real-ip") || undefined;
-}
 
 function getRequestId(req: Request): string | undefined {
     return req.headers.get("x-request-id") || undefined;
@@ -121,7 +112,7 @@ export async function POST(req: Request): Promise<NextResponse> {
             {
                 actorUserId: session.user.id,
                 actorEmail: session.user.email ?? undefined,
-                ip: getClientIp(req),
+                ip: getClientIP(req),
                 userAgent: req.headers.get("user-agent") ?? undefined,
                 requestId: getRequestId(req),
             },

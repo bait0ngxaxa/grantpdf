@@ -52,7 +52,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
         >
             {/* Project Header */}
             <div
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between cursor-pointer p-4 sm:p-6 transition-colors duration-200 gap-4"
+                className="flex flex-col sm:flex-row sm:items-start sm:justify-between cursor-pointer p-4 sm:p-6 transition-colors duration-200 gap-4"
                 onClick={onToggleExpand}
             >
                 <div className="flex items-start space-x-4 min-w-0">
@@ -70,7 +70,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                         <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors break-words text-balance">
                             {project.name}
                         </h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-3 break-words line-clamp-2 sm:line-clamp-1">
+                        <p className="max-w-3xl text-slate-500 dark:text-slate-400 text-sm mb-3 break-words line-clamp-2">
                             {project.description || "ไม่มีคำอธิบาย"}
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
@@ -115,7 +115,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between sm:justify-end gap-3 pl-16 sm:pl-0">
+                <div className="flex items-start justify-between sm:justify-end gap-3 pl-16 sm:pl-0 sm:flex-shrink-0">
                     {/* Desktop Status Badge */}
                     <div className="hidden sm:block relative">
                         {hasUnreadStatusNote && (

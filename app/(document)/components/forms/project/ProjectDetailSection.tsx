@@ -1,6 +1,11 @@
 import { FileText } from "lucide-react";
 import { FormField, FormSection } from "@/app/(document)/components";
 import { type FormProjectData } from "@/config/initialData";
+import {
+    DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_MAX_LENGTH,
+    DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH,
+} from "@/lib/validation/schemas";
 import { type ChangeEvent } from "react";
 
 interface ProjectDetailSectionProps {
@@ -35,6 +40,7 @@ export function ProjectDetailSection({
                     placeholder="ระบุเหตุผลความจำเป็นในการดำเนินโครงการ"
                     value={formData.rationale}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MAX_LENGTH}
                     error={errors.rationale}
                     rows={12}
                     className="h-96"
@@ -47,6 +53,7 @@ export function ProjectDetailSection({
                     placeholder="ระบุเป้าประสงค์โครงการ"
                     value={formData.goal}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.goal}
                     rows={4}
                     className="h-30"
@@ -59,6 +66,7 @@ export function ProjectDetailSection({
                     placeholder="ระบุวัตถุประสงค์โครงการ"
                     value={formData.objective}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.objective}
                     rows={4}
                     className="h-30"
@@ -71,6 +79,7 @@ export function ProjectDetailSection({
                     placeholder="ระบุเป้าหมายโครงการ"
                     value={formData.target}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.target}
                     rows={6}
                     className="h-40"
@@ -83,6 +92,7 @@ export function ProjectDetailSection({
                     placeholder="ระบุกรอบการดำเนินงาน"
                     value={formData.scope}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.scope}
                     rows={6}
                     className="h-40"
@@ -95,6 +105,7 @@ export function ProjectDetailSection({
                     placeholder="ระบุผลผลิตโครงการ"
                     value={formData.product}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.product}
                     rows={6}
                     className="h-40"
@@ -107,6 +118,7 @@ export function ProjectDetailSection({
                     placeholder="ระบุผลลัพธ์โครงการ"
                     value={formData.result}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.result}
                     rows={6}
                     className="h-40"
@@ -119,6 +131,7 @@ export function ProjectDetailSection({
                     placeholder="กรอกประวัติส่วนตัว"
                     value={formData.author}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
                     error={errors.author}
                     rows={6}
                     className="h-40"

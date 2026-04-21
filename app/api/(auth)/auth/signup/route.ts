@@ -3,10 +3,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { applyRateLimit, getClientIP, getStringField } from "@/lib/ratelimit";
+import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
 import { logAudit } from "@/lib/auditLog";
 import { signupSchema } from "@/lib/validation/schemas";
 import { RATE_LIMIT } from "@/lib/constants";
+import { getStringField } from "@/lib/utils";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {

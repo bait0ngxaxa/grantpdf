@@ -4,6 +4,7 @@ import type { AdminProject } from "@/type/models";
 import { ClipboardList, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STATUS_ORDER } from "@/lib/constants";
+import { PROJECT_STATUS_NOTE_MAX_LENGTH } from "@/lib/validation/schemas";
 
 interface ProjectStatusModalProps {
     isStatusModalOpen: boolean;
@@ -122,10 +123,15 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                     className="w-full p-3 border bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none rounded-xl text-slate-700 dark:text-slate-200 h-24 resize-none"
                                     placeholder="เพิ่มคำอธิบายหรือหมายเหตุสำหรับผู้ใช้…"
                                     value={statusNote}
+                                    maxLength={PROJECT_STATUS_NOTE_MAX_LENGTH}
                                     onChange={(e) =>
                                         setStatusNote(e.target.value)
                                     }
                                 />
+                                <p className="mt-2 text-right text-xs text-slate-500 dark:text-slate-400">
+                                    {statusNote.length}/
+                                    {PROJECT_STATUS_NOTE_MAX_LENGTH}
+                                </p>
                             </div>
                         </div>
 

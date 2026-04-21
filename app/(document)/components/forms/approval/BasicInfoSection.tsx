@@ -1,6 +1,7 @@
 import { ClipboardList } from "lucide-react";
 import { FormField, FormSection } from "@/app/(document)/components";
 import { type ApprovalData } from "@/config/initialData";
+import { PROJECT_NAME_MAX_LENGTH } from "@/lib/validation/schemas";
 import { type ChangeEvent } from "react";
 
 interface BasicInfoSectionProps {
@@ -30,6 +31,7 @@ export function BasicInfoSection({
                     placeholder="ระบุชื่อเอกสาร"
                     value={formData.projectName}
                     onChange={handleChange}
+                    maxLength={PROJECT_NAME_MAX_LENGTH}
                     error={errors.projectName}
                     required
                 />

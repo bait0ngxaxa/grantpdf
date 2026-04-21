@@ -2,6 +2,7 @@ import { BarChart, Plus, Trash2 } from "lucide-react";
 import { Button, Textarea } from "@/components/ui";
 import { FormSection } from "@/app/(document)/components";
 import { type ActivityData } from "@/config/initialData";
+import { DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH } from "@/lib/validation/schemas";
 import { type ChangeEvent } from "react";
 
 interface ActivitySectionProps {
@@ -46,7 +47,7 @@ export function ActivitySection({
                         key={index}
                         className="grid grid-cols-1 lg:grid-cols-4 gap-2 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-sm relative"
                     >
-                        <div className="lg:contents">
+                        <div className="flex flex-col">
                             <label className="lg:hidden block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                 กิจกรรม
                             </label>
@@ -54,6 +55,7 @@ export function ActivitySection({
                                 placeholder="กิจกรรม"
                                 value={activity.activity}
                                 constrainToA4={false}
+                                maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>,
                                 ) =>
@@ -65,8 +67,12 @@ export function ActivitySection({
                                 }
                                 className="text-sm h-32 lg:h-40"
                             />
+                            <p className="mt-1 text-right text-xs text-slate-500 dark:text-slate-400">
+                                {activity.activity.length}/
+                                {DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
+                            </p>
                         </div>
-                        <div className="lg:contents">
+                        <div className="flex flex-col">
                             <label className="lg:hidden block text-sm font-medium text-slate-700 dark:text-slate-300 mt-2 mb-1">
                                 ผู้ติดตามโครงการ
                             </label>
@@ -74,6 +80,7 @@ export function ActivitySection({
                                 placeholder="ผู้ติดตามโครงการ"
                                 value={activity.manager}
                                 constrainToA4={false}
+                                maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>,
                                 ) =>
@@ -85,8 +92,12 @@ export function ActivitySection({
                                 }
                                 className="text-sm h-32 lg:h-40"
                             />
+                            <p className="mt-1 text-right text-xs text-slate-500 dark:text-slate-400">
+                                {activity.manager.length}/
+                                {DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
+                            </p>
                         </div>
-                        <div className="lg:contents">
+                        <div className="flex flex-col">
                             <label className="lg:hidden block text-sm font-medium text-slate-700 dark:text-slate-300 mt-2 mb-1">
                                 วิธีการประเมินผล
                             </label>
@@ -94,6 +105,7 @@ export function ActivitySection({
                                 placeholder="วิธีการประเมินผล"
                                 value={activity.evaluation2}
                                 constrainToA4={false}
+                                maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>,
                                 ) =>
@@ -105,8 +117,12 @@ export function ActivitySection({
                                 }
                                 className="text-sm h-32 lg:h-40"
                             />
+                            <p className="mt-1 text-right text-xs text-slate-500 dark:text-slate-400">
+                                {activity.evaluation2.length}/
+                                {DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
+                            </p>
                         </div>
-                        <div className="relative">
+                        <div className="relative flex flex-col">
                             <label className="lg:hidden block text-sm font-medium text-slate-700 dark:text-slate-300 mt-2 mb-1">
                                 ระยะเวลา
                             </label>
@@ -114,6 +130,7 @@ export function ActivitySection({
                                 placeholder="ระยะเวลา"
                                 value={activity.duration}
                                 constrainToA4={false}
+                                maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>,
                                 ) =>
@@ -123,15 +140,19 @@ export function ActivitySection({
                                         e.target.value,
                                     )
                                 }
-                                className="text-sm h-32 lg:h-40 mb-8 lg:mb-0"
+                                className="text-sm h-32 lg:h-40"
                             />
+                            <p className="mt-1 text-right text-xs text-slate-500 dark:text-slate-400">
+                                {activity.duration.length}/
+                                {DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
+                            </p>
                             {activities.length > 1 && (
                                 <Button
                                     type="button"
                                     onClick={() => removeActivityRow(index)}
                                     variant="ghost"
                                     size="sm"
-                                    className="absolute bottom-2 right-2 lg:top-1 lg:right-1 lg:bottom-auto text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                    className="absolute top-1 right-1 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                     <span className="lg:hidden ml-1">ลบ</span>

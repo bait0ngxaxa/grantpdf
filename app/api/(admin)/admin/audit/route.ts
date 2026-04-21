@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuditLogsPaginated } from "@/lib/services";
+import { parseActorUserId } from "@/lib/auditUtils";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import { parsePositiveInt } from "@/lib/queryParams";
 
@@ -9,13 +10,6 @@ const MAX_LIMIT = 100;
 
 function normalizeLimit(value: number): number {
     return Math.min(value, MAX_LIMIT);
-}
-
-function parseActorUserId(value: string | null): number | undefined {
-    if (!value) return undefined;
-    const parsed = Number(value);
-    if (!Number.isInteger(parsed) || parsed < 1) return undefined;
-    return parsed;
 }
 
 function parseOutcome(
@@ -44,7 +38,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const date = parseDate(searchParams.get("date"));
         const action = searchParams.get("action") ?? undefined;
         const outcome = parseOutcome(searchParams.get("outcome"));
-        const actorUserId = parseActorUserId(searchParams.get("actorUserId"));
+        const actorUserId = parseActorUserId(
+            searchParams.get("actorUserId"),
+        ) ?? undefined;
         const targetType = searchParams.get("targetType") ?? undefined;
         const targetId = searchParams.get("targetId") ?? undefined;
         const search = searchParams.get("search") ?? undefined;

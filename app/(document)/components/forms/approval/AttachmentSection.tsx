@@ -7,6 +7,7 @@ import {
 import { type ApprovalData } from "@/config/initialData";
 import { type ChangeEvent } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { DOCUMENT_TEXTAREA_MAX_LENGTH } from "@/lib/validation/schemas";
 
 interface AttachmentSectionProps {
     formData: ApprovalData;
@@ -75,11 +76,15 @@ export function AttachmentSection({
                             placeholder="รายละเอียดเนื้อหา"
                             value={formData.detail}
                             onChange={handleChange}
+                            maxLength={DOCUMENT_TEXTAREA_MAX_LENGTH}
                             constrainToA4={false}
                             rows={14}
                             className="min-h-[420px] h-[420px] rounded-none border-0 bg-transparent px-6 py-6 focus-visible:ring-0 focus-visible:border-0 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                         />
                     </div>
+                    <p className="mt-2 text-right text-xs text-slate-500 dark:text-slate-400">
+                        {formData.detail.length}/{DOCUMENT_TEXTAREA_MAX_LENGTH}
+                    </p>
 
                     {errors.detail && (
                         <p className="text-sm text-red-500 dark:text-red-400 mt-1 ml-1">

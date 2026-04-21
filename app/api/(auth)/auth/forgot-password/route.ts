@@ -3,8 +3,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { forgotPasswordSchema } from "@/lib/validation/schemas";
 import { sendPasswordResetEmail } from "@/lib/email";
-import { applyRateLimit, getStringField } from "@/lib/ratelimit";
+import { applyRateLimit } from "@/lib/ratelimit";
 import { RATE_LIMIT } from "@/lib/constants";
+import { getStringField } from "@/lib/utils";
 import {
     createPasswordResetToken,
     resolvePasswordResetBaseUrl,

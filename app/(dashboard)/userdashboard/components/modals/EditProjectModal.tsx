@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+    PROJECT_DESCRIPTION_MAX_LENGTH,
+    PROJECT_NAME_MAX_LENGTH,
+} from "@/lib/validation/schemas";
 import { Pencil, Loader2 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
 
@@ -58,9 +62,13 @@ export const EditProjectModal: React.FC = () => {
                         <Input
                             value={editProjectName}
                             onChange={(e) => setEditProjectName(e.target.value)}
+                            maxLength={PROJECT_NAME_MAX_LENGTH}
                             className="rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus-visible:border-blue-500 focus-visible:ring-blue-500/20 h-11"
                             placeholder="ระบุชื่อโครงการ"
                         />
+                        <p className="mt-2 text-right text-xs text-slate-500 dark:text-slate-400">
+                            {editProjectName.length}/{PROJECT_NAME_MAX_LENGTH}
+                        </p>
                     </div>
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -71,9 +79,14 @@ export const EditProjectModal: React.FC = () => {
                             onChange={(e) =>
                                 setEditProjectDescription(e.target.value)
                             }
+                            maxLength={PROJECT_DESCRIPTION_MAX_LENGTH}
                             className="w-full p-4 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-2xl h-32 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/10 transition-colors resize-none text-slate-700 text-sm"
                             placeholder="ระบุคำอธิบายเกี่ยวกับโครงการนี้ (ถ้ามี)"
                         />
+                        <p className="mt-2 text-right text-xs text-slate-500 dark:text-slate-400">
+                            {(editProjectDescription || "").length}/
+                            {PROJECT_DESCRIPTION_MAX_LENGTH}
+                        </p>
                     </div>
                 </div>
                 <DialogFooter className="gap-2 sm:gap-0">

@@ -1,9 +1,16 @@
 import { z } from "zod";
-import { requiredString, phoneSchema, emailSchema } from "./shared";
+import {
+    requiredString,
+    phoneSchema,
+    emailSchema,
+    requiredBoundedString,
+    DOCUMENT_FILE_NAME_MAX_LENGTH,
+    PROJECT_NAME_MAX_LENGTH,
+} from "./shared";
 
 export const formProjectSchema = z.object({
-    fileName: requiredString("ชื่อไฟล์"),
-    projectName: requiredString("ชื่อโครงการ"),
+    fileName: requiredBoundedString("ชื่อไฟล์", DOCUMENT_FILE_NAME_MAX_LENGTH),
+    projectName: requiredBoundedString("ชื่อโครงการ", PROJECT_NAME_MAX_LENGTH),
     person: requiredString("ผู้รับผิดชอบ"),
     address: requiredString("ที่อยู่"),
     tel: phoneSchema,

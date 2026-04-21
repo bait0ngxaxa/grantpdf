@@ -1,6 +1,7 @@
 import { Target } from "lucide-react";
 import { FormField, FormSection } from "@/app/(document)/components";
 import { type TORData } from "@/config/initialData";
+import { DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH } from "@/lib/validation/schemas";
 import { type ChangeEvent } from "react";
 
 interface ScopeSectionProps {
@@ -35,6 +36,7 @@ export function ScopeSection({
                     placeholder="พื้นที่หรือเขตดำเนินการ"
                     value={formData.zone}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.zone}
                     rows={6}
                     className="h-40"
@@ -47,6 +49,7 @@ export function ScopeSection({
                     placeholder="แผนการดำเนินงานโครงการ"
                     value={formData.plan}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.plan}
                     rows={6}
                     className="h-40"
@@ -59,6 +62,7 @@ export function ScopeSection({
                     placeholder="วิธีการจัดการและบริหารโครงการ"
                     value={formData.projectmanage}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.projectmanage}
                     rows={6}
                     className="h-40"
@@ -72,6 +76,7 @@ export function ScopeSection({
                     value={formData.partner}
                     error={errors.partner}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     rows={6}
                     className="h-40"
                 />

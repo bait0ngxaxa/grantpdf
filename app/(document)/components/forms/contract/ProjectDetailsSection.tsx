@@ -1,6 +1,10 @@
 import { ClipboardList } from "lucide-react";
 import { FormField, FormSection } from "@/app/(document)/components";
 import { type ContractData } from "@/config/initialData";
+import {
+    DOCUMENT_FILE_NAME_MAX_LENGTH,
+    PROJECT_NAME_MAX_LENGTH,
+} from "@/lib/validation/schemas";
 import { type ChangeEvent } from "react";
 
 interface ProjectDetailsSectionProps {
@@ -32,6 +36,7 @@ export function ProjectDetailsSection({
                     placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
                     value={formData.fileName}
                     onChange={handleChange}
+                    maxLength={DOCUMENT_FILE_NAME_MAX_LENGTH}
                     error={errors.fileName}
                     required
                 />
@@ -41,6 +46,7 @@ export function ProjectDetailsSection({
                     placeholder="ระบุชื่อโครงการ"
                     value={formData.projectName}
                     onChange={handleChange}
+                    maxLength={PROJECT_NAME_MAX_LENGTH}
                     error={errors.projectName}
                     required
                 />

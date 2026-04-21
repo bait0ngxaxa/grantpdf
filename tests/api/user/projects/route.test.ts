@@ -13,18 +13,35 @@ vi.mock("@/lib/services", () => ({
 
 import { auth } from "@/lib/auth";
 import {
+    createProjectWithAudit,
     getProjectSummariesByUserId,
     getProjectsByUserIdPaginated,
 } from "@/lib/services";
-import { GET } from "@/app/api/(user)/projects/route";
+import { GET, POST } from "@/app/api/(user)/projects/route";
+import {
+    PROJECT_DESCRIPTION_MAX_LENGTH,
+    PROJECT_NAME_MAX_LENGTH,
+} from "@/lib/validation/schemas";
 
 const mockedAuth = vi.mocked(auth);
+const mockedCreateProjectWithAudit = vi.mocked(createProjectWithAudit);
 const mockedGetProjectSummariesByUserId = vi.mocked(
     getProjectSummariesByUserId,
 );
 const mockedGetProjectsByUserIdPaginated = vi.mocked(
     getProjectsByUserIdPaginated,
 );
+
+function buildPostRequest(body: Record<string, unknown>): Request {
+    return new Request("http://localhost/api/projects", {
+        method: "POST",
+        headers: {
+            "content-type": "application/json",
+            "x-forwarded-for": "203.0.113.10",
+        },
+        body: JSON.stringify(body),
+    });
+}
 
 describe("projects route", () => {
     beforeEach(() => {
@@ -116,5 +133,39 @@ describe("projects route", () => {
             page: 2,
             limit: 25,
         });
+    });
+
+    it("returns 400 when project description exceeds the shared limit", async () => {
+        mockedAuth.mockResolvedValue({
+            user: { id: "7", email: "tester@example.com" },
+        } as never);
+
+        const request = buildPostRequest({
+            name: "โครงการทดสอบ",
+            description: "ก".repeat(PROJECT_DESCRIPTION_MAX_LENGTH + 1),
+        });
+        const response = await POST(request);
+        const body = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(body.error).toBe("รายละเอียดโครงการยาวเกินไป");
+        expect(mockedCreateProjectWithAudit).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 when project name exceeds the shared limit", async () => {
+        mockedAuth.mockResolvedValue({
+            user: { id: "7", email: "tester@example.com" },
+        } as never);
+
+        const request = buildPostRequest({
+            name: "ก".repeat(PROJECT_NAME_MAX_LENGTH + 1),
+            description: "คำอธิบาย",
+        });
+        const response = await POST(request);
+        const body = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(body.error).toBe("ชื่อโครงการยาวเกินไป");
+        expect(mockedCreateProjectWithAudit).not.toHaveBeenCalled();
     });
 });

@@ -35,6 +35,7 @@ export function FormField({
     constrainToA4 = true,
 }: FormFieldProps): React.JSX.Element {
     const hasError = !!error;
+    const shouldShowCounter = typeof maxLength === "number";
     const baseClassName = cn(
         "w-full px-4 py-3 bg-white dark:bg-slate-800 border rounded-xl focus:ring-4 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-800 dark:text-slate-100",
         hasError
@@ -57,6 +58,7 @@ export function FormField({
                     onChange={onChange}
                     rows={rows}
                     required={required}
+                    maxLength={maxLength}
                     constrainToA4={constrainToA4}
                 />
             ) : (
@@ -70,6 +72,11 @@ export function FormField({
                     required={required}
                     maxLength={maxLength}
                 />
+            )}
+            {shouldShowCounter && (
+                <p className="mt-1 ml-1 text-right text-xs text-slate-500 dark:text-slate-400">
+                    {value.length}/{maxLength}
+                </p>
             )}
             {error && (
                 <p className="text-sm text-red-500 dark:text-red-400 mt-1 ml-1">
