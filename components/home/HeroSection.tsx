@@ -37,19 +37,21 @@ export default function HeroSection({
                 </p>
 
                 {!isLoggedIn && (
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link
-                            href={ROUTES.SIGNUP}
-                            className="inline-flex h-12 px-8 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 duration-300 w-full sm:w-auto transition items-center justify-center"
-                        >
-                            ลงทะเบียน
-                        </Link>
-                        <Link
-                            href={ROUTES.SIGNIN}
-                            className="inline-flex h-12 px-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 font-semibold hover:bg-slate-100 dark:hover:bg-slate-600 hover:border-slate-300 dark:hover:border-slate-500 transition-colors duration-300 w-full sm:w-auto items-center justify-center"
-                        >
-                            เข้าสู่ระบบ
-                        </Link>
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <div className="flex w-full flex-col sm:w-auto sm:flex-row items-center justify-center gap-4">
+                            <Link
+                                href={ROUTES.SIGNIN}
+                                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-8 font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:-translate-y-0.5 hover:from-blue-700 hover:to-cyan-600 hover:shadow-xl hover:shadow-blue-500/35 dark:shadow-blue-950/30 sm:w-auto"
+                            >
+                                เข้าสู่ระบบ
+                            </Link>
+                            <Link
+                                href={ROUTES.SIGNUP}
+                                className="inline-flex h-12 w-full items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-8 font-semibold text-blue-700 shadow-sm shadow-blue-200/50 transition hover:bg-blue-100 hover:border-blue-300 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300 dark:shadow-blue-950/20 dark:hover:bg-blue-900/50 sm:w-auto"
+                            >
+                                สมัครสมาชิก
+                            </Link>
+                        </div>
                     </div>
                 )}
             </div>

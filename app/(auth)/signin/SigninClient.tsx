@@ -91,7 +91,7 @@ export default function SigninClient(): React.JSX.Element {
                 });
             } else {
                 toast.success("เข้าสู่ระบบสำเร็จ!", {
-                    description: `ยินดีต้อนรับ ${email} กำลังนำคุณไปยังหน้าหลัก…`,
+                    description: "ยินดีต้อนรับเข้าสู่ระบบ กำลังนำคุณไปยังหน้าหลัก…",
                 });
                 setTimeout(() => {
                     router.push(ROUTES.DASHBOARD);

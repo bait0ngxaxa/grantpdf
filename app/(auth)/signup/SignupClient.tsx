@@ -134,7 +134,7 @@ export default function SignupClient(): React.JSX.Element {
                 }
 
                 toast.success("สมัครสมาชิกและเข้าสู่ระบบสำเร็จ", {
-                    description: "กำลังนำคุณไปยังหน้าหลัก…",
+                    description: "ยินดีต้อนรับเข้าสู่ระบบ กำลังนำคุณไปยังหน้าหลัก…",
                 });
                 router.replace(ROUTES.DASHBOARD);
                 router.refresh();

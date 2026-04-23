@@ -24,7 +24,7 @@ export function ThemeToggle(): React.ReactElement {
     if (!mounted) {
         return (
             <button
-                className="btn btn-ghost btn-circle text-slate-500"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full p-0 text-slate-500 sm:h-12 sm:w-12"
                 aria-label="Toggle theme"
                 disabled
             >
@@ -38,7 +38,7 @@ export function ThemeToggle(): React.ReactElement {
     return (
         <button
             onClick={toggleTheme}
-            className="btn btn-ghost btn-circle text-slate-500 hover:text-blue-600 hover:bg-blue-50/50 dark:text-slate-400 dark:hover:text-yellow-400 dark:hover:bg-slate-700/50 transition-colors duration-300"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full p-0 text-slate-500 transition-colors duration-300 hover:bg-blue-50/50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-yellow-400 dark:focus-visible:ring-offset-slate-900 sm:h-12 sm:w-12"
             aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >

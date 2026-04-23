@@ -25,7 +25,10 @@ export default function HomeNavbar({
     return (
         <nav className="flex items-center w-full sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-700/50 px-4 md:px-8 h-20 transition-colors duration-300">
             <div className="flex-1">
-                <Link href="/" className="flex items-center gap-3 group">
+                <Link
+                    href="/"
+                    className="group inline-flex min-h-12 items-center gap-3 rounded-2xl pr-3 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 transform group-hover:scale-110 group-hover:rotate-3 duration-300 transition">
                         <FileText className="w-6 h-6" />
                     </div>
@@ -177,19 +180,22 @@ function UserDropdownMenu({
 
 function LoggedOutMenu(): React.ReactElement {
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
             <Link href={ROUTES.SIGNIN}>
                 <Button
                     variant="ghost"
-                    className="hidden sm:flex text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full px-6"
+                    className="inline-flex h-11 rounded-full border border-slate-200/80 bg-white/80 px-4 text-slate-700 shadow-sm shadow-slate-200/60 transition hover:bg-white hover:text-slate-900 hover:shadow-md dark:border-slate-700/80 dark:bg-slate-800/80 dark:text-slate-200 dark:shadow-slate-950/30 dark:hover:bg-slate-800 dark:hover:text-white sm:h-12 sm:px-6"
                 >
                     เข้าสู่ระบบ
                 </Button>
             </Link>
             <Link href={ROUTES.SIGNUP}>
-                <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-full px-6 shadow-lg shadow-blue-500/30 hover:scale-105 active:scale-95 transition">
-                    เริ่มต้นใช้งาน
+                <Button
+                    variant="ghost"
+                    className="inline-flex h-11 rounded-full border border-blue-200/80 bg-blue-50/80 px-4 text-blue-700 shadow-sm shadow-blue-200/40 transition hover:bg-blue-100/90 hover:text-blue-800 hover:shadow-md dark:border-blue-800/80 dark:bg-blue-950/40 dark:text-blue-300 dark:shadow-blue-950/20 dark:hover:bg-blue-900/50 dark:hover:text-blue-200 sm:h-12 sm:px-6"
+                >
+                    สมัครสมาชิก
                 </Button>
             </Link>
         </div>
