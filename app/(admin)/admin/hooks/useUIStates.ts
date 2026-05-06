@@ -17,6 +17,7 @@ export const useUIStates = (): {
     setSelectedFileType: React.Dispatch<React.SetStateAction<string>>;
     selectedStatus: string;
     setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+    markProjectViewed: (projectId: string) => void;
     toggleProjectExpansion: (projectId: string) => void;
     toggleRowExpansion: (fileId: string) => void;
 } => {
@@ -53,21 +54,33 @@ export const useUIStates = (): {
     const [selectedFileType, setSelectedFileType] = useState("ไฟล์ทั้งหมด");
     const [selectedStatus, setSelectedStatus] = useState("สถานะทั้งหมด");
 
+    const markProjectViewed = (projectId: string): void => {
+        setViewedProjects((prevViewed) => {
+            if (prevViewed.has(projectId)) {
+                return prevViewed;
+            }
+
+            const newViewedSet = new Set(prevViewed);
+            newViewedSet.add(projectId);
+
+            if (typeof window !== "undefined") {
+                localStorage.setItem(
+                    "viewedProjects",
+                    JSON.stringify([...newViewedSet]),
+                );
+            }
+
+            return newViewedSet;
+        });
+    };
+
     // Custom toggle that also marks project as viewed
     const toggleProjectExpansion = (projectId: string): void => {
         baseToggleProjectExpansion(projectId);
 
         // Mark project as viewed when expanded
         if (!expandedProjects.has(projectId)) {
-            setViewedProjects((prevViewed) => {
-                const newViewedSet = new Set(prevViewed);
-                newViewedSet.add(projectId);
-                localStorage.setItem(
-                    "viewedProjects",
-                    JSON.stringify([...newViewedSet])
-                );
-                return newViewedSet;
-            });
+            markProjectViewed(projectId);
         }
     };
 
@@ -88,6 +101,7 @@ export const useUIStates = (): {
         setSelectedFileType,
         selectedStatus,
         setSelectedStatus,
+        markProjectViewed,
         toggleProjectExpansion,
         toggleRowExpansion,
     };

@@ -10,6 +10,13 @@ export async function getProjectSummariesByUserId(
             id: true,
             name: true,
             description: true,
+            programId: true,
+            program: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
             created_at: true,
             _count: { select: { files: true } },
         },
@@ -20,6 +27,8 @@ export async function getProjectSummariesByUserId(
         id: project.id.toString(),
         name: project.name,
         description: project.description || undefined,
+        programId: project.programId?.toString(),
+        programName: project.program?.name,
         created_at: project.created_at.toISOString(),
         _count: {
             files: project._count.files,

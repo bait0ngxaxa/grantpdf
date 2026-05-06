@@ -19,31 +19,44 @@ export interface UserProjectStats {
 }
 
 export const useUserData = (
-    page: number = 1,
     shouldLoadProjects: boolean = true,
     initialStats?: UserProjectStats,
 ) => {
-    const limit = PAGINATION.PROJECTS_PER_PAGE;
-    const projectsKey = shouldLoadProjects
-        ? `${API_ROUTES.PROJECTS}?page=${page}&limit=${limit}`
-        : null;
     const statsKey = API_ROUTES.PROJECTS_STATS;
 
     const {
-        data: projectsData,
-        error: projectsError,
-        isLoading: isLoadingProjects,
-        mutate,
-    } = useSWR<ProjectsApiResponse>(projectsKey, {
-        keepPreviousData: true,
-    });
-
-    const { data: statsData, isLoading: isLoadingStats } =
+        data: statsData,
+        isLoading: isLoadingStats,
+        mutate: mutateStats,
+    } =
         useSWR<UserProjectStats>(statsKey, {
             fallbackData: initialStats,
             revalidateOnMount: initialStats ? false : undefined,
             revalidateIfStale: initialStats ? false : true,
         });
+
+    const totalProjectsForDashboard = statsData?.total ?? initialStats?.total ?? 0;
+    const limit = shouldLoadProjects
+        ? Math.max(
+              PAGINATION.PROGRAM_GROUP_PROJECTS_PER_PAGE,
+              totalProjectsForDashboard,
+          )
+        : PAGINATION.PROJECTS_PER_PAGE;
+    const projectsKey = shouldLoadProjects
+        ? `${API_ROUTES.PROJECTS}?page=1&limit=${limit}`
+        : null;
+
+    const {
+        data: projectsData,
+        error: projectsError,
+        isLoading: isLoadingProjects,
+        mutate: mutateProjects,
+    } = useSWR<ProjectsApiResponse>(projectsKey, {
+        keepPreviousData: true,
+    });
+
+    const effectiveTotalProjects =
+        statsData?.total ?? projectsData?.total ?? totalProjectsForDashboard;
 
     return {
         projects: projectsData?.projects || [],
@@ -51,9 +64,9 @@ export const useUserData = (
             ? projectsData?.totalFiles ?? statsData?.totalFiles ?? 0
             : statsData?.totalFiles ?? 0,
         total: shouldLoadProjects
-            ? projectsData?.total ?? statsData?.total ?? 0
+            ? effectiveTotalProjects
             : statsData?.total ?? 0,
-        totalPages: projectsData?.totalPages ?? 0,
+        totalPages: shouldLoadProjects ? 1 : projectsData?.totalPages ?? 0,
         statusCounts: statsData?.statusCounts ?? projectsData?.statusCounts ?? {
             pending: 0,
             approved: 0,
@@ -68,8 +81,8 @@ export const useUserData = (
             ? "ไม่สามารถโหลดข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง"
             : null,
         fetchUserData: async () => {
-            await mutate();
+            await Promise.all([mutateProjects(), mutateStats()]);
         },
-        mutate,
+        mutate: mutateProjects,
     };
 };

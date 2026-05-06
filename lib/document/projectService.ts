@@ -16,6 +16,7 @@ export async function findOrCreateProject(
     userId: number,
     projectName: string,
     projectIdFromForm: string | null,
+    programId: number | null,
     documentTypeDescription: string,
 ): Promise<ProjectResult | NextResponse> {
     let project;
@@ -41,15 +42,41 @@ export async function findOrCreateProject(
                 { status: 400 },
             );
         }
+
+        if (project.programId === null) {
+            return NextResponse.json(
+                {
+                    error: "โครงการนี้ยังไม่ได้กำหนดโครงการหลัก กรุณาให้ผู้ดูแลระบบกำหนดก่อนสร้างเอกสาร",
+                },
+                { status: 400 },
+            );
+        }
     } else {
+        if (programId === null) {
+            return NextResponse.json(
+                { error: "กรุณาเลือกโครงการหลักก่อนสร้างเอกสาร" },
+                { status: 400 },
+            );
+        }
+
         // Find or create project by name
         project = await findProjectByNameAndUser(projectName, userId);
+
+        if (project?.programId === null) {
+            return NextResponse.json(
+                {
+                    error: "โครงการนี้ยังไม่ได้กำหนดโครงการหลัก กรุณาให้ผู้ดูแลระบบกำหนดก่อนสร้างเอกสาร",
+                },
+                { status: 400 },
+            );
+        }
 
         if (!project) {
             const newProject = await createProject(
                 userId,
                 projectName,
                 `${projectName} - ${documentTypeDescription}`,
+                programId,
             );
             project = {
                 id: parseInt(newProject.id),
@@ -64,6 +91,15 @@ export async function findOrCreateProject(
         name: project.name,
         description: project.description,
     };
+}
+
+export function readProgramIdFromForm(formData: FormData): number | null {
+    const rawProgramId = formData.get("programId");
+    if (typeof rawProgramId !== "string" || rawProgramId.trim() === "") {
+        return null;
+    }
+
+    return parsePositiveIntId(rawProgramId);
 }
 
 /**

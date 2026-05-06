@@ -44,6 +44,7 @@ const createRawFile = (overrides?: Partial<RawFile>): RawFile => ({
 const createRawProject = (overrides?: Partial<RawProject>): RawProject => ({
     id: BigInt(1),
     userId: BigInt(100),
+    programId: null,
     name: "Test Project",
     description: "Test Description",
     status: "กำลังดำเนินการ",
@@ -117,6 +118,8 @@ describe("sanitizeProjects", () => {
     it("should sanitize projects correctly", () => {
         const rawProjects: RawProject[] = [
             createRawProject({
+                programId: BigInt(9),
+                program: { id: BigInt(9), name: "โครงการหลัก A" },
                 files: [createRawFile()],
                 _count: { files: 1 },
             }),
@@ -129,6 +132,8 @@ describe("sanitizeProjects", () => {
         expect(result[0].userId).toBe("100");
         expect(result[0].userName).toBe("Test User");
         expect(result[0].userEmail).toBe("test@example.com");
+        expect(result[0].programId).toBe("9");
+        expect(result[0].programName).toBe("โครงการหลัก A");
         expect(result[0].files).toHaveLength(1);
     });
 

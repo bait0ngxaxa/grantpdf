@@ -9,20 +9,30 @@ import { sanitizeAttachments, collectAttachmentPaths, filterOutAttachments } fro
 export async function findProjectByNameAndUser(
     name: string,
     userId: number,
-): Promise<{ id: number; name: string; description: string | null } | null> {
+): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    programId: number | null;
+} | null> {
     return await prisma.project.findFirst({
         where: { name, userId },
-        select: { id: true, name: true, description: true },
+        select: { id: true, name: true, description: true, programId: true },
     });
 }
 
 export async function findProjectByIdAndUser(
     projectId: number,
     userId: number,
-): Promise<{ id: number; name: string; description: string | null } | null> {
+): Promise<{
+    id: number;
+    name: string;
+    description: string | null;
+    programId: number | null;
+} | null> {
     return await prisma.project.findFirst({
         where: { id: projectId, userId },
-        select: { id: true, name: true, description: true },
+        select: { id: true, name: true, description: true, programId: true },
     });
 }
 
@@ -116,6 +126,9 @@ export async function getProjectsByUserIdPaginated({
         prisma.project.findMany({
             where: { userId },
             include: {
+                program: {
+                    select: { id: true, name: true },
+                },
                 files: {
                     include: {
                         attachmentFiles: {
@@ -151,6 +164,8 @@ export async function getProjectsByUserIdPaginated({
             description: project.description || undefined,
             status: project.status,
             statusNote: project.statusNote || undefined,
+            programId: project.programId?.toString(),
+            programName: (project as unknown as { program?: { name: string } | null }).program?.name,
             created_at: project.created_at.toISOString(),
             updated_at: project.updated_at.toISOString(),
             userId: project.userId.toString(),

@@ -19,6 +19,7 @@ interface AdminUIContextType {
     setSelectedFileType: React.Dispatch<React.SetStateAction<string>>;
     selectedStatus: string;
     setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+    markProjectViewed: (projectId: string) => void;
     toggleProjectExpansion: (projectId: string) => void;
     toggleRowExpansion: (fileId: string) => void;
 }

@@ -28,7 +28,7 @@ interface UserDashboardContextType {
     expandedProjects: Set<string>;
     toggleProjectExpansion: (projectId: string) => void;
 
-    // Data State — `projects` is already the current page from the server
+    // Data State — `projects` contains all projects when the projects tab is active
     projects: Project[];
     totalProjects: number;
     totalDocuments: number;
@@ -38,11 +38,6 @@ interface UserDashboardContextType {
     hasInitialDataLoaded: boolean;
     error: string | null;
     fetchUserData: () => Promise<void>;
-
-    // Pagination
-    currentPage: number;
-    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
-    totalPages: number;
 
     // Modal Visibility
     isModalOpen: boolean;
@@ -59,6 +54,10 @@ interface UserDashboardContextType {
     setShowDeleteModal: (show: boolean) => void;
     showEditProjectModal: boolean;
     setShowEditProjectModal: (show: boolean) => void;
+    isProjectFilesModalOpen: boolean;
+    selectedProjectForFiles: Project | null;
+    openProjectFilesModal: (project: Project) => void;
+    closeProjectFilesModal: () => void;
     openPreviewModal: (storagePath: string, title: string) => void;
 
     // Form States
@@ -74,6 +73,8 @@ interface UserDashboardContextType {
     setNewProjectName: (name: string) => void;
     newProjectDescription: string;
     setNewProjectDescription: (desc: string) => void;
+    selectedProgramId: number | null;
+    setSelectedProgramId: (id: number | null) => void;
 
     // Actions
     isCreatingProject: boolean;
@@ -124,6 +125,8 @@ function UnifiedProviderValue({
         setNewProjectName: data.setNewProjectName,
         newProjectDescription: data.newProjectDescription,
         setNewProjectDescription: data.setNewProjectDescription,
+        selectedProgramId: data.selectedProgramId,
+        setSelectedProgramId: data.setSelectedProgramId,
     });
 
     const value = useMemo(

@@ -7,22 +7,12 @@ import React, {
     type ReactNode,
 } from "react";
 import { useProjectData } from "../hooks";
-import { usePagination } from "@/lib/hooks";
-import { PAGINATION } from "@/lib/constants";
 import type { ProjectSummary } from "@/type";
 
 interface CreateDocsDataContextType {
     projects: ProjectSummary[];
     isLoading: boolean;
     error: string | null;
-
-    // Pagination
-    currentProjects: ProjectSummary[];
-    currentPage: number;
-    totalPages: number;
-    indexOfFirstProject: number;
-    indexOfLastProject: number;
-    setCurrentPage: (page: number) => void;
 }
 
 const CreateDocsDataContext = createContext<
@@ -32,41 +22,16 @@ const CreateDocsDataContext = createContext<
 export function CreateDocsDataProvider({ children }: { children: ReactNode }) {
     const { projects, isLoading, error } = useProjectData();
 
-    // Pagination
-    const {
-        paginatedItems: currentProjects,
-        totalPages,
-        startIndex: indexOfFirstProject,
-        endIndex: indexOfLastProject,
-        currentPage,
-        goToPage: setCurrentPage,
-    } = usePagination({
-        items: projects,
-        itemsPerPage: PAGINATION.PROJECTS_PER_PAGE,
-    });
-
     const value = useMemo(
         () => ({
             projects,
             isLoading,
             error,
-            currentProjects,
-            currentPage,
-            totalPages,
-            indexOfFirstProject,
-            indexOfLastProject,
-            setCurrentPage,
         }),
         [
             projects,
             isLoading,
             error,
-            currentProjects,
-            currentPage,
-            totalPages,
-            indexOfFirstProject,
-            indexOfLastProject,
-            setCurrentPage,
         ],
     );
 

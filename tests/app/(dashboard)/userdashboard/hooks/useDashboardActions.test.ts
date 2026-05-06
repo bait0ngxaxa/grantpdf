@@ -29,6 +29,11 @@ function createBaseParams() {
             id: "17",
             name: "โครงการเดิม",
             description: "รายละเอียดเดิม",
+            status: "กำลังดำเนินการ",
+            created_at: "2024-01-01T00:00:00.000Z",
+            updated_at: "2024-01-01T00:00:00.000Z",
+            files: [],
+            _count: { files: 0 },
         },
         setProjectToEdit: vi.fn(),
         editProjectName: "โครงการเดิม",
@@ -39,6 +44,8 @@ function createBaseParams() {
         setNewProjectName: vi.fn(),
         newProjectDescription: "   ",
         setNewProjectDescription: vi.fn(),
+        selectedProgramId: 1,
+        setSelectedProgramId: vi.fn(),
     };
 }
 
@@ -74,12 +81,14 @@ describe("useDashboardActions", () => {
         const body = JSON.parse(String(requestInit?.body));
 
         expect(body).toEqual({
+            programId: 1,
             name: "โครงการใหม่",
         });
         expect(params.fetchUserData).toHaveBeenCalledTimes(1);
         expect(params.setShowCreateProjectModal).toHaveBeenCalledWith(false);
         expect(params.setNewProjectName).toHaveBeenCalledWith("");
         expect(params.setNewProjectDescription).toHaveBeenCalledWith("");
+        expect(params.setSelectedProgramId).toHaveBeenCalledWith(null);
         expect(toastSuccess).toHaveBeenCalledWith("สร้างโครงการสำเร็จ");
     });
 

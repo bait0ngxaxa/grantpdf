@@ -22,7 +22,11 @@ export { createDocxRenderer, loadTemplate } from "./templateRenderer";
 export { saveDocumentToStorage } from "./storage";
 
 // Project Service
-export { findOrCreateProject, createUserFileRecord } from "./projectService";
+export {
+    findOrCreateProject,
+    createUserFileRecord,
+    readProgramIdFromForm,
+} from "./projectService";
 
 // Response
 export { handleDocumentError, buildSuccessResponse } from "./responseBuilder";

@@ -30,14 +30,6 @@ interface CreateDocsContextType {
     error: string | null;
     isAdmin: boolean;
 
-    // Pagination
-    currentProjects: ProjectSummary[];
-    currentPage: number;
-    totalPages: number;
-    indexOfFirstProject: number;
-    indexOfLastProject: number;
-    setCurrentPage: (page: number) => void;
-
     // Actions
     goBack: () => void;
     handleCategorySelection: (category: string) => void;

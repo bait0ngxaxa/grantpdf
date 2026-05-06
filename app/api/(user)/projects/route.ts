@@ -4,6 +4,7 @@ import {
     getProjectSummariesByUserId,
     getProjectsByUserIdPaginated,
     createProjectWithAudit,
+    programExists,
 } from "@/lib/services";
 import { PAGINATION, RATE_LIMIT } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 }
 
-// POST: สร้างโครงการใหม่
+// POST: สร้างโครงการใหม่ (ต้องเลือกโครงการหลักก่อน)
 export async function POST(req: Request): Promise<NextResponse> {
     try {
         const rateLimitResult = applyRateLimit({
@@ -97,11 +98,20 @@ export async function POST(req: Request): Promise<NextResponse> {
             return NextResponse.json({ error: firstError }, { status: 400 });
         }
 
-        const { name, description } = parsed.data;
+        const { name, description, programId } = parsed.data;
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
             throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
+        }
+
+        // Verify program exists and is active
+        const validProgram = await programExists(programId);
+        if (!validProgram) {
+            return NextResponse.json(
+                { error: "โครงการหลักที่เลือกไม่ถูกต้องหรือถูกปิดใช้งาน" },
+                { status: 400 },
+            );
         }
 
         const safeDescription = description && description.trim() !== "" ? description : undefined;
@@ -109,6 +119,7 @@ export async function POST(req: Request): Promise<NextResponse> {
             userId,
             name,
             safeDescription,
+            programId,
             {
                 actorUserId: session.user.id,
                 actorEmail: session.user.email ?? undefined,
@@ -120,6 +131,15 @@ export async function POST(req: Request): Promise<NextResponse> {
 
         return NextResponse.json(project, { headers: rateLimitResult.headers });
     } catch (error) {
+        if (error instanceof Error && error.message === "PROJECT_NAME_CONFLICT") {
+            return NextResponse.json(
+                {
+                    error: "มีชื่อโครงการนี้อยู่แล้วภายใต้โครงการหลักอื่น กรุณาเปลี่ยนชื่อโครงการ",
+                },
+                { status: 409 },
+            );
+        }
+
         console.error("Error creating project:", error);
         const mappedError = toPublicApiError(error, "ไม่สามารถสร้างโครงการได้");
         return NextResponse.json(

@@ -28,9 +28,6 @@ interface ProjectDataContextType {
     hasInitialDataLoaded: boolean;
     error: string | null;
     fetchUserData: () => Promise<void>;
-    currentPage: number;
-    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
-    totalPages: number;
     fileToDelete: string | null;
     setFileToDelete: React.Dispatch<React.SetStateAction<string | null>>;
     projectToDelete: string | null;
@@ -45,6 +42,8 @@ interface ProjectDataContextType {
     setNewProjectName: (name: string) => void;
     newProjectDescription: string;
     setNewProjectDescription: (desc: string) => void;
+    selectedProgramId: number | null;
+    setSelectedProgramId: (id: number | null) => void;
 }
 
 const ProjectDataContext = createContext<ProjectDataContextType | undefined>(
@@ -59,21 +58,19 @@ export function ProjectDataProvider({
     initialStats?: UserProjectStats;
 }) {
     const { activeTab } = useDashboardUI();
-    const [currentPage, setCurrentPage] = useState(1);
     const shouldLoadProjects = activeTab === "projects";
 
     const {
         projects,
         totalFiles,
         total,
-        totalPages,
         statusCounts,
         latestProject,
         isLoading,
         hasInitialDataLoaded,
         error,
         fetchUserData,
-    } = useUserData(currentPage, shouldLoadProjects, initialStats);
+    } = useUserData(shouldLoadProjects, initialStats);
 
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
@@ -82,6 +79,7 @@ export function ProjectDataProvider({
     const [editProjectDescription, setEditProjectDescription] = useState("");
     const [newProjectName, setNewProjectName] = useState("");
     const [newProjectDescription, setNewProjectDescription] = useState("");
+    const [selectedProgramId, setSelectedProgramId] = useState<number | null>(null);
 
     const value = {
         projects,
@@ -93,9 +91,6 @@ export function ProjectDataProvider({
         hasInitialDataLoaded,
         error,
         fetchUserData,
-        currentPage,
-        setCurrentPage,
-        totalPages,
         fileToDelete,
         setFileToDelete,
         projectToDelete,
@@ -110,6 +105,8 @@ export function ProjectDataProvider({
         setNewProjectName,
         newProjectDescription,
         setNewProjectDescription,
+        selectedProgramId,
+        setSelectedProgramId,
     };
 
     return (

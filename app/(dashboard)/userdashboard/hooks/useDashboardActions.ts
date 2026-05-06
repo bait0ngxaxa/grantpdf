@@ -4,7 +4,7 @@ import { API_ROUTES } from "@/lib/constants";
 import { toast } from "sonner";
 
 interface DashboardActionsParams {
-    fetchUserData: () => Promise<void>; // Use revalidation instead of state setters
+    fetchUserData: () => Promise<void>;
     setShowDeleteModal: (show: boolean) => void;
     setShowEditProjectModal: (show: boolean) => void;
     setShowCreateProjectModal: (show: boolean) => void;
@@ -22,6 +22,8 @@ interface DashboardActionsParams {
     setNewProjectName: (name: string) => void;
     newProjectDescription: string;
     setNewProjectDescription: (desc: string) => void;
+    selectedProgramId: number | null;
+    setSelectedProgramId: (id: number | null) => void;
 }
 
 function normalizeOptionalText(value: string): string | undefined {
@@ -49,6 +51,8 @@ export function useDashboardActions(params: DashboardActionsParams) {
         setNewProjectName,
         newProjectDescription,
         setNewProjectDescription,
+        selectedProgramId,
+        setSelectedProgramId,
     } = params;
 
     const [isCreatingProject, setIsCreatingProject] = useState(false);
@@ -86,7 +90,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
                 );
             }
 
-            await fetchUserData(); // Revalidate
+            await fetchUserData();
             toast.success("ลบไฟล์สำเร็จ");
         } catch (err: unknown) {
             console.error("Error deleting file:", err);
@@ -128,7 +132,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
                 );
             }
 
-            await fetchUserData(); // Revalidate
+            await fetchUserData();
             toast.success("ลบโครงการสำเร็จ");
         } catch (err: unknown) {
             console.error("Error deleting project:", err);
@@ -177,7 +181,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
                 );
             }
 
-            await fetchUserData(); // Revalidate
+            await fetchUserData();
             toast.success("อัปเดตโครงการสำเร็จ");
             setShowEditProjectModal(false);
             setProjectToEdit(null);
@@ -205,9 +209,9 @@ export function useDashboardActions(params: DashboardActionsParams) {
         setEditProjectDescription,
     ]);
 
-    // Create project action
+    // Create project action — now sends programId
     const onCreateProject = useCallback(async () => {
-        if (!newProjectName.trim()) return;
+        if (!newProjectName.trim() || !selectedProgramId) return;
         setIsCreatingProject(true);
 
         try {
@@ -215,6 +219,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    programId: selectedProgramId,
                     name: newProjectName.trim(),
                     description: normalizeOptionalText(
                         newProjectDescription,
@@ -231,11 +236,12 @@ export function useDashboardActions(params: DashboardActionsParams) {
                 );
             }
 
-            await fetchUserData(); // Revalidate
+            await fetchUserData();
             toast.success("สร้างโครงการสำเร็จ");
             setShowCreateProjectModal(false);
             setNewProjectName("");
             setNewProjectDescription("");
+            setSelectedProgramId(null);
         } catch (err: unknown) {
             console.error("Error creating project:", err);
             toast.error("สร้างโครงการไม่สำเร็จ", {
@@ -250,10 +256,12 @@ export function useDashboardActions(params: DashboardActionsParams) {
     }, [
         newProjectName,
         newProjectDescription,
+        selectedProgramId,
         fetchUserData,
         setShowCreateProjectModal,
         setNewProjectName,
         setNewProjectDescription,
+        setSelectedProgramId,
     ]);
 
     // UI Handlers

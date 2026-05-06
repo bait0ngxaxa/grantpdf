@@ -9,6 +9,7 @@ export async function updateProjectStatus({
     projectId,
     status,
     statusNote,
+    programId,
 }: UpdateProjectStatusParams): Promise<Partial<AdminProject>> {
     if (!Number.isInteger(projectId) || projectId <= 0) {
         throw new Error("Invalid projectId");
@@ -27,9 +28,16 @@ export async function updateProjectStatus({
         data: {
             status,
             statusNote: statusNote || null,
+            programId,
             updated_at: new Date(),
         },
         include: {
+            program: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
             user: {
                 select: {
                     id: true,
@@ -49,6 +57,8 @@ export async function updateProjectStatus({
         description: updatedProject.description || undefined,
         status: updatedProject.status,
         statusNote: updatedProject.statusNote || undefined,
+        programId: updatedProject.programId?.toString(),
+        programName: updatedProject.program?.name,
         created_at: updatedProject.created_at.toISOString(),
         updated_at:
             updatedProject.updated_at?.toISOString() ||
@@ -64,31 +74,60 @@ export async function createProject(
     userId: number,
     name: string,
     description?: string,
+    programId?: number,
 ): Promise<{ id: string } & Omit<Project, "id">> {
     const trimmedName = name.trim();
     const normalizedDescription =
         description && description.trim() !== "" ? description.trim() : null;
 
-    const project = await prisma.project.upsert({
+    const existing = await prisma.project.findUnique({
         where: {
             userId_name: {
                 userId,
                 name: trimmedName,
             },
         },
-        update: {},
-        create: {
-            name: trimmedName,
-            description: normalizedDescription,
-            userId,
-        },
-        include: {
-            files: true,
-            _count: {
-                select: { files: true },
-            },
+        select: {
+            id: true,
+            programId: true,
         },
     });
+
+    if (existing && programId && existing.programId !== null && existing.programId !== programId) {
+        throw new Error("PROJECT_NAME_CONFLICT");
+    }
+
+    const project = existing
+        ? await prisma.project.update({
+              where: { id: existing.id },
+              data:
+                  existing.programId === null && programId
+                      ? {
+                            programId,
+                            updated_at: new Date(),
+                        }
+                      : {},
+              include: {
+                  files: true,
+                  _count: {
+                      select: { files: true },
+                  },
+              },
+          })
+        : await prisma.project.create({
+              data: {
+                  name: trimmedName,
+                  description: normalizedDescription,
+                  userId,
+                  programId: programId ?? null,
+              },
+              include: {
+                  files: true,
+                  _count: {
+                      select: { files: true },
+                  },
+              },
+          });
 
     return {
         ...project,
@@ -108,6 +147,7 @@ export async function createProjectWithAudit(
     userId: number,
     name: string,
     description: string | undefined,
+    programId: number | undefined,
     audit: ProjectAuditContext,
 ): Promise<{ id: string } & Omit<Project, "id">> {
     const trimmedName = name.trim();
@@ -115,26 +155,59 @@ export async function createProjectWithAudit(
         description && description.trim() !== "" ? description.trim() : null;
 
     const project = await prisma.$transaction(async (tx) => {
-        const created = await tx.project.upsert({
+        const existing = await tx.project.findUnique({
             where: {
                 userId_name: {
                     userId,
                     name: trimmedName,
                 },
             },
-            update: {},
-            create: {
-                userId,
-                name: trimmedName,
-                description: normalizedDescription,
-            },
-            include: {
-                files: true,
-                _count: {
-                    select: { files: true },
-                },
+            select: {
+                id: true,
+                programId: true,
             },
         });
+
+        if (
+            existing &&
+            programId &&
+            existing.programId !== null &&
+            existing.programId !== programId
+        ) {
+            throw new Error("PROJECT_NAME_CONFLICT");
+        }
+
+        const created = existing
+            ? await tx.project.update({
+                  where: { id: existing.id },
+                  data:
+                      existing.programId === null && programId
+                          ? {
+                                programId,
+                                updated_at: new Date(),
+                            }
+                          : {},
+                  include: {
+                      files: true,
+                      _count: {
+                          select: { files: true },
+                      },
+                  },
+              })
+            : await tx.project.create({
+                  data: {
+                      userId,
+                      name: trimmedName,
+                      description: normalizedDescription,
+                      programId: programId ?? null,
+                  },
+                  include: {
+                      files: true,
+                      _count: {
+                          select: { files: true },
+                      },
+                  },
+              });
 
         await tx.auditLog.create({
             data: {
@@ -151,6 +224,8 @@ export async function createProjectWithAudit(
                     projectId: created.id,
                     projectName: created.name,
                     description: created.description,
+                    programId: created.programId,
+                    reusedExistingProject: existing !== null,
                 }),
             },
         });

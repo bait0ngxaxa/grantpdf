@@ -3,6 +3,7 @@ import {
     createProjectSchema,
     PROJECT_DESCRIPTION_MAX_LENGTH,
     PROJECT_STATUS_NOTE_MAX_LENGTH,
+    updateAdminProjectSchema,
     updateProjectStatusSchema,
     updateProjectSchema,
 } from "@/lib/validation/schemas";
@@ -12,6 +13,7 @@ describe("project schema validation", () => {
         const description = "ก".repeat(PROJECT_DESCRIPTION_MAX_LENGTH);
 
         const result = createProjectSchema.safeParse({
+            programId: 1,
             name: "โครงการทดสอบ",
             description,
         });
@@ -42,5 +44,16 @@ describe("project schema validation", () => {
 
         expect(result.success).toBe(false);
         expect(result.error?.issues[0]?.message).toBe("หมายเหตุสถานะยาวเกินไป");
+    });
+
+    it("accepts nullable programId in admin project updates", () => {
+        const result = updateAdminProjectSchema.safeParse({
+            projectId: 1,
+            status: "กำลังดำเนินการ",
+            statusNote: "",
+            programId: null,
+        });
+
+        expect(result.success).toBe(true);
     });
 });

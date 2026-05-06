@@ -8,12 +8,14 @@ interface PaginationProps {
     currentPage: number;
     totalPages: number;
     onPageChange: (page: number) => void;
+    className?: string;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
     currentPage,
     totalPages,
     onPageChange,
+    className,
 }): React.JSX.Element | null => {
     if (totalPages <= 1) return null;
 
@@ -55,7 +57,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     const pageNumbers = getPageNumbers();
 
     return (
-        <div className="flex justify-center mt-8">
+        <div className={cn("mt-8 flex justify-center", className)}>
             <div className="inline-flex items-center gap-1 p-1.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-700">
                 {/* Previous Button */}
                 <button

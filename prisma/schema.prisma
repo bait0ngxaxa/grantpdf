@@ -29,23 +29,42 @@ model User {
 }
 
 
+model Program {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(255)
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+
+  projects   Project[]
+
+  @@index([sortOrder])
+  @@index([isActive, sortOrder])
+}
+
 model Project {
   id          Int      @id @default(autoincrement())
   name        String   @db.VarChar(255)
   description String?  @db.Text
-  status      String   @default("กำลังดำเนินการ") 
+  status      String   @default("กำลังดำเนินการ")
   statusNote  String?  @db.Text
-  
+
+  programId   Int?
+
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @default(now()) @db.Timestamp(6)
 
- 
   userId Int
 
- 
+  program Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   files UserFile[]
 
+  @@index([programId])
+  @@index([programId, created_at])
   @@index([userId])
   @@unique([userId, name])
   @@index([userId, created_at])
@@ -53,6 +72,7 @@ model Project {
   @@index([created_at])
   @@index([name])
 }
+
 
 model UserFile {
   id               Int @id @default(autoincrement())

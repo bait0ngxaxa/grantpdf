@@ -25,6 +25,14 @@ interface AdminModalContextType {
     setNewStatus: React.Dispatch<React.SetStateAction<string>>;
     statusNote: string;
     setStatusNote: React.Dispatch<React.SetStateAction<string>>;
+    selectedProgramId: string;
+    setSelectedProgramId: React.Dispatch<React.SetStateAction<string>>;
+    isProjectFilesModalOpen: boolean;
+    setIsProjectFilesModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    selectedProjectForFiles: AdminProject | null;
+    setSelectedProjectForFiles: React.Dispatch<
+        React.SetStateAction<AdminProject | null>
+    >;
 }
 
 const AdminModalContext = createContext<AdminModalContextType | undefined>(
@@ -43,6 +51,11 @@ export function AdminModalProvider({ children }: { children: ReactNode }) {
         useState<AdminProject | null>(null);
     const [newStatus, setNewStatus] = useState("");
     const [statusNote, setStatusNote] = useState("");
+    const [selectedProgramId, setSelectedProgramId] = useState("");
+    const [isProjectFilesModalOpen, setIsProjectFilesModalOpen] =
+        useState(false);
+    const [selectedProjectForFiles, setSelectedProjectForFiles] =
+        useState<AdminProject | null>(null);
 
     const value = {
         isPreviewModalOpen,
@@ -59,6 +72,12 @@ export function AdminModalProvider({ children }: { children: ReactNode }) {
         setNewStatus,
         statusNote,
         setStatusNote,
+        selectedProgramId,
+        setSelectedProgramId,
+        isProjectFilesModalOpen,
+        setIsProjectFilesModalOpen,
+        selectedProjectForFiles,
+        setSelectedProjectForFiles,
     };
 
     return (

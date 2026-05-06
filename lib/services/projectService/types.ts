@@ -3,6 +3,11 @@ import type { AdminProject, AdminDocumentFile } from "@/type/models";
 export interface RawProject {
     id: bigint;
     userId: bigint;
+    programId: bigint | null;
+    program?: {
+        id: bigint | number;
+        name: string;
+    } | null;
     name: string;
     description: string | null;
     status: string;
@@ -94,4 +99,5 @@ export interface UpdateProjectStatusParams {
     projectId: number;
     status: string;
     statusNote?: string | null;
+    programId?: number | null;
 }

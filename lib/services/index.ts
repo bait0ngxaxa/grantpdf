@@ -13,6 +13,16 @@ export {
     getAllFilesPaginated,
 } from "./projectService";
 
+// Program Service
+export {
+    getActivePrograms,
+    getAllPrograms,
+    programExists,
+    programExistsById,
+    createProgram,
+    updateProgram,
+} from "./programService";
+
 // User Service
 export {
     getAllUsers,

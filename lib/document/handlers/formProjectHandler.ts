@@ -4,6 +4,7 @@ import {
     createDocxRenderer,
     saveDocumentToStorage,
     findOrCreateProject,
+    readProgramIdFromForm,
     isProjectError,
     createUserFileRecord,
     buildSuccessResponse,
@@ -96,6 +97,7 @@ export async function handleFormProjectGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
+        readProgramIdFromForm(formData),
         "สร้างจากแบบฟอร์มข้อเสนอโครงการ",
     );
     if (isProjectError(projectResult)) {

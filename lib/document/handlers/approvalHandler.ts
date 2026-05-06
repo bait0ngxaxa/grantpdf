@@ -5,6 +5,7 @@ import {
     loadTemplate,
     saveDocumentToStorage,
     findOrCreateProject,
+    readProgramIdFromForm,
     isProjectError,
     buildSuccessResponse,
 } from "@/lib/document";
@@ -348,6 +349,7 @@ export async function handleApprovalGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
+        readProgramIdFromForm(formData),
         "สร้างจากเอกสารขออนุมัติ",
     );
     if (isProjectError(projectResult)) {

@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui";
-import type { AdminProject } from "@/type/models";
+import type { AdminProject, ProgramSummary } from "@/type/models";
 import { ClipboardList, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STATUS_ORDER } from "@/lib/constants";
@@ -13,6 +13,11 @@ interface ProjectStatusModalProps {
     setNewStatus: (status: string) => void;
     statusNote: string;
     setStatusNote: (note: string) => void;
+    selectedProgramId: string;
+    setSelectedProgramId: (programId: string) => void;
+    programs: ProgramSummary[];
+    isProgramsLoading: boolean;
+    programsError: string | null;
     isUpdatingStatus: boolean;
     closeStatusModal: () => void;
     handleUpdateProjectStatus: () => void;
@@ -26,6 +31,11 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     setNewStatus,
     statusNote,
     setStatusNote,
+    selectedProgramId,
+    setSelectedProgramId,
+    programs,
+    isProgramsLoading,
+    programsError,
     isUpdatingStatus,
     closeStatusModal,
     handleUpdateProjectStatus,
@@ -95,6 +105,37 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                             <div className="flex flex-col mb-4">
                                 <label className="flex items-center pb-1">
                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                        โครงการหลัก
+                                    </span>
+                                </label>
+                                <select
+                                    className="w-full px-3 py-2 border bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none rounded-xl text-slate-700 dark:text-slate-200"
+                                    value={selectedProgramId}
+                                    onChange={(e) =>
+                                        setSelectedProgramId(e.target.value)
+                                    }
+                                    disabled={isProgramsLoading}
+                                >
+                                    <option value="">
+                                        ยังไม่ได้กำหนดโครงการหลัก
+                                    </option>
+                                    {programs.map((program) => (
+                                        <option key={program.id} value={program.id}>
+                                            {program.name}
+                                            {!program.isActive ? " (ปิดใช้งาน)" : ""}
+                                        </option>
+                                    ))}
+                                </select>
+                                {programsError && (
+                                    <p className="mt-2 text-xs text-red-500">
+                                        {programsError}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col mb-4">
+                                <label className="flex items-center pb-1">
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                         เลือกสถานะใหม่
                                     </span>
                                 </label>
@@ -147,16 +188,23 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 onClick={handleUpdateProjectStatus}
                                 disabled={
                                     isUpdatingStatus ||
+                                    !!programsError ||
                                     (newStatus ===
                                         selectedProjectForStatus.status &&
                                         statusNote ===
                                             (selectedProjectForStatus.statusNote ||
+                                                "") &&
+                                        selectedProgramId ===
+                                            (selectedProjectForStatus.programId ||
                                                 ""))
                                 }
                                 className={cn(
                                     "cursor-pointer px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] transform active:scale-95",
                                     newStatus === selectedProjectForStatus.status &&
-                                    statusNote === (selectedProjectForStatus.statusNote || "")
+                                    statusNote ===
+                                        (selectedProjectForStatus.statusNote || "") &&
+                                    selectedProgramId ===
+                                        (selectedProjectForStatus.programId || "")
                                         ? "opacity-50 cursor-not-allowed"
                                         : "",
                                 )}

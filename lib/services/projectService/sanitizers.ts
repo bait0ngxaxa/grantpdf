@@ -53,6 +53,8 @@ export function sanitizeProjects(projects: RawProject[]): AdminProject[] {
             id: project.id.toString(),
             name: project.name,
             description: project.description || undefined,
+            programId: project.programId?.toString(),
+            programName: project.program?.name,
             status: project.status,
             statusNote: project.statusNote || undefined,
             created_at: project.created_at.toISOString(),

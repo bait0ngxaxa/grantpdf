@@ -17,6 +17,8 @@ export const TopBar: React.FC = (): React.JSX.Element => {
     const router = useRouter();
     const { session, setIsSidebarOpen, activeTab } = useUserDashboardContext();
     const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
+    const activeMenuName =
+        menuItems.find((item) => item.id === activeTab)?.name || "Dashboard";
 
     const handleGoToAdmin = (): void => {
         setIsNavigatingAdmin(true);
@@ -33,15 +35,16 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                     >
                         <Menu className="h-6 w-6" />
                     </button>
-                    <div className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
-                        <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-lg shadow-sm">
-                            <ChartBarBig className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    {activeTab !== "projects" && (
+                        <div className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
+                            <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-lg shadow-sm">
+                                <ChartBarBig className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 drop-shadow-sm text-balance">
+                                {activeMenuName}
+                            </h1>
                         </div>
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 drop-shadow-sm text-balance">
-                            {menuItems.find((item) => item.id === activeTab)
-                                ?.name || "Dashboard"}
-                        </h1>
-                    </div>
+                    )}
                 </div>
                 <div className="flex gap-3 sm:flex md:gap-4 items-center">
                     <div className="hidden md:flex flex-col items-end mr-2">

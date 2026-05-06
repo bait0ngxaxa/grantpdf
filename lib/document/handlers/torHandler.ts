@@ -3,6 +3,7 @@ import {
     createDocxRenderer,
     saveDocumentToStorage,
     findOrCreateProject,
+    readProgramIdFromForm,
     isProjectError,
     createUserFileRecord,
     buildSuccessResponse,
@@ -169,6 +170,7 @@ export async function handleTorGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
+        readProgramIdFromForm(formData),
         "สร้างจากเอกสาร TOR",
     );
     if (isProjectError(projectResult)) {

@@ -2,7 +2,6 @@
 
 import { Search } from "lucide-react";
 import {
-    PROJECT_STATUS,
     SORT_OPTIONS,
     STATUS_FILTER,
     STATUS_ORDER,
@@ -16,14 +15,6 @@ interface SearchAndFilterProps {
     selectedStatus: string;
     setSelectedStatus: (value: string) => void;
 }
-
-const statusSortOptions = [
-    { value: SORT_OPTIONS.STATUS_EDIT, label: `สถานะ: ${PROJECT_STATUS.EDIT}` },
-    { value: SORT_OPTIONS.STATUS_APPROVED, label: `สถานะ: ${PROJECT_STATUS.APPROVED}` },
-    { value: SORT_OPTIONS.STATUS_PENDING, label: "สถานะ: ดำเนินการ" },
-    { value: SORT_OPTIONS.STATUS_REJECTED, label: `สถานะ: ${PROJECT_STATUS.REJECTED}` },
-    { value: SORT_OPTIONS.STATUS_CLOSED, label: `สถานะ: ${PROJECT_STATUS.CLOSED}` },
-] as const;
 
 export default function SearchAndFilter({
     searchTerm,
@@ -41,7 +32,7 @@ export default function SearchAndFilter({
                 </div>
                 <input
                     type="text"
-                    placeholder="ค้นหาชื่อโครงการ, ไฟล์ หรือ ผู้สร้าง…"
+                    placeholder="ค้นหาโครงการย่อย, ไฟล์, ผู้สร้าง หรือ โครงการหลัก…"
                     className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl leading-5 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white dark:focus:bg-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 sm:text-sm transition duration-150 ease-in-out"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -61,11 +52,6 @@ export default function SearchAndFilter({
                         <option value={SORT_OPTIONS.CREATED_AT_ASC}>
                             เก่าสุดมาก่อน
                         </option>
-                        {statusSortOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
                     </select>
                 </div>
 

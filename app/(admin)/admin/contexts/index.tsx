@@ -41,6 +41,7 @@ interface AdminDashboardContextType {
     setSelectedFileType: React.Dispatch<React.SetStateAction<string>>;
     selectedStatus: string;
     setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+    markProjectViewed: (projectId: string) => void;
 
     // Modal States
     isPreviewModalOpen: boolean;
@@ -60,6 +61,14 @@ interface AdminDashboardContextType {
     setNewStatus: React.Dispatch<React.SetStateAction<string>>;
     statusNote: string;
     setStatusNote: React.Dispatch<React.SetStateAction<string>>;
+    selectedProgramId: string;
+    setSelectedProgramId: React.Dispatch<React.SetStateAction<string>>;
+    isProjectFilesModalOpen: boolean;
+    setIsProjectFilesModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    selectedProjectForFiles: AdminProject | null;
+    setSelectedProjectForFiles: React.Dispatch<
+        React.SetStateAction<AdminProject | null>
+    >;
 
     // Data State
     projects: AdminProject[];

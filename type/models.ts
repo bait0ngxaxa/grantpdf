@@ -36,10 +36,20 @@ export interface AdminDocumentFile extends UserFile {
     downloadStatus: string;
 }
 
+export interface ProgramSummary {
+    id: string;
+    name: string;
+    description?: string;
+    sortOrder: number;
+    isActive: boolean;
+}
+
 export interface ProjectSummary {
     id: string;
     name: string;
     description?: string;
+    programId?: string;
+    programName?: string;
     created_at: string;
     _count: {
         files: number;

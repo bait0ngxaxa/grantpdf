@@ -4,6 +4,7 @@ import {
     createDocxRenderer,
     saveDocumentToStorage,
     findOrCreateProject,
+    readProgramIdFromForm,
     isProjectError,
     createUserFileRecord,
     buildSuccessResponse,
@@ -101,6 +102,7 @@ export async function handleContractGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
+        readProgramIdFromForm(formData),
         "สร้างจากเอกสารสัญญาจ้างปฎิบัติงาน",
     );
     if (isProjectError(projectResult)) {

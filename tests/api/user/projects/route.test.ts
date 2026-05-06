@@ -9,6 +9,7 @@ vi.mock("@/lib/services", () => ({
     createProjectWithAudit: vi.fn(),
     getProjectSummariesByUserId: vi.fn(),
     getProjectsByUserIdPaginated: vi.fn(),
+    programExists: vi.fn(),
 }));
 
 import { auth } from "@/lib/auth";
@@ -16,6 +17,7 @@ import {
     createProjectWithAudit,
     getProjectSummariesByUserId,
     getProjectsByUserIdPaginated,
+    programExists,
 } from "@/lib/services";
 import { GET, POST } from "@/app/api/(user)/projects/route";
 import {
@@ -31,6 +33,7 @@ const mockedGetProjectSummariesByUserId = vi.mocked(
 const mockedGetProjectsByUserIdPaginated = vi.mocked(
     getProjectsByUserIdPaginated,
 );
+const mockedProgramExists = vi.mocked(programExists);
 
 function buildPostRequest(body: Record<string, unknown>): Request {
     return new Request("http://localhost/api/projects", {
@@ -46,6 +49,8 @@ function buildPostRequest(body: Record<string, unknown>): Request {
 describe("projects route", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // Default: program 1 exists
+        mockedProgramExists.mockResolvedValue(true);
     });
 
     it("returns summary projects when the lightweight view is requested", async () => {
@@ -135,12 +140,29 @@ describe("projects route", () => {
         });
     });
 
+    it("returns 400 when programId is missing", async () => {
+        mockedAuth.mockResolvedValue({
+            user: { id: "7", email: "tester@example.com" },
+        } as never);
+
+        const request = buildPostRequest({
+            name: "โครงการทดสอบ",
+        });
+        const response = await POST(request);
+        const body = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(body.error).toBe("กรุณาเลือกโครงการหลัก");
+        expect(mockedCreateProjectWithAudit).not.toHaveBeenCalled();
+    });
+
     it("returns 400 when project description exceeds the shared limit", async () => {
         mockedAuth.mockResolvedValue({
             user: { id: "7", email: "tester@example.com" },
         } as never);
 
         const request = buildPostRequest({
+            programId: 1,
             name: "โครงการทดสอบ",
             description: "ก".repeat(PROJECT_DESCRIPTION_MAX_LENGTH + 1),
         });
@@ -158,6 +180,7 @@ describe("projects route", () => {
         } as never);
 
         const request = buildPostRequest({
+            programId: 1,
             name: "ก".repeat(PROJECT_NAME_MAX_LENGTH + 1),
             description: "คำอธิบาย",
         });
@@ -180,6 +203,7 @@ describe("projects route", () => {
         } as never);
 
         const request = buildPostRequest({
+            programId: 1,
             name: "โครงการทดสอบ",
         });
         const response = await POST(request);
@@ -189,6 +213,7 @@ describe("projects route", () => {
             7,
             "โครงการทดสอบ",
             undefined,
+            1,
             expect.objectContaining({
                 actorUserId: "7",
                 actorEmail: "tester@example.com",

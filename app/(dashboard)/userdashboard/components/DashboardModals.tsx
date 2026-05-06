@@ -7,6 +7,7 @@ import {
     EditProjectModal,
     DeleteConfirmModal,
     ProfileModal,
+    ProjectFilesModal,
 } from "./modals";
 import { PdfPreviewModal } from "@/components/ui";
 
@@ -21,6 +22,9 @@ export const DashboardModals = () => {
         setPreviewTitle,
         showProfileModal,
         setShowProfileModal,
+        isProjectFilesModalOpen,
+        selectedProjectForFiles,
+        closeProjectFilesModal,
     } = useUserDashboardContext();
 
     return (
@@ -46,6 +50,11 @@ export const DashboardModals = () => {
             <DeleteConfirmModal />
             <CreateProjectModal />
             <EditProjectModal />
+            <ProjectFilesModal
+                isOpen={isProjectFilesModalOpen}
+                project={selectedProjectForFiles}
+                onClose={closeProjectFilesModal}
+            />
         </>
     );
 };

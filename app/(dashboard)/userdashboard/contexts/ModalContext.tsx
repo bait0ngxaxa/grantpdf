@@ -7,6 +7,7 @@ import React, {
     useCallback,
     type ReactNode,
 } from "react";
+import type { Project } from "@/type";
 
 interface ModalContextType {
     isModalOpen: boolean;
@@ -21,6 +22,10 @@ interface ModalContextType {
     setShowDeleteModal: (show: boolean) => void;
     showEditProjectModal: boolean;
     setShowEditProjectModal: (show: boolean) => void;
+    isProjectFilesModalOpen: boolean;
+    selectedProjectForFiles: Project | null;
+    openProjectFilesModal: (project: Project) => void;
+    closeProjectFilesModal: () => void;
     openPreviewModal: (storagePath: string, title: string) => void;
     setPreviewUrl: (url: string) => void;
     setPreviewTitle: (title: string) => void;
@@ -36,6 +41,10 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showEditProjectModal, setShowEditProjectModal] = useState(false);
+    const [isProjectFilesModalOpen, setIsProjectFilesModalOpen] =
+        useState(false);
+    const [selectedProjectForFiles, setSelectedProjectForFiles] =
+        useState<Project | null>(null);
 
     const openPreviewModal = useCallback(
         (storagePath: string, title: string) => {
@@ -46,6 +55,16 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         },
         [],
     );
+
+    const openProjectFilesModal = useCallback((project: Project) => {
+        setSelectedProjectForFiles(project);
+        setIsProjectFilesModalOpen(true);
+    }, []);
+
+    const closeProjectFilesModal = useCallback(() => {
+        setIsProjectFilesModalOpen(false);
+        setSelectedProjectForFiles(null);
+    }, []);
 
     const value = {
         isModalOpen,
@@ -60,6 +79,10 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         setShowDeleteModal,
         showEditProjectModal,
         setShowEditProjectModal,
+        isProjectFilesModalOpen,
+        selectedProjectForFiles,
+        openProjectFilesModal,
+        closeProjectFilesModal,
         openPreviewModal,
         setPreviewUrl,
         setPreviewTitle,

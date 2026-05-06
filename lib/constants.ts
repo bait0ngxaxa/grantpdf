@@ -8,6 +8,7 @@ export type UserRole = (typeof ROLES)[keyof typeof ROLES];
 export const PAGINATION = {
     ITEMS_PER_PAGE: 5,
     PROJECTS_PER_PAGE: 5,
+    PROGRAM_GROUP_PROJECTS_PER_PAGE: 5,
     USERS_PER_PAGE: 10,
 } as const;
 
@@ -122,12 +123,14 @@ export const ROUTES = {
 export const SIGNOUT_CALLBACK = ROUTES.SIGNIN;
 
 export const API_ROUTES = {
+    PROGRAMS: "/api/programs",
     PROJECTS: "/api/projects",
     PROJECTS_SUMMARY: "/api/projects?view=summary",
     PROJECTS_STATS: "/api/projects/stats",
     USER_DOCS: "/api/user-docs",
     FILE_GENERATE_URL: "/api/file/generate-url",
     ADMIN_PROJECTS: "/api/admin/projects",
+    ADMIN_PROGRAMS: "/api/admin/programs",
     ADMIN_USERS: "/api/admin/users",
     ADMIN_AUDIT: "/api/admin/audit",
 } as const;

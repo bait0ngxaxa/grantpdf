@@ -20,6 +20,13 @@ export const useAdminModalStates = () => {
         setNewStatus,
         statusNote,
         setStatusNote,
+        selectedProgramId,
+        setSelectedProgramId,
+        isProjectFilesModalOpen,
+        setIsProjectFilesModalOpen,
+        selectedProjectForFiles,
+        setSelectedProjectForFiles,
+        markProjectViewed,
     } = useAdminDashboardContext();
 
     const openPreviewModal = (storagePath: string, fileName: string) => {
@@ -40,9 +47,11 @@ export const useAdminModalStates = () => {
     };
 
     const openStatusModal = (project: AdminProject) => {
+        markProjectViewed(project.id);
         setSelectedProjectForStatus(project);
         setNewStatus(project.status);
         setStatusNote(project.statusNote || "");
+        setSelectedProgramId(project.programId || "");
         setIsStatusModalOpen(true);
     };
 
@@ -51,6 +60,18 @@ export const useAdminModalStates = () => {
         setSelectedProjectForStatus(null);
         setNewStatus("");
         setStatusNote("");
+        setSelectedProgramId("");
+    };
+
+    const openProjectFilesModal = (project: AdminProject) => {
+        markProjectViewed(project.id);
+        setSelectedProjectForFiles(project);
+        setIsProjectFilesModalOpen(true);
+    };
+
+    const closeProjectFilesModal = () => {
+        setIsProjectFilesModalOpen(false);
+        setSelectedProjectForFiles(null);
     };
 
     return {
@@ -68,7 +89,15 @@ export const useAdminModalStates = () => {
         setNewStatus,
         statusNote,
         setStatusNote,
+        selectedProgramId,
+        setSelectedProgramId,
         openStatusModal,
         closeStatusModal,
+
+        // Project Files Modal
+        isProjectFilesModalOpen,
+        selectedProjectForFiles,
+        openProjectFilesModal,
+        closeProjectFilesModal,
     };
 };

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { PdfPreviewModal } from "@/components/ui";
-import { ProjectStatusModal } from "./modals";
+import { ProjectFilesModal, ProjectStatusModal } from "./modals";
 import { useAdminModalStates, useProjectStatusActions } from "../hooks";
 import { getStatusColor } from "@/lib/utils";
 
@@ -12,17 +12,28 @@ export const AdminModals = () => {
         previewUrl,
         previewFileName,
         closePreviewModal,
+        openPreviewModal,
         isStatusModalOpen,
         selectedProjectForStatus,
         newStatus,
         setNewStatus,
         statusNote,
         setStatusNote,
+        selectedProgramId,
+        setSelectedProgramId,
         closeStatusModal,
+        isProjectFilesModalOpen,
+        selectedProjectForFiles,
+        closeProjectFilesModal,
     } = useAdminModalStates();
 
-    const { isUpdatingStatus, handleUpdateProjectStatus } =
-        useProjectStatusActions();
+    const {
+        isUpdatingStatus,
+        programs,
+        isProgramsLoading,
+        programsError,
+        handleUpdateProjectStatus,
+    } = useProjectStatusActions();
 
     return (
         <>
@@ -40,10 +51,22 @@ export const AdminModals = () => {
                 setNewStatus={setNewStatus}
                 statusNote={statusNote}
                 setStatusNote={setStatusNote}
+                selectedProgramId={selectedProgramId}
+                setSelectedProgramId={setSelectedProgramId}
+                programs={programs}
+                isProgramsLoading={isProgramsLoading}
+                programsError={programsError}
                 isUpdatingStatus={isUpdatingStatus}
                 closeStatusModal={closeStatusModal}
                 handleUpdateProjectStatus={handleUpdateProjectStatus}
                 getStatusColor={getStatusColor}
+            />
+
+            <ProjectFilesModal
+                isOpen={isProjectFilesModalOpen}
+                project={selectedProjectForFiles}
+                onClose={closeProjectFilesModal}
+                onPreviewPdf={openPreviewModal}
             />
         </>
     );

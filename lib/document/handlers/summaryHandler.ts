@@ -4,6 +4,7 @@ import fs from "fs";
 import ExcelJS from "exceljs";
 import {
     findOrCreateProject,
+    readProgramIdFromForm,
     isProjectError,
     createUserFileRecord,
     saveDocumentToStorage,
@@ -151,6 +152,7 @@ export async function handleSummaryGeneration(
         userId,
         projectName,
         formData.get("projectId") as string | null,
+        readProgramIdFromForm(formData),
         "สร้างจากแบบสรุปโครงการ",
     );
     if (isProjectError(projectResult)) {

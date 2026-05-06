@@ -11,6 +11,12 @@ const ATTACHMENT_SELECT = {
 } as const;
 
 export const PROJECT_INCLUDE = {
+    program: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
     user: {
         select: USER_PUBLIC_SELECT,
     },

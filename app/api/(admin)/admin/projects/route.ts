@@ -3,10 +3,11 @@ import { logAudit } from "@/lib/auditLog";
 import {
     getAllProjectsPaginated,
     updateProjectStatus,
+    programExistsById,
 } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
-import { updateProjectStatusSchema } from "@/lib/validation/schemas";
+import { updateAdminProjectSchema } from "@/lib/validation/schemas";
 import { toPublicApiError } from "@/lib/apiError";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 
@@ -45,18 +46,29 @@ export async function PUT(req: Request): Promise<NextResponse> {
         const { session } = guard;
 
         const body: unknown = await req.json();
-        const parsed = updateProjectStatusSchema.safeParse(body);
+        const parsed = updateAdminProjectSchema.safeParse(body);
         if (!parsed.success) {
             const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
             return NextResponse.json({ error: firstError }, { status: 400 });
         }
 
-        const { projectId, status, statusNote } = parsed.data;
+        const { projectId, status, statusNote, programId } = parsed.data;
+
+        if (programId !== undefined && programId !== null) {
+            const validProgram = await programExistsById(programId);
+            if (!validProgram) {
+                return NextResponse.json(
+                    { error: "โครงการหลักที่เลือกไม่ถูกต้อง" },
+                    { status: 400 },
+                );
+            }
+        }
 
         const updatedProject = await updateProjectStatus({
             projectId,
             status,
             statusNote,
+            programId,
         });
 
         logAudit("ADMIN_PROJECT_UPDATE", session.user.id, {
@@ -66,6 +78,8 @@ export async function PUT(req: Request): Promise<NextResponse> {
                 projectName: updatedProject.name,
                 newStatus: status,
                 statusNote: statusNote || null,
+                programId: updatedProject.programId ?? null,
+                programName: updatedProject.programName ?? null,
                 projectOwnerEmail: updatedProject.userEmail,
             },
         });

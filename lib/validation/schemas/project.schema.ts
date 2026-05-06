@@ -4,6 +4,8 @@ import {
     PROJECT_DESCRIPTION_MAX_LENGTH,
     PROJECT_NAME_MAX_LENGTH,
     PROJECT_STATUS_NOTE_MAX_LENGTH,
+    PROGRAM_NAME_MAX_LENGTH,
+    PROGRAM_DESCRIPTION_MAX_LENGTH,
 } from "../constants";
 
 const projectStatusValues = [
@@ -14,6 +16,10 @@ const projectStatusValues = [
     PROJECT_STATUS.CLOSED,
 ] as const;
 export const createProjectSchema = z.object({
+    programId: z.coerce
+        .number({ message: "กรุณาเลือกโครงการหลัก" })
+        .int({ message: "รหัสโครงการหลักไม่ถูกต้อง" })
+        .positive({ message: "กรุณาเลือกโครงการหลัก" }),
     name: z
         .string("กรุณาระบุชื่อโครงการ")
         .trim()
@@ -47,6 +53,18 @@ export const updateProjectStatusSchema = z.object({
         .or(z.literal("")),
 });
 
+export const updateAdminProjectSchema = updateProjectStatusSchema.extend({
+    programId: z
+        .union([
+            z.coerce
+                .number({ message: "รหัสโครงการหลักไม่ถูกต้อง" })
+                .int({ message: "รหัสโครงการหลักไม่ถูกต้อง" })
+                .positive({ message: "รหัสโครงการหลักไม่ถูกต้อง" }),
+            z.null(),
+        ])
+        .optional(),
+});
+
 export const updateAdminUserSchema = z.object({
     name: z
         .string("กรุณากรอกชื่อ")
@@ -76,5 +94,47 @@ export const updateProjectSchema = z.object({
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectStatusInput = z.infer<typeof updateProjectStatusSchema>;
+export type UpdateAdminProjectInput = z.infer<typeof updateAdminProjectSchema>;
 export type UpdateAdminUserInput = z.infer<typeof updateAdminUserSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
+
+// Program schemas (admin CRUD)
+export const createProgramSchema = z.object({
+    name: z
+        .string("กรุณาระบุชื่อโครงการหลัก")
+        .trim()
+        .min(1, { message: "กรุณาระบุชื่อโครงการหลัก" })
+        .max(PROGRAM_NAME_MAX_LENGTH, { message: "ชื่อโครงการหลักยาวเกินไป" }),
+    description: z
+        .string()
+        .trim()
+        .max(PROGRAM_DESCRIPTION_MAX_LENGTH, {
+            message: "รายละเอียดยาวเกินไป",
+        })
+        .optional()
+        .or(z.literal("")),
+});
+
+export const updateProgramSchema = z.object({
+    name: z
+        .string("กรุณาระบุชื่อโครงการหลัก")
+        .trim()
+        .min(1, { message: "กรุณาระบุชื่อโครงการหลัก" })
+        .max(PROGRAM_NAME_MAX_LENGTH, { message: "ชื่อโครงการหลักยาวเกินไป" }),
+    description: z
+        .string()
+        .trim()
+        .max(PROGRAM_DESCRIPTION_MAX_LENGTH, {
+            message: "รายละเอียดยาวเกินไป",
+        })
+        .optional()
+        .or(z.literal("")),
+    isActive: z.boolean({ message: "สถานะไม่ถูกต้อง" }),
+    sortOrder: z.coerce
+        .number({ message: "ลำดับไม่ถูกต้อง" })
+        .int({ message: "ลำดับต้องเป็นจำนวนเต็ม" })
+        .min(0, { message: "ลำดับต้องไม่ติดลบ" }),
+});
+
+export type CreateProgramInput = z.infer<typeof createProgramSchema>;
+export type UpdateProgramInput = z.infer<typeof updateProgramSchema>;
