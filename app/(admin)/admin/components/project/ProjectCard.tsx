@@ -56,14 +56,17 @@ export default function ProjectCard({
 
     return (
         <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
-            <div className="grid gap-3 xl:grid-cols-[auto_minmax(0,2.1fr)_minmax(0,1.1fr)_auto_auto_auto_auto] xl:items-start">
+            <div className="grid gap-3 xl:grid-cols-[auto_minmax(0,1fr)_12rem_8.5rem_5.5rem_6.5rem_auto] xl:items-start">
                 <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm shadow-blue-200 dark:shadow-blue-900/30">
                     <Archive className="h-4.5 w-4.5" />
                 </div>
 
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="min-w-0 break-words line-clamp-1 text-sm font-bold text-slate-800 dark:text-slate-100">
+                        <h3 
+                            className="min-w-0 break-words line-clamp-2 text-sm font-bold text-slate-800 dark:text-slate-100"
+                            title={project.name}
+                        >
                             {project.name}
                         </h3>
                         {showNewBadge && (
@@ -104,10 +107,10 @@ export default function ProjectCard({
                     <span className="truncate">{project.userName}</span>
                 </div>
 
-                <div className="pt-0.5 xl:self-start xl:justify-self-start">
+                <div className="pt-0.5 xl:self-start xl:justify-self-center">
                     <span
                         className={cn(
-                            "inline-flex items-center rounded-lg border px-2.5 py-1 text-[11px] font-semibold",
+                            "inline-flex min-w-[7rem] items-center justify-center rounded-lg border px-2.5 py-1 text-[11px] font-semibold",
                             getStatusColor(project.status),
                         )}
                     >

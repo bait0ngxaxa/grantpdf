@@ -39,24 +39,30 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
 
     return (
         <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
-            <div className="grid gap-3 xl:grid-cols-[minmax(0,2.5fr)_auto_auto_auto_auto] xl:items-center">
+            <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_9.5rem_5.5rem_6.5rem_auto] xl:items-center">
                 <div className="min-w-0">
                     <div className="flex items-start gap-3">
                         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                             <Building2 className="h-5 w-5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                            <h3 className="break-words text-sm font-bold text-slate-800 dark:text-slate-100">
+                            <h3 
+                                className="break-words line-clamp-2 text-sm font-bold text-slate-800 dark:text-slate-100"
+                                title={project.name}
+                            >
                                 {project.name}
                             </h3>
-                            <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+                            <p 
+                                className="mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400"
+                                title={project.description || "ไม่มีคำอธิบาย"}
+                            >
                                 {project.description || "ไม่มีคำอธิบาย"}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="relative xl:justify-self-start">
+                <div className="relative xl:justify-self-center">
                     {hasUnreadStatusNote && (
                         <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:animate-none" />
@@ -67,7 +73,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
                         type="button"
                         onClick={onStatusClick}
                         className={cn(
-                            "group/status inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold shadow-sm transition-[transform,box-shadow,background-color,color,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+                            "group/status inline-flex min-w-[7.5rem] justify-center items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold shadow-sm transition-[transform,box-shadow,background-color,color,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
                             statusClassName,
                         )}
                         title="ดูรายละเอียดสถานะ"

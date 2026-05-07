@@ -1,10 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Folder, Calendar, ChevronRight } from "lucide-react";
-import type { ProjectSummary } from "@/type";
+import { Button, Pagination, Skeleton, EmptyState } from "@/components/ui";
+import { Building2, ChevronDown, FileText, FolderTree } from "lucide-react";
+import { PAGINATION, ROUTES } from "@/lib/constants";
+import { groupProjectsByProgram } from "@/lib/programGrouping";
+import { paginateGroupItems } from "@/lib/programGroupPagination";
 import { cn } from "@/lib/utils";
+import { UploadProjectCard } from "./UploadProjectCard";
+import type { ProjectSummary } from "@/type";
 
 interface ProjectListProps {
     projects: ProjectSummary[];
@@ -21,133 +26,216 @@ export function ProjectList({
     isLoading,
     error,
 }: ProjectListProps): React.JSX.Element {
+    const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+        new Set(),
+    );
+    const [groupPages, setGroupPages] = useState<Record<string, number>>({});
+
+    const groupedProjects = useMemo(
+        () => groupProjectsByProgram(projects),
+        [projects],
+    );
+
+    const toggleGroup = (groupKey: string): void => {
+        setExpandedGroups((prev) => {
+            const next = new Set(prev);
+            if (next.has(groupKey)) {
+                next.delete(groupKey);
+            } else {
+                next.add(groupKey);
+            }
+            return next;
+        });
+    };
+
+    const setGroupPage = (groupKey: string, page: number): void => {
+        setGroupPages((prev) => ({ ...prev, [groupKey]: page }));
+    };
+
     return (
         <div className="space-y-6">
-            <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2 text-balance">
-                    <Folder className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    เลือกโครงการ
-                </h3>
+            <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
+                <FolderTree className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                เลือกโครงการสำหรับอัปโหลด
+            </h3>
 
-                {isLoading ? (
-                    <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-                    </div>
-                ) : error ? (
-                    <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 rounded-md">
-                        <p className="text-red-800 dark:text-red-400 text-sm">
-                            {error}
-                        </p>
-                    </div>
-                ) : projects.length === 0 ? (
-                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-900/50 rounded-md text-center">
-                        <p className="text-yellow-800 dark:text-yellow-400 text-sm mb-3">
-                            ไม่พบโครงการ กรุณาสร้างโครงการก่อน
-                        </p>
-                        <Button
-                            asChild
-                            className="cursor-pointer bg-yellow-600 hover:bg-yellow-700 text-white"
-                            size="sm"
-                        >
-                            <Link href="/createproject">สร้างโครงการใหม่</Link>
-                        </Button>
-                    </div>
-                ) : (
-                    <div className="space-y-3 max-h-[50vh] overflow-y-auto p-2 bg-gray-50 dark:bg-slate-900/50 rounded-lg border border-gray-100 dark:border-slate-700">
-                        {projects.map((project) => (
-                            <div
-                                key={project.id}
-                                className={cn(
-                                    "group relative bg-white dark:bg-slate-800 rounded-lg p-4 cursor-pointer transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200",
-                                    selectedProjectId === project.id
-                                        ? "ring-2 ring-blue-500 shadow-md bg-blue-50/30 dark:bg-blue-900/30"
-                                        : "hover:shadow-md border border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700",
-                                )}
-                                onClick={() => onSelectProject(project.id)}
-                            >
-                                <div className="flex items-start gap-3">
-                                    <div
-                                        className={cn(
-                                            "p-2 rounded-lg flex-shrink-0 transition-colors",
-                                            selectedProjectId === project.id
-                                                ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400"
-                                                : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-500 dark:group-hover:text-blue-400",
-                                        )}
-                                    >
-                                        <Folder className="w-5 h-5" />
+            {isLoading && (
+                <div className="space-y-4">
+                    <Skeleton className="h-20 w-full rounded-2xl" />
+                    <Skeleton className="h-20 w-full rounded-2xl" />
+                    <Skeleton className="h-20 w-full rounded-2xl" />
+                </div>
+            )}
+
+            {error && (
+                <EmptyState
+                    title="เกิดข้อผิดพลาด"
+                    description={error}
+                    icon={Building2}
+                >
+                    <Button asChild className="mt-4">
+                        <Link href={ROUTES.DASHBOARD}>กลับไปแดชบอร์ด</Link>
+                    </Button>
+                </EmptyState>
+            )}
+
+            {!isLoading && !error && projects.length === 0 && (
+                <EmptyState
+                    title="ยังไม่มีโครงการ"
+                    description="กรุณาสร้างโครงการก่อนอัปโหลดไฟล์"
+                    icon={Building2}
+                >
+                    <Button asChild>
+                        <Link href="/createproject">สร้างโครงการใหม่</Link>
+                    </Button>
+                </EmptyState>
+            )}
+
+            {!isLoading && !error && projects.length > 0 && (
+                <>
+                    <div className="max-h-[50vh] space-y-4 overflow-y-auto rounded-xl px-1 py-1">
+                        {groupedProjects.map((group) => {
+                            const isExpanded = expandedGroups.has(group.key);
+                            const paginated = paginateGroupItems(
+                                group.items,
+                                groupPages[group.key],
+                                PAGINATION.PROGRAM_GROUP_PROJECTS_PER_PAGE,
+                            );
+
+                            return (
+                                <ProgramGroupAccordion
+                                    key={group.key}
+                                    label={group.label}
+                                    projectCount={group.projectCount}
+                                    totalFiles={group.totalFiles}
+                                    isUngrouped={group.isUngrouped}
+                                    isExpanded={isExpanded}
+                                    onToggle={() => toggleGroup(group.key)}
+                                >
+                                    <div className="space-y-3 bg-slate-50/60 p-4 dark:bg-slate-900/40 sm:p-5">
+                                        {paginated.items.map((project) => (
+                                            <UploadProjectCard
+                                                key={project.id}
+                                                project={project}
+                                                isSelected={
+                                                    selectedProjectId ===
+                                                    project.id
+                                                }
+                                                onSelect={onSelectProject}
+                                            />
+                                        ))}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-1 truncate group-hover:text-blue-700 dark:group-hover:text-blue-400 text-balance">
-                                            {project.name}
-                                        </h4>
-                                        {project.description && (
-                                            <p className="text-xs text-gray-500 dark:text-slate-400 mb-2 line-clamp-2">
-                                                {project.description}
-                                            </p>
-                                        )}
-                                        <div className="flex items-center text-xs text-gray-400 dark:text-slate-500">
-                                            <Calendar className="w-3 h-3 mr-1" />
-                                            {new Date(
-                                                project.created_at,
-                                            ).toLocaleDateString("th-TH", {
-                                                year: "numeric",
-                                                month: "long",
-                                                day: "numeric",
-                                            })}
-                                        </div>
-                                    </div>
-                                    {selectedProjectId === project.id && (
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
-                                                <ChevronRight className="w-4 h-4 text-white" />
-                                            </div>
+                                    {paginated.totalPages > 1 && (
+                                        <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
+                                            <Pagination
+                                                currentPage={
+                                                    paginated.currentPage
+                                                }
+                                                totalPages={
+                                                    paginated.totalPages
+                                                }
+                                                onPageChange={(page) =>
+                                                    setGroupPage(
+                                                        group.key,
+                                                        page,
+                                                    )
+                                                }
+                                                className="mt-4"
+                                            />
                                         </div>
                                     )}
-                                </div>
-                            </div>
-                        ))}
+                                </ProgramGroupAccordion>
+                            );
+                        })}
                     </div>
-                )}
 
-                {projects.length > 0 && (
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-3 text-right">
-                        เลือกโครงการที่ต้องการอัพโหลดไฟล์เข้าไป
+                    <p className="text-right text-xs text-slate-500 dark:text-slate-400">
+                        เลือกโครงการที่ต้องการอัปโหลดไฟล์เข้าไป
                     </p>
-                )}
-            </div>
-
-            <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5 border border-blue-100 dark:border-blue-800">
-                <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-400 mb-3 flex items-center gap-2 text-balance">
-                    <span className="w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 flex items-center justify-center text-xs">
-                        i
-                    </span>
-                    คำแนะนำการใช้งาน
-                </h4>
-                <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-2 pl-2">
-                    <li className="flex items-start gap-2">
-                        <span className="text-blue-400 mt-1">•</span>
-                        เลือกโครงการจากรายการด้านบน
-                    </li>
-                    <li className="flex items-start gap-2">
-                        <span className="text-blue-400 mt-1">•</span>
-                        รองรับไฟล์ .docx และ .pdf
-                    </li>
-                    <li className="flex items-start gap-2">
-                        <span className="text-blue-400 mt-1">•</span>
-                        ขนาดไฟล์สูงสุด: .docx ไม่เกิน 3MB และ .pdf ไม่เกิน
-                        5MB
-                    </li>
-                    <li className="flex items-start gap-2">
-                        <span className="text-blue-400 mt-1">•</span>
-                        ระบบตรวจสอบชนิดไฟล์จริงก่อนอัปโหลดทุกครั้ง
-                    </li>
-                    <li className="flex items-start gap-2">
-                        <span className="text-blue-400 mt-1">•</span>
-                        สามารถลากไฟล์มาวางในพื้นที่อัพโหลดได้
-                    </li>
-                </ul>
-            </div>
+                </>
+            )}
         </div>
     );
 }
 
+// -- Extracted accordion sub-component to keep ProjectList within LOC limits --
+
+interface ProgramGroupAccordionProps {
+    label: string;
+    projectCount: number;
+    totalFiles: number;
+    isUngrouped: boolean;
+    isExpanded: boolean;
+    onToggle: () => void;
+    children: React.ReactNode;
+}
+
+function ProgramGroupAccordion({
+    label,
+    projectCount,
+    totalFiles,
+    isUngrouped,
+    isExpanded,
+    onToggle,
+    children,
+}: ProgramGroupAccordionProps): React.JSX.Element {
+    return (
+        <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <button
+                type="button"
+                onClick={onToggle}
+                className="flex w-full items-center justify-between gap-4 bg-slate-50/80 px-5 py-4 text-left transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:px-6"
+            >
+                <div className="flex min-w-0 items-start gap-4">
+                    <div
+                        className={cn(
+                            "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-white shadow-md",
+                            isUngrouped
+                                ? "bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/20"
+                                : "bg-gradient-to-br from-violet-600 to-fuchsia-500 shadow-violet-500/20",
+                        )}
+                    >
+                        {isUngrouped ? (
+                            <FolderTree className="h-6 w-6" />
+                        ) : (
+                            <Building2 className="h-6 w-6" />
+                        )}
+                    </div>
+                    <div className="min-w-0">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                            {label}
+                        </h2>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <span className="rounded-full bg-white px-2.5 py-1 dark:bg-slate-700">
+                                {projectCount} โครงการย่อย
+                            </span>
+                            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 dark:bg-slate-700">
+                                <FileText className="mr-1.5 h-3.5 w-3.5" />
+                                {totalFiles} รายการเอกสาร
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    className={cn(
+                        "rounded-full bg-white p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300",
+                        isExpanded && "rotate-180",
+                    )}
+                >
+                    <ChevronDown className="h-5 w-5" />
+                </div>
+            </button>
+
+            <div
+                className={cn(
+                    "overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out",
+                    isExpanded
+                        ? "max-h-[4000px] opacity-100"
+                        : "max-h-0 opacity-0",
+                )}
+            >
+                {children}
+            </div>
+        </div>
+    );
+}
