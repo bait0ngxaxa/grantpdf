@@ -8,14 +8,29 @@ import { ROUTES } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Info, Loader2 } from "lucide-react";
 
-export default function SigninClient(): React.JSX.Element {
+interface SigninClientProps {
+    callbackUrl?: string;
+    reason?: string;
+}
+
+function getSessionMessage(reason: string | undefined): string {
+    return reason === "session-expired"
+        ? "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง"
+        : "";
+}
+
+export default function SigninClient({
+    callbackUrl,
+    reason,
+}: SigninClientProps): React.JSX.Element {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const sessionMessage = getSessionMessage(reason);
 
     const getRetryAfterSeconds = (
         data: unknown,
@@ -94,7 +109,7 @@ export default function SigninClient(): React.JSX.Element {
                     description: "ยินดีต้อนรับเข้าสู่ระบบ กำลังนำคุณไปยังหน้าหลัก…",
                 });
                 setTimeout(() => {
-                    router.push(ROUTES.DASHBOARD);
+                    router.push(callbackUrl ?? ROUTES.DASHBOARD);
                 }, 1500);
             }
         } catch (err) {
@@ -140,6 +155,19 @@ export default function SigninClient(): React.JSX.Element {
                             onSubmit={handleLogin}
                             className="space-y-5 relative z-10"
                         >
+                            {sessionMessage && (
+                                <div
+                                    aria-live="polite"
+                                    className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-900/50 text-amber-700 dark:text-amber-300 text-sm font-medium flex items-center gap-2"
+                                >
+                                    <Info
+                                        aria-hidden="true"
+                                        className="w-5 h-5 shrink-0"
+                                    />
+                                    {sessionMessage}
+                                </div>
+                            )}
+
                             <div className="space-y-2">
                                 <label
                                     htmlFor="signin-email"

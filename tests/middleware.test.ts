@@ -50,8 +50,24 @@ function isProtectedPage(pathname: string): boolean {
     return PROTECTED_PAGES.includes(pathname);
 }
 
-function shouldBlockNonAdmin(pathname: string, role: string | null): boolean {
-    return isAdminPage(pathname) && role !== "admin";
+type AdminRouteDecision = "allow" | "signin" | "access-denied";
+
+function getAdminRouteDecision(
+    pathname: string,
+    role: string | null,
+): AdminRouteDecision {
+    if (!isAdminPage(pathname)) return "allow";
+    if (!role) return "signin";
+
+    return role === "admin" ? "allow" : "access-denied";
+}
+
+function shouldBlockNonAdmin(pathname: string, role: string): boolean {
+    return getAdminRouteDecision(pathname, role) === "access-denied";
+}
+
+function shouldRedirectUnauthenticatedAdmin(pathname: string): boolean {
+    return getAdminRouteDecision(pathname, null) === "signin";
 }
 
 function shouldRequireAuth(
@@ -164,7 +180,10 @@ describe("Middleware Security - CSRF Protection", () => {
 
             it("should block non-admin users from admin pages", () => {
                 expect(shouldBlockNonAdmin("/admin", "user")).toBe(true);
-                expect(shouldBlockNonAdmin("/admin", null)).toBe(true);
+            });
+
+            it("should redirect unauthenticated admin page access to signin", () => {
+                expect(shouldRedirectUnauthenticatedAdmin("/admin")).toBe(true);
             });
 
             it("should allow admin users to access admin pages", () => {
@@ -207,8 +226,8 @@ describe("Middleware Security - CSRF Protection", () => {
             }
         });
 
-        it("should deny access to admin routes for unauthenticated users", () => {
-            expect(shouldBlockNonAdmin("/admin", null)).toBe(true);
+        it("should redirect unauthenticated admin routes to signin", () => {
+            expect(shouldRedirectUnauthenticatedAdmin("/admin")).toBe(true);
         });
 
         it("should allow admin access to admin routes", () => {

@@ -80,7 +80,7 @@ function isSecureAuthRequest(req: NextRequest): boolean {
 export async function middleware(
     req: NextRequest
 ): Promise<NextResponse | Response> {
-    const { pathname } = req.nextUrl;
+    const { pathname, search } = req.nextUrl;
     const isApiRequest = pathname.startsWith("/api/");
 
     if (
@@ -130,9 +130,19 @@ export async function middleware(
     // revoked in the database and must be allowed to reach the sign-in page.
 
     if (matchesAnyPrefix(pathname, ADMIN_PREFIXES)) {
-        if (!token || token.role !== ROLES.ADMIN) {
+        if (!token) {
             console.warn(
-                `User with role '${token?.role}' tried to access admin page. Redirecting to /access-denied...`
+                `User is not authenticated. Redirecting from '${pathname}' to /signin...`
+            );
+            const url = new URL(ROUTES.SIGNIN, req.url);
+            url.searchParams.set("callbackUrl", `${pathname}${search}`);
+            url.searchParams.set("reason", "session-expired");
+            return NextResponse.redirect(url);
+        }
+
+        if (token.role !== ROLES.ADMIN) {
+            console.warn(
+                `User with role '${token.role}' tried to access admin page. Redirecting to /access-denied...`
             );
             return NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, req.url));
         }

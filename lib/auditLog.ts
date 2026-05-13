@@ -1,5 +1,6 @@
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import { prisma } from "@/lib/prisma";
+import { purgeExpiredAuditLogsOncePerInterval } from "@/lib/services/auditRetentionService";
 
 const TIMEZONE = "Asia/Bangkok"; // Thailand UTC+7
 
@@ -113,6 +114,7 @@ export function logAudit(
     void (async () => {
         try {
             await writeAuditLogToDatabase(entry);
+            await purgeExpiredAuditLogsOncePerInterval();
         } catch (error) {
             // Silent fail - don't break the app if logging fails
             console.error("Audit log error:", error);

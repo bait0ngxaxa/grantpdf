@@ -4,6 +4,7 @@ vi.mock("@/lib/prisma", () => ({
     prisma: {
         auditLog: {
             create: vi.fn(),
+            deleteMany: vi.fn(),
         },
     },
 }));
@@ -12,11 +13,13 @@ import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/auditLog";
 
 const mockedAuditCreate = vi.mocked(prisma.auditLog.create);
+const mockedAuditDeleteMany = vi.mocked(prisma.auditLog.deleteMany);
 
 describe("auditLog", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockedAuditCreate.mockResolvedValue({} as never);
+        mockedAuditDeleteMany.mockResolvedValue({ count: 0 } as never);
     });
 
     it("writes audit log to database asynchronously", async () => {

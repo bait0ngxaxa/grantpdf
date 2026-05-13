@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { purgeExpiredAuditLogs } from "@/lib/services/auditRetentionService";
 import type { Prisma } from "@prisma/client";
 import type { AuditLogsApiResponse, AuditLogApiData } from "@/type/api";
 
@@ -106,6 +107,8 @@ export async function getAuditLogsPaginated(
 ): Promise<AuditLogsApiResponse> {
     const skip = (params.page - 1) * params.limit;
     const where = toWhereClause(params);
+
+    await purgeExpiredAuditLogs();
 
     const [total, rows] = await Promise.all([
         prisma.auditLog.count({ where }),
