@@ -212,11 +212,20 @@ export async function POST(
     let idempotencyRecordId: bigint | null = null;
 
     try {
-        const rateLimitResult = applyRateLimit({
+        const sessionResult = await validateSession();
+        if (isSessionError(sessionResult)) {
+            return sessionResult;
+        }
+        const { userId, session } = sessionResult;
+        auditUserId = String(userId);
+        auditUserEmail = session.user.email ?? undefined;
+
+        const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.USER.DOCUMENT_GENERATE.ROUTE_KEY,
             limit: RATE_LIMIT.USER.DOCUMENT_GENERATE.LIMIT,
             windowMs: RATE_LIMIT.USER.DOCUMENT_GENERATE.WINDOW_MS,
+            identifier: String(userId),
         });
 
         if (!rateLimitResult.success) {
@@ -229,13 +238,6 @@ export async function POST(
             );
         }
 
-        const sessionResult = await validateSession();
-        if (isSessionError(sessionResult)) {
-            return sessionResult;
-        }
-        const { userId, session } = sessionResult;
-        auditUserId = String(userId);
-        auditUserEmail = session.user.email ?? undefined;
         const { type } = await params;
         auditType = type;
 

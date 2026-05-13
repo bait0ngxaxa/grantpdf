@@ -65,11 +65,21 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 // POST: สร้างโครงการใหม่ (ต้องเลือกโครงการหลักก่อน)
 export async function POST(req: Request): Promise<NextResponse> {
     try {
-        const rateLimitResult = applyRateLimit({
+        const session = await auth();
+
+        if (!session || !session.user?.id) {
+            return NextResponse.json(
+                { error: "กรุณาเข้าสู่ระบบ" },
+                { status: 401 },
+            );
+        }
+
+        const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
             limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
             windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
+            identifier: session.user.id,
         });
 
         if (!rateLimitResult.success) {
@@ -79,15 +89,6 @@ export async function POST(req: Request): Promise<NextResponse> {
                     retryAfter: rateLimitResult.retryAfter,
                 },
                 { status: 429, headers: rateLimitResult.headers },
-            );
-        }
-
-        const session = await auth();
-
-        if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401, headers: rateLimitResult.headers },
             );
         }
 

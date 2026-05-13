@@ -29,25 +29,26 @@ export async function GET(): Promise<NextResponse> {
 
 export async function POST(req: Request): Promise<NextResponse> {
     try {
-        const rateLimitResult = applyRateLimit({
+        const session = await auth();
+        if (!isAdmin(session)) {
+            return NextResponse.json(
+                { error: "ไม่มีสิทธิ์เข้าถึง" },
+                { status: 403 },
+            );
+        }
+
+        const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
             limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
             windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
+            identifier: session.user.id,
         });
 
         if (!rateLimitResult.success) {
             return NextResponse.json(
                 { error: "ส่งคำขอบ่อยเกินไป" },
                 { status: 429, headers: rateLimitResult.headers },
-            );
-        }
-
-        const session = await auth();
-        if (!isAdmin(session)) {
-            return NextResponse.json(
-                { error: "ไม่มีสิทธิ์เข้าถึง" },
-                { status: 403 },
             );
         }
 

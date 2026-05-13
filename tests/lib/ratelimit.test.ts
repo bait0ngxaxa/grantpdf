@@ -7,176 +7,147 @@ import {
     getClientIP,
 } from "@/lib/ratelimit";
 
+async function exhaustLimit(
+    key: string,
+    limit: number,
+    windowMs: number,
+): Promise<void> {
+    for (let index = 0; index < limit; index += 1) {
+        await rateLimit(key, limit, windowMs);
+    }
+}
+
 describe("Rate Limiting - Security Tests", () => {
-    beforeEach(() => {
-        // Reset all rate limits before each test
-        resetRateLimit("test-ip");
-        resetRateLimit("attacker-ip");
-        resetRateLimit("user-1");
-        resetRateLimit("user-2");
+    beforeEach(async () => {
+        await Promise.all([
+            resetRateLimit("test-ip"),
+            resetRateLimit("attacker-ip"),
+            resetRateLimit("user-1"),
+            resetRateLimit("user-2"),
+            resetRateLimit("new-ip"),
+            resetRateLimit("ip-1"),
+            resetRateLimit("ip-2"),
+            resetRateLimit("ip-3"),
+        ]);
     });
 
-    // ============================================
-    // Basic Rate Limiting Tests
-    // ============================================
     describe("Basic Rate Limiting", () => {
-        it("should allow first request", () => {
-            const result = rateLimit("test-ip", 5, 60000);
+        it("should allow first request", async () => {
+            const result = await rateLimit("test-ip", 5, 60_000);
 
             expect(result.success).toBe(true);
             expect(result.remaining).toBe(4);
         });
 
-        it("should decrement remaining count with each request", () => {
-            const result1 = rateLimit("test-ip", 5, 60000);
-            const result2 = rateLimit("test-ip", 5, 60000);
-            const result3 = rateLimit("test-ip", 5, 60000);
+        it("should decrement remaining count with each request", async () => {
+            const result1 = await rateLimit("test-ip", 5, 60_000);
+            const result2 = await rateLimit("test-ip", 5, 60_000);
+            const result3 = await rateLimit("test-ip", 5, 60_000);
 
             expect(result1.remaining).toBe(4);
             expect(result2.remaining).toBe(3);
             expect(result3.remaining).toBe(2);
         });
 
-        it("should block after exceeding limit", () => {
-            // Make 5 requests (the limit)
-            for (let i = 0; i < 5; i++) {
-                rateLimit("test-ip", 5, 60000);
-            }
+        it("should block after exceeding limit", async () => {
+            await exhaustLimit("test-ip", 5, 60_000);
 
-            // 6th request should be blocked
-            const result = rateLimit("test-ip", 5, 60000);
+            const result = await rateLimit("test-ip", 5, 60_000);
 
             expect(result.success).toBe(false);
             expect(result.remaining).toBe(0);
             expect(result.retryAfter).toBeGreaterThan(0);
         });
 
-        it("should return reset time", () => {
+        it("should return reset time", async () => {
             const before = Date.now();
-            const result = rateLimit("test-ip", 5, 60000);
+            const result = await rateLimit("test-ip", 5, 60_000);
             const after = Date.now();
 
-            expect(result.resetTime).toBeGreaterThanOrEqual(before + 60000);
-            expect(result.resetTime).toBeLessThanOrEqual(after + 60000);
+            expect(result.resetTime).toBeGreaterThanOrEqual(before + 60_000);
+            expect(result.resetTime).toBeLessThanOrEqual(after + 60_000);
         });
     });
 
-    // ============================================
-    // Brute Force Protection Tests
-    // ============================================
     describe("Brute Force Protection", () => {
-        it("should block rapid successive requests", () => {
-            // Simulate rapid login attempts
-            const ip = "attacker-ip";
-            const limit = 3; // Strict limit for login
+        it("should block rapid successive requests", async () => {
+            await exhaustLimit("attacker-ip", 3, 60_000);
 
-            for (let i = 0; i < limit; i++) {
-                rateLimit(ip, limit, 60000);
-            }
+            const blocked = await rateLimit("attacker-ip", 3, 60_000);
 
-            // Next attempt should be blocked
-            const blocked = rateLimit(ip, limit, 60000);
             expect(blocked.success).toBe(false);
         });
 
-        it("should track different IPs separately", () => {
-            // IP 1 exhausts limit
-            for (let i = 0; i < 5; i++) {
-                rateLimit("user-1", 5, 60000);
-            }
-            const blockedUser1 = rateLimit("user-1", 5, 60000);
+        it("should track different subjects separately", async () => {
+            await exhaustLimit("user-1", 5, 60_000);
 
-            // IP 2 should still work
-            const allowedUser2 = rateLimit("user-2", 5, 60000);
+            const blockedUser1 = await rateLimit("user-1", 5, 60_000);
+            const allowedUser2 = await rateLimit("user-2", 5, 60_000);
 
             expect(blockedUser1.success).toBe(false);
             expect(allowedUser2.success).toBe(true);
         });
 
-        it("should provide retryAfter when blocked", () => {
-            const ip = "attacker-ip";
+        it("should provide retryAfter when blocked", async () => {
+            await exhaustLimit("attacker-ip", 5, 60_000);
 
-            // Exhaust the limit
-            for (let i = 0; i < 5; i++) {
-                rateLimit(ip, 5, 60000);
-            }
-
-            const blocked = rateLimit(ip, 5, 60000);
+            const blocked = await rateLimit("attacker-ip", 5, 60_000);
 
             expect(blocked.success).toBe(false);
             expect(blocked.retryAfter).toBeDefined();
             expect(blocked.retryAfter).toBeGreaterThan(0);
-            expect(blocked.retryAfter).toBeLessThanOrEqual(60); // Should be <= window in seconds
+            expect(blocked.retryAfter).toBeLessThanOrEqual(60);
         });
     });
 
-    // ============================================
-    // getRateLimitStatus Tests
-    // ============================================
     describe("getRateLimitStatus", () => {
-        it("should return full limit for new IP", () => {
-            const status = getRateLimitStatus("new-ip", 10, 60000);
+        it("should return full limit for new subject", async () => {
+            const status = await getRateLimitStatus("new-ip", 10, 60_000);
 
             expect(status.remaining).toBe(10);
         });
 
-        it("should NOT increment counter when checking status", () => {
-            // First make some requests
-            rateLimit("test-ip", 5, 60000);
-            rateLimit("test-ip", 5, 60000);
+        it("should NOT increment counter when checking status", async () => {
+            await rateLimit("test-ip", 5, 60_000);
+            await rateLimit("test-ip", 5, 60_000);
 
-            const status1 = getRateLimitStatus("test-ip", 5, 60000);
-            const status2 = getRateLimitStatus("test-ip", 5, 60000);
+            const status1 = await getRateLimitStatus("test-ip", 5, 60_000);
+            const status2 = await getRateLimitStatus("test-ip", 5, 60_000);
 
-            // Status checks should not affect the count
             expect(status1.remaining).toBe(status2.remaining);
         });
 
-        it("should show retryAfter when limit exceeded", () => {
-            // Exhaust the limit
-            for (let i = 0; i < 5; i++) {
-                rateLimit("test-ip", 5, 60000);
-            }
+        it("should show retryAfter when limit exceeded", async () => {
+            await exhaustLimit("test-ip", 5, 60_000);
 
-            const status = getRateLimitStatus("test-ip", 5, 60000);
+            const status = await getRateLimitStatus("test-ip", 5, 60_000);
 
             expect(status.remaining).toBe(0);
             expect(status.retryAfter).toBeDefined();
         });
     });
 
-    // ============================================
-    // resetRateLimit Tests
-    // ============================================
     describe("resetRateLimit", () => {
-        it("should reset rate limit for specific IP", () => {
-            // Exhaust the limit
-            for (let i = 0; i < 5; i++) {
-                rateLimit("test-ip", 5, 60000);
-            }
+        it("should reset rate limit for specific subject", async () => {
+            await exhaustLimit("test-ip", 5, 60_000);
 
-            // Verify blocked
-            expect(rateLimit("test-ip", 5, 60000).success).toBe(false);
+            expect((await rateLimit("test-ip", 5, 60_000)).success).toBe(false);
 
-            // Reset
-            resetRateLimit("test-ip");
+            await resetRateLimit("test-ip");
 
-            // Should work again
-            const result = rateLimit("test-ip", 5, 60000);
+            const result = await rateLimit("test-ip", 5, 60_000);
             expect(result.success).toBe(true);
             expect(result.remaining).toBe(4);
         });
     });
 
-    // ============================================
-    // getRateLimitStats Tests
-    // ============================================
     describe("getRateLimitStats", () => {
-        it("should return statistics", () => {
-            // Make some requests
-            rateLimit("ip-1", 5, 60000);
-            rateLimit("ip-2", 5, 60000);
-            rateLimit("ip-3", 5, 60000);
+        it("should return statistics", async () => {
+            await Promise.all([
+                rateLimit("ip-1", 5, 60_000),
+                rateLimit("ip-2", 5, 60_000),
+                rateLimit("ip-3", 5, 60_000),
+            ]);
 
             const stats = getRateLimitStats();
 
@@ -184,70 +155,61 @@ describe("Rate Limiting - Security Tests", () => {
             expect(stats.memoryUsage).toMatch(/\d+KB/);
         });
 
-        it("should cap the number of tracked subjects to avoid unbounded growth", () => {
+        it("should cap the number of tracked subjects to avoid unbounded growth", async () => {
             const insertedKeys: string[] = [];
 
             for (let index = 0; index < 5_200; index += 1) {
                 const key = `overflow-ip-${index}`;
                 insertedKeys.push(key);
-                rateLimit(key, 1, 60_000);
+                await rateLimit(key, 1, 60_000);
             }
 
             const stats = getRateLimitStats();
 
             expect(stats.totalIPs).toBeLessThanOrEqual(5_000);
 
-            for (const key of insertedKeys) {
-                resetRateLimit(key);
-            }
+            await Promise.all(insertedKeys.map((key) => resetRateLimit(key)));
         });
     });
 
-    // ============================================
-    // getClientIP Tests
-    // ============================================
     describe("getClientIP", () => {
         it("should extract IP from x-forwarded-for header", () => {
             const mockRequest = {
                 headers: {
                     get: vi.fn((header: string) => {
-                        if (header === "x-forwarded-for")
+                        if (header === "x-forwarded-for") {
                             return "203.0.113.50, 70.41.3.18";
+                        }
                         return null;
                     }),
                 },
             } as unknown as Request;
 
-            const ip = getClientIP(mockRequest);
-            expect(ip).toBe("203.0.113.50");
+            expect(getClientIP(mockRequest)).toBe("203.0.113.50");
         });
 
         it("should extract IP from x-real-ip header", () => {
             const mockRequest = {
                 headers: {
-                    get: vi.fn((header: string) => {
-                        if (header === "x-real-ip") return "192.168.1.100";
-                        return null;
-                    }),
+                    get: vi.fn((header: string) =>
+                        header === "x-real-ip" ? "192.168.1.100" : null,
+                    ),
                 },
             } as unknown as Request;
 
-            const ip = getClientIP(mockRequest);
-            expect(ip).toBe("192.168.1.100");
+            expect(getClientIP(mockRequest)).toBe("192.168.1.100");
         });
 
         it("should extract IP from cf-connecting-ip header (Cloudflare)", () => {
             const mockRequest = {
                 headers: {
-                    get: vi.fn((header: string) => {
-                        if (header === "cf-connecting-ip") return "10.0.0.1";
-                        return null;
-                    }),
+                    get: vi.fn((header: string) =>
+                        header === "cf-connecting-ip" ? "10.0.0.1" : null,
+                    ),
                 },
             } as unknown as Request;
 
-            const ip = getClientIP(mockRequest);
-            expect(ip).toBe("10.0.0.1");
+            expect(getClientIP(mockRequest)).toBe("10.0.0.1");
         });
 
         it('should return "unknown" when no IP headers present', () => {
@@ -257,8 +219,7 @@ describe("Rate Limiting - Security Tests", () => {
                 },
             } as unknown as Request;
 
-            const ip = getClientIP(mockRequest);
-            expect(ip).toBe("unknown");
+            expect(getClientIP(mockRequest)).toBe("unknown");
         });
 
         it("should prioritize x-forwarded-for over other headers", () => {
@@ -273,35 +234,27 @@ describe("Rate Limiting - Security Tests", () => {
                 },
             } as unknown as Request;
 
-            const ip = getClientIP(mockRequest);
-            expect(ip).toBe("1.1.1.1");
+            expect(getClientIP(mockRequest)).toBe("1.1.1.1");
         });
     });
 
-    // ============================================
-    // Window Expiration Tests
-    // ============================================
     describe("Window Expiration", () => {
-        it("should reset after window expires", () => {
+        it("should reset after window expires", async () => {
             vi.useFakeTimers();
 
-            // Make requests to exhaust limit
-            for (let i = 0; i < 5; i++) {
-                rateLimit("test-ip", 5, 60000);
+            try {
+                await exhaustLimit("test-ip", 5, 60_000);
+
+                expect((await rateLimit("test-ip", 5, 60_000)).success).toBe(false);
+
+                vi.advanceTimersByTime(61_000);
+
+                const result = await rateLimit("test-ip", 5, 60_000);
+                expect(result.success).toBe(true);
+                expect(result.remaining).toBe(4);
+            } finally {
+                vi.useRealTimers();
             }
-
-            // Blocked now
-            expect(rateLimit("test-ip", 5, 60000).success).toBe(false);
-
-            // Advance time past the window
-            vi.advanceTimersByTime(61000);
-
-            // Should be allowed again
-            const result = rateLimit("test-ip", 5, 60000);
-            expect(result.success).toBe(true);
-            expect(result.remaining).toBe(4);
-
-            vi.useRealTimers();
         });
     });
 });

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         RATE_LIMIT.AUTH.SIGNIN.ROUTE_KEY,
         email
     );
-    const status = getRateLimitStatus(
+    const status = await getRateLimitStatus(
         key,
         RATE_LIMIT.AUTH.SIGNIN.LIMIT,
         RATE_LIMIT.AUTH.SIGNIN.WINDOW_MS

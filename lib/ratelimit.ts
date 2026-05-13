@@ -1,16 +1,16 @@
 // lib/ratelimit.ts
-interface RateLimitRecord {
-    tokens: number;
-    lastRefill: number;
-    lastRequest: number;
-}
-
-interface RateLimitResult {
-    success: boolean;
-    remaining: number;
-    resetTime: number;
-    retryAfter?: number;
-}
+import { getRedisClient } from "@/lib/redis";
+import {
+    getRateLimitMemoryStats,
+    getRateLimitStatusMemory,
+    rateLimitMemory,
+    resetRateLimitMemory,
+    type RateLimitResult,
+} from "@/lib/ratelimitMemory";
+import {
+    RATE_LIMIT_SCRIPT,
+    RATE_LIMIT_STATUS_SCRIPT,
+} from "@/lib/ratelimitScripts";
 
 interface ApplyRateLimitOptions {
     request: Request;
@@ -20,261 +20,123 @@ interface ApplyRateLimitOptions {
     identifier?: string;
 }
 
-interface RateLimitState {
-    records: Map<string, RateLimitRecord>;
-    cleanupTimer: ReturnType<typeof setInterval> | null;
-    listenersRegistered: boolean;
+const REDIS_KEY_TTL_BUFFER_MS = 60_000;
+
+function shouldUseRedis(): boolean {
+    return Boolean(process.env.REDIS_URL) && process.env.NODE_ENV !== "test";
 }
 
-const CLEANUP_INTERVAL = 5 * 60 * 1000;
-const MAX_ENTRY_AGE_MS = 60 * 60 * 1000;
-const MAX_RATE_LIMIT_ENTRIES = 5_000;
+function assertRateLimitConfig(limit: number, windowMs: number): void {
+    if (!Number.isFinite(limit) || limit < 1) {
+        throw new Error("Rate limit must be greater than zero");
+    }
 
-declare global {
-    var __grantOnlineRateLimitState: RateLimitState | undefined;
+    if (!Number.isFinite(windowMs) || windowMs < 1) {
+        throw new Error("Rate limit window must be greater than zero");
+    }
 }
 
-function createRateLimitState(): RateLimitState {
+function toNumber(value: unknown): number {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") return Number(value);
+    throw new Error("Invalid Redis rate limit response");
+}
+
+function parseRateLimitReply(reply: unknown): RateLimitResult {
+    if (!Array.isArray(reply) || reply.length < 4) {
+        throw new Error("Invalid Redis rate limit response");
+    }
+
+    const retryAfter = toNumber(reply[3]);
     return {
-        records: new Map<string, RateLimitRecord>(),
-        cleanupTimer: null,
-        listenersRegistered: false,
+        success: toNumber(reply[0]) === 1,
+        remaining: toNumber(reply[1]),
+        resetTime: toNumber(reply[2]),
+        ...(retryAfter > 0 && { retryAfter }),
     };
 }
 
-const rateLimitState =
-    globalThis.__grantOnlineRateLimitState ??
-    createRateLimitState();
-globalThis.__grantOnlineRateLimitState = rateLimitState;
-
-const rateLimitMap = rateLimitState.records;
-
-function cleanupExpiredEntries(now: number): void {
-    for (const [key, record] of rateLimitMap.entries()) {
-        if (now - record.lastRequest > MAX_ENTRY_AGE_MS) {
-            rateLimitMap.delete(key);
-        }
+function parseStatusReply(reply: unknown): Omit<RateLimitResult, "success"> {
+    if (!Array.isArray(reply) || reply.length < 3) {
+        throw new Error("Invalid Redis rate limit status response");
     }
+
+    const retryAfter = toNumber(reply[2]);
+    return {
+        remaining: toNumber(reply[0]),
+        resetTime: toNumber(reply[1]),
+        ...(retryAfter > 0 && { retryAfter }),
+    };
 }
 
-function evictOverflowEntries(targetSize: number): void {
-    if (rateLimitMap.size <= targetSize) {
-        return;
-    }
-
-    const overflow = rateLimitMap.size - targetSize;
-    const entriesByAge = [...rateLimitMap.entries()].sort(
-        (left, right) => left[1].lastRequest - right[1].lastRequest,
-    );
-
-    for (let index = 0; index < overflow; index += 1) {
-        const oldestEntry = entriesByAge[index];
-        if (!oldestEntry) {
-            break;
-        }
-        rateLimitMap.delete(oldestEntry[0]);
-    }
-}
-
-function cleanupRateLimitMap(now: number = Date.now()): void {
-    cleanupExpiredEntries(now);
-    evictOverflowEntries(MAX_RATE_LIMIT_ENTRIES);
-
-    if (process.env.NODE_ENV === "development") {
-        console.warn(
-            `[RateLimit] Cleanup completed. Active IPs: ${rateLimitMap.size}`
-        );
-    }
-}
-
-function clearCleanupTimer(): void {
-    if (!rateLimitState.cleanupTimer) {
-        return;
-    }
-
-    clearInterval(rateLimitState.cleanupTimer);
-    rateLimitState.cleanupTimer = null;
-}
-
-function ensureRateLimitStateInitialized(): void {
-    if (!rateLimitState.cleanupTimer) {
-        const cleanupTimer = setInterval(() => {
-            cleanupRateLimitMap();
-        }, CLEANUP_INTERVAL);
-
-        cleanupTimer.unref?.();
-        rateLimitState.cleanupTimer = cleanupTimer;
-    }
-
-    if (!rateLimitState.listenersRegistered) {
-        process.once("SIGTERM", clearCleanupTimer);
-        process.once("SIGINT", clearCleanupTimer);
-        rateLimitState.listenersRegistered = true;
-    }
-}
-
-function makeRoomForRateLimitKey(now: number): void {
-    if (rateLimitMap.size < MAX_RATE_LIMIT_ENTRIES) {
-        return;
-    }
-
-    cleanupRateLimitMap(now);
-    if (rateLimitMap.size < MAX_RATE_LIMIT_ENTRIES) {
-        return;
-    }
-
-    evictOverflowEntries(MAX_RATE_LIMIT_ENTRIES - 1);
-}
-
-ensureRateLimitStateInitialized();
-
-/**
- * Rate limiting function using token bucket algorithm
- * @param key - Unique rate limit key
- * @param limit - Maximum number of requests allowed (default: 5)
- * @param windowMs - Time window in milliseconds (default: 60000 = 1 minute)
- * @returns RateLimitResult with success status and metadata
- */
-export function rateLimit(
+export async function rateLimit(
     key: string,
     limit: number = 5,
-    windowMs: number = 60_000
-): RateLimitResult {
-    const now = Date.now();
-    const refillRate = limit / windowMs;
-    const record = rateLimitMap.get(key);
+    windowMs: number = 60_000,
+): Promise<RateLimitResult> {
+    assertRateLimitConfig(limit, windowMs);
 
-    if (!record) {
-        makeRoomForRateLimitKey(now);
-
-        const newRecord: RateLimitRecord = {
-            tokens: Math.max(0, limit - 1),
-            lastRefill: now,
-            lastRequest: now,
-        };
-
-        rateLimitMap.set(key, newRecord);
-
-        return {
-            success: true,
-            remaining: Math.floor(newRecord.tokens),
-            resetTime: now + windowMs,
-        };
+    if (!shouldUseRedis()) {
+        return rateLimitMemory(key, limit, windowMs);
     }
 
-    const elapsedMs = Math.max(0, now - record.lastRefill);
-    const refilledTokens = elapsedMs * refillRate;
-    const availableTokens = Math.min(limit, record.tokens + refilledTokens);
-
-    if (availableTokens < 1) {
-        const missingTokens = 1 - availableTokens;
-        const waitMs = Math.ceil(missingTokens / refillRate);
-        const retryAfter = Math.max(1, Math.ceil(waitMs / 1000));
-        const resetTime = now + waitMs;
-        record.tokens = availableTokens;
-        record.lastRefill = now;
-        record.lastRequest = now;
-        rateLimitMap.set(key, record);
-
-        return {
-            success: false,
-            remaining: 0,
-            resetTime,
-            retryAfter,
-        };
-    }
-
-    record.tokens = availableTokens - 1;
-    record.lastRefill = now;
-    record.lastRequest = now;
-    rateLimitMap.set(key, record);
-
-    const missingToFull = Math.max(0, limit - record.tokens);
-    const resetTime = now + Math.ceil(missingToFull / refillRate);
-
-    return {
-        success: true,
-        remaining: Math.max(0, Math.floor(record.tokens)),
-        resetTime,
-    };
+    const client = await getRedisClient();
+    const ttlMs = windowMs + REDIS_KEY_TTL_BUFFER_MS;
+    const reply = await client.eval(RATE_LIMIT_SCRIPT, {
+        keys: [key],
+        arguments: [
+            Date.now().toString(),
+            limit.toString(),
+            windowMs.toString(),
+            ttlMs.toString(),
+        ],
+    });
+    return parseRateLimitReply(reply);
 }
 
-/**
- * Get current rate limit status for an IP without incrementing counter
- * @param ip - Client IP address
- * @param limit - Maximum number of requests allowed
- * @param windowMs - Time window in milliseconds
- * @returns Current status without affecting the counter
- */
-export function getRateLimitStatus(
+export async function getRateLimitStatus(
     key: string,
     limit: number = 5,
-    windowMs: number = 60_000
-): Omit<RateLimitResult, "success"> {
-    const now = Date.now();
-    const refillRate = limit / windowMs;
-    const record = rateLimitMap.get(key);
+    windowMs: number = 60_000,
+): Promise<Omit<RateLimitResult, "success">> {
+    assertRateLimitConfig(limit, windowMs);
 
-    if (!record) {
-        return {
-            remaining: limit,
-            resetTime: now + windowMs,
-        };
+    if (!shouldUseRedis()) {
+        return getRateLimitStatusMemory(key, limit, windowMs);
     }
 
-    const elapsedMs = Math.max(0, now - record.lastRefill);
-    const availableTokens = Math.min(limit, record.tokens + elapsedMs * refillRate);
-    const missingToFull = Math.max(0, limit - availableTokens);
-    const resetTime = now + Math.ceil(missingToFull / refillRate);
-    const retryAfter =
-        availableTokens < 1
-            ? Math.max(1, Math.ceil((1 - availableTokens) / refillRate / 1000))
-            : undefined;
-
-    return {
-        remaining: Math.max(0, Math.floor(availableTokens)),
-        resetTime,
-        ...(retryAfter && { retryAfter }),
-    };
+    const client = await getRedisClient();
+    const reply = await client.eval(RATE_LIMIT_STATUS_SCRIPT, {
+        keys: [key],
+        arguments: [Date.now().toString(), limit.toString(), windowMs.toString()],
+    });
+    return parseStatusReply(reply);
 }
 
-/**
- * Reset rate limit for a specific IP (useful for testing or admin overrides)
- * @param ip - Client IP address to reset
- */
-export function resetRateLimit(ip: string): void {
-    rateLimitMap.delete(ip);
+export async function resetRateLimit(key: string): Promise<void> {
+    resetRateLimitMemory(key);
+
+    if (!shouldUseRedis()) return;
+    const client = await getRedisClient();
+    await client.del(key);
 }
 
-/**
- * Get current statistics (useful for monitoring)
- */
 export function getRateLimitStats(): { totalIPs: number; memoryUsage: string } {
-    return {
-        totalIPs: rateLimitMap.size,
-        memoryUsage: `${Math.round(
-            JSON.stringify([...rateLimitMap]).length / 1024
-        )}KB`,
-    };
+    if (shouldUseRedis()) {
+        return { totalIPs: 0, memoryUsage: "redis" };
+    }
+
+    return getRateLimitMemoryStats();
 }
 
-/**
- * Helper function to get client IP from Next.js request
- * @param request - Next.js request object
- * @returns Client IP address
- */
 export function getClientIP(request: Request): string {
     const forwarded = request.headers.get("x-forwarded-for");
     const realIP = request.headers.get("x-real-ip");
     const cfConnectingIP = request.headers.get("cf-connecting-ip");
 
-    if (forwarded) {
-        return forwarded.split(",")[0].trim();
-    }
-
+    if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
     if (realIP) return realIP;
     if (cfConnectingIP) return cfConnectingIP;
-
     return "unknown";
 }
 
@@ -299,28 +161,25 @@ function getUnknownIPFallbackKey(request: Request): string {
 
 export function getRateLimitSubject(request: Request): string {
     const ip = getClientIP(request);
-    if (ip !== "unknown") {
-        return ip;
-    }
+    if (ip !== "unknown") return `ip:${ip}`;
     return `unknown:${getUnknownIPFallbackKey(request)}`;
 }
 
 export function createRateLimitKey(
     request: Request,
     routeKey: string,
-    identifier?: string
+    identifier?: string,
 ): string {
-    const subject = getRateLimitSubject(request);
-    if (!identifier) {
-        return `${routeKey}:${subject}`;
+    if (identifier && identifier.trim() !== "") {
+        return `${routeKey}:id:${hashText(normalizeIdentifier(identifier))}`;
     }
-    const normalized = normalizeIdentifier(identifier);
-    return `${routeKey}:${subject}:${hashText(normalized)}`;
+
+    return `${routeKey}:${getRateLimitSubject(request)}`;
 }
 
 export function getRateLimitHeaders(
     result: RateLimitResult,
-    limit: number
+    limit: number,
 ): Record<string, string> {
     const headers: Record<string, string> = {
         "X-RateLimit-Limit": limit.toString(),
@@ -335,18 +194,17 @@ export function getRateLimitHeaders(
     return headers;
 }
 
-export function applyRateLimit(
-    options: ApplyRateLimitOptions
-): RateLimitResult & { headers: Record<string, string> } {
+export async function applyRateLimit(
+    options: ApplyRateLimitOptions,
+): Promise<RateLimitResult & { headers: Record<string, string> }> {
     const key = createRateLimitKey(
         options.request,
         options.routeKey,
-        options.identifier
+        options.identifier,
     );
-    const result = rateLimit(key, options.limit, options.windowMs);
+    const result = await rateLimit(key, options.limit, options.windowMs);
     return {
         ...result,
         headers: getRateLimitHeaders(result, options.limit),
     };
 }
-

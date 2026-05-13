@@ -13,18 +13,21 @@ services:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
       --default-authentication-plugin=caching_sha2_password
-      --max-connections=100
+      --max-connections=60
       --innodb-buffer-pool-size=2G
       --innodb-log-file-size=256M
       --innodb-flush-log-at-trx-commit=2
       --innodb-flush-method=O_DIRECT
       --innodb-buffer-pool-instances=2
       --thread-cache-size=16
-      --table-open-cache=2000
+      --table-open-cache=1000
       --tmp-table-size=32M
       --max-heap-table-size=32M
       --slow-query-log=1
       --long-query-time=2
+    cpus: "1.5"
+    mem_limit: 3584m
+    mem_reservation: 1g
     ports:
       - "127.0.0.1:3307:3306"
     volumes:
@@ -53,8 +56,34 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis-grant-online
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - grant-online-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   mysql-data-staging:
+    driver: local
+  redis-data:
     driver: local
 
 networks:

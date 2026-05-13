@@ -15,14 +15,14 @@ function buildRequest(email: string, ip: string = "203.0.113.10"): Request {
 }
 
 describe("signin-rate-limit route", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         const request = buildRequest("tester@example.com");
         const key = createRateLimitKey(
             request,
             RATE_LIMIT.AUTH.SIGNIN.ROUTE_KEY,
             "tester@example.com"
         );
-        resetRateLimit(key);
+        await resetRateLimit(key);
     });
 
     it("returns 200 when remaining quota is available", async () => {
@@ -46,7 +46,7 @@ describe("signin-rate-limit route", () => {
         );
 
         for (let i = 0; i < RATE_LIMIT.AUTH.SIGNIN.LIMIT; i++) {
-            rateLimit(
+            await rateLimit(
                 key,
                 RATE_LIMIT.AUTH.SIGNIN.LIMIT,
                 RATE_LIMIT.AUTH.SIGNIN.WINDOW_MS
@@ -71,7 +71,7 @@ describe("signin-rate-limit route", () => {
         );
 
         for (let i = 0; i < RATE_LIMIT.AUTH.SIGNIN.LIMIT; i++) {
-            rateLimit(
+            await rateLimit(
                 blockedKey,
                 RATE_LIMIT.AUTH.SIGNIN.LIMIT,
                 RATE_LIMIT.AUTH.SIGNIN.WINDOW_MS

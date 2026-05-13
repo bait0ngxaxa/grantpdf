@@ -32,7 +32,7 @@ const { auth: nextAuthAuth, handlers, signIn, signOut } = NextAuth({
                 // Dynamic import to avoid issues with server-side module
                 const { logAudit } = await import("@/lib/auditLog");
                 const ip = getClientIP(request);
-                const signInRateLimit = rateLimit(
+                const signInRateLimit = await rateLimit(
                     createRateLimitKey(
                         request,
                         RATE_LIMIT.AUTH.SIGNIN.ROUTE_KEY,

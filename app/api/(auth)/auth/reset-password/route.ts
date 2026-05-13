@@ -9,14 +9,18 @@ import {
     type PasswordResetTokenPayload,
     verifyPasswordResetToken,
 } from "@/lib/passwordReset";
+import { getStringField } from "@/lib/utils";
 
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
-        const rateLimitResult = applyRateLimit({
+        const body: unknown = await req.json();
+        const tokenIdentifier = getStringField(body, "token");
+        const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.AUTH.RESET_PASSWORD.ROUTE_KEY,
             limit: RATE_LIMIT.AUTH.RESET_PASSWORD.LIMIT,
             windowMs: RATE_LIMIT.AUTH.RESET_PASSWORD.WINDOW_MS,
+            identifier: tokenIdentifier,
         });
 
         if (!rateLimitResult.success) {
@@ -28,8 +32,6 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
                 { status: 429, headers: rateLimitResult.headers }
             );
         }
-
-        const body: unknown = await req.json();
 
         const parsed = resetPasswordSchema.safeParse(body);
         if (!parsed.success) {

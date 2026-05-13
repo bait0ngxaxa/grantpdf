@@ -22,17 +22,18 @@ function buildRequest(
 }
 
 describe("ratelimit helpers", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         const req = buildRequest("198.51.100.10");
         const key = createRateLimitKey(req, "auth:test", "tester@example.com");
-        resetRateLimit(key);
+        await resetRateLimit(key);
     });
 
-    it("createRateLimitKey should include route+subject and hash identifier", () => {
+    it("createRateLimitKey should use identifier hash instead of IP when identifier exists", () => {
         const req = buildRequest("198.51.100.10");
         const key = createRateLimitKey(req, "auth:test", "tester@example.com");
 
-        expect(key.startsWith("auth:test:198.51.100.10:")).toBe(true);
+        expect(key.startsWith("auth:test:id:")).toBe(true);
+        expect(key).not.toContain("198.51.100.10");
         expect(key).not.toContain("tester@example.com");
     });
 
@@ -67,7 +68,7 @@ describe("ratelimit helpers", () => {
         expect(headers["Retry-After"]).toBe("1");
     });
 
-    it("applyRateLimit should return blocked result with headers", () => {
+    it("applyRateLimit should return blocked result with headers", async () => {
         const req = buildRequest("198.51.100.10");
         const options = {
             request: req,
@@ -77,8 +78,8 @@ describe("ratelimit helpers", () => {
             identifier: "tester@example.com",
         };
 
-        const first = applyRateLimit(options);
-        const second = applyRateLimit(options);
+        const first = await applyRateLimit(options);
+        const second = await applyRateLimit(options);
 
         expect(first.success).toBe(true);
         expect(second.success).toBe(false);

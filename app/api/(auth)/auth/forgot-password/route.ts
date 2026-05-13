@@ -15,7 +15,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const body: unknown = await req.json();
         const emailIdentifier = getStringField(body, "email");
-        const rateLimitResult = applyRateLimit({
+        const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.AUTH.FORGOT_PASSWORD.ROUTE_KEY,
             limit: RATE_LIMIT.AUTH.FORGOT_PASSWORD.LIMIT,

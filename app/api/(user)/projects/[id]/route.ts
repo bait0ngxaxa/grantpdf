@@ -29,11 +29,21 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
-        const rateLimitResult = applyRateLimit({
+        const session = await auth();
+
+        if (!session || !session.user?.id) {
+            return NextResponse.json(
+                { error: "กรุณาเข้าสู่ระบบ" },
+                { status: 401 },
+            );
+        }
+
+        const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
             limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
             windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
+            identifier: session.user.id,
         });
 
         if (!rateLimitResult.success) {
@@ -43,15 +53,6 @@ export async function PUT(
                     retryAfter: rateLimitResult.retryAfter,
                 },
                 { status: 429, headers: rateLimitResult.headers },
-            );
-        }
-
-        const session = await auth();
-
-        if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401, headers: rateLimitResult.headers },
             );
         }
 
@@ -121,11 +122,21 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
-        const rateLimitResult = applyRateLimit({
+        const session = await auth();
+
+        if (!session || !session.user?.id) {
+            return NextResponse.json(
+                { error: "กรุณาเข้าสู่ระบบ" },
+                { status: 401 },
+            );
+        }
+
+        const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
             limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
             windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
+            identifier: session.user.id,
         });
 
         if (!rateLimitResult.success) {
@@ -135,15 +146,6 @@ export async function DELETE(
                     retryAfter: rateLimitResult.retryAfter,
                 },
                 { status: 429, headers: rateLimitResult.headers },
-            );
-        }
-
-        const session = await auth();
-
-        if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401, headers: rateLimitResult.headers },
             );
         }
 
