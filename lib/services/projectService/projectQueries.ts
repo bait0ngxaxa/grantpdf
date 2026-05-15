@@ -83,7 +83,9 @@ export async function getUserProjectStats(
 ): Promise<UserProjectStatsResult> {
     const [total, totalFiles, statusGroups, latestProjectRaw] = await Promise.all([
         prisma.project.count({ where: { userId } }),
-        prisma.userFile.count({ where: { userId } }),
+        prisma.userFile.count({
+            where: { userId, projectReports: { none: {} } },
+        }),
         prisma.project.groupBy({
             by: ["status"],
             where: { userId },
@@ -130,6 +132,11 @@ export async function getProjectsByUserIdPaginated({
                     select: { id: true, name: true },
                 },
                 files: {
+                    where: {
+                        projectReports: {
+                            none: {},
+                        },
+                    },
                     include: {
                         attachmentFiles: {
                             select: {
@@ -143,13 +150,34 @@ export async function getProjectsByUserIdPaginated({
                     },
                     orderBy: { created_at: "desc" },
                 },
-                _count: { select: { files: true } },
+                reports: {
+                    select: {
+                        id: true,
+                        status: true,
+                        reviewedAt: true,
+                        adminNote: true,
+                    },
+                    orderBy: { submittedAt: "desc" },
+                },
+                _count: {
+                    select: {
+                        files: {
+                            where: {
+                                projectReports: {
+                                    none: {},
+                                },
+                            },
+                        },
+                    },
+                },
             },
             orderBy: { created_at: "desc" },
             skip,
             take: limit,
         }),
-        prisma.userFile.count({ where: { userId } }),
+        prisma.userFile.count({
+            where: { userId, projectReports: { none: {} } },
+        }),
         prisma.project.groupBy({
             by: ["status"],
             where: { userId },
@@ -187,6 +215,12 @@ export async function getProjectsByUserIdPaginated({
                 userName: "",
                 userEmail: "",
                 attachmentFiles: sanitizeAttachments(file.attachmentFiles),
+            })),
+            reports: (project.reports || []).map((report) => ({
+                id: report.id.toString(),
+                status: report.status,
+                reviewedAt: report.reviewedAt?.toISOString(),
+                adminNote: report.adminNote ?? undefined,
             })),
             _count: project._count,
         }),

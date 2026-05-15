@@ -97,6 +97,11 @@ function buildAdminProjectsWhereSql(params: {
                 FROM \`UserFile\` uf
                 WHERE uf.projectId = p.id
                   AND uf.fileExtension = ${params.fileType}
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM \`ProjectReport\` pr
+                      WHERE pr.fileId = uf.id
+                  )
             )`,
         );
     }
@@ -170,14 +175,19 @@ export async function getAllProjectsPaginated({
         ...(status && status !== "สถานะทั้งหมด" ? { status } : {}),
         ...(fileType && fileType !== "ไฟล์ทั้งหมด"
             ? {
-                  files: { some: { fileExtension: fileType } },
+                  files: {
+                      some: {
+                          fileExtension: fileType,
+                          projectReports: { none: {} },
+                      },
+                  },
               }
             : {}),
     };
 
     const [total, totalFiles] = await Promise.all([
         prisma.project.count({ where }),
-        prisma.userFile.count(),
+        prisma.userFile.count({ where: { projectReports: { none: {} } } }),
     ]);
 
     let projects: RawProject[] = [];

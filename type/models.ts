@@ -64,6 +64,35 @@ export interface Project extends ProjectSummary {
     userName?: string;
     userEmail?: string;
     files: UserFile[];
+    reports?: ProjectReportSummary[];
+}
+
+export interface ProjectReportSummary {
+    id: string;
+    status: string;
+    reviewedAt?: string;
+    adminNote?: string;
+}
+
+export interface ProjectReport {
+    id: string;
+    projectId: string;
+    userId: string;
+    fileId: string;
+    reportType: string;
+    status: string;
+    note?: string;
+    adminNote?: string;
+    submittedAt: string;
+    reviewedAt?: string;
+    file: UserFile;
+}
+
+export interface AdminProjectReport extends ProjectReport {
+    projectName: string;
+    programName?: string;
+    userName: string;
+    userEmail: string;
 }
 
 export interface AdminProject

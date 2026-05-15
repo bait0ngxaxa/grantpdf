@@ -28,6 +28,38 @@ export const STATUS_FILTER = {
     ALL: "สถานะทั้งหมด",
 } as const;
 
+export const REPORT_TYPES = {
+    PROGRESS: "รายงานความก้าวหน้า",
+    FINAL: "รายงานฉบับสมบูรณ์",
+} as const;
+
+export type ReportType = (typeof REPORT_TYPES)[keyof typeof REPORT_TYPES];
+
+export const REPORT_STATUS = {
+    PENDING_REVIEW: "รอตรวจสอบ",
+    NEEDS_REVISION: "ต้องแก้ไข",
+    APPROVED: "อนุมัติแล้ว",
+} as const;
+
+export type ReportStatus = (typeof REPORT_STATUS)[keyof typeof REPORT_STATUS];
+
+export const REPORT_STATUS_CONFIG = {
+    [REPORT_STATUS.PENDING_REVIEW]: {
+        badgeColor:
+            "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300",
+    },
+    [REPORT_STATUS.NEEDS_REVISION]: {
+        badgeColor:
+            "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900/40 dark:bg-orange-900/20 dark:text-orange-300",
+    },
+    [REPORT_STATUS.APPROVED]: {
+        badgeColor:
+            "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-300",
+    },
+} as const;
+
+export type ReportStatusConfigKey = keyof typeof REPORT_STATUS_CONFIG;
+
 // =====================================================
 // Project Status — Single Source of Truth
 // =====================================================
@@ -133,6 +165,7 @@ export const API_ROUTES = {
     ADMIN_PROGRAMS: "/api/admin/programs",
     ADMIN_USERS: "/api/admin/users",
     ADMIN_AUDIT: "/api/admin/audit",
+    ADMIN_REPORTS: "/api/admin/reports",
 } as const;
 
 export const TEXT_LIMITS = {
@@ -145,10 +178,6 @@ export const FILE_UPLOAD = {
         ".docx",
         ".pdf",
         ".doc",
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".txt",
         ".xlsx",
         ".xls",
     ],
@@ -158,10 +187,6 @@ export const FILE_UPLOAD = {
         ".doc": 3,
         ".xlsx": 3,
         ".xls": 3,
-        ".jpg": 1,
-        ".jpeg": 1,
-        ".png": 1,
-        ".txt": 1,
     },
     DEFAULT_MAX_SIZE_MB: 3,
     TIMEOUT_MS: 60_000,

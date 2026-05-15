@@ -5,6 +5,7 @@ import { Button } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
 import { getStatusColor, cn } from "@/lib/utils";
+import { REPORT_STATUS } from "@/lib/constants";
 import {
     Archive,
     User,
@@ -28,7 +29,11 @@ export default function ProjectCard({
     project,
     showNewBadge = false,
 }: ProjectCardProps): React.JSX.Element {
-    const { openProjectFilesModal, openStatusModal } = useAdminModalStates();
+    const {
+        openProjectFilesModal,
+        openProjectReportsModal,
+        openStatusModal,
+    } = useAdminModalStates();
 
     const onEditProjectStatus = (targetProject: AdminProject) => {
         openStatusModal(targetProject);
@@ -37,6 +42,14 @@ export default function ProjectCard({
     const onViewProjectFiles = (targetProject: AdminProject) => {
         openProjectFilesModal(targetProject);
     };
+
+    const onViewProjectReports = (targetProject: AdminProject) => {
+        openProjectReportsModal(targetProject);
+    };
+
+    const hasPendingReport = (project.reports || []).some(
+        (report) => report.status === REPORT_STATUS.PENDING_REVIEW,
+    );
 
     const getStatusIcon = (status: string): React.JSX.Element | null => {
         switch (status) {
@@ -85,21 +98,23 @@ export default function ProjectCard({
                                 {project.programName}
                             </span>
                         )}
-                        {(project.description || project.statusNote) && (
+                        {project.description && (
                             <p
                                 className="min-w-0 flex-1 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400"
-                                title={
-                                    project.statusNote
-                                        ? `หมายเหตุ: ${project.statusNote}`
-                                        : project.description || ""
-                                }
+                                title={project.description}
                             >
-                                {project.statusNote
-                                    ? `หมายเหตุ: ${project.statusNote}`
-                                    : project.description}
+                                {project.description}
                             </p>
                         )}
                     </div>
+                    {project.statusNote && (
+                        <p
+                            className="mt-1 line-clamp-2 text-xs leading-5 text-amber-700 dark:text-amber-300"
+                            title={`หมายเหตุสถานะ: ${project.statusNote}`}
+                        >
+                            หมายเหตุสถานะ: {project.statusNote}
+                        </p>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2 pt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 xl:self-start xl:justify-self-start">
@@ -140,6 +155,22 @@ export default function ProjectCard({
                         <Eye className="mr-1.5 h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
                         ดูไฟล์
                     </Button>
+                    <div className="relative">
+                        {hasPendingReport && (
+                            <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:animate-none" />
+                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-orange-500" />
+                            </span>
+                        )}
+                        <Button
+                            size="sm"
+                            onClick={() => onViewProjectReports(project)}
+                            className="h-8 rounded-xl border border-blue-200 bg-white px-3 text-xs font-medium text-blue-700 shadow-sm transition hover:bg-blue-50 hover:text-blue-800 dark:border-blue-800 dark:bg-slate-700 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-200"
+                        >
+                            <FileText className="mr-1.5 h-3.5 w-3.5" />
+                            รายงาน
+                        </Button>
+                    </div>
                     <Button
                         size="sm"
                         onClick={() => onEditProjectStatus(project)}

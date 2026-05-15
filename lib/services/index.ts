@@ -48,6 +48,14 @@ export {
     deleteFileRecord,
 } from "./fileService";
 
+// Project Report Service
+export {
+    createProjectReportWithFile,
+    getProjectReportsForAdmin,
+    getProjectReportsForUser,
+    updateProjectReportStatus,
+} from "./projectReportService";
+
 // Audit Service
 export { getAuditLogsPaginated } from "./auditService";
 export type { GetAuditLogsParams } from "./auditService";

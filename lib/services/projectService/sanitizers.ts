@@ -63,6 +63,12 @@ export function sanitizeProjects(projects: RawProject[]): AdminProject[] {
             userName,
             userEmail,
             files: sanitizeFiles(project.files, userName, userEmail),
+            reports: (project.reports || []).map((report) => ({
+                id: report.id.toString(),
+                status: report.status,
+                reviewedAt: report.reviewedAt?.toISOString(),
+                adminNote: report.adminNote ?? undefined,
+            })),
             _count: project._count,
         };
     });

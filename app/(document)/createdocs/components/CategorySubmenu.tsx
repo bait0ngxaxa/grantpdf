@@ -90,7 +90,13 @@ export const CategorySubmenu = (): React.JSX.Element | null => {
                     เลือกเอกสารที่ต้องการสร้าง
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+                <div
+                    className={
+                        isAdmin
+                            ? "grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl"
+                            : "grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl"
+                    }
+                >
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 duration-300 cursor-pointer hover:-translate-y-1 transition"
                         onClick={() => handleFormProjectSelection()}
@@ -108,25 +114,27 @@ export const CategorySubmenu = (): React.JSX.Element | null => {
                         </div>
                     </div>
 
-                    <div
-                        className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 duration-300 cursor-pointer hover:-translate-y-1 transition"
-                        onClick={() => setSelectedContractType("academic")}
-                    >
-                        <div className="flex flex-col items-center text-center h-full">
-                            <div className="p-4 rounded-2xl bg-pink-50 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">
-                                <BookOpen
-                                    className="h-12 w-12"
-                                    strokeWidth={1.5}
-                                />
+                    {isAdmin && (
+                        <div
+                            className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 duration-300 cursor-pointer hover:-translate-y-1 transition"
+                            onClick={() => setSelectedContractType("academic")}
+                        >
+                            <div className="flex flex-col items-center text-center h-full">
+                                <div className="p-4 rounded-2xl bg-pink-50 dark:bg-pink-900/50 text-pink-500 dark:text-pink-400 mb-6 group-hover:bg-pink-500 group-hover:text-white transition-colors duration-300">
+                                    <BookOpen
+                                        className="h-12 w-12"
+                                        strokeWidth={1.5}
+                                    />
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
+                                    สัญญาจ้างปฎิบัติงานวิชาการ
+                                </h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    สัญญาจ้างสำหรับงานวิชาการเฉพาะ
+                                </p>
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
-                                สัญญาจ้างปฎิบัติงานวิชาการ
-                            </h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                                สัญญาจ้างสำหรับงานวิชาการเฉพาะ
-                            </p>
                         </div>
-                    </div>
+                    )}
 
                     <div
                         className="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-pink-200 dark:hover:border-pink-800 duration-300 cursor-pointer hover:-translate-y-1 transition"

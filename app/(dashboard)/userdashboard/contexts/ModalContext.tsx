@@ -24,8 +24,12 @@ interface ModalContextType {
     setShowEditProjectModal: (show: boolean) => void;
     isProjectFilesModalOpen: boolean;
     selectedProjectForFiles: Project | null;
+    isReportModalOpen: boolean;
+    selectedProjectForReport: Project | null;
     openProjectFilesModal: (project: Project) => void;
     closeProjectFilesModal: () => void;
+    openReportModal: (project: Project) => void;
+    closeReportModal: () => void;
     openPreviewModal: (storagePath: string, title: string) => void;
     setPreviewUrl: (url: string) => void;
     setPreviewTitle: (title: string) => void;
@@ -44,6 +48,9 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     const [isProjectFilesModalOpen, setIsProjectFilesModalOpen] =
         useState(false);
     const [selectedProjectForFiles, setSelectedProjectForFiles] =
+        useState<Project | null>(null);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [selectedProjectForReport, setSelectedProjectForReport] =
         useState<Project | null>(null);
 
     const openPreviewModal = useCallback(
@@ -66,6 +73,16 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         setSelectedProjectForFiles(null);
     }, []);
 
+    const openReportModal = useCallback((project: Project) => {
+        setSelectedProjectForReport(project);
+        setIsReportModalOpen(true);
+    }, []);
+
+    const closeReportModal = useCallback(() => {
+        setIsReportModalOpen(false);
+        setSelectedProjectForReport(null);
+    }, []);
+
     const value = {
         isModalOpen,
         setIsModalOpen,
@@ -81,8 +98,12 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         setShowEditProjectModal,
         isProjectFilesModalOpen,
         selectedProjectForFiles,
+        isReportModalOpen,
+        selectedProjectForReport,
         openProjectFilesModal,
         closeProjectFilesModal,
+        openReportModal,
+        closeReportModal,
         openPreviewModal,
         setPreviewUrl,
         setPreviewTitle,

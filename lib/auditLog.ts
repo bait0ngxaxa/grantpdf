@@ -28,6 +28,8 @@ export type AuditAction =
     | "PROJECT_CREATE"
     | "PROJECT_UPDATE"
     | "PROJECT_DELETE"
+    | "PROJECT_REPORT_SUBMIT"
+    | "ADMIN_PROJECT_REPORT_UPDATE"
     | "DOCUMENT_GENERATE"
     // Admin operations
     | "ADMIN_USER_DELETE"

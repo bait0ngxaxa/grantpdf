@@ -21,6 +21,11 @@ export const PROJECT_INCLUDE = {
         select: USER_PUBLIC_SELECT,
     },
     files: {
+        where: {
+            projectReports: {
+                none: {},
+            },
+        },
         include: {
             attachmentFiles: {
                 select: ATTACHMENT_SELECT,
@@ -28,8 +33,25 @@ export const PROJECT_INCLUDE = {
         },
         orderBy: { created_at: "desc" as const },
     },
+    reports: {
+        select: {
+            id: true,
+            status: true,
+            reviewedAt: true,
+            adminNote: true,
+        },
+        orderBy: { submittedAt: "desc" as const },
+    },
     _count: {
-        select: { files: true },
+        select: {
+            files: {
+                where: {
+                    projectReports: {
+                        none: {},
+                    },
+                },
+            },
+        },
     },
 };
 

@@ -20,9 +20,17 @@ export interface RawProject {
         email: string;
     } | null;
     files: RawFile[];
+    reports?: RawProjectReportSummary[];
     _count: {
         files: number;
     };
+}
+
+export interface RawProjectReportSummary {
+    id: bigint;
+    status: string;
+    reviewedAt: Date | null;
+    adminNote: string | null;
 }
 
 export interface RawFile {

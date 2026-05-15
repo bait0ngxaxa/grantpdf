@@ -2,7 +2,11 @@
 
 import React from "react";
 import { PdfPreviewModal } from "@/components/ui";
-import { ProjectFilesModal, ProjectStatusModal } from "./modals";
+import {
+    ProjectFilesModal,
+    ProjectReportsModal,
+    ProjectStatusModal,
+} from "./modals";
 import { useAdminModalStates, useProjectStatusActions } from "../hooks";
 import { getStatusColor } from "@/lib/utils";
 
@@ -25,6 +29,9 @@ export const AdminModals = () => {
         isProjectFilesModalOpen,
         selectedProjectForFiles,
         closeProjectFilesModal,
+        isProjectReportsModalOpen,
+        selectedProjectForReports,
+        closeProjectReportsModal,
     } = useAdminModalStates();
 
     const {
@@ -67,6 +74,12 @@ export const AdminModals = () => {
                 project={selectedProjectForFiles}
                 onClose={closeProjectFilesModal}
                 onPreviewPdf={openPreviewModal}
+            />
+
+            <ProjectReportsModal
+                isOpen={isProjectReportsModalOpen}
+                project={selectedProjectForReports}
+                onClose={closeProjectReportsModal}
             />
         </>
     );

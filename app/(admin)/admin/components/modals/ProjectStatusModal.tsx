@@ -157,7 +157,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                             <div className="flex flex-col">
                                 <label className="flex items-center pb-1">
                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                        คำอธิบาย/หมายเหตุ (ไม่บังคับ)
+                                        หมายเหตุสถานะโครงการ (ไม่บังคับ)
                                     </span>
                                 </label>
                                 <textarea

@@ -69,6 +69,12 @@ interface AdminDashboardContextType {
     setSelectedProjectForFiles: React.Dispatch<
         React.SetStateAction<AdminProject | null>
     >;
+    isProjectReportsModalOpen: boolean;
+    setIsProjectReportsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    selectedProjectForReports: AdminProject | null;
+    setSelectedProjectForReports: React.Dispatch<
+        React.SetStateAction<AdminProject | null>
+    >;
 
     // Data State
     projects: AdminProject[];

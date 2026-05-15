@@ -21,6 +21,7 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
         totalProjects,
         isLoading,
         setShowCreateProjectModal,
+        openReportModal,
     } = useUserDashboardContext();
 
     const [showStatusModal, setShowStatusModal] = useState(false);
@@ -43,12 +44,28 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
             return new Set();
         },
     );
+    const [viewedReportUpdates, setViewedReportUpdates] = useState<Set<string>>(
+        () => {
+            if (typeof window !== "undefined") {
+                const saved = localStorage.getItem("viewedReportUpdates");
+                return saved ? new Set(JSON.parse(saved)) : new Set();
+            }
+            return new Set();
+        },
+    );
 
     // Check if project has unread status note
     const hasUnreadStatusNote = (project: Project): boolean => {
         if (!project.statusNote) return false;
         const noteKey = `${project.id}_${project.updated_at}`;
         return !viewedStatusNotes.has(noteKey);
+    };
+
+    const getUnreadReportKeys = (project: Project): string[] => {
+        return (project.reports || [])
+            .filter((report) => report.reviewedAt)
+            .map((report) => `${project.id}_${report.id}_${report.reviewedAt}`)
+            .filter((key) => !viewedReportUpdates.has(key));
     };
 
     const openStatusDetailModal = (project: Project): void => {
@@ -71,6 +88,22 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
     const closeStatusDetailModal = (): void => {
         setShowStatusModal(false);
         setSelectedStatusProject(null);
+    };
+
+    const openReportDetailModal = (project: Project): void => {
+        const reportKeys = getUnreadReportKeys(project);
+        if (reportKeys.length > 0) {
+            const newViewed = new Set(viewedReportUpdates);
+            for (const key of reportKeys) {
+                newViewed.add(key);
+            }
+            setViewedReportUpdates(newViewed);
+            localStorage.setItem(
+                "viewedReportUpdates",
+                JSON.stringify([...newViewed]),
+            );
+        }
+        openReportModal(project);
     };
 
     const groupedProjects = useMemo(
@@ -186,8 +219,15 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                                                 hasUnreadStatusNote={hasUnreadStatusNote(
                                                     project,
                                                 )}
+                                                hasUnreadReportUpdate={
+                                                    getUnreadReportKeys(project)
+                                                        .length > 0
+                                                }
                                                 onStatusClick={() =>
                                                     openStatusDetailModal(project)
+                                                }
+                                                onReportClick={() =>
+                                                    openReportDetailModal(project)
                                                 }
                                             />
                                         ))}

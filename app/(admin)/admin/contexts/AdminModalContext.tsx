@@ -33,6 +33,12 @@ interface AdminModalContextType {
     setSelectedProjectForFiles: React.Dispatch<
         React.SetStateAction<AdminProject | null>
     >;
+    isProjectReportsModalOpen: boolean;
+    setIsProjectReportsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    selectedProjectForReports: AdminProject | null;
+    setSelectedProjectForReports: React.Dispatch<
+        React.SetStateAction<AdminProject | null>
+    >;
 }
 
 const AdminModalContext = createContext<AdminModalContextType | undefined>(
@@ -56,6 +62,10 @@ export function AdminModalProvider({ children }: { children: ReactNode }) {
         useState(false);
     const [selectedProjectForFiles, setSelectedProjectForFiles] =
         useState<AdminProject | null>(null);
+    const [isProjectReportsModalOpen, setIsProjectReportsModalOpen] =
+        useState(false);
+    const [selectedProjectForReports, setSelectedProjectForReports] =
+        useState<AdminProject | null>(null);
 
     const value = {
         isPreviewModalOpen,
@@ -78,6 +88,10 @@ export function AdminModalProvider({ children }: { children: ReactNode }) {
         setIsProjectFilesModalOpen,
         selectedProjectForFiles,
         setSelectedProjectForFiles,
+        isProjectReportsModalOpen,
+        setIsProjectReportsModalOpen,
+        selectedProjectForReports,
+        setSelectedProjectForReports,
     };
 
     return (

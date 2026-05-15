@@ -32,10 +32,11 @@ describe("fileStorage - Security Tests", () => {
             );
         });
 
-        it("should return correct MIME type for images", () => {
-            expect(getMimeType("image.jpg")).toBe("image/jpeg");
-            expect(getMimeType("image.jpeg")).toBe("image/jpeg");
-            expect(getMimeType("image.png")).toBe("image/png");
+        it("should return octet-stream for image and text extensions", () => {
+            expect(getMimeType("image.jpg")).toBe("application/octet-stream");
+            expect(getMimeType("image.jpeg")).toBe("application/octet-stream");
+            expect(getMimeType("image.png")).toBe("application/octet-stream");
+            expect(getMimeType("readme.txt")).toBe("application/octet-stream");
         });
 
         it("should return octet-stream for unknown extensions", () => {
@@ -113,7 +114,7 @@ describe("fileStorage - Security Tests", () => {
             expect(result.valid).toBe(false);
         });
 
-        it("should REJECT image extension with script content", async () => {
+        it("should REJECT image extension because it is not allowed", async () => {
             mockedFileTypeFromBuffer.mockResolvedValueOnce({
                 ext: "html",
                 mime: "text/html",
@@ -123,7 +124,7 @@ describe("fileStorage - Security Tests", () => {
             const result = await validateFileMime(buffer, "image.png");
 
             expect(result.valid).toBe(false);
-            expect(result.error).toContain("File type mismatch");
+            expect(result.error).toContain("File extension .png is not allowed");
         });
 
         it("should REJECT disallowed file extension", async () => {
@@ -160,14 +161,14 @@ describe("fileStorage - Security Tests", () => {
             expect(result.valid).toBe(false);
         });
 
-        it("should HANDLE text files specially (no magic bytes)", async () => {
+        it("should REJECT text files because they are not allowed", async () => {
             mockedFileTypeFromBuffer.mockResolvedValueOnce(undefined);
 
             const buffer = Buffer.from("This is plain text content");
             const result = await validateFileMime(buffer, "readme.txt");
 
-            expect(result.valid).toBe(true);
-            expect(result.detectedMime).toBe("text/plain");
+            expect(result.valid).toBe(false);
+            expect(result.error).toContain("File extension .txt is not allowed");
         });
 
         it("should REJECT txt with binary content", async () => {
@@ -180,17 +181,20 @@ describe("fileStorage - Security Tests", () => {
             const result = await validateFileMime(buffer, "readme.txt");
 
             expect(result.valid).toBe(false);
-            expect(result.error).toContain("not a text file");
+            expect(result.error).toContain("File extension .txt is not allowed");
         });
 
-        it("should REJECT when file type cannot be detected", async () => {
-            mockedFileTypeFromBuffer.mockResolvedValueOnce(undefined);
+        it("should REJECT when file type does not match extension", async () => {
+            mockedFileTypeFromBuffer.mockResolvedValueOnce({
+                ext: "html",
+                mime: "text/html",
+            });
 
-            const buffer = Buffer.from([0x00, 0x00, 0x00, 0x00]);
+            const buffer = Buffer.from("<html></html>");
             const result = await validateFileMime(buffer, "document.pdf");
 
             expect(result.valid).toBe(false);
-            expect(result.error).toContain("Could not detect file type");
+            expect(result.error).toContain("File type mismatch");
         });
     });
 
@@ -244,6 +248,13 @@ describe("fileStorage - Security Tests", () => {
             expect(allMimes).not.toContain("text/javascript");
             expect(allMimes).not.toContain("text/html");
         });
+
+        it("should NOT allow image or text mime types", () => {
+            expect(ALLOWED_MIME_TYPES[".jpg"]).toBeUndefined();
+            expect(ALLOWED_MIME_TYPES[".jpeg"]).toBeUndefined();
+            expect(ALLOWED_MIME_TYPES[".png"]).toBeUndefined();
+            expect(ALLOWED_MIME_TYPES[".txt"]).toBeUndefined();
+        });
     });
 
     // ============================================
@@ -263,6 +274,13 @@ describe("fileStorage - Security Tests", () => {
             expect(MIME_TYPES[".php"]).toBeUndefined();
             expect(MIME_TYPES[".js"]).toBeUndefined();
             expect(MIME_TYPES[".html"]).toBeUndefined();
+        });
+
+        it("should NOT map image or text extensions", () => {
+            expect(MIME_TYPES[".jpg"]).toBeUndefined();
+            expect(MIME_TYPES[".jpeg"]).toBeUndefined();
+            expect(MIME_TYPES[".png"]).toBeUndefined();
+            expect(MIME_TYPES[".txt"]).toBeUndefined();
         });
     });
 });

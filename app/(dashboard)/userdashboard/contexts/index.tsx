@@ -56,8 +56,12 @@ interface UserDashboardContextType {
     setShowEditProjectModal: (show: boolean) => void;
     isProjectFilesModalOpen: boolean;
     selectedProjectForFiles: Project | null;
+    isReportModalOpen: boolean;
+    selectedProjectForReport: Project | null;
     openProjectFilesModal: (project: Project) => void;
     closeProjectFilesModal: () => void;
+    openReportModal: (project: Project) => void;
+    closeReportModal: () => void;
     openPreviewModal: (storagePath: string, title: string) => void;
 
     // Form States

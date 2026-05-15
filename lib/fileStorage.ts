@@ -43,10 +43,6 @@ export const MIME_TYPES: Record<string, string> = {
     ".xlsx":
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ".xls": "application/vnd.ms-excel",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".txt": "text/plain",
 };
 
 export function getMimeType(filename: string): string {
@@ -66,10 +62,6 @@ export const ALLOWED_MIME_TYPES: Record<string, string[]> = {
         "application/zip",
     ],
     ".xls": ["application/vnd.ms-excel", "application/x-cfb"],
-    ".jpg": ["image/jpeg"],
-    ".jpeg": ["image/jpeg"],
-    ".png": ["image/png"],
-    ".txt": ["text/plain"],
 };
 
 export interface MimeValidationResult {
@@ -95,19 +87,6 @@ export async function validateFileMime(
     }
 
     const detected = await fileTypeFromBuffer(buffer);
-
-    if (ext === ".txt") {
-        if (!detected) {
-            return { valid: true, detectedMime: "text/plain" };
-        }
-
-        return {
-            valid: false,
-            detectedMime: detected.mime,
-            expectedMimes,
-            error: `File appears to be ${detected.mime}, not a text file`,
-        };
-    }
 
     if (!detected) {
         return {

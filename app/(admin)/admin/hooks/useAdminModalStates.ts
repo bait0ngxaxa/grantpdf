@@ -26,6 +26,10 @@ export const useAdminModalStates = () => {
         setIsProjectFilesModalOpen,
         selectedProjectForFiles,
         setSelectedProjectForFiles,
+        isProjectReportsModalOpen,
+        setIsProjectReportsModalOpen,
+        selectedProjectForReports,
+        setSelectedProjectForReports,
         markProjectViewed,
     } = useAdminDashboardContext();
 
@@ -74,6 +78,17 @@ export const useAdminModalStates = () => {
         setSelectedProjectForFiles(null);
     };
 
+    const openProjectReportsModal = (project: AdminProject) => {
+        markProjectViewed(project.id);
+        setSelectedProjectForReports(project);
+        setIsProjectReportsModalOpen(true);
+    };
+
+    const closeProjectReportsModal = () => {
+        setIsProjectReportsModalOpen(false);
+        setSelectedProjectForReports(null);
+    };
+
     return {
         // Preview
         isPreviewModalOpen,
@@ -99,5 +114,9 @@ export const useAdminModalStates = () => {
         selectedProjectForFiles,
         openProjectFilesModal,
         closeProjectFilesModal,
+        isProjectReportsModalOpen,
+        selectedProjectForReports,
+        openProjectReportsModal,
+        closeProjectReportsModal,
     };
 };
