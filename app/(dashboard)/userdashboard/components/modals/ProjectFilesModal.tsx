@@ -7,6 +7,7 @@ import { FileText, FolderOpen, X } from "lucide-react";
 import type { Project } from "@/type";
 import { ROUTES } from "@/lib/constants";
 import FileItem from "../FileItem";
+import { cn, getStatusColor } from "@/lib/utils";
 
 interface ProjectFilesModalProps {
     isOpen: boolean;
@@ -82,7 +83,12 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                             <FileText className="mr-1.5 h-4 w-4" />
                             {project.files.length} เอกสาร
                         </span>
-                        <span className="rounded-full bg-white px-3 py-1 font-medium shadow-sm dark:bg-slate-800">
+                        <span
+                            className={cn(
+                                "rounded-full border px-3 py-1 font-semibold shadow-sm",
+                                getStatusColor(project.status),
+                            )}
+                        >
                             สถานะ: {project.status}
                         </span>
                     </div>

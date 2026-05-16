@@ -37,8 +37,15 @@ export const AdminModals = () => {
     const {
         isUpdatingStatus,
         programs,
+        adminOwnerOptions,
         isProgramsLoading,
+        isAdminOwnersLoading,
         programsError,
+        adminOwnersError,
+        allowCoOwners,
+        setAllowCoOwners,
+        selectedCoOwnerAdminIds,
+        setSelectedCoOwnerAdminIds,
         handleUpdateProjectStatus,
     } = useProjectStatusActions();
 
@@ -61,8 +68,15 @@ export const AdminModals = () => {
                 selectedProgramId={selectedProgramId}
                 setSelectedProgramId={setSelectedProgramId}
                 programs={programs}
+                adminOwnerOptions={adminOwnerOptions}
                 isProgramsLoading={isProgramsLoading}
+                isAdminOwnersLoading={isAdminOwnersLoading}
                 programsError={programsError}
+                adminOwnersError={adminOwnersError}
+                allowCoOwners={allowCoOwners}
+                setAllowCoOwners={setAllowCoOwners}
+                selectedCoOwnerAdminIds={selectedCoOwnerAdminIds}
+                setSelectedCoOwnerAdminIds={setSelectedCoOwnerAdminIds}
                 isUpdatingStatus={isUpdatingStatus}
                 closeStatusModal={closeStatusModal}
                 handleUpdateProjectStatus={handleUpdateProjectStatus}

@@ -50,7 +50,7 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[70] flex items-center justify-center p-4"
             aria-modal="true"
             role="dialog"
         >

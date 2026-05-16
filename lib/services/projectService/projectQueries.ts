@@ -5,6 +5,10 @@ import type {
     PaginatedProjectsResult,
 } from "./types";
 import { sanitizeAttachments, collectAttachmentPaths, filterOutAttachments } from "./sanitizers";
+import {
+    buildProjectAccessWhere,
+    buildUserProjectsAccessWhere,
+} from "./projectAccess";
 
 export async function findProjectByNameAndUser(
     name: string,
@@ -31,7 +35,7 @@ export async function findProjectByIdAndUser(
     programId: number | null;
 } | null> {
     return await prisma.project.findFirst({
-        where: { id: projectId, userId },
+        where: buildProjectAccessWhere(projectId, userId),
         select: { id: true, name: true, description: true, programId: true },
     });
 }
@@ -81,18 +85,22 @@ function mapStatusGroupsToCounts(
 export async function getUserProjectStats(
     userId: number,
 ): Promise<UserProjectStatsResult> {
+    const projectAccessWhere = buildUserProjectsAccessWhere(userId);
+
     const [total, totalFiles, statusGroups, latestProjectRaw] = await Promise.all([
-        prisma.project.count({ where: { userId } }),
+        prisma.project.count({
+            where: projectAccessWhere,
+        }),
         prisma.userFile.count({
             where: { userId, projectReports: { none: {} } },
         }),
         prisma.project.groupBy({
             by: ["status"],
-            where: { userId },
+            where: projectAccessWhere,
             _count: { _all: true },
         }),
         prisma.project.findFirst({
-            where: { userId },
+            where: projectAccessWhere,
             orderBy: { created_at: "desc" },
             select: {
                 id: true,
@@ -122,11 +130,14 @@ export async function getProjectsByUserIdPaginated({
     limit,
 }: GetProjectsByUserIdPaginatedParams): Promise<PaginatedProjectsResult> {
     const skip = (page - 1) * limit;
+    const projectAccessWhere = buildUserProjectsAccessWhere(userId);
 
     const [total, projects, totalFiles, statusGroups] = await Promise.all([
-        prisma.project.count({ where: { userId } }),
+        prisma.project.count({
+            where: projectAccessWhere,
+        }),
         prisma.project.findMany({
-            where: { userId },
+            where: projectAccessWhere,
             include: {
                 program: {
                     select: { id: true, name: true },
@@ -159,6 +170,19 @@ export async function getProjectsByUserIdPaginated({
                     },
                     orderBy: { submittedAt: "desc" },
                 },
+                coOwners: {
+                    select: {
+                        id: true,
+                        adminUser: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                            },
+                        },
+                    },
+                    orderBy: { created_at: "asc" },
+                },
                 _count: {
                     select: {
                         files: {
@@ -180,7 +204,7 @@ export async function getProjectsByUserIdPaginated({
         }),
         prisma.project.groupBy({
             by: ["status"],
-            where: { userId },
+            where: projectAccessWhere,
             _count: { _all: true },
         }),
     ]);
@@ -199,6 +223,12 @@ export async function getProjectsByUserIdPaginated({
             userId: project.userId.toString(),
             userName: "",
             userEmail: "",
+            allowCoOwners: project.allowCoOwners ?? false,
+            coOwners: (project.coOwners || []).map((coOwner) => ({
+                id: coOwner.adminUser.id.toString(),
+                name: coOwner.adminUser.name || "Unknown User",
+                email: coOwner.adminUser.email,
+            })),
             files: project.files.map((file) => ({
                 id: file.id.toString(),
                 userId: file.userId.toString(),

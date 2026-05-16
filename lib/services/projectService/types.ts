@@ -21,8 +21,19 @@ export interface RawProject {
     } | null;
     files: RawFile[];
     reports?: RawProjectReportSummary[];
+    allowCoOwners?: boolean;
+    coOwners?: RawProjectCoOwner[];
     _count: {
         files: number;
+    };
+}
+
+export interface RawProjectCoOwner {
+    id: bigint;
+    adminUser: {
+        id: bigint;
+        name: string | null;
+        email: string;
     };
 }
 
@@ -108,4 +119,11 @@ export interface UpdateProjectStatusParams {
     status: string;
     statusNote?: string | null;
     programId?: number | null;
+}
+
+export interface UpdateProjectCoOwnersParams {
+    projectId: number;
+    allowCoOwners: boolean;
+    adminUserIds: number[];
+    assignedById: number;
 }

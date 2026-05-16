@@ -12,6 +12,11 @@ export {
     PROJECT_INCLUDE,
 } from "./constants";
 
+export {
+    buildProjectAccessWhere,
+    buildUserProjectsAccessWhere,
+} from "./projectAccess";
+
 // Sanitizers
 export {
     sanitizeAttachments,
@@ -41,4 +46,5 @@ export {
     createProjectWithAudit,
     updateProjectWithAudit,
     deleteProjectWithAudit,
+    updateProjectCoOwners,
 } from "./mutations";

@@ -62,6 +62,15 @@ function getAdminRouteDecision(
     return role === "admin" ? "allow" : "access-denied";
 }
 
+type AdminLayoutDecision = "signin" | "access-denied" | "allow";
+
+function getAdminLayoutDecision(session: {
+    user?: { id?: string; role?: string };
+} | null): AdminLayoutDecision {
+    if (!session?.user?.id) return "signin";
+    return session.user.role === "admin" ? "allow" : "access-denied";
+}
+
 function shouldBlockNonAdmin(pathname: string, role: string): boolean {
     return getAdminRouteDecision(pathname, role) === "access-denied";
 }
@@ -184,6 +193,11 @@ describe("Middleware Security - CSRF Protection", () => {
 
             it("should redirect unauthenticated admin page access to signin", () => {
                 expect(shouldRedirectUnauthenticatedAdmin("/admin")).toBe(true);
+            });
+
+            it("should redirect expired admin layout sessions to signin, not access denied", () => {
+                expect(getAdminLayoutDecision(null)).toBe("signin");
+                expect(getAdminLayoutDecision({ user: {} })).toBe("signin");
             });
 
             it("should allow admin users to access admin pages", () => {

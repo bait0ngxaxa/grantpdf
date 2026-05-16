@@ -7,18 +7,20 @@ import { Button } from "@/components/ui";
 import { ROUTES } from "@/lib/constants";
 import { Lock, Home, Circle } from "lucide-react";
 
+const REDIRECT_DELAY_SECONDS = 5;
+
 export default function AccessDeniedClient(): React.JSX.Element {
     const router = useRouter();
-    const [countdown, setCountdown] = useState(5);
+    const [countdown, setCountdown] = useState(REDIRECT_DELAY_SECONDS);
 
     useEffect(() => {
         const countdownInterval = setInterval(() => {
-            setCountdown((prev) => prev - 1);
+            setCountdown((prev) => Math.max(0, prev - 1));
         }, 1000);
 
         const redirectTimer = setTimeout(() => {
             router.push(ROUTES.HOME);
-        }, 6000);
+        }, REDIRECT_DELAY_SECONDS * 1000);
 
         return (): void => {
             clearInterval(countdownInterval);

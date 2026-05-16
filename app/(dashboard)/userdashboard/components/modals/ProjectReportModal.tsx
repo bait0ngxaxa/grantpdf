@@ -147,11 +147,11 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
 
     const validateSelectedFile = (selectedFile: File): string | null => {
         const fileName = selectedFile.name.toLowerCase();
-        const isAllowedExtension = FILE_UPLOAD.SERVER_ALLOWED_EXTENSIONS.some(
+        const isAllowedExtension = FILE_UPLOAD.ALLOWED_EXTENSIONS.some(
             (ext) => fileName.endsWith(ext),
         );
         if (!isAllowedExtension) {
-            return `รองรับเฉพาะไฟล์: ${FILE_UPLOAD.SERVER_ALLOWED_EXTENSIONS.join(", ")}`;
+            return `รองรับเฉพาะไฟล์: ${FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ")}`;
         }
 
         const maxSizeBytes = getMaxUploadSizeBytesByFileName(selectedFile.name);
@@ -186,7 +186,7 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
         setFileError(null);
     };
 
-    const accept = FILE_UPLOAD.SERVER_ALLOWED_EXTENSIONS.join(",");
+    const accept = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(",");
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>

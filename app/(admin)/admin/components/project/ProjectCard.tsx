@@ -50,7 +50,6 @@ export default function ProjectCard({
     const hasPendingReport = (project.reports || []).some(
         (report) => report.status === REPORT_STATUS.PENDING_REVIEW,
     );
-
     const getStatusIcon = (status: string): React.JSX.Element | null => {
         switch (status) {
             case PROJECT_STATUS.APPROVED:
@@ -69,52 +68,55 @@ export default function ProjectCard({
 
     return (
         <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
-            <div className="grid gap-3 xl:grid-cols-[auto_minmax(0,1fr)_12rem_8.5rem_5.5rem_6.5rem_auto] xl:items-start">
-                <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm shadow-blue-200 dark:shadow-blue-900/30">
-                    <Archive className="h-4.5 w-4.5" />
-                </div>
-
+            <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_12rem_8.5rem_5.5rem_6.5rem_auto] xl:items-start">
                 <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <h3 
-                            className="min-w-0 break-words line-clamp-2 text-sm font-bold text-slate-800 dark:text-slate-100"
-                            title={project.name}
-                        >
-                            {project.name}
-                        </h3>
-                        {showNewBadge && (
-                            <div className="inline-flex items-center gap-1 rounded-full border border-rose-200/60 bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-600 dark:border-rose-800/50 dark:bg-rose-900/20 dark:text-rose-400">
-                                <span className="relative flex h-1.5 w-1.5">
-                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-75 motion-reduce:animate-none" />
-                                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-600 dark:bg-rose-400" />
-                                </span>
-                                New
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm shadow-blue-200 dark:shadow-blue-900/30">
+                            <Archive className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <div className="flex items-start gap-2">
+                                <h3
+                                    className="line-clamp-2 min-w-0 flex-1 break-words text-sm font-bold text-slate-800 dark:text-slate-100"
+                                    title={project.name}
+                                >
+                                    {project.name}
+                                </h3>
                             </div>
-                        )}
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                                {showNewBadge && (
+                                    <div className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-rose-200/60 bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-600 dark:border-rose-800/50 dark:bg-rose-900/20 dark:text-rose-400">
+                                        <span className="relative flex h-1.5 w-1.5">
+                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-75 motion-reduce:animate-none" />
+                                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-600 dark:bg-rose-400" />
+                                        </span>
+                                        New
+                                    </div>
+                                )}
+                                {project.programName && (
+                                    <span className="inline-flex items-center rounded-full border border-violet-100 bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300">
+                                        {project.programName}
+                                    </span>
+                                )}
+                                {project.description && (
+                                    <p
+                                        className="min-w-0 flex-1 truncate text-xs leading-5 text-slate-500 dark:text-slate-400"
+                                        title={project.description}
+                                    >
+                                        {project.description}
+                                    </p>
+                                )}
+                            </div>
+                            {project.statusNote && (
+                                <p
+                                    className="mt-1 truncate text-xs leading-5 text-amber-700 dark:text-amber-300"
+                                    title={`หมายเหตุสถานะ: ${project.statusNote}`}
+                                >
+                                    หมายเหตุสถานะ: {project.statusNote}
+                                </p>
+                            )}
+                        </div>
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                        {project.programName && (
-                            <span className="inline-flex items-center rounded-full border border-violet-100 bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300">
-                                {project.programName}
-                            </span>
-                        )}
-                        {project.description && (
-                            <p
-                                className="min-w-0 flex-1 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400"
-                                title={project.description}
-                            >
-                                {project.description}
-                            </p>
-                        )}
-                    </div>
-                    {project.statusNote && (
-                        <p
-                            className="mt-1 line-clamp-2 text-xs leading-5 text-amber-700 dark:text-amber-300"
-                            title={`หมายเหตุสถานะ: ${project.statusNote}`}
-                        >
-                            หมายเหตุสถานะ: {project.statusNote}
-                        </p>
-                    )}
                 </div>
 
                 <div className="flex items-center gap-2 pt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 xl:self-start xl:justify-self-start">

@@ -65,6 +65,22 @@ export const updateAdminProjectSchema = updateProjectStatusSchema.extend({
         .optional(),
 });
 
+export const updateProjectCoOwnersSchema = z.object({
+    projectId: z.coerce
+        .number({ message: "รหัสโครงการไม่ถูกต้อง" })
+        .int({ message: "รหัสโครงการไม่ถูกต้อง" })
+        .positive({ message: "รหัสโครงการไม่ถูกต้อง" }),
+    allowCoOwners: z.boolean({ message: "สถานะเจ้าของร่วมไม่ถูกต้อง" }),
+    adminUserIds: z
+        .array(
+            z.coerce
+                .number({ message: "รหัสผู้ดูแลไม่ถูกต้อง" })
+                .int({ message: "รหัสผู้ดูแลไม่ถูกต้อง" })
+                .positive({ message: "รหัสผู้ดูแลไม่ถูกต้อง" }),
+        )
+        .max(20, { message: "เลือกเจ้าของร่วมได้สูงสุด 20 คน" }),
+});
+
 export const updateAdminUserSchema = z.object({
     name: z
         .string("กรุณากรอกชื่อ")
@@ -95,6 +111,7 @@ export const updateProjectSchema = z.object({
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectStatusInput = z.infer<typeof updateProjectStatusSchema>;
 export type UpdateAdminProjectInput = z.infer<typeof updateAdminProjectSchema>;
+export type UpdateProjectCoOwnersInput = z.infer<typeof updateProjectCoOwnersSchema>;
 export type UpdateAdminUserInput = z.infer<typeof updateAdminUserSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 

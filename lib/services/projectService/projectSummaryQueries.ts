@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import type { ProjectSummary } from "@/type/models";
+import { buildUserProjectsAccessWhere } from "./projectAccess";
 
 export async function getProjectSummariesByUserId(
     userId: number,
 ): Promise<ProjectSummary[]> {
     const projects = await prisma.project.findMany({
-        where: { userId },
+        where: buildUserProjectsAccessWhere(userId),
         select: {
             id: true,
             name: true,

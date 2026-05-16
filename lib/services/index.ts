@@ -9,6 +9,7 @@ export {
     createProjectWithAudit,
     updateProjectWithAudit,
     deleteProjectWithAudit,
+    updateProjectCoOwners,
     getUserFilesPaginated,
     getAllFilesPaginated,
 } from "./projectService";
@@ -35,6 +36,7 @@ export {
     updateUserWithAudit,
     deleteUserWithAudit,
     getUserCount,
+    getAdminOwnerOptions,
     checkAdminPermission,
 } from "./userService";
 

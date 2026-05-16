@@ -112,10 +112,10 @@ function sanitizeAdminProjectReport(
 
 export async function getProjectReportsForUser(
     projectId: number,
-    userId: number,
+    _userId: number,
 ): Promise<ProjectReport[]> {
     const reports = await prisma.projectReport.findMany({
-        where: { projectId, userId },
+        where: { projectId },
         select: {
             id: true,
             projectId: true,

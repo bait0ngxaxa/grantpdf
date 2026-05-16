@@ -18,6 +18,7 @@ import {
 } from "@/lib/constants";
 import { toPublicApiError } from "@/lib/apiError";
 import { parsePositiveIntId } from "@/lib/id";
+import { buildProjectAccessWhere } from "@/lib/services/projectService";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -85,10 +86,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const file = fileEntry;
 
         const project = await prisma.project.findFirst({
-            where: {
-                id: projectId,
-                userId,
-            },
+            where: buildProjectAccessWhere(projectId, userId),
         });
 
         if (!project) {
@@ -99,7 +97,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         const fileName = file.name.toLowerCase();
-        const allowedExtensions = FILE_UPLOAD.SERVER_ALLOWED_EXTENSIONS;
+        const allowedExtensions = FILE_UPLOAD.ALLOWED_EXTENSIONS;
         const isAllowed = allowedExtensions.some((ext) =>
             fileName.endsWith(ext)
         );

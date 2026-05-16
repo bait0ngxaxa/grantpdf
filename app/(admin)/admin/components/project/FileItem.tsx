@@ -66,20 +66,6 @@ export default function FileItem({
                             <span className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-100 break-words">
                                 {truncateFileName(file.originalFileName, 30)}
                             </span>
-                            {file.downloadStatus === "done" ? (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex-shrink-0 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
-                                    อ่านแล้ว
-                                </span>
-                            ) : (
-                                <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 dark:from-amber-400/10 dark:to-orange-400/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-200/50 dark:border-amber-800/50 shadow-sm relative group overflow-hidden flex-shrink-0">
-                                    <div className="absolute inset-0 bg-amber-400/20 dark:bg-amber-500/20 rounded-full blur-md group-hover:bg-amber-400/30 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300" />
-                                    <span className="relative flex h-1.5 w-1.5 z-10">
-                                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
-                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-600 dark:bg-amber-400" />
-                                    </span>
-                                    <span className="text-[10px] font-bold tracking-wider relative z-10">ใหม่</span>
-                                </div>
-                            )}
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-sm text-slate-500 dark:text-slate-400">
                             <span className="flex items-center">

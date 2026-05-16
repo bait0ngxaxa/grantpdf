@@ -25,6 +25,7 @@ import {
     createProjectReportWithFile,
     getProjectReportsForUser,
 } from "@/lib/services";
+import { buildProjectAccessWhere } from "@/lib/services/projectService";
 
 interface RouteContext {
     params: Promise<{ id: string }>;
@@ -58,7 +59,7 @@ async function ensureOwnProject(
     userId: number,
 ): Promise<void> {
     const project = await prisma.project.findFirst({
-        where: { id: projectId, userId },
+        where: buildProjectAccessWhere(projectId, userId),
         select: { id: true },
     });
     if (!project) {
@@ -68,7 +69,7 @@ async function ensureOwnProject(
 
 function validateReportFile(file: File): string | null {
     const fileName = file.name.toLowerCase();
-    const isAllowed = FILE_UPLOAD.SERVER_ALLOWED_EXTENSIONS.some((ext) =>
+    const isAllowed = FILE_UPLOAD.ALLOWED_EXTENSIONS.some((ext) =>
         fileName.endsWith(ext),
     );
     if (!isAllowed) return "ไม่รองรับประเภทไฟล์นี้";

@@ -4,6 +4,7 @@ import {
     PROJECT_DESCRIPTION_MAX_LENGTH,
     PROJECT_STATUS_NOTE_MAX_LENGTH,
     updateAdminProjectSchema,
+    updateProjectCoOwnersSchema,
     updateProjectStatusSchema,
     updateProjectSchema,
 } from "@/lib/validation/schemas";
@@ -55,5 +56,26 @@ describe("project schema validation", () => {
         });
 
         expect(result.success).toBe(true);
+    });
+
+    it("accepts valid project co-owner updates", () => {
+        const result = updateProjectCoOwnersSchema.safeParse({
+            projectId: 1,
+            allowCoOwners: true,
+            adminUserIds: [2, 3],
+        });
+
+        expect(result.success).toBe(true);
+    });
+
+    it("rejects invalid project co-owner admin ids", () => {
+        const result = updateProjectCoOwnersSchema.safeParse({
+            projectId: 1,
+            allowCoOwners: true,
+            adminUserIds: [0],
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues[0]?.message).toBe("รหัสผู้ดูแลไม่ถูกต้อง");
     });
 });

@@ -154,6 +154,35 @@ describe("sanitizeProjects", () => {
         expect(result[0].description).toBeUndefined();
         expect(result[0].statusNote).toBeUndefined();
     });
+
+    it("should preserve co-owner enabled state and selected admins", () => {
+        const rawProjects: RawProject[] = [
+            createRawProject({
+                allowCoOwners: true,
+                coOwners: [
+                    {
+                        id: BigInt(1),
+                        adminUser: {
+                            id: BigInt(200),
+                            name: "แอดมินร่วม",
+                            email: "co-owner@test.com",
+                        },
+                    },
+                ],
+            }),
+        ];
+
+        const result = sanitizeProjects(rawProjects);
+
+        expect(result[0].allowCoOwners).toBe(true);
+        expect(result[0].coOwners).toEqual([
+            {
+                id: "200",
+                name: "แอดมินร่วม",
+                email: "co-owner@test.com",
+            },
+        ]);
+    });
 });
 
 describe("sanitizeOrphanFiles", () => {

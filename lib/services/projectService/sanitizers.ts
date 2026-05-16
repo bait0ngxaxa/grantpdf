@@ -62,6 +62,12 @@ export function sanitizeProjects(projects: RawProject[]): AdminProject[] {
             userId: project.userId.toString(),
             userName,
             userEmail,
+            allowCoOwners: project.allowCoOwners ?? false,
+            coOwners: (project.coOwners || []).map((coOwner) => ({
+                id: coOwner.adminUser.id.toString(),
+                name: coOwner.adminUser.name || "Unknown User",
+                email: coOwner.adminUser.email,
+            })),
             files: sanitizeFiles(project.files, userName, userEmail),
             reports: (project.reports || []).map((report) => ({
                 id: report.id.toString(),

@@ -1,7 +1,11 @@
 import React from "react";
 import { Button } from "@/components/ui";
-import type { AdminProject, ProgramSummary } from "@/type/models";
-import { ClipboardList, Loader2, X } from "lucide-react";
+import type {
+    AdminProject,
+    ProgramSummary,
+    ProjectCoOwnerSummary,
+} from "@/type/models";
+import { ClipboardList, Loader2, UserCog, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STATUS_ORDER } from "@/lib/constants";
 import { PROJECT_STATUS_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
@@ -16,8 +20,15 @@ interface ProjectStatusModalProps {
     selectedProgramId: string;
     setSelectedProgramId: (programId: string) => void;
     programs: ProgramSummary[];
+    adminOwnerOptions: ProjectCoOwnerSummary[];
     isProgramsLoading: boolean;
+    isAdminOwnersLoading: boolean;
     programsError: string | null;
+    adminOwnersError: string | null;
+    allowCoOwners: boolean;
+    setAllowCoOwners: (allowCoOwners: boolean) => void;
+    selectedCoOwnerAdminIds: string[];
+    setSelectedCoOwnerAdminIds: (adminUserIds: string[]) => void;
     isUpdatingStatus: boolean;
     closeStatusModal: () => void;
     handleUpdateProjectStatus: () => void;
@@ -34,13 +45,41 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     selectedProgramId,
     setSelectedProgramId,
     programs,
+    adminOwnerOptions,
     isProgramsLoading,
+    isAdminOwnersLoading,
     programsError,
+    adminOwnersError,
+    allowCoOwners,
+    setAllowCoOwners,
+    selectedCoOwnerAdminIds,
+    setSelectedCoOwnerAdminIds,
     isUpdatingStatus,
     closeStatusModal,
     handleUpdateProjectStatus,
     getStatusColor,
 }) => {
+    const toggleCoOwner = (adminUserId: string): void => {
+        setSelectedCoOwnerAdminIds(
+            selectedCoOwnerAdminIds.includes(adminUserId)
+                ? selectedCoOwnerAdminIds.filter((id) => id !== adminUserId)
+                : [...selectedCoOwnerAdminIds, adminUserId],
+        );
+    };
+
+    const hasCoOwnerChanges =
+        allowCoOwners !== selectedProjectForStatus?.allowCoOwners ||
+        selectedCoOwnerAdminIds.join(",") !==
+            (selectedProjectForStatus?.coOwners || [])
+                .map((coOwner) => coOwner.id)
+                .join(",");
+
+    const hasProjectChanges =
+        newStatus !== selectedProjectForStatus?.status ||
+        statusNote !== (selectedProjectForStatus?.statusNote || "") ||
+        selectedProgramId !== (selectedProjectForStatus?.programId || "") ||
+        hasCoOwnerChanges;
+
     return (
         <>
             {isStatusModalOpen && selectedProjectForStatus && (
@@ -55,7 +94,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="project-status-modal-title"
-                        className="relative w-full bg-white dark:bg-slate-800 p-8 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 z-10"
+                        className="relative z-10 max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-800 sm:p-8"
                     >
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center space-x-3">
@@ -79,8 +118,8 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                             </button>
                         </div>
 
-                        <div className="mb-8">
-                            <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl mb-6">
+                        <div className="mb-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
+                            <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-700/50 lg:col-start-1 lg:row-start-1">
                                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
                                     โครงการ
                                 </p>
@@ -102,7 +141,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 </div>
                             </div>
 
-                            <div className="flex flex-col mb-4">
+                            <div className="flex flex-col lg:col-start-2 lg:row-start-1">
                                 <label className="flex items-center pb-1">
                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                         โครงการหลัก
@@ -133,7 +172,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 )}
                             </div>
 
-                            <div className="flex flex-col mb-4">
+                            <div className="flex flex-col lg:col-start-2 lg:row-start-2">
                                 <label className="flex items-center pb-1">
                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                         เลือกสถานะใหม่
@@ -154,7 +193,92 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 </select>
                             </div>
 
-                            <div className="flex flex-col">
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-slate-700/40 lg:col-start-1 lg:row-span-2 lg:row-start-2">
+                                <div className="mb-3 flex items-start justify-between gap-3">
+                                    <div className="flex min-w-0 items-start gap-2">
+                                        <UserCog className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-300" />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                เจ้าของร่วมโครงการ
+                                            </p>
+                                            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                                                เลือกแอดมินที่สามารถเข้าไปจัดการโครงการนี้ร่วมกันได้
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                                        <input
+                                            type="checkbox"
+                                            checked={allowCoOwners}
+                                            onChange={(event) =>
+                                                setAllowCoOwners(
+                                                    event.target.checked,
+                                                )
+                                            }
+                                            className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                        เปิดใช้
+                                    </label>
+                                </div>
+
+                                <div className="max-h-44 space-y-2 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50 p-2 dark:border-slate-600 dark:bg-slate-800/60 lg:max-h-60">
+                                    {isAdminOwnersLoading ? (
+                                        <div className="flex items-center gap-2 px-2 py-3 text-xs text-slate-500 dark:text-slate-400">
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                            กำลังโหลดรายชื่อแอดมิน…
+                                        </div>
+                                    ) : adminOwnerOptions.length === 0 ? (
+                                        <p className="px-2 py-3 text-xs text-slate-500 dark:text-slate-400">
+                                            ไม่พบรายชื่อแอดมิน
+                                        </p>
+                                    ) : (
+                                        adminOwnerOptions
+                                            .filter(
+                                                (admin) =>
+                                                    admin.id !==
+                                                    selectedProjectForStatus.userId,
+                                            )
+                                            .map((admin) => (
+                                            <label
+                                                key={admin.id}
+                                                className={cn(
+                                                    "flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm transition-colors",
+                                                    allowCoOwners
+                                                        ? "hover:bg-white dark:hover:bg-slate-700"
+                                                        : "cursor-not-allowed opacity-50",
+                                                )}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    disabled={!allowCoOwners}
+                                                    checked={selectedCoOwnerAdminIds.includes(
+                                                        admin.id,
+                                                    )}
+                                                    onChange={() =>
+                                                        toggleCoOwner(admin.id)
+                                                    }
+                                                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <span className="min-w-0">
+                                                    <span className="block truncate font-medium text-slate-700 dark:text-slate-200">
+                                                        {admin.name}
+                                                    </span>
+                                                    <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                                                        {admin.email}
+                                                    </span>
+                                                </span>
+                                            </label>
+                                            ))
+                                    )}
+                                </div>
+                                {adminOwnersError && (
+                                    <p className="mt-2 text-xs text-red-500">
+                                        {adminOwnersError}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex flex-col lg:col-start-2 lg:row-start-3">
                                 <label className="flex items-center pb-1">
                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                         หมายเหตุสถานะโครงการ (ไม่บังคับ)
@@ -189,22 +313,12 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                                 disabled={
                                     isUpdatingStatus ||
                                     !!programsError ||
-                                    (newStatus ===
-                                        selectedProjectForStatus.status &&
-                                        statusNote ===
-                                            (selectedProjectForStatus.statusNote ||
-                                                "") &&
-                                        selectedProgramId ===
-                                            (selectedProjectForStatus.programId ||
-                                                ""))
+                                    !!adminOwnersError ||
+                                    !hasProjectChanges
                                 }
                                 className={cn(
                                     "cursor-pointer px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] transform active:scale-95",
-                                    newStatus === selectedProjectForStatus.status &&
-                                    statusNote ===
-                                        (selectedProjectForStatus.statusNote || "") &&
-                                    selectedProgramId ===
-                                        (selectedProjectForStatus.programId || "")
+                                    !hasProjectChanges
                                         ? "opacity-50 cursor-not-allowed"
                                         : "",
                                 )}

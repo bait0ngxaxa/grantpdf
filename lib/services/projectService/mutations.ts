@@ -1,9 +1,23 @@
 import { prisma } from "@/lib/prisma";
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
-import type { AdminProject } from "@/type/models";
+import type { AdminProject, ProjectCoOwnerSummary } from "@/type/models";
 import { Prisma, type Project } from "@prisma/client";
-import type { UpdateProjectStatusParams } from "./types";
+import type { UpdateProjectCoOwnersParams, UpdateProjectStatusParams } from "./types";
 import { VALID_STATUSES_SET, PROJECT_STATUS } from "@/lib/constants";
+import { ROLES } from "@/lib/constants";
+import { buildProjectAccessWhere } from "./projectAccess";
+
+function uniquePositiveIds(ids: number[]): number[] {
+    const uniqueIds = new Set<number>();
+
+    for (const id of ids) {
+        if (Number.isInteger(id) && id > 0) {
+            uniqueIds.add(id);
+        }
+    }
+
+    return [...uniqueIds];
+}
 
 export async function updateProjectStatus({
     projectId,
@@ -68,6 +82,117 @@ export async function updateProjectStatus({
         userEmail: updatedProject.user?.email || "Unknown Email",
         _count: updatedProject._count,
     };
+}
+
+export async function updateProjectCoOwners({
+    projectId,
+    allowCoOwners,
+    adminUserIds,
+    assignedById,
+}: UpdateProjectCoOwnersParams): Promise<{
+    allowCoOwners: boolean;
+    coOwners: ProjectCoOwnerSummary[];
+}> {
+    if (!Number.isInteger(projectId) || projectId <= 0) {
+        throw new Error("Invalid projectId");
+    }
+
+    if (!Number.isInteger(assignedById) || assignedById <= 0) {
+        throw new Error("Invalid assignedById");
+    }
+
+    const requestedAdminIds = allowCoOwners ? uniquePositiveIds(adminUserIds) : [];
+
+    return prisma.$transaction(async (tx) => {
+        const project = await tx.project.findUnique({
+            where: { id: projectId },
+            select: {
+                id: true,
+                userId: true,
+            },
+        });
+
+        if (!project) {
+            throw new Error("PROJECT_NOT_FOUND");
+        }
+
+        if (requestedAdminIds.length > 0) {
+            const admins = await tx.user.findMany({
+                where: {
+                    id: { in: requestedAdminIds },
+                    role: ROLES.ADMIN,
+                },
+                select: { id: true },
+            });
+            const validAdminIds = new Set(admins.map((admin) => admin.id));
+
+            if (requestedAdminIds.some((id) => !validAdminIds.has(id))) {
+                throw new Error("INVALID_CO_OWNER_ADMIN");
+            }
+        }
+
+        await tx.project.update({
+            where: { id: projectId },
+            data: {
+                allowCoOwners,
+                updated_at: new Date(),
+            },
+            select: { id: true },
+        });
+
+        await tx.projectCoOwner.deleteMany({
+            where: {
+                projectId,
+                adminUserId: { notIn: requestedAdminIds },
+            },
+        });
+
+        for (const adminUserId of requestedAdminIds) {
+            if (adminUserId === project.userId) {
+                continue;
+            }
+
+            await tx.projectCoOwner.upsert({
+                where: {
+                    projectId_adminUserId: {
+                        projectId,
+                        adminUserId,
+                    },
+                },
+                update: {
+                    assignedById,
+                },
+                create: {
+                    projectId,
+                    adminUserId,
+                    assignedById,
+                },
+            });
+        }
+
+        const coOwners = await tx.projectCoOwner.findMany({
+            where: { projectId },
+            select: {
+                adminUser: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+            orderBy: { created_at: "asc" },
+        });
+
+        return {
+            allowCoOwners,
+            coOwners: coOwners.map((coOwner) => ({
+                id: coOwner.adminUser.id.toString(),
+                name: coOwner.adminUser.name || "Unknown User",
+                email: coOwner.adminUser.email,
+            })),
+        };
+    });
 }
 
 export async function createProject(
@@ -255,7 +380,7 @@ export async function updateProjectWithAudit(
     try {
         updatedProject = await prisma.$transaction(async (tx) => {
             const existing = await tx.project.findFirst({
-                where: { id: projectId, userId },
+                where: buildProjectAccessWhere(projectId, userId),
                 select: { id: true, name: true, description: true },
             });
 
@@ -323,7 +448,7 @@ export async function deleteProjectWithAudit(
 ): Promise<void> {
     await prisma.$transaction(async (tx) => {
         const existing = await tx.project.findFirst({
-            where: { id: projectId, userId },
+            where: buildProjectAccessWhere(projectId, userId),
             select: { id: true, name: true, description: true },
         });
 

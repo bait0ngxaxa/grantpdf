@@ -35,6 +35,7 @@ export type AuditAction =
     | "ADMIN_USER_DELETE"
     | "ADMIN_USER_UPDATE"
     | "ADMIN_PROJECT_UPDATE"
+    | "ADMIN_PROJECT_CO_OWNER_UPDATE"
     | "ADMIN_FILE_DOWNLOAD";
 
 export type AuditOutcome = "success" | "failure";

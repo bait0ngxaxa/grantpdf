@@ -11,10 +11,13 @@ const ACTION_LABELS = {
     PROJECT_CREATE: "สร้างโครงการ",
     PROJECT_UPDATE: "อัปเดตโครงการ",
     PROJECT_DELETE: "ลบโครงการ",
+    PROJECT_REPORT_SUBMIT: "ส่งรายงานโครงการ",
+    ADMIN_PROJECT_REPORT_UPDATE: "แอดมินตรวจรายงานโครงการ",
     DOCUMENT_GENERATE: "สร้างเอกสาร",
     ADMIN_USER_DELETE: "แอดมินลบผู้ใช้งาน",
     ADMIN_USER_UPDATE: "แอดมินแก้ไขผู้ใช้งาน",
     ADMIN_PROJECT_UPDATE: "แอดมินอัปเดตโครงการ",
+    ADMIN_PROJECT_CO_OWNER_UPDATE: "แอดมินอัปเดตเจ้าของร่วมโครงการ",
     ADMIN_FILE_DOWNLOAD: "แอดมินดาวน์โหลดไฟล์",
 } as const;
 
@@ -99,6 +102,14 @@ function readObjectField(
         return null;
     }
     return value as Record<string, unknown>;
+}
+
+function readArrayField(
+    data: Record<string, unknown>,
+    key: string,
+): unknown[] {
+    const value = data[key];
+    return Array.isArray(value) ? value : [];
 }
 
 function formatKeyValueDetails(details: Record<string, unknown>): string {
@@ -268,6 +279,45 @@ export function formatAuditDetails(
         return projectName ? `ลบโครงการ ${projectName}` : "ลบโครงการ";
     }
 
+    if (knownAction === "PROJECT_REPORT_SUBMIT") {
+        const projectId = readNumberField(details, "projectId");
+        const reportId = readNumberField(details, "reportId");
+        const parts: string[] = ["ส่งรายงานโครงการ"];
+
+        if (projectId !== null) {
+            parts.push(`โครงการ #${projectId}`);
+        }
+        if (reportId !== null) {
+            parts.push(`รายงาน #${reportId}`);
+        }
+        return parts.join(" | ");
+    }
+
+    if (knownAction === "ADMIN_PROJECT_REPORT_UPDATE") {
+        const projectName = readStringField(details, "projectName");
+        const projectId = readNumberField(details, "projectId");
+        const reportId = readNumberField(details, "reportId");
+        const status = readStringField(details, "status");
+        const userEmail = readStringField(details, "userEmail");
+        const parts: string[] = ["ตรวจรายงานโครงการ"];
+
+        if (projectName) {
+            parts.push(`โครงการ: ${projectName}`);
+        } else if (projectId !== null) {
+            parts.push(`โครงการ #${projectId}`);
+        }
+        if (reportId !== null) {
+            parts.push(`รายงาน #${reportId}`);
+        }
+        if (status) {
+            parts.push(`ผลตรวจ: ${status}`);
+        }
+        if (userEmail) {
+            parts.push(`ผู้ส่ง: ${userEmail}`);
+        }
+        return parts.join(" | ");
+    }
+
     if (knownAction === "DOCUMENT_GENERATE") {
         const documentType = readStringField(details, "documentType");
         const replayed = details.replayed === true;
@@ -303,6 +353,24 @@ export function formatAuditDetails(
         }
         if (statusNote) {
             parts.push(`หมายเหตุ: ${statusNote}`);
+        }
+        return parts.join(" | ");
+    }
+
+    if (knownAction === "ADMIN_PROJECT_CO_OWNER_UPDATE") {
+        const projectId = readNumberField(details, "projectId");
+        const allowCoOwners = details.allowCoOwners === true;
+        const adminUserIds = readArrayField(details, "adminUserIds")
+            .map((value) => String(value))
+            .filter((value) => value.trim().length > 0);
+        const parts: string[] = ["อัปเดตเจ้าของร่วมโครงการ"];
+
+        if (projectId !== null) {
+            parts.push(`โครงการ #${projectId}`);
+        }
+        parts.push(allowCoOwners ? "เปิดใช้งานเจ้าของร่วม" : "ปิดใช้งานเจ้าของร่วม");
+        if (adminUserIds.length > 0) {
+            parts.push(`แอดมินที่มอบหมาย: ${adminUserIds.join(", ")}`);
         }
         return parts.join(" | ");
     }

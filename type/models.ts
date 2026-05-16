@@ -74,6 +74,12 @@ export interface ProjectReportSummary {
     adminNote?: string;
 }
 
+export interface ProjectCoOwnerSummary {
+    id: string;
+    name: string;
+    email: string;
+}
+
 export interface ProjectReport {
     id: string;
     projectId: string;
@@ -100,6 +106,8 @@ export interface AdminProject
     userId: string;
     userName: string;
     userEmail: string;
+    allowCoOwners?: boolean;
+    coOwners?: ProjectCoOwnerSummary[];
     files: AdminDocumentFile[];
 }
 

@@ -22,6 +22,8 @@ model User {
   updated_at DateTime? @default(now()) @db.Timestamp(6)
   files      UserFile[]
   projects   Project[]
+  coOwnedProjects ProjectCoOwner[] @relation("ProjectCoOwnerAdmin")
+  assignedProjectCoOwners ProjectCoOwner[] @relation("ProjectCoOwnerAssigner")
   projectReports ProjectReport[]
   documentIdempotencyKeys DocumentIdempotency[]
 
@@ -52,6 +54,7 @@ model Project {
   description String?  @db.Text
   status      String   @default("กำลังดำเนินการ")
   statusNote  String?  @db.Text
+  allowCoOwners Boolean @default(false)
 
   programId   Int?
 
@@ -62,6 +65,7 @@ model Project {
 
   program Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coOwners ProjectCoOwner[]
   files UserFile[]
   reports ProjectReport[]
 
@@ -73,6 +77,23 @@ model Project {
   @@index([status, created_at])
   @@index([created_at])
   @@index([name])
+}
+
+model ProjectCoOwner {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  adminUserId Int
+  assignedById Int
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  adminUser  User    @relation("ProjectCoOwnerAdmin", fields: [adminUserId], references: [id], onDelete: Cascade)
+  assignedBy User    @relation("ProjectCoOwnerAssigner", fields: [assignedById], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, adminUserId])
+  @@index([projectId])
+  @@index([adminUserId])
+  @@index([assignedById])
 }
 
 

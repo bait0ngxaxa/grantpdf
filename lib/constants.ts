@@ -162,6 +162,7 @@ export const API_ROUTES = {
     USER_DOCS: "/api/user-docs",
     FILE_GENERATE_URL: "/api/file/generate-url",
     ADMIN_PROJECTS: "/api/admin/projects",
+    ADMIN_PROJECT_CO_OWNERS: "/api/admin/project-co-owners",
     ADMIN_PROGRAMS: "/api/admin/programs",
     ADMIN_USERS: "/api/admin/users",
     ADMIN_AUDIT: "/api/admin/audit",
@@ -173,8 +174,7 @@ export const TEXT_LIMITS = {
 } as const;
 
 export const FILE_UPLOAD = {
-    ALLOWED_EXTENSIONS: [".docx", ".pdf"],
-    SERVER_ALLOWED_EXTENSIONS: [
+    ALLOWED_EXTENSIONS: [
         ".docx",
         ".pdf",
         ".doc",

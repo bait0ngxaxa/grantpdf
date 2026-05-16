@@ -42,6 +42,15 @@ export const PROJECT_INCLUDE = {
         },
         orderBy: { submittedAt: "desc" as const },
     },
+    coOwners: {
+        select: {
+            id: true,
+            adminUser: {
+                select: USER_PUBLIC_SELECT,
+            },
+        },
+        orderBy: { created_at: "asc" as const },
+    },
     _count: {
         select: {
             files: {

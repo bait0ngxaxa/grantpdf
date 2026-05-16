@@ -19,6 +19,14 @@ export default async function AdminDashboardLayout({
 }): Promise<React.JSX.Element> {
     // P3: Prefetch admin stats on server to eliminate client-side waterfall
     const session = await auth();
+    if (!session?.user?.id) {
+        redirect(
+            `${ROUTES.SIGNIN}?callbackUrl=${encodeURIComponent(
+                ROUTES.ADMIN,
+            )}&reason=session-expired`,
+        );
+    }
+
     if (!isAdmin(session)) {
         redirect(ROUTES.ACCESS_DENIED);
     }

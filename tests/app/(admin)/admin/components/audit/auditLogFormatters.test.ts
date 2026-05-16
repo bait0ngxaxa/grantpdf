@@ -20,10 +20,13 @@ describe("auditLogFormatters", () => {
             "PROJECT_CREATE",
             "PROJECT_UPDATE",
             "PROJECT_DELETE",
+            "PROJECT_REPORT_SUBMIT",
+            "ADMIN_PROJECT_REPORT_UPDATE",
             "DOCUMENT_GENERATE",
             "ADMIN_USER_DELETE",
             "ADMIN_USER_UPDATE",
             "ADMIN_PROJECT_UPDATE",
+            "ADMIN_PROJECT_CO_OWNER_UPDATE",
             "ADMIN_FILE_DOWNLOAD",
         ];
 
@@ -133,6 +136,47 @@ describe("auditLogFormatters", () => {
                 statusNote: "ผ่านแล้ว",
             }),
         ).toBe("อัปเดตโครงการ A | สถานะใหม่: อนุมัติ | หมายเหตุ: ผ่านแล้ว");
+    });
+
+    it("formats project report and co-owner actions", () => {
+        expect(getActionLabel("PROJECT_REPORT_SUBMIT")).toBe(
+            "ส่งรายงานโครงการ",
+        );
+        expect(getActionLabel("ADMIN_PROJECT_REPORT_UPDATE")).toBe(
+            "แอดมินตรวจรายงานโครงการ",
+        );
+        expect(getActionLabel("ADMIN_PROJECT_CO_OWNER_UPDATE")).toBe(
+            "แอดมินอัปเดตเจ้าของร่วมโครงการ",
+        );
+
+        expect(
+            formatAuditDetails("PROJECT_REPORT_SUBMIT", {
+                projectId: "12",
+                reportId: "5",
+            }),
+        ).toBe("ส่งรายงานโครงการ | โครงการ #12 | รายงาน #5");
+
+        expect(
+            formatAuditDetails("ADMIN_PROJECT_REPORT_UPDATE", {
+                reportId: 5,
+                projectId: 12,
+                projectName: "โครงการ A",
+                status: "อนุมัติแล้ว",
+                userEmail: "owner@example.com",
+            }),
+        ).toBe(
+            "ตรวจรายงานโครงการ | โครงการ: โครงการ A | รายงาน #5 | ผลตรวจ: อนุมัติแล้ว | ผู้ส่ง: owner@example.com",
+        );
+
+        expect(
+            formatAuditDetails("ADMIN_PROJECT_CO_OWNER_UPDATE", {
+                projectId: 12,
+                allowCoOwners: true,
+                adminUserIds: ["2", "3"],
+            }),
+        ).toBe(
+            "อัปเดตเจ้าของร่วมโครงการ | โครงการ #12 | เปิดใช้งานเจ้าของร่วม | แอดมินที่มอบหมาย: 2, 3",
+        );
     });
 
     it("formats DOCUMENT_GENERATE with thai document type mapping", () => {
