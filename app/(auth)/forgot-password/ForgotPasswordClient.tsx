@@ -96,15 +96,31 @@ export default function ForgotPasswordClient(): React.JSX.Element {
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
             <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 {/* Left Side - Hero Content */}
-                <div className="hidden md:flex flex-col space-y-8 p-8">
-                    <h1 className="text-5xl font-bold text-slate-900 dark:text-slate-100 leading-tight text-balance">
-                        ลืมรหัสผ่าน? <br />
-                    </h1>
+                <div className="hidden md:flex flex-col space-y-8 p-8 relative overflow-visible">
+                    {/* Floating elements like homepage */}
+                    <div className="absolute top-1/2 left-0 -translate-y-1/2 -z-10 w-full h-full opacity-30">
+                        <div className="absolute top-0 right-0 h-[300px] w-[300px] rounded-full bg-blue-100/50 blur-3xl dark:bg-blue-900/10" />
+                    </div>
 
-                    <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-lg">
-                        กรอกอีเมลที่คุณใช้สมัครสมาชิก
-                        ระบบจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้คุณทางอีเมล
-                    </p>
+                    <div className="space-y-4">
+                        <h1 className="text-5xl font-bold leading-tight text-balance">
+                            <span className="block text-slate-900 dark:text-white">
+                                E-GRANT ONLINE
+                            </span>
+                            <span className="animate-gradient-x bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
+                                RHHSDI
+                            </span>
+                        </h1>
+                        <p className="max-w-[450px] text-lg leading-relaxed font-light text-slate-600 dark:text-slate-400">
+                            แพลตฟอร์มบริหารจัดการเอกสารและยื่นโครงการ <br />
+                            สำหรับการยื่นเอกสารเสนอโครงการและเอกสารอื่นๆ
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500">
+                        <div className="h-px w-8 bg-slate-200 dark:bg-slate-700" />
+                        <span className="text-xs font-bold uppercase tracking-widest">Institutional Platform</span>
+                    </div>
                 </div>
 
                 {/* Right Side - Form */}
