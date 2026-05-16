@@ -20,6 +20,7 @@ export type AuditAction =
     | "SIGNUP"
     | "PASSWORD_RESET_REQUEST"
     | "PASSWORD_RESET_SUCCESS"
+    | "PASSWORD_RESET_FAILED"
     // File operations (User)
     | "FILE_UPLOAD"
     | "FILE_DOWNLOAD"

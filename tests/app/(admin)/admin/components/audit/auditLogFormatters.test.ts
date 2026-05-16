@@ -14,6 +14,7 @@ describe("auditLogFormatters", () => {
             "SIGNUP",
             "PASSWORD_RESET_REQUEST",
             "PASSWORD_RESET_SUCCESS",
+            "PASSWORD_RESET_FAILED",
             "FILE_UPLOAD",
             "FILE_DOWNLOAD",
             "FILE_DELETE",
@@ -54,6 +55,9 @@ describe("auditLogFormatters", () => {
         );
         expect(formatAuditDetails("PASSWORD_RESET_SUCCESS", {})).toBe(
             "รีเซ็ตรหัสผ่านสำเร็จ",
+        );
+        expect(formatAuditDetails("PASSWORD_RESET_FAILED", {})).toBe(
+            "รีเซ็ตรหัสผ่านไม่สำเร็จ",
         );
     });
 

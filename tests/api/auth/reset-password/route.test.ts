@@ -15,6 +15,7 @@ vi.mock("@/lib/ratelimit", () => ({
         retryAfter: 0,
         headers: new Headers(),
     })),
+    getClientIP: vi.fn(() => "127.0.0.1"),
 }));
 
 vi.mock("bcryptjs", () => ({
@@ -23,12 +24,18 @@ vi.mock("bcryptjs", () => ({
     },
 }));
 
+vi.mock("@/lib/auditLog", () => ({
+    logAudit: vi.fn(),
+}));
+
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { logAudit } from "@/lib/auditLog";
 import { PUT } from "@/app/api/(auth)/auth/reset-password/route";
 
 const mockedHash = vi.mocked(bcrypt.hash);
 const mockedUpdateMany = vi.mocked(prisma.user.updateMany);
+const mockedLogAudit = vi.mocked(logAudit);
 
 const originalPassResetSecret = process.env.PASSRESET_TOKEN_SECRET;
 
@@ -90,6 +97,15 @@ describe("reset-password route", () => {
                 },
             },
         });
+        expect(mockedLogAudit).toHaveBeenCalledWith(
+            "PASSWORD_RESET_SUCCESS",
+            "9",
+            expect.objectContaining({
+                targetId: "9",
+                targetType: "user",
+                ip: "127.0.0.1",
+            })
+        );
     });
 
     it("rejects tokens that do not carry the password-reset type claim", async () => {
@@ -105,6 +121,16 @@ describe("reset-password route", () => {
 
         expect(response.status).toBe(400);
         expect(mockedUpdateMany).not.toHaveBeenCalled();
+        expect(mockedLogAudit).toHaveBeenCalledWith(
+            "PASSWORD_RESET_FAILED",
+            null,
+            expect.objectContaining({
+                details: {
+                    reason: "invalid_or_expired_token",
+                },
+                ip: "127.0.0.1",
+            })
+        );
     });
 
     it("rejects tokens that were already used", async () => {
@@ -123,5 +149,17 @@ describe("reset-password route", () => {
 
         expect(response.status).toBe(400);
         expect(body).toEqual({ error: "ลิงก์หมดอายุหรือไม่ถูกต้อง" });
+        expect(mockedLogAudit).toHaveBeenCalledWith(
+            "PASSWORD_RESET_FAILED",
+            "9",
+            expect.objectContaining({
+                targetId: "9",
+                targetType: "user",
+                details: {
+                    reason: "token_already_used_or_version_mismatch",
+                },
+                ip: "127.0.0.1",
+            })
+        );
     });
 });

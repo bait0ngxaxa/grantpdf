@@ -117,6 +117,29 @@ const { auth: nextAuthAuth, handlers, signIn, signOut } = NextAuth({
             return session;
         },
     },
+
+    events: {
+        signOut: async (message) => {
+            if (!("token" in message)) {
+                return;
+            }
+
+            const userId =
+                typeof message.token?.id === "string" ? message.token.id : null;
+            if (!userId) {
+                return;
+            }
+
+            const userEmail =
+                typeof message.token?.email === "string"
+                    ? message.token.email
+                    : undefined;
+            const { logAudit } = await import("@/lib/auditLog");
+            logAudit("LOGOUT", userId, {
+                userEmail,
+            });
+        },
+    },
 });
 
 export { handlers, signIn, signOut };

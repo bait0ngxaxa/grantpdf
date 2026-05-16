@@ -18,25 +18,21 @@ vi.mock("@/lib/ratelimit", () => ({
         retryAfter: 0,
         headers: new Headers(),
     })),
-    getStringField: vi.fn((body: unknown, fieldName: string) => {
-        if (typeof body === "object" && body !== null) {
-            const record = body as Record<string, unknown>;
-            const value = record[fieldName];
-            if (typeof value === "string") {
-                return value;
-            }
-        }
+    getClientIP: vi.fn(() => "127.0.0.1"),
+}));
 
-        return undefined;
-    }),
+vi.mock("@/lib/auditLog", () => ({
+    logAudit: vi.fn(),
 }));
 
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { logAudit } from "@/lib/auditLog";
 import { POST } from "@/app/api/(auth)/auth/forgot-password/route";
 
 const mockedFindUnique = vi.mocked(prisma.user.findUnique);
 const mockedSendPasswordResetEmail = vi.mocked(sendPasswordResetEmail);
+const mockedLogAudit = vi.mocked(logAudit);
 
 const originalAuthUrl = process.env.AUTH_URL;
 const originalNextAuthUrl = process.env.NEXTAUTH_URL;
@@ -107,6 +103,16 @@ describe("forgot-password route", () => {
                 resetLink: expect.stringContaining("attacker.example.com"),
             })
         );
+        expect(mockedLogAudit).toHaveBeenCalledWith(
+            "PASSWORD_RESET_REQUEST",
+            "7",
+            expect.objectContaining({
+                userEmail: "user@example.com",
+                targetId: "7",
+                targetType: "user",
+                ip: "127.0.0.1",
+            })
+        );
     });
 
     it("fails closed when no canonical base URL is configured", async () => {
@@ -125,5 +131,26 @@ describe("forgot-password route", () => {
         expect(response.status).toBe(500);
         expect(body).toEqual({ error: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์" });
         expect(mockedSendPasswordResetEmail).not.toHaveBeenCalled();
+    });
+
+    it("audits accepted reset requests for unknown accounts without exposing them", async () => {
+        mockedFindUnique.mockResolvedValue(null as never);
+
+        const response = await POST(buildRequest() as never);
+
+        expect(response.status).toBe(200);
+        expect(mockedSendPasswordResetEmail).not.toHaveBeenCalled();
+        expect(mockedLogAudit).toHaveBeenCalledWith(
+            "PASSWORD_RESET_REQUEST",
+            null,
+            expect.objectContaining({
+                details: {
+                    requestedEmail: "user@example.com",
+                    accountFound: false,
+                },
+                ip: "127.0.0.1",
+                outcome: "success",
+            })
+        );
     });
 });

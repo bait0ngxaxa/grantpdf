@@ -3,8 +3,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { resetPasswordSchema } from "@/lib/validation/schemas";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
 import { RATE_LIMIT } from "@/lib/constants";
+import { logAudit } from "@/lib/auditLog";
 import {
     type PasswordResetTokenPayload,
     verifyPasswordResetToken,
@@ -14,6 +15,7 @@ import { getStringField } from "@/lib/utils";
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
         const body: unknown = await req.json();
+        const ip = getClientIP(req);
         const tokenIdentifier = getStringField(body, "token");
         const rateLimitResult = await applyRateLimit({
             request: req,
@@ -24,6 +26,13 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         });
 
         if (!rateLimitResult.success) {
+            logAudit("PASSWORD_RESET_FAILED", null, {
+                details: {
+                    reason: "rate_limited",
+                },
+                ip,
+            });
+
             return NextResponse.json(
                 {
                     error: "มีการร้องขอมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
@@ -46,6 +55,13 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             decodedToken = verifyPasswordResetToken(token);
         } catch (err) {
             console.error("Token verification failed:", err);
+            logAudit("PASSWORD_RESET_FAILED", null, {
+                details: {
+                    reason: "invalid_or_expired_token",
+                },
+                ip,
+            });
+
             return NextResponse.json(
                 { error: "ลิงก์หมดอายุหรือไม่ถูกต้อง" },
                 { status: 400 }
@@ -71,11 +87,26 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
         });
 
         if (updateResult.count === 0) {
+            logAudit("PASSWORD_RESET_FAILED", String(decodedToken.userId), {
+                targetType: "user",
+                targetId: decodedToken.userId,
+                details: {
+                    reason: "token_already_used_or_version_mismatch",
+                },
+                ip,
+            });
+
             return NextResponse.json(
                 { error: "ลิงก์หมดอายุหรือไม่ถูกต้อง" },
                 { status: 400 }
             );
         }
+
+        logAudit("PASSWORD_RESET_SUCCESS", String(decodedToken.userId), {
+            targetType: "user",
+            targetId: decodedToken.userId,
+            ip,
+        });
 
         return NextResponse.json(
             {

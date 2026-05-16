@@ -5,6 +5,7 @@ const ACTION_LABELS = {
     SIGNUP: "สมัครสมาชิก",
     PASSWORD_RESET_REQUEST: "ขอรีเซ็ตรหัสผ่าน",
     PASSWORD_RESET_SUCCESS: "รีเซ็ตรหัสผ่านสำเร็จ",
+    PASSWORD_RESET_FAILED: "รีเซ็ตรหัสผ่านไม่สำเร็จ",
     FILE_UPLOAD: "อัปโหลดไฟล์",
     FILE_DOWNLOAD: "ดาวน์โหลดไฟล์",
     FILE_DELETE: "ลบไฟล์",
@@ -196,6 +197,10 @@ export function formatAuditDetails(
 
     if (knownAction === "PASSWORD_RESET_SUCCESS") {
         return "รีเซ็ตรหัสผ่านสำเร็จ";
+    }
+
+    if (knownAction === "PASSWORD_RESET_FAILED") {
+        return "รีเซ็ตรหัสผ่านไม่สำเร็จ";
     }
 
     if (knownAction === "FILE_UPLOAD") {

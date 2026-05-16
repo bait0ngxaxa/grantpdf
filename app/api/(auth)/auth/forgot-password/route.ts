@@ -3,9 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { forgotPasswordSchema } from "@/lib/validation/schemas";
 import { sendPasswordResetEmail } from "@/lib/email";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
 import { RATE_LIMIT } from "@/lib/constants";
 import { getStringField } from "@/lib/utils";
+import { logAudit } from "@/lib/auditLog";
 import {
     createPasswordResetToken,
     resolvePasswordResetBaseUrl,
@@ -14,6 +15,7 @@ import {
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const body: unknown = await req.json();
+        const ip = getClientIP(req);
         const emailIdentifier = getStringField(body, "email");
         const rateLimitResult = await applyRateLimit({
             request: req,
@@ -24,6 +26,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         });
 
         if (!rateLimitResult.success) {
+            logAudit("PASSWORD_RESET_REQUEST", null, {
+                details: {
+                    attemptedEmail: emailIdentifier,
+                    reason: "rate_limited",
+                },
+                ip,
+                outcome: "failure",
+            });
+
             return NextResponse.json(
                 {
                     error: "มีการร้องขอมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
@@ -51,6 +62,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         // คืน 200 เสมอเพื่อป้องกัน user enumeration attack
         if (!user) {
+            logAudit("PASSWORD_RESET_REQUEST", null, {
+                details: {
+                    requestedEmail: email,
+                    accountFound: false,
+                },
+                ip,
+                outcome: "success",
+            });
+
             return NextResponse.json(
                 { message: "ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว" },
                 { status: 200, headers: rateLimitResult.headers }
@@ -70,6 +90,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const resetLink = resetUrl.toString();
 
         await sendPasswordResetEmail({ email, resetLink });
+
+        logAudit("PASSWORD_RESET_REQUEST", String(user.id), {
+            userEmail: email,
+            targetType: "user",
+            targetId: String(user.id),
+            details: {
+                requestedEmail: email,
+                accountFound: true,
+            },
+            ip,
+        });
 
         return NextResponse.json(
             { message: "ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว" },
