@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, FileBarChart, Building2 } from "lucide-react";
+import { FileText, FileBarChart, Building2, UploadCloud } from "lucide-react";
 import { useCreateDocsContext } from "../contexts";
 import { cn } from "@/lib/utils";
 
@@ -113,18 +113,36 @@ export const MainMenu = (): React.JSX.Element => {
             </div>
 
             {selectedProjectId && (
-                <div className="text-center mt-12">
-                    <p className="text-slate-500 dark:text-slate-400">
-                        หรือ{" "}
-                        <Link
-                            href={`/uploads-doc?projectId=${encodeURIComponent(
-                                selectedProjectId,
-                            )}`}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold hover:underline transition-colors"
-                        >
-                            อัพโหลดเอกสาร
-                        </Link>
-                    </p>
+                <div className="mt-12 w-full max-w-lg">
+                    <div className="mb-5 flex items-center gap-3">
+                        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                            หรือ
+                        </span>
+                        <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                    </div>
+
+                    <Link
+                        href={`/uploads-doc?projectId=${encodeURIComponent(
+                            selectedProjectId,
+                        )}`}
+                        className="group flex min-w-0 items-center gap-4 rounded-2xl border border-blue-100 bg-white p-4 text-left shadow-sm transition-[border-color,box-shadow,transform,background-color] duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/50 hover:shadow-lg hover:shadow-blue-100/60 dark:border-blue-900/40 dark:bg-slate-800 dark:hover:border-blue-800 dark:hover:bg-blue-900/20 dark:hover:shadow-blue-950/30"
+                    >
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors duration-300 group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-900/40 dark:text-blue-300">
+                            <UploadCloud className="h-6 w-6" strokeWidth={1.8} />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-bold text-slate-900 dark:text-slate-100">
+                                อัพโหลดเอกสาร
+                            </span>
+                            <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
+                                แนบเอกสารที่จัดเตรียมไว้แล้วเข้าสู่โครงการนี้
+                            </span>
+                        </span>
+                        <span className="hidden rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-transform duration-300 group-hover:translate-x-0.5 sm:inline-flex">
+                            ไปอัปโหลด
+                        </span>
+                    </Link>
                 </div>
             )}
         </div>

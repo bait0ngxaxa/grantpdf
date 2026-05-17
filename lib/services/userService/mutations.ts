@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import type { SafeUser, UpdateUserData } from "./types";
 import { isValidRole } from "./constants";
+import type { Prisma } from "@prisma/client";
 
 interface AuditContext {
     actorUserId: string | null;
@@ -9,6 +10,30 @@ interface AuditContext {
     ip?: string;
     userAgent?: string;
     requestId?: string;
+}
+
+function shouldInvalidateSession(
+    currentRole: string | null,
+    data: UpdateUserData,
+): boolean {
+    return typeof data.role === "string" && data.role !== currentRole;
+}
+
+function buildUserUpdateData(
+    data: UpdateUserData,
+    invalidateSession: boolean,
+): Prisma.UserUpdateInput {
+    return {
+        ...data,
+        updated_at: new Date(),
+        ...(invalidateSession
+            ? {
+                  sessionVersion: {
+                      increment: 1,
+                  },
+              }
+            : {}),
+    };
 }
 
 export async function updateUser(
@@ -19,12 +44,19 @@ export async function updateUser(
         throw new Error("บทบาทไม่ถูกต้อง");
     }
 
+    const currentUser = await prisma.user.findUnique({
+        where: { id },
+        select: {
+            role: true,
+        },
+    });
+
     const updatedUser = await prisma.user.update({
         where: { id },
-        data: {
-            ...data,
-            updated_at: new Date(),
-        },
+        data: buildUserUpdateData(
+            data,
+            shouldInvalidateSession(currentUser?.role ?? null, data),
+        ),
         select: {
             id: true,
             name: true,
@@ -73,10 +105,10 @@ export async function updateUserWithAudit(
 
         const updatedUser = await tx.user.update({
             where: { id },
-            data: {
-                ...data,
-                updated_at: new Date(),
-            },
+            data: buildUserUpdateData(
+                data,
+                shouldInvalidateSession(beforeUser.role, data),
+            ),
             select: {
                 id: true,
                 name: true,

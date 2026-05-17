@@ -12,14 +12,15 @@ import {
 import { Button } from "@/components/ui/button";
 import {
     FILE_UPLOAD,
+    REPORT_STATUS,
     REPORT_TYPES,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
 } from "@/lib/constants";
 import { PROJECT_REPORT_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
-import { getReportStatusColor } from "@/lib/utils";
+import { getReportStatusColor, getReportTypeColor } from "@/lib/utils";
 import type { Project, ProjectReport } from "@/type";
-import { FileUp, Loader2, X } from "lucide-react";
+import { FileText, FileUp, Loader2, MessageSquareText, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProjectReportModalProps {
@@ -41,6 +42,16 @@ const REPORT_TYPE_OPTIONS = [
     REPORT_TYPES.PROGRESS,
     REPORT_TYPES.FINAL,
 ] as const;
+
+const ADMIN_NOTE_STYLE_BY_STATUS: Record<string, string> = {
+    [REPORT_STATUS.APPROVED]:
+        "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-100 [&_.admin-note-title]:text-emerald-800 dark:[&_.admin-note-title]:text-emerald-200",
+    [REPORT_STATUS.NEEDS_REVISION]:
+        "border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-100 [&_.admin-note-title]:text-rose-800 dark:[&_.admin-note-title]:text-rose-200",
+};
+
+const DEFAULT_ADMIN_NOTE_STYLE =
+    "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-100 [&_.admin-note-title]:text-blue-800 dark:[&_.admin-note-title]:text-blue-200";
 
 function getApiUrl(projectId: string): string {
     return `/api/projects/${encodeURIComponent(projectId)}/reports`;
@@ -291,9 +302,11 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
                                         <div className="flex items-center gap-3">
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex flex-wrap items-center gap-2">
-                                                    <p className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">
+                                                    <span
+                                                        className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold ${getReportTypeColor(report.reportType)}`}
+                                                    >
                                                         {report.reportType}
-                                                    </p>
+                                                    </span>
                                                     <span
                                                         className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold ${getReportStatusColor(report.status)}`}
                                                     >
@@ -307,10 +320,55 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
                                                 </p>
                                             </div>
                                         </div>
+                                        <div className="mt-2 grid min-w-0 gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300 sm:grid-cols-2">
+                                            <div className="flex min-w-0 items-start gap-2">
+                                                <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                                <div className="min-w-0">
+                                                    <p className="font-semibold text-slate-700 dark:text-slate-200">
+                                                        ไฟล์ที่ส่ง
+                                                    </p>
+                                                    <p
+                                                        className="mt-1 break-words leading-5"
+                                                        title={
+                                                            report.file
+                                                                .originalFileName
+                                                        }
+                                                    >
+                                                        {
+                                                            report.file
+                                                                .originalFileName
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex min-w-0 items-start gap-2">
+                                                <MessageSquareText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                                <div className="min-w-0">
+                                                    <p className="font-semibold text-slate-700 dark:text-slate-200">
+                                                        หมายเหตุผู้ส่ง
+                                                    </p>
+                                                    <p className="mt-1 whitespace-pre-wrap break-words leading-5">
+                                                        {report.note ||
+                                                            "ไม่มีหมายเหตุ"}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
                                         {report.adminNote && (
-                                            <div className="mt-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
-                                                หมายเหตุผู้ตรวจ:{" "}
-                                                {report.adminNote}
+                                            <div
+                                                className={`mt-2 rounded-xl border px-3 py-2.5 text-xs shadow-sm ${
+                                                    ADMIN_NOTE_STYLE_BY_STATUS[
+                                                        report.status
+                                                    ] ??
+                                                    DEFAULT_ADMIN_NOTE_STYLE
+                                                }`}
+                                            >
+                                                <p className="admin-note-title font-bold">
+                                                    หมายเหตุผู้ตรวจ
+                                                </p>
+                                                <p className="mt-1 whitespace-pre-wrap break-words text-sm font-medium leading-6">
+                                                    {report.adminNote}
+                                                </p>
                                             </div>
                                         )}
                                     </div>

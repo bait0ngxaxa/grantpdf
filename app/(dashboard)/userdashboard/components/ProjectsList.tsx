@@ -156,14 +156,14 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                         return (
                             <div
                                 key={group.key}
-                                className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-[border-color,box-shadow] duration-300 dark:border-slate-700 dark:bg-slate-800"
+                                className="min-w-0 overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-[border-color,box-shadow] duration-300 dark:border-slate-700 dark:bg-slate-800"
                             >
                                 <button
                                     type="button"
                                     onClick={() => toggleProgramGroup(group.key)}
-                                    className="flex w-full items-center justify-between gap-4 bg-slate-50/80 px-5 py-4 text-left transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:px-6"
+                                    className="flex w-full flex-col items-start justify-between gap-4 bg-slate-50/80 px-4 py-4 text-left transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
                                 >
-                                    <div className="flex min-w-0 items-start gap-4">
+                                    <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                                         <div
                                             className={cn(
                                             "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-white shadow-md",
@@ -179,7 +179,7 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                                             )}
                                         </div>
                                         <div className="min-w-0">
-                                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                                            <h3 className="text-base font-bold break-words text-slate-800 dark:text-slate-100 sm:text-lg">
                                                 {group.label}
                                             </h3>
                                             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -195,7 +195,7 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                                     </div>
                                     <div
                                         className={cn(
-                                            "rounded-full bg-white p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300",
+                                            "self-end rounded-full bg-white p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300 sm:self-auto",
                                             isExpanded && "rotate-180",
                                         )}
                                     >

@@ -16,7 +16,7 @@ export const StatsCards: React.FC = () => {
     const projectStatusCounts = statusCounts;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="mb-8 grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
             {/* Total Projects Card */}
             <StatsCard
                 title="โครงการทั้งหมด"

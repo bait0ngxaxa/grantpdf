@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui";
 import { REPORT_STATUS } from "@/lib/constants";
 import { PROJECT_REPORT_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
-import { getReportStatusColor } from "@/lib/utils";
+import { getReportStatusColor, getReportTypeColor } from "@/lib/utils";
 import type { AdminProjectReport } from "@/type";
 import { CheckCircle2, Download, Loader2 } from "lucide-react";
 
@@ -39,7 +39,9 @@ export const ProjectReportItem: React.FC<ProjectReportItemProps> = ({
                     >
                         {report.status}
                     </span>
-                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <span
+                        className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${getReportTypeColor(report.reportType)}`}
+                    >
                         {report.reportType}
                     </span>
                 </div>

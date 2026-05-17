@@ -26,9 +26,6 @@ export const UploadHeader = ({
 
     return (
         <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
-            {/* Top decorative bar */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between py-6 gap-4">
                     <div className="flex items-start gap-4">

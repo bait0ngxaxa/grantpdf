@@ -3,9 +3,10 @@
 import React from "react";
 import { Sidebar } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
-import { UserDashboardProvider } from "./contexts";
+import { UserDashboardProvider, useUserDashboardContext } from "./contexts";
 import type { UserProjectStats } from "./hooks/useUserData";
 import type { Session } from "next-auth";
+import { cn } from "@/lib/utils";
 
 interface DashboardWrapperProps {
     children: React.ReactNode;
@@ -22,17 +23,36 @@ export function DashboardWrapper({
 }: DashboardWrapperProps): React.JSX.Element {
     return (
         <UserDashboardProvider initialStats={initialStats} session={session}>
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-100 dark:selection:bg-blue-900 selection:text-blue-900 dark:selection:text-blue-100">
-                <Sidebar />
+            <DashboardShell>{children}</DashboardShell>
+        </UserDashboardProvider>
+    );
+}
 
-                {/* Main Content */}
-                <div className="lg:ml-72 min-h-screen transition duration-300">
-                    <TopBar />
+function DashboardShell({
+    children,
+}: {
+    children: React.ReactNode;
+}): React.JSX.Element {
+    const { isSidebarOpen } = useUserDashboardContext();
 
-                    {/* Content Area */}
-                    <div className="p-6 md:p-8">{children}</div>
+    return (
+        <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50 font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 dark:text-slate-100 dark:selection:bg-blue-900 dark:selection:text-blue-100">
+            <Sidebar />
+
+            {/* Main Content */}
+            <div
+                className={cn(
+                    "ml-20 min-h-screen min-w-0 max-w-full transition-[margin] duration-300",
+                    isSidebarOpen && "lg:ml-72",
+                )}
+            >
+                <TopBar />
+
+                {/* Content Area */}
+                <div className="min-w-0 max-w-full px-3 py-4 sm:p-6 md:p-8">
+                    {children}
                 </div>
             </div>
-        </UserDashboardProvider>
+        </div>
     );
 }

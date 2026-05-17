@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui";
-import { ChartBarBig, UserStar, LogOut, Menu, Loader2 } from "lucide-react";
+import { ChartBarBig, UserStar, LogOut, Loader2 } from "lucide-react";
 import { ROUTES, ROLES } from "@/lib/constants";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ const menuItems = [
 
 export const TopBar: React.FC = (): React.JSX.Element => {
     const router = useRouter();
-    const { session, setIsSidebarOpen, activeTab } = useUserDashboardContext();
+    const { session, activeTab } = useUserDashboardContext();
     const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
     const activeMenuName =
         menuItems.find((item) => item.id === activeTab)?.name || "Dashboard";
@@ -26,27 +26,21 @@ export const TopBar: React.FC = (): React.JSX.Element => {
     };
 
     return (
-        <div className="bg-gradient-to-r from-white/80 via-white/80 to-blue-50/30 dark:from-slate-900/80 dark:via-slate-900/80 dark:to-slate-800/30 backdrop-blur-2xl sticky top-0 z-30 px-6 py-4 border-b border-white/60 dark:border-slate-700/60 shadow-sm">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                    <button
-                        className="lg:hidden p-1.5 rounded-full inline-flex items-center justify-center hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 text-slate-600 dark:text-slate-300 transition-colors"
-                        onClick={() => setIsSidebarOpen(true)}
-                    >
-                        <Menu className="h-6 w-6" />
-                    </button>
+        <div className="sticky top-0 z-30 border-b border-white/60 bg-gradient-to-r from-white/80 via-white/80 to-blue-50/30 px-3 py-3 shadow-sm backdrop-blur-2xl dark:border-slate-700/60 dark:from-slate-900/80 dark:via-slate-900/80 dark:to-slate-800/30 sm:px-6 sm:py-4">
+            <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     {activeTab !== "projects" && (
-                        <div className="flex items-center gap-3 text-slate-800 dark:text-slate-100">
+                        <div className="flex min-w-0 items-center gap-3 text-slate-800 dark:text-slate-100">
                             <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-lg shadow-sm">
                                 <ChartBarBig className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                             </div>
-                            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 drop-shadow-sm text-balance">
+                            <h1 className="min-w-0 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-xl font-bold break-words text-transparent text-balance drop-shadow-sm dark:from-slate-100 dark:to-slate-300 sm:text-2xl">
                                 {activeMenuName}
                             </h1>
                         </div>
                     )}
                 </div>
-                <div className="flex gap-3 sm:flex md:gap-4 items-center">
+                <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:flex md:gap-4">
                     <div className="hidden md:flex flex-col items-end mr-2">
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
                             {session?.user?.name}
@@ -63,7 +57,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                             type="button"
                             onClick={handleGoToAdmin}
                             disabled={isNavigatingAdmin}
-                            className="font-semibold cursor-pointer transform hover:scale-105 active:scale-95 duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 border-0 transition"
+                            className="cursor-pointer rounded-full border-0 bg-gradient-to-r from-purple-600 to-indigo-600 px-3 font-semibold text-white shadow-lg shadow-purple-500/20 transition duration-300 hover:scale-105 hover:shadow-purple-500/40 active:scale-95 sm:px-4"
                         >
                             {isNavigatingAdmin ? (
                                 <React.Fragment>

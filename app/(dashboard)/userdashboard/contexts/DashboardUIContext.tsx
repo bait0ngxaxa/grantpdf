@@ -23,7 +23,7 @@ const DashboardUIContext = createContext<DashboardUIContextType | undefined>(
 
 export function DashboardUIProvider({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState("dashboard");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
         new Set(),
     );

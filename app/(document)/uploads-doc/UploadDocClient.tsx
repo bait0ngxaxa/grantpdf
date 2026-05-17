@@ -28,10 +28,10 @@ export default function UploadDocClient(): React.JSX.Element {
         <div className="min-h-screen bg-gray-50 dark:bg-slate-900 font-sans">
             <UploadHeader />
 
-            <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-                    <div className="p-6 lg:p-8">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    <div className="p-4 sm:p-5 lg:p-6">
+                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(18rem,0.82fr)_minmax(0,1.18fr)] lg:gap-8">
                             {/* Left Column - Project Selection */}
                             <ProjectList
                                 projects={projects}
@@ -42,7 +42,7 @@ export default function UploadDocClient(): React.JSX.Element {
                             />
 
                             {/* Right Column - Upload Area */}
-                            <div className="lg:border-l lg:pl-12 lg:border-dashed lg:border-gray-200 dark:lg:border-slate-700">
+                            <div className="min-w-0 lg:border-l lg:border-dashed lg:border-gray-200 lg:pl-8 dark:lg:border-slate-700">
                                 <UploadArea
                                     fileInputRef={fileInputRef}
                                     selectedFile={selectedFile}

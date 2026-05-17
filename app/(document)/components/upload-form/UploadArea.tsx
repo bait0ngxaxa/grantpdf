@@ -45,16 +45,16 @@ export function UploadArea({
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
             <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4 flex items-center gap-2 text-balance">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900 text-balance dark:text-slate-100">
                     <UploadCloud className="w-5 h-5 text-green-600 dark:text-green-400" />
                     อัปโหลดไฟล์เอกสาร
                 </h3>
 
                 <div
                     className={cn(
-                        "relative border-2 border-dashed rounded-xl p-8 text-center transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200",
+                        "relative min-h-[24rem] rounded-2xl border-2 border-dashed p-8 text-center transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:p-10 lg:min-h-[28rem]",
                         selectedFile
                             ? "border-green-400 dark:border-green-600 bg-green-50/50 dark:bg-green-900/20"
                             : "border-gray-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800",
@@ -63,9 +63,9 @@ export function UploadArea({
                     onDrop={onDrop}
                 >
                     {selectedFile ? (
-                        <div className="space-y-4">
-                            <div className="w-16 h-16 mx-auto bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm border border-green-100 dark:border-green-900">
-                                <FileText className="w-8 h-8 text-green-600 dark:text-green-400" />
+                        <div className="flex min-h-[18rem] flex-col items-center justify-center space-y-4">
+                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-green-100 bg-white shadow-sm dark:border-green-900 dark:bg-slate-800">
+                                <FileText className="h-10 w-10 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
                                 <h4 className="text-lg font-medium text-gray-900 dark:text-slate-100 break-all px-4 text-balance">
@@ -85,9 +85,9 @@ export function UploadArea({
                             )}
                         </div>
                     ) : (
-                        <div className="space-y-4 py-4">
-                            <div className="w-16 h-16 mx-auto bg-blue-50 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                                <UploadCloud className="w-8 h-8 text-blue-500" />
+                        <div className="flex min-h-[18rem] flex-col items-center justify-center space-y-4 py-4">
+                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/50">
+                                <UploadCloud className="h-10 w-10 text-blue-500" />
                             </div>
                             <div>
                                 <h4 className="text-lg font-medium text-gray-900 dark:text-slate-100 text-balance">
@@ -113,7 +113,7 @@ export function UploadArea({
                         disabled={isUploading}
                     />
 
-                    {!selectedFile && (
+                    {!selectedFile ? (
                         <Button
                             onClick={() => fileInputRef.current?.click()}
                             variant="outline"
@@ -122,33 +122,48 @@ export function UploadArea({
                         >
                             เลือกไฟล์จากเครื่อง
                         </Button>
+                    ) : hasSelectedProject ? (
+                        <Button
+                            onClick={onUpload}
+                            disabled={isUploading}
+                            className="mt-6 min-w-[200px] cursor-pointer px-8 py-2"
+                            size="lg"
+                        >
+                            {isUploading ? (
+                                <>
+                                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    กำลังอัพโหลด…
+                                </>
+                            ) : (
+                                <>
+                                    <UploadCloud className="mr-2 h-4 w-4" />
+                                    อัพโหลดไฟล์ทันที
+                                </>
+                            )}
+                        </Button>
+                    ) : null}
+
+                    {uploadMessage && (
+                        <div
+                            className={cn(
+                                "mx-auto mt-5 flex max-w-md items-start gap-3 rounded-xl border px-4 py-3 text-left animate-in fade-in",
+                                uploadSuccess
+                                    ? "border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-900/30 dark:text-green-400"
+                                    : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-900/30 dark:text-red-400",
+                            )}
+                        >
+                            {uploadSuccess ? (
+                                <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+                            ) : (
+                                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+                            )}
+                            <p className="text-sm font-semibold leading-6">
+                                {uploadMessage}
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
-
-            {/* Action Button */}
-            {selectedFile && hasSelectedProject && (
-                <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <Button
-                        onClick={onUpload}
-                        disabled={isUploading}
-                        className="px-8 py-2 cursor-pointer w-full sm:w-auto min-w-[200px]"
-                        size="lg"
-                    >
-                        {isUploading ? (
-                            <>
-                                <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                                กำลังอัพโหลด…
-                            </>
-                        ) : (
-                            <>
-                                <UploadCloud className="w-4 h-4 mr-2" />
-                                อัพโหลดไฟล์ทันที
-                            </>
-                        )}
-                    </Button>
-                </div>
-            )}
 
             {/* Warning when file selected but no project */}
             {selectedFile && !hasSelectedProject && (
@@ -160,24 +175,6 @@ export function UploadArea({
                 </div>
             )}
 
-            {/* Status Message */}
-            {uploadMessage && (
-                <div
-                    className={cn(
-                        "p-4 rounded-lg flex items-start gap-3 animate-in fade-in",
-                        uploadSuccess
-                            ? "bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-900/50 text-green-800 dark:text-green-400"
-                            : "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-400",
-                    )}
-                >
-                    {uploadSuccess ? (
-                        <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                    ) : (
-                        <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                    )}
-                    <p className="text-sm font-medium">{uploadMessage}</p>
-                </div>
-            )}
         </div>
     );
 }

@@ -57,14 +57,14 @@ export const Pagination: React.FC<PaginationProps> = ({
     const pageNumbers = getPageNumbers();
 
     return (
-        <div className={cn("mt-8 flex justify-center", className)}>
-            <div className="inline-flex items-center gap-1 p-1.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-700">
+        <div className={cn("mt-8 flex w-full justify-start overflow-x-auto sm:justify-center", className)}>
+            <div className="inline-flex min-w-max items-center gap-1 rounded-2xl border border-slate-100 bg-white/80 p-1.5 shadow-lg shadow-slate-200/50 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-black/20">
                 {/* Previous Button */}
                 <button
                     onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                     className={cn(
-                        "flex items-center justify-center w-10 h-10 rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200",
+                        "flex h-8 w-8 items-center justify-center rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
                         currentPage === 1
                             ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
                             : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer",
@@ -80,7 +80,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                         page === "…" ? (
                             <span
                                 key={`ellipsis-${index}`}
-                                className="w-10 h-10 flex items-center justify-center text-slate-400 text-sm"
+                                className="flex h-8 w-8 items-center justify-center text-sm text-slate-400 sm:h-10 sm:w-10"
                             >
                                 •••
                             </span>
@@ -89,7 +89,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                                 key={page}
                                 onClick={() => onPageChange(page as number)}
                                 className={cn(
-                                    "w-10 h-10 rounded-xl text-sm font-semibold transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 cursor-pointer",
+                                    "h-8 w-8 cursor-pointer rounded-xl text-sm font-semibold transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
                                     currentPage === page
                                         ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-200 dark:shadow-none"
                                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200",
@@ -108,7 +108,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                     }
                     disabled={currentPage === totalPages}
                     className={cn(
-                        "flex items-center justify-center w-10 h-10 rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200",
+                        "flex h-8 w-8 items-center justify-center rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
                         currentPage === totalPages
                             ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
                             : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer",

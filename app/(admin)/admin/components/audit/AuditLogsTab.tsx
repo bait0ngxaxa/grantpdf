@@ -46,7 +46,7 @@ export function AuditLogsTab(): React.JSX.Element {
                     </div>
                     <div>
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
-                            Audit Logs
+                            บันทึกการใช้ระบบ
                         </h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
                             บันทึกเหตุการณ์สำคัญของระบบ ({total} รายการ)
@@ -127,7 +127,7 @@ export function AuditLogsTab(): React.JSX.Element {
                                             colSpan={6}
                                             className="px-4 py-10 text-center text-slate-500 dark:text-slate-400"
                                         >
-                                            ไม่พบข้อมูล Audit Logs
+                                            ไม่พบข้อมูลบันทึกการใช้ระบบ
                                         </td>
                                     </tr>
                                 ) : (

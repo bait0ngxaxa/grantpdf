@@ -108,18 +108,18 @@ export default function ProjectsList({
     }
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
-            <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-3">
+        <div className="min-w-0 rounded-3xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
+            <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 items-center gap-3">
                     <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                         <Archive className="h-6 w-6" />
                     </div>
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
+                    <h2 className="min-w-0 text-lg font-bold break-words text-slate-800 text-balance dark:text-slate-100 sm:text-xl">
                         โครงการตามโครงการหลัก
                     </h2>
                 </div>
                 {projects.length > 0 && (
-                    <div className="text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-600">
+                    <div className="text-sm break-words text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-600">
                         {groupedProjects.length} โครงการหลัก จาก{" "}
                         {projects.length} โครงการย่อย
                     </div>
@@ -140,14 +140,14 @@ export default function ProjectsList({
                     return (
                         <div
                             key={group.key}
-                            className="overflow-hidden rounded-3xl border border-slate-100 bg-slate-50/60 shadow-sm dark:border-slate-700 dark:bg-slate-900/40"
+                            className="min-w-0 overflow-hidden rounded-3xl border border-slate-100 bg-slate-50/60 shadow-sm dark:border-slate-700 dark:bg-slate-900/40"
                         >
                             <button
                                 type="button"
                                 onClick={() => toggleProgramGroup(group.key)}
-                                className="flex w-full items-center justify-between gap-4 bg-white px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:px-6"
+                                className="flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
                             >
-                                <div className="flex min-w-0 items-start gap-4">
+                                <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                                     <div
                                         className={cn(
                                             "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-white shadow-md",
@@ -163,7 +163,7 @@ export default function ProjectsList({
                                         )}
                                     </div>
                                     <div className="min-w-0">
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                                        <h3 className="text-base font-bold break-words text-slate-900 dark:text-slate-100 sm:text-lg">
                                             {group.label}
                                         </h3>
                                         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -184,7 +184,7 @@ export default function ProjectsList({
                                 {!hasActiveFilters && (
                                     <div
                                         className={cn(
-                                            "rounded-full bg-slate-50 p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300",
+                                            "self-end rounded-full bg-slate-50 p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300 sm:self-auto",
                                             isExpanded && "rotate-180",
                                         )}
                                     >

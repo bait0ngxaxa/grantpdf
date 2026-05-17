@@ -25,8 +25,8 @@ export default function SearchAndFilter({
     setSelectedStatus,
 }: SearchAndFilterProps): React.JSX.Element {
     return (
-        <div className="sticky top-[73px] z-20 mb-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 lg:flex-row">
-            <div className="relative w-full lg:w-96">
+        <div className="sticky top-[65px] z-20 mb-6 flex min-w-0 flex-col items-stretch justify-between gap-3 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 sm:top-[73px] lg:flex-row lg:items-center">
+            <div className="relative w-full min-w-0 lg:w-96">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                 </div>
@@ -39,7 +39,7 @@ export default function SearchAndFilter({
                 />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row lg:w-auto">
                 <div className="relative flex-1 sm:flex-none">
                     <select
                         className="block w-full pl-3 pr-10 py-2.5 text-base border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 sm:text-sm rounded-xl text-slate-600 dark:text-slate-300 font-medium cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"

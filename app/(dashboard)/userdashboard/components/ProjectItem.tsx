@@ -46,8 +46,8 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
   );
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
-      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_9.5rem_5.5rem_6.5rem_auto] xl:items-center">
+    <div className="min-w-0 rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:px-4">
+      <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(7.5rem,9.5rem)_5.5rem_6.5rem_auto] xl:items-center">
         <div className="min-w-0">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -70,7 +70,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
           </div>
         </div>
 
-        <div className="relative xl:justify-self-center">
+        <div className="relative min-w-0 xl:justify-self-center">
           {hasUnreadStatusNote && (
             <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:animate-none" />
@@ -81,7 +81,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
             type="button"
             onClick={onStatusClick}
             className={cn(
-              "group/status inline-flex min-w-[7.5rem] items-center justify-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold shadow-sm transition-[transform,box-shadow,background-color,color,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none",
+              "group/status inline-flex max-w-full min-w-0 items-center justify-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold shadow-sm transition-[transform,box-shadow,background-color,color,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none sm:min-w-[7.5rem]",
               statusClassName,
             )}
             title="ดูรายละเอียดสถานะ"
@@ -90,25 +90,27 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
             }`}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-current opacity-75" />
-            {project.status || PROJECT_STATUS.IN_PROGRESS}
+            <span className="min-w-0 break-words">
+              {project.status || PROJECT_STATUS.IN_PROGRESS}
+            </span>
             <ChevronRight className="h-3.5 w-3.5 opacity-80 transition-transform duration-200 group-hover/status:translate-x-0.5" />
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">
+        <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">
           <FileText className="h-3.5 w-3.5" />
           <span>{project.files.length} เอกสาร</span>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">
+        <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">
           <Calendar className="h-3.5 w-3.5" />
           <span>
             {new Date(project.created_at).toLocaleDateString("th-TH")}
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 xl:justify-self-end">
-          <div className="relative">
+        <div className="grid min-w-0 grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap xl:justify-self-end">
+          <div className="relative min-w-0">
             {hasUnreadReportUpdate && (
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:animate-none" />
@@ -119,7 +121,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
               size="sm"
               variant="outline"
               onClick={onReportClick}
-              className="h-8 rounded-xl border-blue-200 px-3 text-xs font-medium text-blue-700 hover:bg-blue-50 hover:text-blue-800 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-200"
+              className="h-auto min-h-8 w-full rounded-xl border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 hover:text-blue-800 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-200 sm:w-auto"
             >
               <FileUp className="mr-1.5 h-3.5 w-3.5" />
               รายงาน
@@ -129,7 +131,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
             size="sm"
             variant="outline"
             onClick={onViewProjectFiles}
-            className="h-8 rounded-xl border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+            className="h-auto min-h-8 w-full rounded-xl border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100 sm:w-auto"
           >
             <Eye className="mr-1.5 h-3.5 w-3.5" />
             ดูไฟล์
@@ -137,7 +139,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
           <Button
             asChild
             size="sm"
-            className="h-8 rounded-xl bg-blue-600 px-3 text-xs font-medium text-white hover:bg-blue-700"
+            className="col-span-2 h-auto min-h-8 w-full rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 sm:col-span-1 sm:w-auto"
           >
             <Link
               href={`${

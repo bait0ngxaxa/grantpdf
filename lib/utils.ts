@@ -1,8 +1,14 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { TEXT_LIMITS, REPORT_STATUS_CONFIG, STATUS_CONFIG } from "@/lib/constants";
+import {
+    TEXT_LIMITS,
+    REPORT_STATUS_CONFIG,
+    REPORT_TYPE_CONFIG,
+    STATUS_CONFIG,
+} from "@/lib/constants";
 import type {
     ReportStatusConfigKey,
+    ReportTypeConfigKey,
     StatusConfigKey,
 } from "@/lib/constants";
 
@@ -38,6 +44,11 @@ export const getStatusColor = (status: string): string => {
 
 export const getReportStatusColor = (status: string): string => {
     const config = REPORT_STATUS_CONFIG[status as ReportStatusConfigKey];
+    return config?.badgeColor ?? DEFAULT_BADGE_COLOR;
+};
+
+export const getReportTypeColor = (reportType: string): string => {
+    const config = REPORT_TYPE_CONFIG[reportType as ReportTypeConfigKey];
     return config?.badgeColor ?? DEFAULT_BADGE_COLOR;
 };
 

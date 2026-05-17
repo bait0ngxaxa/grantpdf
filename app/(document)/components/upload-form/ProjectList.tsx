@@ -53,9 +53,9 @@ export function ProjectList({
     };
 
     return (
-        <div className="space-y-6">
-            <h3 className="flex items-center gap-2 text-lg font-bold text-slate-800 dark:text-slate-100">
-                <FolderTree className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        <div className="min-w-0 space-y-4">
+            <h3 className="flex items-center gap-2 text-base font-bold text-slate-800 dark:text-slate-100">
+                <FolderTree className="h-4.5 w-4.5 text-blue-600 dark:text-blue-400" />
                 เลือกโครงการสำหรับอัปโหลด
             </h3>
 
@@ -93,7 +93,7 @@ export function ProjectList({
 
             {!isLoading && !error && projects.length > 0 && (
                 <>
-                    <div className="max-h-[50vh] space-y-4 overflow-y-auto rounded-xl px-1 py-1">
+                    <div className="max-h-[62vh] space-y-3 overflow-y-auto rounded-xl px-1 py-1">
                         {groupedProjects.map((group) => {
                             const isExpanded = expandedGroups.has(group.key);
                             const paginated = paginateGroupItems(
@@ -112,7 +112,7 @@ export function ProjectList({
                                     isExpanded={isExpanded}
                                     onToggle={() => toggleGroup(group.key)}
                                 >
-                                    <div className="space-y-3 bg-slate-50/60 p-4 dark:bg-slate-900/40 sm:p-5">
+                                    <div className="space-y-2 bg-slate-50/60 p-3 dark:bg-slate-900/40">
                                         {paginated.items.map((project) => (
                                             <UploadProjectCard
                                                 key={project.id}
@@ -149,7 +149,7 @@ export function ProjectList({
                         })}
                     </div>
 
-                    <p className="text-right text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-right text-[11px] text-slate-500 dark:text-slate-400">
                         เลือกโครงการที่ต้องการอัปโหลดไฟล์เข้าไป
                     </p>
                 </>
@@ -180,37 +180,37 @@ function ProgramGroupAccordion({
     children,
 }: ProgramGroupAccordionProps): React.JSX.Element {
     return (
-        <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <button
                 type="button"
                 onClick={onToggle}
-                className="flex w-full items-center justify-between gap-4 bg-slate-50/80 px-5 py-4 text-left transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:px-6"
+                className="flex w-full items-center justify-between gap-3 bg-slate-50/80 px-3 py-3 text-left transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/70"
             >
-                <div className="flex min-w-0 items-start gap-4">
+                <div className="flex min-w-0 items-start gap-3">
                     <div
                         className={cn(
-                            "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-white shadow-md",
+                            "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-white shadow-md",
                             isUngrouped
                                 ? "bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/20"
                                 : "bg-gradient-to-br from-violet-600 to-fuchsia-500 shadow-violet-500/20",
                         )}
                     >
                         {isUngrouped ? (
-                            <FolderTree className="h-6 w-6" />
+                            <FolderTree className="h-4.5 w-4.5" />
                         ) : (
-                            <Building2 className="h-6 w-6" />
+                            <Building2 className="h-4.5 w-4.5" />
                         )}
                     </div>
                     <div className="min-w-0">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                        <h2 className="line-clamp-2 text-sm font-bold text-slate-900 dark:text-slate-100">
                             {label}
                         </h2>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            <span className="rounded-full bg-white px-2.5 py-1 dark:bg-slate-700">
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                            <span className="rounded-full bg-white px-2 py-0.5 dark:bg-slate-700">
                                 {projectCount} โครงการย่อย
                             </span>
-                            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 dark:bg-slate-700">
-                                <FileText className="mr-1.5 h-3.5 w-3.5" />
+                            <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 dark:bg-slate-700">
+                                <FileText className="mr-1 h-3 w-3" />
                                 {totalFiles} รายการเอกสาร
                             </span>
                         </div>
@@ -218,11 +218,11 @@ function ProgramGroupAccordion({
                 </div>
                 <div
                     className={cn(
-                        "rounded-full bg-white p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300",
+                        "rounded-full bg-white p-1.5 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300",
                         isExpanded && "rotate-180",
                     )}
                 >
-                    <ChevronDown className="h-5 w-5" />
+                    <ChevronDown className="h-4 w-4" />
                 </div>
             </button>
 

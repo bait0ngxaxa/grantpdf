@@ -12,8 +12,8 @@ export const ProjectsListHeader: React.FC<ProjectsListHeaderProps> = ({
     onCreateProject,
 }): React.JSX.Element => {
     return (
-        <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3 text-balance">
+        <div className="mb-6 flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+            <h2 className="flex min-w-0 flex-wrap items-center gap-3 text-xl font-bold text-slate-800 text-balance dark:text-slate-100 sm:text-2xl">
                 <span className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-xl text-blue-600 dark:text-blue-400">
                     <Building2 className="h-6 w-6" />
                 </span>
@@ -24,7 +24,7 @@ export const ProjectsListHeader: React.FC<ProjectsListHeaderProps> = ({
             </h2>
             <Button
                 onClick={onCreateProject}
-                className="cursor-pointer transform hover:scale-105 duration-300 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 shadow-lg shadow-blue-500/30 transition"
+                className="w-full cursor-pointer rounded-full bg-blue-600 px-4 text-white shadow-lg shadow-blue-500/30 transition duration-300 hover:scale-105 hover:bg-blue-700 sm:w-auto sm:px-6"
             >
                 <Plus className="h-5 w-5 mr-2" />
                 สร้างโครงการใหม่
