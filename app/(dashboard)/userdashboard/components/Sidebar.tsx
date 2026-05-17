@@ -72,7 +72,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                     "fixed left-0 top-0 z-50 flex h-full transform flex-col border-r border-slate-100 bg-gradient-to-b from-white via-white to-blue-50/30 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] backdrop-blur-2xl transition-[width,transform] duration-300 dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/30 dark:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.3)] lg:translate-x-0",
                     isSidebarOpen
                         ? "w-72 translate-x-0"
-                        : "w-20 translate-x-0",
+                        : "w-72 -translate-x-full lg:w-20 lg:translate-x-0",
                 )}
             >
                 {/* Header */}

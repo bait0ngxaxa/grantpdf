@@ -42,7 +42,7 @@ function AdminDashboardShell({
             {/* Main Content */}
             <div
                 className={cn(
-                    "ml-20 min-h-screen min-w-0 max-w-full transition-[margin] duration-300",
+                    "min-h-screen min-w-0 max-w-full transition-[margin] duration-300 lg:ml-20",
                     isSidebarOpen && "lg:ml-72",
                 )}
             >

@@ -23,7 +23,11 @@ const DashboardUIContext = createContext<DashboardUIContextType | undefined>(
 
 export function DashboardUIProvider({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState("dashboard");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(
+        () =>
+            typeof window === "undefined" ||
+            window.matchMedia("(min-width: 1024px)").matches,
+    );
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
         new Set(),
     );

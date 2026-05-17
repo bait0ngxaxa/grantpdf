@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui";
-import { ChartBarBig, UserStar, LogOut, Loader2 } from "lucide-react";
+import { ChartBarBig, UserStar, LogOut, Loader2, Menu } from "lucide-react";
 import { ROUTES, ROLES } from "@/lib/constants";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ const menuItems = [
 
 export const TopBar: React.FC = (): React.JSX.Element => {
     const router = useRouter();
-    const { session, activeTab } = useUserDashboardContext();
+    const { session, activeTab, setIsSidebarOpen } = useUserDashboardContext();
     const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
     const activeMenuName =
         menuItems.find((item) => item.id === activeTab)?.name || "Dashboard";
@@ -29,6 +29,14 @@ export const TopBar: React.FC = (): React.JSX.Element => {
         <div className="sticky top-0 z-30 border-b border-white/60 bg-gradient-to-r from-white/80 via-white/80 to-blue-50/30 px-3 py-3 shadow-sm backdrop-blur-2xl dark:border-slate-700/60 dark:from-slate-900/80 dark:via-slate-900/80 dark:to-slate-800/30 sm:px-6 sm:py-4">
             <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                    <button
+                        type="button"
+                        className="inline-flex items-center justify-center rounded-full p-1.5 text-slate-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400 lg:hidden"
+                        onClick={() => setIsSidebarOpen(true)}
+                        aria-label="เปิดเมนูด้านข้าง"
+                    >
+                        <Menu className="h-6 w-6" />
+                    </button>
                     {activeTab !== "projects" && (
                         <div className="flex min-w-0 items-center gap-3 text-slate-800 dark:text-slate-100">
                             <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-lg shadow-sm">

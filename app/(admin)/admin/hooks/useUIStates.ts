@@ -22,7 +22,11 @@ export const useUIStates = (): {
     toggleRowExpansion: (fileId: string) => void;
 } => {
     const [activeTab, setActiveTab] = useState("dashboard");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(
+        () =>
+            typeof window === "undefined" ||
+            window.matchMedia("(min-width: 1024px)").matches,
+    );
 
     // Use shared expandable state hook
     const {
