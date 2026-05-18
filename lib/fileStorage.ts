@@ -8,6 +8,7 @@ export const STORAGE_ROOT = path.join(process.cwd(), "storage");
 export const STORAGE_PATHS = {
     attachments: path.join(STORAGE_ROOT, "attachments"),
     documents: path.join(STORAGE_ROOT, "documents"),
+    reports: path.join(STORAGE_ROOT, "reports"),
     tmp: path.join(STORAGE_ROOT, "tmp"),
 } as const;
 

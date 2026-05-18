@@ -298,7 +298,7 @@ describe("useFileHandlers - Security Tests", () => {
             expect(mockSetUploadSuccess).toHaveBeenCalledWith(false);
         });
 
-        it("should REJECT docx file over 3MB based on extension policy", () => {
+        it("should REJECT docx file over max size based on extension policy", () => {
             const { result } = renderFileHandlers();
             const file = createMockFile(
                 "large.docx",

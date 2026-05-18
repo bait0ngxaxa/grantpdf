@@ -195,13 +195,13 @@ export const FILE_UPLOAD = {
         ".xls",
     ],
     MAX_SIZE_MB_BY_EXTENSION: {
-        ".pdf": 5,
-        ".docx": 3,
-        ".doc": 3,
-        ".xlsx": 3,
-        ".xls": 3,
+        ".pdf": 10,
+        ".docx": 10,
+        ".doc": 10,
+        ".xlsx": 10,
+        ".xls": 10,
     },
-    DEFAULT_MAX_SIZE_MB: 3,
+    DEFAULT_MAX_SIZE_MB: 10,
     TIMEOUT_MS: 60_000,
 } as const;
 

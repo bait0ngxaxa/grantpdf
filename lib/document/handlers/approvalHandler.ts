@@ -22,7 +22,7 @@ import { normalizePhoneNumber } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
 
 const ALLOWED_SIGNATURE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
-const MAX_SIGNATURE_SIZE_BYTES = 5 * 1024 * 1024;
+const MAX_SIGNATURE_SIZE_BYTES = 10 * 1024 * 1024;
 
 async function parseAndValidateSignatureFile(
     file: File,
@@ -36,7 +36,7 @@ async function parseAndValidateSignatureFile(
 
     if (file.size > MAX_SIGNATURE_SIZE_BYTES) {
         return NextResponse.json(
-            { error: "ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 5MB)" },
+            { error: "ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 10MB)" },
             { status: 400 },
         );
     }

@@ -214,6 +214,11 @@ describe("fileStorage - Security Tests", () => {
             expect(path).toBe("storage/attachments/file.pdf");
         });
 
+        it("should construct correct report paths", () => {
+            const path = getRelativeStoragePath("reports", "report.pdf");
+            expect(path).toBe("storage/reports/report.pdf");
+        });
+
         it("should handle filename with special characters", () => {
             const path = getRelativeStoragePath("documents", "เอกสาร.pdf");
             expect(path).toBe("storage/documents/เอกสาร.pdf");

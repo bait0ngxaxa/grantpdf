@@ -97,8 +97,7 @@ export function UploadArea({
                                     หรือคลิกปุ่มด้านล่างเพื่อเลือกไฟล์
                                 </p>
                                 <p className="text-xs text-gray-400 dark:text-slate-500 mt-2">
-                                    รองรับไฟล์ .docx (สูงสุด 3MB) และ .pdf
-                                    (สูงสุด 5MB)
+                                    รองรับไฟล์ .docx และ .pdf (สูงสุด 10MB)
                                 </p>
                             </div>
                         </div>

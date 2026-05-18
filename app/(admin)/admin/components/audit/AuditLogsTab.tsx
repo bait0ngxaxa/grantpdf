@@ -11,6 +11,22 @@ import {
     getActionLabel,
 } from "./auditLogFormatters";
 
+interface AuditDetailsCellProps {
+    action: string;
+    details: Record<string, unknown> | null;
+}
+
+function AuditDetailsCell({
+    action,
+    details,
+}: AuditDetailsCellProps): React.JSX.Element {
+    return (
+        <span className="block min-w-[18rem] max-w-[34rem] whitespace-normal break-words leading-5">
+            {formatAuditDetails(action, details)}
+        </span>
+    );
+}
+
 export function AuditLogsTab(): React.JSX.Element {
     const {
         logs,
@@ -162,11 +178,11 @@ export function AuditLogsTab(): React.JSX.Element {
                                             <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
                                                 {log.targetType || "-"} / {log.targetId || "-"}
                                             </td>
-                                            <td
-                                                className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 max-w-xs truncate"
-                                                title={JSON.stringify(log.details)}
-                                            >
-                                                {formatAuditDetails(log.action, log.details)}
+                                            <td className="px-4 py-3 align-top text-xs text-slate-500 dark:text-slate-400">
+                                                <AuditDetailsCell
+                                                    action={log.action}
+                                                    details={log.details}
+                                                />
                                             </td>
                                         </tr>
                                     ))

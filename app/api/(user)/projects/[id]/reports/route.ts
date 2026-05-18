@@ -95,15 +95,15 @@ async function persistReportFile(file: File): Promise<{
     }
 
     await ensureStorageDir("tmp");
-    await ensureStorageDir("attachments");
+    await ensureStorageDir("reports");
     const tempFilePath = getStoragePath("tmp", tempFileName);
-    const finalFilePath = getStoragePath("attachments", uniqueFileName);
+    const finalFilePath = getStoragePath("reports", uniqueFileName);
     await writeFile(tempFilePath, buffer);
     await rename(tempFilePath, finalFilePath);
 
     return {
         fileExtension: path.extname(file.name).substring(1).toLowerCase(),
-        relativeStoragePath: getRelativeStoragePath("attachments", uniqueFileName),
+        relativeStoragePath: getRelativeStoragePath("reports", uniqueFileName),
         finalFilePath,
     };
 }
