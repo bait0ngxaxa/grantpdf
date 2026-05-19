@@ -33,5 +33,3 @@
 ## 6. Defensive Coding & Git
 
 - **Defensive:** Handle `null/undefined` explicitly, re-verify roles server-side on every mutation, use exponential backoff for retries.
-- **Git & Docs:** Use Conventional Commits. Comments should explain the "WHY", not the "WHAT".
-- **PROJECT.md:** Drop into the project root to define the tech stack and override specific rules.

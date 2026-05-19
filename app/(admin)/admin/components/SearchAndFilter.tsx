@@ -25,7 +25,7 @@ export default function SearchAndFilter({
     setSelectedStatus,
 }: SearchAndFilterProps): React.JSX.Element {
     return (
-        <div className="sticky top-[65px] z-20 mb-6 flex min-w-0 flex-col items-stretch justify-between gap-3 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 sm:top-[73px] lg:flex-row lg:items-center">
+        <div className="sticky top-[5.25rem] z-20 mb-6 flex min-w-0 flex-col items-stretch justify-between gap-3 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 sm:top-[5.75rem] lg:flex-row lg:items-center">
             <div className="relative w-full min-w-0 lg:w-96">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-5 w-5 text-slate-400 dark:text-slate-500" />

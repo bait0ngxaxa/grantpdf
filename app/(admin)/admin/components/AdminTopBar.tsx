@@ -5,6 +5,7 @@ import { ChartBarBig, LogOut, Menu, User } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useAdminDashboardContext } from "../contexts";
 import { SIGNOUT_CALLBACK } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 const menuItems = [
     { id: "dashboard", name: "ภาพรวมระบบ" },
@@ -14,10 +15,16 @@ const menuItems = [
 ];
 
 export const AdminTopBar: React.FC = (): React.JSX.Element => {
-    const { session, activeTab, setIsSidebarOpen } = useAdminDashboardContext();
+    const { session, activeTab, isSidebarOpen, setIsSidebarOpen } =
+        useAdminDashboardContext();
 
     return (
-        <div className="sticky top-0 z-30 border-b border-slate-200/60 bg-white/70 px-3 py-3 backdrop-blur-md transition-colors duration-300 dark:border-slate-700/60 dark:bg-slate-900/70 sm:px-6 sm:py-4">
+        <div
+            className={cn(
+                "fixed left-0 right-0 top-0 z-30 border-b border-slate-200/60 bg-white/85 px-3 py-3 backdrop-blur-md transition-[left,color,background-color,border-color] duration-300 dark:border-slate-700/60 dark:bg-slate-900/85 sm:px-6 sm:py-4 lg:left-20",
+                isSidebarOpen && "lg:left-72",
+            )}
+        >
             <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     <button

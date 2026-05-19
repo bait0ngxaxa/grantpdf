@@ -16,7 +16,6 @@ import {
     Clock,
     FileText,
     Eye,
-    Hash,
 } from "lucide-react";
 
 import { useAdminModalStates } from "../../hooks";
@@ -123,10 +122,6 @@ export default function ProjectCard({
                                 </h3>
                             </div>
                             <div className="mt-1 flex flex-wrap items-center gap-2">
-                                <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                                    <Hash className="h-3 w-3" />
-                                    เลขโครงการ #{project.id}
-                                </span>
                                 {showNewBadge && (
                                     <div className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-rose-200/60 bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-600 dark:border-rose-800/50 dark:bg-rose-900/20 dark:text-rose-400">
                                         <span className="relative flex h-1.5 w-1.5">

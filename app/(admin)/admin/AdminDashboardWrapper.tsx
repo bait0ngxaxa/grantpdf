@@ -49,7 +49,7 @@ function AdminDashboardShell({
                 <AdminTopBar />
 
                 {/* Content Area */}
-                <div className="min-w-0 max-w-full px-3 py-4 sm:p-6">
+                <div className="min-w-0 max-w-full px-3 pb-4 pt-24 sm:px-6 sm:pb-6 sm:pt-28">
                     {children}
                 </div>
             </div>

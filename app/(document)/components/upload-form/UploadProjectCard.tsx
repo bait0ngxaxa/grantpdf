@@ -7,7 +7,6 @@ import {
     Calendar,
     Check,
     ChevronRight,
-    Hash,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -52,12 +51,6 @@ export const UploadProjectCard = ({
                         <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500 dark:text-slate-400">
                             {project.description || "ไม่มีคำอธิบาย"}
                         </p>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                                <Hash className="h-3 w-3" />
-                                เลขโครงการ #{project.id}
-                            </span>
-                        </div>
                     </div>
                 </div>
 

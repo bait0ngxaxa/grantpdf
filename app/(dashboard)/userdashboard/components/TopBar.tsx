@@ -7,6 +7,7 @@ import { ROUTES, ROLES, SIGNOUT_CALLBACK } from "@/lib/constants";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
+import { cn } from "@/lib/utils";
 
 const menuItems = [
     { id: "dashboard", name: "ภาพรวม" },
@@ -16,8 +17,13 @@ const menuItems = [
 
 export const TopBar: React.FC = (): React.JSX.Element => {
     const router = useRouter();
-    const { session, activeTab, setIsSidebarOpen, setShowProfileModal } =
-        useUserDashboardContext();
+    const {
+        session,
+        activeTab,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        setShowProfileModal,
+    } = useUserDashboardContext();
     const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
     const activeMenuName =
         menuItems.find((item) => item.id === activeTab)?.name || "Dashboard";
@@ -28,7 +34,12 @@ export const TopBar: React.FC = (): React.JSX.Element => {
     };
 
     return (
-        <div className="sticky top-0 z-30 border-b border-white/60 bg-gradient-to-r from-white/80 via-white/80 to-blue-50/30 px-3 py-3 shadow-sm backdrop-blur-2xl dark:border-slate-700/60 dark:from-slate-900/80 dark:via-slate-900/80 dark:to-slate-800/30 sm:px-6 sm:py-4">
+        <div
+            className={cn(
+                "fixed left-0 right-0 top-0 z-30 border-b border-white/60 bg-gradient-to-r from-white/90 via-white/90 to-blue-50/40 px-3 py-3 shadow-sm backdrop-blur-2xl transition-[left,color,background-color,border-color] duration-300 dark:border-slate-700/60 dark:from-slate-900/90 dark:via-slate-900/90 dark:to-slate-800/40 sm:px-6 sm:py-4 lg:left-20",
+                isSidebarOpen && "lg:left-72",
+            )}
+        >
             <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     <button
