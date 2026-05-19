@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { PROJECT_STATUS } from "@/type/models";
 import { FILE_TYPES, STATUS_FILTER } from "@/lib/constants";
+import { parseProjectSearchTerm } from "@/lib/projectSearch";
 import { type AdminProject, type AdminDocumentFile } from "@/type/models";
 
 interface UseAdminProjectFilterProps {
@@ -55,22 +56,25 @@ export function useAdminProjectFilter({
 } {
     const filteredAndSortedProjects = useMemo(() => {
         // Fix #2: Compute lowercased search term once — O(1) instead of O(3n)
-        const lowerSearch = searchTerm.toLowerCase();
+        const parsedSearch = parseProjectSearchTerm(searchTerm);
+        const lowerSearch = parsedSearch.normalized;
         const lowerFileType = selectedFileType.toLowerCase();
 
         const filteredProjects = projects.filter((project) => {
             // Search: name, userName, or any file name
             const matchesSearch =
                 !lowerSearch ||
-                project.name.toLowerCase().includes(lowerSearch) ||
-                (project.userName || "")
-                    .toLowerCase()
-                    .includes(lowerSearch) ||
-                project.files.some((file) =>
-                    file.originalFileName
-                        .toLowerCase()
-                        .includes(lowerSearch),
-                );
+                (parsedSearch.projectIdText !== null
+                    ? project.id === parsedSearch.projectIdText
+                    : project.name.toLowerCase().includes(lowerSearch) ||
+                      (project.userName || "")
+                          .toLowerCase()
+                          .includes(lowerSearch) ||
+                      project.files.some((file) =>
+                          file.originalFileName
+                              .toLowerCase()
+                              .includes(lowerSearch),
+                      ));
 
             // File type filter
             const matchesFileType =

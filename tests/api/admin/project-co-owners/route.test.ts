@@ -11,14 +11,14 @@ vi.mock("@/lib/auditLog", () => ({
 }));
 
 vi.mock("@/lib/services", () => ({
-    getAdminOwnerOptions: vi.fn(),
+    getCoOwnerUserOptions: vi.fn(),
     updateProjectCoOwners: vi.fn(),
 }));
 
 import { logAudit } from "@/lib/auditLog";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import {
-    getAdminOwnerOptions,
+    getCoOwnerUserOptions,
     updateProjectCoOwners,
 } from "@/lib/services";
 import {
@@ -29,7 +29,7 @@ import {
 const mockedLogAudit = vi.mocked(logAudit);
 const mockedRequireAdminSession = vi.mocked(requireAdminSession);
 const mockedIsGuardError = vi.mocked(isGuardError);
-const mockedGetAdminOwnerOptions = vi.mocked(getAdminOwnerOptions);
+const mockedGetCoOwnerUserOptions = vi.mocked(getCoOwnerUserOptions);
 const mockedUpdateProjectCoOwners = vi.mocked(updateProjectCoOwners);
 
 describe("admin project co-owners route", () => {
@@ -50,8 +50,8 @@ describe("admin project co-owners route", () => {
         } as never);
     });
 
-    it("returns admin owner options", async () => {
-        mockedGetAdminOwnerOptions.mockResolvedValue([
+    it("returns co-owner user options", async () => {
+        mockedGetCoOwnerUserOptions.mockResolvedValue([
             {
                 id: "1",
                 name: "ผู้ดูแลระบบ",
@@ -136,13 +136,13 @@ describe("admin project co-owners route", () => {
         const body = await response.json();
 
         expect(response.status).toBe(400);
-        expect(body.error).toBe("รหัสผู้ดูแลไม่ถูกต้อง");
+        expect(body.error).toBe("รหัสผู้ใช้ไม่ถูกต้อง");
         expect(mockedUpdateProjectCoOwners).not.toHaveBeenCalled();
     });
 
-    it("returns 400 when service rejects a non-admin co-owner", async () => {
+    it("returns 400 when service rejects an unknown co-owner user", async () => {
         mockedUpdateProjectCoOwners.mockRejectedValue(
-            new Error("INVALID_CO_OWNER_ADMIN"),
+            new Error("INVALID_CO_OWNER_USER"),
         );
 
         const request = new Request(
@@ -162,6 +162,6 @@ describe("admin project co-owners route", () => {
         const body = await response.json();
 
         expect(response.status).toBe(400);
-        expect(body.error).toBe("เลือกได้เฉพาะผู้ใช้ที่เป็นแอดมินเท่านั้น");
+        expect(body.error).toBe("เลือกได้เฉพาะผู้ใช้ที่มีอยู่ในระบบเท่านั้น");
     });
 });

@@ -32,7 +32,7 @@ export default function SearchAndFilter({
                 </div>
                 <input
                     type="text"
-                    placeholder="ค้นหาโครงการย่อย, ไฟล์, ผู้สร้าง หรือ โครงการหลัก…"
+                    placeholder="ค้นหาเลขโครงการ, โครงการย่อย, ไฟล์, ผู้สร้าง หรือ โครงการหลัก…"
                     className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl leading-5 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white dark:focus:bg-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 sm:text-sm transition duration-150 ease-in-out"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

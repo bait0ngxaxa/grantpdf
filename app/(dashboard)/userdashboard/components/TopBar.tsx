@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui";
-import { ChartBarBig, UserStar, LogOut, Loader2, Menu } from "lucide-react";
-import { ROUTES, ROLES } from "@/lib/constants";
+import { ChartBarBig, UserStar, LogOut, Loader2, Menu, User } from "lucide-react";
+import { ROUTES, ROLES, SIGNOUT_CALLBACK } from "@/lib/constants";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
@@ -15,7 +16,8 @@ const menuItems = [
 
 export const TopBar: React.FC = (): React.JSX.Element => {
     const router = useRouter();
-    const { session, activeTab, setIsSidebarOpen } = useUserDashboardContext();
+    const { session, activeTab, setIsSidebarOpen, setShowProfileModal } =
+        useUserDashboardContext();
     const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
     const activeMenuName =
         menuItems.find((item) => item.id === activeTab)?.name || "Dashboard";
@@ -49,15 +51,6 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                     )}
                 </div>
                 <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:flex md:gap-4">
-                    <div className="hidden md:flex flex-col items-end mr-2">
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                            {session?.user?.name}
-                        </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-                            {session?.user?.role || ROLES.MEMBER}
-                        </span>
-                    </div>
-
                     <ThemeToggle />
 
                     {session?.user?.role === ROLES.ADMIN && (
@@ -80,17 +73,102 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                             )}
                         </Button>
                     )}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="hidden sm:flex items-center gap-2 px-4 rounded-full text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:shadow-md hover:shadow-red-500/10 duration-300 group border border-transparent hover:border-red-100 dark:hover:border-red-900 transition"
-                        onClick={() => signOut()}
-                    >
-                        <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                        <span className="font-medium">ออกจากระบบ</span>
-                    </Button>
+                    <UserAvatarMenu
+                        session={session}
+                        onOpenProfile={() => setShowProfileModal(true)}
+                    />
                 </div>
             </div>
         </div>
     );
 };
+
+interface UserAvatarMenuProps {
+    session: ReturnType<typeof useUserDashboardContext>["session"];
+    onOpenProfile: () => void;
+}
+
+function UserAvatarMenu({
+    session,
+    onOpenProfile,
+}: UserAvatarMenuProps): React.JSX.Element {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const initial =
+        session?.user?.name?.charAt(0).toUpperCase() ||
+        session?.user?.email?.charAt(0).toUpperCase() ||
+        "U";
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent): void => {
+            if (!dropdownRef.current?.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleOpenProfile = (): void => {
+        setIsOpen(false);
+        onOpenProfile();
+    };
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen((current) => !current)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white p-0.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+                aria-label="เปิดเมนูบัญชีผู้ใช้"
+                aria-expanded={isOpen}
+                aria-haspopup="menu"
+            >
+                <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    {session?.user?.image ? (
+                        <Image
+                            src={session.user.image}
+                            alt="Profile"
+                            width={44}
+                            height={44}
+                            className="h-full w-full rounded-full object-cover"
+                        />
+                    ) : (
+                        <span className="flex h-full w-full items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-400">
+                            {initial}
+                        </span>
+                    )}
+                </span>
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+                    <div className="mb-2 border-b border-slate-100 px-3 py-2 dark:border-slate-800">
+                        <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                            {session?.user?.name || "ผู้ใช้"}
+                        </p>
+                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                            {session?.user?.email}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleOpenProfile}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                        <User className="h-4 w-4" />
+                        ข้อมูลส่วนตัว
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: SIGNOUT_CALLBACK })}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        ออกจากระบบ
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}

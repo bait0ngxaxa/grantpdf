@@ -75,15 +75,14 @@ export async function getUserCount(): Promise<number> {
     return prisma.user.count();
 }
 
-export interface AdminOwnerOption {
+export interface CoOwnerUserOption {
     id: string;
     name: string;
     email: string;
 }
 
-export async function getAdminOwnerOptions(): Promise<AdminOwnerOption[]> {
+export async function getCoOwnerUserOptions(): Promise<CoOwnerUserOption[]> {
     const users = await prisma.user.findMany({
-        where: { role: ROLES.ADMIN },
         select: {
             id: true,
             name: true,

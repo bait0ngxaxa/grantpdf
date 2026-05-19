@@ -83,6 +83,7 @@ interface UserDashboardContextType {
     // Actions
     isCreatingProject: boolean;
     isUpdatingProject: boolean;
+    isDeleting: boolean;
     handleDeleteFile: (fileId: string) => void;
     handleDeleteProject: (projectId: string) => void;
     handleEditProject: (project: Project) => void;

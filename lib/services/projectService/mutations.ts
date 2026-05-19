@@ -4,7 +4,6 @@ import type { AdminProject, ProjectCoOwnerSummary } from "@/type/models";
 import { Prisma, type Project } from "@prisma/client";
 import type { UpdateProjectCoOwnersParams, UpdateProjectStatusParams } from "./types";
 import { VALID_STATUSES_SET, PROJECT_STATUS } from "@/lib/constants";
-import { ROLES } from "@/lib/constants";
 import { buildProjectAccessWhere } from "./projectAccess";
 
 function uniquePositiveIds(ids: number[]): number[] {
@@ -117,17 +116,16 @@ export async function updateProjectCoOwners({
         }
 
         if (requestedAdminIds.length > 0) {
-            const admins = await tx.user.findMany({
+            const users = await tx.user.findMany({
                 where: {
                     id: { in: requestedAdminIds },
-                    role: ROLES.ADMIN,
                 },
                 select: { id: true },
             });
-            const validAdminIds = new Set(admins.map((admin) => admin.id));
+            const validUserIds = new Set(users.map((user) => user.id));
 
-            if (requestedAdminIds.some((id) => !validAdminIds.has(id))) {
-                throw new Error("INVALID_CO_OWNER_ADMIN");
+            if (requestedAdminIds.some((id) => !validUserIds.has(id))) {
+                throw new Error("INVALID_CO_OWNER_USER");
             }
         }
 

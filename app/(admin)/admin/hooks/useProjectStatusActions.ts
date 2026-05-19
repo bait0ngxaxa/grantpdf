@@ -123,7 +123,7 @@ export const useProjectStatusActions = (): {
             try {
                 const response = await fetch(API_ROUTES.ADMIN_PROJECT_CO_OWNERS);
                 if (!response.ok) {
-                    throw new Error("ไม่สามารถโหลดรายชื่อแอดมินได้");
+                    throw new Error("ไม่สามารถโหลดรายชื่อผู้ใช้ได้");
                 }
 
                 const data = (await response.json()) as {
@@ -134,7 +134,7 @@ export const useProjectStatusActions = (): {
                 setAdminOwnersError(
                     error instanceof Error
                         ? error.message
-                        : "ไม่สามารถโหลดรายชื่อแอดมินได้",
+                        : "ไม่สามารถโหลดรายชื่อผู้ใช้ได้",
                 );
             } finally {
                 setIsAdminOwnersLoading(false);

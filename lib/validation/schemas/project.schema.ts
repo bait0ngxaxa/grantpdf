@@ -74,9 +74,9 @@ export const updateProjectCoOwnersSchema = z.object({
     adminUserIds: z
         .array(
             z.coerce
-                .number({ message: "รหัสผู้ดูแลไม่ถูกต้อง" })
-                .int({ message: "รหัสผู้ดูแลไม่ถูกต้อง" })
-                .positive({ message: "รหัสผู้ดูแลไม่ถูกต้อง" }),
+                .number({ message: "รหัสผู้ใช้ไม่ถูกต้อง" })
+                .int({ message: "รหัสผู้ใช้ไม่ถูกต้อง" })
+                .positive({ message: "รหัสผู้ใช้ไม่ถูกต้อง" }),
         )
         .max(20, { message: "เลือกเจ้าของร่วมได้สูงสุด 20 คน" }),
 });

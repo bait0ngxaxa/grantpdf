@@ -12,7 +12,7 @@ export {
     getUserById,
     userExists,
     getUserCount,
-    getAdminOwnerOptions,
+    getCoOwnerUserOptions,
 } from "./queries";
 
 // Mutations

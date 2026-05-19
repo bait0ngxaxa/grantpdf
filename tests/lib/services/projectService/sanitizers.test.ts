@@ -90,10 +90,18 @@ describe("sanitizeFiles", () => {
         expect(result).toHaveLength(1);
         expect(result[0].id).toBe("1");
         expect(result[0].userId).toBe("100");
-        expect(result[0].userName).toBe("User Name");
-        expect(result[0].userEmail).toBe("user@example.com");
+        expect(result[0].userName).toBe("Test User");
+        expect(result[0].userEmail).toBe("test@example.com");
         expect(result[0].downloadStatus).toBe("pending");
         expect(result[0].created_at).toBe(mockDate.toISOString());
+    });
+
+    it("should fallback to project owner info when file user is missing", () => {
+        const rawFiles: RawFile[] = [createRawFile({ user: null })];
+        const result = sanitizeFiles(rawFiles, "User Name", "user@example.com");
+
+        expect(result[0].userName).toBe("User Name");
+        expect(result[0].userEmail).toBe("user@example.com");
     });
 
     it("should default downloadStatus to pending", () => {

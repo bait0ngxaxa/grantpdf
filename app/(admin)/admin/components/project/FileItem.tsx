@@ -14,6 +14,7 @@ import {
     Download,
     Eye,
     Loader2,
+    User,
 } from "lucide-react";
 
 interface FileItemProps {
@@ -68,6 +69,12 @@ export default function FileItem({
                             </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            <span className="flex items-center min-w-0">
+                                <User className="h-3.5 w-3.5 mr-1.5 flex-shrink-0 text-slate-400 dark:text-slate-500" />
+                                <span className="truncate">
+                                    เจ้าของไฟล์: {file.userName || "ไม่ระบุ"}
+                                </span>
+                            </span>
                             <span className="flex items-center">
                                 <Calendar className="h-3.5 w-3.5 mr-1.5 text-slate-400 dark:text-slate-500" />
                                 {new Date(file.created_at).toLocaleDateString(
@@ -107,10 +114,14 @@ export default function FileItem({
                                     type: "userFile",
                                     fromAdminPanel: true,
                                 })
-                            }
+                            }	                            
                             disabled={isDownloading}
-                            className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:opacity-50"
-                            title="ดาวน์โหลด"
+                            aria-busy={isDownloading}
+                            aria-label={
+                                isDownloading ? "กำลังดาวน์โหลด" : "ดาวน์โหลด"
+                            }
+                            className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:cursor-progress disabled:opacity-60"
+                            title={isDownloading ? "กำลังดาวน์โหลด…" : "ดาวน์โหลด"}
                         >
                             {isDownloading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />

@@ -149,6 +149,13 @@ export async function getProjectsByUserIdPaginated({
                         },
                     },
                     include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                            },
+                        },
                         attachmentFiles: {
                             select: {
                                 id: true,
@@ -229,23 +236,28 @@ export async function getProjectsByUserIdPaginated({
                 name: coOwner.adminUser.name || "Unknown User",
                 email: coOwner.adminUser.email,
             })),
-            files: project.files.map((file) => ({
-                id: file.id.toString(),
-                userId: file.userId.toString(),
-                originalFileName: file.originalFileName,
-                storagePath: file.storagePath,
-                fileExtension: file.fileExtension,
-                downloadStatus: file.downloadStatus || "pending",
-                downloadedAt: file.downloadedAt?.toISOString(),
-                created_at: file.created_at.toISOString(),
-                updated_at: file.updated_at.toISOString(),
-                fileName: file.originalFileName,
-                createdAt: file.created_at.toISOString(),
-                lastModified: file.updated_at.toISOString(),
-                userName: "",
-                userEmail: "",
-                attachmentFiles: sanitizeAttachments(file.attachmentFiles),
-            })),
+            files: project.files.map((file) => {
+                const fileOwnerName = file.user?.name || "Unknown User";
+                const fileOwnerEmail = file.user?.email || "Unknown Email";
+
+                return {
+                    id: file.id.toString(),
+                    userId: file.userId.toString(),
+                    originalFileName: file.originalFileName,
+                    storagePath: file.storagePath,
+                    fileExtension: file.fileExtension,
+                    downloadStatus: file.downloadStatus || "pending",
+                    downloadedAt: file.downloadedAt?.toISOString(),
+                    created_at: file.created_at.toISOString(),
+                    updated_at: file.updated_at.toISOString(),
+                    fileName: file.originalFileName,
+                    createdAt: file.created_at.toISOString(),
+                    lastModified: file.updated_at.toISOString(),
+                    userName: fileOwnerName,
+                    userEmail: fileOwnerEmail,
+                    attachmentFiles: sanitizeAttachments(file.attachmentFiles),
+                };
+            }),
             reports: (project.reports || []).map((report) => ({
                 id: report.id.toString(),
                 status: report.status,

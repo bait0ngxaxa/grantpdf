@@ -3,7 +3,9 @@
 import { Button } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, UploadCloud, FileText } from "lucide-react";
-import { ROUTES } from "@/lib/constants";
+import { FILE_UPLOAD, ROUTES } from "@/lib/constants";
+
+const ACCEPTED_FILE_TYPES_LABEL = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ");
 
 interface UploadHeaderProps {
     onBack?: () => void;
@@ -41,7 +43,7 @@ export const UploadHeader = ({
                             </h1>
                             <p className="text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-2">
                                 <FileText className="w-4 h-4" />
-                                อัพโหลดไฟล์เอกสาร .docx หรือ .pdf
+                                อัพโหลดไฟล์เอกสาร {ACCEPTED_FILE_TYPES_LABEL}
                                 เพื่อแนบในโครงการ
                             </p>
                         </div>

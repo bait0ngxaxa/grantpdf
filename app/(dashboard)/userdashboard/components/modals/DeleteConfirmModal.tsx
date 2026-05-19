@@ -10,7 +10,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
 
 export const DeleteConfirmModal: React.FC = () => {
@@ -18,13 +18,22 @@ export const DeleteConfirmModal: React.FC = () => {
         showDeleteModal,
         setShowDeleteModal,
         fileToDelete,
+        isDeleting,
         onConfirmDeleteFile,
         onConfirmDeleteProject,
         cancelDelete,
     } = useUserDashboardContext();
 
+    const handleOpenChange = (open: boolean): void => {
+        if (isDeleting) {
+            return;
+        }
+
+        setShowDeleteModal(open);
+    };
+
     return (
-        <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <Dialog open={showDeleteModal} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-800 border-0 shadow-2xl">
                 <div className="flex flex-col items-center text-center p-4">
                     <div className="w-20 h-20 bg-red-50 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-6 shadow-inner ring-4 ring-red-50 dark:ring-red-900/20">
@@ -46,6 +55,7 @@ export const DeleteConfirmModal: React.FC = () => {
                         <Button
                             variant="ghost"
                             onClick={cancelDelete}
+                            disabled={isDeleting}
                             className="flex-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 h-12 text-base font-semibold"
                         >
                             ยกเลิก
@@ -56,9 +66,19 @@ export const DeleteConfirmModal: React.FC = () => {
                                     ? onConfirmDeleteFile
                                     : onConfirmDeleteProject
                             }
+                            disabled={isDeleting}
                             className="flex-1 rounded-xl bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20 h-12 text-base font-semibold border-0"
                         >
-                            {fileToDelete ? "ยืนยันลบไฟล์" : "ยืนยันลบโครงการ"}
+                            {isDeleting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    กำลังลบ…
+                                </>
+                            ) : fileToDelete ? (
+                                "ยืนยันลบไฟล์"
+                            ) : (
+                                "ยืนยันลบโครงการ"
+                            )}
                         </Button>
                     </div>
                 </DialogFooter>

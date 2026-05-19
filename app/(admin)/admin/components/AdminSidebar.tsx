@@ -280,9 +280,9 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors">
                                     {session?.user?.name || "Admin"}
                                 </p>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-800 uppercase tracking-wide">
-                                    {session?.user?.role}
-                                </span>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate font-medium">
+                                    {session?.user?.email}
+                                </p>
                             </div>
                         </div>
                         <div className="flex gap-2 relative z-10">

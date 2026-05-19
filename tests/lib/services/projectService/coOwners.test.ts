@@ -85,7 +85,7 @@ describe("updateProjectCoOwners", () => {
         expect(result).toEqual({ allowCoOwners: false, coOwners: [] });
     });
 
-    it("rejects selected users that are not admins", async () => {
+    it("rejects selected users that do not exist", async () => {
         tx.user.findMany.mockResolvedValue([{ id: 3 }]);
 
         await expect(
@@ -95,7 +95,7 @@ describe("updateProjectCoOwners", () => {
                 adminUserIds: [3, 4],
                 assignedById: 1,
             }),
-        ).rejects.toThrow("INVALID_CO_OWNER_ADMIN");
+        ).rejects.toThrow("INVALID_CO_OWNER_USER");
 
         expect(tx.projectCoOwner.deleteMany).not.toHaveBeenCalled();
     });

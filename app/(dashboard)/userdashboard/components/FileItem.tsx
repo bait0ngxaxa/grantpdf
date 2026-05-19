@@ -14,6 +14,7 @@ import {
     Eye,
     Loader2,
     Trash2,
+    User,
 } from "lucide-react";
 import { useUserDashboardContext } from "../contexts";
 import { AttachmentList } from "@/components/ui/AttachmentList";
@@ -25,6 +26,8 @@ interface FileItemProps {
         fileExtension: string;
         created_at: string;
         storagePath: string;
+        userName?: string;
+        userEmail?: string;
         attachmentFiles?: AttachmentFile[];
     };
 }
@@ -60,6 +63,12 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                             </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            <span className="flex items-center min-w-0">
+                                <User className="h-3 w-3 mr-1 flex-shrink-0" />
+                                <span className="truncate">
+                                    เจ้าของไฟล์: {file.userName || "ไม่ระบุ"}
+                                </span>
+                            </span>
                             <span className="flex items-center">
                                 <Calendar className="h-3 w-3 mr-1" />
                                 {new Date(file.created_at).toLocaleDateString(
@@ -99,8 +108,12 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                             download({ fileId: file.id, type: "userFile" })
                         }
                         disabled={isDownloading}
-                        className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors disabled:opacity-50"
-                        title="ดาวน์โหลด"
+                        aria-busy={isDownloading}
+                        aria-label={
+                            isDownloading ? "กำลังดาวน์โหลด" : "ดาวน์โหลด"
+                        }
+                        className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors disabled:cursor-progress disabled:opacity-60"
+                        title={isDownloading ? "กำลังดาวน์โหลด…" : "ดาวน์โหลด"}
                     >
                         {isDownloading ? (
                             <Loader2 className="h-5 w-5 animate-spin" />

@@ -76,6 +76,6 @@ describe("project schema validation", () => {
         });
 
         expect(result.success).toBe(false);
-        expect(result.error?.issues[0]?.message).toBe("รหัสผู้ดูแลไม่ถูกต้อง");
+        expect(result.error?.issues[0]?.message).toBe("รหัสผู้ใช้ไม่ถูกต้อง");
     });
 });

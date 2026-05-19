@@ -3,7 +3,7 @@ import { logAudit } from "@/lib/auditLog";
 import { toPublicApiError } from "@/lib/apiError";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import { updateProjectCoOwnersSchema } from "@/lib/validation/schemas";
-import { getAdminOwnerOptions, updateProjectCoOwners } from "@/lib/services";
+import { getCoOwnerUserOptions, updateProjectCoOwners } from "@/lib/services";
 import { parsePositiveIntId } from "@/lib/id";
 
 export async function GET(): Promise<NextResponse> {
@@ -11,14 +11,14 @@ export async function GET(): Promise<NextResponse> {
         const guard = await requireAdminSession();
         if (isGuardError(guard)) return guard;
 
-        const admins = await getAdminOwnerOptions();
+        const users = await getCoOwnerUserOptions();
 
-        return NextResponse.json({ admins });
+        return NextResponse.json({ admins: users });
     } catch (error) {
-        console.error("Error fetching admin owner options:", error);
+        console.error("Error fetching co-owner user options:", error);
         const mappedError = toPublicApiError(
             error,
-            "ไม่สามารถดึงรายชื่อผู้ดูแลได้",
+            "ไม่สามารถดึงรายชื่อผู้ใช้ได้",
         );
 
         return NextResponse.json(
@@ -84,10 +84,10 @@ export async function PUT(req: Request): Promise<NextResponse> {
 
         if (
             error instanceof Error &&
-            error.message === "INVALID_CO_OWNER_ADMIN"
+            error.message === "INVALID_CO_OWNER_USER"
         ) {
             return NextResponse.json(
-                { error: "เลือกได้เฉพาะผู้ใช้ที่เป็นแอดมินเท่านั้น" },
+                { error: "เลือกได้เฉพาะผู้ใช้ที่มีอยู่ในระบบเท่านั้น" },
                 { status: 400 },
             );
         }

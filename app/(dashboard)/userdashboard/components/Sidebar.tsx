@@ -1,15 +1,12 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
-    LogOut,
     Folder,
     Building2,
     Plus,
     PanelLeftClose,
     PanelLeftOpen,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
 import { useUserDashboardContext } from "../contexts";
 
 type MenuItemType = {
@@ -17,8 +14,6 @@ type MenuItemType = {
     name: string;
     icon: React.ReactNode;
 };
-
-// Removed props interface as it's no longer needed
 
 const menuItems: MenuItemType[] = [
     {
@@ -46,7 +41,6 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
         activeTab,
         setActiveTab,
         setShowCreateProjectModal,
-        setShowProfileModal,
     } = useUserDashboardContext();
 
     const [, startTransition] = React.useTransition();
@@ -239,23 +233,6 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     {session?.user?.email}
                                 </p>
                             </div>
-                        </div>
-                        <div className="flex gap-2 relative z-10">
-                            <Button
-                                onClick={() => setShowProfileModal(true)}
-                                variant="outline"
-                                className="flex-1 h-9 text-xs font-semibold rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-white dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md hover:shadow-blue-500/10 duration-300 transition"
-                            >
-                                ข้อมูลส่วนตัว
-                            </Button>
-                            <Button
-                                onClick={() => signOut()}
-                                variant="outline"
-                                className="w-9 h-9 p-0 rounded-lg border-slate-200/60 dark:border-slate-600/60 bg-white/50 dark:bg-slate-700/50 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 hover:shadow-md hover:shadow-red-500/10 duration-300 transition"
-                                title="ออกจากระบบ"
-                            >
-                                <LogOut className="w-4 h-4" />
-                            </Button>
                         </div>
                     </div>
                 </div>

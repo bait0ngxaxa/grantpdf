@@ -375,7 +375,7 @@ export function formatAuditDetails(
         }
         parts.push(allowCoOwners ? "เปิดใช้งานเจ้าของร่วม" : "ปิดใช้งานเจ้าของร่วม");
         if (adminUserIds.length > 0) {
-            parts.push(`แอดมินที่มอบหมาย: ${adminUserIds.join(", ")}`);
+            parts.push(`ผู้ใช้ที่มอบหมาย: ${adminUserIds.join(", ")}`);
         }
         return parts.join(" | ");
     }

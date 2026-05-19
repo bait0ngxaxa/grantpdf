@@ -8,6 +8,10 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FILE_UPLOAD } from "@/lib/constants";
+
+const ACCEPTED_FILE_TYPES = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(",");
+const ACCEPTED_FILE_TYPES_LABEL = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ");
 
 interface UploadAreaProps {
     fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -97,7 +101,8 @@ export function UploadArea({
                                     หรือคลิกปุ่มด้านล่างเพื่อเลือกไฟล์
                                 </p>
                                 <p className="text-xs text-gray-400 dark:text-slate-500 mt-2">
-                                    รองรับไฟล์ .docx และ .pdf (สูงสุด 10MB)
+                                    รองรับไฟล์ {ACCEPTED_FILE_TYPES_LABEL}{" "}
+                                    (สูงสุด {FILE_UPLOAD.DEFAULT_MAX_SIZE_MB}MB)
                                 </p>
                             </div>
                         </div>
@@ -106,7 +111,7 @@ export function UploadArea({
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept=".docx,.pdf"
+                        accept={ACCEPTED_FILE_TYPES}
                         onChange={onFileSelect}
                         className="hidden"
                         disabled={isUploading}

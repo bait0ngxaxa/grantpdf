@@ -8,6 +8,8 @@ import {
 } from "@/lib/constants";
 import { type FileHandlersProps } from "./types";
 
+const ACCEPTED_FILE_TYPES_LABEL = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ");
+
 export function useFileHandlers({
     setSelectedFile,
     setUploadMessage,
@@ -21,7 +23,9 @@ export function useFileHandlers({
             );
 
             if (!isValidExtension) {
-                setUploadMessage("กรุณาเลือกไฟล์ .docx และ .pdf เท่านั้น");
+                setUploadMessage(
+                    `กรุณาเลือกไฟล์ ${ACCEPTED_FILE_TYPES_LABEL} เท่านั้น`,
+                );
                 setUploadSuccess(false);
                 return false;
             }

@@ -9,6 +9,7 @@ import {
     collectAttachmentPaths,
     filterOutAttachments,
 } from "./sanitizers";
+import { parseProjectSearchTerm } from "@/lib/projectSearch";
 
 type AdminSortKey =
     | "createdAtDesc"
@@ -77,13 +78,19 @@ function buildAdminProjectsWhereSql(params: {
 
     if (params.search) {
         const keyword = `%${params.search}%`;
-        conditions.push(
-            Prisma.sql`(
-                p.name LIKE ${keyword}
-                OR u.name LIKE ${keyword}
-                OR u.email LIKE ${keyword}
-            )`,
-        );
+        const projectId = parseProjectSearchTerm(params.search).projectIdNumber;
+
+        if (projectId !== null) {
+            conditions.push(Prisma.sql`p.id = ${projectId}`);
+        } else {
+            conditions.push(
+                Prisma.sql`(
+                    p.name LIKE ${keyword}
+                    OR u.name LIKE ${keyword}
+                    OR u.email LIKE ${keyword}
+                )`,
+            );
+        }
     }
 
     if (params.status && params.status !== STATUS_FILTER.ALL) {
@@ -161,15 +168,20 @@ export async function getAllProjectsPaginated({
 }: GetAllProjectsPaginatedParams): Promise<PaginatedProjectsResult> {
     const skip = (page - 1) * limit;
     const safeSortBy = sortBy as AdminSortKey;
+    const projectIdSearch = parseProjectSearchTerm(search).projectIdNumber;
 
     const where = {
         ...(search
             ? {
-                  OR: [
-                      { name: { contains: search } },
-                      { user: { name: { contains: search } } },
-                      { user: { email: { contains: search } } },
-                  ],
+                  ...(projectIdSearch !== null
+                      ? { id: projectIdSearch }
+                      : {
+                            OR: [
+                                { name: { contains: search } },
+                                { user: { name: { contains: search } } },
+                                { user: { email: { contains: search } } },
+                            ],
+                        }),
               }
             : {}),
         ...(status && status !== "สถานะทั้งหมด" ? { status } : {}),

@@ -27,6 +27,9 @@ export const PROJECT_INCLUDE = {
             },
         },
         include: {
+            user: {
+                select: USER_PUBLIC_SELECT,
+            },
             attachmentFiles: {
                 select: ATTACHMENT_SELECT,
             },

@@ -5,6 +5,7 @@ import {
     STATUS_FILTER,
 } from "@/lib/constants";
 import { groupProjectsByProgram } from "@/lib/programGrouping";
+import { parseProjectSearchTerm } from "@/lib/projectSearch";
 
 export interface AdminProjectGroupView {
     key: string;
@@ -31,13 +32,17 @@ const SORT_STATUS_TARGETS: Partial<Record<string, string>> = {
     [SORT_OPTIONS.STATUS_CLOSED]: PROJECT_STATUS.CLOSED,
 };
 
-function normalize(value: string): string {
-    return value.trim().toLocaleLowerCase("th");
-}
-
 function matchesSearch(project: AdminProject, normalizedSearchTerm: string): boolean {
     if (!normalizedSearchTerm) {
         return true;
+    }
+
+    const projectIdSearch = parseProjectSearchTerm(
+        normalizedSearchTerm,
+    ).projectIdText;
+
+    if (projectIdSearch !== null) {
+        return project.id === projectIdSearch;
     }
 
     const haystacks = [
@@ -55,7 +60,7 @@ function matchesSearch(project: AdminProject, normalizedSearchTerm: string): boo
     ];
 
     return haystacks.some((value) =>
-        normalize(value).includes(normalizedSearchTerm),
+        parseProjectSearchTerm(value).normalized.includes(normalizedSearchTerm),
     );
 }
 
@@ -108,7 +113,9 @@ export function buildAdminProjectGroupViews(
     projects: AdminProject[],
     options: BuildAdminProjectGroupViewsOptions,
 ): AdminProjectGroupView[] {
-    const normalizedSearchTerm = normalize(options.searchTerm);
+    const normalizedSearchTerm = parseProjectSearchTerm(
+        options.searchTerm,
+    ).normalized;
 
     return groupProjectsByProgram(projects)
         .map((group) => {
@@ -143,7 +150,7 @@ export function hasActiveAdminProjectFilters(
     searchTerm: string,
     selectedStatus: string,
 ): boolean {
-    return normalize(searchTerm).length > 0 && searchTerm.trim().length > 0
+    return parseProjectSearchTerm(searchTerm).normalized.length > 0
         ? true
         : selectedStatus !== STATUS_FILTER.ALL && selectedStatus !== "";
 }

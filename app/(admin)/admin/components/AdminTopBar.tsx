@@ -1,6 +1,7 @@
-import React from "react";
-import { Button, ThemeToggle } from "@/components/ui";
-import { ChartBarBig, LogOut, Menu } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { ThemeToggle } from "@/components/ui";
+import { ChartBarBig, LogOut, Menu, User } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useAdminDashboardContext } from "../contexts";
 import { SIGNOUT_CALLBACK } from "@/lib/constants";
@@ -13,7 +14,7 @@ const menuItems = [
 ];
 
 export const AdminTopBar: React.FC = (): React.JSX.Element => {
-    const { activeTab, setIsSidebarOpen } = useAdminDashboardContext();
+    const { session, activeTab, setIsSidebarOpen } = useAdminDashboardContext();
 
     return (
         <div className="sticky top-0 z-30 border-b border-slate-200/60 bg-white/70 px-3 py-3 backdrop-blur-md transition-colors duration-300 dark:border-slate-700/60 dark:bg-slate-900/70 sm:px-6 sm:py-4">
@@ -37,17 +38,108 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
                 </div>
                 <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-4">
                     <ThemeToggle />
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => signOut({ callbackUrl: SIGNOUT_CALLBACK })}
-                        className="cursor-pointer text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl"
-                    >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        ออกจากระบบ
-                    </Button>
+                    <AdminAvatarMenu session={session} />
                 </div>
             </div>
         </div>
     );
 };
+
+interface AdminAvatarMenuProps {
+    session: ReturnType<typeof useAdminDashboardContext>["session"];
+}
+
+function AdminAvatarMenu({
+    session,
+}: AdminAvatarMenuProps): React.JSX.Element {
+    const [isOpen, setIsOpen] = useState(false);
+    const [showProfileDetails, setShowProfileDetails] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const initial =
+        session?.user?.name?.charAt(0).toUpperCase() ||
+        session?.user?.email?.charAt(0).toUpperCase() ||
+        "A";
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent): void => {
+            if (!dropdownRef.current?.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen((current) => !current)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white p-0.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+                aria-label="เปิดเมนูบัญชีผู้ดูแล"
+                aria-expanded={isOpen}
+                aria-haspopup="menu"
+            >
+                <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    {session?.user?.image ? (
+                        <Image
+                            src={session.user.image}
+                            alt="Profile"
+                            width={44}
+                            height={44}
+                            className="h-full w-full rounded-full object-cover"
+                        />
+                    ) : (
+                        <span className="flex h-full w-full items-center justify-center text-sm font-bold text-orange-600 dark:text-orange-400">
+                            {initial}
+                        </span>
+                    )}
+                </span>
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+                    <div className="mb-2 border-b border-slate-100 px-3 py-2 dark:border-slate-800">
+                        <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                            {session?.user?.name || "Admin"}
+                        </p>
+                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                            {session?.user?.email}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setShowProfileDetails((current) => !current)
+                        }
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                        <User className="h-4 w-4" />
+                        ข้อมูลส่วนตัว
+                    </button>
+                    {showProfileDetails && (
+                        <div className="mb-1 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:bg-slate-800/70 dark:text-slate-300">
+                            <p className="truncate">
+                                ชื่อ: {session?.user?.name || "Admin"}
+                            </p>
+                            <p className="truncate">
+                                อีเมล: {session?.user?.email || "-"}
+                            </p>
+                            <p className="truncate">
+                                สิทธิ์: {session?.user?.role || "-"}
+                            </p>
+                        </div>
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: SIGNOUT_CALLBACK })}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        ออกจากระบบ
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}

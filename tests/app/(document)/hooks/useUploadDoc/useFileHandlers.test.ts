@@ -95,7 +95,7 @@ describe("useFileHandlers - Security Tests", () => {
 
             expect(mockSetSelectedFile).not.toHaveBeenCalled();
             expect(mockSetUploadMessage).toHaveBeenCalledWith(
-                "กรุณาเลือกไฟล์ .docx และ .pdf เท่านั้น",
+                `กรุณาเลือกไฟล์ ${FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ")} เท่านั้น`,
             );
             expect(mockSetUploadSuccess).toHaveBeenCalledWith(false);
         });

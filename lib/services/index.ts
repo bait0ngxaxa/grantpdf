@@ -36,7 +36,7 @@ export {
     updateUserWithAudit,
     deleteUserWithAudit,
     getUserCount,
-    getAdminOwnerOptions,
+    getCoOwnerUserOptions,
     checkAdminPermission,
 } from "./userService";
 

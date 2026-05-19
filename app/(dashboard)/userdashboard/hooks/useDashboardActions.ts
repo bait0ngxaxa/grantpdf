@@ -57,6 +57,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
 
     const [isCreatingProject, setIsCreatingProject] = useState(false);
     const [isUpdatingProject, setIsUpdatingProject] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const getApiErrorMessage = (data: unknown, fallback: string): string => {
         if (
@@ -73,8 +74,8 @@ export function useDashboardActions(params: DashboardActionsParams) {
 
     // Delete file action
     const onConfirmDeleteFile = useCallback(async () => {
-        if (!fileToDelete) return;
-        setShowDeleteModal(false);
+        if (!fileToDelete || isDeleting) return;
+        setIsDeleting(true);
 
         try {
             const res = await fetch(`${API_ROUTES.USER_DOCS}/${fileToDelete}`, {
@@ -92,6 +93,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
 
             await fetchUserData();
             toast.success("ลบไฟล์สำเร็จ");
+            setShowDeleteModal(false);
         } catch (err: unknown) {
             console.error("Error deleting file:", err);
             toast.error("ลบไฟล์ไม่สำเร็จ", {
@@ -101,10 +103,12 @@ export function useDashboardActions(params: DashboardActionsParams) {
                         : "ไม่สามารถลบไฟล์ได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
+            setIsDeleting(false);
             setFileToDelete(null);
         }
     }, [
         fileToDelete,
+        isDeleting,
         fetchUserData,
         setShowDeleteModal,
         setFileToDelete,
@@ -112,8 +116,8 @@ export function useDashboardActions(params: DashboardActionsParams) {
 
     // Delete project action
     const onConfirmDeleteProject = useCallback(async () => {
-        if (!projectToDelete) return;
-        setShowDeleteModal(false);
+        if (!projectToDelete || isDeleting) return;
+        setIsDeleting(true);
 
         try {
             const res = await fetch(
@@ -134,6 +138,7 @@ export function useDashboardActions(params: DashboardActionsParams) {
 
             await fetchUserData();
             toast.success("ลบโครงการสำเร็จ");
+            setShowDeleteModal(false);
         } catch (err: unknown) {
             console.error("Error deleting project:", err);
             toast.error("ลบโครงการไม่สำเร็จ", {
@@ -143,10 +148,12 @@ export function useDashboardActions(params: DashboardActionsParams) {
                         : "ไม่สามารถลบโครงการได้ กรุณาลองใหม่อีกครั้ง",
             });
         } finally {
+            setIsDeleting(false);
             setProjectToDelete(null);
         }
     }, [
         projectToDelete,
+        isDeleting,
         fetchUserData,
         setShowDeleteModal,
         setProjectToDelete,
@@ -297,14 +304,16 @@ export function useDashboardActions(params: DashboardActionsParams) {
     );
 
     const cancelDelete = useCallback(() => {
+        if (isDeleting) return;
         setShowDeleteModal(false);
         setFileToDelete(null);
         setProjectToDelete(null);
-    }, [setShowDeleteModal, setFileToDelete, setProjectToDelete]);
+    }, [isDeleting, setShowDeleteModal, setFileToDelete, setProjectToDelete]);
 
     return {
         isCreatingProject,
         isUpdatingProject,
+        isDeleting,
         handleDeleteFile,
         handleDeleteProject,
         handleEditProject,
