@@ -5,6 +5,8 @@ export { FormActions } from "./FormActions";
 export { FormField } from "./FormField";
 export { FormSection } from "./FormSection";
 export { DocumentEditorLayout } from "./DocumentEditorLayout";
+export { DocumentActionBar } from "./DocumentActionBar";
+export { DocumentFormHeader } from "./DocumentFormHeader";
 export { PageLayout } from "./PageLayout";
 export { PreviewField, PreviewGrid, PreviewList } from "./PreviewField";
 export { PreviewModal } from "./PreviewModal";

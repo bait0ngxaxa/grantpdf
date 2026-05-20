@@ -2,9 +2,9 @@ import { Folder } from "lucide-react";
 import { AttachmentList } from "@/app/(document)/components/document-form/AttachmentList";
 import { AttachmentUpload } from "@/app/(document)/components/document-form/AttachmentUpload";
 import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { RichTextField } from "@/app/(document)/components/document-form/RichTextField";
 import { type ApprovalData } from "@/config/initialData";
 import { type ChangeEvent } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { DOCUMENT_TEXTAREA_MAX_LENGTH } from "@/lib/validation/constants";
 
 interface AttachmentSectionProps {
@@ -32,6 +32,11 @@ export function AttachmentSection({
     removeAttachment,
     updateAttachment,
 }: AttachmentSectionProps): React.JSX.Element {
+    const handleRichTextChange = (name: string, value: string): void => {
+        const target = { name, value } as HTMLTextAreaElement;
+        handleChange({ target } as ChangeEvent<HTMLTextAreaElement>);
+    };
+
     return (
         <FormSection
             title="สิ่งที่ส่งมาด้วยและเนื้อหา"
@@ -58,38 +63,17 @@ export function AttachmentSection({
                     />
                 )}
 
-                <div className="group">
-                    <div className="flex items-center justify-between mb-2 ml-1">
-                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            เนื้อหา <span className="text-red-500">*</span>
-                        </label>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                            รูปแบบการพิมพ์เอกสาร
-                        </span>
-                    </div>
-
-                    <div className="rounded-2xl bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
-                        <Textarea
-                            name="detail"
-                            placeholder="รายละเอียดเนื้อหา"
-                            value={formData.detail}
-                            onChange={handleChange}
-                            maxLength={DOCUMENT_TEXTAREA_MAX_LENGTH}
-                            constrainToA4={false}
-                            rows={14}
-                            className="min-h-[420px] h-[420px] rounded-none border-0 bg-transparent px-6 py-6 focus-visible:ring-0 focus-visible:border-0 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                        />
-                    </div>
-                    <p className="mt-2 text-right text-xs text-slate-500 dark:text-slate-400">
-                        {formData.detail.length}/{DOCUMENT_TEXTAREA_MAX_LENGTH}
-                    </p>
-
-                    {errors.detail && (
-                        <p className="text-sm text-red-500 dark:text-red-400 mt-1 ml-1">
-                            {errors.detail}
-                        </p>
-                    )}
-                </div>
+                <RichTextField
+                    label="เนื้อหา"
+                    name="detail"
+                    placeholder="รายละเอียดเนื้อหา"
+                    value={formData.detail}
+                    onValueChange={handleRichTextChange}
+                    required
+                    maxLength={DOCUMENT_TEXTAREA_MAX_LENGTH}
+                    error={errors.detail}
+                    className="h-[420px]"
+                />
             </div>
         </FormSection>
     );

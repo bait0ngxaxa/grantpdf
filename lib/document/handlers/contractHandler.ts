@@ -9,7 +9,7 @@ import {
     createUserFileRecord,
     buildSuccessResponse,
 } from "@/lib/document";
-import { fixThaiDistributed } from "../fixThaiwordUtils";
+import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
 import { formatNumericWithCommas } from "@/lib/utils";
 import { getNextContractNumber } from "./contractNumber";
 
@@ -72,19 +72,19 @@ export async function handleContractGeneration(
     const processedData = {
         projectName: fixThaiDistributed(projectName || ""),
         name: fixThaiDistributed(name || ""),
-        address: fixThaiDistributed(address || ""),
+        address: normalizeRichEditorText(address || ""),
         citizenid: citizenid || "",
         citizenexpire: citizenexpire || "",
         contractnumber: finalContractNumber || "",
-        projectOffer: fixThaiDistributed(projectOffer || ""),
+        projectOffer: normalizeRichEditorText(projectOffer || ""),
         owner: fixThaiDistributed(owner || ""),
         projectCo: fixThaiDistributed(projectCo || ""),
         projectCode: projectCode || "",
         acceptNum: acceptNum || "",
         cost: formatNumericWithCommas(cost || ""),
         timelineMonth: timelineMonth || "",
-        timelineText: fixThaiDistributed(timelineText || ""),
-        section: fixThaiDistributed(section || ""),
+        timelineText: normalizeRichEditorText(timelineText || ""),
+        section: normalizeRichEditorText(section || ""),
         date: date || "",
         witness: fixThaiDistributed(witness || ""),
     };

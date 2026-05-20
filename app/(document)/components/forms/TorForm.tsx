@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
@@ -46,6 +46,7 @@ export function TorForm(): React.JSX.Element {
 
     const {
         formData,
+        setFormData,
         handleChange,
         handleSubmit,
         isSubmitting,
@@ -82,6 +83,16 @@ export function TorForm(): React.JSX.Element {
         "tel",
         handleChange,
         () => {},
+    );
+
+    const handleRichTextChange = useCallback(
+        (name: string, value: string): void => {
+            setFormData((prevData) => ({
+                ...prevData,
+                [name]: value,
+            }));
+        },
+        [setFormData],
     );
 
     // Wrap validateBeforeSubmit
@@ -255,13 +266,13 @@ export function TorForm(): React.JSX.Element {
 
             <ProjectDetailSection
                 formData={formData}
-                handleChange={handleChange}
+                handleRichTextChange={handleRichTextChange}
                 errors={errors}
             />
 
             <ScopeSection
                 formData={formData}
-                handleChange={handleChange}
+                handleRichTextChange={handleRichTextChange}
                 errors={errors}
             />
 

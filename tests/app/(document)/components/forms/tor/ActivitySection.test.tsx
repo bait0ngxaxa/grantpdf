@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { ActivitySection } from "@/app/(document)/components/forms/tor/ActivitySection";
 import { DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH } from "@/lib/validation/schemas";
 import type { ActivityData } from "@/config/initialData";
@@ -40,42 +40,16 @@ function ActivitySectionHarness(): React.JSX.Element {
 }
 
 describe("ActivitySection", () => {
-    it("renders counters for each textarea and updates them while typing", () => {
+    it("renders rich text editors and counters for each activity field", () => {
         render(<ActivitySectionHarness />);
 
-        const activityTextarea = screen.getByPlaceholderText("กิจกรรม");
-        const managerTextarea = screen.getByPlaceholderText("ผู้ติดตามโครงการ");
-        const evaluationTextarea =
-            screen.getByPlaceholderText("วิธีการประเมินผล");
-        const durationTextarea = screen.getByPlaceholderText("ระยะเวลา");
+        expect(screen.getByLabelText("กิจกรรม")).toBeInTheDocument();
+        expect(screen.getByLabelText("ผู้ติดตามโครงการ")).toBeInTheDocument();
+        expect(screen.getByLabelText("วิธีการประเมินผล")).toBeInTheDocument();
+        expect(screen.getByLabelText("ระยะเวลา")).toBeInTheDocument();
 
-        expect(activityTextarea).toHaveAttribute(
-            "maxlength",
-            DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH.toString(),
-        );
-        expect(managerTextarea).toHaveAttribute(
-            "maxlength",
-            DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH.toString(),
-        );
-        expect(evaluationTextarea).toHaveAttribute(
-            "maxlength",
-            DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH.toString(),
-        );
-        expect(durationTextarea).toHaveAttribute(
-            "maxlength",
-            DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH.toString(),
-        );
-
-        const longValue = "ก".repeat(DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH);
-
-        expect(() => {
-            fireEvent.change(activityTextarea, {
-                target: { value: longValue },
-            });
-        }).not.toThrow();
-
-        expect(screen.getByText(
-            `${DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}/${DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}`,
-        )).toBeInTheDocument();
+        expect(
+            screen.getAllByText(`0/${DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}`),
+        ).toHaveLength(4);
     });
 });

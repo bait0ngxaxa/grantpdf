@@ -2,7 +2,10 @@ import fs from "fs/promises";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import { fixThaiDistributed } from "./fixThaiwordUtils";
+import {
+    fixThaiDistributed,
+    normalizeRichEditorText,
+} from "./fixThaiwordUtils";
 import type { DocxParserOptions } from "./types";
 
 export function createDocxRenderer(
@@ -43,11 +46,12 @@ export function createDocxRenderer(
 
                     const rawValue = scope[tag];
                     if (typeof rawValue === "string" && rawValue.trim()) {
-                        // Fix Thai formatting for all fields
-                        let value = fixThaiDistributed(rawValue);
+                        const isTextareaField = textareaFields.includes(tag);
+                        let value = isTextareaField
+                            ? normalizeRichEditorText(rawValue)
+                            : fixThaiDistributed(rawValue);
 
-                        // Handle textarea fields - convert line breaks
-                        if (textareaFields.includes(tag)) {
+                        if (isTextareaField) {
                             value = value.replace(/\n/g, "\r\n");
                         }
                         return value;

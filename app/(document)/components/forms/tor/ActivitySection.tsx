@@ -1,9 +1,9 @@
 import { BarChart, Plus, Trash2 } from "lucide-react";
-import { Button, Textarea } from "@/components/ui";
+import { Button } from "@/components/ui";
+import { RichTextField } from "@/app/(document)/components/document-form/RichTextField";
 import { FormSection } from "@/app/(document)/components/document-form/FormSection";
 import { type ActivityData } from "@/config/initialData";
 import { DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH } from "@/lib/validation/constants";
-import { type ChangeEvent } from "react";
 
 interface ActivitySectionProps {
     activities: ActivityData[];
@@ -47,105 +47,65 @@ export function ActivitySection({
                         key={index}
                         className="grid grid-cols-1 lg:grid-cols-4 gap-2 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-sm relative"
                     >
-                        <div className="flex flex-col">
-                            <label className="lg:hidden block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                กิจกรรม
-                            </label>
-                            <Textarea
+                        <div>
+                            <RichTextField
+                                label="กิจกรรม"
+                                name="activity"
                                 placeholder="กิจกรรม"
                                 value={activity.activity}
-                                constrainToA4={false}
                                 maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
-                                onChange={(
-                                    e: ChangeEvent<HTMLTextAreaElement>,
-                                ) =>
-                                    updateActivity(
-                                        index,
-                                        "activity",
-                                        e.target.value,
-                                    )
+                                onValueChange={(_name, value) =>
+                                    updateActivity(index, "activity", value)
                                 }
-                                className="text-sm h-32 lg:h-40"
+                                className="h-32 lg:h-40"
+                                toolbarVariant="compact"
+                                labelClassName="lg:hidden"
                             />
-                            <p className="mt-1 text-right text-xs text-slate-500 dark:text-slate-400">
-                                {activity.activity.length}/
-                                {DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
-                            </p>
                         </div>
-                        <div className="flex flex-col">
-                            <label className="lg:hidden block text-sm font-medium text-slate-700 dark:text-slate-300 mt-2 mb-1">
-                                ผู้ติดตามโครงการ
-                            </label>
-                            <Textarea
+                        <div>
+                            <RichTextField
+                                label="ผู้ติดตามโครงการ"
+                                name="manager"
                                 placeholder="ผู้ติดตามโครงการ"
                                 value={activity.manager}
-                                constrainToA4={false}
                                 maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
-                                onChange={(
-                                    e: ChangeEvent<HTMLTextAreaElement>,
-                                ) =>
-                                    updateActivity(
-                                        index,
-                                        "manager",
-                                        e.target.value,
-                                    )
+                                onValueChange={(_name, value) =>
+                                    updateActivity(index, "manager", value)
                                 }
-                                className="text-sm h-32 lg:h-40"
+                                className="h-32 lg:h-40"
+                                toolbarVariant="compact"
+                                labelClassName="lg:hidden"
                             />
-                            <p className="mt-1 text-right text-xs text-slate-500 dark:text-slate-400">
-                                {activity.manager.length}/
-                                {DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
-                            </p>
                         </div>
-                        <div className="flex flex-col">
-                            <label className="lg:hidden block text-sm font-medium text-slate-700 dark:text-slate-300 mt-2 mb-1">
-                                วิธีการประเมินผล
-                            </label>
-                            <Textarea
+                        <div>
+                            <RichTextField
+                                label="วิธีการประเมินผล"
+                                name="evaluation2"
                                 placeholder="วิธีการประเมินผล"
                                 value={activity.evaluation2}
-                                constrainToA4={false}
                                 maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
-                                onChange={(
-                                    e: ChangeEvent<HTMLTextAreaElement>,
-                                ) =>
-                                    updateActivity(
-                                        index,
-                                        "evaluation2",
-                                        e.target.value,
-                                    )
+                                onValueChange={(_name, value) =>
+                                    updateActivity(index, "evaluation2", value)
                                 }
-                                className="text-sm h-32 lg:h-40"
+                                className="h-32 lg:h-40"
+                                toolbarVariant="compact"
+                                labelClassName="lg:hidden"
                             />
-                            <p className="mt-1 text-right text-xs text-slate-500 dark:text-slate-400">
-                                {activity.evaluation2.length}/
-                                {DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
-                            </p>
                         </div>
-                        <div className="relative flex flex-col">
-                            <label className="lg:hidden block text-sm font-medium text-slate-700 dark:text-slate-300 mt-2 mb-1">
-                                ระยะเวลา
-                            </label>
-                            <Textarea
+                        <div className="relative">
+                            <RichTextField
+                                label="ระยะเวลา"
+                                name="duration"
                                 placeholder="ระยะเวลา"
                                 value={activity.duration}
-                                constrainToA4={false}
                                 maxLength={DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
-                                onChange={(
-                                    e: ChangeEvent<HTMLTextAreaElement>,
-                                ) =>
-                                    updateActivity(
-                                        index,
-                                        "duration",
-                                        e.target.value,
-                                    )
+                                onValueChange={(_name, value) =>
+                                    updateActivity(index, "duration", value)
                                 }
-                                className="text-sm h-32 lg:h-40"
+                                className="h-32 lg:h-40"
+                                toolbarVariant="compact"
+                                labelClassName="lg:hidden"
                             />
-                            <p className="mt-1 text-right text-xs text-slate-500 dark:text-slate-400">
-                                {activity.duration.length}/
-                                {DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH}
-                            </p>
                             {activities.length > 1 && (
                                 <Button
                                     type="button"
@@ -163,15 +123,27 @@ export function ActivitySection({
                 ))}
 
                 {/* Add Row Button */}
-                <Button
-                    type="button"
-                    onClick={addActivityRow}
-                    variant="outline"
-                    className="w-full border-dashed border-2 border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:border-indigo-400 dark:hover:border-indigo-600 py-4 h-auto"
-                >
-                    <Plus className="w-5 h-5 mr-2" />
-                    เพิ่มแถวกิจกรรม
-                </Button>
+                <div className="rounded-xl border border-dashed border-indigo-300 bg-indigo-50/60 p-4 dark:border-indigo-800 dark:bg-indigo-950/20">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                เพิ่มรายการกิจกรรม
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                                เพิ่มแถวใหม่สำหรับกิจกรรม ผู้ติดตาม วิธีประเมิน และระยะเวลา
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            onClick={addActivityRow}
+                            variant="outline"
+                            className="h-10 shrink-0 cursor-pointer rounded-lg border-indigo-200 bg-white px-4 font-semibold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-950"
+                        >
+                            <Plus className="size-4" />
+                            เพิ่มแถวกิจกรรม
+                        </Button>
+                    </div>
+                </div>
             </div>
         </FormSection>
     );

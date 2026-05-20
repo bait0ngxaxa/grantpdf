@@ -11,6 +11,7 @@ interface PageLayoutProps {
     children: ReactNode;
     title: string;
     subtitle?: string;
+    headerContent?: ReactNode;
     backPath?: string;
     gradientFrom?: string;
     gradientTo?: string;
@@ -25,6 +26,7 @@ export function PageLayout({
     children,
     title,
     subtitle,
+    headerContent,
     backPath = "/createdocs",
     gradientFrom = "from-slate-50 dark:from-slate-900",
     gradientTo = "to-blue-50 dark:to-slate-800",
@@ -79,25 +81,27 @@ export function PageLayout({
             </div>
 
             <div className="w-full max-w-5xl bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 border border-white/50 dark:border-slate-700 overflow-hidden ring-1 ring-slate-900/5 dark:ring-white/5">
-                <div
-                    className={cn("bg-gradient-to-r p-8 text-white relative overflow-hidden", headerGradientFrom, headerGradientTo)}
-                >
-                    <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
-                    <div className="relative z-10">
-                        <h2 className="text-3xl md:text-4xl font-bold text-center tracking-tight text-white drop-shadow-sm text-balance">
-                            {title}
-                        </h2>
-                        {subtitle && (
-                            <div className="flex justify-center mt-3">
-                                <span
-                                    className={cn("inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-sm font-medium tracking-wide", headerTextColor)}
-                                >
-                                    {subtitle}
-                                </span>
-                            </div>
-                        )}
+                {headerContent || (
+                    <div
+                        className={cn("bg-gradient-to-r p-8 text-white relative overflow-hidden", headerGradientFrom, headerGradientTo)}
+                    >
+                        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+                        <div className="relative z-10">
+                            <h2 className="text-3xl md:text-4xl font-bold text-center tracking-tight text-white drop-shadow-sm text-balance">
+                                {title}
+                            </h2>
+                            {subtitle && (
+                                <div className="flex justify-center mt-3">
+                                    <span
+                                        className={cn("inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-sm font-medium tracking-wide", headerTextColor)}
+                                    >
+                                        {subtitle}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
                 <div className="p-6 md:p-10 bg-slate-50/30 dark:bg-slate-900/30">
                     {children}
                 </div>

@@ -1,21 +1,18 @@
 import { Target } from "lucide-react";
-import { FormField } from "@/app/(document)/components/document-form/FormField";
+import { RichTextField } from "@/app/(document)/components/document-form/RichTextField";
 import { FormSection } from "@/app/(document)/components/document-form/FormSection";
 import { type TORData } from "@/config/initialData";
 import { DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH } from "@/lib/validation/constants";
-import { type ChangeEvent } from "react";
 
 interface ScopeSectionProps {
     formData: TORData;
-    handleChange: (
-        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ) => void;
+    handleRichTextChange: (name: string, value: string) => void;
     errors: Partial<Record<keyof TORData, string>>;
 }
 
 export function ScopeSection({
     formData,
-    handleChange,
+    handleRichTextChange,
     errors,
 }: ScopeSectionProps): React.JSX.Element {
     return (
@@ -29,56 +26,44 @@ export function ScopeSection({
             }
         >
             <div className="space-y-6">
-                <FormField
+                <RichTextField
                     label="พื้นที่/เขต"
                     name="zone"
-                    type="textarea"
-                    constrainToA4={false}
                     placeholder="พื้นที่หรือเขตดำเนินการ"
                     value={formData.zone}
-                    onChange={handleChange}
+                    onValueChange={handleRichTextChange}
                     maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.zone}
-                    rows={6}
                     className="h-40"
                 />
-                <FormField
+                <RichTextField
                     label="แผนการดำเนินงาน"
                     name="plan"
-                    type="textarea"
-                    constrainToA4={false}
                     placeholder="แผนการดำเนินงานโครงการ"
                     value={formData.plan}
-                    onChange={handleChange}
+                    onValueChange={handleRichTextChange}
                     maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.plan}
-                    rows={6}
                     className="h-40"
                 />
-                <FormField
+                <RichTextField
                     label="การจัดการโครงการ"
                     name="projectmanage"
-                    type="textarea"
-                    constrainToA4={false}
                     placeholder="วิธีการจัดการและบริหารโครงการ"
                     value={formData.projectmanage}
-                    onChange={handleChange}
+                    onValueChange={handleRichTextChange}
                     maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
                     error={errors.projectmanage}
-                    rows={6}
                     className="h-40"
                 />
-                <FormField
+                <RichTextField
                     label="องค์กร ภาคี ร่วมงาน"
                     name="partner"
-                    type="textarea"
-                    constrainToA4={false}
                     placeholder="องค์กร ภาค ร่วมงาน"
                     value={formData.partner}
                     error={errors.partner}
-                    onChange={handleChange}
+                    onValueChange={handleRichTextChange}
                     maxLength={DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH}
-                    rows={6}
                     className="h-40"
                 />
             </div>

@@ -1,16 +1,18 @@
 import { type ReactNode, type FormEvent } from "react";
 import {
     PageLayout,
-    FormActions,
     PreviewModal,
     ErrorAlert,
 } from "@/app/(document)/components";
+import { DocumentActionBar } from "./DocumentActionBar";
+import { DocumentFormHeader } from "./DocumentFormHeader";
 import { CreateDocSuccessModal } from "@/components/ui";
 
 interface DocumentEditorLayoutProps {
     // Page Config
     title: string;
     subtitle?: string;
+    headerContent?: ReactNode;
 
     // Form Logic
     onSubmit: (e: FormEvent<HTMLFormElement>) => void;
@@ -40,11 +42,13 @@ interface DocumentEditorLayoutProps {
 
     // Content
     children: ReactNode;
+    actions?: ReactNode;
 }
 
 export function DocumentEditorLayout({
     title,
     subtitle,
+    headerContent,
     onSubmit,
     isSubmitting,
     isDirty,
@@ -64,21 +68,29 @@ export function DocumentEditorLayout({
     successDocumentType = "เอกสาร",
     onSuccessRedirect,
     children,
+    actions,
 }: DocumentEditorLayoutProps): React.JSX.Element {
     return (
         <PageLayout
             title={title}
             subtitle={subtitle}
+            headerContent={
+                headerContent || (
+                    <DocumentFormHeader title={title} subtitle={subtitle} />
+                )
+            }
             isDirty={isDirty}
             onConfirmExit={onConfirmExit}
         >
             <form onSubmit={onSubmit} className="space-y-8">
                 {children}
 
-                <FormActions
-                    onPreview={onPreview}
-                    isSubmitting={isSubmitting}
-                />
+                {actions || (
+                    <DocumentActionBar
+                        onPreview={onPreview}
+                        isSubmitting={isSubmitting}
+                    />
+                )}
             </form>
 
             <ErrorAlert message={message} isError={isError} />

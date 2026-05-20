@@ -138,3 +138,52 @@
 .animate-shine {
     animation: shine 8s linear infinite;
 }
+
+.document-rich-editor .ProseMirror {
+    min-height: 100%;
+}
+
+.document-rich-editor .ProseMirror p {
+    margin: 0 0 0.5rem;
+}
+
+.document-rich-editor .ProseMirror p:last-child {
+    margin-bottom: 0;
+}
+
+.document-rich-editor .ProseMirror ul,
+.document-rich-editor .ProseMirror ol {
+    margin: 0.25rem 0 0.75rem 1.5rem;
+    padding: 0;
+}
+
+.document-rich-editor .ProseMirror ul {
+    list-style: disc;
+}
+
+.document-rich-editor .ProseMirror ol {
+    list-style: decimal;
+}
+
+.document-rich-editor .ProseMirror table {
+    border-collapse: collapse;
+    margin: 0.5rem 0;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.document-rich-editor .ProseMirror td,
+.document-rich-editor .ProseMirror th {
+    border: 1px solid var(--border);
+    min-width: 4rem;
+    padding: 0.35rem 0.5rem;
+    vertical-align: top;
+}
+
+.document-rich-editor .ProseMirror p.is-editor-empty:first-child::before {
+    color: var(--muted-foreground);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+}

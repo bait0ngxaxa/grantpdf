@@ -12,6 +12,7 @@ import {
 import {
     fixThaiDistributed,
     getMimeType,
+    normalizeRichEditorText,
 } from "../fixThaiwordUtils";
 import { prisma } from "@/lib/prisma";
 import PizZip from "pizzip";
@@ -288,7 +289,10 @@ export async function handleApprovalGeneration(
 
                     const rawValue = scope[tag];
                     if (typeof rawValue === "string" && rawValue.trim()) {
-                        let value = fixThaiDistributed(rawValue);
+                        let value =
+                            tag === "detail"
+                                ? normalizeRichEditorText(rawValue)
+                                : fixThaiDistributed(rawValue);
                         if (
                             [
                                 "topicdetail",
@@ -323,7 +327,7 @@ export async function handleApprovalGeneration(
         todetail: fixThaiDistributed(todetail || ""),
         attachment: attachmentData,
         hasAttachments: attachmentData.length > 0,
-        detail: fixThaiDistributed(detail || ""),
+        detail: normalizeRichEditorText(detail || ""),
         regard: fixThaiDistributed(fixedRegard || ""),
         name: fixThaiDistributed(name || ""),
         depart: fixThaiDistributed(depart || ""),

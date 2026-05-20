@@ -30,15 +30,15 @@ export function PreviewField({
                 className,
             )}
         >
-            <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-2 text-balance">
+            <h4 className="mb-2 text-xs font-semibold text-slate-600 text-balance dark:text-slate-300">
                 {label}
             </h4>
             {children ? (
-                <div className="text-sm font-medium text-slate-800 dark:text-slate-100 leading-relaxed break-words">
+                <div className="overflow-x-auto whitespace-pre-wrap break-words text-sm font-medium leading-relaxed text-slate-800 dark:text-slate-100">
                     {children}
                 </div>
             ) : (
-                <p className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-50 break-words">
+                <p className="whitespace-pre-wrap break-words text-sm font-semibold text-slate-900 md:text-base dark:text-slate-50">
                     {normalizedValue || "-"}
                 </p>
             )}
@@ -78,11 +78,11 @@ export function PreviewList({
 }: PreviewListProps): React.JSX.Element {
     return (
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70 px-4 py-3">
-            <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-2 text-balance">
+            <h4 className="mb-2 text-xs font-semibold text-slate-600 text-balance dark:text-slate-300">
                 {label}
             </h4>
             {items.length > 0 ? (
-                <ul className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-50 list-disc list-inside space-y-1">
+                <ul className="list-inside list-disc space-y-1 break-words text-sm font-semibold text-slate-900 md:text-base dark:text-slate-50">
                     {items.map((item, index) => (
                         <li key={index}>
                             {item || `รายการที่ ${index + 1} (ยังไม่ได้กรอก)`}

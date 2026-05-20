@@ -9,7 +9,7 @@ import {
     createUserFileRecord,
     buildSuccessResponse,
 } from "@/lib/document";
-import { fixThaiDistributed } from "../fixThaiwordUtils";
+import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
 import { formatNumericWithCommas } from "@/lib/utils";
 import { normalizePhoneNumber } from "@/lib/validation/schemas";
 
@@ -68,14 +68,14 @@ export async function handleFormProjectGeneration(
         tel: normalizePhoneNumber(tel || ""),
         timeline: fixThaiDistributed(timeline || ""),
         cost: formatNumericWithCommas(cost || ""),
-        rationale: fixThaiDistributed(rationale || ""),
-        objective: fixThaiDistributed(objective || ""),
-        goal: fixThaiDistributed(goal || ""),
-        target: fixThaiDistributed(target || ""),
-        product: fixThaiDistributed(product || ""),
-        scope: fixThaiDistributed(scope || ""),
-        result: fixThaiDistributed(result || ""),
-        author: fixThaiDistributed(author || ""),
+        rationale: normalizeRichEditorText(rationale || ""),
+        objective: normalizeRichEditorText(objective || ""),
+        goal: normalizeRichEditorText(goal || ""),
+        target: normalizeRichEditorText(target || ""),
+        product: normalizeRichEditorText(product || ""),
+        scope: normalizeRichEditorText(scope || ""),
+        result: normalizeRichEditorText(result || ""),
+        author: normalizeRichEditorText(author || ""),
         currentDate: new Date().toLocaleDateString("th-TH", {
             year: "numeric",
             month: "long",

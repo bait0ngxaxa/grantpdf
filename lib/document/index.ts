@@ -34,6 +34,7 @@ export { handleDocumentError, buildSuccessResponse } from "./responseBuilder";
 // Utils
 export {
     fixThaiDistributed,
+    normalizeRichEditorText,
     generateUniqueFilename,
     getMimeType,
 } from "./fixThaiwordUtils";

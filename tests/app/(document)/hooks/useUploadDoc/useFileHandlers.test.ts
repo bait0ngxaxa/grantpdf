@@ -27,8 +27,10 @@ describe("useFileHandlers - Security Tests", () => {
         size: number,
         type: string = "application/octet-stream",
     ): File => {
-        const content = new Uint8Array(size);
-        return new File([content], name, { type });
+        const content = new Uint8Array(Math.min(size, 1024));
+        const file = new File([content], name, { type });
+        Object.defineProperty(file, "size", { value: size });
+        return file;
     };
 
     // ============================================

@@ -102,6 +102,20 @@ export const fixThaiDistributed = (text: string): string => {
     return result;
 };
 
+export const normalizeRichEditorText = (text: string): string => {
+    if (!text || typeof text !== "string") return "";
+
+    return normalizeText(text)
+        .replace(/\r\n|\r|\u2028/g, "\n")
+        .replace(/\u2029/g, "\n\n")
+        .replace(/[\u000B\u000C]/g, "\n")
+        .replace(/[\u0013-\u0015\u200E\u200F\u202A-\u202E]/g, "")
+        .replace(/[ ]+([.,:;!?])/g, "$1")
+        .replace(/\n{4,}/g, "\n\n\n")
+        .replace(/^\n+|\n+$/g, "")
+        .trim();
+};
+
 /**
  * Generate a unique filename with UUID prefix.
  * Preserves Thai characters in the filename.

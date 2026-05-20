@@ -8,7 +8,7 @@ import {
     createUserFileRecord,
     buildSuccessResponse,
 } from "@/lib/document";
-import { fixThaiDistributed } from "../fixThaiwordUtils";
+import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
 import { NextResponse } from "next/server";
 import { formatNumericWithCommas } from "@/lib/utils";
 import { normalizePhoneNumber } from "@/lib/validation/schemas";
@@ -104,10 +104,14 @@ export async function handleTorGeneration(
             "plan",
             "projectmanage",
             "partner",
+            "activity",
+            "manager",
+            "evaluation2",
+            "duration",
         ],
     });
 
-    // Process activities with Thai formatting
+    // Process activities while preserving rich editor line/tab structure.
     const processedActivities = activities.map(
         (activity: Record<string, unknown>) => ({
             ...activity,
@@ -116,7 +120,7 @@ export async function handleTorGeneration(
                       (acc, key) => {
                           const value = activity[key];
                           if (typeof value === "string") {
-                              acc[key] = fixThaiDistributed(value);
+                              acc[key] = normalizeRichEditorText(value);
                           } else {
                               acc[key] = value;
                           }
@@ -138,13 +142,13 @@ export async function handleTorGeneration(
         timeline: fixThaiDistributed(timeline || ""),
         contractnumber: contractnumber || "",
         cost: formatNumericWithCommas(cost || ""),
-        topic1: fixThaiDistributed(topic1 || ""),
-        objective1: fixThaiDistributed(objective1 || ""),
-        target: fixThaiDistributed(target || ""),
-        zone: fixThaiDistributed(zone || ""),
-        plan: fixThaiDistributed(plan || ""),
-        projectmanage: fixThaiDistributed(projectmanage || ""),
-        partner: fixThaiDistributed(partner || ""),
+        topic1: normalizeRichEditorText(topic1 || ""),
+        objective1: normalizeRichEditorText(objective1 || ""),
+        target: normalizeRichEditorText(target || ""),
+        zone: normalizeRichEditorText(zone || ""),
+        plan: normalizeRichEditorText(plan || ""),
+        projectmanage: normalizeRichEditorText(projectmanage || ""),
+        partner: normalizeRichEditorText(partner || ""),
         date: date || "",
         activities: processedActivities,
         hasActivities: processedActivities.length > 0,

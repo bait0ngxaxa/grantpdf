@@ -3,6 +3,7 @@ import {
     fixThaiDistributed,
     generateUniqueFilename,
     getMimeType,
+    normalizeRichEditorText,
 } from "@/lib/document/fixThaiwordUtils";
 
 // Mock uuid
@@ -82,6 +83,32 @@ describe("fixThaiDistributed", () => {
         const result = fixThaiDistributed(input);
         expect(result).toContain("10MB");
         expect(result).toContain("20%");
+    });
+});
+
+describe("normalizeRichEditorText", () => {
+    it("should preserve tabs from table-like rich editor text", () => {
+        const input = "เนื้อหา\tรายละเอียด\nเนื้อหา2\tรายละเอียด2";
+        const result = normalizeRichEditorText(input);
+        expect(result).toBe(input);
+    });
+
+    it("should preserve multiple spaces inside a line", () => {
+        const input = "หัวข้อ    รายละเอียด";
+        const result = normalizeRichEditorText(input);
+        expect(result).toBe(input);
+    });
+
+    it("should normalize mixed line endings without collapsing paragraphs", () => {
+        const input = "บรรทัดแรก\r\n\r\nบรรทัดสอง\rบรรทัดสาม";
+        const result = normalizeRichEditorText(input);
+        expect(result).toBe("บรรทัดแรก\n\nบรรทัดสอง\nบรรทัดสาม");
+    });
+
+    it("should not insert Thai word segmentation characters", () => {
+        const input = "สวัสดีครับ";
+        const result = normalizeRichEditorText(input);
+        expect(result).toBe(input);
     });
 });
 

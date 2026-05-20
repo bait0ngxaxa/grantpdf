@@ -2,7 +2,7 @@
 
 import { type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextField } from "@/app/(document)/components/document-form/RichTextField";
 import { cn } from "@/lib/utils";
 
 interface FormFieldProps {
@@ -28,11 +28,9 @@ export function FormField({
     value,
     onChange,
     required = false,
-    rows = 4,
     className = "",
     error,
     maxLength,
-    constrainToA4 = true,
 }: FormFieldProps): React.JSX.Element {
     const hasError = !!error;
     const shouldShowCounter = typeof maxLength === "number";
@@ -43,36 +41,42 @@ export function FormField({
             : "border-slate-200 dark:border-slate-700 focus:ring-blue-100 dark:focus:ring-blue-900/30 focus:border-blue-400 dark:focus:border-blue-500 hover:border-blue-200 dark:hover:border-blue-600",
         className,
     );
+    const handleRichTextChange = (_name: string, nextValue: string): void => {
+        const target = { name, value: nextValue } as HTMLTextAreaElement;
+        onChange({ target } as ChangeEvent<HTMLTextAreaElement>);
+    };
+
+    if (type === "textarea") {
+        return (
+            <RichTextField
+                label={label}
+                name={name}
+                placeholder={placeholder}
+                className={className}
+                value={value}
+                onValueChange={handleRichTextChange}
+                required={required}
+                maxLength={maxLength}
+                error={error}
+            />
+        );
+    }
 
     return (
         <div className="group">
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 ml-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {label} {required ? <span className="text-red-500">*</span> : null}
             </label>
-            {type === "textarea" ? (
-                <Textarea
-                    name={name}
-                    placeholder={placeholder}
-                    className={cn(baseClassName, "min-h-[120px] resize-y")}
-                    value={value}
-                    onChange={onChange}
-                    rows={rows}
-                    required={required}
-                    maxLength={maxLength}
-                    constrainToA4={constrainToA4}
-                />
-            ) : (
-                <Input
-                    type={type}
-                    name={name}
-                    placeholder={placeholder}
-                    className={baseClassName}
-                    value={value}
-                    onChange={onChange}
-                    required={required}
-                    maxLength={maxLength}
-                />
-            )}
+            <Input
+                type={type}
+                name={name}
+                placeholder={placeholder}
+                className={baseClassName}
+                value={value}
+                onChange={onChange}
+                required={required}
+                maxLength={maxLength}
+            />
             {shouldShowCounter && (
                 <p className="mt-1 ml-1 text-right text-xs text-slate-500 dark:text-slate-400">
                     {value.length}/{maxLength}
