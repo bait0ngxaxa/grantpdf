@@ -1,5 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useExpandableState } from "@/lib/hooks/useExpandableState";
+
+const readStringSetFromStorage = (key: string): Set<string> => {
+    const storedValue = localStorage.getItem(key);
+    if (!storedValue) {
+        return new Set();
+    }
+
+    const parsedValue: unknown = JSON.parse(storedValue);
+    if (!Array.isArray(parsedValue)) {
+        return new Set();
+    }
+
+    return new Set(parsedValue.filter((item) => typeof item === "string"));
+};
 
 export const useUIStates = (): {
     activeTab: string;
@@ -22,11 +36,7 @@ export const useUIStates = (): {
     toggleRowExpansion: (fileId: string) => void;
 } => {
     const [activeTab, setActiveTab] = useState("dashboard");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(
-        () =>
-            typeof window === "undefined" ||
-            window.matchMedia("(min-width: 1024px)").matches,
-    );
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     // Use shared expandable state hook
     const {
@@ -37,20 +47,23 @@ export const useUIStates = (): {
     } = useExpandableState();
 
     // Admin-specific: Track viewed projects for "NEW" badge
-    const [viewedProjects, setViewedProjects] = useState<Set<string>>(() => {
-        if (typeof window !== "undefined") {
-            const storedViewedProjects = localStorage.getItem("viewedProjects");
-            if (storedViewedProjects) {
-                try {
-                    const viewedProjectIds = JSON.parse(storedViewedProjects);
-                    return new Set(viewedProjectIds);
-                } catch (error) {
-                    console.error("Error loading viewed projects:", error);
-                }
+    const [viewedProjects, setViewedProjects] = useState<Set<string>>(
+        new Set(),
+    );
+
+    useEffect(() => {
+        const frameId = window.requestAnimationFrame(() => {
+            setIsSidebarOpen(window.matchMedia("(min-width: 1024px)").matches);
+
+            try {
+                setViewedProjects(readStringSetFromStorage("viewedProjects"));
+            } catch (error) {
+                console.error("Error loading viewed projects:", error);
             }
-        }
-        return new Set();
-    });
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, []);
 
     // Admin-specific: Filter and search states
     const [searchTerm, setSearchTerm] = useState("");

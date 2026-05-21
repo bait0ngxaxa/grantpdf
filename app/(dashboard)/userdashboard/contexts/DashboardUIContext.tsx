@@ -5,6 +5,7 @@ import React, {
     useContext,
     useState,
     useCallback,
+    useEffect,
     type ReactNode,
 } from "react";
 
@@ -23,14 +24,18 @@ const DashboardUIContext = createContext<DashboardUIContextType | undefined>(
 
 export function DashboardUIProvider({ children }: { children: ReactNode }) {
     const [activeTab, setActiveTab] = useState("dashboard");
-    const [isSidebarOpen, setIsSidebarOpen] = useState(
-        () =>
-            typeof window === "undefined" ||
-            window.matchMedia("(min-width: 1024px)").matches,
-    );
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
         new Set(),
     );
+
+    useEffect(() => {
+        const frameId = window.requestAnimationFrame(() => {
+            setIsSidebarOpen(window.matchMedia("(min-width: 1024px)").matches);
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, []);
 
     const toggleProjectExpansion = useCallback((projectId: string) => {
         setExpandedProjects((prev) => {

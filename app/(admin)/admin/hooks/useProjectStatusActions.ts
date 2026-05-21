@@ -149,15 +149,19 @@ export const useProjectStatusActions = (): {
             return;
         }
 
-        const assignedCoOwnerIds = (
-            selectedProjectForStatus.coOwners ?? []
-        ).map((coOwner) => coOwner.id);
+        const frameId = window.requestAnimationFrame(() => {
+            const assignedCoOwnerIds = (
+                selectedProjectForStatus.coOwners ?? []
+            ).map((coOwner) => coOwner.id);
 
-        setAllowCoOwners(
-            (selectedProjectForStatus.allowCoOwners ?? false) ||
-                assignedCoOwnerIds.length > 0,
-        );
-        setSelectedCoOwnerAdminIds(assignedCoOwnerIds);
+            setAllowCoOwners(
+                (selectedProjectForStatus.allowCoOwners ?? false) ||
+                    assignedCoOwnerIds.length > 0,
+            );
+            setSelectedCoOwnerAdminIds(assignedCoOwnerIds);
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
     }, [isStatusModalOpen, selectedProjectForStatus]);
 
     // Open status modal

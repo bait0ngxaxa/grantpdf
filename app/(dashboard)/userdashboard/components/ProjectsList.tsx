@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { Project } from "@/type";
 import { useUserDashboardContext } from "../contexts";
 import { groupProjectsByProgram } from "@/lib/programGrouping";
@@ -14,6 +14,20 @@ import { Building2, ChevronDown, FolderTree, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PAGINATION } from "@/lib/constants";
 import { paginateGroupItems } from "@/lib/programGroupPagination";
+
+const readStringSetFromStorage = (key: string): Set<string> => {
+    const storedValue = localStorage.getItem(key);
+    if (!storedValue) {
+        return new Set();
+    }
+
+    const parsedValue: unknown = JSON.parse(storedValue);
+    if (!Array.isArray(parsedValue)) {
+        return new Set();
+    }
+
+    return new Set(parsedValue.filter((item) => typeof item === "string"));
+};
 
 export const ProjectsList: React.FC = (): React.JSX.Element => {
     const {
@@ -36,23 +50,29 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
 
     // Track which status notes have been viewed (stored in localStorage)
     const [viewedStatusNotes, setViewedStatusNotes] = useState<Set<string>>(
-        () => {
-            if (typeof window !== "undefined") {
-                const saved = localStorage.getItem("viewedStatusNotes");
-                return saved ? new Set(JSON.parse(saved)) : new Set();
-            }
-            return new Set();
-        },
+        new Set(),
     );
     const [viewedReportUpdates, setViewedReportUpdates] = useState<Set<string>>(
-        () => {
-            if (typeof window !== "undefined") {
-                const saved = localStorage.getItem("viewedReportUpdates");
-                return saved ? new Set(JSON.parse(saved)) : new Set();
-            }
-            return new Set();
-        },
+        new Set(),
     );
+
+    useEffect(() => {
+        const frameId = window.requestAnimationFrame(() => {
+            try {
+                setViewedStatusNotes(
+                    readStringSetFromStorage("viewedStatusNotes"),
+                );
+                setViewedReportUpdates(
+                    readStringSetFromStorage("viewedReportUpdates"),
+                );
+            } catch {
+                setViewedStatusNotes(new Set());
+                setViewedReportUpdates(new Set());
+            }
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, []);
 
     // Check if project has unread status note
     const hasUnreadStatusNote = (project: Project): boolean => {

@@ -113,11 +113,16 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
     }, [project]);
 
     useEffect(() => {
-        if (!isOpen) {
-            resetForm();
-            return;
-        }
-        void fetchReports();
+        const frameId = window.requestAnimationFrame(() => {
+            if (!isOpen) {
+                resetForm();
+                return;
+            }
+
+            void fetchReports();
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
     }, [fetchReports, isOpen]);
 
     const handleSubmit = async (): Promise<void> => {
@@ -161,6 +166,7 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
         const isAllowedExtension = FILE_UPLOAD.ALLOWED_EXTENSIONS.some(
             (ext) => fileName.endsWith(ext),
         );
+
         if (!isAllowedExtension) {
             return `รองรับเฉพาะไฟล์: ${FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ")}`;
         }

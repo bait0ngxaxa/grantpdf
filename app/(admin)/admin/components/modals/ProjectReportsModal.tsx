@@ -77,7 +77,12 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
 
     useEffect(() => {
         if (!isOpen) return;
-        void fetchReports();
+
+        const frameId = window.requestAnimationFrame(() => {
+            void fetchReports();
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
     }, [fetchReports, isOpen]);
 
     const updateReport = async (

@@ -62,9 +62,15 @@ export const CreateProjectModal: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (showCreateProjectModal && programs.length === 0) {
-            void fetchPrograms();
+        if (!showCreateProjectModal || programs.length > 0) {
+            return;
         }
+
+        const frameId = window.requestAnimationFrame(() => {
+            void fetchPrograms();
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
     }, [showCreateProjectModal, programs.length, fetchPrograms]);
 
     const selectedProgram = programs.find(

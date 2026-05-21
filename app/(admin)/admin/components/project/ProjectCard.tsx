@@ -20,6 +20,20 @@ import {
 
 import { useAdminModalStates } from "../../hooks";
 
+const readStringSetFromStorage = (key: string): Set<string> => {
+    const storedValue = localStorage.getItem(key);
+    if (!storedValue) {
+        return new Set();
+    }
+
+    const parsedValue: unknown = JSON.parse(storedValue);
+    if (!Array.isArray(parsedValue)) {
+        return new Set();
+    }
+
+    return new Set(parsedValue.filter((item) => typeof item === "string"));
+};
+
 interface ProjectCardProps {
     project: AdminProject;
     showNewBadge?: boolean;
@@ -30,23 +44,26 @@ export default function ProjectCard({
     showNewBadge = false,
 }: ProjectCardProps): React.JSX.Element {
     const [viewedPendingReportKeys, setViewedPendingReportKeys] =
-        React.useState<Set<string>>(() => {
-            if (typeof window === "undefined") {
-                return new Set();
-            }
-
-            try {
-                const saved = localStorage.getItem("viewedPendingReportKeys");
-                return saved ? new Set(JSON.parse(saved)) : new Set();
-            } catch {
-                return new Set();
-            }
-        });
+        React.useState<Set<string>>(new Set());
     const {
         openProjectFilesModal,
         openProjectReportsModal,
         openStatusModal,
     } = useAdminModalStates();
+
+    React.useEffect(() => {
+        const frameId = window.requestAnimationFrame(() => {
+            try {
+                setViewedPendingReportKeys(
+                    readStringSetFromStorage("viewedPendingReportKeys"),
+                );
+            } catch {
+                setViewedPendingReportKeys(new Set());
+            }
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, []);
 
     const onEditProjectStatus = (targetProject: AdminProject) => {
         openStatusModal(targetProject);
@@ -74,10 +91,12 @@ export default function ProjectCard({
         }
 
         setViewedPendingReportKeys(nextViewedKeys);
-        localStorage.setItem(
-            "viewedPendingReportKeys",
-            JSON.stringify([...nextViewedKeys]),
-        );
+        if (typeof window !== "undefined") {
+            localStorage.setItem(
+                "viewedPendingReportKeys",
+                JSON.stringify([...nextViewedKeys]),
+            );
+        }
     };
 
     const onViewProjectReports = (targetProject: AdminProject) => {
