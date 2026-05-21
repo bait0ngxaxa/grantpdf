@@ -1,29 +1,26 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type ChangeEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
 import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
 import { useApprovalLogic } from "@/app/(document)/hooks/useApprovalLogic";
-import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
-import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
-import { PreviewList } from "@/app/(document)/components/document-form/PreviewField";
-import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
-import { FormSkeleton } from "@/components/ui";
+import { PreviewField } from "@/app/(document)/components/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/PreviewField";
+import { PreviewList } from "@/app/(document)/components/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/DocumentEditorLayout";
 import { FileText } from "lucide-react";
 import { type ApprovalData, initialApprovalData } from "@/config/initialData";
 import { type DocumentValidationResult } from "@/lib/validation";
-import {
-    BasicInfoSection,
-    DocumentDetailSection,
-    AttachmentSection,
-    ApproverInfoSection,
-    SignatureSection,
-    type SignatureCanvasRef,
-} from "@/app/(document)/components/forms/approval";
-import { useDocumentAuth } from "../../contexts/DocumentAuthContext";
+import { ApproverInfoSection } from "./ApproverInfoSection";
+import { AttachmentSection } from "./AttachmentSection";
+import { BasicInfoSection } from "./BasicInfoSection";
+import { DocumentDetailSection } from "./DocumentDetailSection";
+import { SignatureSection } from "./SignatureSection";
+import { type SignatureCanvasRef } from "./SignatureCanvas";
+import { useDocumentAuth } from "../../../contexts/DocumentAuthContext";
 
 async function validateApprovalForm(
     data: ApprovalData,
@@ -53,7 +50,6 @@ export function ApprovalForm(): React.JSX.Element {
         isSuccessModalOpen,
         setIsSuccessModalOpen,
         generatedFileUrl,
-        isClient,
         setMessage,
         setIsError,
     } = useDocumentForm<ApprovalData>({
@@ -108,6 +104,22 @@ export function ApprovalForm(): React.JSX.Element {
         setFormData,
     );
 
+    const handleBasicInfoChange = (
+        event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ): void => {
+        if (event.target.name !== "fileName") {
+            handleChange(event);
+            return;
+        }
+
+        const nextFileName = event.target.value;
+        setFormData((prevData) => ({
+            ...prevData,
+            fileName: nextFileName,
+            projectName: nextFileName,
+        }));
+    };
+
     const isDirty =
         Object.values(formData).some((value) => {
             if (Array.isArray(value)) return value.length > 0;
@@ -120,10 +132,6 @@ export function ApprovalForm(): React.JSX.Element {
     const { handleConfirmExit, allowNavigation } = useExitConfirmation({
         isDirty,
     });
-
-    if (!isClient) {
-        return <FormSkeleton />;
-    }
 
     return (
         <DocumentEditorLayout
@@ -147,7 +155,7 @@ export function ApprovalForm(): React.JSX.Element {
                     <PreviewGrid>
                         <PreviewField
                             label="ชื่อไฟล์"
-                            value={formData.projectName}
+                            value={formData.fileName}
                         />
                         <PreviewField
                             label="เลขที่หนังสือ"
@@ -200,6 +208,8 @@ export function ApprovalForm(): React.JSX.Element {
                     </PreviewGrid>
 
                     <PreviewField label="อีเมล" value={formData.email} />
+
+                    <PreviewField label="ผู้อนุมัติ" value={formData.accept} />
 
                     {(signaturePreview || signatureCanvasData) && (
                         <PreviewField label="ลายเซ็น">
@@ -272,7 +282,7 @@ export function ApprovalForm(): React.JSX.Element {
         >
             <BasicInfoSection
                 formData={formData}
-                handleChange={handleChange}
+                handleChange={handleBasicInfoChange}
                 errors={errors}
             />
 

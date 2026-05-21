@@ -1,8 +1,8 @@
 import { ClipboardList } from "lucide-react";
-import { FormField } from "@/app/(document)/components/document-form/FormField";
-import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { FormField } from "@/app/(document)/components/FormField";
+import { FormSection } from "@/app/(document)/components/FormSection";
 import { type ApprovalData } from "@/config/initialData";
-import { PROJECT_NAME_MAX_LENGTH } from "@/lib/validation/constants";
+import { DOCUMENT_FILE_NAME_MAX_LENGTH } from "@/lib/validation/constants";
 import { type ChangeEvent } from "react";
 
 interface BasicInfoSectionProps {
@@ -27,13 +27,13 @@ export function BasicInfoSection({
         >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <FormField
-                    label="ชื่อเอกสาร"
-                    name="projectName"
-                    placeholder="ระบุชื่อเอกสาร"
-                    value={formData.projectName}
+                    label="ชื่อไฟล์"
+                    name="fileName"
+                    placeholder="ระบุชื่อไฟล์ที่ต้องการบันทึก"
+                    value={formData.fileName}
                     onChange={handleChange}
-                    maxLength={PROJECT_NAME_MAX_LENGTH}
-                    error={errors.projectName}
+                    maxLength={DOCUMENT_FILE_NAME_MAX_LENGTH}
+                    error={errors.fileName || errors.projectName}
                     required
                 />
                 <FormField

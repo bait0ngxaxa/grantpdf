@@ -2,7 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui";
-import { ChartBarBig, UserStar, LogOut, Loader2, Menu, User } from "lucide-react";
+import {
+    ArrowRight,
+    ChartBarBig,
+    LogOut,
+    Loader2,
+    Menu,
+    ShieldCheck,
+    User,
+} from "lucide-react";
 import { ROUTES, ROLES, SIGNOUT_CALLBACK } from "@/lib/constants";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -69,18 +77,35 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                             type="button"
                             onClick={handleGoToAdmin}
                             disabled={isNavigatingAdmin}
-                            className="cursor-pointer rounded-full border-0 bg-gradient-to-r from-purple-600 to-indigo-600 px-3 font-semibold text-white shadow-lg shadow-purple-500/20 transition duration-300 hover:scale-105 hover:shadow-purple-500/40 active:scale-95 sm:px-4"
+                            className="group relative h-10 cursor-pointer overflow-hidden rounded-full border border-blue-300/50 bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-500 px-2.5 text-white shadow-md shadow-blue-500/15 ring-1 ring-white/10 transition duration-300 hover:border-cyan-200/80 hover:brightness-105 hover:ring-cyan-200/40 active:brightness-95 disabled:pointer-events-none disabled:opacity-80 dark:border-blue-400/30 dark:from-blue-500 dark:via-sky-500 dark:to-cyan-400 dark:text-white sm:px-3.5"
                         >
+                            <span className="absolute inset-0 bg-gradient-to-r from-white/18 via-white/8 to-transparent opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
                             {isNavigatingAdmin ? (
-                                <React.Fragment>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    กำลังเข้าสู่ระบบแอดมิน…
-                                </React.Fragment>
+                                <span className="relative flex items-center gap-2 text-xs font-bold sm:text-sm">
+                                    <Loader2 className="h-4 w-4 animate-spin text-cyan-100" />
+                                    <span className="hidden sm:inline">
+                                        กำลังเข้าสู่ระบบแอดมิน…
+                                    </span>
+                                    <span className="sm:hidden">แอดมิน…</span>
+                                </span>
                             ) : (
-                                <React.Fragment>
-                                    <UserStar className="w-4 h-4 mr-2" />
-                                    ระบบแอดมิน
-                                </React.Fragment>
+                                <span className="relative flex items-center gap-2">
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-blue-600 shadow-sm shadow-blue-900/10">
+                                        <ShieldCheck className="h-4 w-4" />
+                                    </span>
+                                    <span className="hidden flex-col items-start leading-none sm:flex">
+                                        <span className="text-[10px] font-black tracking-[0.18em] text-cyan-100">
+                                            ADMIN
+                                        </span>
+                                        <span className="text-sm font-bold">
+                                            ระบบแอดมิน
+                                        </span>
+                                    </span>
+                                    <span className="text-xs font-bold sm:hidden">
+                                        แอดมิน
+                                    </span>
+                                    <ArrowRight className="hidden h-4 w-4 text-cyan-100 transition-transform group-hover:translate-x-0.5 md:block" />
+                                </span>
                             )}
                         </Button>
                     )}

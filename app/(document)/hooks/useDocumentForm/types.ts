@@ -32,7 +32,6 @@ export interface UseDocumentFormReturn<T> {
     setIsSuccessModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     generatedFileUrl: string | null;
     setGeneratedFileUrl: React.Dispatch<React.SetStateAction<string | null>>;
-    isClient: boolean;
 
     // Handlers
     handleChange: (
@@ -64,7 +63,6 @@ export interface FormStateReturn<T> {
     setIsSuccessModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     generatedFileUrl: string | null;
     setGeneratedFileUrl: React.Dispatch<React.SetStateAction<string | null>>;
-    isClient: boolean;
 }
 
 export interface UseFormSubmitProps<T> {

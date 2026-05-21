@@ -1,7 +1,7 @@
 import { BarChart, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui";
-import { RichTextField } from "@/app/(document)/components/document-form/RichTextField";
-import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { RichTextField } from "@/app/(document)/components/RichTextField";
+import { FormSection } from "@/app/(document)/components/FormSection";
 import { type ActivityData } from "@/config/initialData";
 import { DOCUMENT_TEXTAREA_COMPACT_MAX_LENGTH } from "@/lib/validation/constants";
 
@@ -45,9 +45,26 @@ export function ActivitySection({
                 {activities.map((activity, index) => (
                     <div
                         key={index}
-                        className="grid grid-cols-1 lg:grid-cols-4 gap-2 p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-sm relative"
+                        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
                     >
-                        <div>
+                        <div className="mb-3 flex items-center justify-between gap-3 lg:hidden">
+                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                รายการที่ {index + 1}
+                            </p>
+                            {activities.length > 1 && (
+                                <Button
+                                    type="button"
+                                    onClick={() => removeActivityRow(index)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 shrink-0 text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span className="ml-1">ลบ</span>
+                                </Button>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-start">
                             <RichTextField
                                 label="กิจกรรม"
                                 name="activity"
@@ -57,12 +74,10 @@ export function ActivitySection({
                                 onValueChange={(_name, value) =>
                                     updateActivity(index, "activity", value)
                                 }
-                                className="h-32 lg:h-40"
+                                className="h-56 lg:h-64"
                                 toolbarVariant="compact"
                                 labelClassName="lg:hidden"
                             />
-                        </div>
-                        <div>
                             <RichTextField
                                 label="ผู้ติดตามโครงการ"
                                 name="manager"
@@ -72,12 +87,10 @@ export function ActivitySection({
                                 onValueChange={(_name, value) =>
                                     updateActivity(index, "manager", value)
                                 }
-                                className="h-32 lg:h-40"
+                                className="h-56 lg:h-64"
                                 toolbarVariant="compact"
                                 labelClassName="lg:hidden"
                             />
-                        </div>
-                        <div>
                             <RichTextField
                                 label="วิธีการประเมินผล"
                                 name="evaluation2"
@@ -87,12 +100,10 @@ export function ActivitySection({
                                 onValueChange={(_name, value) =>
                                     updateActivity(index, "evaluation2", value)
                                 }
-                                className="h-32 lg:h-40"
+                                className="h-56 lg:h-64"
                                 toolbarVariant="compact"
                                 labelClassName="lg:hidden"
                             />
-                        </div>
-                        <div className="relative">
                             <RichTextField
                                 label="ระยะเวลา"
                                 name="duration"
@@ -102,7 +113,7 @@ export function ActivitySection({
                                 onValueChange={(_name, value) =>
                                     updateActivity(index, "duration", value)
                                 }
-                                className="h-32 lg:h-40"
+                                className="h-56 lg:h-64"
                                 toolbarVariant="compact"
                                 labelClassName="lg:hidden"
                             />
@@ -111,11 +122,12 @@ export function ActivitySection({
                                     type="button"
                                     onClick={() => removeActivityRow(index)}
                                     variant="ghost"
-                                    size="sm"
-                                    className="absolute top-1 right-1 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                    size="icon"
+                                    aria-label={`ลบรายการที่ ${index + 1}`}
+                                    title={`ลบรายการที่ ${index + 1}`}
+                                    className="mt-0 hidden size-9 shrink-0 text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300 lg:inline-flex"
                                 >
                                     <Trash2 className="w-4 h-4" />
-                                    <span className="lg:hidden ml-1">ลบ</span>
                                 </Button>
                             )}
                         </div>

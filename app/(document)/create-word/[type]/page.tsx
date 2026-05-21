@@ -14,21 +14,33 @@ async function getDocumentForm(
 ): Promise<ComponentType | null> {
     switch (type) {
         case "approval":
-            return (await import("@/app/(document)/components/forms/ApprovalForm"))
-                .ApprovalForm;
+            return (
+                await import(
+                    "@/app/(document)/components/forms/approval/ApprovalForm"
+                )
+            ).ApprovalForm;
         case "contract":
-            return (await import("@/app/(document)/components/forms/ContractForm"))
-                .ContractForm;
+            return (
+                await import(
+                    "@/app/(document)/components/forms/contract/ContractForm"
+                )
+            ).ContractForm;
         case "formproject":
             return (
-                await import("@/app/(document)/components/forms/FormProjectForm")
+                await import(
+                    "@/app/(document)/components/forms/project/FormProjectForm"
+                )
             ).FormProjectForm;
         case "summary":
-            return (await import("@/app/(document)/components/forms/SummaryForm"))
-                .SummaryForm;
+            return (
+                await import(
+                    "@/app/(document)/components/forms/summary/SummaryForm"
+                )
+            ).SummaryForm;
         case "tor":
-            return (await import("@/app/(document)/components/forms/TorForm"))
-                .TorForm;
+            return (
+                await import("@/app/(document)/components/forms/tor/TorForm")
+            ).TorForm;
         default:
             return null;
     }

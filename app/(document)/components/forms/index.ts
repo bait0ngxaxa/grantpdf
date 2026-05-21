@@ -1,5 +1,5 @@
-export { ApprovalForm } from "./ApprovalForm";
-export { ContractForm } from "./ContractForm";
-export { FormProjectForm } from "./FormProjectForm";
-export { SummaryForm } from "./SummaryForm";
-export { TorForm } from "./TorForm";
+export { ApprovalForm } from "./approval/ApprovalForm";
+export { ContractForm } from "./contract/ContractForm";
+export { FormProjectForm } from "./project/FormProjectForm";
+export { SummaryForm } from "./summary/SummaryForm";
+export { TorForm } from "./tor/TorForm";

@@ -3,10 +3,9 @@
 import { useCallback, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
-import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
-import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
-import { FormSkeleton } from "@/components/ui";
+import { PreviewField } from "@/app/(document)/components/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/DocumentEditorLayout";
 import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
 import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
@@ -19,12 +18,10 @@ import {
     initialActivity,
 } from "@/config/initialData";
 import { type DocumentValidationResult } from "@/lib/validation";
-import {
-    BasicInfoSection,
-    ProjectDetailSection,
-    ScopeSection,
-    ActivitySection,
-} from "@/app/(document)/components/forms/tor";
+import { ActivitySection } from "./ActivitySection";
+import { BasicInfoSection } from "./BasicInfoSection";
+import { ProjectDetailSection } from "./ProjectDetailSection";
+import { ScopeSection } from "./ScopeSection";
 
 async function validateTorForm(
     data: TORData,
@@ -55,7 +52,6 @@ export function TorForm(): React.JSX.Element {
         isSuccessModalOpen,
         setIsSuccessModalOpen,
         generatedFileUrl,
-        isClient,
     } = useDocumentForm<TORData>({
         initialData: initialTORData,
         apiEndpoint: "/api/generate/tor",
@@ -136,10 +132,6 @@ export function TorForm(): React.JSX.Element {
         isDirty,
     });
 
-    if (!isClient) {
-        return <FormSkeleton />;
-    }
-
     return (
         <DocumentEditorLayout
             title="สร้างเอกสาร Terms of Reference (TOR)"
@@ -158,31 +150,53 @@ export function TorForm(): React.JSX.Element {
                 <>
                     <PreviewGrid>
                         <PreviewField
+                            label="ชื่อไฟล์"
+                            value={formData.fileName}
+                        />
+                        <PreviewField
                             label="ชื่อโครงการ"
                             value={formData.projectName}
                         />
-                        <PreviewField label="วันที่" value={formData.date} />
                     </PreviewGrid>
 
                     <PreviewGrid>
+                        <PreviewField label="วันที่" value={formData.date} />
                         <PreviewField
                             label="เลขที่สัญญา"
                             value={formData.contractnumber}
                         />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
                         <PreviewField
                             label="ผู้รับผิดชอบ"
                             value={formData.owner}
+                        />
+                        <PreviewField
+                            label="อีเมล"
+                            value={formData.email}
                         />
                     </PreviewGrid>
 
                     <PreviewGrid>
                         <PreviewField
+                            label="เบอร์โทรศัพท์"
+                            value={formData.tel}
+                        />
+                        <PreviewField
                             label="ที่อยู่"
                             value={formData.address}
                         />
+                    </PreviewGrid>
+
+                    <PreviewGrid>
                         <PreviewField
                             label="กำหนดเวลา"
                             value={formData.timeline}
+                        />
+                        <PreviewField
+                            label="งบประมาณ"
+                            value={formData.cost}
                         />
                     </PreviewGrid>
 
@@ -195,6 +209,36 @@ export function TorForm(): React.JSX.Element {
                     <PreviewField label="วัตถุประสงค์">
                         <p className="text-sm whitespace-pre-wrap">
                             {formData.objective1 || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="กลุ่มเป้าหมาย">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.target || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="พื้นที่/เขต">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.zone || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="แผนการดำเนินงาน">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.plan || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="การจัดการโครงการ">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.projectmanage || "-"}
+                        </p>
+                    </PreviewField>
+
+                    <PreviewField label="องค์กร ภาคี ร่วมงาน">
+                        <p className="text-sm whitespace-pre-wrap">
+                            {formData.partner || "-"}
                         </p>
                     </PreviewField>
 

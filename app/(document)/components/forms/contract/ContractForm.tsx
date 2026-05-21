@@ -3,21 +3,18 @@
 import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
-import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
-import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
-import { FormSkeleton } from "@/components/ui";
+import { PreviewField } from "@/app/(document)/components/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/DocumentEditorLayout";
 import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
 import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
 import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation";
 import { type ContractData, initialContractData } from "@/config/initialData";
 import { type DocumentValidationResult } from "@/lib/validation";
-import {
-    ProjectDetailsSection,
-    ContractorInfoSection,
-    BudgetSection,
-} from "@/app/(document)/components/forms/contract";
+import { BudgetSection } from "./BudgetSection";
+import { ContractorInfoSection } from "./ContractorInfoSection";
+import { ProjectDetailsSection } from "./ProjectDetailsSection";
 
 async function validateContractForm(
     data: ContractData,
@@ -47,7 +44,6 @@ export function ContractForm(): React.JSX.Element {
         setIsSuccessModalOpen,
         generatedFileUrl,
         isDirty,
-        isClient,
     } = useDocumentForm<ContractData>({
         initialData: initialContractData,
         apiEndpoint: "/api/generate/contract",
@@ -88,10 +84,6 @@ export function ContractForm(): React.JSX.Element {
         isDirty,
     });
 
-    if (!isClient) {
-        return <FormSkeleton />;
-    }
-
     return (
         <DocumentEditorLayout
             title="สร้างหนังสือสัญญาเพื่อรับรองการลงนาม"
@@ -126,6 +118,11 @@ export function ContractForm(): React.JSX.Element {
                     {contractCode && (
                         <PreviewField label="รหัสสัญญา" value={contractCode} />
                     )}
+
+                    <PreviewField
+                        label="เลขที่สัญญา"
+                        value={formData.contractnumber}
+                    />
 
                     <PreviewGrid>
                         <PreviewField label="วันที่" value={formData.date} />

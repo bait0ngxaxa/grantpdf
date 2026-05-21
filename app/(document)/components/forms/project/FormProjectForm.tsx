@@ -3,10 +3,9 @@
 import { type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
-import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
-import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
-import { FormSkeleton } from "@/components/ui";
+import { PreviewField } from "@/app/(document)/components/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/DocumentEditorLayout";
 import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
 import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
@@ -17,10 +16,8 @@ import {
     initialFormProjectData,
 } from "@/config/initialData";
 import { type DocumentValidationResult } from "@/lib/validation";
-import {
-    BasicInfoSection,
-    ProjectDetailSection,
-} from "@/app/(document)/components/forms/project";
+import { BasicInfoSection } from "./BasicInfoSection";
+import { ProjectDetailSection } from "./ProjectDetailSection";
 
 async function validateFormProjectDocument(
     data: FormProjectData,
@@ -48,7 +45,6 @@ export function FormProjectForm(): React.JSX.Element {
         setIsSuccessModalOpen,
         generatedFileUrl,
         isDirty,
-        isClient,
     } = useDocumentForm<FormProjectData>({
         initialData: initialFormProjectData,
         apiEndpoint: "/api/generate/formproject",
@@ -83,10 +79,6 @@ export function FormProjectForm(): React.JSX.Element {
     const { handleConfirmExit, allowNavigation } = useExitConfirmation({
         isDirty,
     });
-
-    if (!isClient) {
-        return <FormSkeleton />;
-    }
 
     return (
         <DocumentEditorLayout

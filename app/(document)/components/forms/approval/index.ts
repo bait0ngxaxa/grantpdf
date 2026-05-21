@@ -1,3 +1,4 @@
+export { ApprovalForm } from "./ApprovalForm";
 export { BasicInfoSection } from "./BasicInfoSection";
 export { DocumentDetailSection } from "./DocumentDetailSection";
 export { AttachmentSection } from "./AttachmentSection";

@@ -2,10 +2,9 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { PreviewField } from "@/app/(document)/components/document-form/PreviewField";
-import { PreviewGrid } from "@/app/(document)/components/document-form/PreviewField";
-import { DocumentEditorLayout } from "@/app/(document)/components/document-form/DocumentEditorLayout";
-import { FormSkeleton } from "@/components/ui";
+import { PreviewField } from "@/app/(document)/components/PreviewField";
+import { PreviewGrid } from "@/app/(document)/components/PreviewField";
+import { DocumentEditorLayout } from "@/app/(document)/components/DocumentEditorLayout";
 import { useDocumentForm } from "@/app/(document)/hooks/useDocumentForm";
 import { usePreviewModal } from "@/app/(document)/hooks/usePreviewModal";
 import { useDocumentValidation } from "@/app/(document)/hooks/useDocumentValidation";
@@ -13,11 +12,9 @@ import { useExitConfirmation } from "@/app/(document)/hooks/useExitConfirmation"
 
 import { type SummaryData, initialSummaryData } from "@/config/initialData";
 import { type DocumentValidationResult } from "@/lib/validation";
-import {
-    BasicInfoSection,
-    PersonInfoSection,
-    BudgetSection,
-} from "@/app/(document)/components/forms/summary";
+import { BasicInfoSection } from "./BasicInfoSection";
+import { BudgetSection } from "./BudgetSection";
+import { PersonInfoSection } from "./PersonInfoSection";
 
 async function validateSummaryForm(
     data: SummaryData,
@@ -45,7 +42,6 @@ export function SummaryForm(): React.JSX.Element {
         setIsSuccessModalOpen,
         generatedFileUrl,
         isDirty,
-        isClient,
     } = useDocumentForm<SummaryData>({
         initialData: initialSummaryData,
         apiEndpoint: "/api/generate/summary",
@@ -72,10 +68,6 @@ export function SummaryForm(): React.JSX.Element {
     const onSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
         validateBeforeSubmit(e, formData, handleSubmit);
     };
-
-    if (!isClient) {
-        return <FormSkeleton />;
-    }
 
     return (
         <DocumentEditorLayout
@@ -158,6 +150,11 @@ export function SummaryForm(): React.JSX.Element {
                             value={formData.projectReview}
                         />
                     </PreviewGrid>
+
+                    <PreviewField
+                        label="ผู้ตรวจสอบ"
+                        value={formData.inspector}
+                    />
 
                     <PreviewField
                         label="ผู้ประสานงาน"

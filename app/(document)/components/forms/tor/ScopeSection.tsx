@@ -1,6 +1,6 @@
 import { Target } from "lucide-react";
-import { RichTextField } from "@/app/(document)/components/document-form/RichTextField";
-import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { RichTextField } from "@/app/(document)/components/RichTextField";
+import { FormSection } from "@/app/(document)/components/FormSection";
 import { type TORData } from "@/config/initialData";
 import { DOCUMENT_TEXTAREA_MEDIUM_MAX_LENGTH } from "@/lib/validation/constants";
 

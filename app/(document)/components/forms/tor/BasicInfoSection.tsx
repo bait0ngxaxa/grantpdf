@@ -1,6 +1,6 @@
 import { ClipboardList } from "lucide-react";
-import { FormField } from "@/app/(document)/components/document-form/FormField";
-import { FormSection } from "@/app/(document)/components/document-form/FormSection";
+import { FormField } from "@/app/(document)/components/FormField";
+import { FormSection } from "@/app/(document)/components/FormSection";
 import { type TORData } from "@/config/initialData";
 import {
     DOCUMENT_FILE_NAME_MAX_LENGTH,

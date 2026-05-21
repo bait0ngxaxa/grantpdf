@@ -36,7 +36,6 @@ export function useDocumentForm<T extends object>({
         setIsSuccessModalOpen,
         generatedFileUrl,
         setGeneratedFileUrl,
-        isClient,
     } = useFormState<T>(initialData);
 
     // Form handlers
@@ -79,7 +78,6 @@ export function useDocumentForm<T extends object>({
         setIsSuccessModalOpen,
         generatedFileUrl,
         setGeneratedFileUrl,
-        isClient,
 
         // Handlers
         handleChange,

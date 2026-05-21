@@ -6,8 +6,6 @@ import { type FormStateReturn } from "./types";
 export function useFormState<T extends object>(
     initialData: T,
 ): FormStateReturn<T> {
-    const isClient = typeof window !== "undefined";
-
     const [formData, setFormData] = useState<T>(initialData);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
@@ -30,6 +28,5 @@ export function useFormState<T extends object>(
         setIsSuccessModalOpen,
         generatedFileUrl,
         setGeneratedFileUrl,
-        isClient,
     };
 }

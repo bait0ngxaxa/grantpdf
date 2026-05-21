@@ -2,7 +2,7 @@
 
 import { type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
-import { RichTextField } from "@/app/(document)/components/document-form/RichTextField";
+import { RichTextField } from "@/app/(document)/components/RichTextField";
 import { cn } from "@/lib/utils";
 
 interface FormFieldProps {

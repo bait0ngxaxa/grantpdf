@@ -1,8 +1,8 @@
 import { Folder } from "lucide-react";
-import { AttachmentList } from "@/app/(document)/components/document-form/AttachmentList";
-import { AttachmentUpload } from "@/app/(document)/components/document-form/AttachmentUpload";
-import { FormSection } from "@/app/(document)/components/document-form/FormSection";
-import { RichTextField } from "@/app/(document)/components/document-form/RichTextField";
+import { AttachmentList } from "@/app/(document)/components/AttachmentList";
+import { AttachmentUpload } from "@/app/(document)/components/AttachmentUpload";
+import { FormSection } from "@/app/(document)/components/FormSection";
+import { RichTextField } from "@/app/(document)/components/RichTextField";
 import { type ApprovalData } from "@/config/initialData";
 import { type ChangeEvent } from "react";
 import { DOCUMENT_TEXTAREA_MAX_LENGTH } from "@/lib/validation/constants";
