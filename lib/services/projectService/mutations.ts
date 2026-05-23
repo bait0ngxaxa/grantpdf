@@ -2,7 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import type { AdminProject, ProjectCoOwnerSummary } from "@/type/models";
 import { Prisma, type Project } from "@prisma/client";
-import type { UpdateProjectCoOwnersParams, UpdateProjectStatusParams } from "./types";
+import type {
+    ProjectAuditContext,
+    UpdateProjectCoOwnersParams,
+    UpdateProjectStatusParams,
+} from "./types";
 import { VALID_STATUSES_SET, PROJECT_STATUS } from "@/lib/constants";
 import { buildProjectAccessWhere } from "./projectAccess";
 
@@ -16,6 +20,118 @@ function uniquePositiveIds(ids: number[]): number[] {
     }
 
     return [...uniqueIds];
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+    return (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+    );
+}
+
+function toProjectWithStringId(
+    project: Project & { files: unknown[]; _count: { files: number } },
+): { id: string } & Omit<Project, "id"> {
+    return {
+        ...project,
+        id: project.id.toString(),
+    };
+}
+
+function toAdminProject(project: {
+    id: number;
+    name: string;
+    description: string | null;
+    status: string;
+    statusNote: string | null;
+    programId: number | null;
+    program?: { name: string } | null;
+    created_at: Date;
+    updated_at: Date | null;
+    userId: number;
+    user?: { name: string | null; email: string } | null;
+    _count: { files: number };
+}): Partial<AdminProject> {
+    return {
+        id: project.id.toString(),
+        name: project.name,
+        description: project.description || undefined,
+        status: project.status,
+        statusNote: project.statusNote || undefined,
+        programId: project.programId?.toString(),
+        programName: project.program?.name,
+        created_at: project.created_at.toISOString(),
+        updated_at: project.updated_at?.toISOString() || new Date().toISOString(),
+        userId: project.userId.toString(),
+        userName: project.user?.name || "Unknown User",
+        userEmail: project.user?.email || "Unknown Email",
+        _count: project._count,
+    };
+}
+
+async function findProjectForCreate(
+    userId: number,
+    name: string,
+): Promise<{ id: number; programId: number | null } | null> {
+    return prisma.project.findUnique({
+        where: { userId_name: { userId, name } },
+        select: { id: true, programId: true },
+    });
+}
+
+async function getProjectForCreate(
+    id: number,
+): Promise<Project & { files: unknown[]; _count: { files: number } }> {
+    return prisma.project.findUniqueOrThrow({
+        where: { id },
+        include: {
+            files: true,
+            _count: {
+                select: { files: true },
+            },
+        },
+    });
+}
+
+async function createProjectStatusAudit(
+    tx: Prisma.TransactionClient,
+    beforeProject: {
+        status: string;
+        statusNote: string | null;
+        programId: number | null;
+    },
+    updated: { id: number; name: string; programId: number | null } & {
+        program?: { name: string } | null;
+        user?: { email: string } | null;
+    },
+    params: UpdateProjectStatusParams,
+    audit: ProjectAuditContext,
+): Promise<void> {
+    await tx.auditLog.create({
+        data: {
+            action: "ADMIN_PROJECT_UPDATE",
+            outcome: "success",
+            actorUserId: parseActorUserId(audit.actorUserId),
+            actorEmail: audit.actorEmail ?? null,
+            targetType: "project",
+            targetId: updated.id.toString(),
+            ip: audit.ip ?? null,
+            userAgent: audit.userAgent ?? null,
+            requestId: audit.requestId ?? null,
+            details: toPrismaJsonValue({
+                projectId: updated.id,
+                projectName: updated.name,
+                previousStatus: beforeProject.status,
+                previousStatusNote: beforeProject.statusNote,
+                previousProgramId: beforeProject.programId,
+                newStatus: params.status,
+                statusNote: params.statusNote || null,
+                programId: updated.programId ?? null,
+                programName: updated.program?.name ?? null,
+                projectOwnerEmail: updated.user?.email ?? null,
+            }),
+        },
+    });
 }
 
 export async function updateProjectStatus({
@@ -64,23 +180,60 @@ export async function updateProjectStatus({
         },
     });
 
-    return {
-        id: updatedProject.id.toString(),
-        name: updatedProject.name,
-        description: updatedProject.description || undefined,
-        status: updatedProject.status,
-        statusNote: updatedProject.statusNote || undefined,
-        programId: updatedProject.programId?.toString(),
-        programName: updatedProject.program?.name,
-        created_at: updatedProject.created_at.toISOString(),
-        updated_at:
-            updatedProject.updated_at?.toISOString() ||
-            new Date().toISOString(),
-        userId: updatedProject.userId.toString(),
-        userName: updatedProject.user?.name || "Unknown User",
-        userEmail: updatedProject.user?.email || "Unknown Email",
-        _count: updatedProject._count,
-    };
+    return toAdminProject(updatedProject);
+}
+
+export async function updateProjectStatusWithAudit(
+    params: UpdateProjectStatusParams,
+    audit: ProjectAuditContext,
+): Promise<Partial<AdminProject>> {
+    if (!Number.isInteger(params.projectId) || params.projectId <= 0) {
+        throw new Error("Invalid projectId");
+    }
+
+    if (!VALID_STATUSES_SET.has(params.status)) {
+        throw new Error(
+            `Invalid status. Must be one of: ${Object.values(PROJECT_STATUS).join(", ")}`,
+        );
+    }
+
+    const updatedProject = await prisma.$transaction(async (tx) => {
+        const beforeProject = await tx.project.findUnique({
+            where: { id: params.projectId },
+            select: {
+                id: true,
+                name: true,
+                status: true,
+                statusNote: true,
+                programId: true,
+            },
+        });
+
+        if (!beforeProject) {
+            throw new Error("PROJECT_NOT_FOUND");
+        }
+
+        const updated = await tx.project.update({
+            where: { id: params.projectId },
+            data: {
+                status: params.status,
+                statusNote: params.statusNote || null,
+                programId: params.programId,
+                updated_at: new Date(),
+            },
+            include: {
+                program: { select: { id: true, name: true } },
+                user: { select: { id: true, name: true, email: true } },
+                _count: { select: { files: true } },
+            },
+        });
+
+        await createProjectStatusAudit(tx, beforeProject, updated, params, audit);
+
+        return updated;
+    });
+
+    return toAdminProject(updatedProject);
 }
 
 export async function updateProjectCoOwners({
@@ -203,67 +356,80 @@ export async function createProject(
     const normalizedDescription =
         description && description.trim() !== "" ? description.trim() : null;
 
-    const existing = await prisma.project.findUnique({
-        where: {
-            userId_name: {
-                userId,
-                name: trimmedName,
-            },
-        },
-        select: {
-            id: true,
-            programId: true,
-        },
-    });
+    try {
+        const project = await prisma.$transaction(async (tx) => {
+            const existing = await tx.project.findUnique({
+                where: { userId_name: { userId, name: trimmedName } },
+                select: { id: true, programId: true },
+            });
 
-    if (existing && programId && existing.programId !== null && existing.programId !== programId) {
-        throw new Error("PROJECT_NAME_CONFLICT");
+            if (
+                existing &&
+                programId &&
+                existing.programId !== null &&
+                existing.programId !== programId
+            ) {
+                throw new Error("PROJECT_NAME_CONFLICT");
+            }
+
+            return existing
+                ? tx.project.update({
+                      where: { id: existing.id },
+                      data:
+                          existing.programId === null && programId
+                              ? { programId, updated_at: new Date() }
+                              : {},
+                      include: {
+                          files: true,
+                          _count: { select: { files: true } },
+                      },
+                  })
+                : tx.project.create({
+                      data: {
+                          name: trimmedName,
+                          description: normalizedDescription,
+                          userId,
+                          programId: programId ?? null,
+                      },
+                      include: {
+                          files: true,
+                          _count: { select: { files: true } },
+                      },
+                  });
+        });
+
+        return toProjectWithStringId(project);
+    } catch (error) {
+        if (!isUniqueConstraintError(error)) {
+            throw error;
+        }
+
+        const existing = await findProjectForCreate(userId, trimmedName);
+        if (!existing) {
+            throw error;
+        }
+
+        if (
+            programId &&
+            existing.programId !== null &&
+            existing.programId !== programId
+        ) {
+            throw new Error("PROJECT_NAME_CONFLICT");
+        }
+
+        const project = existing.programId === null && programId
+            ? await prisma.project.update({
+                  where: { id: existing.id },
+                  data: { programId, updated_at: new Date() },
+                  include: {
+                      files: true,
+                      _count: { select: { files: true } },
+                  },
+              })
+            : await getProjectForCreate(existing.id);
+
+        return toProjectWithStringId(project);
     }
-
-    const project = existing
-        ? await prisma.project.update({
-              where: { id: existing.id },
-              data:
-                  existing.programId === null && programId
-                      ? {
-                            programId,
-                            updated_at: new Date(),
-                        }
-                      : {},
-              include: {
-                  files: true,
-                  _count: {
-                      select: { files: true },
-                  },
-              },
-          })
-        : await prisma.project.create({
-              data: {
-                  name: trimmedName,
-                  description: normalizedDescription,
-                  userId,
-                  programId: programId ?? null,
-              },
-              include: {
-                  files: true,
-                  _count: {
-                      select: { files: true },
-                  },
-              },
-          });
-
-    return {
-        ...project,
-        id: project.id.toString(),
-    };
-}
-
-interface ProjectAuditContext {
-    actorUserId: string;
-    actorEmail?: string;
-    ip?: string;
-    userAgent?: string;
-    requestId?: string;
 }
 
 export async function createProjectWithAudit(

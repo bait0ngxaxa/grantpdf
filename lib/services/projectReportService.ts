@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import { REPORT_STATUS } from "@/lib/constants";
+import type { Prisma } from "@prisma/client";
 import type {
     AdminProjectReport,
     ProjectReport,
@@ -14,6 +16,14 @@ interface CreateProjectReportParams {
     fileExtension: string;
     reportType: string;
     note?: string;
+}
+
+interface ReportAuditContext {
+    actorUserId: string;
+    actorEmail?: string;
+    ip?: string;
+    userAgent?: string;
+    requestId?: string;
 }
 
 interface RawReportFile {
@@ -69,6 +79,27 @@ const REPORT_FILE_SELECT = {
     updated_at: true,
 } as const;
 
+const ADMIN_REPORT_SELECT = {
+    id: true,
+    projectId: true,
+    userId: true,
+    fileId: true,
+    reportType: true,
+    status: true,
+    note: true,
+    adminNote: true,
+    submittedAt: true,
+    reviewedAt: true,
+    file: { select: REPORT_FILE_SELECT },
+    user: { select: { name: true, email: true } },
+    project: {
+        select: {
+            name: true,
+            program: { select: { name: true } },
+        },
+    },
+} as const;
+
 function sanitizeReportFile(file: RawReportFile): UserFile {
     return {
         id: file.id.toString(),
@@ -108,6 +139,65 @@ function sanitizeAdminProjectReport(
         userName: report.user?.name ?? "ไม่พบชื่อผู้ใช้",
         userEmail: report.user?.email ?? "ไม่พบอีเมล",
     };
+}
+
+async function updatePendingProjectReport(
+    tx: Prisma.TransactionClient,
+    params: {
+        reportId: number;
+        status: string;
+        adminNote?: string;
+        reviewedBy: number;
+    },
+): Promise<unknown> {
+    const updateResult = await tx.projectReport.updateMany({
+        where: {
+            id: params.reportId,
+            status: REPORT_STATUS.PENDING_REVIEW,
+        },
+        data: {
+            status: params.status,
+            adminNote: params.adminNote,
+            reviewedBy: params.reviewedBy,
+            reviewedAt: new Date(),
+        },
+    });
+
+    if (updateResult.count !== 1) {
+        throw new Error("PROJECT_REPORT_ALREADY_REVIEWED");
+    }
+
+    return tx.projectReport.findUniqueOrThrow({
+        where: { id: params.reportId },
+        select: ADMIN_REPORT_SELECT,
+    });
+}
+
+async function createReportStatusAudit(
+    tx: Prisma.TransactionClient,
+    report: RawProjectReport,
+    audit: ReportAuditContext,
+): Promise<void> {
+    await tx.auditLog.create({
+        data: {
+            action: "ADMIN_PROJECT_REPORT_UPDATE",
+            outcome: "success",
+            actorUserId: parseActorUserId(audit.actorUserId),
+            actorEmail: audit.actorEmail ?? null,
+            targetType: "project_report",
+            targetId: report.id.toString(),
+            ip: audit.ip ?? null,
+            userAgent: audit.userAgent ?? null,
+            requestId: audit.requestId ?? null,
+            details: toPrismaJsonValue({
+                reportId: report.id,
+                projectId: report.projectId,
+                projectName: report.project?.name ?? null,
+                status: report.status,
+                userEmail: report.user?.email ?? null,
+            }),
+        },
+    });
 }
 
 export async function getProjectReportsForUser(
@@ -261,47 +351,43 @@ export async function updateProjectReportStatus({
     reviewedBy: number;
 }): Promise<AdminProjectReport> {
     const report = await prisma.$transaction(async (tx) => {
-        const updateResult = await tx.projectReport.updateMany({
-            where: {
-                id: reportId,
-                status: REPORT_STATUS.PENDING_REVIEW,
-            },
-            data: {
-                status,
-                adminNote,
-                reviewedBy,
-                reviewedAt: new Date(),
-            },
-        });
-
-        if (updateResult.count !== 1) {
-            throw new Error("PROJECT_REPORT_ALREADY_REVIEWED");
-        }
-
-        return tx.projectReport.findUniqueOrThrow({
-            where: { id: reportId },
-            select: {
-                id: true,
-                projectId: true,
-                userId: true,
-                fileId: true,
-                reportType: true,
-                status: true,
-                note: true,
-                adminNote: true,
-                submittedAt: true,
-                reviewedAt: true,
-                file: { select: REPORT_FILE_SELECT },
-                user: { select: { name: true, email: true } },
-                project: {
-                    select: {
-                        name: true,
-                        program: { select: { name: true } },
-                    },
-                },
-            },
+        return updatePendingProjectReport(tx, {
+            reportId,
+            status,
+            adminNote,
+            reviewedBy,
         });
     });
 
     return sanitizeAdminProjectReport(report as unknown as RawProjectReport);
+}
+
+export async function updateProjectReportStatusWithAudit({
+    reportId,
+    status,
+    adminNote,
+    reviewedBy,
+    audit,
+}: {
+    reportId: number;
+    status: string;
+    adminNote?: string;
+    reviewedBy: number;
+    audit: ReportAuditContext;
+}): Promise<AdminProjectReport> {
+    const report = await prisma.$transaction(async (tx) => {
+        const updated = await updatePendingProjectReport(tx, {
+            reportId,
+            status,
+            adminNote,
+            reviewedBy,
+        });
+        const rawReport = updated as RawProjectReport;
+
+        await createReportStatusAudit(tx, rawReport, audit);
+
+        return rawReport;
+    });
+
+    return sanitizeAdminProjectReport(report);
 }

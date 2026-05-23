@@ -192,7 +192,24 @@ export function formatAuditDetails(
     }
 
     if (knownAction === "PASSWORD_RESET_REQUEST") {
-        return "ส่งคำขอรีเซ็ตรหัสผ่าน";
+        const requestedEmail =
+            readStringField(details, "requestedEmail") ||
+            readStringField(details, "attemptedEmail");
+        const accountFound = details.accountFound;
+        const reason = readStringField(details, "reason");
+        const parts: string[] = ["ส่งคำขอรีเซ็ตรหัสผ่าน"];
+
+        if (requestedEmail) {
+            parts.push(`อีเมล: ${requestedEmail}`);
+        }
+        if (accountFound === false) {
+            parts.push("ไม่พบบัญชีในระบบ");
+        }
+        if (reason === "rate_limited") {
+            parts.push("ถูกจำกัดจำนวนครั้ง");
+        }
+
+        return parts.join(" | ");
     }
 
     if (knownAction === "PASSWORD_RESET_SUCCESS") {

@@ -1,15 +1,26 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { logAudit } from "@/lib/auditLog";
 import { PAGINATION } from "@/lib/constants";
 import { toPublicApiError } from "@/lib/apiError";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import { parsePositiveInt } from "@/lib/queryParams";
 import {
     getProjectReportsForAdmin,
-    updateProjectReportStatus,
+    updateProjectReportStatusWithAudit,
 } from "@/lib/services";
 import { parsePositiveIntId } from "@/lib/id";
 import { updateProjectReportStatusSchema } from "@/lib/validation/schemas";
+
+function getClientIp(req: Request): string | undefined {
+    return (
+        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        req.headers.get("x-real-ip") ||
+        undefined
+    );
+}
+
+function getRequestId(req: Request): string | undefined {
+    return req.headers.get("x-request-id") || undefined;
+}
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -64,21 +75,17 @@ export async function PATCH(req: Request): Promise<NextResponse> {
             return NextResponse.json({ error: message }, { status: 400 });
         }
 
-        const report = await updateProjectReportStatus({
+        const report = await updateProjectReportStatusWithAudit({
             reportId: parsed.data.reportId,
             status: parsed.data.status,
             adminNote: parsed.data.adminNote,
             reviewedBy,
-        });
-
-        logAudit("ADMIN_PROJECT_REPORT_UPDATE", session.user.id, {
-            userEmail: session.user.email ?? undefined,
-            details: {
-                reportId: report.id,
-                projectId: report.projectId,
-                projectName: report.projectName,
-                status: report.status,
-                userEmail: report.userEmail,
+            audit: {
+                actorUserId: session.user.id,
+                actorEmail: session.user.email ?? undefined,
+                ip: getClientIp(req),
+                userAgent: req.headers.get("user-agent") ?? undefined,
+                requestId: getRequestId(req),
             },
         });
 

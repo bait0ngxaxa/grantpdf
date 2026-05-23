@@ -42,6 +42,7 @@ export {
 // Mutations
 export {
     updateProjectStatus,
+    updateProjectStatusWithAudit,
     createProject,
     createProjectWithAudit,
     updateProjectWithAudit,

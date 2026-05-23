@@ -41,6 +41,14 @@ describe("auditLog", () => {
                 actorEmail: "tester@example.com",
             }),
         });
+        expect(mockedAuditDeleteMany).toHaveBeenCalledOnce();
+        expect(mockedAuditDeleteMany.mock.calls[0]?.[0]).toMatchObject({
+            where: {
+                created_at: {
+                    lt: expect.any(Date),
+                },
+            },
+        });
     });
 
     it("infers failure outcome for *_FAILED action", async () => {

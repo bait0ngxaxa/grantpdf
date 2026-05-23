@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { logAudit } from "@/lib/auditLog";
 import {
     getAllProjectsPaginated,
-    updateProjectStatus,
+    updateProjectStatusWithAudit,
     programExistsById,
 } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
@@ -10,6 +9,18 @@ import { parsePositiveInt } from "@/lib/queryParams";
 import { updateAdminProjectSchema } from "@/lib/validation/schemas";
 import { toPublicApiError } from "@/lib/apiError";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
+
+function getClientIp(req: Request): string | undefined {
+    return (
+        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        req.headers.get("x-real-ip") ||
+        undefined
+    );
+}
+
+function getRequestId(req: Request): string | undefined {
+    return req.headers.get("x-request-id") || undefined;
+}
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -64,25 +75,21 @@ export async function PUT(req: Request): Promise<NextResponse> {
             }
         }
 
-        const updatedProject = await updateProjectStatus({
-            projectId,
-            status,
-            statusNote,
-            programId,
-        });
-
-        logAudit("ADMIN_PROJECT_UPDATE", session.user.id, {
-            userEmail: session.user.email || undefined,
-            details: {
-                projectId: updatedProject.id,
-                projectName: updatedProject.name,
-                newStatus: status,
-                statusNote: statusNote || null,
-                programId: updatedProject.programId ?? null,
-                programName: updatedProject.programName ?? null,
-                projectOwnerEmail: updatedProject.userEmail,
+        const updatedProject = await updateProjectStatusWithAudit(
+            {
+                projectId,
+                status,
+                statusNote,
+                programId,
             },
-        });
+            {
+                actorUserId: session.user.id,
+                actorEmail: session.user.email || undefined,
+                ip: getClientIp(req),
+                userAgent: req.headers.get("user-agent") ?? undefined,
+                requestId: getRequestId(req),
+            },
+        );
 
         return NextResponse.json({
             success: true,
@@ -91,6 +98,13 @@ export async function PUT(req: Request): Promise<NextResponse> {
         });
     } catch (error) {
         console.error("Error updating project status:", error);
+
+        if (error instanceof Error && error.message === "PROJECT_NOT_FOUND") {
+            return NextResponse.json(
+                { error: "ไม่พบโครงการ" },
+                { status: 404 },
+            );
+        }
 
         if (error instanceof Error && error.message.includes("Invalid")) {
             return NextResponse.json(

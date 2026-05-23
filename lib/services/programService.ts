@@ -1,5 +1,8 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { ProgramSummary } from "@/type/models";
+
+const PROGRAM_CREATE_RETRY_LIMIT = 3;
 
 function toProgramSummary(program: {
     id: number;
@@ -71,29 +74,62 @@ interface CreateProgramData {
     description?: string;
 }
 
+function isTransactionRetryable(error: unknown): boolean {
+    return (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2034"
+    );
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+    return (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+    );
+}
+
 export async function createProgram(
     data: CreateProgramData,
 ): Promise<ProgramSummary> {
-    const maxOrder = await prisma.program.aggregate({
-        _max: { sortOrder: true },
-    });
+    for (let attempt = 1; attempt <= PROGRAM_CREATE_RETRY_LIMIT; attempt += 1) {
+        try {
+            const program = await prisma.$transaction(
+                async (tx) => {
+                    const maxOrder = await tx.program.aggregate({
+                        _max: { sortOrder: true },
+                    });
 
-    const program = await prisma.program.create({
-        data: {
-            name: data.name.trim(),
-            description: data.description?.trim() || null,
-            sortOrder: (maxOrder._max.sortOrder ?? 0) + 1,
-        },
-        select: {
-            id: true,
-            name: true,
-            description: true,
-            sortOrder: true,
-            isActive: true,
-        },
-    });
+                    return tx.program.create({
+                        data: {
+                            name: data.name.trim(),
+                            description: data.description?.trim() || null,
+                            sortOrder: (maxOrder._max.sortOrder ?? 0) + 1,
+                        },
+                        select: {
+                            id: true,
+                            name: true,
+                            description: true,
+                            sortOrder: true,
+                            isActive: true,
+                        },
+                    });
+                },
+                { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+            );
 
-    return toProgramSummary(program);
+            return toProgramSummary(program);
+        } catch (error) {
+            if (isUniqueConstraintError(error)) {
+                throw new Error("PROGRAM_NAME_CONFLICT");
+            }
+
+            if (!isTransactionRetryable(error) || attempt === PROGRAM_CREATE_RETRY_LIMIT) {
+                throw error;
+            }
+        }
+    }
+
+    throw new Error("PROGRAM_CREATE_RETRY_EXHAUSTED");
 }
 
 interface UpdateProgramData {
@@ -107,23 +143,46 @@ export async function updateProgram(
     id: number,
     data: UpdateProgramData,
 ): Promise<ProgramSummary> {
-    const program = await prisma.program.update({
-        where: { id },
-        data: {
-            name: data.name.trim(),
-            description: data.description?.trim() || null,
-            isActive: data.isActive,
-            sortOrder: data.sortOrder,
-            updated_at: new Date(),
-        },
-        select: {
-            id: true,
-            name: true,
-            description: true,
-            sortOrder: true,
-            isActive: true,
-        },
-    });
+    let program: {
+        id: number;
+        name: string;
+        description: string | null;
+        sortOrder: number;
+        isActive: boolean;
+    };
+
+    try {
+        program = await prisma.program.update({
+            where: { id },
+            data: {
+                name: data.name.trim(),
+                description: data.description?.trim() || null,
+                isActive: data.isActive,
+                sortOrder: data.sortOrder,
+                updated_at: new Date(),
+            },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                sortOrder: true,
+                isActive: true,
+            },
+        });
+    } catch (error) {
+        if (isUniqueConstraintError(error)) {
+            throw new Error("PROGRAM_NAME_CONFLICT");
+        }
+
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2025"
+        ) {
+            throw new Error("PROGRAM_NOT_FOUND");
+        }
+
+        throw error;
+    }
 
     return toProgramSummary(program);
 }

@@ -121,6 +121,14 @@ export interface UpdateProjectStatusParams {
     programId?: number | null;
 }
 
+export interface ProjectAuditContext {
+    actorUserId: string;
+    actorEmail?: string;
+    ip?: string;
+    userAgent?: string;
+    requestId?: string;
+}
+
 export interface UpdateProjectCoOwnersParams {
     projectId: number;
     allowCoOwners: boolean;

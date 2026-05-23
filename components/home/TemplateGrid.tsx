@@ -47,14 +47,14 @@ function FeatureCard({
           <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             {title}
           </h3>
-          <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+          <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
             {description}
           </p>
         </div>
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-500">
+        <span className="text-[10px] font-bold tracking-widest text-slate-700 uppercase dark:text-slate-300">
           System Capability
         </span>
         <div className="flex h-8 w-8 translate-x-4 items-center justify-center rounded-full bg-blue-50 text-blue-600 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 dark:bg-blue-900/30 dark:text-blue-400">
@@ -104,7 +104,7 @@ export default function FeatureGrid(): React.ReactElement {
           <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase sm:text-4xl dark:text-white">
             ฟีเจอร์หลักของระบบ
           </h2>
-          <p className="max-w-2xl text-slate-500 dark:text-slate-400">
+          <p className="max-w-2xl text-slate-600 dark:text-slate-300">
             แพลตฟอร์มดิจิทัลที่ช่วยยกระดับการบริหารจัดการโครงการของ RHHSDI
             ให้มีประสิทธิภาพสูงสุด
           </p>

@@ -50,8 +50,27 @@ describe("auditLogFormatters", () => {
         ).toContain("ถูกจำกัดจำนวนครั้ง");
         expect(formatAuditDetails("LOGOUT", {})).toBe("ออกจากระบบสำเร็จ");
         expect(formatAuditDetails("SIGNUP", {})).toBe("สมัครสมาชิกสำเร็จ");
-        expect(formatAuditDetails("PASSWORD_RESET_REQUEST", {})).toBe(
-            "ส่งคำขอรีเซ็ตรหัสผ่าน",
+        expect(
+            formatAuditDetails("PASSWORD_RESET_REQUEST", {
+                requestedEmail: "user@example.com",
+                accountFound: true,
+            }),
+        ).toBe("ส่งคำขอรีเซ็ตรหัสผ่าน | อีเมล: user@example.com");
+        expect(
+            formatAuditDetails("PASSWORD_RESET_REQUEST", {
+                requestedEmail: "missing@example.com",
+                accountFound: false,
+            }),
+        ).toBe(
+            "ส่งคำขอรีเซ็ตรหัสผ่าน | อีเมล: missing@example.com | ไม่พบบัญชีในระบบ",
+        );
+        expect(
+            formatAuditDetails("PASSWORD_RESET_REQUEST", {
+                attemptedEmail: "rate@example.com",
+                reason: "rate_limited",
+            }),
+        ).toBe(
+            "ส่งคำขอรีเซ็ตรหัสผ่าน | อีเมล: rate@example.com | ถูกจำกัดจำนวนครั้ง",
         );
         expect(formatAuditDetails("PASSWORD_RESET_SUCCESS", {})).toBe(
             "รีเซ็ตรหัสผ่านสำเร็จ",

@@ -5,6 +5,7 @@ export {
     getUserProjectStats,
     getProjectsByUserIdPaginated,
     updateProjectStatus,
+    updateProjectStatusWithAudit,
     createProject,
     createProjectWithAudit,
     updateProjectWithAudit,
@@ -56,6 +57,7 @@ export {
     getProjectReportsForAdmin,
     getProjectReportsForUser,
     updateProjectReportStatus,
+    updateProjectReportStatusWithAudit,
 } from "./projectReportService";
 
 // Audit Service

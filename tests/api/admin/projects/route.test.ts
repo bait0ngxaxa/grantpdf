@@ -9,19 +9,20 @@ vi.mock("@/lib/auth-helpers", () => ({
 vi.mock("@/lib/services", () => ({
     getAllProjectsPaginated: vi.fn(),
     updateProjectStatus: vi.fn(),
+    updateProjectStatusWithAudit: vi.fn(),
     programExistsById: vi.fn(),
 }));
 
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import {
-    updateProjectStatus,
+    updateProjectStatusWithAudit,
     programExistsById,
 } from "@/lib/services";
 import { PUT } from "@/app/api/(admin)/admin/projects/route";
 
 const mockedRequireAdminSession = vi.mocked(requireAdminSession);
 const mockedIsGuardError = vi.mocked(isGuardError);
-const mockedUpdateProjectStatus = vi.mocked(updateProjectStatus);
+const mockedUpdateProjectStatusWithAudit = vi.mocked(updateProjectStatusWithAudit);
 const mockedProgramExistsById = vi.mocked(programExistsById);
 
 describe("admin projects route PUT", () => {
@@ -56,7 +57,7 @@ describe("admin projects route PUT", () => {
 
         expect(response.status).toBe(400);
         expect(body.error).toBe("โครงการหลักที่เลือกไม่ถูกต้อง");
-        expect(mockedUpdateProjectStatus).not.toHaveBeenCalled();
+        expect(mockedUpdateProjectStatusWithAudit).not.toHaveBeenCalled();
     });
 
     it("passes programId through when payload is valid", async () => {
@@ -64,7 +65,7 @@ describe("admin projects route PUT", () => {
             session: { user: { id: "1", role: "admin", email: "admin@test.com" } },
             userId: "1",
         } as never);
-        mockedUpdateProjectStatus.mockResolvedValue({
+        mockedUpdateProjectStatusWithAudit.mockResolvedValue({
             id: "10",
             name: "โครงการ A",
             status: "อนุมัติ",
@@ -88,11 +89,44 @@ describe("admin projects route PUT", () => {
         const response = await PUT(request);
 
         expect(response.status).toBe(200);
-        expect(mockedUpdateProjectStatus).toHaveBeenCalledWith({
-            projectId: 10,
-            status: "อนุมัติ",
-            statusNote: "",
-            programId: 3,
+        expect(mockedUpdateProjectStatusWithAudit).toHaveBeenCalledWith(
+            {
+                projectId: 10,
+                status: "อนุมัติ",
+                statusNote: "",
+                programId: 3,
+            },
+            expect.objectContaining({
+                actorUserId: "1",
+                actorEmail: "admin@test.com",
+            }),
+        );
+    });
+
+    it("returns 404 when project disappears before update", async () => {
+        mockedRequireAdminSession.mockResolvedValue({
+            session: { user: { id: "1", role: "admin", email: "admin@test.com" } },
+            userId: "1",
+        } as never);
+        mockedUpdateProjectStatusWithAudit.mockRejectedValue(
+            new Error("PROJECT_NOT_FOUND"),
+        );
+
+        const request = new Request("http://localhost/api/admin/projects", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                projectId: 10,
+                status: "อนุมัติ",
+                statusNote: "",
+                programId: 3,
+            }),
         });
+
+        const response = await PUT(request);
+        const body = await response.json();
+
+        expect(response.status).toBe(404);
+        expect(body.error).toBe("ไม่พบโครงการ");
     });
 });

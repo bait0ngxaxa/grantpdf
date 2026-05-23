@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export const AUDIT_LOG_RETENTION_DAYS = 180;
+export const AUDIT_LOG_RETENTION_DAYS = 90;
 
 const RETENTION_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 let lastRetentionCheckAt = 0;

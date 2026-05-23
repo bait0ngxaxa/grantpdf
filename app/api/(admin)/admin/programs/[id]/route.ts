@@ -37,6 +37,20 @@ export async function PUT(
         const program = await updateProgram(programId, parsed.data);
         return NextResponse.json(program);
     } catch (error) {
+        if (error instanceof Error && error.message === "PROGRAM_NAME_CONFLICT") {
+            return NextResponse.json(
+                { error: "มีชื่อโครงการหลักนี้อยู่แล้ว" },
+                { status: 409 },
+            );
+        }
+
+        if (error instanceof Error && error.message === "PROGRAM_NOT_FOUND") {
+            return NextResponse.json(
+                { error: "ไม่พบโครงการหลัก" },
+                { status: 404 },
+            );
+        }
+
         console.error("Error updating program:", error);
         return NextResponse.json(
             { error: "ไม่สามารถอัปเดตโครงการหลักได้" },
