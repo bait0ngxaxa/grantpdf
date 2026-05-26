@@ -1,22 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { isAdmin } from "@/lib/auth-helpers";
+import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
 import { updateProgram } from "@/lib/services";
 import { updateProgramSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
+import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
 
 export async function PUT(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
     try {
-        const session = await auth();
-        if (!isAdmin(session)) {
-            return NextResponse.json(
-                { error: "ไม่มีสิทธิ์เข้าถึง" },
-                { status: 403 },
-            );
-        }
+        const rateLimitResponse = await applyAdminMutationRateLimit(req);
+        if (rateLimitResponse) return rateLimitResponse;
+
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const { id } = await params;
         const programId = parsePositiveIntId(id);

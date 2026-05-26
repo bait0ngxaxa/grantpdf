@@ -6,6 +6,7 @@ export function buildProjectAccessWhere(
 ): Prisma.ProjectWhereInput {
     return {
         id: projectId,
+        deletedAt: null,
         OR: [
             { userId },
             {
@@ -20,6 +21,7 @@ export function buildUserProjectsAccessWhere(
     userId: number,
 ): Prisma.ProjectWhereInput {
     return {
+        deletedAt: null,
         OR: [
             { userId },
             {

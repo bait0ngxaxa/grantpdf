@@ -74,7 +74,7 @@ function buildAdminProjectsWhereSql(params: {
     status?: string;
     fileType?: string;
 }): Prisma.Sql {
-    const conditions: Prisma.Sql[] = [];
+    const conditions: Prisma.Sql[] = [Prisma.sql`p.deleted_at IS NULL`];
 
     if (params.search) {
         const keyword = `%${params.search}%`;
@@ -111,10 +111,6 @@ function buildAdminProjectsWhereSql(params: {
                   )
             )`,
         );
-    }
-
-    if (conditions.length === 0) {
-        return Prisma.sql`1 = 1`;
     }
 
     return Prisma.sql`${Prisma.join(conditions, " AND ")}`;
@@ -171,6 +167,7 @@ export async function getAllProjectsPaginated({
     const projectIdSearch = parseProjectSearchTerm(search).projectIdNumber;
 
     const where = {
+        deletedAt: null,
         ...(search
             ? {
                   ...(projectIdSearch !== null
@@ -220,7 +217,7 @@ export async function getAllProjectsPaginated({
             );
 
             const unorderedProjects = await prisma.project.findMany({
-                where: { id: { in: projectIds } },
+                where: { id: { in: projectIds }, deletedAt: null },
                 include: PROJECT_INCLUDE,
             });
 

@@ -20,7 +20,7 @@ export async function findProjectByNameAndUser(
     programId: number | null;
 } | null> {
     return await prisma.project.findFirst({
-        where: { name, userId },
+        where: { name, userId, deletedAt: null },
         select: { id: true, name: true, description: true, programId: true },
     });
 }

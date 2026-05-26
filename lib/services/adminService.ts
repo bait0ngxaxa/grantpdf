@@ -50,10 +50,13 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         statusGroups,
     ] = await Promise.all([
         prisma.user.count(),
-        prisma.project.count(),
+        prisma.project.count({ where: { deletedAt: null } }),
         prisma.userFile.count(),
         prisma.project.count({
-            where: { created_at: { gte: today, lt: tomorrow } },
+            where: {
+                deletedAt: null,
+                created_at: { gte: today, lt: tomorrow },
+            },
         }),
         prisma.userFile.count({
             where: { created_at: { gte: today, lt: tomorrow } },
@@ -63,6 +66,7 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
             select: { name: true, email: true, created_at: true },
         }),
         prisma.project.findFirst({
+            where: { deletedAt: null },
             orderBy: { created_at: "desc" },
             select: {
                 id: true,
@@ -73,6 +77,7 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         }),
         prisma.project.groupBy({
             by: ["status"],
+            where: { deletedAt: null },
             _count: { _all: true },
         }),
     ]);

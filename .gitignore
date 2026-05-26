@@ -49,6 +49,8 @@ next-env.d.ts
 # Audit logs
 /logs
 
+/graphify-out
+
 
 
 

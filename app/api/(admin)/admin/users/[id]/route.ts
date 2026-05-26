@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
-    checkAdminPermission,
     updateUserWithAudit,
     deleteUserWithAudit,
 } from "@/lib/services";
@@ -8,6 +7,8 @@ import { updateAdminUserSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
 import { toPublicApiError } from "@/lib/apiError";
 import { ROLES } from "@/lib/constants";
+import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
+import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
 
 function getClientIp(req: NextRequest): string | undefined {
     const forwarded = req.headers.get("x-forwarded-for");
@@ -27,11 +28,13 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
     try {
-        const { isAdmin, session } = await checkAdminPermission();
+        const rateLimitResponse = await applyAdminMutationRateLimit(req);
+        if (rateLimitResponse) return rateLimitResponse;
 
-        if (!isAdmin || !session) {
-            return NextResponse.json({ error: "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้" }, { status: 403 });
-        }
+        const guard = await requireAdminSession();
+
+        if (isGuardError(guard)) return guard;
+        const { session } = guard;
 
         const awaitParams = await params;
         const userId = awaitParams.id;
@@ -100,11 +103,13 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
     try {
-        const { isAdmin, session } = await checkAdminPermission();
+        const rateLimitResponse = await applyAdminMutationRateLimit(req);
+        if (rateLimitResponse) return rateLimitResponse;
 
-        if (!isAdmin || !session) {
-            return NextResponse.json({ error: "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้" }, { status: 403 });
-        }
+        const guard = await requireAdminSession();
+
+        if (isGuardError(guard)) return guard;
+        const { session } = guard;
 
         const awaitParams = await params;
         const userId = awaitParams.id;

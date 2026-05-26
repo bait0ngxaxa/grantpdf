@@ -1,27 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
 import { ROLES } from "@/lib/constants";
-import type { SafeUser, CheckAdminResult } from "./types";
-
-export async function checkAdminPermission(): Promise<CheckAdminResult> {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-        return { isAdmin: false, userId: null, session: null };
-    }
-
-    const userId = Number(session.user.id);
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { role: true },
-    });
-
-    return {
-        isAdmin: user?.role === ROLES.ADMIN,
-        userId,
-        session,
-    };
-}
+import type { SafeUser } from "./types";
 
 export async function getAllUsers(): Promise<SafeUser[]> {
     const users = await prisma.user.findMany({

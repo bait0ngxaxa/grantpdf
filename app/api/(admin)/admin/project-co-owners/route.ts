@@ -5,6 +5,7 @@ import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import { updateProjectCoOwnersSchema } from "@/lib/validation/schemas";
 import { getCoOwnerUserOptions, updateProjectCoOwners } from "@/lib/services";
 import { parsePositiveIntId } from "@/lib/id";
+import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
 
 export async function GET(): Promise<NextResponse> {
     try {
@@ -30,6 +31,9 @@ export async function GET(): Promise<NextResponse> {
 
 export async function PUT(req: Request): Promise<NextResponse> {
     try {
+        const rateLimitResponse = await applyAdminMutationRateLimit(req);
+        if (rateLimitResponse) return rateLimitResponse;
+
         const guard = await requireAdminSession();
         if (isGuardError(guard)) return guard;
         const { session } = guard;

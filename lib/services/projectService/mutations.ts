@@ -72,10 +72,14 @@ function toAdminProject(project: {
 async function findProjectForCreate(
     userId: number,
     name: string,
-): Promise<{ id: number; programId: number | null } | null> {
+): Promise<{
+    id: number;
+    programId: number | null;
+    deletedAt: Date | null;
+} | null> {
     return prisma.project.findUnique({
         where: { userId_name: { userId, name } },
-        select: { id: true, programId: true },
+        select: { id: true, programId: true, deletedAt: true },
     });
 }
 
@@ -360,11 +364,12 @@ export async function createProject(
         const project = await prisma.$transaction(async (tx) => {
             const existing = await tx.project.findUnique({
                 where: { userId_name: { userId, name: trimmedName } },
-                select: { id: true, programId: true },
+                select: { id: true, programId: true, deletedAt: true },
             });
 
             if (
                 existing &&
+                existing.deletedAt === null &&
                 programId &&
                 existing.programId !== null &&
                 existing.programId !== programId
@@ -375,10 +380,18 @@ export async function createProject(
             return existing
                 ? tx.project.update({
                       where: { id: existing.id },
-                      data:
-                          existing.programId === null && programId
-                              ? { programId, updated_at: new Date() }
-                              : {},
+                      data: {
+                          ...(existing.deletedAt !== null
+                              ? { deletedAt: null }
+                              : {}),
+                          ...(existing.programId === null && programId
+                              ? { programId }
+                              : {}),
+                          ...(existing.deletedAt !== null && programId
+                              ? { programId }
+                              : {}),
+                          updated_at: new Date(),
+                      },
                       include: {
                           files: true,
                           _count: { select: { files: true } },
@@ -411,6 +424,7 @@ export async function createProject(
 
         if (
             programId &&
+            existing.deletedAt === null &&
             existing.programId !== null &&
             existing.programId !== programId
         ) {
@@ -420,12 +434,29 @@ export async function createProject(
         const project = existing.programId === null && programId
             ? await prisma.project.update({
                   where: { id: existing.id },
-                  data: { programId, updated_at: new Date() },
+                  data: {
+                      programId,
+                      deletedAt: null,
+                      updated_at: new Date(),
+                  },
                   include: {
                       files: true,
                       _count: { select: { files: true } },
                   },
               })
+            : existing.deletedAt !== null
+              ? await prisma.project.update({
+                    where: { id: existing.id },
+                    data: {
+                        deletedAt: null,
+                        ...(programId ? { programId } : {}),
+                        updated_at: new Date(),
+                    },
+                    include: {
+                        files: true,
+                        _count: { select: { files: true } },
+                    },
+                })
             : await getProjectForCreate(existing.id);
 
         return toProjectWithStringId(project);
@@ -454,11 +485,13 @@ export async function createProjectWithAudit(
             select: {
                 id: true,
                 programId: true,
+                deletedAt: true,
             },
         });
 
         if (
             existing &&
+            existing.deletedAt === null &&
             programId &&
             existing.programId !== null &&
             existing.programId !== programId
@@ -469,13 +502,18 @@ export async function createProjectWithAudit(
         const created = existing
             ? await tx.project.update({
                   where: { id: existing.id },
-                  data:
-                      existing.programId === null && programId
-                          ? {
-                                programId,
-                                updated_at: new Date(),
-                            }
-                          : {},
+                  data: {
+                      ...(existing.deletedAt !== null
+                          ? { deletedAt: null }
+                          : {}),
+                      ...(existing.programId === null && programId
+                          ? { programId }
+                          : {}),
+                      ...(existing.deletedAt !== null && programId
+                          ? { programId }
+                          : {}),
+                      updated_at: new Date(),
+                  },
                   include: {
                       files: true,
                       _count: {
@@ -515,6 +553,7 @@ export async function createProjectWithAudit(
                     description: created.description,
                     programId: created.programId,
                     reusedExistingProject: existing !== null,
+                    restoredArchivedProject: existing?.deletedAt !== null,
                 }),
             },
         });
@@ -620,8 +659,12 @@ export async function deleteProjectWithAudit(
             throw new Error("PROJECT_NOT_FOUND");
         }
 
-        await tx.project.delete({
+        await tx.project.update({
             where: { id: projectId },
+            data: {
+                deletedAt: new Date(),
+                updated_at: new Date(),
+            },
         });
 
         await tx.auditLog.create({

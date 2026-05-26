@@ -2,18 +2,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, PUT } from "@/app/api/(admin)/admin/users/[id]/route";
 
 vi.mock("@/lib/services", () => ({
-    checkAdminPermission: vi.fn(),
     updateUserWithAudit: vi.fn(),
     deleteUserWithAudit: vi.fn(),
 }));
 
+vi.mock("@/lib/auth-helpers", () => ({
+    requireAdminSession: vi.fn(),
+    isGuardError: vi.fn(),
+}));
+
+import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
 import {
-    checkAdminPermission,
     deleteUserWithAudit,
     updateUserWithAudit,
 } from "@/lib/services";
 
-const mockedCheckAdminPermission = vi.mocked(checkAdminPermission);
+const mockedRequireAdminSession = vi.mocked(requireAdminSession);
+const mockedIsGuardError = vi.mocked(isGuardError);
 const mockedDeleteUserWithAudit = vi.mocked(deleteUserWithAudit);
 const mockedUpdateUserWithAudit = vi.mocked(updateUserWithAudit);
 
@@ -21,10 +26,8 @@ function buildParams(id: string): Promise<{ id: string }> {
     return Promise.resolve({ id });
 }
 
-function buildAdminPermission() {
+function buildAdminGuard() {
     return {
-        isAdmin: true,
-        userId: 1,
         session: {
             user: {
                 id: "1",
@@ -32,22 +35,25 @@ function buildAdminPermission() {
             },
             expires: "2099-01-01T00:00:00.000Z",
         },
+        userId: "1",
     };
 }
 
 describe("admin users [id] route", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockedCheckAdminPermission.mockResolvedValue(buildAdminPermission());
+        mockedRequireAdminSession.mockResolvedValue(buildAdminGuard() as never);
+        mockedIsGuardError.mockReturnValue(false);
     });
 
     describe("PUT", () => {
         it("returns 403 when requester is not admin", async () => {
-            mockedCheckAdminPermission.mockResolvedValue({
-                isAdmin: false,
-                userId: null,
-                session: null,
-            });
+            const guardResponse = Response.json(
+                { error: "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้" },
+                { status: 403 },
+            );
+            mockedRequireAdminSession.mockResolvedValue(guardResponse as never);
+            mockedIsGuardError.mockReturnValue(true);
 
             const request = new Request("http://localhost/api/admin/users/2", {
                 method: "PUT",
@@ -184,11 +190,12 @@ describe("admin users [id] route", () => {
 
     describe("DELETE", () => {
         it("returns 403 when requester is not admin", async () => {
-            mockedCheckAdminPermission.mockResolvedValue({
-                isAdmin: false,
-                userId: null,
-                session: null,
-            });
+            const guardResponse = Response.json(
+                { error: "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้" },
+                { status: 403 },
+            );
+            mockedRequireAdminSession.mockResolvedValue(guardResponse as never);
+            mockedIsGuardError.mockReturnValue(true);
 
             const request = new Request("http://localhost/api/admin/users/2", {
                 method: "DELETE",

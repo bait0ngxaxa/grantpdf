@@ -240,6 +240,13 @@ export const RATE_LIMIT = {
             WINDOW_MS: 60_000,
         },
     },
+    ADMIN: {
+        MUTATION: {
+            ROUTE_KEY: "admin:mutation",
+            LIMIT: 120,
+            WINDOW_MS: 60_000,
+        },
+    },
 } as const;
 
 export function getFileExtension(fileName: string): string {

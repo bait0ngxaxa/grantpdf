@@ -3,6 +3,7 @@ import { PAGINATION } from "@/lib/constants";
 import { toPublicApiError } from "@/lib/apiError";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import { parsePositiveInt } from "@/lib/queryParams";
+import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
 import {
     getProjectReportsForAdmin,
     updateProjectReportStatusWithAudit,
@@ -57,6 +58,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
 export async function PATCH(req: Request): Promise<NextResponse> {
     try {
+        const rateLimitResponse = await applyAdminMutationRateLimit(req);
+        if (rateLimitResponse) return rateLimitResponse;
+
         const guard = await requireAdminSession();
         if (isGuardError(guard)) return guard;
         const { session } = guard;

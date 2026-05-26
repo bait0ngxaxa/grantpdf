@@ -1,24 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/auth", () => ({
-    auth: vi.fn(),
-}));
-
 vi.mock("@/lib/auth-helpers", () => ({
-    isAdmin: vi.fn(),
+    requireAdminSession: vi.fn(),
+    isGuardError: vi.fn(),
 }));
 
 vi.mock("@/lib/services", () => ({
     updateProgram: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
-import { isAdmin } from "@/lib/auth-helpers";
+import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
 import { updateProgram } from "@/lib/services";
 import { PUT } from "@/app/api/(admin)/admin/programs/[id]/route";
 
-const mockedAuth = vi.mocked(auth);
-const mockedIsAdmin = vi.mocked(isAdmin);
+const mockedRequireAdminSession = vi.mocked(requireAdminSession);
+const mockedIsGuardError = vi.mocked(isGuardError);
 const mockedUpdateProgram = vi.mocked(updateProgram);
 
 function createRequest(body: unknown): Request {
@@ -39,10 +35,13 @@ const validBody = {
 describe("admin programs id route PUT", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockedAuth.mockResolvedValue({
-            user: { id: "1", role: "admin" },
+        mockedRequireAdminSession.mockResolvedValue({
+            session: {
+                user: { id: "1", role: "admin" },
+            },
+            userId: "1",
         } as never);
-        mockedIsAdmin.mockReturnValue(true);
+        mockedIsGuardError.mockReturnValue(false);
     });
 
     it("returns 409 when program name already exists", async () => {

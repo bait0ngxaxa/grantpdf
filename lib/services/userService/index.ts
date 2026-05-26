@@ -1,12 +1,11 @@
 // Types
-export type { SafeUser, UpdateUserData, CheckAdminResult } from "./types";
+export type { SafeUser, UpdateUserData } from "./types";
 
 // Constants
 export { VALID_ROLES, isValidRole } from "./constants";
 
 // Queries
 export {
-    checkAdminPermission,
     getAllUsers,
     getAllUsersPaginated,
     getUserById,

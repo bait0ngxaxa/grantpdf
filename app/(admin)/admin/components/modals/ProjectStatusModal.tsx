@@ -164,14 +164,14 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
             </div>
 
             <div className="mb-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
-              <div className="rounded-2xl bg-slate-50 p-4 lg:col-start-1 lg:row-start-1 dark:bg-slate-700/50">
+              <div className="min-w-0 rounded-2xl bg-slate-50 p-4 lg:col-start-1 lg:row-start-1 dark:bg-slate-700/50">
                 <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">
                   โครงการ
                 </p>
-                <p className="mb-4 truncate text-lg font-semibold text-slate-800 dark:text-slate-100">
+                <p className="mb-4 whitespace-normal break-words text-lg font-semibold leading-7 text-slate-800 [overflow-wrap:anywhere] dark:text-slate-100">
                   {selectedProjectForStatus.name}
                 </p>
-                <div className="flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-600">
+                <div className="flex min-w-0 items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-600">
                   <span className="text-sm text-slate-500 dark:text-slate-400">
                     สถานะปัจจุบัน
                   </span>

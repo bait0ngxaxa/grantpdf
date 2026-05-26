@@ -1,11 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/auth", () => ({
-    auth: vi.fn(),
-}));
-
 vi.mock("@/lib/auth-helpers", () => ({
-    isAdmin: vi.fn(),
+    requireAdminSession: vi.fn(),
+    isGuardError: vi.fn(),
 }));
 
 vi.mock("@/lib/ratelimit", () => ({
@@ -17,14 +14,13 @@ vi.mock("@/lib/services", () => ({
     createProgram: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
-import { isAdmin } from "@/lib/auth-helpers";
+import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
 import { applyRateLimit } from "@/lib/ratelimit";
 import { createProgram } from "@/lib/services";
 import { POST } from "@/app/api/(admin)/admin/programs/route";
 
-const mockedAuth = vi.mocked(auth);
-const mockedIsAdmin = vi.mocked(isAdmin);
+const mockedRequireAdminSession = vi.mocked(requireAdminSession);
+const mockedIsGuardError = vi.mocked(isGuardError);
 const mockedApplyRateLimit = vi.mocked(applyRateLimit);
 const mockedCreateProgram = vi.mocked(createProgram);
 
@@ -39,10 +35,13 @@ function createRequest(body: unknown): Request {
 describe("admin programs route POST", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mockedAuth.mockResolvedValue({
-            user: { id: "1", role: "admin" },
+        mockedRequireAdminSession.mockResolvedValue({
+            session: {
+                user: { id: "1", role: "admin" },
+            },
+            userId: "1",
         } as never);
-        mockedIsAdmin.mockReturnValue(true);
+        mockedIsGuardError.mockReturnValue(false);
         mockedApplyRateLimit.mockResolvedValue({
             success: true,
             headers: {},

@@ -1,20 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { isAdmin } from "@/lib/auth-helpers";
+import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
 import { getAllPrograms, createProgram } from "@/lib/services";
 import { createProgramSchema } from "@/lib/validation/schemas";
-import { RATE_LIMIT } from "@/lib/constants";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
 
 export async function GET(): Promise<NextResponse> {
     try {
-        const session = await auth();
-        if (!isAdmin(session)) {
-            return NextResponse.json(
-                { error: "ไม่มีสิทธิ์เข้าถึง" },
-                { status: 403 },
-            );
-        }
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const programs = await getAllPrograms();
         return NextResponse.json({ programs });
@@ -29,28 +22,11 @@ export async function GET(): Promise<NextResponse> {
 
 export async function POST(req: Request): Promise<NextResponse> {
     try {
-        const session = await auth();
-        if (!isAdmin(session)) {
-            return NextResponse.json(
-                { error: "ไม่มีสิทธิ์เข้าถึง" },
-                { status: 403 },
-            );
-        }
+        const rateLimitResponse = await applyAdminMutationRateLimit(req);
+        if (rateLimitResponse) return rateLimitResponse;
 
-        const rateLimitResult = await applyRateLimit({
-            request: req,
-            routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
-            limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
-            windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
-            identifier: session.user.id,
-        });
-
-        if (!rateLimitResult.success) {
-            return NextResponse.json(
-                { error: "ส่งคำขอบ่อยเกินไป" },
-                { status: 429, headers: rateLimitResult.headers },
-            );
-        }
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const body: unknown = await req.json();
         const parsed = createProgramSchema.safeParse(body);

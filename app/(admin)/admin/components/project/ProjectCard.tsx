@@ -14,6 +14,7 @@ import {
     X,
     Pencil,
     Clock,
+    ClipboardList,
     FileText,
     Eye,
 } from "lucide-react";
@@ -107,6 +108,7 @@ export default function ProjectCard({
     const hasPendingReport = getPendingReportKeys(project).some(
         (key) => !viewedPendingReportKeys.has(key),
     );
+    const reportCount = project.reports?.length ?? 0;
     const getStatusIcon = (status: string): React.JSX.Element | null => {
         switch (status) {
             case PROJECT_STATUS.APPROVED:
@@ -125,16 +127,16 @@ export default function ProjectCard({
 
     return (
         <div className="min-w-0 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:px-4">
-            <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(8rem,12rem)_minmax(7rem,8.5rem)_5.5rem_6.5rem_auto] xl:items-start">
+            <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(16rem,1fr)_minmax(6.5rem,9rem)_minmax(6.5rem,7.75rem)_minmax(6.5rem,7.25rem)_5.5rem_auto] xl:items-start">
                 <div className="min-w-0">
-                    <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm shadow-blue-200 dark:shadow-blue-900/30">
-                            <Archive className="h-5 w-5" />
+                    <div className="flex items-start gap-2.5">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm shadow-blue-200 dark:shadow-blue-900/30">
+                            <Archive className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="flex items-start gap-2">
                                 <h3
-                                    className="line-clamp-2 min-w-0 flex-1 break-words text-sm font-bold text-slate-800 dark:text-slate-100"
+                                    className="line-clamp-3 min-w-0 flex-1 break-words text-sm font-bold leading-5 text-slate-800 dark:text-slate-100"
                                     title={project.name}
                                 >
                                     {project.name}
@@ -193,9 +195,20 @@ export default function ProjectCard({
                     </span>
                 </div>
 
-                <div className="flex min-w-0 items-center gap-2 pt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 xl:self-start xl:justify-self-start">
-                    <FileText className="h-3.5 w-3.5" />
-                    <span>{project._count.files} ไฟล์</span>
+                <div className="flex min-w-0 flex-col items-start gap-1 pt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 xl:self-start xl:justify-self-start">
+                    <span className="inline-flex items-center gap-1.5">
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>{project._count.files} ไฟล์</span>
+                    </span>
+                    <span
+                        className={cn(
+                            "inline-flex items-center gap-1.5",
+                            hasPendingReport && "text-orange-600 dark:text-orange-300",
+                        )}
+                    >
+                        <ClipboardList className="h-3.5 w-3.5" />
+                        <span>{reportCount} รายงาน</span>
+                    </span>
                 </div>
 
                 <div className="flex min-w-0 items-center gap-2 pt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 xl:self-start xl:justify-self-start">
@@ -205,11 +218,11 @@ export default function ProjectCard({
                     </span>
                 </div>
 
-                <div className="grid min-w-0 grid-cols-2 items-center gap-2 pt-0.5 sm:flex sm:flex-wrap xl:self-start xl:justify-self-end">
+                <div className="grid min-w-0 grid-cols-2 items-center gap-2 pt-0.5 sm:flex sm:flex-wrap xl:flex-nowrap xl:gap-1.5 xl:self-start xl:justify-self-end">
                     <Button
                         size="sm"
                         onClick={() => onViewProjectFiles(project)}
-                        className="h-auto min-h-8 w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-100 sm:w-auto"
+                        className="h-auto min-h-8 w-full shrink-0 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-100 sm:w-auto xl:px-2.5"
                     >
                         <Eye className="mr-1.5 h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
                         ดูไฟล์
@@ -224,7 +237,7 @@ export default function ProjectCard({
                         <Button
                             size="sm"
                             onClick={() => onViewProjectReports(project)}
-                            className="h-auto min-h-8 w-full rounded-xl border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm transition hover:bg-blue-50 hover:text-blue-800 dark:border-blue-800 dark:bg-slate-700 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-200 sm:w-auto"
+                            className="h-auto min-h-8 w-full shrink-0 whitespace-nowrap rounded-xl border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm transition hover:bg-blue-50 hover:text-blue-800 dark:border-blue-800 dark:bg-slate-700 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-200 sm:w-auto xl:px-2.5"
                         >
                             <FileText className="mr-1.5 h-3.5 w-3.5" />
                             รายงาน
@@ -233,7 +246,7 @@ export default function ProjectCard({
                     <Button
                         size="sm"
                         onClick={() => onEditProjectStatus(project)}
-                        className="col-span-2 h-auto min-h-8 w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-100 sm:col-span-1 sm:w-auto"
+                        className="col-span-2 h-auto min-h-8 w-full shrink-0 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-100 sm:col-span-1 sm:w-auto xl:px-2.5"
                     >
                         <Pencil className="mr-1.5 h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
                         จัดการ

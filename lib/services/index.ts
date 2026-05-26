@@ -38,7 +38,6 @@ export {
     deleteUserWithAudit,
     getUserCount,
     getCoOwnerUserOptions,
-    checkAdminPermission,
 } from "./userService";
 
 // File Service
