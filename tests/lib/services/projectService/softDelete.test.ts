@@ -48,6 +48,7 @@ describe("deleteProjectWithAudit", () => {
             id: 10,
             name: "โครงการอ้างอิง",
             description: "ใช้เก็บเอกสารอ้างอิง",
+            userId: 7,
         });
         tx.project.update.mockResolvedValue({ id: 10 });
         tx.auditLog.create.mockResolvedValue({ id: BigInt(1) });
@@ -84,6 +85,36 @@ describe("deleteProjectWithAudit", () => {
             deleteProjectWithAudit(10, 7, { actorUserId: "7" }),
         ).rejects.toThrow("PROJECT_NOT_FOUND");
 
+        expect(tx.project.update).not.toHaveBeenCalled();
+        expect(tx.auditLog.create).not.toHaveBeenCalled();
+    });
+
+    it("rejects co-owner project deletion while keeping other project access intact", async () => {
+        tx.project.findFirst.mockResolvedValue({
+            id: 10,
+            name: "โครงการอ้างอิง",
+            description: "ใช้เก็บเอกสารอ้างอิง",
+            userId: 8,
+        });
+
+        await expect(
+            deleteProjectWithAudit(10, 7, { actorUserId: "7" }),
+        ).rejects.toThrow("PROJECT_DELETE_FORBIDDEN");
+
+        expect(tx.project.findFirst).toHaveBeenCalledWith({
+            where: {
+                id: 10,
+                deletedAt: null,
+                OR: [
+                    { userId: 7 },
+                    {
+                        allowCoOwners: true,
+                        coOwners: { some: { adminUserId: 7 } },
+                    },
+                ],
+            },
+            select: { id: true, name: true, description: true, userId: true },
+        });
         expect(tx.project.update).not.toHaveBeenCalled();
         expect(tx.auditLog.create).not.toHaveBeenCalled();
     });

@@ -1,10 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
+import useSWR from "swr";
 import { FileText, FolderOpen, X } from "lucide-react";
 import type { AdminProject } from "@/type/models";
+import { API_ROUTES } from "@/lib/constants";
 import FileItem from "../project/FileItem";
 import { cn, getStatusColor } from "@/lib/utils";
+import {
+    fetchAllProjectFiles,
+    type ProjectFilesResponse,
+} from "@/lib/projectFilesClient";
 
 interface ProjectFilesModalProps {
     isOpen: boolean;
@@ -19,9 +25,29 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
     onClose,
     onPreviewPdf,
 }) => {
+    const fallbackFiles = useMemo(
+        () => project?.files || [],
+        [project?.files],
+    );
+    const filesKey = isOpen && project ? [API_ROUTES.ADMIN_FILES, project.id] : null;
+    const {
+        data: filesData,
+        error: projectFilesError,
+        isLoading: isLoadingFiles,
+    } = useSWR<ProjectFilesResponse>(
+        filesKey,
+        ([basePath, projectId]: [string, string]) =>
+            fetchAllProjectFiles(basePath, projectId),
+        { keepPreviousData: true },
+    );
+
     if (!isOpen || !project) {
         return null;
     }
+
+    const visibleFiles = filesData?.files ?? fallbackFiles;
+    const fileCount = isLoadingFiles ? project._count.files : visibleFiles.length;
+    const filesError = projectFilesError ? "ไม่สามารถโหลดไฟล์ล่าสุดได้" : null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -68,7 +94,7 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                     <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                         <span className="inline-flex items-center rounded-full bg-white px-3 py-1 font-medium shadow-sm dark:bg-slate-800">
                             <FileText className="mr-1.5 h-4 w-4" />
-                            {project.files.length} ไฟล์
+                            {fileCount} ไฟล์
                         </span>
                         <span
                             className={cn(
@@ -82,9 +108,18 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-6 py-5">
-                    {project.files.length > 0 ? (
+                    {filesError && (
+                        <p className="mb-3 rounded-2xl bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                            {filesError}
+                        </p>
+                    )}
+                    {isLoadingFiles && visibleFiles.length === 0 ? (
+                        <div className="flex min-h-40 items-center justify-center text-sm font-medium text-slate-500 dark:text-slate-400">
+                            กำลังโหลดไฟล์...
+                        </div>
+                    ) : visibleFiles.length > 0 ? (
                         <div className="space-y-3">
-                            {project.files.map((file) => (
+                            {visibleFiles.map((file) => (
                                 <FileItem
                                     key={file.id}
                                     file={file}

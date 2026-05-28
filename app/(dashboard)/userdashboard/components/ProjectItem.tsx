@@ -99,7 +99,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
 
         <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">
           <FileText className="h-3.5 w-3.5" />
-          <span>{project.files.length} เอกสาร</span>
+          <span>{project._count.files} เอกสาร</span>
         </div>
 
         <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">

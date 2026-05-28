@@ -41,6 +41,8 @@ interface AdminDashboardContextType {
     setSelectedFileType: React.Dispatch<React.SetStateAction<string>>;
     selectedStatus: string;
     setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+    selectedProgramFilterId: string;
+    setSelectedProgramFilterId: React.Dispatch<React.SetStateAction<string>>;
     markProjectViewed: (projectId: string) => void;
 
     // Modal States

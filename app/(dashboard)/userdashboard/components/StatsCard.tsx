@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface StatsCardProps {
     title: string;
     value: string | number;
+    valueTitle?: string;
     subtitle: string;
     icon: React.ReactNode;
     colorTheme: "blue" | "purple" | "green";
@@ -37,12 +38,14 @@ const colorClasses = {
 export const StatsCard: React.FC<StatsCardProps> = ({
     title,
     value,
+    valueTitle,
     subtitle,
     icon,
     colorTheme,
     children,
 }): React.JSX.Element => {
     const colors = colorClasses[colorTheme];
+    const isTextValue = typeof value === "string";
 
     return (
         <div
@@ -61,7 +64,15 @@ export const StatsCard: React.FC<StatsCardProps> = ({
                     <div className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1">
                         {title}
                     </div>
-                    <div className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-1">
+                    <div
+                        title={valueTitle}
+                        className={cn(
+                            "mb-1 min-w-0 max-w-full font-bold text-slate-800 dark:text-slate-100",
+                            isTextValue
+                                ? "truncate whitespace-nowrap text-2xl leading-tight sm:text-3xl"
+                                : "text-3xl",
+                        )}
+                    >
                         {value}
                     </div>
                     <div className="text-sm text-slate-400 dark:text-slate-500">

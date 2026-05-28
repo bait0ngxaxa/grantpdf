@@ -179,6 +179,15 @@ export async function DELETE(
                 { status: 404 },
             );
         }
+        if (
+            error instanceof Error &&
+            error.message === "PROJECT_DELETE_FORBIDDEN"
+        ) {
+            return NextResponse.json(
+                { error: "เฉพาะเจ้าของโครงการเท่านั้นที่ลบโครงการได้" },
+                { status: 403 },
+            );
+        }
 
         console.error("Error deleting project:", error);
         const mappedError = toPublicApiError(error, "ไม่สามารถลบโครงการได้");

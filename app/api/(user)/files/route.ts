@@ -23,12 +23,22 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             searchParams.get("limit"),
             PAGINATION.PROJECTS_PER_PAGE,
         );
+        const safeLimit = Math.min(
+            limit,
+            PAGINATION.PROJECT_FILES_API_PAGE_LIMIT,
+        );
+        const projectId = parsePositiveIntId(searchParams.get("projectId"));
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
             throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
         }
-        const result = await getUserFilesPaginated({ userId, page, limit });
+        const result = await getUserFilesPaginated({
+            userId,
+            page,
+            limit: safeLimit,
+            projectId: projectId ?? undefined,
+        });
 
         return NextResponse.json(result);
     } catch (error) {

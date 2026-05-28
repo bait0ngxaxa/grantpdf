@@ -8,6 +8,7 @@ import { groupProjectsByProgram } from "@/lib/programGrouping";
 import { ProjectsListHeader } from "./ProjectsListHeader";
 import { ProjectItem } from "./ProjectItem";
 import { EmptyProjectsState } from "./EmptyProjectsState";
+import { ProjectSearchAndFilter } from "./ProjectSearchAndFilter";
 import { StatusDetailModal } from "./StatusDetailModal";
 import { Pagination, Skeleton } from "@/components/ui";
 import { Building2, ChevronDown, FolderTree, FileText } from "lucide-react";
@@ -36,6 +37,14 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
         isLoading,
         setShowCreateProjectModal,
         openReportModal,
+        searchTerm,
+        setSearchTerm,
+        sortBy,
+        setSortBy,
+        selectedStatus,
+        setSelectedStatus,
+        selectedProgramFilterId,
+        setSelectedProgramFilterId,
     } = useUserDashboardContext();
 
     const [showStatusModal, setShowStatusModal] = useState(false);
@@ -155,6 +164,16 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
             <ProjectsListHeader
                 totalProjects={totalProjects}
                 onCreateProject={() => setShowCreateProjectModal(true)}
+            />
+            <ProjectSearchAndFilter
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                selectedStatus={selectedStatus}
+                setSelectedStatus={setSelectedStatus}
+                selectedProgramFilterId={selectedProgramFilterId}
+                setSelectedProgramFilterId={setSelectedProgramFilterId}
             />
 
             <div className="space-y-6">

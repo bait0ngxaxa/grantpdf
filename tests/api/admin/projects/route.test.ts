@@ -15,15 +15,57 @@ vi.mock("@/lib/services", () => ({
 
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import {
+    getAllProjectsPaginated,
     updateProjectStatusWithAudit,
     programExistsById,
 } from "@/lib/services";
-import { PUT } from "@/app/api/(admin)/admin/projects/route";
+import { GET, PUT } from "@/app/api/(admin)/admin/projects/route";
+import { PAGINATION } from "@/lib/constants";
 
 const mockedRequireAdminSession = vi.mocked(requireAdminSession);
 const mockedIsGuardError = vi.mocked(isGuardError);
+const mockedGetAllProjectsPaginated = vi.mocked(getAllProjectsPaginated);
 const mockedUpdateProjectStatusWithAudit = vi.mocked(updateProjectStatusWithAudit);
 const mockedProgramExistsById = vi.mocked(programExistsById);
+
+describe("admin projects route GET", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockedIsGuardError.mockImplementation(
+            (result): result is NextResponse => result instanceof NextResponse,
+        );
+    });
+
+    it("forwards search filters and clamps oversized limits", async () => {
+        mockedRequireAdminSession.mockResolvedValue({
+            session: { user: { id: "1", role: "admin" } },
+            userId: "1",
+        } as never);
+        mockedGetAllProjectsPaginated.mockResolvedValue({
+            projects: [],
+            totalFiles: 0,
+            total: 0,
+            page: 1,
+            totalPages: 0,
+        });
+
+        const request = new Request(
+            "http://localhost/api/admin/projects?page=1&limit=999&search=budget&status=อนุมัติ&fileType=pdf&programId=12&sortBy=createdAtAsc",
+        );
+        const response = await GET(request as never);
+
+        expect(response.status).toBe(200);
+        expect(mockedGetAllProjectsPaginated).toHaveBeenCalledWith({
+            page: 1,
+            limit: PAGINATION.ADMIN_PROJECTS_API_PAGE_LIMIT,
+            programId: 12,
+            search: "budget",
+            status: "อนุมัติ",
+            fileType: "pdf",
+            sortBy: "createdAtAsc",
+        });
+    });
+});
 
 describe("admin projects route PUT", () => {
     beforeEach(() => {

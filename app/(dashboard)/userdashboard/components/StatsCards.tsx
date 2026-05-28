@@ -2,11 +2,18 @@
 
 import React from "react";
 import { Building2, FileText, Clock } from "lucide-react";
-import { truncateFileName } from "@/lib/utils";
 import { useUserDashboardContext } from "../contexts";
 
 import { StatsCard } from "./StatsCard";
 import { ProjectStatusDetails } from "./ProjectStatusDetails";
+
+const truncateProjectName = (name: string, maxLength: number = 24): string => {
+    if (name.length <= maxLength) {
+        return name;
+    }
+
+    return `${name.slice(0, maxLength - 3)}...`;
+};
 
 export const StatsCards: React.FC = () => {
     const { totalProjects, totalDocuments, statusCounts, latestProject } =
@@ -44,9 +51,10 @@ export const StatsCards: React.FC = () => {
                 title="โครงการล่าสุด"
                 value={
                     latestProject
-                        ? truncateFileName(latestProject.name, 20)
+                        ? truncateProjectName(latestProject.name)
                         : "-"
                 }
+                valueTitle={latestProject?.name}
                 subtitle={
                     latestProject
                         ? new Date(latestProject.created_at).toLocaleDateString(

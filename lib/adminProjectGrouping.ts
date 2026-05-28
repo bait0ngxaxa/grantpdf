@@ -53,10 +53,6 @@ function matchesSearch(project: AdminProject, normalizedSearchTerm: string): boo
         project.programName || "",
         project.status,
         project.statusNote || "",
-        ...project.files.flatMap((file) => [
-            file.originalFileName,
-            file.fileName,
-        ]),
     ];
 
     return haystacks.some((value) =>

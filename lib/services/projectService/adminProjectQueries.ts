@@ -73,8 +73,13 @@ function buildAdminProjectsWhereSql(params: {
     search?: string;
     status?: string;
     fileType?: string;
+    programId?: number;
 }): Prisma.Sql {
     const conditions: Prisma.Sql[] = [Prisma.sql`p.deleted_at IS NULL`];
+
+    if (params.programId) {
+        conditions.push(Prisma.sql`p.programId = ${params.programId}`);
+    }
 
     if (params.search) {
         const keyword = `%${params.search}%`;
@@ -83,11 +88,22 @@ function buildAdminProjectsWhereSql(params: {
         if (projectId !== null) {
             conditions.push(Prisma.sql`p.id = ${projectId}`);
         } else {
-            conditions.push(
+                conditions.push(
                 Prisma.sql`(
                     p.name LIKE ${keyword}
                     OR u.name LIKE ${keyword}
                     OR u.email LIKE ${keyword}
+                    OR EXISTS (
+                        SELECT 1
+                        FROM \`UserFile\` uf_search
+                        WHERE uf_search.projectId = p.id
+                          AND uf_search.originalFileName LIKE ${keyword}
+                          AND NOT EXISTS (
+                              SELECT 1
+                              FROM \`ProjectReport\` pr_search
+                              WHERE pr_search.fileId = uf_search.id
+                          )
+                    )
                 )`,
             );
         }
@@ -120,6 +136,7 @@ async function findProjectIdsByStatusSort(params: {
     page: number;
     limit: number;
     sortBy: StatusSortKey;
+    programId?: number;
     search?: string;
     status?: string;
     fileType?: string;
@@ -148,6 +165,7 @@ async function findProjectIdsByStatusSort(params: {
 interface GetAllProjectsPaginatedParams {
     page: number;
     limit: number;
+    programId?: number;
     search?: string;
     status?: string;
     fileType?: string;
@@ -157,6 +175,7 @@ interface GetAllProjectsPaginatedParams {
 export async function getAllProjectsPaginated({
     page,
     limit,
+    programId,
     search,
     status,
     fileType,
@@ -168,6 +187,7 @@ export async function getAllProjectsPaginated({
 
     const where = {
         deletedAt: null,
+        ...(programId ? { programId } : {}),
         ...(search
             ? {
                   ...(projectIdSearch !== null
@@ -177,6 +197,16 @@ export async function getAllProjectsPaginated({
                                 { name: { contains: search } },
                                 { user: { name: { contains: search } } },
                                 { user: { email: { contains: search } } },
+                                {
+                                    files: {
+                                        some: {
+                                            originalFileName: {
+                                                contains: search,
+                                            },
+                                            projectReports: { none: {} },
+                                        },
+                                    },
+                                },
                             ],
                         }),
               }
@@ -206,6 +236,7 @@ export async function getAllProjectsPaginated({
             page,
             limit,
             sortBy: safeSortBy,
+            programId,
             search,
             status,
             fileType,

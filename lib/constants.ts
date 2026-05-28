@@ -9,6 +9,9 @@ export const PAGINATION = {
     ITEMS_PER_PAGE: 5,
     PROJECTS_PER_PAGE: 5,
     PROGRAM_GROUP_PROJECTS_PER_PAGE: 5,
+    USER_PROJECTS_API_PAGE_LIMIT: 25,
+    ADMIN_PROJECTS_API_PAGE_LIMIT: 25,
+    PROJECT_FILES_API_PAGE_LIMIT: 25,
     USERS_PER_PAGE: 10,
 } as const;
 
@@ -172,9 +175,11 @@ export const API_ROUTES = {
     PROJECTS: "/api/projects",
     PROJECTS_SUMMARY: "/api/projects?view=summary",
     PROJECTS_STATS: "/api/projects/stats",
+    USER_FILES: "/api/files",
     USER_DOCS: "/api/user-docs",
     FILE_GENERATE_URL: "/api/file/generate-url",
     ADMIN_PROJECTS: "/api/admin/projects",
+    ADMIN_FILES: "/api/admin/files",
     ADMIN_PROJECT_CO_OWNERS: "/api/admin/project-co-owners",
     ADMIN_PROGRAMS: "/api/admin/programs",
     ADMIN_USERS: "/api/admin/users",

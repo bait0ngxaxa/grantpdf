@@ -16,6 +16,8 @@ export const ProjectsTab = (): React.JSX.Element => {
         setSortBy,
         selectedStatus,
         setSelectedStatus,
+        selectedProgramFilterId,
+        setSelectedProgramFilterId,
     } = useAdminDashboardContext();
 
     return (
@@ -27,6 +29,8 @@ export const ProjectsTab = (): React.JSX.Element => {
                 setSortBy={setSortBy}
                 selectedStatus={selectedStatus}
                 setSelectedStatus={setSelectedStatus}
+                selectedProgramFilterId={selectedProgramFilterId}
+                setSelectedProgramFilterId={setSelectedProgramFilterId}
             />
 
             <ProjectsList

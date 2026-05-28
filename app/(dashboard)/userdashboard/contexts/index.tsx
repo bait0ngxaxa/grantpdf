@@ -27,6 +27,14 @@ interface UserDashboardContextType {
     setIsSidebarOpen: (open: boolean) => void;
     expandedProjects: Set<string>;
     toggleProjectExpansion: (projectId: string) => void;
+    searchTerm: string;
+    setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+    sortBy: string;
+    setSortBy: React.Dispatch<React.SetStateAction<string>>;
+    selectedStatus: string;
+    setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+    selectedProgramFilterId: string;
+    setSelectedProgramFilterId: React.Dispatch<React.SetStateAction<string>>;
 
     // Data State — `projects` contains all projects when the projects tab is active
     projects: Project[];

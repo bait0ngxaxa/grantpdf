@@ -14,7 +14,6 @@ import { publicApiError, toPublicApiError } from "@/lib/apiError";
 import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
 
 const PROJECT_SUMMARY_VIEW = "summary";
-const MAX_PROJECTS_PAGE_LIMIT = 25;
 
 function getRequestId(req: Request): string | undefined {
     return req.headers.get("x-request-id") || undefined;
@@ -48,8 +47,23 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             searchParams.get("limit"),
             PAGINATION.PROJECTS_PER_PAGE,
         );
-        const limit = Math.min(requestedLimit, MAX_PROJECTS_PAGE_LIMIT);
-        const result = await getProjectsByUserIdPaginated({ userId, page, limit });
+        const limit = Math.min(
+            requestedLimit,
+            PAGINATION.USER_PROJECTS_API_PAGE_LIMIT,
+        );
+        const programId = parsePositiveIntId(searchParams.get("programId"));
+        const search = searchParams.get("search") ?? undefined;
+        const status = searchParams.get("status") ?? undefined;
+        const sortBy = searchParams.get("sortBy") ?? undefined;
+        const result = await getProjectsByUserIdPaginated({
+            userId,
+            page,
+            limit,
+            programId: programId ?? undefined,
+            search,
+            status,
+            sortBy,
+        });
 
         return NextResponse.json(result);
     } catch (error) {

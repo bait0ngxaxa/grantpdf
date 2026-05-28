@@ -16,6 +16,14 @@ interface DashboardUIContextType {
     setIsSidebarOpen: (open: boolean) => void;
     expandedProjects: Set<string>;
     toggleProjectExpansion: (projectId: string) => void;
+    searchTerm: string;
+    setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+    sortBy: string;
+    setSortBy: React.Dispatch<React.SetStateAction<string>>;
+    selectedStatus: string;
+    setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+    selectedProgramFilterId: string;
+    setSelectedProgramFilterId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const DashboardUIContext = createContext<DashboardUIContextType | undefined>(
@@ -28,6 +36,10 @@ export function DashboardUIProvider({ children }: { children: ReactNode }) {
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
         new Set(),
     );
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useState("createdAtDesc");
+    const [selectedStatus, setSelectedStatus] = useState("สถานะทั้งหมด");
+    const [selectedProgramFilterId, setSelectedProgramFilterId] = useState("");
 
     useEffect(() => {
         const frameId = window.requestAnimationFrame(() => {
@@ -56,6 +68,14 @@ export function DashboardUIProvider({ children }: { children: ReactNode }) {
         setIsSidebarOpen,
         expandedProjects,
         toggleProjectExpansion,
+        searchTerm,
+        setSearchTerm,
+        sortBy,
+        setSortBy,
+        selectedStatus,
+        setSelectedStatus,
+        selectedProgramFilterId,
+        setSelectedProgramFilterId,
     };
 
     return (

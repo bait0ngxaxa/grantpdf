@@ -1,13 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { FileText, FolderOpen, X } from "lucide-react";
 import type { Project } from "@/type";
-import { ROUTES } from "@/lib/constants";
+import { API_ROUTES, ROUTES } from "@/lib/constants";
+import type { AdminDocumentFile } from "@/type/models";
 import FileItem from "../FileItem";
 import { cn, getStatusColor } from "@/lib/utils";
+import {
+    fetchAllProjectFiles,
+    type ProjectFilesResponse,
+} from "@/lib/projectFilesClient";
 
 interface ProjectFilesModalProps {
     isOpen: boolean;
@@ -20,9 +26,29 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
     project,
     onClose,
 }) => {
+    const fallbackFiles = useMemo(
+        () => (project?.files || []) as AdminDocumentFile[],
+        [project?.files],
+    );
+    const filesKey = isOpen && project ? [API_ROUTES.USER_FILES, project.id] : null;
+    const {
+        data: filesData,
+        error: projectFilesError,
+        isLoading: isLoadingFiles,
+    } = useSWR<ProjectFilesResponse>(
+        filesKey,
+        ([basePath, projectId]: [string, string]) =>
+            fetchAllProjectFiles(basePath, projectId),
+        { keepPreviousData: true },
+    );
+
     if (!isOpen || !project) {
         return null;
     }
+
+    const visibleFiles = filesData?.files ?? fallbackFiles;
+    const fileCount = isLoadingFiles ? project._count.files : visibleFiles.length;
+    const filesError = projectFilesError ? "ไม่สามารถโหลดไฟล์ล่าสุดได้" : null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -34,25 +60,31 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
             />
 
             <div className="relative z-10 flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
-                <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-700">
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
+                <div className="flex min-w-0 items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-700">
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                        <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
                                 <FolderOpen className="h-6 w-6" />
                             </div>
                             <div className="min-w-0">
-                                <h3 className="truncate text-xl font-bold text-slate-800 dark:text-slate-100">
+                                <h3
+                                    className="truncate text-xl font-bold text-slate-800 dark:text-slate-100"
+                                    title={project.name}
+                                >
                                     {project.name}
                                 </h3>
-                                <div className="mt-1">
-                                    <span className="inline-flex items-center rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300">
+                                <div className="mt-1 min-w-0">
+                                    <span
+                                        className="inline-flex max-w-full items-center truncate rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300"
+                                        title={project.programName || "ยังไม่ได้กำหนดโครงการหลัก"}
+                                    >
                                         {project.programName || "ยังไม่ได้กำหนดโครงการหลัก"}
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-shrink-0 items-center gap-2">
                         <Button
                             asChild
                             size="sm"
@@ -81,7 +113,7 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                     <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                         <span className="inline-flex items-center rounded-full bg-white px-3 py-1 font-medium shadow-sm dark:bg-slate-800">
                             <FileText className="mr-1.5 h-4 w-4" />
-                            {project.files.length} เอกสาร
+                            {fileCount} เอกสาร
                         </span>
                         <span
                             className={cn(
@@ -95,9 +127,18 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-6 py-5">
-                    {project.files.length > 0 ? (
+                    {filesError && (
+                        <p className="mb-3 rounded-2xl bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                            {filesError}
+                        </p>
+                    )}
+                    {isLoadingFiles && visibleFiles.length === 0 ? (
+                        <div className="flex min-h-40 items-center justify-center text-sm font-medium text-slate-500 dark:text-slate-400">
+                            กำลังโหลดเอกสาร...
+                        </div>
+                    ) : visibleFiles.length > 0 ? (
                         <div className="space-y-3">
-                            {project.files.map((file) => (
+                            {visibleFiles.map((file) => (
                                 <FileItem key={file.id} file={file} />
                             ))}
                         </div>

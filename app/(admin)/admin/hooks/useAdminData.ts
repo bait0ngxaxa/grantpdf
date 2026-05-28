@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import type { AdminProject } from "@/type/models";
 import type { AdminStatsResult } from "@/lib/services/adminService";
-import { API_ROUTES, PAGINATION } from "@/lib/constants";
+import { API_ROUTES, PAGINATION, STATUS_FILTER } from "@/lib/constants";
 
 export type AdminStatsResponse = AdminStatsResult;
 
@@ -19,16 +19,113 @@ interface UseAdminDataParams {
     search?: string;
     status?: string;
     fileType?: string;
+    programId?: string;
     sortBy?: string;
     shouldLoadProjects?: boolean;
     initialStats?: AdminStatsResponse;
 }
 
+interface AdminProjectsRequestParams {
+    search?: string;
+    status?: string;
+    fileType?: string;
+    programId?: string;
+    sortBy?: string;
+}
+
+type AdminProjectsKey = readonly [string, string, string, string, string, string];
+
+function normalizeFilter(value?: string): string | undefined {
+    const trimmed = value?.trim();
+    return trimmed ? trimmed : undefined;
+}
+
+function buildAdminProjectsPageUrl(
+    page: number,
+    filters: AdminProjectsRequestParams,
+): string {
+    const params = new URLSearchParams({
+        page: page.toString(),
+        limit: PAGINATION.ADMIN_PROJECTS_API_PAGE_LIMIT.toString(),
+    });
+
+    const search = normalizeFilter(filters.search);
+    const status = normalizeFilter(filters.status);
+    const fileType = normalizeFilter(filters.fileType);
+    const programId = normalizeFilter(filters.programId);
+    const sortBy = normalizeFilter(filters.sortBy);
+
+    if (search) params.set("search", search);
+    if (status && status !== STATUS_FILTER.ALL) params.set("status", status);
+    if (fileType) params.set("fileType", fileType);
+    if (programId) params.set("programId", programId);
+    if (sortBy) params.set("sortBy", sortBy);
+
+    return `${API_ROUTES.ADMIN_PROJECTS}?${params.toString()}`;
+}
+
+function isProjectsResponse(value: unknown): value is ProjectsResponse {
+    if (typeof value !== "object" || value === null) {
+        return false;
+    }
+
+    const response = value as Partial<ProjectsResponse>;
+    return (
+        Array.isArray(response.projects) &&
+        typeof response.totalFiles === "number" &&
+        typeof response.total === "number" &&
+        typeof response.page === "number" &&
+        typeof response.totalPages === "number"
+    );
+}
+
+async function fetchProjectsPage(
+    page: number,
+    filters: AdminProjectsRequestParams,
+): Promise<ProjectsResponse> {
+    const response = await fetch(buildAdminProjectsPageUrl(page, filters));
+    if (!response.ok) {
+        throw new Error("Failed to fetch data");
+    }
+
+    const data: unknown = await response.json();
+    if (!isProjectsResponse(data)) {
+        throw new Error("Invalid admin projects response");
+    }
+
+    return data;
+}
+
+async function fetchAllProjects(
+    filters: AdminProjectsRequestParams,
+): Promise<ProjectsResponse> {
+    const firstPage = await fetchProjectsPage(1, filters);
+    if (firstPage.totalPages <= 1) {
+        return firstPage;
+    }
+
+    const remainingPages = Array.from(
+        { length: firstPage.totalPages - 1 },
+        (_, index) => index + 2,
+    );
+    const pageResults = await Promise.all(
+        remainingPages.map((page) => fetchProjectsPage(page, filters)),
+    );
+
+    return {
+        ...firstPage,
+        projects: [
+            ...firstPage.projects,
+            ...pageResults.flatMap((page) => page.projects),
+        ],
+    };
+}
+
 export const useAdminData = ({
-    page = 1,
     search,
     status,
     fileType,
+    programId,
     sortBy,
     shouldLoadProjects = true,
     initialStats,
@@ -42,49 +139,36 @@ export const useAdminData = ({
             revalidateIfStale: initialStats ? false : true,
         });
 
-    const totalProjectsForDocuments =
-        statsData?.totalProjects ?? initialStats?.totalProjects ?? 0;
-    const limit = shouldLoadProjects
-        ? Math.max(PAGINATION.ITEMS_PER_PAGE, totalProjectsForDocuments)
-        : PAGINATION.ITEMS_PER_PAGE;
-    const effectivePage = shouldLoadProjects ? 1 : page;
-    const effectiveSearch = shouldLoadProjects ? undefined : search;
-    const effectiveStatus = shouldLoadProjects ? undefined : status;
-    const effectiveFileType = shouldLoadProjects ? undefined : fileType;
-    const effectiveSortBy = shouldLoadProjects ? undefined : sortBy;
-
     const projectsKey = useMemo(() => {
         if (!shouldLoadProjects) return null;
 
-        const params = new URLSearchParams({
-            page: String(effectivePage),
-            limit: String(limit),
-        });
-
-        if (effectiveSearch) params.set("search", effectiveSearch);
-        if (effectiveStatus) params.set("status", effectiveStatus);
-        if (effectiveFileType) params.set("fileType", effectiveFileType);
-        if (effectiveSortBy) params.set("sortBy", effectiveSortBy);
-
-        return `${API_ROUTES.ADMIN_PROJECTS}?${params.toString()}`;
-    }, [
-        effectivePage,
-        limit,
-        effectiveSearch,
-        effectiveStatus,
-        effectiveFileType,
-        effectiveSortBy,
-        shouldLoadProjects,
-    ]);
+        return [
+            API_ROUTES.ADMIN_PROJECTS,
+            normalizeFilter(search) ?? "",
+            normalizeFilter(status) ?? "",
+            normalizeFilter(fileType) ?? "",
+            normalizeFilter(programId) ?? "",
+            normalizeFilter(sortBy) ?? "",
+        ] as const;
+    }, [fileType, programId, search, shouldLoadProjects, sortBy, status]);
 
     const {
         data: projectsData,
         error: projectsError,
         isLoading: isLoadingProjects,
         mutate: mutateProjects,
-    } = useSWR<ProjectsResponse>(projectsKey, {
-        keepPreviousData: true,
-    });
+    } = useSWR<ProjectsResponse, Error, AdminProjectsKey | null>(
+        projectsKey,
+        ([, keySearch, keyStatus, keyFileType, keyProgramId, keySortBy]) =>
+            fetchAllProjects({
+                search: keySearch,
+                status: keyStatus,
+                fileType: keyFileType,
+                programId: keyProgramId,
+                sortBy: keySortBy,
+            }),
+        { keepPreviousData: true },
+    );
 
     const projects = useMemo(() => projectsData?.projects || [], [projectsData]);
     const totalFiles = shouldLoadProjects

@@ -652,11 +652,15 @@ export async function deleteProjectWithAudit(
     await prisma.$transaction(async (tx) => {
         const existing = await tx.project.findFirst({
             where: buildProjectAccessWhere(projectId, userId),
-            select: { id: true, name: true, description: true },
+            select: { id: true, name: true, description: true, userId: true },
         });
 
         if (!existing) {
             throw new Error("PROJECT_NOT_FOUND");
+        }
+
+        if (existing.userId !== userId) {
+            throw new Error("PROJECT_DELETE_FORBIDDEN");
         }
 
         await tx.project.update({

@@ -11,13 +11,18 @@ export async function getUserFilesPaginated({
     userId,
     page,
     limit,
+    projectId,
 }: GetUserFilesPaginatedParams): Promise<PaginatedFilesResult> {
     const skip = (page - 1) * limit;
+    const where = {
+        userId,
+        ...(projectId ? { projectId, projectReports: { none: {} } } : {}),
+    };
 
     const [total, rawFiles] = await Promise.all([
-        prisma.userFile.count({ where: { userId } }),
+        prisma.userFile.count({ where }),
         prisma.userFile.findMany({
-            where: { userId },
+            where,
             include: {
                 user: { select: { id: true, name: true, email: true } },
                 attachmentFiles: {
@@ -49,6 +54,7 @@ export async function getUserFilesPaginated({
 export async function getAllFilesPaginated({
     page,
     limit,
+    projectId,
     search,
     status,
     fileType,
@@ -56,6 +62,7 @@ export async function getAllFilesPaginated({
     const skip = (page - 1) * limit;
 
     const where = {
+        ...(projectId ? { projectId, projectReports: { none: {} } } : {}),
         ...(search
             ? {
                   OR: [

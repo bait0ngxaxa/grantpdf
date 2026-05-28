@@ -31,6 +31,8 @@ export const useUIStates = (): {
     setSelectedFileType: React.Dispatch<React.SetStateAction<string>>;
     selectedStatus: string;
     setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+    selectedProgramFilterId: string;
+    setSelectedProgramFilterId: React.Dispatch<React.SetStateAction<string>>;
     markProjectViewed: (projectId: string) => void;
     toggleProjectExpansion: (projectId: string) => void;
     toggleRowExpansion: (fileId: string) => void;
@@ -70,6 +72,7 @@ export const useUIStates = (): {
     const [sortBy, setSortBy] = useState("createdAtDesc");
     const [selectedFileType, setSelectedFileType] = useState("ไฟล์ทั้งหมด");
     const [selectedStatus, setSelectedStatus] = useState("สถานะทั้งหมด");
+    const [selectedProgramFilterId, setSelectedProgramFilterId] = useState("");
 
     const markProjectViewed = (projectId: string): void => {
         setViewedProjects((prevViewed) => {
@@ -118,6 +121,8 @@ export const useUIStates = (): {
         setSelectedFileType,
         selectedStatus,
         setSelectedStatus,
+        selectedProgramFilterId,
+        setSelectedProgramFilterId,
         markProjectViewed,
         toggleProjectExpansion,
         toggleRowExpansion,

@@ -45,4 +45,37 @@ describe("buildAdminProjectGroupViews", () => {
         expect(groups).toHaveLength(1);
         expect(groups[0]?.items.map((project) => project.id)).toEqual(["12"]);
     });
+
+    it("does not depend on loaded files for text search", () => {
+        const groups = buildAdminProjectGroupViews(
+            [
+                buildProject({
+                    id: "12",
+                    name: "โครงการทั่วไป",
+                    files: [
+                        {
+                            id: "99",
+                            userId: "10",
+                            originalFileName: "budget-report.pdf",
+                            storagePath: "files/budget-report.pdf",
+                            fileExtension: "pdf",
+                            created_at: "2026-01-01T00:00:00.000Z",
+                            updated_at: "2026-01-01T00:00:00.000Z",
+                            fileName: "budget-report.pdf",
+                            createdAt: "2026-01-01T00:00:00.000Z",
+                            lastModified: "2026-01-01T00:00:00.000Z",
+                            downloadStatus: "pending",
+                        },
+                    ],
+                }),
+            ],
+            {
+                searchTerm: "budget",
+                selectedStatus: "สถานะทั้งหมด",
+                sortBy: "createdAtDesc",
+            },
+        );
+
+        expect(groups).toHaveLength(0);
+    });
 });

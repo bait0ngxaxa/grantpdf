@@ -39,11 +39,11 @@ export default function ProjectsList({
     const groupedProjects = useMemo(
         () =>
             buildAdminProjectGroupViews(projects, {
-                searchTerm,
+                searchTerm: "",
                 sortBy,
                 selectedStatus,
             }),
-        [projects, searchTerm, sortBy, selectedStatus],
+        [projects, sortBy, selectedStatus],
     );
     const hasActiveFilters = hasActiveAdminProjectFilters(
         searchTerm,

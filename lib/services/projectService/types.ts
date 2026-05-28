@@ -19,7 +19,7 @@ export interface RawProject {
         name: string | null;
         email: string;
     } | null;
-    files: RawFile[];
+    files?: RawFile[];
     reports?: RawProjectReportSummary[];
     allowCoOwners?: boolean;
     coOwners?: RawProjectCoOwner[];
@@ -104,11 +104,13 @@ export interface GetUserFilesPaginatedParams {
     userId: number;
     page: number;
     limit: number;
+    projectId?: number;
 }
 
 export interface GetAllFilesPaginatedParams {
     page: number;
     limit: number;
+    projectId?: number;
     search?: string;
     status?: string;
     fileType?: string;

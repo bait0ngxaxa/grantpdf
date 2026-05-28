@@ -57,7 +57,13 @@ export function ProjectDataProvider({
     children: ReactNode;
     initialStats?: UserProjectStats;
 }) {
-    const { activeTab } = useDashboardUI();
+    const {
+        activeTab,
+        searchTerm,
+        selectedStatus,
+        selectedProgramFilterId,
+        sortBy,
+    } = useDashboardUI();
     const shouldLoadProjects = activeTab === "projects";
 
     const {
@@ -70,7 +76,12 @@ export function ProjectDataProvider({
         hasInitialDataLoaded,
         error,
         fetchUserData,
-    } = useUserData(shouldLoadProjects, initialStats);
+    } = useUserData(shouldLoadProjects, initialStats, {
+        search: searchTerm,
+        status: selectedStatus,
+        programId: selectedProgramFilterId,
+        sortBy,
+    });
 
     const [fileToDelete, setFileToDelete] = useState<string | null>(null);
     const [projectToDelete, setProjectToDelete] = useState<string | null>(null);

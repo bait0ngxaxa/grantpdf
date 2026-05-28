@@ -106,6 +106,10 @@ describe("projects route", () => {
             userId: 7,
             page: 1,
             limit: PAGINATION.PROJECTS_PER_PAGE,
+            programId: undefined,
+            search: undefined,
+            status: undefined,
+            sortBy: undefined,
         });
     });
 
@@ -137,6 +141,46 @@ describe("projects route", () => {
             userId: 7,
             page: 2,
             limit: 25,
+            programId: undefined,
+            search: undefined,
+            status: undefined,
+            sortBy: undefined,
+        });
+    });
+
+    it("forwards user project filters to the service", async () => {
+        mockedAuth.mockResolvedValue({
+            user: { id: "7" },
+        } as never);
+        mockedGetProjectsByUserIdPaginated.mockResolvedValue({
+            projects: [],
+            totalFiles: 0,
+            total: 0,
+            page: 1,
+            totalPages: 0,
+            statusCounts: {
+                pending: 0,
+                approved: 0,
+                rejected: 0,
+                editing: 0,
+                closed: 0,
+            },
+        });
+
+        const request = new Request(
+            "http://localhost/api/projects?search=budget&status=อนุมัติ&programId=12&sortBy=createdAtAsc",
+        );
+        const response = await GET(request as never);
+
+        expect(response.status).toBe(200);
+        expect(mockedGetProjectsByUserIdPaginated).toHaveBeenCalledWith({
+            userId: 7,
+            page: 1,
+            limit: PAGINATION.PROJECTS_PER_PAGE,
+            programId: 12,
+            search: "budget",
+            status: "อนุมัติ",
+            sortBy: "createdAtAsc",
         });
     });
 

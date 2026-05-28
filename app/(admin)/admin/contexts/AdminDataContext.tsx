@@ -54,6 +54,7 @@ export function AdminDataProvider({
         search: ui.searchTerm || undefined,
         status: ui.selectedStatus || undefined,
         fileType: ui.selectedFileType || undefined,
+        programId: ui.selectedProgramFilterId || undefined,
         sortBy: ui.sortBy || undefined,
         shouldLoadProjects: ui.activeTab === "documents",
         initialStats,

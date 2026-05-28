@@ -20,22 +20,6 @@ export const PROJECT_INCLUDE = {
     user: {
         select: USER_PUBLIC_SELECT,
     },
-    files: {
-        where: {
-            projectReports: {
-                none: {},
-            },
-        },
-        include: {
-            user: {
-                select: USER_PUBLIC_SELECT,
-            },
-            attachmentFiles: {
-                select: ATTACHMENT_SELECT,
-            },
-        },
-        orderBy: { created_at: "desc" as const },
-    },
     reports: {
         select: {
             id: true,

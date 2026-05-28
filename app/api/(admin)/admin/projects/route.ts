@@ -6,6 +6,7 @@ import {
 } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
+import { parsePositiveIntId } from "@/lib/id";
 import { updateAdminProjectSchema } from "@/lib/validation/schemas";
 import { toPublicApiError } from "@/lib/apiError";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
@@ -34,12 +35,25 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             searchParams.get("limit"),
             PAGINATION.ITEMS_PER_PAGE,
         );
+        const safeLimit = Math.min(
+            limit,
+            PAGINATION.ADMIN_PROJECTS_API_PAGE_LIMIT,
+        );
         const search = searchParams.get("search") ?? undefined;
         const status = searchParams.get("status") ?? undefined;
         const fileType = searchParams.get("fileType") ?? undefined;
+        const programId = parsePositiveIntId(searchParams.get("programId"));
         const sortBy = searchParams.get("sortBy") ?? undefined;
 
-        const result = await getAllProjectsPaginated({ page, limit, search, status, fileType, sortBy });
+        const result = await getAllProjectsPaginated({
+            page,
+            limit: safeLimit,
+            programId: programId ?? undefined,
+            search,
+            status,
+            fileType,
+            sortBy,
+        });
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching admin projects:", error);

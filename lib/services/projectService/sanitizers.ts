@@ -73,7 +73,7 @@ export function sanitizeProjects(projects: RawProject[]): AdminProject[] {
                 name: coOwner.adminUser.name || "Unknown User",
                 email: coOwner.adminUser.email,
             })),
-            files: sanitizeFiles(project.files, userName, userEmail),
+            files: sanitizeFiles(project.files ?? [], userName, userEmail),
             reports: (project.reports || []).map((report) => ({
                 id: report.id.toString(),
                 status: report.status,
