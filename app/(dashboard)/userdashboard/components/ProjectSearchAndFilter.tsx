@@ -58,7 +58,7 @@ export function ProjectSearchAndFilter({
     });
 
     return (
-        <div className="sticky top-32 z-40 mb-6 flex min-w-0 flex-col items-stretch justify-between gap-3 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-lg shadow-slate-200/40 backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 dark:shadow-slate-950/30 sm:top-32 lg:top-28 lg:flex-row lg:items-center">
+        <div className="sticky top-32 z-20 mb-6 flex min-w-0 flex-col items-stretch justify-between gap-3 rounded-2xl border border-slate-100 bg-white/95 p-2 shadow-lg shadow-slate-200/40 backdrop-blur dark:border-slate-700 dark:bg-slate-800/95 dark:shadow-slate-950/30 sm:top-32 lg:top-28 lg:flex-row lg:items-center">
             <div className="relative w-full min-w-0 lg:w-96">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <Search className="h-5 w-5 text-slate-400 dark:text-slate-500" />

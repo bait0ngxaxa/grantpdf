@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import useSWR from "swr";
-import { FileText, FolderOpen, X } from "lucide-react";
+import { FileText, FolderOpen, Loader2, X } from "lucide-react";
 import type { AdminProject } from "@/type/models";
 import { API_ROUTES } from "@/lib/constants";
 import FileItem from "../project/FileItem";
@@ -114,8 +114,13 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                         </p>
                     )}
                     {isLoadingFiles && visibleFiles.length === 0 ? (
-                        <div className="flex min-h-40 items-center justify-center text-sm font-medium text-slate-500 dark:text-slate-400">
-                            กำลังโหลดไฟล์...
+                        <div
+                            className="flex min-h-40 flex-col items-center justify-center gap-3 text-sm font-medium text-slate-500 dark:text-slate-400"
+                            aria-busy="true"
+                            aria-live="polite"
+                        >
+                            <Loader2 className="h-8 w-8 animate-spin text-blue-500 dark:text-blue-400" />
+                            <span>กำลังโหลดไฟล์...</span>
                         </div>
                     ) : visibleFiles.length > 0 ? (
                         <div className="space-y-3">
