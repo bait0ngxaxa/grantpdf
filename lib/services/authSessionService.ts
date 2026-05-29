@@ -10,6 +10,7 @@ import {
 const REFRESH_TOKEN_BYTES = 48;
 const TOKEN_ID_BYTES = 24;
 const TOKEN_HASH_ALGORITHM = "sha256";
+const CONCURRENT_ROTATION_GRACE_MS = 10_000;
 
 export { createAccessToken, verifyAccessToken };
 export type { AccessTokenPayload };
@@ -39,7 +40,7 @@ export type RotateRefreshSessionResult =
           accessToken: string;
           expiresAt: Date;
       }
-    | { status: "invalid" | "expired" | "revoked" | "reused" };
+    | { status: "invalid" | "expired" | "revoked" | "reused" | "stale" };
 
 type AuthSessionTransaction = {
     authSession: {
@@ -129,91 +130,128 @@ function shouldRejectSession(session: {
     return null;
 }
 
+function isWithinConcurrentRotationGrace(
+    rotatedAt: Date | null,
+    now: Date
+): boolean {
+    return (
+        rotatedAt !== null &&
+        now.getTime() - rotatedAt.getTime() <= CONCURRENT_ROTATION_GRACE_MS
+    );
+}
+
 export async function rotateRefreshSession(
     refreshToken: string
 ): Promise<RotateRefreshSessionResult> {
     const refreshTokenHash = hashRefreshToken(refreshToken);
     const now = new Date();
 
-    return prisma.$transaction(async (tx) => {
-        const session = await tx.authSession.findUnique({
-            where: { refreshTokenHash },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        role: true,
-                        sessionVersion: true,
+    return prisma.$transaction(
+        async (tx) => {
+            const session = await tx.authSession.findUnique({
+                where: { refreshTokenHash },
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            role: true,
+                            sessionVersion: true,
+                        },
                     },
                 },
-            },
-        });
+            });
 
-        if (!session) return { status: "invalid" };
+            if (!session) return { status: "invalid" };
 
-        const rejectStatus = shouldRejectSession(session);
-        if (rejectStatus === "reused") {
-            await revokeFamily(tx, session.familyId, now);
-            return { status: "reused" };
-        }
-        if (rejectStatus) {
-            await revokeFamily(tx, session.familyId, now);
-            return { status: rejectStatus };
-        }
+            const rejectStatus = shouldRejectSession(session);
+            if (rejectStatus === "reused") {
+                if (isWithinConcurrentRotationGrace(session.rotatedAt, now)) {
+                    return { status: "stale" };
+                }
 
-        const nextRefreshToken = generateRefreshToken();
-        const nextSessionId = generateTokenId();
-        const expiresAt = addSeconds(
-            now,
-            SESSION.REFRESH_TOKEN_MAX_AGE_SECONDS
-        );
+                await revokeFamily(tx, session.familyId, now);
+                return { status: "reused" };
+            }
+            if (rejectStatus) {
+                await revokeFamily(tx, session.familyId, now);
+                return { status: rejectStatus };
+            }
 
-        const rotation = await tx.authSession.updateMany({
-            where: {
-                id: session.id,
-                revokedAt: null,
-                rotatedAt: null,
-            },
-            data: {
-                rotatedAt: now,
-                lastUsedAt: now,
-            },
-        });
+            const nextRefreshToken = generateRefreshToken();
+            const nextSessionId = generateTokenId();
+            const expiresAt = addSeconds(
+                now,
+                SESSION.REFRESH_TOKEN_MAX_AGE_SECONDS
+            );
 
-        if (rotation.count !== 1) {
-            await revokeFamily(tx, session.familyId, now);
-            return { status: "reused" };
-        }
+            const rotation = await tx.authSession.updateMany({
+                where: {
+                    id: session.id,
+                    revokedAt: null,
+                    rotatedAt: null,
+                },
+                data: {
+                    rotatedAt: now,
+                    lastUsedAt: now,
+                },
+            });
 
-        await tx.authSession.create({
-            data: {
+            if (rotation.count !== 1) {
+                const currentSession = await tx.authSession.findUnique({
+                    where: { id: session.id },
+                    select: {
+                        familyId: true,
+                        revokedAt: true,
+                        rotatedAt: true,
+                    },
+                });
+
+                if (
+                    currentSession &&
+                    !currentSession.revokedAt &&
+                    isWithinConcurrentRotationGrace(currentSession.rotatedAt, now)
+                ) {
+                    return { status: "stale" };
+                }
+
+                await revokeFamily(tx, session.familyId, now);
+                return { status: "reused" };
+            }
+
+            await tx.authSession.create({
+                data: {
+                    userId: session.user.id,
+                    sessionId: nextSessionId,
+                    familyId: session.familyId,
+                    refreshTokenHash: hashRefreshToken(nextRefreshToken),
+                    sessionVersion: session.user.sessionVersion,
+                    expiresAt,
+                    ip: session.ip,
+                    userAgent: session.userAgent,
+                },
+            });
+
+            const accessToken = await createAccessToken({
                 userId: session.user.id,
+                role: session.user.role,
+                sessionId: nextSessionId,
+                sessionVersion: session.user.sessionVersion,
+            });
+
+            return {
+                status: "rotated",
                 sessionId: nextSessionId,
                 familyId: session.familyId,
-                refreshTokenHash: hashRefreshToken(nextRefreshToken),
-                sessionVersion: session.user.sessionVersion,
+                refreshToken: nextRefreshToken,
+                accessToken,
                 expiresAt,
-                ip: session.ip,
-                userAgent: session.userAgent,
-            },
-        });
-
-        const accessToken = await createAccessToken({
-            userId: session.user.id,
-            role: session.user.role,
-            sessionId: nextSessionId,
-            sessionVersion: session.user.sessionVersion,
-        });
-
-        return {
-            status: "rotated",
-            sessionId: nextSessionId,
-            familyId: session.familyId,
-            refreshToken: nextRefreshToken,
-            accessToken,
-            expiresAt,
-        };
-    });
+            };
+        },
+        {
+            maxWait: 10_000,
+            timeout: 15_000,
+        }
+    );
 }
 
 export async function revokeSession(sessionId: string): Promise<void> {

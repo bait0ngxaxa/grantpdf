@@ -207,6 +207,25 @@ describe("authSessionService", () => {
         });
     });
 
+    it("treats immediate concurrent rotation conflict as stale without revoking family", async () => {
+        mockedFindUnique
+            .mockResolvedValueOnce(createSession() as never)
+            .mockResolvedValueOnce(
+                {
+                    familyId: "family-1",
+                    revokedAt: null,
+                    rotatedAt: new Date(),
+                } as never
+            );
+        mockedUpdateMany.mockResolvedValue({ count: 0 } as never);
+
+        const result = await rotateRefreshSession("refresh-token");
+
+        expect(result).toEqual({ status: "stale" });
+        expect(mockedCreate).not.toHaveBeenCalled();
+        expect(mockedUpdateMany).toHaveBeenCalledOnce();
+    });
+
     it("returns invalid when refresh token hash is unknown", async () => {
         mockedFindUnique.mockResolvedValue(null);
 
@@ -218,7 +237,7 @@ describe("authSessionService", () => {
 
     it("revokes family when a rotated token is reused", async () => {
         mockedFindUnique.mockResolvedValue(
-            createSession({ rotatedAt: new Date() }) as never
+            createSession({ rotatedAt: new Date(Date.now() - 30_000) }) as never
         );
 
         const result = await rotateRefreshSession("refresh-token");
@@ -233,6 +252,17 @@ describe("authSessionService", () => {
                 revokedAt: expect.any(Date),
             },
         });
+    });
+
+    it("ignores recently rotated token reuse as stale", async () => {
+        mockedFindUnique.mockResolvedValue(
+            createSession({ rotatedAt: new Date() }) as never
+        );
+
+        const result = await rotateRefreshSession("refresh-token");
+
+        expect(result).toEqual({ status: "stale" });
+        expect(mockedUpdateMany).not.toHaveBeenCalled();
     });
 
     it("revokes family when session version is stale", async () => {

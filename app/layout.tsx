@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ThemeProvider } from "@/components/providers";
+import { AuthRefreshProvider, ThemeProvider } from "@/components/providers";
 import { Toaster } from "sonner";
 
 const googleSans = localFont({
@@ -25,6 +25,7 @@ export default function RootLayout({
             <body
                 className={`${googleSans.variable} antialiased bg-background text-foreground font-sans`}
             >
+                <AuthRefreshProvider />
                 <ThemeProvider>{children}</ThemeProvider>
                 <Toaster
                     position="top-right"

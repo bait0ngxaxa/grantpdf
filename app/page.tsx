@@ -1,9 +1,12 @@
 import { auth } from "@/lib/auth";
 import { type Metadata } from "next";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import HomeNavbar from "@/components/home/HomeNavbar";
 import HeroSection from "@/components/home/HeroSection";
 import FeatureGrid from "@/components/home/TemplateGrid";
+import { ROUTES, SESSION } from "@/lib/constants";
 
 export const metadata: Metadata = {
     title: "E-GRANT ONLINE RHHSDI - ระบบสร้างและจัดการเอกสารอัตโนมัติ",
@@ -11,12 +14,22 @@ export const metadata: Metadata = {
 
 export default async function Home() {
     const session = await auth();
+    if (session) {
+        redirect(ROUTES.DASHBOARD);
+    }
+
+    const cookieStore = await cookies();
+    if (cookieStore.get(SESSION.SESSION_HINT_COOKIE_NAME)?.value === "1") {
+        const url = new URL(ROUTES.SESSION_REFRESH, "http://localhost");
+        url.searchParams.set("callbackUrl", ROUTES.DASHBOARD);
+        redirect(url.pathname + url.search);
+    }
 
     return (
         <div className="min-h-screen bg-white dark:bg-slate-950 font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30 selection:text-blue-900 dark:selection:text-blue-100">
-            <HomeNavbar session={session} />
+            <HomeNavbar session={null} />
             <main className="mx-auto max-w-7xl px-4 md:px-6">
-                <HeroSection isLoggedIn={!!session} />
+                <HeroSection isLoggedIn={false} />
                 <div className="pb-24">
                     <FeatureGrid />
                 </div>

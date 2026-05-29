@@ -20,6 +20,28 @@ function buildUnauthorizedResponse(headers: Record<string, string>): NextRespons
     return response;
 }
 
+function isPrismaTransactionStartTimeout(error: unknown): boolean {
+    return (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "P2028"
+    );
+}
+
+function buildRetryableRefreshResponse(
+    headers: Record<string, string>
+): NextResponse {
+    return NextResponse.json(
+        { error: "ไม่สามารถต่ออายุเซสชันได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" },
+        { status: 503, headers }
+    );
+}
+
+function buildStaleRefreshResponse(headers: Record<string, string>): NextResponse {
+    return new NextResponse(null, { status: 204, headers });
+}
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const rateLimitResult = await applyRateLimit({
         request: req,
@@ -43,7 +65,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         return buildUnauthorizedResponse(rateLimitResult.headers);
     }
 
-    const result = await rotateRefreshSession(refreshToken);
+    let result: Awaited<ReturnType<typeof rotateRefreshSession>>;
+    try {
+        result = await rotateRefreshSession(refreshToken);
+    } catch (error) {
+        if (isPrismaTransactionStartTimeout(error)) {
+            return buildRetryableRefreshResponse(rateLimitResult.headers);
+        }
+
+        throw error;
+    }
+
+    if (result.status === "stale") {
+        return buildStaleRefreshResponse(rateLimitResult.headers);
+    }
+
     if (result.status !== "rotated") {
         return buildUnauthorizedResponse(rateLimitResult.headers);
     }

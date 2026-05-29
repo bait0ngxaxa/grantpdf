@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { sanitizeRichTextHtml } from "@/lib/security/htmlSanitizer";
 import { cn } from "@/lib/utils";
 
 type RichTextNode = {
@@ -140,27 +141,6 @@ const applyFontSize = (editor: Editor, fontSize: string): void => {
     }
 
     editor.chain().focus().setMark("textStyle", { fontSize }).run();
-};
-
-const sanitizePastedHtml = (html: string): string => {
-    const document = new DOMParser().parseFromString(html, "text/html");
-    const styledElements = document.body.querySelectorAll<HTMLElement>("[style]");
-    const fontElements = document.body.querySelectorAll("font");
-
-    styledElements.forEach((element) => {
-        element.style.removeProperty("font-size");
-        element.style.removeProperty("line-height");
-
-        if (!element.getAttribute("style")) {
-            element.removeAttribute("style");
-        }
-    });
-
-    fontElements.forEach((element) => {
-        element.removeAttribute("size");
-    });
-
-    return document.body.innerHTML;
 };
 
 const contentToPlainText = (node: RichTextNode, index = 0): string => {
@@ -299,7 +279,7 @@ export function RichTextField({
                 "aria-label": label,
                 class: "min-h-full px-4 py-3 focus:outline-none",
             },
-            transformPastedHTML: sanitizePastedHtml,
+            transformPastedHTML: sanitizeRichTextHtml,
         },
         onUpdate: ({ editor: currentEditor }) => {
             const nextValue = contentToPlainText(

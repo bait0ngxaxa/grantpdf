@@ -73,6 +73,9 @@ describe("refresh route", () => {
         expect(response.headers.get("set-cookie")).toContain(
             SESSION.ACCESS_COOKIE_NAME
         );
+        expect(response.headers.get("set-cookie")).toContain(
+            SESSION.SESSION_HINT_COOKIE_NAME
+        );
     });
 
     it("returns 401 and clears cookie when refresh cookie is missing", async () => {
@@ -84,6 +87,9 @@ describe("refresh route", () => {
         expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
         expect(response.headers.get("set-cookie")).toContain(
             SESSION.ACCESS_COOKIE_NAME
+        );
+        expect(response.headers.get("set-cookie")).toContain(
+            SESSION.SESSION_HINT_COOKIE_NAME
         );
         expect(mockedRotateRefreshSession).not.toHaveBeenCalled();
     });
@@ -97,6 +103,17 @@ describe("refresh route", () => {
 
         expect(response.status).toBe(401);
         expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
+    });
+
+    it("returns 204 without clearing cookies when refresh was already rotated by another tab", async () => {
+        mockedRotateRefreshSession.mockResolvedValue({ status: "stale" });
+
+        const response = await POST(
+            buildRequest(`${SESSION.REFRESH_COOKIE_NAME}=refresh-token`) as never
+        );
+
+        expect(response.status).toBe(204);
+        expect(response.headers.get("set-cookie")).toBeNull();
     });
 
     it("returns 429 when rate limited", async () => {
@@ -116,5 +133,22 @@ describe("refresh route", () => {
         expect(response.status).toBe(429);
         expect(body.retryAfter).toBe(30);
         expect(mockedRotateRefreshSession).not.toHaveBeenCalled();
+    });
+
+    it("returns retryable 503 without clearing cookies when Prisma cannot start transaction", async () => {
+        mockedRotateRefreshSession.mockRejectedValue({
+            code: "P2028",
+        });
+
+        const response = await POST(
+            buildRequest(`${SESSION.REFRESH_COOKIE_NAME}=refresh-token`) as never
+        );
+        const body = await response.json();
+
+        expect(response.status).toBe(503);
+        expect(body.error).toBe(
+            "ไม่สามารถต่ออายุเซสชันได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง"
+        );
+        expect(response.headers.get("set-cookie")).toBeNull();
     });
 });

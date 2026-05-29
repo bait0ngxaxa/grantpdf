@@ -59,6 +59,9 @@ describe("session logout route", () => {
         expect(response.headers.get("set-cookie")).toContain(
             SESSION.ACCESS_COOKIE_NAME
         );
+        expect(response.headers.get("set-cookie")).toContain(
+            SESSION.SESSION_HINT_COOKIE_NAME
+        );
     });
 
     it("clears cookie even when refresh cookie is missing", async () => {
@@ -67,6 +70,9 @@ describe("session logout route", () => {
         expect(response.status).toBe(200);
         expect(mockedRevokeRefreshSession).not.toHaveBeenCalled();
         expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
+        expect(response.headers.get("set-cookie")).toContain(
+            SESSION.SESSION_HINT_COOKIE_NAME
+        );
     });
 
     it("returns 429 when rate limited", async () => {

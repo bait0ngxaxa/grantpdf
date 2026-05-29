@@ -51,16 +51,36 @@ function isProtectedPage(pathname: string): boolean {
     return PROTECTED_PAGES.includes(pathname);
 }
 
-type AdminRouteDecision = "allow" | "signin" | "access-denied";
+type AdminRouteDecision =
+    | "allow"
+    | "signin"
+    | "access-denied"
+    | "session-refresh";
+type ProtectedRouteDecision =
+    | "allow"
+    | "signin"
+    | "access-denied"
+    | "session-refresh";
 
 function getAdminRouteDecision(
     pathname: string,
     role: string | null,
+    hasRefreshSession: boolean = false,
 ): AdminRouteDecision {
     if (!isAdminPage(pathname)) return "allow";
-    if (!role) return "signin";
+    if (!role) return hasRefreshSession ? "session-refresh" : "signin";
 
     return role === "admin" ? "allow" : "access-denied";
+}
+
+function getProtectedRouteDecision(
+    pathname: string,
+    isAuthenticated: boolean,
+    hasRefreshSession: boolean,
+): ProtectedRouteDecision {
+    if (!isProtectedPage(pathname)) return "allow";
+    if (isAuthenticated) return "allow";
+    return hasRefreshSession ? "session-refresh" : "signin";
 }
 
 type AdminLayoutDecision = "signin" | "access-denied" | "allow";
@@ -214,6 +234,15 @@ describe("Middleware Security - CSRF Protection", () => {
 
             it("should redirect unauthenticated admin page access to signin", () => {
                 expect(shouldRedirectUnauthenticatedAdmin("/admin")).toBe(true);
+            });
+
+            it("should try session refresh before signin when refresh cookie exists", () => {
+                expect(getAdminRouteDecision("/admin", null, true)).toBe(
+                    "session-refresh",
+                );
+                expect(
+                    getProtectedRouteDecision("/userdashboard", false, true),
+                ).toBe("session-refresh");
             });
 
             it("should redirect expired admin layout sessions to signin, not access denied", () => {

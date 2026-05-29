@@ -184,6 +184,9 @@ describe("grant signin route", () => {
         expect(response.headers.get("set-cookie")).toContain(
             SESSION.REFRESH_COOKIE_NAME
         );
+        expect(response.headers.get("set-cookie")).toContain(
+            SESSION.SESSION_HINT_COOKIE_NAME
+        );
         expect(mockedLogAudit).toHaveBeenCalledWith("LOGIN_SUCCESS", "7", {
             userEmail: "grant@example.com",
             ip: "203.0.113.10",

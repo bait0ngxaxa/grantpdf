@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { ROUTES, ROLES } from "@/lib/constants";
 import { verifyAccessToken, type AccessTokenPayload } from "@/lib/accessToken";
-import { getAccessTokenFromRequest } from "@/lib/authSessionCookies";
+import {
+    getAccessTokenFromRequest,
+    getRefreshTokenFromRequest,
+    getSessionHintFromRequest,
+} from "@/lib/authSessionCookies";
 
+const CSP_NONCE_HEADER = "x-nonce";
 const ADMIN_PREFIXES = [ROUTES.ADMIN];
 
 const PROTECTED_PREFIXES = [
@@ -15,8 +20,60 @@ const PROTECTED_PREFIXES = [
 ];
 
 const RESET_PASSWORD_PAGES: string[] = [ROUTES.RESET_PASSWORD];
-
 const CSRF_PROTECTED_METHODS = ["POST", "PUT", "DELETE", "PATCH"];
+
+function isDevelopment(): boolean {
+    return process.env.NODE_ENV !== "production";
+}
+
+function createNonce(): string {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    return btoa(String.fromCharCode(...bytes));
+}
+
+export function buildContentSecurityPolicy(nonce: string): string {
+    const scriptSrc = isDevelopment()
+        ? "'self' 'unsafe-inline' 'unsafe-eval' http: https:"
+        : "'self' 'unsafe-inline'";
+
+    const directives = [
+        "default-src 'self'",
+        `script-src ${scriptSrc}`,
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https:",
+        "font-src 'self' data:",
+        "connect-src 'self' https: blob: data: ws: wss:",
+        "media-src 'self' blob: data:",
+        "worker-src 'self' blob:",
+        "frame-src 'none'",
+        "frame-ancestors 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "script-src-attr 'none'",
+    ];
+
+    if (!isDevelopment()) {
+        directives.push("upgrade-insecure-requests");
+    }
+
+    return directives.join("; ");
+}
+
+function applySecurityHeaders(response: NextResponse, nonce: string): NextResponse {
+    response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(nonce));
+    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("X-Frame-Options", "SAMEORIGIN");
+    response.headers.set(
+        "Permissions-Policy",
+        "camera=(), microphone=(), geolocation=()"
+    );
+    response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+    response.headers.set("X-DNS-Prefetch-Control", "off");
+    return response;
+}
 
 function isExactOrSubpath(pathname: string, route: string): boolean {
     return pathname === route || pathname.startsWith(`${route}/`);
@@ -81,9 +138,29 @@ async function getAuthenticatedRole(req: NextRequest): Promise<string | null> {
     return null;
 }
 
+function hasRefreshSession(req: NextRequest): boolean {
+    return (
+        getRefreshTokenFromRequest(req) !== null ||
+        getSessionHintFromRequest(req) !== null
+    );
+}
+
+function redirectToSessionRefresh(req: NextRequest, nonce: string): NextResponse {
+    const { pathname, search } = req.nextUrl;
+    const url = new URL(ROUTES.SESSION_REFRESH, req.url);
+    url.searchParams.set("callbackUrl", `${pathname}${search}`);
+    return applySecurityHeaders(NextResponse.redirect(url), nonce);
+}
+
 export async function middleware(
     req: NextRequest
 ): Promise<NextResponse | Response> {
+    const nonce = createNonce();
+    const requestHeaders = new Headers(req.headers);
+    const contentSecurityPolicy = buildContentSecurityPolicy(nonce);
+    requestHeaders.set(CSP_NONCE_HEADER, nonce);
+    requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
+
     const { pathname, search } = req.nextUrl;
     const isApiRequest = pathname.startsWith("/api/");
 
@@ -99,44 +176,61 @@ export async function middleware(
                     "origin"
                 )}`
             );
-            return NextResponse.json(
-                { error: "Cross-site request forbidden" },
-                { status: 403 }
+            return applySecurityHeaders(
+                NextResponse.json(
+                    { error: "Cross-site request forbidden" },
+                    { status: 403 }
+                ),
+                nonce
             );
         }
     }
 
     if (isApiRequest) {
-        return NextResponse.next();
+        return applySecurityHeaders(
+            NextResponse.next({ request: { headers: requestHeaders } }),
+            nonce
+        );
     }
 
     const authenticatedRole = await getAuthenticatedRole(req);
 
     if (matchesAnyPrefix(pathname, ADMIN_PREFIXES)) {
         if (!authenticatedRole) {
+            if (hasRefreshSession(req)) {
+                return redirectToSessionRefresh(req, nonce);
+            }
+
             console.warn(
                 `User is not authenticated. Redirecting from '${pathname}' to /signin...`
             );
             const url = new URL(ROUTES.SIGNIN, req.url);
             url.searchParams.set("callbackUrl", `${pathname}${search}`);
             url.searchParams.set("reason", "session-expired");
-            return NextResponse.redirect(url);
+            return applySecurityHeaders(NextResponse.redirect(url), nonce);
         }
 
         if (authenticatedRole !== ROLES.ADMIN) {
             console.warn(
                 `User with role '${authenticatedRole}' tried to access admin page. Redirecting to /access-denied...`
             );
-            return NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, req.url));
+            return applySecurityHeaders(
+                NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, req.url)),
+                nonce
+            );
         }
     } else if (matchesAnyPrefix(pathname, PROTECTED_PREFIXES)) {
         if (!authenticatedRole) {
+            if (hasRefreshSession(req)) {
+                return redirectToSessionRefresh(req, nonce);
+            }
+
             console.warn(
                 `User is not authenticated. Redirecting from '${pathname}' to /signin...`
             );
             const url = new URL(ROUTES.SIGNIN, req.url);
             url.searchParams.set("callbackUrl", pathname);
-            return NextResponse.redirect(url);
+            return applySecurityHeaders(NextResponse.redirect(url), nonce);
         }
     }
 
@@ -146,22 +240,21 @@ export async function middleware(
             console.warn(
                 "User tried to access reset password page without a token. Redirecting to forgot password..."
             );
-            return NextResponse.redirect(new URL(ROUTES.FORGOT_PASSWORD, req.url));
+            return applySecurityHeaders(
+                NextResponse.redirect(new URL(ROUTES.FORGOT_PASSWORD, req.url)),
+                nonce
+            );
         }
     }
 
-    return NextResponse.next();
+    return applySecurityHeaders(
+        NextResponse.next({ request: { headers: requestHeaders } }),
+        nonce
+    );
 }
 
 export const config = {
     matcher: [
-        "/api/:path*",
-        "/admin/:path*",
-        "/form",
-        "/userdashboard",
-        "/uploads-doc",
-        "/create-word/:path*",
-        "/reset-password",
-        "/createdocs",
+        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map)$).*)",
     ],
 };

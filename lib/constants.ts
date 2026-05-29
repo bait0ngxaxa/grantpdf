@@ -18,8 +18,9 @@ export const PAGINATION = {
 export const SESSION = {
     ACCESS_TOKEN_MAX_AGE_SECONDS: 15 * 60,
     REFRESH_TOKEN_MAX_AGE_SECONDS: 30 * 24 * 60 * 60,
-    ACCESS_COOKIE_NAME: "grant_access_token",
-    REFRESH_COOKIE_NAME: "grant_refresh_token",
+    ACCESS_COOKIE_NAME: "__Host-grant_access_token",
+    REFRESH_COOKIE_NAME: "__Secure-grant_refresh_token",
+    SESSION_HINT_COOKIE_NAME: "__Host-grant_session_hint",
 } as const;
 
 export const FILE_TYPES = {
@@ -164,6 +165,7 @@ export const ROUTES = {
     DASHBOARD: "/userdashboard",
     ADMIN: "/admin",
     CREATE_DOCS: "/createdocs",
+    SESSION_REFRESH: "/session-refresh",
     ACCESS_DENIED: "/access-denied",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
