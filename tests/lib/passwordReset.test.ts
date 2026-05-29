@@ -8,8 +8,6 @@ import {
 
 const originalPassResetSecret = process.env.PASSRESET_TOKEN_SECRET;
 const originalAuthUrl = process.env.AUTH_URL;
-const originalNextAuthUrl = process.env.NEXTAUTH_URL;
-const originalNextAuthSecret = process.env.NEXTAUTH_SECRET;
 
 describe("password reset helpers", () => {
     afterEach(() => {
@@ -25,17 +23,6 @@ describe("password reset helpers", () => {
             process.env.AUTH_URL = originalAuthUrl;
         }
 
-        if (originalNextAuthUrl === undefined) {
-            delete process.env.NEXTAUTH_URL;
-        } else {
-            process.env.NEXTAUTH_URL = originalNextAuthUrl;
-        }
-
-        if (originalNextAuthSecret === undefined) {
-            delete process.env.NEXTAUTH_SECRET;
-        } else {
-            process.env.NEXTAUTH_SECRET = originalNextAuthSecret;
-        }
     });
 
     it("creates and verifies password reset tokens with a scoped type claim", () => {
@@ -62,13 +49,13 @@ describe("password reset helpers", () => {
         );
     });
 
-    it("rejects tokens signed with NEXTAUTH_SECRET instead of PASSRESET_TOKEN_SECRET", () => {
+    it("rejects tokens signed with an unrelated secret", () => {
         process.env.PASSRESET_TOKEN_SECRET = "passreset-secret";
-        process.env.NEXTAUTH_SECRET = "nextauth-secret";
+        const unrelatedSecret = "unrelated-secret";
 
         const token = jwt.sign(
             { resetVersion: 0, userId: "42", type: "password-reset" },
-            process.env.NEXTAUTH_SECRET
+            unrelatedSecret
         );
 
         expect(() => verifyPasswordResetToken(token)).toThrow();
@@ -76,24 +63,15 @@ describe("password reset helpers", () => {
 
     it("uses AUTH_URL as the canonical password reset base URL", () => {
         process.env.AUTH_URL = "https://grants.example.com/app/login";
-        delete process.env.NEXTAUTH_URL;
 
         expect(resolvePasswordResetBaseUrl()).toBe("https://grants.example.com");
     });
 
-    it("falls back to NEXTAUTH_URL when AUTH_URL is unavailable", () => {
-        delete process.env.AUTH_URL;
-        process.env.NEXTAUTH_URL = "https://auth.example.com/reset";
-
-        expect(resolvePasswordResetBaseUrl()).toBe("https://auth.example.com");
-    });
-
     it("throws when no canonical base URL is configured", () => {
         delete process.env.AUTH_URL;
-        delete process.env.NEXTAUTH_URL;
 
         expect(() => resolvePasswordResetBaseUrl()).toThrow(
-            "AUTH_URL or NEXTAUTH_URL must be configured for password reset emails."
+            "AUTH_URL must be configured for password reset emails."
         );
     });
 });

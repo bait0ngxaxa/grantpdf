@@ -7,9 +7,11 @@ export { torSchema, type TORData } from "./tor.schema";
 
 // Auth schemas + types
 export {
+    signinSchema,
     signupSchema,
     forgotPasswordSchema,
     resetPasswordSchema,
+    type SigninInput,
     type SignupInput,
     type ForgotPasswordInput,
     type ResetPasswordInput,

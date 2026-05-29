@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { X, User, Mail, BadgeCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Session } from "next-auth";
+import type { Session } from "@/lib/authTypes";
 import { ROLES } from "@/lib/constants";
 
 interface ProfileModalProps {

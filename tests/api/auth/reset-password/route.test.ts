@@ -1,13 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import jwt from "jsonwebtoken";
 
-vi.mock("@/lib/prisma", () => ({
-    prisma: {
+vi.mock("@/lib/prisma", () => {
+    const prismaMock = {
         user: {
             updateMany: vi.fn(),
         },
-    },
-}));
+        authSession: {
+            updateMany: vi.fn(),
+        },
+        $transaction: vi.fn(
+            async (callback: (tx: typeof prismaMock) => Promise<unknown>) =>
+                callback(prismaMock)
+        ),
+    };
+
+    return { prisma: prismaMock };
+});
 
 vi.mock("@/lib/ratelimit", () => ({
     applyRateLimit: vi.fn(() => ({
@@ -35,6 +44,7 @@ import { PUT } from "@/app/api/(auth)/auth/reset-password/route";
 
 const mockedHash = vi.mocked(bcrypt.hash);
 const mockedUpdateMany = vi.mocked(prisma.user.updateMany);
+const mockedAuthSessionUpdateMany = vi.mocked(prisma.authSession.updateMany);
 const mockedLogAudit = vi.mocked(logAudit);
 
 const originalPassResetSecret = process.env.PASSRESET_TOKEN_SECRET;
@@ -68,7 +78,7 @@ describe("reset-password route", () => {
         }
     });
 
-    it("increments password reset and session versions after a successful reset", async () => {
+    it("increments password reset version and revokes auth sessions after reset", async () => {
         const token = jwt.sign(
             {
                 resetVersion: 4,
@@ -95,6 +105,15 @@ describe("reset-password route", () => {
                 sessionVersion: {
                     increment: 1,
                 },
+            },
+        });
+        expect(mockedAuthSessionUpdateMany).toHaveBeenCalledWith({
+            where: {
+                userId: 9,
+                revokedAt: null,
+            },
+            data: {
+                revokedAt: expect.any(Date),
             },
         });
         expect(mockedLogAudit).toHaveBeenCalledWith(
@@ -149,6 +168,7 @@ describe("reset-password route", () => {
 
         expect(response.status).toBe(400);
         expect(body).toEqual({ error: "ลิงก์หมดอายุหรือไม่ถูกต้อง" });
+        expect(mockedAuthSessionUpdateMany).not.toHaveBeenCalled();
         expect(mockedLogAudit).toHaveBeenCalledWith(
             "PASSWORD_RESET_FAILED",
             "9",

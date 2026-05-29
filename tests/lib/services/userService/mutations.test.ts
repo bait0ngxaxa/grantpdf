@@ -8,6 +8,9 @@ const mockTx = {
     auditLog: {
         create: vi.fn(),
     },
+    authSession: {
+        updateMany: vi.fn(),
+    },
 };
 
 vi.mock("@/lib/prisma", () => ({
@@ -86,6 +89,15 @@ describe("userService mutations", () => {
                     },
                 }),
             );
+            expect(mockTx.authSession.updateMany).toHaveBeenCalledWith({
+                where: {
+                    userId: 1,
+                    revokedAt: null,
+                },
+                data: {
+                    revokedAt: expect.any(Date),
+                },
+            });
         });
 
         it("does not increment sessionVersion when role is unchanged", async () => {
@@ -99,6 +111,7 @@ describe("userService mutations", () => {
             );
 
             expect(getUpdateData()).not.toHaveProperty("sessionVersion");
+            expect(mockTx.authSession.updateMany).not.toHaveBeenCalled();
         });
 
         it("does not increment sessionVersion when only profile data changes", async () => {
@@ -111,6 +124,7 @@ describe("userService mutations", () => {
             await updateUserWithAudit(1, { name: "ชื่อใหม่" }, auditContext);
 
             expect(getUpdateData()).not.toHaveProperty("sessionVersion");
+            expect(mockTx.authSession.updateMany).not.toHaveBeenCalled();
         });
     });
 });

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getGrantSession } from "@/lib/grantAuth";
 import { ROLES } from "@/lib/constants";
-import type { Session } from "next-auth";
+import type { Session } from "@/lib/authTypes";
 
 /**
  * Check if a session belongs to an admin user.
@@ -25,7 +25,7 @@ interface AdminGuardSuccess {
 export async function requireAdminSession(): Promise<
     AdminGuardSuccess | NextResponse
 > {
-    const session = await auth();
+    const session = await getGrantSession();
 
     if (!session?.user?.id) {
         return NextResponse.json(

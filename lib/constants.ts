@@ -16,8 +16,10 @@ export const PAGINATION = {
 } as const;
 
 export const SESSION = {
-    MAX_AGE_HOURS: 1,
-    MAX_AGE_SECONDS: 60 * 60, // 1 hour
+    ACCESS_TOKEN_MAX_AGE_SECONDS: 15 * 60,
+    REFRESH_TOKEN_MAX_AGE_SECONDS: 30 * 24 * 60 * 60,
+    ACCESS_COOKIE_NAME: "grant_access_token",
+    REFRESH_COOKIE_NAME: "grant_refresh_token",
 } as const;
 
 export const FILE_TYPES = {
@@ -231,6 +233,16 @@ export const RATE_LIMIT = {
             ROUTE_KEY: "auth:reset-password",
             LIMIT: 5,
             WINDOW_MS: 15 * 60_000,
+        },
+        REFRESH: {
+            ROUTE_KEY: "auth:refresh",
+            LIMIT: 30,
+            WINDOW_MS: 60_000,
+        },
+        LOGOUT: {
+            ROUTE_KEY: "auth:logout",
+            LIMIT: 30,
+            WINDOW_MS: 60_000,
         },
     },
     USER: {

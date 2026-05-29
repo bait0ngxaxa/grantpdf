@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { ROUTES, ROLES } from "@/lib/constants";
+import { verifyAccessToken, type AccessTokenPayload } from "@/lib/accessToken";
+import { getAccessTokenFromRequest } from "@/lib/authSessionCookies";
 
 const ADMIN_PREFIXES = [ROUTES.ADMIN];
 
@@ -16,9 +17,6 @@ const PROTECTED_PREFIXES = [
 const RESET_PASSWORD_PAGES: string[] = [ROUTES.RESET_PASSWORD];
 
 const CSRF_PROTECTED_METHODS = ["POST", "PUT", "DELETE", "PATCH"];
-
-// Routes ที่ไม่ต้องตรวจสอบ CSRF (NextAuth จัดการเอง)
-const CSRF_EXEMPT_ROUTES = ["/api/auth/"];
 
 function isExactOrSubpath(pathname: string, route: string): boolean {
     return pathname === route || pathname.startsWith(`${route}/`);
@@ -63,18 +61,24 @@ function validateCSRF(req: NextRequest): boolean {
     return false;
 }
 
-function isSecureAuthRequest(req: NextRequest): boolean {
-    const forwardedProto = req.headers.get("x-forwarded-proto");
-    if (forwardedProto) {
-        return forwardedProto.split(",")[0].trim() === "https";
+async function getHybridAccessToken(
+    req: NextRequest
+): Promise<AccessTokenPayload | null> {
+    const accessToken = getAccessTokenFromRequest(req);
+    if (!accessToken) {
+        return null;
     }
 
-    if (req.nextUrl.protocol === "https:") {
-        return true;
+    return verifyAccessToken(accessToken);
+}
+
+async function getAuthenticatedRole(req: NextRequest): Promise<string | null> {
+    const hybridToken = await getHybridAccessToken(req);
+    if (hybridToken) {
+        return hybridToken.role;
     }
 
-    const authUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL;
-    return typeof authUrl === "string" && authUrl.startsWith("https://");
+    return null;
 }
 
 export async function middleware(
@@ -85,8 +89,7 @@ export async function middleware(
 
     if (
         isApiRequest &&
-        CSRF_PROTECTED_METHODS.includes(req.method) &&
-        !CSRF_EXEMPT_ROUTES.some((route) => pathname.startsWith(route))
+        CSRF_PROTECTED_METHODS.includes(req.method)
     ) {
         if (!validateCSRF(req)) {
             console.warn(
@@ -107,30 +110,10 @@ export async function middleware(
         return NextResponse.next();
     }
 
-    // Auth.js v5: use getToken (still works in Edge middleware)
-    // auth() wrapper uses Node.js runtime, so getToken is preferred in middleware
-    const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
-    const isSecureRequest = isSecureAuthRequest(req);
-
-    let token = await getToken({
-        req,
-        secret,
-        secureCookie: isSecureRequest,
-    });
-    if (!token) {
-        token = await getToken({
-            req,
-            secret,
-            secureCookie: !isSecureRequest,
-        });
-    }
-
-    // Auth pages perform their own server-side redirect via auth().
-    // Avoid redirecting from middleware because stale JWTs may already be
-    // revoked in the database and must be allowed to reach the sign-in page.
+    const authenticatedRole = await getAuthenticatedRole(req);
 
     if (matchesAnyPrefix(pathname, ADMIN_PREFIXES)) {
-        if (!token) {
+        if (!authenticatedRole) {
             console.warn(
                 `User is not authenticated. Redirecting from '${pathname}' to /signin...`
             );
@@ -140,14 +123,14 @@ export async function middleware(
             return NextResponse.redirect(url);
         }
 
-        if (token.role !== ROLES.ADMIN) {
+        if (authenticatedRole !== ROLES.ADMIN) {
             console.warn(
-                `User with role '${token.role}' tried to access admin page. Redirecting to /access-denied...`
+                `User with role '${authenticatedRole}' tried to access admin page. Redirecting to /access-denied...`
             );
             return NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, req.url));
         }
     } else if (matchesAnyPrefix(pathname, PROTECTED_PREFIXES)) {
-        if (!token) {
+        if (!authenticatedRole) {
             console.warn(
                 `User is not authenticated. Redirecting from '${pathname}' to /signin...`
             );

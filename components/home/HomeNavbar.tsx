@@ -4,10 +4,10 @@ import React, { useState, useRef, useEffect } from "react";
 
 import Link from "next/link";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
-import type { Session } from "next-auth";
+import type { Session } from "@/lib/authTypes";
 
-import { ROUTES, SIGNOUT_CALLBACK } from "@/lib/constants";
+import { ROUTES } from "@/lib/constants";
+import { signOutWithSessionRevoke } from "@/lib/authClient";
 import { Button, ThemeToggle } from "@/components/ui";
 import { LayoutDashboard, LogOut, FileText } from "lucide-react";
 
@@ -19,7 +19,7 @@ export default function HomeNavbar({
   session,
 }: HomeNavbarProps): React.ReactElement {
   const handleLogout = (): void => {
-    signOut({ callbackUrl: SIGNOUT_CALLBACK });
+    void signOutWithSessionRevoke();
   };
 
   return (

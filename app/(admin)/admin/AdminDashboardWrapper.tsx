@@ -5,7 +5,7 @@ import { AdminSidebar } from "./components/AdminSidebar";
 import { AdminTopBar } from "./components/AdminTopBar";
 import { AdminDashboardProvider, useAdminDashboardContext } from "./contexts";
 import type { AdminStatsResult } from "@/lib/services/adminService";
-import type { Session } from "next-auth";
+import type { Session } from "@/lib/authTypes";
 import { cn } from "@/lib/utils";
 
 interface AdminDashboardWrapperProps {

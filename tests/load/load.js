@@ -32,36 +32,28 @@ export const options = {
   },
 };
 
-// Login ด้วย NextAuth credentials provider
+// Login ด้วย grant credentials endpoint
 function login() {
-  // NextAuth uses CSRF token flow
-  const csrfRes = http.get(`${BASE_URL}/api/auth/csrf`);
-  const csrfData = csrfRes.json();
-  const csrfToken = csrfData.csrfToken;
-
   const loginRes = http.post(
-    `${BASE_URL}/api/auth/callback/credentials`,
-    {
+    `${BASE_URL}/api/auth/session/signin`,
+    JSON.stringify({
       email: TEST_USER.email,
       password: TEST_USER.password,
-      csrfToken: csrfToken,
-      json: "true",
-    },
+    }),
     {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      redirects: 0, // NextAuth redirects on success
+      headers: JSON_HEADERS,
     },
   );
 
   loginDuration.add(loginRes.timings.duration);
 
-  const loginOk = loginRes.status === 200 || loginRes.status === 302;
+  const loginOk = loginRes.status === 200;
   if (!loginOk) {
     failedLogins.add(1);
   }
 
   check(loginRes, {
-    "login: success (200 or 302)": () => loginOk,
+    "login: success (200)": () => loginOk,
   });
 
   return loginRes;

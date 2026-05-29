@@ -3,14 +3,13 @@ import { NextResponse } from "next/server";
 import { validateSession } from "@/lib/services/sessionService/sessionValidator";
 import { isSessionError } from "@/lib/services/sessionService/types";
 
-// Mock auth() from @/lib/auth (Auth.js v5)
-vi.mock("@/lib/auth", () => ({
-    auth: vi.fn(),
+vi.mock("@/lib/grantAuth", () => ({
+    getGrantSession: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
+import { getGrantSession } from "@/lib/grantAuth";
 
-const mockedAuth = vi.mocked(auth);
+const mockedGetGrantSession = vi.mocked(getGrantSession);
 
 describe("sessionValidator", () => {
     beforeEach(() => {
@@ -19,7 +18,7 @@ describe("sessionValidator", () => {
 
     describe("validateSession", () => {
         it("should return 401 when session is null", async () => {
-            mockedAuth.mockResolvedValue(null as never);
+            mockedGetGrantSession.mockResolvedValue(null as never);
 
             const result = await validateSession();
 
@@ -31,7 +30,7 @@ describe("sessionValidator", () => {
         });
 
         it("should return 401 when session.user is undefined", async () => {
-            mockedAuth.mockResolvedValue({
+            mockedGetGrantSession.mockResolvedValue({
                 expires: "2024-01-01",
             } as never);
 
@@ -44,7 +43,7 @@ describe("sessionValidator", () => {
         });
 
         it("should return 401 when session.user.id is undefined", async () => {
-            mockedAuth.mockResolvedValue({
+            mockedGetGrantSession.mockResolvedValue({
                 expires: "2024-01-01",
                 user: {
                     name: "Test User",
@@ -69,7 +68,7 @@ describe("sessionValidator", () => {
                     email: "test@example.com",
                 },
             };
-            mockedAuth.mockResolvedValue(mockSession as never);
+            mockedGetGrantSession.mockResolvedValue(mockSession as never);
 
             const result = await validateSession();
 
@@ -89,7 +88,7 @@ describe("sessionValidator", () => {
                     email: "another@example.com",
                 },
             };
-            mockedAuth.mockResolvedValue(mockSession as never);
+            mockedGetGrantSession.mockResolvedValue(mockSession as never);
 
             const result = await validateSession();
 
@@ -108,7 +107,7 @@ describe("sessionValidator", () => {
                     email: "numeric@example.com",
                 },
             };
-            mockedAuth.mockResolvedValue(mockSession as never);
+            mockedGetGrantSession.mockResolvedValue(mockSession as never);
 
             const result = await validateSession();
 

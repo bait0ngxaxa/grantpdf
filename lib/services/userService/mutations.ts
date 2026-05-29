@@ -44,32 +44,47 @@ export async function updateUser(
         throw new Error("บทบาทไม่ถูกต้อง");
     }
 
-    const currentUser = await prisma.user.findUnique({
-        where: { id },
-        select: {
-            role: true,
-        },
-    });
+    return prisma.$transaction(async (tx) => {
+        const currentUser = await tx.user.findUnique({
+            where: { id },
+            select: {
+                role: true,
+            },
+        });
 
-    const updatedUser = await prisma.user.update({
-        where: { id },
-        data: buildUserUpdateData(
+        const invalidateSession = shouldInvalidateSession(
+            currentUser?.role ?? null,
             data,
-            shouldInvalidateSession(currentUser?.role ?? null, data),
-        ),
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            created_at: true,
-        },
-    });
+        );
+        const updatedUser = await tx.user.update({
+            where: { id },
+            data: buildUserUpdateData(data, invalidateSession),
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                created_at: true,
+            },
+        });
 
-    return {
-        ...updatedUser,
-        id: updatedUser.id.toString(),
-    };
+        if (invalidateSession) {
+            await tx.authSession.updateMany({
+                where: {
+                    userId: id,
+                    revokedAt: null,
+                },
+                data: {
+                    revokedAt: new Date(),
+                },
+            });
+        }
+
+        return {
+            ...updatedUser,
+            id: updatedUser.id.toString(),
+        };
+    });
 }
 
 export async function deleteUser(id: number): Promise<void> {
@@ -103,12 +118,10 @@ export async function updateUserWithAudit(
             throw new Error("USER_NOT_FOUND");
         }
 
+        const invalidateSession = shouldInvalidateSession(beforeUser.role, data);
         const updatedUser = await tx.user.update({
             where: { id },
-            data: buildUserUpdateData(
-                data,
-                shouldInvalidateSession(beforeUser.role, data),
-            ),
+            data: buildUserUpdateData(data, invalidateSession),
             select: {
                 id: true,
                 name: true,
@@ -117,6 +130,18 @@ export async function updateUserWithAudit(
                 created_at: true,
             },
         });
+
+        if (invalidateSession) {
+            await tx.authSession.updateMany({
+                where: {
+                    userId: id,
+                    revokedAt: null,
+                },
+                data: {
+                    revokedAt: new Date(),
+                },
+            });
+        }
 
         await tx.auditLog.create({
             data: {

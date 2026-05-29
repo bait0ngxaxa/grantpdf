@@ -10,7 +10,7 @@ import { useDashboardActions } from "../hooks/useDashboardActions";
 import type { UserProjectStats } from "../hooks/useUserData";
 import type { Project } from "@/type";
 import type { LatestProject } from "@/type/models";
-import type { Session } from "next-auth";
+import type { Session } from "@/lib/authTypes";
 
 import { DashboardUIProvider, useDashboardUI } from "./DashboardUIContext";
 import { ModalProvider, useModalContext } from "./ModalContext";

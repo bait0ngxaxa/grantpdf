@@ -1,0 +1,150 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("next/headers", () => ({
+    cookies: vi.fn(),
+}));
+
+vi.mock("@/lib/accessToken", () => ({
+    verifyAccessToken: vi.fn(),
+}));
+
+vi.mock("@/lib/prisma", () => ({
+    prisma: {
+        authSession: {
+            findUnique: vi.fn(),
+        },
+    },
+}));
+
+import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
+import { verifyAccessToken } from "@/lib/accessToken";
+import { SESSION } from "@/lib/constants";
+import { getGrantSession } from "@/lib/grantAuth";
+
+const mockedCookies = vi.mocked(cookies);
+const mockedVerifyAccessToken = vi.mocked(verifyAccessToken);
+const mockedFindUnique = vi.mocked(prisma.authSession.findUnique);
+
+function mockCookieStore(token: string | null): void {
+    mockedCookies.mockResolvedValue({
+        get: vi.fn((name: string) => {
+            if (name !== SESSION.ACCESS_COOKIE_NAME || token === null) {
+                return undefined;
+            }
+
+            return { name, value: token };
+        }),
+    } as never);
+}
+
+function buildSessionRecord(overrides: Partial<{
+    expiresAt: Date;
+    revokedAt: Date | null;
+    sessionVersion: number;
+    user: {
+        id: number;
+        name: string;
+        email: string;
+        role: string;
+        sessionVersion: number;
+    };
+}> = {}) {
+    return {
+        expiresAt: new Date(Date.now() + 60_000),
+        revokedAt: null,
+        sessionVersion: 2,
+        user: {
+            id: 7,
+            name: "Grant User",
+            email: "grant@example.com",
+            role: "admin",
+            sessionVersion: 2,
+        },
+        ...overrides,
+    };
+}
+
+describe("getGrantSession", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it("returns null when access cookie is missing", async () => {
+        mockCookieStore(null);
+
+        const result = await getGrantSession();
+
+        expect(result).toBeNull();
+        expect(mockedVerifyAccessToken).not.toHaveBeenCalled();
+        expect(mockedFindUnique).not.toHaveBeenCalled();
+    });
+
+    it("returns null when access token is invalid", async () => {
+        mockCookieStore("access-token");
+        mockedVerifyAccessToken.mockResolvedValue(null);
+
+        const result = await getGrantSession();
+
+        expect(result).toBeNull();
+        expect(mockedFindUnique).not.toHaveBeenCalled();
+    });
+
+    it("returns session when token and DB session are active", async () => {
+        mockCookieStore("access-token");
+        mockedVerifyAccessToken.mockResolvedValue({
+            userId: 7,
+            role: "admin",
+            sessionId: "session-1",
+            sessionVersion: 2,
+        });
+        mockedFindUnique.mockResolvedValue(buildSessionRecord() as never);
+
+        const result = await getGrantSession();
+
+        expect(mockedFindUnique).toHaveBeenCalledWith({
+            where: { sessionId: "session-1" },
+            select: expect.any(Object),
+        });
+        expect(result).toEqual({
+            expires: expect.any(String),
+            user: {
+                id: "7",
+                name: "Grant User",
+                email: "grant@example.com",
+                role: "admin",
+                sessionVersion: 2,
+            },
+        });
+    });
+
+    it("returns null for revoked DB session", async () => {
+        mockCookieStore("access-token");
+        mockedVerifyAccessToken.mockResolvedValue({
+            userId: 7,
+            role: "admin",
+            sessionId: "session-1",
+            sessionVersion: 2,
+        });
+        mockedFindUnique.mockResolvedValue(
+            buildSessionRecord({ revokedAt: new Date() }) as never
+        );
+
+        await expect(getGrantSession()).resolves.toBeNull();
+    });
+
+    it("returns null when sessionVersion is stale", async () => {
+        mockCookieStore("access-token");
+        mockedVerifyAccessToken.mockResolvedValue({
+            userId: 7,
+            role: "admin",
+            sessionId: "session-1",
+            sessionVersion: 1,
+        });
+        mockedFindUnique.mockResolvedValue(
+            buildSessionRecord({ sessionVersion: 1 }) as never
+        );
+
+        await expect(getGrantSession()).resolves.toBeNull();
+    });
+});

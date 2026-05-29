@@ -35,7 +35,6 @@ const mockedSendPasswordResetEmail = vi.mocked(sendPasswordResetEmail);
 const mockedLogAudit = vi.mocked(logAudit);
 
 const originalAuthUrl = process.env.AUTH_URL;
-const originalNextAuthUrl = process.env.NEXTAUTH_URL;
 const originalPassResetSecret = process.env.PASSRESET_TOKEN_SECRET;
 
 function buildRequest(): Request {
@@ -56,7 +55,6 @@ describe("forgot-password route", () => {
         vi.clearAllMocks();
         process.env.PASSRESET_TOKEN_SECRET = "passreset-secret";
         process.env.AUTH_URL = "https://grants.example.com";
-        delete process.env.NEXTAUTH_URL;
     });
 
     afterEach(() => {
@@ -64,12 +62,6 @@ describe("forgot-password route", () => {
             delete process.env.AUTH_URL;
         } else {
             process.env.AUTH_URL = originalAuthUrl;
-        }
-
-        if (originalNextAuthUrl === undefined) {
-            delete process.env.NEXTAUTH_URL;
-        } else {
-            process.env.NEXTAUTH_URL = originalNextAuthUrl;
         }
 
         if (originalPassResetSecret === undefined) {
@@ -123,7 +115,6 @@ describe("forgot-password route", () => {
             } as never
         );
         delete process.env.AUTH_URL;
-        delete process.env.NEXTAUTH_URL;
 
         const response = await POST(buildRequest() as never);
         const body = await response.json();

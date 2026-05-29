@@ -12,6 +12,13 @@ export const signupSchema = z.object({
         .min(6, { message: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }),
 });
 
+export const signinSchema = z.object({
+    email: emailSchema,
+    password: z
+        .string("กรุณาระบุรหัสผ่าน")
+        .min(1, { message: "กรุณาระบุรหัสผ่าน" }),
+});
+
 export const forgotPasswordSchema = z.object({
     email: emailSchema,
 });
@@ -26,6 +33,6 @@ export const resetPasswordSchema = z.object({
 });
 
 export type SignupInput = z.infer<typeof signupSchema>;
+export type SigninInput = z.infer<typeof signinSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
-

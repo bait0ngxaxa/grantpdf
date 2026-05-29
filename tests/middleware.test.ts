@@ -41,6 +41,7 @@ const PROTECTED_PAGES = [
     "/create-word",
     "/createdocs",
 ];
+const CSRF_PROTECTED_METHODS = ["POST", "PUT", "DELETE", "PATCH"];
 
 function isAdminPage(pathname: string): boolean {
     return ADMIN_PAGES.includes(pathname);
@@ -84,6 +85,10 @@ function shouldRequireAuth(
     isAuthenticated: boolean,
 ): boolean {
     return isProtectedPage(pathname) && !isAuthenticated;
+}
+
+function shouldApplyCsrf(pathname: string, method: string): boolean {
+    return pathname.startsWith("/api/") && CSRF_PROTECTED_METHODS.includes(method);
 }
 
 describe("Middleware Security - CSRF Protection", () => {
@@ -148,6 +153,22 @@ describe("Middleware Security - CSRF Protection", () => {
         it("should BLOCK when no origin/referer", () => {
             const result = validateCSRF(null, null, "example.com");
             expect(result).toBe(false);
+        });
+
+        it("should apply CSRF checks to auth mutation routes", () => {
+            expect(shouldApplyCsrf("/api/auth/session/signin", "POST")).toBe(
+                true,
+            );
+            expect(shouldApplyCsrf("/api/auth/refresh", "POST")).toBe(true);
+            expect(shouldApplyCsrf("/api/auth/session/logout", "POST")).toBe(
+                true,
+            );
+        });
+
+        it("should not apply CSRF checks to safe methods", () => {
+            expect(shouldApplyCsrf("/api/auth/session/signin", "GET")).toBe(
+                false,
+            );
         });
 
         it("should ALLOW when host is missing", () => {

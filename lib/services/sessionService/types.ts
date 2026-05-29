@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { Session } from "next-auth";
+import type { Session } from "@/lib/authTypes";
 
 export interface SessionValidationResult {
     userId: number;

@@ -2,9 +2,9 @@ import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 
 // Secret key for signing (should be in environment variables)
 const getSecretKey = (): Uint8Array => {
-    const secret = process.env.FILE_TOKEN_SECRET || process.env.NEXTAUTH_SECRET;
+    const secret = process.env.FILE_TOKEN_SECRET || process.env.AUTH_SECRET;
     if (!secret) {
-        throw new Error("FILE_TOKEN_SECRET or NEXTAUTH_SECRET must be set");
+        throw new Error("FILE_TOKEN_SECRET or AUTH_SECRET must be set");
     }
     return new TextEncoder().encode(secret);
 };

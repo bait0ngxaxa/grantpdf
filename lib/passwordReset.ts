@@ -83,13 +83,11 @@ export function verifyPasswordResetToken(
 }
 
 export function resolvePasswordResetBaseUrl(): string {
-    const envBaseUrl =
-        normalizeBaseUrl(process.env.AUTH_URL) ??
-        normalizeBaseUrl(process.env.NEXTAUTH_URL);
+    const envBaseUrl = normalizeBaseUrl(process.env.AUTH_URL);
 
     if (!envBaseUrl) {
         throw new Error(
-            "AUTH_URL or NEXTAUTH_URL must be configured for password reset emails."
+            "AUTH_URL must be configured for password reset emails."
         );
     }
 

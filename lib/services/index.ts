@@ -71,3 +71,22 @@ export {
     failDocumentIdempotency,
 } from "./documentIdempotencyService";
 export type { DocumentType as IdempotentDocumentType } from "./documentIdempotencyService";
+
+// Auth Session Service
+export {
+    createAccessToken,
+    verifyAccessToken,
+    createRefreshSession,
+    rotateRefreshSession,
+    revokeSession,
+    revokeRefreshSession,
+    revokeAllUserSessions,
+    generateRefreshToken,
+    hashRefreshToken,
+} from "./authSessionService";
+export type {
+    AccessTokenPayload,
+    CreateRefreshSessionInput,
+    CreateRefreshSessionResult,
+    RotateRefreshSessionResult,
+} from "./authSessionService";

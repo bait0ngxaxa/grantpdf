@@ -11,8 +11,8 @@ import {
     ShieldCheck,
     User,
 } from "lucide-react";
-import { ROUTES, ROLES, SIGNOUT_CALLBACK } from "@/lib/constants";
-import { signOut } from "next-auth/react";
+import { ROUTES, ROLES } from "@/lib/constants";
+import { signOutWithSessionRevoke } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
 import { cn } from "@/lib/utils";
@@ -197,7 +197,7 @@ function UserAvatarMenu({
                     </button>
                     <button
                         type="button"
-                        onClick={() => signOut({ callbackUrl: SIGNOUT_CALLBACK })}
+                        onClick={() => void signOutWithSessionRevoke()}
                         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
                     >
                         <LogOut className="h-4 w-4" />

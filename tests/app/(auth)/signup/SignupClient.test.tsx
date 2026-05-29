@@ -6,7 +6,6 @@ import { ROUTES } from "@/lib/constants";
 const pushMock = vi.fn();
 const replaceMock = vi.fn();
 const refreshMock = vi.fn();
-const signInMock = vi.fn();
 const toastSuccessMock = vi.fn();
 const toastErrorMock = vi.fn();
 
@@ -16,10 +15,6 @@ vi.mock("next/navigation", () => ({
         replace: replaceMock,
         refresh: refreshMock,
     }),
-}));
-
-vi.mock("next-auth/react", () => ({
-    signIn: (...args: unknown[]) => signInMock(...args),
 }));
 
 vi.mock("sonner", () => ({
@@ -63,24 +58,28 @@ describe("SignupClient", () => {
 
     it("redirects to dashboard with replace + refresh when signup and signin succeed", async () => {
         const fetchMock = vi.mocked(fetch);
-        fetchMock.mockResolvedValue({
-            ok: true,
-        } as Response);
-        signInMock.mockResolvedValue({ error: null });
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+            } as Response)
+            .mockResolvedValueOnce({
+                ok: true,
+            } as Response);
 
         render(<SignupClient />);
         await openConfirmModal();
 
         fireEvent.click(screen.getByRole("button", { name: "ยืนยันการสมัคร" }));
 
-        await waitFor(() => {
-            expect(signInMock).toHaveBeenCalledWith("credentials", {
-                redirect: false,
+        await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+        expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/auth/session/signin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
                 email: "tester@example.com",
                 password: "123456",
-            });
+            }),
         });
-
         expect(replaceMock).toHaveBeenCalledWith(ROUTES.DASHBOARD);
         expect(refreshMock).toHaveBeenCalledOnce();
         expect(pushMock).not.toHaveBeenCalled();
@@ -88,10 +87,13 @@ describe("SignupClient", () => {
 
     it("redirects to signin when auto sign-in fails", async () => {
         const fetchMock = vi.mocked(fetch);
-        fetchMock.mockResolvedValue({
-            ok: true,
-        } as Response);
-        signInMock.mockResolvedValue({ error: "invalid_credentials" });
+        fetchMock
+            .mockResolvedValueOnce({
+                ok: true,
+            } as Response)
+            .mockResolvedValueOnce({
+                ok: false,
+            } as Response);
 
         render(<SignupClient />);
         await openConfirmModal();
@@ -120,7 +122,7 @@ describe("SignupClient", () => {
 
         const errorMessages = await screen.findAllByText("อีเมลนี้ถูกใช้งานแล้ว");
         expect(errorMessages.length).toBeGreaterThan(0);
-        expect(signInMock).not.toHaveBeenCalled();
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(pushMock).not.toHaveBeenCalled();
         expect(replaceMock).not.toHaveBeenCalled();
     });

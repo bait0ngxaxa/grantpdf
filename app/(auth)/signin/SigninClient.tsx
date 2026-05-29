@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ROUTES } from "@/lib/constants";
@@ -19,6 +18,14 @@ function getSessionMessage(reason: string | undefined): string {
     return reason === "session-expired"
         ? "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง"
         : "";
+}
+
+async function grantSignIn(email: string, password: string): Promise<Response> {
+    return fetch("/api/auth/session/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
 }
 
 export default function SigninClient({
@@ -92,17 +99,22 @@ export default function SigninClient({
                 return;
             }
 
-            const result = await signIn("credentials", {
-                redirect: false,
-                email,
-                password,
-            });
+            const result = await grantSignIn(email, password);
 
-            if (result?.error) {
-                setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-                console.error("Login failed:", result.error);
+            if (!result.ok) {
+                const data: unknown = await result.json().catch(() => null);
+                const message =
+                    typeof data === "object" &&
+                    data !== null &&
+                    "error" in data &&
+                    typeof (data as { error?: unknown }).error === "string"
+                        ? (data as { error: string }).error
+                        : "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+
+                setError(message);
+                console.error("Login failed:", message);
                 toast.error("เข้าสู่ระบบไม่สำเร็จ", {
-                    description: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+                    description: message,
                 });
             } else {
                 toast.success("เข้าสู่ระบบสำเร็จ!", {

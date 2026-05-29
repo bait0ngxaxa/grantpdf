@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input, Button } from "@/components/ui";
@@ -118,13 +117,13 @@ export default function SignupClient(): React.JSX.Element {
             if (ok) {
                 setShowConfirmModal(false);
                 setIsPasswordVisibleInConfirm(false);
-                const signinResult = await signIn("credentials", {
-                    redirect: false,
-                    email,
-                    password,
+                const signinResult = await fetch("/api/auth/session/signin", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password }),
                 });
 
-                if (signinResult?.error) {
+                if (!signinResult.ok) {
                     toast.success("สร้างบัญชีผู้ใช้เรียบร้อยแล้ว", {
                         description:
                             "ไม่สามารถเข้าสู่ระบบอัตโนมัติได้ กรุณาเข้าสู่ระบบด้วยตนเอง",

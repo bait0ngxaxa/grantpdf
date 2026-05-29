@@ -62,7 +62,7 @@ vi.mock("jose", () => {
 });
 
 // Set env before import
-process.env.NEXTAUTH_SECRET = "test-secret-key-minimum-32-characters-required";
+process.env.AUTH_SECRET = "test-secret-key-minimum-32-characters-required";
 
 import {
     generateSignedToken,

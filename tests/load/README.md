@@ -187,7 +187,7 @@ k6 run -e BASE_URL=https://your-domain.com \
 ```
 
 **สิ่งที่ทดสอบ:**
-- Login flow (NextAuth CSRF + credentials)
+- Login flow (grant credentials endpoint)
 - Dashboard stats API
 - Project listing API (paginated)
 - Project creation (10% ของ users)

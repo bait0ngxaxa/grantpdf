@@ -1,7 +1,7 @@
 "use client";
 
 import { type ChangeEvent, type FormEvent } from "react";
-import { type Session } from "next-auth";
+import { type Session } from "@/lib/authTypes";
 import { type ApprovalData } from "@/config/initialData";
 
 // =====================================================

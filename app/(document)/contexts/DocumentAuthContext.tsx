@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useMemo } from "react";
-import type { Session } from "next-auth";
+import type { Session } from "@/lib/authTypes";
 import { ROLES } from "@/lib/constants";
 
 interface DocumentAuthContextType {

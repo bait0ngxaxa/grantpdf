@@ -70,20 +70,37 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        const updateResult = await prisma.user.updateMany({
-            where: {
-                id: Number(decodedToken.userId),
-                passwordResetVersion: decodedToken.resetVersion,
-            },
-            data: {
-                password: hashedPassword,
-                passwordResetVersion: {
-                    increment: 1,
+        const userId = Number(decodedToken.userId);
+        const updateResult = await prisma.$transaction(async (tx) => {
+            const passwordUpdate = await tx.user.updateMany({
+                where: {
+                    id: userId,
+                    passwordResetVersion: decodedToken.resetVersion,
                 },
-                sessionVersion: {
-                    increment: 1,
+                data: {
+                    password: hashedPassword,
+                    passwordResetVersion: {
+                        increment: 1,
+                    },
+                    sessionVersion: {
+                        increment: 1,
+                    },
                 },
-            },
+            });
+
+            if (passwordUpdate.count > 0) {
+                await tx.authSession.updateMany({
+                    where: {
+                        userId,
+                        revokedAt: null,
+                    },
+                    data: {
+                        revokedAt: new Date(),
+                    },
+                });
+            }
+
+            return passwordUpdate;
         });
 
         if (updateResult.count === 0) {

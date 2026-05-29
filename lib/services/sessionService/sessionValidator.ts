@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getGrantSession } from "@/lib/grantAuth";
 import type { SessionValidationResult } from "./types";
 
 export async function validateSession(): Promise<
     SessionValidationResult | NextResponse
 > {
-    const session = await auth();
+    const session = await getGrantSession();
 
     if (!session || !session.user || !session.user.id) {
         return new NextResponse("Unauthorized", { status: 401 });
