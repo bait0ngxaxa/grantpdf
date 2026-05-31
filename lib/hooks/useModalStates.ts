@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
 
 /**
- * Hook for managing preview modal state
- * Shared between admin and user dashboards
+ * Hook for managing shared modal state.
  */
 export function useModalStates<T, F>(): {
     isSuccessModalOpen: boolean;
@@ -26,11 +25,6 @@ export function useModalStates<T, F>(): {
     isResultSuccess: boolean;
     openResultModal: (success: boolean, message: string) => void;
     closeResultModal: () => void;
-    isPreviewModalOpen: boolean;
-    previewUrl: string;
-    previewFileName: string;
-    openPreviewModal: (storagePath: string, fileName: string) => void;
-    closePreviewModal: () => void;
     isUploadModalOpen: boolean;
     openUploadModal: (project: F[keyof F]) => void;
     closeUploadModal: () => void;
@@ -99,27 +93,6 @@ export function useModalStates<T, F>(): {
         setResultMessage("");
     }, []);
 
-    // Preview Modal
-    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-    const [previewUrl, setPreviewUrl] = useState("");
-    const [previewFileName, setPreviewFileName] = useState("");
-
-    const openPreviewModal = useCallback(
-        (storagePath: string, fileName: string) => {
-            const previewApiUrl = `/api/preview?path=${encodeURIComponent(storagePath)}`;
-            setPreviewUrl(previewApiUrl);
-            setPreviewFileName(fileName);
-            setIsPreviewModalOpen(true);
-        },
-        [],
-    );
-
-    const closePreviewModal = useCallback(() => {
-        setIsPreviewModalOpen(false);
-        setPreviewUrl("");
-        setPreviewFileName("");
-    }, []);
-
     // Upload Modal
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [selectedProjectForUpload, setSelectedProjectForUpload] = useState<
@@ -179,13 +152,6 @@ export function useModalStates<T, F>(): {
         isResultSuccess,
         openResultModal,
         closeResultModal,
-
-        // Preview Modal
-        isPreviewModalOpen,
-        previewUrl,
-        previewFileName,
-        openPreviewModal,
-        closePreviewModal,
 
         // Upload Modal
         isUploadModalOpen,

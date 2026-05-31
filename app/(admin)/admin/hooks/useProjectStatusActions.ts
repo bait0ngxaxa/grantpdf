@@ -212,6 +212,11 @@ export const useProjectStatusActions = (): {
             return;
         }
 
+        if (allowCoOwners && selectedCoOwnerAdminIds.length === 0) {
+            toast.error("กรุณาเลือกเจ้าของร่วมอย่างน้อย 1 คน");
+            return;
+        }
+
         setIsUpdatingStatus(true);
         try {
             let successMessage = "บันทึกการเปลี่ยนแปลงโครงการสำเร็จแล้ว";

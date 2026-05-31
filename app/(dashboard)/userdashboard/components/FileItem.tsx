@@ -11,7 +11,6 @@ import {
     Paperclip,
     ChevronDown,
     Download,
-    Eye,
     Loader2,
     Trash2,
     User,
@@ -33,7 +32,7 @@ interface FileItemProps {
 }
 
 export default function FileItem({ file }: FileItemProps): React.JSX.Element {
-    const { openPreviewModal, handleDeleteFile } = useUserDashboardContext();
+    const { handleDeleteFile } = useUserDashboardContext();
     const [isAttachmentExpanded, setIsAttachmentExpanded] = useState(false);
     const { download, isDownloading } = useSignedDownload();
 
@@ -121,20 +120,6 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                             <Download className="h-5 w-5" />
                         )}
                     </button>
-                    {file.fileExtension === "pdf" && (
-                        <button
-                            onClick={() =>
-                                openPreviewModal(
-                                    file.storagePath,
-                                    file.originalFileName,
-                                )
-                            }
-                            className="p-2 text-slate-400 dark:text-slate-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-                            title="พรีวิว PDF"
-                        >
-                            <Eye className="h-5 w-5" />
-                        </button>
-                    )}
                     <button
                         onClick={() => handleDeleteFile(file.id)}
                         className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { PdfPreviewModal } from "@/components/ui";
 import {
     ProjectFilesModal,
     ProjectReportsModal,
@@ -12,11 +11,6 @@ import { getStatusColor } from "@/lib/utils";
 
 export const AdminModals = () => {
     const {
-        isPreviewModalOpen,
-        previewUrl,
-        previewFileName,
-        closePreviewModal,
-        openPreviewModal,
         isStatusModalOpen,
         selectedProjectForStatus,
         newStatus,
@@ -51,13 +45,6 @@ export const AdminModals = () => {
 
     return (
         <>
-            <PdfPreviewModal
-                isOpen={isPreviewModalOpen}
-                previewUrl={previewUrl}
-                previewFileName={previewFileName}
-                onClose={closePreviewModal}
-            />
-
             <ProjectStatusModal
                 isStatusModalOpen={isStatusModalOpen}
                 selectedProjectForStatus={selectedProjectForStatus}
@@ -87,7 +74,6 @@ export const AdminModals = () => {
                 isOpen={isProjectFilesModalOpen}
                 project={selectedProjectForFiles}
                 onClose={closeProjectFilesModal}
-                onPreviewPdf={openPreviewModal}
             />
 
             <ProjectReportsModal

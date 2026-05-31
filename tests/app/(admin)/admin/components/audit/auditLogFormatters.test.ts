@@ -11,6 +11,8 @@ describe("auditLogFormatters", () => {
             "LOGIN_SUCCESS",
             "LOGIN_FAILED",
             "LOGOUT",
+            "SESSION_REVOKE",
+            "SESSION_REVOKE_OTHERS",
             "SIGNUP",
             "PASSWORD_RESET_REQUEST",
             "PASSWORD_RESET_SUCCESS",
@@ -49,6 +51,12 @@ describe("auditLogFormatters", () => {
             }),
         ).toContain("ถูกจำกัดจำนวนครั้ง");
         expect(formatAuditDetails("LOGOUT", {})).toBe("ออกจากระบบสำเร็จ");
+        expect(formatAuditDetails("SESSION_REVOKE", { revokedCount: 1 })).toBe(
+            "ออกจากระบบอุปกรณ์ที่เลือก | จำนวนเซสชันที่ออกจากระบบ: 1",
+        );
+        expect(
+            formatAuditDetails("SESSION_REVOKE_OTHERS", { revokedCount: "3" }),
+        ).toBe("ออกจากระบบอุปกรณ์อื่นทั้งหมด | จำนวนเซสชันที่ออกจากระบบ: 3");
         expect(formatAuditDetails("SIGNUP", {})).toBe("สมัครสมาชิกสำเร็จ");
         expect(
             formatAuditDetails("PASSWORD_RESET_REQUEST", {

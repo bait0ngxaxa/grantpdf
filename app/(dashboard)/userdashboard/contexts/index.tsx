@@ -48,12 +48,6 @@ interface UserDashboardContextType {
     fetchUserData: () => Promise<void>;
 
     // Modal Visibility
-    isModalOpen: boolean;
-    setIsModalOpen: (open: boolean) => void;
-    previewUrl: string;
-    setPreviewUrl: (url: string) => void;
-    previewTitle: string;
-    setPreviewTitle: (title: string) => void;
     showProfileModal: boolean;
     setShowProfileModal: (show: boolean) => void;
     showCreateProjectModal: boolean;
@@ -70,7 +64,6 @@ interface UserDashboardContextType {
     closeProjectFilesModal: () => void;
     openReportModal: (project: Project) => void;
     closeReportModal: () => void;
-    openPreviewModal: (storagePath: string, title: string) => void;
 
     // Form States
     fileToDelete: string | null;

@@ -1,6 +1,5 @@
 export { CreateDocSuccessModal } from "./CreateDocSuccessModal";
 export { Pagination } from "./Pagination";
-export { PdfPreviewModal } from "./PdfPreviewModal";
 export { SuccessModal } from "./SuccessModal";
 export { LoadingSpinner } from "./LoadingSpinner";
 export { Skeleton } from "./Skeleton";

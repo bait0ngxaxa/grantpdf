@@ -6,9 +6,8 @@ import {
     type SuccessModalState,
     type ConfirmModalState,
     type LoadingModalState,
-    type PreviewModalState,
 } from "./GlobalModalContext";
-import { SuccessModal, PdfPreviewModal, Skeleton } from "@/components/ui";
+import { SuccessModal, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 import {
@@ -45,13 +44,6 @@ export function GlobalModalProvider({
     // Loading
     const [loadingModal, setLoadingModal] = useState<LoadingModalState>({
         isOpen: false,
-    });
-
-    // Preview
-    const [previewModal, setPreviewModal] = useState<PreviewModalState>({
-        isOpen: false,
-        url: "",
-        fileName: "",
     });
 
     // --- Actions ---
@@ -98,15 +90,6 @@ export function GlobalModalProvider({
         setLoadingModal((prev) => ({ ...prev, isOpen: false }));
     }, []);
 
-    // Preview Actions
-    const showPreview = useCallback((url: string, fileName: string) => {
-        setPreviewModal({ isOpen: true, url, fileName });
-    }, []);
-
-    const closePreview = useCallback(() => {
-        setPreviewModal((prev) => ({ ...prev, isOpen: false }));
-    }, []);
-
     return (
         <GlobalModalContext.Provider
             value={{
@@ -119,9 +102,6 @@ export function GlobalModalProvider({
                 loadingModal,
                 showLoading,
                 hideLoading,
-                previewModal,
-                showPreview,
-                closePreview,
             }}
         >
             {children}
@@ -133,14 +113,6 @@ export function GlobalModalProvider({
                 isOpen={successModal.isOpen}
                 message={successModal.message}
                 onClose={closeSuccess}
-            />
-
-            {/* Preview Modal */}
-            <PdfPreviewModal
-                isOpen={previewModal.isOpen}
-                previewUrl={previewModal.url}
-                previewFileName={previewModal.fileName}
-                onClose={closePreview}
             />
 
             {/* Global Loading Overlay */}

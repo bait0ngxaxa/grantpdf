@@ -46,13 +46,6 @@ interface AdminDashboardContextType {
     markProjectViewed: (projectId: string) => void;
 
     // Modal States
-    isPreviewModalOpen: boolean;
-    setIsPreviewModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    previewUrl: string;
-    setPreviewUrl: React.Dispatch<React.SetStateAction<string>>;
-    previewFileName: string;
-    setPreviewFileName: React.Dispatch<React.SetStateAction<string>>;
-
     isStatusModalOpen: boolean;
     setIsStatusModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedProjectForStatus: AdminProject | null;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, AttachmentList } from "@/components/ui";
+import { AttachmentList } from "@/components/ui";
 import type { AdminDocumentFile } from "@/type/models";
 import { truncateFileName, cn } from "@/lib/utils";
 import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
@@ -12,20 +12,15 @@ import {
     Paperclip,
     ChevronDown,
     Download,
-    Eye,
     Loader2,
     User,
 } from "lucide-react";
 
 interface FileItemProps {
     file: AdminDocumentFile;
-    onPreviewPdf: (storagePath: string, fileName: string) => void;
 }
 
-export default function FileItem({
-    file,
-    onPreviewPdf,
-}: FileItemProps): React.JSX.Element {
+export default function FileItem({ file }: FileItemProps): React.JSX.Element {
     const [isAttachmentExpanded, setIsAttachmentExpanded] = useState(false);
     const { download, isDownloading } = useSignedDownload();
 
@@ -129,23 +124,6 @@ export default function FileItem({
                                 <Download className="h-4 w-4" />
                             )}
                         </button>
-                    )}
-                    {file.fileExtension === "pdf" && (
-                        <Button
-                            onClick={() => {
-                                if (file.storagePath) {
-                                    onPreviewPdf(
-                                        file.storagePath,
-                                        file.originalFileName,
-                                    );
-                                }
-                            }}
-                            size="sm"
-                            className="h-8 w-8 p-0 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-500 hover:bg-green-100 dark:hover:bg-green-900/50 hover:text-green-700 dark:hover:text-green-300 border-none shadow-none"
-                            title="พรีวิว PDF"
-                        >
-                            <Eye className="h-4 w-4" />
-                        </Button>
                     )}
                 </div>
             </div>

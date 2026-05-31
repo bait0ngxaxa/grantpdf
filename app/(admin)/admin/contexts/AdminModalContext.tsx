@@ -9,12 +9,6 @@ import React, {
 import type { AdminProject } from "@/type/models";
 
 interface AdminModalContextType {
-    isPreviewModalOpen: boolean;
-    setIsPreviewModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    previewUrl: string;
-    setPreviewUrl: React.Dispatch<React.SetStateAction<string>>;
-    previewFileName: string;
-    setPreviewFileName: React.Dispatch<React.SetStateAction<string>>;
     isStatusModalOpen: boolean;
     setIsStatusModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedProjectForStatus: AdminProject | null;
@@ -46,12 +40,6 @@ const AdminModalContext = createContext<AdminModalContextType | undefined>(
 );
 
 export function AdminModalProvider({ children }: { children: ReactNode }) {
-    // 2. Preview Modal
-    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-    const [previewUrl, setPreviewUrl] = useState("");
-    const [previewFileName, setPreviewFileName] = useState("");
-
-    // 3. Status Modal
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
     const [selectedProjectForStatus, setSelectedProjectForStatus] =
         useState<AdminProject | null>(null);
@@ -68,12 +56,6 @@ export function AdminModalProvider({ children }: { children: ReactNode }) {
         useState<AdminProject | null>(null);
 
     const value = {
-        isPreviewModalOpen,
-        setIsPreviewModalOpen,
-        previewUrl,
-        setPreviewUrl,
-        previewFileName,
-        setPreviewFileName,
         isStatusModalOpen,
         setIsStatusModalOpen,
         selectedProjectForStatus,

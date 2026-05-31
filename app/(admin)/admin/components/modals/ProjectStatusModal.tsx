@@ -138,6 +138,10 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     statusNote !== (selectedProjectForStatus?.statusNote || "") ||
     selectedProgramId !== (selectedProjectForStatus?.programId || "") ||
     hasCoOwnerChanges;
+  const coOwnerSelectionError =
+    allowCoOwners && selectedCoOwnerAdminIds.length === 0
+      ? "กรุณาเลือกเจ้าของร่วมอย่างน้อย 1 คน"
+      : null;
 
   return (
     <>
@@ -411,6 +415,11 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                     {adminOwnersError}
                   </p>
                 )}
+                {coOwnerSelectionError && (
+                  <p className="mt-2 text-xs text-red-500">
+                    {coOwnerSelectionError}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-col lg:col-start-2 lg:row-start-3">
@@ -446,6 +455,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                   isUpdatingStatus ||
                   !!programsError ||
                   !!adminOwnersError ||
+                  !!coOwnerSelectionError ||
                   !hasProjectChanges
                 }
                 className={cn(

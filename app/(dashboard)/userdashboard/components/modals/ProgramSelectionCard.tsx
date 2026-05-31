@@ -22,17 +22,17 @@ export function ProgramSelectionCard({
                 <ProgramIdentityIcon accentKey={accent.key} />
             </div>
             <div className="min-w-0 flex-1">
-                <div className="mb-1 flex items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2">
                     <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent.dot}`} />
-                    {!program.isActive ? (
-                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                            ปิดใช้งาน
-                        </span>
-                    ) : null}
+                    <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+                        {program.name}
+                    </p>
                 </div>
-                <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
-                    {program.name}
-                </p>
+                {!program.isActive ? (
+                    <span className="mt-1 inline-flex text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                        ปิดใช้งาน
+                    </span>
+                ) : null}
                 {program.description ? (
                     <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                         {program.description}
@@ -61,9 +61,12 @@ export function SelectedProgramBadge({
                 <p className={`text-[11px] font-bold ${accent.text}`}>
                     โครงการหลักที่เลือก
                 </p>
-                <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
-                    {program.name}
-                </p>
+                <div className="flex min-w-0 items-center gap-1.5">
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent.dot}`} />
+                    <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+                        {program.name}
+                    </p>
+                </div>
             </div>
             <button
                 type="button"

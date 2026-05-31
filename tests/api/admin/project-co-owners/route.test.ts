@@ -140,6 +140,28 @@ describe("admin project co-owners route", () => {
         expect(mockedUpdateProjectCoOwners).not.toHaveBeenCalled();
     });
 
+    it("returns 400 when co-owners are enabled without selected admins", async () => {
+        const request = new Request(
+            "http://localhost/api/admin/project-co-owners",
+            {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    projectId: 10,
+                    allowCoOwners: true,
+                    adminUserIds: [],
+                }),
+            },
+        );
+
+        const response = await PUT(request);
+        const body = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(body.error).toBe("กรุณาเลือกเจ้าของร่วมอย่างน้อย 1 คน");
+        expect(mockedUpdateProjectCoOwners).not.toHaveBeenCalled();
+    });
+
     it("returns 400 when service rejects an unknown co-owner user", async () => {
         mockedUpdateProjectCoOwners.mockRejectedValue(
             new Error("INVALID_CO_OWNER_USER"),

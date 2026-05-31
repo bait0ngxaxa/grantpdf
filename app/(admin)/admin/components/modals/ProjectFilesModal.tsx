@@ -16,14 +16,12 @@ interface ProjectFilesModalProps {
     isOpen: boolean;
     project: AdminProject | null;
     onClose: () => void;
-    onPreviewPdf: (storagePath: string, fileName: string) => void;
 }
 
 export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
     isOpen,
     project,
     onClose,
-    onPreviewPdf,
 }) => {
     const fallbackFiles = useMemo(
         () => project?.files || [],
@@ -128,7 +126,6 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                                 <FileItem
                                     key={file.id}
                                     file={file}
-                                    onPreviewPdf={onPreviewPdf}
                                 />
                             ))}
                         </div>

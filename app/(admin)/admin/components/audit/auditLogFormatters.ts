@@ -2,6 +2,8 @@ const ACTION_LABELS = {
     LOGIN_SUCCESS: "เข้าสู่ระบบสำเร็จ",
     LOGIN_FAILED: "เข้าสู่ระบบไม่สำเร็จ",
     LOGOUT: "ออกจากระบบ",
+    SESSION_REVOKE: "ออกจากระบบอุปกรณ์ที่เลือก",
+    SESSION_REVOKE_OTHERS: "ออกจากระบบอุปกรณ์อื่นทั้งหมด",
     SIGNUP: "สมัครสมาชิก",
     PASSWORD_RESET_REQUEST: "ขอรีเซ็ตรหัสผ่าน",
     PASSWORD_RESET_SUCCESS: "รีเซ็ตรหัสผ่านสำเร็จ",
@@ -69,6 +71,11 @@ function mapStatus(value: string | null): string | null {
 function mapLoginReason(value: string | null): string {
     if (!value) return "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง";
     return LOGIN_REASON_LABELS[value] || "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง";
+}
+
+function formatRevokedCount(count: number | null): string | null {
+    if (count === null) return null;
+    return `จำนวนเซสชันที่ออกจากระบบ: ${count}`;
 }
 
 function readStringField(
@@ -185,6 +192,24 @@ export function formatAuditDetails(
 
     if (knownAction === "LOGOUT") {
         return "ออกจากระบบสำเร็จ";
+    }
+
+    if (knownAction === "SESSION_REVOKE") {
+        const revokedCount = formatRevokedCount(
+            readNumberField(details, "revokedCount"),
+        );
+        return revokedCount
+            ? `ออกจากระบบอุปกรณ์ที่เลือก | ${revokedCount}`
+            : "ออกจากระบบอุปกรณ์ที่เลือก";
+    }
+
+    if (knownAction === "SESSION_REVOKE_OTHERS") {
+        const revokedCount = formatRevokedCount(
+            readNumberField(details, "revokedCount"),
+        );
+        return revokedCount
+            ? `ออกจากระบบอุปกรณ์อื่นทั้งหมด | ${revokedCount}`
+            : "ออกจากระบบอุปกรณ์อื่นทั้งหมด";
     }
 
     if (knownAction === "SIGNUP") {

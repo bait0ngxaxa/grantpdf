@@ -78,4 +78,27 @@ describe("project schema validation", () => {
         expect(result.success).toBe(false);
         expect(result.error?.issues[0]?.message).toBe("รหัสผู้ใช้ไม่ถูกต้อง");
     });
+
+    it("rejects enabled project co-owners without selected admins", () => {
+        const result = updateProjectCoOwnersSchema.safeParse({
+            projectId: 1,
+            allowCoOwners: true,
+            adminUserIds: [],
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues[0]?.message).toBe(
+            "กรุณาเลือกเจ้าของร่วมอย่างน้อย 1 คน",
+        );
+    });
+
+    it("accepts disabled project co-owners without selected admins", () => {
+        const result = updateProjectCoOwnersSchema.safeParse({
+            projectId: 1,
+            allowCoOwners: false,
+            adminUserIds: [],
+        });
+
+        expect(result.success).toBe(true);
+    });
 });

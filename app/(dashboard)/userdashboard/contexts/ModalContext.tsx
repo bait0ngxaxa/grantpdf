@@ -10,10 +10,6 @@ import React, {
 import type { Project } from "@/type";
 
 interface ModalContextType {
-    isModalOpen: boolean;
-    setIsModalOpen: (open: boolean) => void;
-    previewUrl: string;
-    previewTitle: string;
     showProfileModal: boolean;
     setShowProfileModal: (show: boolean) => void;
     showCreateProjectModal: boolean;
@@ -30,17 +26,11 @@ interface ModalContextType {
     closeProjectFilesModal: () => void;
     openReportModal: (project: Project) => void;
     closeReportModal: () => void;
-    openPreviewModal: (storagePath: string, title: string) => void;
-    setPreviewUrl: (url: string) => void;
-    setPreviewTitle: (title: string) => void;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export function ModalProvider({ children }: { children: ReactNode }) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [previewUrl, setPreviewUrl] = useState("");
-    const [previewTitle, setPreviewTitle] = useState("");
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -52,16 +42,6 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [selectedProjectForReport, setSelectedProjectForReport] =
         useState<Project | null>(null);
-
-    const openPreviewModal = useCallback(
-        (storagePath: string, title: string) => {
-            const previewUrl = `/api/preview?path=${encodeURIComponent(storagePath)}`;
-            setPreviewUrl(previewUrl);
-            setPreviewTitle(title);
-            setIsModalOpen(true);
-        },
-        [],
-    );
 
     const openProjectFilesModal = useCallback((project: Project) => {
         setSelectedProjectForFiles(project);
@@ -84,10 +64,6 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const value = {
-        isModalOpen,
-        setIsModalOpen,
-        previewUrl,
-        previewTitle,
         showProfileModal,
         setShowProfileModal,
         showCreateProjectModal,
@@ -104,9 +80,6 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         closeProjectFilesModal,
         openReportModal,
         closeReportModal,
-        openPreviewModal,
-        setPreviewUrl,
-        setPreviewTitle,
     };
 
     return (

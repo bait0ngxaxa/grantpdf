@@ -27,13 +27,6 @@ export interface LoadingModalState {
     message?: string;
 }
 
-// PDF Preview Modal Type
-export interface PreviewModalState {
-    isOpen: boolean;
-    url: string;
-    fileName: string;
-}
-
 interface GlobalModalContextType {
     // Success Modal
     successModal: SuccessModalState;
@@ -50,10 +43,6 @@ interface GlobalModalContextType {
     showLoading: (message?: string) => void;
     hideLoading: () => void;
 
-    // Preview Modal
-    previewModal: PreviewModalState;
-    showPreview: (url: string, fileName: string) => void;
-    closePreview: () => void;
 }
 
 export const GlobalModalContext = createContext<

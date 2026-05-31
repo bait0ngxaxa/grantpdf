@@ -65,21 +65,31 @@ export const updateAdminProjectSchema = updateProjectStatusSchema.extend({
         .optional(),
 });
 
-export const updateProjectCoOwnersSchema = z.object({
-    projectId: z.coerce
-        .number({ message: "รหัสโครงการไม่ถูกต้อง" })
-        .int({ message: "รหัสโครงการไม่ถูกต้อง" })
-        .positive({ message: "รหัสโครงการไม่ถูกต้อง" }),
-    allowCoOwners: z.boolean({ message: "สถานะเจ้าของร่วมไม่ถูกต้อง" }),
-    adminUserIds: z
-        .array(
-            z.coerce
-                .number({ message: "รหัสผู้ใช้ไม่ถูกต้อง" })
-                .int({ message: "รหัสผู้ใช้ไม่ถูกต้อง" })
-                .positive({ message: "รหัสผู้ใช้ไม่ถูกต้อง" }),
-        )
-        .max(20, { message: "เลือกเจ้าของร่วมได้สูงสุด 20 คน" }),
-});
+export const updateProjectCoOwnersSchema = z
+    .object({
+        projectId: z.coerce
+            .number({ message: "รหัสโครงการไม่ถูกต้อง" })
+            .int({ message: "รหัสโครงการไม่ถูกต้อง" })
+            .positive({ message: "รหัสโครงการไม่ถูกต้อง" }),
+        allowCoOwners: z.boolean({ message: "สถานะเจ้าของร่วมไม่ถูกต้อง" }),
+        adminUserIds: z
+            .array(
+                z.coerce
+                    .number({ message: "รหัสผู้ใช้ไม่ถูกต้อง" })
+                    .int({ message: "รหัสผู้ใช้ไม่ถูกต้อง" })
+                    .positive({ message: "รหัสผู้ใช้ไม่ถูกต้อง" }),
+            )
+            .max(20, { message: "เลือกเจ้าของร่วมได้สูงสุด 20 คน" }),
+    })
+    .superRefine((data, context) => {
+        if (data.allowCoOwners && data.adminUserIds.length === 0) {
+            context.addIssue({
+                code: "custom",
+                path: ["adminUserIds"],
+                message: "กรุณาเลือกเจ้าของร่วมอย่างน้อย 1 คน",
+            });
+        }
+    });
 
 export const updateAdminUserSchema = z.object({
     name: z
