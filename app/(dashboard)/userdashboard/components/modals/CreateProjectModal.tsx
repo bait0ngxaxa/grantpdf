@@ -19,12 +19,14 @@ import {
     Plus,
     Loader2,
     ArrowLeft,
-    ChevronRight,
-    FolderTree,
 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
 import { API_ROUTES } from "@/lib/constants";
 import type { ProgramSummary } from "@/type/models";
+import {
+    ProgramSelectionCard,
+    SelectedProgramBadge,
+} from "./ProgramSelectionCard";
 
 type ModalStep = "select-program" | "project-form";
 
@@ -127,29 +129,11 @@ export const CreateProjectModal: React.FC = () => {
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1">
                                     {programs.map((program) => (
-                                        <button
+                                        <ProgramSelectionCard
                                             key={program.id}
-                                            type="button"
-                                            onClick={() =>
-                                                handleSelectProgram(program.id)
-                                            }
-                                            className="group relative flex items-center gap-3 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-200 text-left cursor-pointer"
-                                        >
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform duration-200">
-                                                <FolderTree className="h-5 w-5" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
-                                                    {program.name}
-                                                </p>
-                                                {program.description && (
-                                                    <p className="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">
-                                                        {program.description}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all shrink-0" />
-                                        </button>
+                                            program={program}
+                                            onSelect={handleSelectProgram}
+                                        />
                                     ))}
                                 </div>
                             )}
@@ -183,21 +167,10 @@ export const CreateProjectModal: React.FC = () => {
 
                         {/* Selected program badge */}
                         {selectedProgram && (
-                            <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800">
-                                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center text-white shrink-0">
-                                    <FolderTree className="h-3.5 w-3.5" />
-                                </div>
-                                <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300 truncate">
-                                    {selectedProgram.name}
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={handleBack}
-                                    className="ml-auto text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium underline underline-offset-2 cursor-pointer shrink-0"
-                                >
-                                    เปลี่ยน
-                                </button>
-                            </div>
+                            <SelectedProgramBadge
+                                program={selectedProgram}
+                                onChange={handleBack}
+                            />
                         )}
 
                         <div className="space-y-5 py-4">

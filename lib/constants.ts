@@ -246,6 +246,11 @@ export const RATE_LIMIT = {
             LIMIT: 30,
             WINDOW_MS: 60_000,
         },
+        SESSIONS: {
+            ROUTE_KEY: "auth:sessions",
+            LIMIT: 60,
+            WINDOW_MS: 60_000,
+        },
     },
     USER: {
         PROJECT_MUTATION: {

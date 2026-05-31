@@ -3,7 +3,11 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button, Pagination, Skeleton, EmptyState } from "@/components/ui";
-import { Building2, ChevronDown, FileText, FolderTree } from "lucide-react";
+import { Building2, FolderTree } from "lucide-react";
+import {
+    fileStatIcon,
+    ProgramGroupHeader,
+} from "@/components/ProgramGroupHeader";
 import { PAGINATION, ROUTES } from "@/lib/constants";
 import { groupProjectsByProgram } from "@/lib/programGrouping";
 import { paginateGroupItems } from "@/lib/programGroupPagination";
@@ -105,6 +109,7 @@ export function ProjectList({
                             return (
                                 <ProgramGroupAccordion
                                     key={group.key}
+                                    groupKey={group.key}
                                     label={group.label}
                                     projectCount={group.projectCount}
                                     totalFiles={group.totalFiles}
@@ -161,6 +166,7 @@ export function ProjectList({
 // -- Extracted accordion sub-component to keep ProjectList within LOC limits --
 
 interface ProgramGroupAccordionProps {
+    groupKey: string;
     label: string;
     projectCount: number;
     totalFiles: number;
@@ -171,6 +177,7 @@ interface ProgramGroupAccordionProps {
 }
 
 function ProgramGroupAccordion({
+    groupKey,
     label,
     projectCount,
     totalFiles,
@@ -184,46 +191,22 @@ function ProgramGroupAccordion({
             <button
                 type="button"
                 onClick={onToggle}
-                className="flex w-full items-center justify-between gap-3 bg-slate-50/80 px-3 py-3 text-left transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/70"
+                className="flex w-full items-start justify-between gap-3 bg-white px-3 py-3 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70"
             >
-                <div className="flex min-w-0 items-start gap-3">
-                    <div
-                        className={cn(
-                            "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-white shadow-md",
-                            isUngrouped
-                                ? "bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/20"
-                                : "bg-gradient-to-br from-violet-600 to-fuchsia-500 shadow-violet-500/20",
-                        )}
-                    >
-                        {isUngrouped ? (
-                            <FolderTree className="h-4.5 w-4.5" />
-                        ) : (
-                            <Building2 className="h-4.5 w-4.5" />
-                        )}
-                    </div>
-                    <div className="min-w-0">
-                        <h2 className="line-clamp-2 text-sm font-bold text-slate-900 dark:text-slate-100">
-                            {label}
-                        </h2>
-                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                            <span className="rounded-full bg-white px-2 py-0.5 dark:bg-slate-700">
-                                {projectCount} โครงการย่อย
-                            </span>
-                            <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 dark:bg-slate-700">
-                                <FileText className="mr-1 h-3 w-3" />
-                                {totalFiles} รายการเอกสาร
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div
-                    className={cn(
-                        "rounded-full bg-white p-1.5 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300",
-                        isExpanded && "rotate-180",
-                    )}
-                >
-                    <ChevronDown className="h-4 w-4" />
-                </div>
+                <ProgramGroupHeader
+                    groupKey={groupKey}
+                    label={label}
+                    isUngrouped={isUngrouped}
+                    isExpanded={isExpanded}
+                    compact
+                    stats={[
+                        { label: `${projectCount} โครงการย่อย` },
+                        {
+                            label: `${totalFiles} รายการเอกสาร`,
+                            icon: fileStatIcon("mr-1 h-3 w-3"),
+                        },
+                    ]}
+                />
             </button>
 
             <div

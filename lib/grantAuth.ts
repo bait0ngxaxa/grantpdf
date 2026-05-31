@@ -8,6 +8,8 @@ import {
 import type { Session } from "@/lib/authTypes";
 
 type GrantSessionRecord = {
+    sessionId: string;
+    familyId: string;
     expiresAt: Date;
     revokedAt: Date | null;
     sessionVersion: number;
@@ -40,6 +42,8 @@ function buildSession(record: GrantSessionRecord): Session {
             email: record.user.email,
             role: record.user.role,
             sessionVersion: record.user.sessionVersion,
+            sessionId: record.sessionId,
+            sessionFamilyId: record.familyId,
         },
     };
 }
@@ -59,6 +63,8 @@ export async function getGrantSession(): Promise<Session | null> {
     const record = await prisma.authSession.findUnique({
         where: { sessionId: payload.sessionId },
         select: {
+            sessionId: true,
+            familyId: true,
             expiresAt: true,
             revokedAt: true,
             sessionVersion: true,

@@ -5,6 +5,8 @@ export interface AuthUser {
     image?: string | null;
     role?: string;
     sessionVersion?: number;
+    sessionId?: string;
+    sessionFamilyId?: string;
 }
 
 export interface Session {

@@ -90,3 +90,14 @@ export type {
     CreateRefreshSessionResult,
     RotateRefreshSessionResult,
 } from "./authSessionService";
+
+// Device Session Service
+export {
+    getUserDeviceSessions,
+    revokeUserSessionFamily,
+    revokeOtherUserSessionFamilies,
+} from "./deviceSessionService";
+export type {
+    DeviceSessionStatus,
+    DeviceSessionSummary,
+} from "./deviceSessionService";

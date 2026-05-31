@@ -93,12 +93,12 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                 )}
                             >
                                 <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-none mb-1 text-balance">
-                                    Dashboard
+                                    E-GRANT ONLINE
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                     <p className="text-[11px] uppercase font-bold text-blue-600 dark:text-blue-400 tracking-wider">
-                                        Management Documents
+                                        RHHSDI
                                     </p>
                                 </div>
                             </div>

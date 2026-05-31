@@ -4,7 +4,11 @@ import React, { useMemo, useState } from "react";
 import ProjectCard from "./ProjectCard";
 import { Skeleton, EmptyState, Pagination } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
-import { Archive, Building2, ChevronDown, FileText, FolderTree } from "lucide-react";
+import { Archive } from "lucide-react";
+import {
+    fileStatIcon,
+    ProgramGroupHeader,
+} from "@/components/ProgramGroupHeader";
 import {
     buildAdminProjectGroupViews,
     hasActiveAdminProjectFilters,
@@ -147,50 +151,26 @@ export default function ProjectsList({
                                 onClick={() => toggleProgramGroup(group.key)}
                                 className="flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
                             >
-                                <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                                    <div
-                                        className={cn(
-                                            "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-white shadow-md",
-                                            group.isUngrouped
-                                                ? "bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/20"
-                                                : "bg-gradient-to-br from-violet-600 to-fuchsia-500 shadow-violet-500/20",
-                                        )}
-                                    >
-                                        {group.isUngrouped ? (
-                                            <FolderTree className="h-6 w-6" />
-                                        ) : (
-                                            <Building2 className="h-6 w-6" />
-                                        )}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h3 className="text-base font-bold break-words text-slate-900 dark:text-slate-100 sm:text-lg">
-                                            {group.label}
-                                        </h3>
-                                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                                            <span className="rounded-full bg-slate-50 px-2.5 py-1 dark:bg-slate-700">
-                                                {hasActiveFilters
-                                                    ? `พบ ${group.matchedProjectCount} จาก ${group.totalProjectCount} โครงการย่อย`
-                                                    : `${group.totalProjectCount} โครงการย่อย`}
-                                            </span>
-                                            <span className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 dark:bg-slate-700">
-                                                <FileText className="mr-1.5 h-3.5 w-3.5" />
-                                                {hasActiveFilters
-                                                    ? `${group.matchedFiles} จาก ${group.totalFiles} ไฟล์`
-                                                    : `${group.totalFiles} ไฟล์`}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {!hasActiveFilters && (
-                                    <div
-                                        className={cn(
-                                            "self-end rounded-full bg-slate-50 p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300 sm:self-auto",
-                                            isExpanded && "rotate-180",
-                                        )}
-                                    >
-                                        <ChevronDown className="h-5 w-5" />
-                                    </div>
-                                )}
+                                <ProgramGroupHeader
+                                    groupKey={group.key}
+                                    label={group.label}
+                                    isUngrouped={group.isUngrouped}
+                                    isExpanded={isExpanded}
+                                    showChevron={!hasActiveFilters}
+                                    stats={[
+                                        {
+                                            label: hasActiveFilters
+                                                ? `พบ ${group.matchedProjectCount} จาก ${group.totalProjectCount} โครงการย่อย`
+                                                : `${group.totalProjectCount} โครงการย่อย`,
+                                        },
+                                        {
+                                            label: hasActiveFilters
+                                                ? `${group.matchedFiles} จาก ${group.totalFiles} ไฟล์`
+                                                : `${group.totalFiles} ไฟล์`,
+                                            icon: fileStatIcon(),
+                                        },
+                                    ]}
+                                />
                             </button>
 
                             <div

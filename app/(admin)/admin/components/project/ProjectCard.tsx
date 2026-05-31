@@ -6,6 +6,8 @@ import type { AdminProject } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
 import { getStatusColor, cn } from "@/lib/utils";
 import { REPORT_STATUS } from "@/lib/constants";
+import { getProgramAccent } from "@/components/programAccent";
+import { ProgramIdentityIcon } from "@/components/ProgramIdentityIcon";
 import {
     Archive,
     User,
@@ -109,6 +111,12 @@ export default function ProjectCard({
         (key) => !viewedPendingReportKeys.has(key),
     );
     const reportCount = project.reports?.length ?? 0;
+    const programAccent = project.programName
+        ? getProgramAccent({
+              id: project.programId ?? project.programName,
+              name: project.programName,
+          })
+        : null;
     const getStatusIcon = (status: string): React.JSX.Element | null => {
         switch (status) {
             case PROJECT_STATUS.APPROVED:
@@ -130,8 +138,22 @@ export default function ProjectCard({
             <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(16rem,1fr)_minmax(6.5rem,9rem)_minmax(6.5rem,7.75rem)_minmax(6.5rem,7.25rem)_5.5rem_auto] xl:items-start">
                 <div className="min-w-0">
                     <div className="flex items-start gap-2.5">
-                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm shadow-blue-200 dark:shadow-blue-900/30">
-                            <Archive className="h-4 w-4" />
+                        <div
+                            className={cn(
+                                "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ring-1",
+                                programAccent
+                                    ? programAccent.icon
+                                    : "bg-slate-100 text-slate-500 ring-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:ring-slate-600",
+                            )}
+                        >
+                            {programAccent ? (
+                                <ProgramIdentityIcon
+                                    accentKey={programAccent.key}
+                                    className="h-4 w-4"
+                                />
+                            ) : (
+                                <Archive className="h-4 w-4" />
+                            )}
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="flex items-start gap-2">
@@ -152,8 +174,19 @@ export default function ProjectCard({
                                         New
                                     </div>
                                 )}
-                                {project.programName && (
-                                    <span className="inline-flex max-w-full items-center rounded-full border border-violet-100 bg-violet-50 px-2 py-0.5 text-[10px] font-semibold break-words text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300">
+                                {project.programName && programAccent && (
+                                    <span
+                                        className={cn(
+                                            "inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold break-words dark:border-slate-700 dark:bg-slate-900/60",
+                                            programAccent.text,
+                                        )}
+                                    >
+                                        <span
+                                            className={cn(
+                                                "h-1.5 w-1.5 shrink-0 rounded-full",
+                                                programAccent.dot,
+                                            )}
+                                        />
                                         {project.programName}
                                     </span>
                                 )}

@@ -6,6 +6,8 @@ import { getStatusColor, cn } from "@/lib/utils";
 import type { Project } from "@/type";
 import { ROUTES } from "@/lib/constants";
 import { useUserDashboardContext } from "../contexts";
+import { getProgramAccent } from "@/components/programAccent";
+import { ProgramIdentityIcon } from "@/components/ProgramIdentityIcon";
 import {
   Building2,
   FileText,
@@ -44,14 +46,31 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
   const statusClassName = getStatusColor(
     project.status || PROJECT_STATUS.IN_PROGRESS,
   );
+  const programAccent = project.programName
+    ? getProgramAccent({
+        id: project.programId ?? project.programName,
+        name: project.programName,
+      })
+    : null;
 
   return (
     <div className="min-w-0 rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:px-4">
       <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(7.5rem,9.5rem)_5.5rem_6.5rem_auto] xl:items-center">
         <div className="min-w-0">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-              <Building2 className="h-5 w-5" />
+            <div
+              className={cn(
+                "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ring-1",
+                programAccent
+                  ? programAccent.icon
+                  : "bg-slate-100 text-slate-500 ring-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:ring-slate-600",
+              )}
+            >
+              {programAccent ? (
+                <ProgramIdentityIcon accentKey={programAccent.key} />
+              ) : (
+                <Building2 className="h-5 w-5" />
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <h3
@@ -66,6 +85,23 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
               >
                 {project.description || "ไม่มีคำอธิบาย"}
               </p>
+              {project.programName && programAccent ? (
+                <span
+                  className={cn(
+                    "mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold dark:border-slate-700 dark:bg-slate-900/60",
+                    programAccent.text,
+                  )}
+                  title={project.programName}
+                >
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 shrink-0 rounded-full",
+                      programAccent.dot,
+                    )}
+                  />
+                  <span className="truncate">{project.programName}</span>
+                </span>
+              ) : null}
             </div>
           </div>
         </div>

@@ -5,10 +5,19 @@ import type {
   ProgramSummary,
   ProjectCoOwnerSummary,
 } from "@/type/models";
-import { ClipboardList, Loader2, Search, UserCog, X } from "lucide-react";
+import {
+  ChevronDown,
+  ClipboardList,
+  FolderKanban,
+  Loader2,
+  Search,
+  UserCog,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { STATUS_ORDER } from "@/lib/constants";
 import { PROJECT_STATUS_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
+import { getProgramAccent } from "@/components/programAccent";
 
 const CO_OWNER_VISIBLE_LIMIT = 50;
 
@@ -62,6 +71,11 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
   getStatusColor,
 }) => {
   const [coOwnerSearch, setCoOwnerSearch] = React.useState("");
+  const selectedProgram = React.useMemo(
+    () => programs.find((program) => program.id === selectedProgramId) ?? null,
+    [programs, selectedProgramId],
+  );
+  const programAccent = selectedProgram ? getProgramAccent(selectedProgram) : null;
   const selectedCoOwnerIdSet = React.useMemo(
     () => new Set(selectedCoOwnerAdminIds),
     [selectedCoOwnerAdminIds],
@@ -187,25 +201,64 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
               </div>
 
               <div className="flex flex-col lg:col-start-2 lg:row-start-1">
-                <label className="flex items-center pb-1">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    โครงการหลัก
-                  </span>
-                </label>
-                <select
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-700 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
-                  value={selectedProgramId}
-                  onChange={(e) => setSelectedProgramId(e.target.value)}
-                  disabled={isProgramsLoading}
+                <div
+                  className={cn(
+                    "rounded-2xl border p-3 transition-colors",
+                    selectedProgram ? programAccent?.panel : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/70",
+                  )}
                 >
-                  <option value="">ยังไม่ได้กำหนดโครงการหลัก</option>
-                  {programs.map((program) => (
-                    <option key={program.id} value={program.id}>
-                      {program.name}
-                      {!program.isActive ? " (ปิดใช้งาน)" : ""}
-                    </option>
-                  ))}
-                </select>
+                  <label className="mb-2 flex items-center justify-between gap-3">
+                    <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      <span
+                        className={cn(
+                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl shadow-sm",
+                          selectedProgram ? programAccent?.icon : "bg-slate-100 text-slate-500 ring-1 ring-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:ring-slate-600",
+                        )}
+                      >
+                        <FolderKanban className="h-4 w-4" />
+                      </span>
+                      โครงการหลัก
+                    </span>
+                    <span
+                      className={cn(
+                        "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold dark:bg-slate-900/60",
+                        selectedProgram ? programAccent?.text : "text-slate-500 dark:text-slate-400",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "h-1.5 w-1.5 rounded-full",
+                          selectedProgram ? programAccent?.dot : "bg-slate-400",
+                        )}
+                      />
+                      {selectedProgram?.isActive === false
+                        ? "ปิดใช้งาน"
+                        : selectedProgram
+                          ? "เลือกแล้ว"
+                          : "ยังไม่กำหนด"}
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      className="w-full appearance-none rounded-xl border border-white/80 bg-white py-2.5 pl-3 pr-10 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:disabled:bg-slate-700"
+                      value={selectedProgramId}
+                      onChange={(e) => setSelectedProgramId(e.target.value)}
+                      disabled={isProgramsLoading}
+                    >
+                      <option value="">ยังไม่ได้กำหนดโครงการหลัก</option>
+                      {programs.map((program) => (
+                        <option key={program.id} value={program.id}>
+                          {program.name}
+                          {!program.isActive ? " (ปิดใช้งาน)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  </div>
+                  <p className="mt-2 truncate text-xs text-slate-500 dark:text-slate-400">
+                    {selectedProgram?.name ?? "เลือกโครงการหลักเพื่อจัดกลุ่มงานนี้"}
+                  </p>
+                </div>
                 {programsError && (
                   <p className="mt-2 text-xs text-red-500">{programsError}</p>
                 )}
@@ -280,7 +333,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                           key={user.id}
                           type="button"
                           disabled={!allowCoOwners}
-                          onClick={() => toggleCoOwner(user.id)}
+                          onClick={() => setSelectedCoOwnerAdminIds([])}
                           className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-200"
                         >
                           <span className="truncate">{user.name}</span>
@@ -332,7 +385,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                             disabled={!allowCoOwners}
                             checked={selectedCoOwnerIdSet.has(admin.id)}
                             onChange={() => toggleCoOwner(admin.id)}
-                            className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                            className="h-4 w-4 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500"
                           />
                           <span className="min-w-0">
                             <span className="block truncate font-medium text-slate-700 dark:text-slate-200">

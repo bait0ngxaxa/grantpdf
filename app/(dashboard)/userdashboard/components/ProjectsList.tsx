@@ -11,7 +11,10 @@ import { EmptyProjectsState } from "./EmptyProjectsState";
 import { ProjectSearchAndFilter } from "./ProjectSearchAndFilter";
 import { StatusDetailModal } from "./StatusDetailModal";
 import { Pagination, Skeleton } from "@/components/ui";
-import { Building2, ChevronDown, FolderTree, FileText } from "lucide-react";
+import {
+    fileStatIcon,
+    ProgramGroupHeader,
+} from "@/components/ProgramGroupHeader";
 import { cn } from "@/lib/utils";
 import { PAGINATION } from "@/lib/constants";
 import { paginateGroupItems } from "@/lib/programGroupPagination";
@@ -200,46 +203,23 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                                 <button
                                     type="button"
                                     onClick={() => toggleProgramGroup(group.key)}
-                                    className="flex w-full flex-col items-start justify-between gap-4 bg-slate-50/80 px-4 py-4 text-left transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
+                                    className="flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
                                 >
-                                    <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                                        <div
-                                            className={cn(
-                                            "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-white shadow-md",
-                                            group.isUngrouped
-                                                ? "bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/20"
-                                                : "bg-gradient-to-br from-violet-600 to-fuchsia-500 shadow-violet-500/20",
-                                            )}
-                                        >
-                                            {group.isUngrouped ? (
-                                                <FolderTree className="h-6 w-6" />
-                                            ) : (
-                                                <Building2 className="h-6 w-6" />
-                                            )}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <h3 className="text-base font-bold break-words text-slate-800 dark:text-slate-100 sm:text-lg">
-                                                {group.label}
-                                            </h3>
-                                            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                                                <span className="rounded-full bg-white px-2.5 py-1 dark:bg-slate-700">
-                                                    {group.projectCount} โครงการย่อย
-                                                </span>
-                                                <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 dark:bg-slate-700">
-                                                    <FileText className="mr-1.5 h-3.5 w-3.5" />
-                                                    {group.totalFiles} เอกสาร
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        className={cn(
-                                            "self-end rounded-full bg-white p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300 sm:self-auto",
-                                            isExpanded && "rotate-180",
-                                        )}
-                                    >
-                                        <ChevronDown className="h-5 w-5" />
-                                    </div>
+                                    <ProgramGroupHeader
+                                        groupKey={group.key}
+                                        label={group.label}
+                                        isUngrouped={group.isUngrouped}
+                                        isExpanded={isExpanded}
+                                        stats={[
+                                            {
+                                                label: `${group.projectCount} โครงการย่อย`,
+                                            },
+                                            {
+                                                label: `${group.totalFiles} เอกสาร`,
+                                                icon: fileStatIcon(),
+                                            },
+                                        ]}
+                                    />
                                 </button>
 
                                 <div

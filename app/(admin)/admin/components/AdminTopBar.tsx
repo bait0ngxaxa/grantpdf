@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/ui";
-import { ChartBarBig, LogOut, Menu, User } from "lucide-react";
+import { ChartBarBig, ChevronDown, LogOut, Menu, User } from "lucide-react";
 import { useAdminDashboardContext } from "../contexts";
 import { signOutWithSessionRevoke } from "@/lib/authClient";
 import { cn } from "@/lib/utils";
@@ -65,6 +65,7 @@ function AdminAvatarMenu({
         session?.user?.name?.charAt(0).toUpperCase() ||
         session?.user?.email?.charAt(0).toUpperCase() ||
         "A";
+    const displayName = session?.user?.name || "Admin";
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent): void => {
@@ -82,26 +83,40 @@ function AdminAvatarMenu({
             <button
                 type="button"
                 onClick={() => setIsOpen((current) => !current)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white p-0.5 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+                className="group flex h-11 max-w-[190px] items-center gap-2 rounded-full border border-orange-100 bg-white px-1.5 pr-3 shadow-sm shadow-orange-100/60 transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/70 hover:shadow-md hover:shadow-orange-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none dark:hover:border-orange-800 dark:hover:bg-orange-950/30 dark:hover:shadow-orange-950/20 dark:focus-visible:ring-offset-slate-900"
                 aria-label="เปิดเมนูบัญชีผู้ดูแล"
                 aria-expanded={isOpen}
                 aria-haspopup="menu"
             >
-                <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-orange-500 to-amber-400 text-white shadow-sm ring-2 ring-orange-50 dark:ring-slate-800">
                     {session?.user?.image ? (
                         <Image
                             src={session.user.image}
                             alt="Profile"
-                            width={44}
-                            height={44}
+                            width={36}
+                            height={36}
                             className="h-full w-full rounded-full object-cover"
                         />
                     ) : (
-                        <span className="flex h-full w-full items-center justify-center text-sm font-bold text-orange-600 dark:text-orange-400">
+                        <span className="flex h-full w-full items-center justify-center text-sm font-black">
                             {initial}
                         </span>
                     )}
                 </span>
+                <span className="hidden min-w-0 flex-col items-start leading-none sm:flex">
+                    <span className="max-w-[96px] truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+                        {displayName}
+                    </span>
+                    <span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-300">
+                        ผู้ดูแลระบบ
+                    </span>
+                </span>
+                <ChevronDown
+                    className={cn(
+                        "hidden h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:text-orange-600 sm:block",
+                        isOpen && "rotate-180 text-orange-600",
+                    )}
+                />
             </button>
             {isOpen && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
