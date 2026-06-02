@@ -6,9 +6,11 @@ import {
     ArrowRight,
     ChartBarBig,
     ChevronDown,
+    Folder,
     LogOut,
     Loader2,
     Menu,
+    Plus,
     ShieldCheck,
     User,
 } from "lucide-react";
@@ -18,11 +20,29 @@ import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
 import { cn } from "@/lib/utils";
 
-const menuItems = [
-    { id: "dashboard", name: "ภาพรวม" },
-    { id: "projects", name: "โครงการของฉัน" },
-    { id: "create-project", name: "สร้างโครงการ" },
-];
+type TopBarMenuItem = {
+    name: string;
+    subtitle: string;
+    icon: React.ReactNode;
+};
+
+const menuItems: Record<string, TopBarMenuItem> = {
+    dashboard: {
+        name: "ภาพรวม",
+        subtitle: "พื้นที่ทำงานของคุณ",
+        icon: <ChartBarBig className="h-5 w-5 text-blue-600 dark:text-blue-300" />,
+    },
+    projects: {
+        name: "โครงการของฉัน",
+        subtitle: "ติดตามและจัดการโครงการ",
+        icon: <Folder className="h-5 w-5 text-blue-600 dark:text-blue-300" />,
+    },
+    "create-project": {
+        name: "สร้างโครงการ",
+        subtitle: "เริ่มต้นคำขอทุนใหม่",
+        icon: <Plus className="h-5 w-5 text-blue-600 dark:text-blue-300" />,
+    },
+};
 
 export const TopBar: React.FC = (): React.JSX.Element => {
     const router = useRouter();
@@ -34,8 +54,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
         setShowProfileModal,
     } = useUserDashboardContext();
     const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
-    const activeMenuName =
-        menuItems.find((item) => item.id === activeTab)?.name || "Dashboard";
+    const activeMenu = menuItems[activeTab] ?? menuItems.dashboard;
 
     const handleGoToAdmin = (): void => {
         setIsNavigatingAdmin(true);
@@ -45,7 +64,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
     return (
         <div
             className={cn(
-                "fixed left-0 right-0 top-0 z-30 border-b border-white/60 bg-gradient-to-r from-white/90 via-white/90 to-blue-50/40 px-3 py-3 shadow-sm backdrop-blur-2xl transition-[left,color,background-color,border-color] duration-300 dark:border-slate-700/60 dark:from-slate-900/90 dark:via-slate-900/90 dark:to-slate-800/40 sm:px-6 sm:py-4 lg:left-20",
+                "fixed left-0 right-0 top-0 z-30 border-b border-blue-100/70 bg-gradient-to-r from-white/95 via-white/90 to-blue-50/75 px-3 py-3 shadow-[0_12px_34px_-26px_rgba(37,99,235,0.75)] backdrop-blur-2xl transition-[left,color,background-color,border-color] duration-300 dark:border-slate-800/70 dark:from-slate-950/95 dark:via-slate-900/90 dark:to-blue-950/35 dark:shadow-[0_12px_34px_-26px_rgba(59,130,246,0.5)] sm:px-6 sm:py-4 lg:left-20",
                 isSidebarOpen && "lg:left-72",
             )}
         >
@@ -53,22 +72,25 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center rounded-full p-1.5 text-slate-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400 lg:hidden"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-slate-600 shadow-sm shadow-blue-100/70 transition-[border-color,background-color,box-shadow,transform,color] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:text-blue-300 lg:hidden"
                         onClick={() => setIsSidebarOpen(true)}
                         aria-label="เปิดเมนูด้านข้าง"
                     >
-                        <Menu className="h-6 w-6" />
+                        <Menu className="h-5 w-5" />
                     </button>
-                    {activeTab !== "projects" && (
-                        <div className="flex min-w-0 items-center gap-3 text-slate-800 dark:text-slate-100">
-                            <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-lg shadow-sm">
-                                <ChartBarBig className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <h1 className="min-w-0 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-xl font-bold break-words text-transparent text-balance drop-shadow-sm dark:from-slate-100 dark:to-slate-300 sm:text-2xl">
-                                {activeMenuName}
-                            </h1>
+                    <div className="flex min-w-0 items-center gap-3 text-slate-800 dark:text-slate-100">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white shadow-sm shadow-blue-100/70 dark:border-blue-900/50 dark:bg-blue-950/40 dark:shadow-none">
+                            {activeMenu.icon}
                         </div>
-                    )}
+                        <div className="min-w-0">
+                            <h1 className="min-w-0 truncate text-lg font-black text-slate-900 text-balance dark:text-white sm:text-2xl">
+                                {activeMenu.name}
+                            </h1>
+                            <p className="mt-0.5 hidden truncate text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
+                                {activeMenu.subtitle}
+                            </p>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:flex md:gap-4">
                     <ThemeToggle />
@@ -158,7 +180,7 @@ function UserAvatarMenu({
             <button
                 type="button"
                 onClick={() => setIsOpen((current) => !current)}
-                className="group flex h-11 max-w-[190px] items-center gap-2 rounded-full border border-blue-100 bg-white px-1.5 pr-3 shadow-sm shadow-blue-100/60 transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/70 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:shadow-blue-950/20 dark:focus-visible:ring-offset-slate-900"
+                className="group flex h-11 max-w-[190px] items-center gap-2 rounded-full border border-blue-100 bg-white/95 px-1.5 pr-3 shadow-sm shadow-blue-100/60 ring-1 ring-white/80 transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/80 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-none dark:ring-slate-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:shadow-blue-950/20 dark:focus-visible:ring-offset-slate-900"
                 aria-label="เปิดเมนูบัญชีผู้ใช้"
                 aria-expanded={isOpen}
                 aria-haspopup="menu"
@@ -182,7 +204,7 @@ function UserAvatarMenu({
                     <span className="max-w-[96px] truncate text-sm font-bold text-slate-800 dark:text-slate-100">
                         {displayName}
                     </span>
-                    <span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-300">
+                    <span className="mt-0.5 text-[10px] font-bold uppercase text-blue-600 dark:text-blue-300">
                         บัญชีผู้ใช้
                     </span>
                 </span>
@@ -194,7 +216,7 @@ function UserAvatarMenu({
                 />
             </button>
             {isOpen && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+                <div className="absolute right-0 top-full z-50 mt-3 w-60 rounded-xl border border-blue-100/80 bg-white/95 p-2 shadow-2xl shadow-blue-950/10 backdrop-blur-xl animate-in fade-in slide-in-from-top-1 dark:border-slate-800 dark:bg-slate-900/95">
                     <div className="mb-2 border-b border-slate-100 px-3 py-2 dark:border-slate-800">
                         <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
                             {session?.user?.name || "ผู้ใช้"}
@@ -206,7 +228,7 @@ function UserAvatarMenu({
                     <button
                         type="button"
                         onClick={handleOpenProfile}
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-300"
                     >
                         <User className="h-4 w-4" />
                         ข้อมูลส่วนตัว

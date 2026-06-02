@@ -43,7 +43,7 @@ async function openConfirmModal(): Promise<void> {
     fillSignupForm();
     fireEvent.click(screen.getByRole("button", { name: "ดำเนินการต่อ" }));
 
-    await screen.findByText("ยืนยันข้อมูลการสมัคร");
+    await screen.findByText("ยืนยันข้อมูลการลงทะเบียน");
 }
 
 describe("SignupClient", () => {
@@ -69,7 +69,7 @@ describe("SignupClient", () => {
         render(<SignupClient />);
         await openConfirmModal();
 
-        fireEvent.click(screen.getByRole("button", { name: "ยืนยันการสมัคร" }));
+        fireEvent.click(screen.getByRole("button", { name: "ยืนยันการลงทะเบียน" }));
 
         await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
         expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/auth/session/signin", {
@@ -98,7 +98,7 @@ describe("SignupClient", () => {
         render(<SignupClient />);
         await openConfirmModal();
 
-        fireEvent.click(screen.getByRole("button", { name: "ยืนยันการสมัคร" }));
+        fireEvent.click(screen.getByRole("button", { name: "ยืนยันการลงทะเบียน" }));
 
         await waitFor(() => {
             expect(pushMock).toHaveBeenCalledWith(ROUTES.SIGNIN);
@@ -118,7 +118,7 @@ describe("SignupClient", () => {
         render(<SignupClient />);
         await openConfirmModal();
 
-        fireEvent.click(screen.getByRole("button", { name: "ยืนยันการสมัคร" }));
+        fireEvent.click(screen.getByRole("button", { name: "ยืนยันการลงทะเบียน" }));
 
         const errorMessages = await screen.findAllByText("อีเมลนี้ถูกใช้งานแล้ว");
         expect(errorMessages.length).toBeGreaterThan(0);

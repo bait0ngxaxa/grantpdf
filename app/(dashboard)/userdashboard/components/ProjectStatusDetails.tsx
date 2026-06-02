@@ -28,21 +28,24 @@ export const ProjectStatusDetails: React.FC<ProjectStatusDetailsProps> = ({
     });
 
     return (
-        <div className="space-y-2.5 pt-2 border-t border-slate-50 dark:border-slate-700 mt-4">
+        <div className="mt-4 space-y-2.5 border-t border-slate-100 pt-3 dark:border-slate-700">
             {statusItems.map(({ status, key, label, color }) => (
                 <div
                     key={status}
-                    className="flex items-center justify-between group/item"
+                    className="group/item flex items-center justify-between gap-3"
                 >
                     <div className="flex items-center">
                         <div
-                            className={cn("w-1.5 h-1.5 rounded-full mr-2.5", color)}
+                            className={cn(
+                                "mr-2.5 h-1.5 w-1.5 rounded-full",
+                                color,
+                            )}
                         />
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 group-hover/item:text-slate-700 dark:group-hover/item:text-slate-300 transition-colors">
+                        <span className="text-xs font-medium text-slate-500 transition-colors group-hover/item:text-slate-700 dark:text-slate-400 dark:group-hover/item:text-slate-300">
                             {label}
                         </span>
                     </div>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/50 px-2 py-0.5 rounded-full">
+                    <span className="min-w-7 rounded-full bg-slate-50 px-2 py-0.5 text-center text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                         {counts[key]}
                     </span>
                 </div>

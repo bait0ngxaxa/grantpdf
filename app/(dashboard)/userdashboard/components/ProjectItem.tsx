@@ -145,7 +145,16 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
           </span>
         </div>
 
-        <div className="grid min-w-0 grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap xl:justify-self-end">
+        <div className="grid min-w-0 grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap sm:justify-end xl:justify-self-end">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onViewProjectFiles}
+            className="h-8 w-full rounded-lg border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-600 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 sm:w-auto"
+          >
+            <Eye className="mr-1.5 h-3.5 w-3.5" />
+            ดูไฟล์
+          </Button>
           <div className="relative min-w-0">
             {hasUnreadReportUpdate && (
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
@@ -157,25 +166,16 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
               size="sm"
               variant="outline"
               onClick={onReportClick}
-              className="h-auto min-h-8 w-full rounded-xl border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 hover:text-blue-800 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-200 sm:w-auto"
+              className="h-8 w-full rounded-lg border-blue-100 bg-blue-50/70 px-2.5 text-xs font-bold text-blue-700 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-100 hover:text-blue-800 hover:shadow-md dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200 dark:hover:bg-blue-900/45 sm:w-auto"
             >
               <FileUp className="mr-1.5 h-3.5 w-3.5" />
               รายงาน
             </Button>
           </div>
           <Button
-            size="sm"
-            variant="outline"
-            onClick={onViewProjectFiles}
-            className="h-auto min-h-8 w-full rounded-xl border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100 sm:w-auto"
-          >
-            <Eye className="mr-1.5 h-3.5 w-3.5" />
-            ดูไฟล์
-          </Button>
-          <Button
             asChild
             size="sm"
-            className="col-span-2 h-auto min-h-8 w-full rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 sm:col-span-1 sm:w-auto"
+            className="col-span-2 h-8 w-full rounded-lg bg-blue-600 px-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 sm:col-span-1 sm:w-auto"
           >
             <Link
               href={`${
@@ -185,24 +185,26 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
               จัดการเอกสาร
             </Link>
           </Button>
-          <button
-            type="button"
-            aria-label="แก้ไขโครงการ"
-            onClick={onEditProject}
-            className="rounded-xl p-2 text-slate-400 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
-            title="แก้ไขโครงการ"
-          >
-            <Pencil className="h-4.5 w-4.5" />
-          </button>
-          <button
-            type="button"
-            aria-label="ลบโครงการ"
-            onClick={onDeleteProject}
-            className="rounded-xl p-2 text-slate-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
-            title="ลบโครงการ"
-          >
-            <Trash2 className="h-4.5 w-4.5" />
-          </button>
+          <div className="col-span-2 flex items-center justify-end gap-1 border-t border-slate-100 pt-2 dark:border-slate-700 sm:col-span-1 sm:border-l sm:border-t-0 sm:pl-2 sm:pt-0">
+            <button
+              type="button"
+              aria-label="แก้ไขโครงการ"
+              onClick={onEditProject}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-[background-color,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
+              title="แก้ไขโครงการ"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="ลบโครงการ"
+              onClick={onDeleteProject}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-[background-color,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+              title="ลบโครงการ"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

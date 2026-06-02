@@ -5,7 +5,7 @@ import { type Metadata } from "next";
 import SignupClient from "./SignupClient";
 
 export const metadata: Metadata = {
-    title: "สมัครสมาชิก - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ",
+    title: "ลงทะเบียน - ระบบสร้างและกรอกแบบฟอร์มอัตโนมัติ",
 };
 
 export default async function SignupPage() {

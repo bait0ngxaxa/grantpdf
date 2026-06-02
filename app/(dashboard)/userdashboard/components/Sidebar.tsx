@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import {
     Folder,
     Building2,
@@ -63,7 +64,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
             {/* Sidebar */}
             <div
                 className={cn(
-                    "fixed left-0 top-0 z-50 flex h-full transform flex-col border-r border-slate-100 bg-gradient-to-b from-white via-white to-blue-50/30 shadow-[4px_0_24px_-12px_rgba(59,130,246,0.15)] backdrop-blur-2xl transition-[width,transform] duration-300 dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/30 dark:shadow-[4px_0_24px_-12px_rgba(0,0,0,0.3)] lg:translate-x-0",
+                    "fixed left-0 top-0 z-50 flex h-full transform flex-col border-r border-blue-100/70 bg-gradient-to-b from-white/98 via-white/95 to-blue-50/70 shadow-[8px_0_36px_-24px_rgba(37,99,235,0.8)] backdrop-blur-2xl transition-[width,transform] duration-300 dark:border-slate-800/80 dark:from-slate-950/98 dark:via-slate-900/95 dark:to-blue-950/35 dark:shadow-[8px_0_36px_-24px_rgba(59,130,246,0.5)] lg:translate-x-0",
                     isSidebarOpen
                         ? "w-72 translate-x-0"
                         : "w-72 -translate-x-full lg:w-20 lg:translate-x-0",
@@ -83,8 +84,15 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                 !isSidebarOpen && "hidden",
                             )}
                         >
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 shadow-lg shadow-blue-500/25 transition duration-300 group-hover:scale-105 group-hover:shadow-blue-500/40">
-                                <Folder className="h-6 w-6 text-white" />
+                            <div className="flex h-13 w-13 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg shadow-blue-500/25 ring-1 ring-blue-100 transition duration-300 group-hover:scale-105 group-hover:shadow-blue-500/40 dark:bg-slate-800 dark:ring-blue-900/50">
+                                <Image
+                                    src="/e-grant_logo.webp"
+                                    alt="E-GRANT ONLINE"
+                                    width={52}
+                                    height={52}
+                                    className="h-full w-full rounded-xl object-cover"
+                                    priority
+                                />
                             </div>
                             <div
                                 className={cn(
@@ -92,12 +100,12 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     !isSidebarOpen && "hidden",
                                 )}
                             >
-                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight leading-none mb-1 text-balance">
+                                <h2 className="mb-1 text-xl font-black leading-none text-slate-900 text-balance dark:text-slate-100">
                                     E-GRANT ONLINE
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                    <p className="text-[11px] uppercase font-bold text-blue-600 dark:text-blue-400 tracking-wider">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                                    <p className="text-[11px] font-bold uppercase text-blue-600 dark:text-blue-300">
                                         RHHSDI
                                     </p>
                                 </div>
@@ -116,7 +124,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     : "ขยายเมนูด้านข้าง"
                             }
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-800 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 dark:focus-visible:ring-offset-slate-900"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-slate-600 shadow-sm shadow-blue-100/60 transition-[border-color,background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:text-blue-300 dark:focus-visible:ring-offset-slate-900"
                         >
                             {isSidebarOpen ? (
                                 <PanelLeftClose className="h-4 w-4" />
@@ -136,7 +144,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                 >
                     <p
                         className={cn(
-                            "mb-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500",
+                            "mb-3 px-4 text-xs font-bold uppercase text-slate-400 dark:text-slate-500",
                             !isSidebarOpen && "lg:hidden",
                         )}
                     >
@@ -157,17 +165,20 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                         closeSidebarOnMobile();
                                     }}
                                     className={cn(
-                                        "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl px-4 py-3.5 text-left font-medium transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300",
+                                        "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border px-4 py-3.5 text-left font-medium transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300",
                                         !isSidebarOpen &&
                                             "lg:justify-center lg:px-0",
                                         activeTab === item.id
-                                            ? "text-white shadow-lg shadow-blue-500/25"
-                                            : "text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800/50",
+                                            ? "border-blue-500/20 text-white shadow-lg shadow-blue-500/25"
+                                            : "border-transparent text-slate-600 hover:border-blue-100 hover:bg-blue-50/70 hover:text-blue-700 dark:text-slate-300 dark:hover:border-blue-900/50 dark:hover:bg-blue-950/25 dark:hover:text-blue-300",
                                     )}
                                 >
                                     {/* Active Background Gradient */}
                                     {activeTab === item.id && (
-                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl" />
+                                        <>
+                                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500" />
+                                            <div className="absolute inset-y-2 left-1 w-1 rounded-full bg-white/85" />
+                                        </>
                                     )}
 
                                     {/* Hover slide effect for inactive items */}
@@ -177,10 +188,10 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
 
                                     <span
                                         className={cn(
-                                            "relative z-10 transition-transform duration-300 group-hover:scale-110",
+                                            "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-105",
                                             activeTab === item.id
-                                                ? "text-white"
-                                                : "text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400",
+                                                ? "bg-white/15 text-white"
+                                                : "text-slate-400 group-hover:bg-white/80 group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:bg-slate-900/70 dark:group-hover:text-blue-300",
                                         )}
                                     >
                                         {item.icon}
@@ -213,12 +224,12 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
 
                 {/* User Info */}
                 <div className={cn("mt-auto p-4", !isSidebarOpen && "lg:hidden")}>
-                    <div className="relative overflow-hidden rounded-2xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-md border border-white/60 dark:border-slate-700/60 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 p-4 group hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 duration-300 transition">
+                    <div className="group relative overflow-hidden rounded-2xl border border-blue-100/80 bg-white/85 p-4 shadow-lg shadow-blue-100/60 backdrop-blur-xl transition duration-300 hover:border-blue-200 hover:bg-white hover:shadow-xl hover:shadow-blue-500/10 dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-slate-900 dark:hover:shadow-blue-950/20">
                         {/* Decorativr background blur */}
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-400/10 dark:bg-blue-400/5 rounded-full blur-2xl group-hover:bg-blue-400/20 dark:group-hover:bg-blue-400/10 transition-colors" />
+                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/70 to-transparent" />
 
                         <div className="flex items-center space-x-3 mb-3 relative z-10">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-100 via-indigo-50 to-white dark:from-blue-900 dark:via-indigo-900 dark:to-slate-800 rounded-xl flex items-center justify-center border border-white dark:border-slate-700 shadow-sm ring-2 ring-white dark:ring-slate-700 group-hover:scale-105 transition-transform duration-300">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-100 bg-gradient-to-br from-blue-100 via-indigo-50 to-white shadow-sm ring-2 ring-white transition-transform duration-300 group-hover:scale-105 dark:border-slate-700 dark:from-blue-900 dark:via-indigo-900 dark:to-slate-800 dark:ring-slate-700">
                                 <span className="text-base font-bold text-blue-600 dark:text-blue-400">
                                     {session?.user?.name?.charAt(0) ||
                                         session?.user?.email?.charAt(0) ||

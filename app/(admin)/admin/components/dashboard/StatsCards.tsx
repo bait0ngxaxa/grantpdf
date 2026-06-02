@@ -19,19 +19,20 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
     return (
         <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             {/* Total Projects Card */}
-            <div className="min-w-0 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 sm:p-6">
-                <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+            <div className="relative min-w-0 overflow-hidden rounded-2xl border border-blue-100/70 bg-white/90 p-5 shadow-sm shadow-blue-100/40 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-xl hover:shadow-blue-100/60 dark:border-blue-900/35 dark:bg-slate-900/80 dark:shadow-none dark:hover:bg-slate-900">
+                <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-blue-300/70 to-transparent" />
+                <div className="relative z-10 flex min-w-0 items-center gap-3.5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 shadow-sm dark:bg-blue-950/40 dark:text-blue-300">
                         <Archive className="h-6 w-6" />
                     </div>
                     <div className="min-w-0">
-                        <div className="text-sm font-medium break-words text-slate-500 dark:text-slate-400">
+                        <div className="mb-2 break-words text-xs font-bold text-slate-500 dark:text-slate-400">
                             โครงการทั้งหมด
                         </div>
-                        <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                        <div className="mb-2 text-3xl font-black leading-none text-slate-900 dark:text-slate-100">
                             {totalProjects}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                        <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
                             โครงการในระบบ
                         </div>
                     </div>
@@ -39,38 +40,34 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
             </div>
 
             {/* Today's New Projects Card */}
-            <div className="group relative min-w-0 overflow-hidden rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 sm:p-6">
-                {/* Background Glowing Orb Effect */}
-                {todayProjects > 0 && (
-                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 dark:bg-green-400/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-500" />
-                )}
-                
-                <div className="relative z-10 flex min-w-0 items-center gap-4">
-                    <div className="w-12 h-12 bg-green-50 dark:bg-green-900/50 rounded-2xl flex items-center justify-center text-green-600 dark:text-green-400 shrink-0">
+            <div className="group relative min-w-0 overflow-hidden rounded-2xl border border-emerald-100/70 bg-white/90 p-5 shadow-sm shadow-emerald-100/40 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-xl hover:shadow-emerald-100/60 dark:border-emerald-900/35 dark:bg-slate-900/80 dark:shadow-none dark:hover:bg-slate-900">
+                <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-300/70 to-transparent" />
+                <div className="relative z-10 flex min-w-0 items-center gap-3.5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-300">
                         <Plus className="h-6 w-6" />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex min-w-0 justify-between gap-2">
                             <div className="min-w-0">
-                                <div className="text-sm font-medium break-words text-slate-500 dark:text-slate-400">
+                                <div className="mb-2 break-words text-xs font-bold text-slate-500 dark:text-slate-400">
                                     โครงการใหม่วันนี้
                                 </div>
-                                <div className="text-2xl font-bold text-green-600 flex items-center gap-2 mt-1">
+                                <div className="mb-2 flex items-center gap-2 text-3xl font-black leading-none text-emerald-600 dark:text-emerald-300">
                                     {todayProjects}
                                 </div>
                             </div>
                             
                             {todayProjects > 0 && (
-                                <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-green-200/50 bg-gradient-to-r from-green-500/10 to-emerald-500/10 px-2.5 py-1 text-green-600 shadow-sm dark:border-green-800/50 dark:from-green-400/10 dark:to-emerald-400/10 dark:text-green-400">
+                                <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50 px-2.5 py-1 text-emerald-600 shadow-sm dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-300">
                                     <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600 dark:bg-green-400" />
+                                        <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-emerald-400" />
                                     </span>
-                                    <span className="text-[10px] uppercase font-bold tracking-wider">New</span>
+                                    <span className="text-[10px] font-bold uppercase">New</span>
                                 </div>
                             )}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+                        <div className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
                             โครงการที่สร้างวันนี้
                         </div>
                     </div>
@@ -79,21 +76,22 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
 
             {/* Total Documents Card */}
             <div
-                className="group min-w-0 cursor-pointer rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 sm:p-6"
+                className="group relative min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-indigo-100/70 bg-white/90 p-5 shadow-sm shadow-indigo-100/40 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-xl hover:shadow-indigo-100/60 dark:border-indigo-900/35 dark:bg-slate-900/80 dark:shadow-none dark:hover:bg-slate-900"
                 onClick={() => setActiveTab("documents")}
             >
-                <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 transition-transform group-hover:scale-110 dark:bg-purple-900/50 dark:text-purple-400">
+                <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-indigo-300/70 to-transparent" />
+                <div className="relative z-10 flex min-w-0 items-center gap-3.5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm transition-colors duration-300 group-hover:bg-indigo-600 group-hover:text-white dark:bg-indigo-950/40 dark:text-indigo-300">
                         <FilePlus className="h-6 w-6" />
                     </div>
                     <div className="min-w-0">
-                        <div className="text-sm font-medium break-words text-slate-500 dark:text-slate-400">
+                        <div className="mb-2 break-words text-xs font-bold text-slate-500 dark:text-slate-400">
                             จำนวนเอกสาร
                         </div>
-                        <div className="text-2xl font-bold text-purple-600">
+                        <div className="mb-2 text-3xl font-black leading-none text-indigo-600 dark:text-indigo-300">
                             {totalFiles}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                        <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
                             เอกสารทั้งหมดในระบบ
                         </div>
                     </div>
@@ -101,38 +99,34 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
             </div>
 
             {/* Today's New Files Card */}
-            <div className="group relative min-w-0 overflow-hidden rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 sm:p-6">
-                {/* Background Glowing Orb Effect */}
-                {todayFiles > 0 && (
-                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 dark:bg-orange-400/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-500" />
-                )}
-
-                <div className="relative z-10 flex min-w-0 items-center gap-4">
-                    <div className="w-12 h-12 bg-orange-50 dark:bg-orange-900/50 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0">
+            <div className="group relative min-w-0 overflow-hidden rounded-2xl border border-orange-100/70 bg-white/90 p-5 shadow-sm shadow-orange-100/40 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-xl hover:shadow-orange-100/60 dark:border-orange-900/35 dark:bg-slate-900/80 dark:shadow-none dark:hover:bg-slate-900">
+                <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-orange-300/70 to-transparent" />
+                <div className="relative z-10 flex min-w-0 items-center gap-3.5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 shadow-sm dark:bg-orange-950/40 dark:text-orange-300">
                         <Clock className="h-6 w-6" />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex min-w-0 justify-between gap-2">
                             <div className="min-w-0">
-                                <div className="text-sm font-medium break-words text-slate-500 dark:text-slate-400">
+                                <div className="mb-2 break-words text-xs font-bold text-slate-500 dark:text-slate-400">
                                     ไฟล์ใหม่วันนี้
                                 </div>
-                                <div className="text-2xl font-bold text-orange-600 flex items-center gap-2 mt-1">
+                                <div className="mb-2 flex items-center gap-2 text-3xl font-black leading-none text-orange-600 dark:text-orange-300">
                                     {todayFiles}
                                 </div>
                             </div>
 
                             {todayFiles > 0 && (
-                                <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-orange-200/50 bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-2.5 py-1 text-orange-600 shadow-sm dark:border-orange-800/50 dark:from-orange-400/10 dark:to-amber-400/10 dark:text-orange-400">
+                                <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-orange-200/60 bg-orange-50 px-2.5 py-1 text-orange-600 shadow-sm dark:border-orange-800/50 dark:bg-orange-950/30 dark:text-orange-300">
                                     <span className="relative flex h-2 w-2">
                                         <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75" />
                                         <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-600 dark:bg-orange-400" />
                                     </span>
-                                    <span className="text-[10px] uppercase font-bold tracking-wider">New</span>
+                                    <span className="text-[10px] font-bold uppercase">New</span>
                                 </div>
                             )}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+                        <div className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
                             ไฟล์ที่เข้ามาวันนี้
                         </div>
                     </div>

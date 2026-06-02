@@ -26,27 +26,28 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
     });
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md duration-300 transition">
-            <div className="flex items-center space-x-4 mb-6">
-                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+        <div className="relative overflow-hidden rounded-2xl border border-indigo-100/70 bg-white/90 p-5 shadow-sm shadow-indigo-100/40 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-xl hover:shadow-indigo-100/60 dark:border-indigo-900/35 dark:bg-slate-900/80 dark:shadow-none dark:hover:bg-slate-900">
+            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-indigo-300/70 to-transparent" />
+            <div className="relative z-10 mb-5 flex items-center gap-3.5">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-sm dark:bg-indigo-950/40 dark:text-indigo-300">
                     <BarChart3 className="h-6 w-6" />
                 </div>
-                <div>
-                    <div className="text-base font-bold text-slate-800 dark:text-slate-100">
+                <div className="min-w-0">
+                    <div className="text-base font-black text-slate-900 text-balance dark:text-slate-100">
                         รายละเอียดสถานะโครงการ
                     </div>
-                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                    <div className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                         ภาพรวมสถานะทั้งหมด
                     </div>
                 </div>
             </div>
 
             {/* Status Breakdown */}
-            <div className="space-y-4">
+            <div className="relative z-10 space-y-2.5">
                 {statusItems.map((item) => (
                     <div
                         key={item.status}
-                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl"
+                        className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800/70"
                     >
                         <div className="flex items-center space-x-3">
                             <div
@@ -56,7 +57,7 @@ export const ProjectStatusStats: React.FC<ProjectStatusStatsProps> = ({
                                 {item.label}
                             </span>
                         </div>
-                        <span className="font-bold text-slate-800 dark:text-slate-100">
+                        <span className="min-w-8 rounded-full bg-white px-2 py-0.5 text-center text-sm font-bold text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-100">
                             {item.count}
                         </span>
                     </div>

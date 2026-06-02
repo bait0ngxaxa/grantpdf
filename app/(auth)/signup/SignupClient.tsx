@@ -132,7 +132,7 @@ export default function SignupClient(): React.JSX.Element {
                     return;
                 }
 
-                toast.success("สมัครสมาชิกและเข้าสู่ระบบสำเร็จ", {
+                toast.success("ลงทะเบียนและเข้าสู่ระบบสำเร็จ", {
                     description: "ยินดีต้อนรับเข้าสู่ระบบ กำลังนำคุณไปยังหน้าหลัก…",
                 });
                 router.replace(ROUTES.DASHBOARD);
@@ -144,7 +144,7 @@ export default function SignupClient(): React.JSX.Element {
                     "error" in data &&
                     typeof (data as { error?: unknown }).error === "string"
                         ? (data as { error: string }).error
-                        : "เกิดข้อผิดพลาดในการสมัครสมาชิก";
+                        : "เกิดข้อผิดพลาดในการลงทะเบียน";
                 const retryAfter = getRetryAfterSeconds(data, headers);
                 const toastTitle =
                     status === 429
@@ -208,7 +208,7 @@ export default function SignupClient(): React.JSX.Element {
 
                         <div className="mb-8 relative z-10">
                             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2 text-balance">
-                                สมัครสมาชิก
+                                ลงทะเบียน
                             </h2>
                             <p className="text-slate-500 dark:text-slate-400">
                                 กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้ใหม่
@@ -357,7 +357,7 @@ export default function SignupClient(): React.JSX.Element {
                                 id="signup-confirm-modal-title"
                                 className="text-xl font-bold text-balance"
                             >
-                                ยืนยันข้อมูลการสมัคร
+                                ยืนยันข้อมูลการลงทะเบียน
                             </h3>
                             <p className="text-blue-100 text-sm">
                                 กรุณาตรวจสอบข้อมูลก่อนยืนยัน
@@ -449,7 +449,7 @@ export default function SignupClient(): React.JSX.Element {
                                             <span>กำลังยืนยัน…</span>
                                         </div>
                                     ) : (
-                                        "ยืนยันการสมัคร"
+                                        "ยืนยันการลงทะเบียน"
                                     )}
                                 </Button>
                             </div>

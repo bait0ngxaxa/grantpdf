@@ -13,25 +13,25 @@ interface StatsCardProps {
 
 const colorClasses = {
     blue: {
-        bg: "bg-blue-50 dark:bg-blue-900/50",
-        text: "text-blue-600 dark:text-blue-400",
-        hover: "hover:shadow-blue-100/50 dark:hover:shadow-blue-900/30",
-        accent: "bg-blue-100 dark:bg-blue-900/30",
+        bg: "bg-blue-50 dark:bg-blue-950/40",
+        text: "text-blue-600 dark:text-blue-300",
+        hover: "hover:border-blue-100 hover:shadow-blue-100/60 dark:hover:border-blue-900/50 dark:hover:shadow-blue-950/20",
+        accent: "from-transparent via-blue-300/70 to-transparent",
         hoverBg: "group-hover:bg-blue-600",
     },
     purple: {
-        bg: "bg-purple-50 dark:bg-purple-900/50",
-        text: "text-purple-600 dark:text-purple-400",
-        hover: "hover:shadow-purple-100/50 dark:hover:shadow-purple-900/30",
-        accent: "bg-purple-100 dark:bg-purple-900/30",
-        hoverBg: "group-hover:bg-purple-600",
+        bg: "bg-indigo-50 dark:bg-indigo-950/40",
+        text: "text-indigo-600 dark:text-indigo-300",
+        hover: "hover:border-indigo-100 hover:shadow-indigo-100/60 dark:hover:border-indigo-900/50 dark:hover:shadow-indigo-950/20",
+        accent: "from-transparent via-indigo-300/70 to-transparent",
+        hoverBg: "group-hover:bg-indigo-600",
     },
     green: {
-        bg: "bg-green-50 dark:bg-green-900/50",
-        text: "text-green-600 dark:text-green-400",
-        hover: "hover:shadow-green-100/50 dark:hover:shadow-green-900/30",
-        accent: "bg-green-100 dark:bg-green-900/30",
-        hoverBg: "group-hover:bg-green-600",
+        bg: "bg-emerald-50 dark:bg-emerald-950/40",
+        text: "text-emerald-600 dark:text-emerald-300",
+        hover: "hover:border-emerald-100 hover:shadow-emerald-100/60 dark:hover:border-emerald-900/50 dark:hover:shadow-emerald-950/20",
+        accent: "from-transparent via-emerald-300/70 to-transparent",
+        hoverBg: "group-hover:bg-emerald-600",
     },
 };
 
@@ -49,33 +49,44 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 
     return (
         <div
-            className={cn("group bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:-translate-y-1 duration-300 relative overflow-hidden transition", colors.hover)}
+            className={cn(
+                "group relative overflow-hidden rounded-2xl border border-slate-100 bg-white/90 p-5 shadow-sm shadow-slate-200/60 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none dark:hover:bg-slate-900",
+                colors.hover,
+            )}
         >
             <div
-                className={cn("absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110", colors.accent)}
+                className={cn(
+                    "absolute inset-x-0 top-0 h-px bg-gradient-to-r",
+                    colors.accent,
+                )}
             />
-            <div className="flex items-start space-x-4 relative z-10">
+            <div className="relative z-10 flex items-start gap-3.5">
                 <div
-                    className={cn("p-3.5 rounded-2xl flex-shrink-0 group-hover:text-white transition-colors duration-300 shadow-sm", colors.bg, colors.text, colors.hoverBg)}
+                    className={cn(
+                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm transition-colors duration-300 group-hover:text-white",
+                        colors.bg,
+                        colors.text,
+                        colors.hoverBg,
+                    )}
                 >
                     {icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <div className="mb-2 text-xs font-bold text-slate-500 dark:text-slate-400">
                         {title}
                     </div>
                     <div
                         title={valueTitle}
                         className={cn(
-                            "mb-1 min-w-0 max-w-full font-bold text-slate-800 dark:text-slate-100",
+                            "mb-2 min-w-0 max-w-full font-black leading-none text-slate-900 dark:text-slate-100",
                             isTextValue
-                                ? "truncate whitespace-nowrap text-2xl leading-tight sm:text-3xl"
+                                ? "truncate whitespace-nowrap text-2xl sm:text-3xl"
                                 : "text-3xl",
                         )}
                     >
                         {value}
                     </div>
-                    <div className="text-sm text-slate-400 dark:text-slate-500">
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         {subtitle}
                     </div>
                     {children}

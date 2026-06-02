@@ -1,26 +1,58 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/ui";
-import { ChartBarBig, ChevronDown, LogOut, Menu, User } from "lucide-react";
+import {
+    Archive,
+    ChartBarBig,
+    ChevronDown,
+    LogOut,
+    Menu,
+    ScrollText,
+    User,
+    Users,
+} from "lucide-react";
 import { useAdminDashboardContext } from "../contexts";
 import { signOutWithSessionRevoke } from "@/lib/authClient";
 import { cn } from "@/lib/utils";
 
-const menuItems = [
-    { id: "dashboard", name: "ภาพรวมระบบ" },
-    { id: "documents", name: "จัดการโครงการและเอกสาร" },
-    { id: "users", name: "จัดการผู้ใช้งาน" },
-    { id: "audit", name: "บันทึกการใช้ระบบ" },
-];
+type AdminTopBarMenuItem = {
+    name: string;
+    subtitle: string;
+    icon: React.ReactNode;
+};
+
+const menuItems: Record<string, AdminTopBarMenuItem> = {
+    dashboard: {
+        name: "ภาพรวมระบบ",
+        subtitle: "สรุปสถานะและกิจกรรมล่าสุด",
+        icon: <ChartBarBig className="h-5 w-5 text-orange-600 dark:text-orange-300" />,
+    },
+    documents: {
+        name: "จัดการโครงการและเอกสาร",
+        subtitle: "ตรวจสอบโครงการ รายงาน และไฟล์แนบ",
+        icon: <Archive className="h-5 w-5 text-orange-600 dark:text-orange-300" />,
+    },
+    users: {
+        name: "จัดการผู้ใช้งาน",
+        subtitle: "ดูแลบัญชีและสิทธิ์การใช้งาน",
+        icon: <Users className="h-5 w-5 text-orange-600 dark:text-orange-300" />,
+    },
+    audit: {
+        name: "บันทึกการใช้ระบบ",
+        subtitle: "ติดตามประวัติการดำเนินการ",
+        icon: <ScrollText className="h-5 w-5 text-orange-600 dark:text-orange-300" />,
+    },
+};
 
 export const AdminTopBar: React.FC = (): React.JSX.Element => {
     const { session, activeTab, isSidebarOpen, setIsSidebarOpen } =
         useAdminDashboardContext();
+    const activeMenu = menuItems[activeTab] ?? menuItems.dashboard;
 
     return (
         <div
             className={cn(
-                "fixed left-0 right-0 top-0 z-30 border-b border-slate-200/60 bg-white/85 px-3 py-3 backdrop-blur-md transition-[left,color,background-color,border-color] duration-300 dark:border-slate-700/60 dark:bg-slate-900/85 sm:px-6 sm:py-4 lg:left-20",
+                "fixed left-0 right-0 top-0 z-30 border-b border-orange-100/70 bg-gradient-to-r from-white/95 via-white/90 to-orange-50/70 px-3 py-3 shadow-[0_12px_34px_-26px_rgba(249,115,22,0.72)] backdrop-blur-2xl transition-[left,color,background-color,border-color] duration-300 dark:border-slate-800/70 dark:from-slate-950/95 dark:via-slate-900/90 dark:to-orange-950/30 dark:shadow-[0_12px_34px_-26px_rgba(251,146,60,0.45)] sm:px-6 sm:py-4 lg:left-20",
                 isSidebarOpen && "lg:left-72",
             )}
         >
@@ -28,19 +60,25 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
                 <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     <button
                         type="button"
-                        className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-white text-slate-600 shadow-sm shadow-orange-100/70 transition-[border-color,background-color,box-shadow,transform,color] hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 hover:shadow-md hover:shadow-orange-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-orange-800 dark:hover:bg-orange-950/30 dark:hover:text-orange-300 lg:hidden"
                         onClick={() => setIsSidebarOpen(true)}
                         aria-label="เปิดเมนูด้านข้าง"
                     >
-                        <Menu className="h-6 w-6" />
+                        <Menu className="h-5 w-5" />
                     </button>
-                    <div className="bg-blue-50 dark:bg-blue-900/50 p-2 rounded-lg text-blue-600 dark:text-blue-400">
-                        <ChartBarBig className="h-6 w-6" />
+                    <div className="flex min-w-0 items-center gap-3 text-slate-800 dark:text-slate-100">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-white shadow-sm shadow-orange-100/70 dark:border-orange-900/50 dark:bg-orange-950/30 dark:shadow-none">
+                            {activeMenu.icon}
+                        </div>
+                        <div className="min-w-0">
+                            <h1 className="min-w-0 truncate text-lg font-black text-slate-900 text-balance dark:text-white sm:text-2xl">
+                                {activeMenu.name}
+                            </h1>
+                            <p className="mt-0.5 hidden truncate text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
+                                {activeMenu.subtitle}
+                            </p>
+                        </div>
                     </div>
-                    <h1 className="min-w-0 text-xl font-bold break-words text-slate-800 text-balance dark:text-slate-100 sm:text-2xl">
-                        {menuItems.find((item) => item.id === activeTab)
-                            ?.name || "Admin Dashboard"}
-                    </h1>
                 </div>
                 <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-4">
                     <ThemeToggle />
@@ -83,7 +121,7 @@ function AdminAvatarMenu({
             <button
                 type="button"
                 onClick={() => setIsOpen((current) => !current)}
-                className="group flex h-11 max-w-[190px] items-center gap-2 rounded-full border border-orange-100 bg-white px-1.5 pr-3 shadow-sm shadow-orange-100/60 transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/70 hover:shadow-md hover:shadow-orange-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none dark:hover:border-orange-800 dark:hover:bg-orange-950/30 dark:hover:shadow-orange-950/20 dark:focus-visible:ring-offset-slate-900"
+                className="group flex h-11 max-w-[190px] items-center gap-2 rounded-full border border-orange-100 bg-white/95 px-1.5 pr-3 shadow-sm shadow-orange-100/60 ring-1 ring-white/80 transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/80 hover:shadow-md hover:shadow-orange-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-none dark:ring-slate-800 dark:hover:border-orange-800 dark:hover:bg-orange-950/30 dark:hover:shadow-orange-950/20 dark:focus-visible:ring-offset-slate-900"
                 aria-label="เปิดเมนูบัญชีผู้ดูแล"
                 aria-expanded={isOpen}
                 aria-haspopup="menu"
@@ -107,7 +145,7 @@ function AdminAvatarMenu({
                     <span className="max-w-[96px] truncate text-sm font-bold text-slate-800 dark:text-slate-100">
                         {displayName}
                     </span>
-                    <span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-300">
+                    <span className="mt-0.5 text-[10px] font-bold uppercase text-orange-600 dark:text-orange-300">
                         ผู้ดูแลระบบ
                     </span>
                 </span>
@@ -119,7 +157,7 @@ function AdminAvatarMenu({
                 />
             </button>
             {isOpen && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+                <div className="absolute right-0 top-full z-50 mt-3 w-64 rounded-xl border border-orange-100/80 bg-white/95 p-2 shadow-2xl shadow-orange-950/10 backdrop-blur-xl animate-in fade-in slide-in-from-top-1 dark:border-slate-800 dark:bg-slate-900/95">
                     <div className="mb-2 border-b border-slate-100 px-3 py-2 dark:border-slate-800">
                         <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
                             {session?.user?.name || "Admin"}
@@ -133,13 +171,13 @@ function AdminAvatarMenu({
                         onClick={() =>
                             setShowProfileDetails((current) => !current)
                         }
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-orange-50 hover:text-orange-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-orange-300"
                     >
                         <User className="h-4 w-4" />
                         ข้อมูลส่วนตัว
                     </button>
                     {showProfileDetails && (
-                        <div className="mb-1 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:bg-slate-800/70 dark:text-slate-300">
+                        <div className="mb-1 rounded-lg border border-orange-100/70 bg-orange-50/60 px-3 py-2 text-xs text-slate-600 dark:border-orange-900/40 dark:bg-orange-950/20 dark:text-slate-300">
                             <p className="truncate">
                                 ชื่อ: {session?.user?.name || "Admin"}
                             </p>

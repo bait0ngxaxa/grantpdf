@@ -27,7 +27,7 @@ export default async function Home() {
 
     return (
         <div className="min-h-screen bg-white dark:bg-slate-950 font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30 selection:text-blue-900 dark:selection:text-blue-100">
-            <HomeNavbar session={null} />
+            <HomeNavbar />
             <main className="mx-auto max-w-7xl px-4 md:px-6">
                 <HeroSection isLoggedIn={false} />
                 <div className="pb-24">

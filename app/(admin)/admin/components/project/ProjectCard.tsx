@@ -251,11 +251,11 @@ export default function ProjectCard({
                     </span>
                 </div>
 
-                <div className="grid min-w-0 grid-cols-2 items-center gap-2 pt-0.5 sm:flex sm:flex-wrap xl:flex-nowrap xl:gap-1.5 xl:self-start xl:justify-self-end">
+                <div className="grid min-w-0 grid-cols-2 items-center gap-2 pt-0.5 sm:flex sm:flex-wrap sm:justify-end xl:flex-nowrap xl:gap-1.5 xl:self-start xl:justify-self-end">
                     <Button
                         size="sm"
                         onClick={() => onViewProjectFiles(project)}
-                        className="h-auto min-h-8 w-full shrink-0 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-100 sm:w-auto xl:px-2.5"
+                        className="h-8 w-full shrink-0 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-600 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 sm:w-auto"
                     >
                         <Eye className="mr-1.5 h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
                         ดูไฟล์
@@ -270,7 +270,7 @@ export default function ProjectCard({
                         <Button
                             size="sm"
                             onClick={() => onViewProjectReports(project)}
-                            className="h-auto min-h-8 w-full shrink-0 whitespace-nowrap rounded-xl border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 shadow-sm transition hover:bg-blue-50 hover:text-blue-800 dark:border-blue-800 dark:bg-slate-700 dark:text-blue-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-200 sm:w-auto xl:px-2.5"
+                            className="h-8 w-full shrink-0 whitespace-nowrap rounded-lg border border-blue-100 bg-blue-50/70 px-2.5 text-xs font-bold text-blue-700 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-100 hover:text-blue-800 hover:shadow-md dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200 dark:hover:bg-blue-900/45 sm:w-auto"
                         >
                             <FileText className="mr-1.5 h-3.5 w-3.5" />
                             รายงาน
@@ -279,9 +279,9 @@ export default function ProjectCard({
                     <Button
                         size="sm"
                         onClick={() => onEditProjectStatus(project)}
-                        className="col-span-2 h-auto min-h-8 w-full shrink-0 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 dark:hover:text-slate-100 sm:col-span-1 sm:w-auto xl:px-2.5"
+                        className="col-span-2 h-8 w-full shrink-0 whitespace-nowrap rounded-lg bg-blue-600 px-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 dark:bg-blue-600 dark:hover:bg-blue-500 sm:col-span-1 sm:w-auto"
                     >
-                        <Pencil className="mr-1.5 h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
+                        <Pencil className="mr-1.5 h-3.5 w-3.5" />
                         จัดการ
                     </Button>
                 </div>
