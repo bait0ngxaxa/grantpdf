@@ -259,9 +259,6 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                     </select>
                     <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   </div>
-                  <p className="mt-2 truncate text-xs text-slate-500 dark:text-slate-400">
-                    {selectedProgram?.name ?? "เลือกโครงการหลักเพื่อจัดกลุ่มงานนี้"}
-                  </p>
                 </div>
                 {programsError && (
                   <p className="mt-2 text-xs text-red-500">{programsError}</p>

@@ -103,8 +103,15 @@ export async function getUserDeviceSessions(input: {
     currentFamilyId: string;
     sessionVersion: number;
 }): Promise<DeviceSessionSummary[]> {
+    const now = new Date();
     const rows = await prisma.authSession.findMany({
-        where: { userId: input.userId },
+        where: {
+            userId: input.userId,
+            sessionVersion: input.sessionVersion,
+            expiresAt: { gt: now },
+            revokedAt: null,
+            rotatedAt: null,
+        },
         orderBy: { created_at: "desc" },
         take: 100,
         select: {
@@ -120,7 +127,6 @@ export async function getUserDeviceSessions(input: {
             created_at: true,
         },
     });
-    const now = new Date();
     return uniqueLatestFamilies(rows).map((row) =>
         toDeviceSessionSummary(
             row,

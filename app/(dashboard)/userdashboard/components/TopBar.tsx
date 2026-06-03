@@ -68,22 +68,22 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                 isSidebarOpen && "lg:left-72",
             )}
         >
-            <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <div className="flex min-w-0 items-center justify-between gap-2 sm:gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
                     <button
                         type="button"
-                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-slate-600 shadow-sm shadow-blue-100/70 transition-[border-color,background-color,box-shadow,transform,color] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:text-blue-300 lg:hidden"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-slate-600 shadow-sm shadow-blue-100/70 transition-[border-color,background-color,box-shadow,transform,color] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:text-blue-300 sm:h-10 sm:w-10 lg:hidden"
                         onClick={() => setIsSidebarOpen(true)}
                         aria-label="เปิดเมนูด้านข้าง"
                     >
                         <Menu className="h-5 w-5" />
                     </button>
-                    <div className="flex min-w-0 items-center gap-3 text-slate-800 dark:text-slate-100">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white shadow-sm shadow-blue-100/70 dark:border-blue-900/50 dark:bg-blue-950/40 dark:shadow-none">
+                    <div className="flex min-w-0 items-center gap-2 text-slate-800 dark:text-slate-100 sm:gap-3">
+                        <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white shadow-sm shadow-blue-100/70 dark:border-blue-900/50 dark:bg-blue-950/40 dark:shadow-none sm:flex">
                             {activeMenu.icon}
                         </div>
                         <div className="min-w-0">
-                            <h1 className="min-w-0 truncate text-lg font-black text-slate-900 text-balance dark:text-white sm:text-2xl">
+                            <h1 className="min-w-0 truncate text-base font-black text-slate-900 dark:text-white sm:text-2xl">
                                 {activeMenu.name}
                             </h1>
                             <p className="mt-0.5 hidden truncate text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
@@ -92,7 +92,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                         </div>
                     </div>
                 </div>
-                <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:flex md:gap-4">
+                <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 md:gap-4">
                     <ThemeToggle />
 
                     {session?.user?.role === ROLES.ADMIN && (
@@ -100,16 +100,16 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                             type="button"
                             onClick={handleGoToAdmin}
                             disabled={isNavigatingAdmin}
-                            className="group relative h-10 cursor-pointer overflow-hidden rounded-full border border-blue-300/50 bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-500 px-2.5 text-white shadow-md shadow-blue-500/15 ring-1 ring-white/10 transition duration-300 hover:border-cyan-200/80 hover:brightness-105 hover:ring-cyan-200/40 active:brightness-95 disabled:pointer-events-none disabled:opacity-80 dark:border-blue-400/30 dark:from-blue-500 dark:via-sky-500 dark:to-cyan-400 dark:text-white sm:px-3.5"
+                            className="group relative h-10 cursor-pointer overflow-hidden rounded-full border border-blue-300/50 bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-500 px-1.5 text-white shadow-md shadow-blue-500/15 ring-1 ring-white/10 transition duration-300 hover:border-cyan-200/80 hover:brightness-105 hover:ring-cyan-200/40 active:brightness-95 disabled:pointer-events-none disabled:opacity-80 dark:border-blue-400/30 dark:from-blue-500 dark:via-sky-500 dark:to-cyan-400 dark:text-white sm:px-3.5"
+                            aria-label="ไปหน้าระบบแอดมิน"
                         >
                             <span className="absolute inset-0 bg-gradient-to-r from-white/18 via-white/8 to-transparent opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
                             {isNavigatingAdmin ? (
-                                <span className="relative flex items-center gap-2 text-xs font-bold sm:text-sm">
+                                <span className="relative flex items-center gap-0 text-xs font-bold sm:gap-2 sm:text-sm">
                                     <Loader2 className="h-4 w-4 animate-spin text-cyan-100" />
                                     <span className="hidden sm:inline">
                                         กำลังเข้าสู่ระบบแอดมิน…
                                     </span>
-                                    <span className="sm:hidden">แอดมิน…</span>
                                 </span>
                             ) : (
                                 <span className="relative flex items-center gap-2">
@@ -123,9 +123,6 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                                         <span className="text-sm font-bold">
                                             ระบบแอดมิน
                                         </span>
-                                    </span>
-                                    <span className="text-xs font-bold sm:hidden">
-                                        แอดมิน
                                     </span>
                                     <ArrowRight className="hidden h-4 w-4 text-cyan-100 transition-transform group-hover:translate-x-0.5 md:block" />
                                 </span>
@@ -180,7 +177,7 @@ function UserAvatarMenu({
             <button
                 type="button"
                 onClick={() => setIsOpen((current) => !current)}
-                className="group flex h-11 max-w-[190px] items-center gap-2 rounded-full border border-blue-100 bg-white/95 px-1.5 pr-3 shadow-sm shadow-blue-100/60 ring-1 ring-white/80 transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/80 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-none dark:ring-slate-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:shadow-blue-950/20 dark:focus-visible:ring-offset-slate-900"
+                className="group flex h-10 max-w-[190px] items-center gap-2 rounded-full border border-blue-100 bg-white/95 px-1 shadow-sm shadow-blue-100/60 ring-1 ring-white/80 transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/80 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-none dark:ring-slate-800 dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:shadow-blue-950/20 dark:focus-visible:ring-offset-slate-900 sm:h-11 sm:px-1.5 sm:pr-3"
                 aria-label="เปิดเมนูบัญชีผู้ใช้"
                 aria-expanded={isOpen}
                 aria-haspopup="menu"

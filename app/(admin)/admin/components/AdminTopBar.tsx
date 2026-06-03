@@ -8,7 +8,6 @@ import {
     LogOut,
     Menu,
     ScrollText,
-    User,
     Users,
 } from "lucide-react";
 import { useAdminDashboardContext } from "../contexts";
@@ -97,7 +96,6 @@ function AdminAvatarMenu({
     session,
 }: AdminAvatarMenuProps): React.JSX.Element {
     const [isOpen, setIsOpen] = useState(false);
-    const [showProfileDetails, setShowProfileDetails] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const initial =
         session?.user?.name?.charAt(0).toUpperCase() ||
@@ -166,29 +164,6 @@ function AdminAvatarMenu({
                             {session?.user?.email}
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setShowProfileDetails((current) => !current)
-                        }
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-orange-50 hover:text-orange-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-orange-300"
-                    >
-                        <User className="h-4 w-4" />
-                        ข้อมูลส่วนตัว
-                    </button>
-                    {showProfileDetails && (
-                        <div className="mb-1 rounded-lg border border-orange-100/70 bg-orange-50/60 px-3 py-2 text-xs text-slate-600 dark:border-orange-900/40 dark:bg-orange-950/20 dark:text-slate-300">
-                            <p className="truncate">
-                                ชื่อ: {session?.user?.name || "Admin"}
-                            </p>
-                            <p className="truncate">
-                                อีเมล: {session?.user?.email || "-"}
-                            </p>
-                            <p className="truncate">
-                                สิทธิ์: {session?.user?.role || "-"}
-                            </p>
-                        </div>
-                    )}
                     <button
                         type="button"
                         onClick={() => void signOutWithSessionRevoke()}
