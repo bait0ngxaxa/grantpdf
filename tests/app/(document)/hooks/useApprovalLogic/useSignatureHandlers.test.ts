@@ -11,7 +11,7 @@ const {
 }));
 
 vi.mock("@/app/(document)/hooks/useApprovalLogic/helpers", () => ({
-    SIGNATURE_MAX_SIZE_BYTES: 10 * 1024 * 1024,
+    SIGNATURE_MAX_SIZE_BYTES: 15 * 1024 * 1024,
     optimizeSignatureImageFile: optimizeSignatureImageFileMock,
     isAllowedSignatureMimeType: isAllowedSignatureMimeTypeMock,
 }));

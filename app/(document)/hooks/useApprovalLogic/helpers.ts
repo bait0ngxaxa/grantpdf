@@ -1,3 +1,5 @@
+import { SIGNATURE_UPLOAD } from "@/lib/constants";
+
 /**
  * Convert data URL (base64) to File object
  * Used for canvas signature conversion
@@ -7,7 +9,8 @@ export const SIGNATURE_ALLOWED_MIME_TYPES = [
     "image/jpeg",
 ] as const;
 
-export const SIGNATURE_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+export const SIGNATURE_MAX_SIZE_BYTES =
+    SIGNATURE_UPLOAD.MAX_SIZE_MB * 1024 * 1024;
 
 export function isAllowedSignatureMimeType(mimeType: string): boolean {
     return SIGNATURE_ALLOWED_MIME_TYPES.includes(
@@ -212,7 +215,7 @@ export function validateSignature(
         }
 
         if (signatureFile.size > SIGNATURE_MAX_SIZE_BYTES) {
-            return "ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 10MB)";
+            return `ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด ${SIGNATURE_UPLOAD.MAX_SIZE_MB}MB)`;
         }
     }
 

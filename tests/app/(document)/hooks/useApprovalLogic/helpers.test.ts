@@ -4,8 +4,10 @@ import {
     validateAttachments,
     validateSignature,
 } from "@/app/(document)/hooks/useApprovalLogic/helpers";
+import { SIGNATURE_UPLOAD } from "@/lib/constants";
 
-const TEN_MB_PLUS_ONE_BYTE = 10 * 1024 * 1024 + 1;
+const SIGNATURE_MAX_SIZE_PLUS_ONE_BYTE =
+    SIGNATURE_UPLOAD.MAX_SIZE_MB * 1024 * 1024 + 1;
 
 describe("validateAttachments", () => {
     it("should return null when no attachments and no files", () => {
@@ -95,14 +97,16 @@ describe("validateSignature", () => {
         expect(result).toBe("ไฟล์ลายเซ็นต้องเป็น PNG หรือ JPEG เท่านั้น");
     });
 
-    it("should return error when file size exceeds 10MB", () => {
+    it("should return error when file size exceeds signature max size", () => {
         const oversizedFile = new File(
-            [new Uint8Array(TEN_MB_PLUS_ONE_BYTE)],
+            [new Uint8Array(SIGNATURE_MAX_SIZE_PLUS_ONE_BYTE)],
             "signature.png",
             { type: "image/png" },
         );
         const result = validateSignature(oversizedFile, null);
-        expect(result).toBe("ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 10MB)");
+        expect(result).toBe(
+            `ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด ${SIGNATURE_UPLOAD.MAX_SIZE_MB}MB)`,
+        );
     });
 });
 
@@ -201,8 +205,8 @@ describe("optimizeSignatureImageFile", () => {
         expect(toBlobCallCount).toBe(1);
     });
 
-    it("should retry compression until size drops below 10MB", async () => {
-        blobQueue = [11_000_000, 10_500_000, 9_200_000];
+    it("should retry compression until size drops below signature max size", async () => {
+        blobQueue = [17_000_000, 16_000_000, 9_200_000];
         const sourceFile = new File(["raw"], "sig.png", { type: "image/png" });
 
         const optimizedFile = await optimizeSignatureImageFile(sourceFile);

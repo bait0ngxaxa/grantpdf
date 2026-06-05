@@ -14,13 +14,21 @@ import {
     FILE_UPLOAD,
     REPORT_STATUS,
     REPORT_TYPES,
+    getFileExtension,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
 } from "@/lib/constants";
 import { PROJECT_REPORT_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
 import { getReportStatusColor, getReportTypeColor } from "@/lib/utils";
 import type { Project, ProjectReport } from "@/type";
-import { FileText, FileUp, Loader2, MessageSquareText, X } from "lucide-react";
+import {
+    CheckCircle2,
+    FileText,
+    FileUp,
+    Loader2,
+    MessageSquareText,
+    X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface ProjectReportModalProps {
@@ -53,8 +61,30 @@ const ADMIN_NOTE_STYLE_BY_STATUS: Record<string, string> = {
 const DEFAULT_ADMIN_NOTE_STYLE =
     "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-100 [&_.admin-note-title]:text-blue-800 dark:[&_.admin-note-title]:text-blue-200";
 
+const BYTE_UNIT = 1024;
+const MB_UNIT = BYTE_UNIT * BYTE_UNIT;
+
 function getApiUrl(projectId: string): string {
     return `/api/projects/${encodeURIComponent(projectId)}/reports`;
+}
+
+function formatFileSize(size: number): string {
+    if (size >= MB_UNIT) {
+        return `${(size / MB_UNIT).toFixed(2)} MB`;
+    }
+
+    if (size >= BYTE_UNIT) {
+        return `${(size / BYTE_UNIT).toFixed(1)} KB`;
+    }
+
+    return `${size} ไบต์`;
+}
+
+function formatFileDate(timestamp: number): string {
+    return new Intl.DateTimeFormat("th-TH", {
+        dateStyle: "medium",
+        timeStyle: "short",
+    }).format(new Date(timestamp));
 }
 
 function getErrorMessage(value: unknown, fallback: string): string {
@@ -204,6 +234,7 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
     };
 
     const accept = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(",");
+    const selectedFileExtension = file ? getFileExtension(file.name) : "";
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -242,28 +273,84 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
                                 ))}
                             </select>
                         </div>
-                        <div>
-                            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    </div>
+
+                    <div>
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
                                 ไฟล์รายงาน
                             </label>
-                            <label className="flex h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-slate-300 px-3 text-sm text-slate-500 transition-colors hover:border-blue-400 hover:text-blue-600 dark:border-slate-600 dark:text-slate-300">
-                                <span className="truncate">
-                                    {file?.name ?? "เลือกไฟล์รายงาน"}
-                                </span>
-                                <FileUp className="h-4 w-4 shrink-0" />
-                                <input
-                                    type="file"
-                                    accept={accept}
-                                    onChange={handleFileChange}
-                                    className="sr-only"
-                                />
-                            </label>
-                            {fileError && (
-                                <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">
-                                    {fileError}
-                                </p>
-                            )}
                         </div>
+                        <label className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-4 transition-colors hover:border-blue-400 hover:bg-blue-50/40 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-blue-500/70 dark:hover:bg-blue-950/20">
+                            <div className="flex items-start gap-3">
+                                <div className="rounded-xl bg-blue-100 p-2 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-900/40 dark:text-blue-300">
+                                    <FileUp className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-100">
+                                        {file ? "เปลี่ยนไฟล์รายงาน" : "เลือกไฟล์รายงาน"}
+                                    </p>
+                                    <p className="mt-1 break-words text-xs leading-5 text-slate-500 dark:text-slate-400">
+                                        รองรับ {FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ")}
+                                    </p>
+                                </div>
+                            </div>
+                            <input
+                                type="file"
+                                accept={accept}
+                                onChange={handleFileChange}
+                                className="sr-only"
+                            />
+                        </label>
+
+                        {file && (
+                            <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-3 text-xs text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-100">
+                                <div className="flex items-start gap-3">
+                                    <div className="rounded-xl bg-white p-2 text-emerald-600 shadow-sm dark:bg-slate-800 dark:text-emerald-300">
+                                        <FileText className="h-5 w-5" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-200">
+                                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                                พร้อมส่ง
+                                            </span>
+                                            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                                {selectedFileExtension
+                                                    ? selectedFileExtension.toUpperCase()
+                                                    : "ไม่พบนามสกุลไฟล์"}
+                                            </span>
+                                        </div>
+                                        <p
+                                            className="mt-2 break-words text-sm font-semibold leading-5 text-slate-800 dark:text-slate-100"
+                                            title={file.name}
+                                        >
+                                            {file.name}
+                                        </p>
+                                        <dl className="mt-3 grid gap-2 text-slate-600 dark:text-slate-300 sm:grid-cols-2">
+                                            <div>
+                                                <dt className="font-semibold">
+                                                    ขนาดไฟล์
+                                                </dt>
+                                                <dd>{formatFileSize(file.size)}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="font-semibold">
+                                                    แก้ไขล่าสุด
+                                                </dt>
+                                                <dd>{formatFileDate(file.lastModified)}</dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {fileError && (
+                            <p className="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                                {fileError}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -285,103 +372,123 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
                         </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/40">
-                        <div className="mb-3 flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                ประวัติการส่งรายงาน
-                            </h3>
+                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/50">
+                        <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                                    ประวัติการส่งรายงาน
+                                </h3>
+                                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                    {reports.length > 0
+                                        ? `${reports.length} รายการล่าสุด`
+                                        : "ยังไม่มีรายการ"}
+                                </p>
+                            </div>
                             {isLoading && (
                                 <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
                             )}
                         </div>
+
                         {reports.length === 0 && !isLoading ? (
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                                ยังไม่มีการส่งรายงานสำหรับโครงการนี้
-                            </p>
+                            <div className="px-4 py-6 text-center">
+                                <FileText className="mx-auto h-8 w-8 text-slate-300 dark:text-slate-600" />
+                                <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                                    ยังไม่มีการส่งรายงานสำหรับโครงการนี้
+                                </p>
+                            </div>
                         ) : (
-                            <div className="space-y-2">
-                                {reports.map((report) => (
-                                    <div
+                            <ol className="divide-y divide-slate-100 dark:divide-slate-800">
+                                {reports.map((report, index) => (
+                                    <li
                                         key={report.id}
-                                        className="rounded-xl bg-white px-3 py-2 dark:bg-slate-800"
+                                        className="grid gap-3 px-4 py-4 sm:grid-cols-[auto_minmax(0,1fr)]"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <div className="min-w-0 flex-1">
+                                        <div className="flex items-start gap-3 sm:block">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-700 ring-1 ring-blue-100 dark:bg-blue-950/40 dark:text-blue-200 dark:ring-blue-900/50">
+                                                {index + 1}
+                                            </div>
+                                        </div>
+
+                                        <div className="min-w-0 space-y-3">
+                                            <div className="flex flex-wrap items-center justify-between gap-2">
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <span
-                                                        className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold ${getReportTypeColor(report.reportType)}`}
+                                                        className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getReportTypeColor(report.reportType)}`}
                                                     >
                                                         {report.reportType}
                                                     </span>
                                                     <span
-                                                        className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold ${getReportStatusColor(report.status)}`}
+                                                        className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getReportStatusColor(report.status)}`}
                                                     >
                                                         {report.status}
                                                     </span>
                                                 </div>
-                                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                <time className="text-xs font-medium text-slate-500 dark:text-slate-400">
                                                     {new Date(
                                                         report.submittedAt,
                                                     ).toLocaleDateString("th-TH")}
-                                                </p>
+                                                </time>
                                             </div>
-                                        </div>
-                                        <div className="mt-2 grid min-w-0 gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300 sm:grid-cols-2">
-                                            <div className="flex min-w-0 items-start gap-2">
-                                                <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
-                                                <div className="min-w-0">
-                                                    <p className="font-semibold text-slate-700 dark:text-slate-200">
-                                                        ไฟล์ที่ส่ง
-                                                    </p>
-                                                    <p
-                                                        className="mt-1 break-words leading-5"
-                                                        title={
-                                                            report.file
-                                                                .originalFileName
-                                                        }
-                                                    >
-                                                        {
-                                                            report.file
-                                                                .originalFileName
-                                                        }
-                                                    </p>
+
+                                            <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/70">
+                                                <div className="flex min-w-0 items-start gap-2.5">
+                                                    <FileText className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                                                            ไฟล์ที่ส่ง
+                                                        </p>
+                                                        <p
+                                                            className="mt-1 break-words text-sm leading-6 text-slate-700 dark:text-slate-200"
+                                                            title={
+                                                                report.file
+                                                                    .originalFileName
+                                                            }
+                                                        >
+                                                            {
+                                                                report.file
+                                                                    .originalFileName
+                                                            }
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="flex min-w-0 items-start gap-2">
-                                                <MessageSquareText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
-                                                <div className="min-w-0">
-                                                    <p className="font-semibold text-slate-700 dark:text-slate-200">
+
+                                            <div className="grid gap-2 sm:grid-cols-2">
+                                                <div className="rounded-xl border border-slate-100 px-3 py-3 dark:border-slate-700">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+                                                        <MessageSquareText className="h-4 w-4 text-slate-400" />
                                                         หมายเหตุผู้ส่ง
+                                                    </div>
+                                                    <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600 dark:text-slate-300">
+                                                        {report.note || "ไม่มีหมายเหตุ"}
                                                     </p>
-                                                    <p className="mt-1 whitespace-pre-wrap break-words leading-5">
-                                                        {report.note ||
-                                                            "ไม่มีหมายเหตุ"}
+                                                </div>
+
+                                                <div
+                                                    className={`rounded-xl border px-3 py-3 ${
+                                                        report.adminNote
+                                                            ? ADMIN_NOTE_STYLE_BY_STATUS[
+                                                                  report.status
+                                                              ] ??
+                                                              DEFAULT_ADMIN_NOTE_STYLE
+                                                            : "border-slate-100 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400"
+                                                    }`}
+                                                >
+                                                    <p className="admin-note-title text-xs font-bold">
+                                                        หมายเหตุผู้ตรวจ
+                                                    </p>
+                                                    <p className="mt-2 whitespace-pre-wrap break-words text-sm font-medium leading-6">
+                                                        {report.adminNote ||
+                                                            "รอผู้ตรวจระบุหมายเหตุ"}
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
-                                        {report.adminNote && (
-                                            <div
-                                                className={`mt-2 rounded-xl border px-3 py-2.5 text-xs shadow-sm ${
-                                                    ADMIN_NOTE_STYLE_BY_STATUS[
-                                                        report.status
-                                                    ] ??
-                                                    DEFAULT_ADMIN_NOTE_STYLE
-                                                }`}
-                                            >
-                                                <p className="admin-note-title font-bold">
-                                                    หมายเหตุผู้ตรวจ
-                                                </p>
-                                                <p className="mt-1 whitespace-pre-wrap break-words text-sm font-medium leading-6">
-                                                    {report.adminNote}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
+                                    </li>
                                 ))}
-                            </div>
+                            </ol>
                         )}
-                    </div>
+                    </section>
                 </div>
 
                 <DialogFooter className="gap-2 sm:gap-0">

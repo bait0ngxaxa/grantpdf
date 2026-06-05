@@ -195,11 +195,12 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
                             </h4>
                         </div>
                     ) : (
-                        <div className="space-y-3">
-                            {reports.map((report) => (
+                        <ol className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white dark:divide-slate-800 dark:border-slate-700 dark:bg-slate-900/40">
+                            {reports.map((report, index) => (
                                 <ProjectReportItem
                                     key={report.id}
                                     report={report}
+                                    sequence={index + 1}
                                     adminNote={
                                         adminNotes[report.id] ??
                                         report.adminNote ??
@@ -214,7 +215,7 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
                                     }
                                 />
                             ))}
-                        </div>
+                        </ol>
                     )}
                 </div>
             </div>

@@ -204,14 +204,18 @@ export const FILE_UPLOAD = {
         ".xls",
     ],
     MAX_SIZE_MB_BY_EXTENSION: {
-        ".pdf": 10,
-        ".docx": 10,
-        ".doc": 10,
-        ".xlsx": 10,
-        ".xls": 10,
+        ".pdf": 15,
+        ".docx": 15,
+        ".doc": 15,
+        ".xlsx": 15,
+        ".xls": 15,
     },
-    DEFAULT_MAX_SIZE_MB: 10,
+    DEFAULT_MAX_SIZE_MB: 15,
     TIMEOUT_MS: 60_000,
+} as const;
+
+export const SIGNATURE_UPLOAD = {
+    MAX_SIZE_MB: 15,
 } as const;
 
 export const RATE_LIMIT = {

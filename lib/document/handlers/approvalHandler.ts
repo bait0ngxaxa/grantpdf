@@ -21,9 +21,10 @@ import { getFullPathFromStoragePath } from "@/lib/fileStorage";
 import { fileTypeFromBuffer } from "file-type";
 import { normalizePhoneNumber } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
+import { SIGNATURE_UPLOAD } from "@/lib/constants";
 
 const ALLOWED_SIGNATURE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
-const MAX_SIGNATURE_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_SIGNATURE_SIZE_BYTES = SIGNATURE_UPLOAD.MAX_SIZE_MB * 1024 * 1024;
 
 async function parseAndValidateSignatureFile(
     file: File,
@@ -37,7 +38,9 @@ async function parseAndValidateSignatureFile(
 
     if (file.size > MAX_SIGNATURE_SIZE_BYTES) {
         return NextResponse.json(
-            { error: "ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 10MB)" },
+            {
+                error: `ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด ${SIGNATURE_UPLOAD.MAX_SIZE_MB}MB)`,
+            },
             { status: 400 },
         );
     }

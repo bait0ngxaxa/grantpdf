@@ -7,6 +7,7 @@ import {
     optimizeSignatureImageFile,
     SIGNATURE_MAX_SIZE_BYTES,
 } from "./helpers";
+import { SIGNATURE_UPLOAD } from "@/lib/constants";
 
 export function useSignatureHandlers(): UseSignatureHandlersReturn {
     const [signatureFile, setSignatureFile] = useState<File | null>(null);
@@ -45,7 +46,7 @@ export function useSignatureHandlers(): UseSignatureHandlersReturn {
 
                 if (optimizedFile.size > SIGNATURE_MAX_SIZE_BYTES) {
                     inputElement.setCustomValidity(
-                        "ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด 10MB)",
+                        `ไฟล์ลายเซ็นมีขนาดใหญ่เกินไป (สูงสุด ${SIGNATURE_UPLOAD.MAX_SIZE_MB}MB)`,
                     );
                     inputElement.reportValidity();
                     inputElement.value = "";

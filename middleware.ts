@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { ROUTES, ROLES } from "@/lib/constants";
+import { buildRedirectUrl } from "@/lib/redirectUrl";
 import { verifyAccessToken, type AccessTokenPayload } from "@/lib/accessToken";
 import {
     getAccessTokenFromRequest,
@@ -150,7 +151,7 @@ function hasRefreshSession(req: NextRequest): boolean {
 
 function redirectToSessionRefresh(req: NextRequest, nonce: string): NextResponse {
     const { pathname, search } = req.nextUrl;
-    const url = new URL(ROUTES.SESSION_REFRESH, req.url);
+    const url = buildRedirectUrl(req, ROUTES.SESSION_REFRESH);
     url.searchParams.set("callbackUrl", `${pathname}${search}`);
     return applySecurityHeaders(NextResponse.redirect(url), nonce);
 }
@@ -207,7 +208,7 @@ export async function middleware(
             console.warn(
                 `User is not authenticated. Redirecting from '${pathname}' to /signin...`
             );
-            const url = new URL(ROUTES.SIGNIN, req.url);
+            const url = buildRedirectUrl(req, ROUTES.SIGNIN);
             url.searchParams.set("callbackUrl", `${pathname}${search}`);
             url.searchParams.set("reason", "session-expired");
             return applySecurityHeaders(NextResponse.redirect(url), nonce);
@@ -218,7 +219,7 @@ export async function middleware(
                 `User with role '${authenticatedRole}' tried to access admin page. Redirecting to /access-denied...`
             );
             return applySecurityHeaders(
-                NextResponse.redirect(new URL(ROUTES.ACCESS_DENIED, req.url)),
+                NextResponse.redirect(buildRedirectUrl(req, ROUTES.ACCESS_DENIED)),
                 nonce
             );
         }
@@ -231,7 +232,7 @@ export async function middleware(
             console.warn(
                 `User is not authenticated. Redirecting from '${pathname}' to /signin...`
             );
-            const url = new URL(ROUTES.SIGNIN, req.url);
+            const url = buildRedirectUrl(req, ROUTES.SIGNIN);
             url.searchParams.set("callbackUrl", pathname);
             return applySecurityHeaders(NextResponse.redirect(url), nonce);
         }
@@ -244,7 +245,7 @@ export async function middleware(
                 "User tried to access reset password page without a token. Redirecting to forgot password..."
             );
             return applySecurityHeaders(
-                NextResponse.redirect(new URL(ROUTES.FORGOT_PASSWORD, req.url)),
+                NextResponse.redirect(buildRedirectUrl(req, ROUTES.FORGOT_PASSWORD)),
                 nonce
             );
         }

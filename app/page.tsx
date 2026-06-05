@@ -20,9 +20,8 @@ export default async function Home() {
 
     const cookieStore = await cookies();
     if (cookieStore.get(SESSION.SESSION_HINT_COOKIE_NAME)?.value === "1") {
-        const url = new URL(ROUTES.SESSION_REFRESH, "http://localhost");
-        url.searchParams.set("callbackUrl", ROUTES.DASHBOARD);
-        redirect(url.pathname + url.search);
+        const params = new URLSearchParams({ callbackUrl: ROUTES.DASHBOARD });
+        redirect(`${ROUTES.SESSION_REFRESH}?${params.toString()}`);
     }
 
     return (
