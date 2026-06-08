@@ -135,8 +135,30 @@
     to { scale-x: 1; opacity: 1; }
 }
 
+@keyframes homepage-gradient-pan {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
 .animate-shine {
     animation: shine 8s linear infinite;
+}
+
+.homepage-gradient-motion {
+    animation: homepage-gradient-pan 7s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    background-size: 200% 100%;
+}
+
+.homepage-accent-motion {
+    animation: homepage-gradient-pan 5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .homepage-gradient-motion,
+    .homepage-accent-motion {
+        animation: none;
+    }
 }
 
 .document-rich-editor .ProseMirror {

@@ -11,13 +11,13 @@ import { LogIn, UserPlus } from "lucide-react";
 
 export default function HomeNavbar(): React.ReactElement {
   return (
-    <nav className="sticky top-0 z-50 flex h-16 w-full items-center border-b border-blue-100/70 bg-gradient-to-r from-white/95 via-white/90 to-blue-50/80 px-4 shadow-[0_10px_35px_-24px_rgba(37,99,235,0.65)] backdrop-blur-xl transition-all duration-300 md:h-20 md:px-8 dark:border-slate-800/70 dark:from-slate-950/95 dark:via-slate-900/90 dark:to-blue-950/35 dark:shadow-[0_10px_35px_-24px_rgba(59,130,246,0.45)]">
+    <nav className="sticky top-0 z-50 flex h-16 w-full items-center border-b border-slate-200/80 bg-white/95 px-3 shadow-sm backdrop-blur-md transition-colors duration-200 sm:px-4 md:h-20 md:px-8 dark:border-slate-800 dark:bg-slate-950/95">
       <div className="flex flex-1 items-center overflow-hidden">
         <Link
           href="/"
-          className="group inline-flex min-w-0 items-center gap-3 transition-opacity hover:opacity-95 md:gap-4"
+          className="group inline-flex min-w-0 items-center gap-2 transition-opacity hover:opacity-95 sm:gap-3 md:gap-4"
         >
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-lg shadow-blue-500/20 ring-1 ring-blue-100 transition-transform duration-300 group-hover:scale-105 group-hover:shadow-blue-500/30 md:h-12 md:w-12 dark:bg-slate-800 dark:ring-slate-700">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-slate-200 transition-transform duration-200 group-hover:scale-[1.02] sm:h-10 sm:w-10 md:h-12 md:w-12 dark:bg-slate-900 dark:ring-slate-700">
             <Image
               src="/e-grant_logo.webp"
               alt="E-GRANT ONLINE"
@@ -28,10 +28,10 @@ export default function HomeNavbar(): React.ReactElement {
             />
           </div>
           <div className="flex min-w-0 flex-col overflow-hidden leading-none">
-            <span className="truncate text-base font-black uppercase text-slate-900 md:text-xl dark:text-white">
+            <span className="truncate text-sm font-bold text-slate-900 uppercase sm:text-base md:text-xl dark:text-white">
               E-GRANT ONLINE
             </span>
-            <span className="mt-1 text-[9px] font-bold uppercase text-blue-600 md:text-[10px] dark:text-blue-300">
+            <span className="mt-1 hidden text-[10px] font-semibold text-blue-700 uppercase sm:block md:text-xs dark:text-blue-300">
               RHHSDI
             </span>
           </div>
@@ -46,23 +46,27 @@ export default function HomeNavbar(): React.ReactElement {
 
 function LoggedOutMenu(): React.ReactElement {
   return (
-    <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+    <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
       <ThemeToggle />
-      <Link href={ROUTES.SIGNIN}>
-        <Button
-          variant="ghost"
-          className="h-9 rounded-full px-2 text-xs font-bold text-slate-600 transition-all hover:-translate-y-0.5 hover:bg-white/70 hover:text-slate-900 md:h-10 md:px-4 md:text-sm dark:text-slate-400 dark:hover:bg-slate-800/80 dark:hover:text-white"
-        >
-          <LogIn className="mr-1.5 h-3.5 w-3.5 md:h-4 md:w-4" />
-          เข้าสู่ระบบ
-        </Button>
-      </Link>
-      <Link href={ROUTES.SIGNUP}>
-        <Button className="h-9 rounded-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 px-3 text-xs font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 hover:shadow-blue-500/40 active:translate-y-0 sm:px-4 md:h-10 md:px-6 md:text-sm">
-          <UserPlus className="mr-1.5 h-3.5 w-3.5 md:h-4 md:w-4" />
-          ลงทะเบียน
-        </Button>
-      </Link>
+      <Button
+        asChild
+        variant="ghost"
+        className="h-11 rounded-md px-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 sm:px-3 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+      >
+        <Link href={ROUTES.SIGNIN} aria-label="เข้าสู่ระบบ">
+          <LogIn className="h-4 w-4 sm:mr-1.5 md:h-4 md:w-4" />
+          <span className="hidden sm:inline">เข้าสู่ระบบ</span>
+        </Link>
+      </Button>
+      <Button
+        asChild
+        className="h-11 rounded-md bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 px-2 text-sm font-semibold text-white shadow-sm shadow-blue-500/20 transition-colors hover:from-blue-700 hover:via-blue-600 hover:to-cyan-600 sm:px-4 md:px-5"
+      >
+        <Link href={ROUTES.SIGNUP} aria-label="ลงทะเบียน">
+          <UserPlus className="h-4 w-4 sm:mr-1.5 md:h-4 md:w-4" />
+          <span className="hidden sm:inline">ลงทะเบียน</span>
+        </Link>
+      </Button>
     </div>
   );
 }

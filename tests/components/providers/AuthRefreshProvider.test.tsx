@@ -24,7 +24,7 @@ describe("AuthRefreshProvider", () => {
     });
 
     it("refreshes grant session on window focus", async () => {
-        render(<AuthRefreshProvider />);
+        render(<AuthRefreshProvider shouldRefresh={true} />);
 
         await act(async () => {
             window.dispatchEvent(new Event("focus"));
@@ -38,7 +38,7 @@ describe("AuthRefreshProvider", () => {
     });
 
     it("refreshes grant session on interval while page is visible", async () => {
-        render(<AuthRefreshProvider />);
+        render(<AuthRefreshProvider shouldRefresh={true} />);
 
         await act(async () => {
             vi.advanceTimersByTime(10 * 60 * 1000);
@@ -50,7 +50,7 @@ describe("AuthRefreshProvider", () => {
 
     it("does not refresh while page is hidden", async () => {
         setVisibilityState("hidden");
-        render(<AuthRefreshProvider />);
+        render(<AuthRefreshProvider shouldRefresh={true} />);
 
         await act(async () => {
             vi.advanceTimersByTime(10 * 60 * 1000);
@@ -69,7 +69,7 @@ describe("AuthRefreshProvider", () => {
             })
         );
 
-        render(<AuthRefreshProvider />);
+        render(<AuthRefreshProvider shouldRefresh={true} />);
 
         await act(async () => {
             window.dispatchEvent(new Event("focus"));
@@ -80,7 +80,7 @@ describe("AuthRefreshProvider", () => {
     });
 
     it("releases the cross-tab refresh lock after refresh completes", async () => {
-        render(<AuthRefreshProvider />);
+        render(<AuthRefreshProvider shouldRefresh={true} />);
 
         await act(async () => {
             window.dispatchEvent(new Event("focus"));
@@ -89,5 +89,18 @@ describe("AuthRefreshProvider", () => {
 
         expect(fetch).toHaveBeenCalledOnce();
         expect(window.localStorage.getItem("grant_refresh_lock")).toBeNull();
+    });
+
+    it("does not register refresh behavior without a session hint", async () => {
+        render(<AuthRefreshProvider shouldRefresh={false} />);
+
+        await act(async () => {
+            vi.advanceTimersByTime(10 * 60 * 1000);
+            window.dispatchEvent(new Event("focus"));
+            document.dispatchEvent(new Event("visibilitychange"));
+            await Promise.resolve();
+        });
+
+        expect(fetch).not.toHaveBeenCalled();
     });
 });

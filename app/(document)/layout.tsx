@@ -1,7 +1,11 @@
 import { auth } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
 import { redirect } from "next/navigation";
-import { GlobalModalProvider, SWRProvider } from "@/components/providers";
+import {
+    AuthRefreshProvider,
+    GlobalModalProvider,
+    SWRProvider,
+} from "@/components/providers";
 import { DocumentAuthProvider } from "./contexts/DocumentAuthContext";
 
 export default async function DocumentLayout({
@@ -18,6 +22,7 @@ export default async function DocumentLayout({
     return (
         <DocumentAuthProvider session={session}>
             <SWRProvider>
+                <AuthRefreshProvider shouldRefresh={true} />
                 <GlobalModalProvider>{children}</GlobalModalProvider>
             </SWRProvider>
         </DocumentAuthProvider>

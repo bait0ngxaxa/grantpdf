@@ -4,7 +4,7 @@ import { getUserProjectStats } from "@/lib/services";
 import { redirect } from "next/navigation";
 import { DashboardWrapper } from "./DashboardWrapper";
 import { ROUTES } from "@/lib/constants";
-import { SWRProvider } from "@/components/providers";
+import { AuthRefreshProvider, SWRProvider } from "@/components/providers";
 
 export const metadata: Metadata = {
     title: "Dashboard - ระบบจัดการเอกสาร",
@@ -36,6 +36,7 @@ export default async function UserDashboardLayout({
 
     return (
         <SWRProvider>
+            <AuthRefreshProvider shouldRefresh={true} />
             <DashboardWrapper initialStats={initialStats} session={session}>
                 {children}
             </DashboardWrapper>

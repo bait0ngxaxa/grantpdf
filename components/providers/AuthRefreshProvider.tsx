@@ -10,16 +10,26 @@ import {
 
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 
+type AuthRefreshProviderProps = {
+    shouldRefresh: boolean;
+};
+
 async function refreshGrantSession(): Promise<boolean> {
     const response = await requestGrantSessionRefresh();
     return response.ok;
 }
 
-export function AuthRefreshProvider(): null {
+export function AuthRefreshProvider({
+    shouldRefresh,
+}: AuthRefreshProviderProps): null {
     const refreshInFlight = useRef(false);
     const tabId = useRef<string | null>(null);
 
     useEffect(() => {
+        if (!shouldRefresh) {
+            return;
+        }
+
         tabId.current = createRefreshOwnerId();
 
         const refresh = async (): Promise<void> => {
@@ -59,7 +69,7 @@ export function AuthRefreshProvider(): null {
                 handleVisibilityChange,
             );
         };
-    }, []);
+    }, [shouldRefresh]);
 
     return null;
 }
