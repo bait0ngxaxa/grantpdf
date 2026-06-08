@@ -28,8 +28,8 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border-0 shadow-2xl">
-                <div className="flex flex-col items-center text-center p-4">
+            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:max-w-md sm:p-6 dark:border-slate-700 dark:bg-slate-900">
+                <div className="flex flex-col items-center p-2 text-center sm:p-4">
                     <div
                         className={cn(
                             "w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg",

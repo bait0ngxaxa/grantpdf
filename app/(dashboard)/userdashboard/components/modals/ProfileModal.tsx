@@ -27,10 +27,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
             <DialogContent
                 showCloseButton={false}
-                className="sm:max-w-[920px] rounded-3xl p-0 bg-white dark:bg-slate-800 border-0 shadow-2xl overflow-hidden"
+                className="overflow-hidden rounded-2xl border border-slate-100 bg-white p-0 shadow-xl sm:max-w-[920px] dark:border-slate-700 dark:bg-slate-800"
             >
                 {/* Custom Close Button */}
-                <DialogClose className="absolute right-4 top-4 z-50 rounded-full bg-white p-2 text-slate-500 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
+                <DialogClose className="absolute right-3 top-3 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:right-4 sm:top-4 sm:h-9 sm:w-9 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
                     <X className="h-4 w-4" />
                     <span className="sr-only">Close</span>
                 </DialogClose>
@@ -38,7 +38,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 <div className="absolute left-0 top-0 z-0 h-full w-full bg-slate-50 dark:bg-slate-900" />
 
                 {/* Content */}
-                <div className="relative z-10 max-h-[calc(100vh-2rem)] overflow-y-auto p-5 pt-14 sm:p-6">
+                <div className="relative z-10 max-h-[calc(100dvh-1rem)] overflow-y-auto p-4 pt-14 sm:max-h-[calc(100dvh-2rem)] sm:p-6">
                     <div className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.15fr)] lg:items-start">
                         <section className="rounded-2xl border border-white/70 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
                             <div className="mb-6 flex flex-col items-center text-center">

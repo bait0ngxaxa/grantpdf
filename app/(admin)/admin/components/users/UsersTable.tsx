@@ -34,9 +34,9 @@ export const UsersTable: React.FC<UsersTableProps> = ({
     onPageChange,
 }) => {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:rounded-3xl">
             {/* Header */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-700">
+            <div className="border-b border-slate-100 p-4 dark:border-slate-700 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                     <div>
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance">
@@ -51,6 +51,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                         <div className="relative w-full sm:w-80">
                             <input
                                 type="text"
+                                aria-label="ค้นหาผู้ใช้งาน"
                                 placeholder="ค้นหาผู้ใช้งาน…"
                                 value={searchTerm}
                                 onChange={(e) => onSearchChange(e.target.value)}
@@ -67,12 +68,12 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                 <table className="table w-full">
                     <thead className="bg-slate-50/50 dark:bg-slate-700/50">
                         <tr className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide border-b border-slate-100 dark:border-slate-700">
-                            <th className="px-6 py-4 text-left">ID</th>
-                            <th className="px-6 py-4 text-left">ชื่อ</th>
-                            <th className="px-6 py-4 text-left">อีเมล</th>
-                            <th className="px-6 py-4 text-left">บทบาท</th>
-                            <th className="px-6 py-4 text-left">วันที่สร้าง</th>
-                            <th className="px-6 py-4 text-center">จัดการ</th>
+                            <th className="px-4 py-3 text-left sm:px-6 sm:py-4">ID</th>
+                            <th className="px-4 py-3 text-left sm:px-6 sm:py-4">ชื่อ</th>
+                            <th className="px-4 py-3 text-left sm:px-6 sm:py-4">อีเมล</th>
+                            <th className="px-4 py-3 text-left sm:px-6 sm:py-4">บทบาท</th>
+                            <th className="px-4 py-3 text-left sm:px-6 sm:py-4">วันที่สร้าง</th>
+                            <th className="px-4 py-3 text-center sm:px-6 sm:py-4">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -82,10 +83,10 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                                     key={user.id}
                                     className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors duration-150"
                                 >
-                                    <td className="px-6 py-4 font-mono text-sm text-slate-400 dark:text-slate-500">
+                                    <td className="px-4 py-3 font-mono text-sm text-slate-400 dark:text-slate-500 sm:px-6 sm:py-4">
                                         {user.id}
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-4 py-3 sm:px-6 sm:py-4">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs">
                                                 {user.name.charAt(0)}
@@ -95,10 +96,10 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 sm:px-6 sm:py-4">
                                         {user.email}
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-4 py-3 sm:px-6 sm:py-4">
                                         <span
                                             className={cn(
                                                 "inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide",
@@ -112,24 +113,26 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                                                 : "Member"}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-sm">
+                                    <td className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400 sm:px-6 sm:py-4">
                                         {new Date(
                                             user.created_at,
                                         ).toLocaleDateString("th-TH")}
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-4 py-3 sm:px-6 sm:py-4">
                                         <div className="flex space-x-2 justify-center">
                                             <Button
                                                 size="sm"
                                                 onClick={() => onEdit(user)}
-                                                className="h-8 w-8 p-0 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-sm"
+                                                aria-label={`แก้ไขผู้ใช้งาน ${user.name}`}
+                                                className="h-11 w-11 rounded-lg border border-slate-200 bg-white p-0 text-slate-500 shadow-sm hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400 dark:hover:border-blue-800 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 sm:h-8 sm:w-8"
                                             >
                                                 <Edit className="h-4 w-4" />
                                             </Button>
                                             <Button
                                                 size="sm"
                                                 onClick={() => onDelete(user)}
-                                                className="h-8 w-8 p-0 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/30 shadow-sm"
+                                                aria-label={`ลบผู้ใช้งาน ${user.name}`}
+                                                className="h-11 w-11 rounded-lg border border-slate-200 bg-white p-0 text-slate-500 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400 dark:hover:border-red-800 dark:hover:bg-red-900/30 dark:hover:text-red-400 sm:h-8 sm:w-8"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>

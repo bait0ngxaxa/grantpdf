@@ -171,7 +171,7 @@ function PanelHeader({
                 type="button"
                 onClick={() => void onRefresh()}
                 disabled={isLoading}
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 dark:hover:bg-slate-700 dark:hover:text-slate-200"
                 aria-label="รีเฟรชรายการอุปกรณ์"
             >
                 <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
@@ -223,7 +223,7 @@ function PanelActions({ state }: { state: DeviceSessionsState }): React.JSX.Elem
                 variant="outline"
                 onClick={() => void state.revokeOthers()}
                 disabled={state.actionId !== null || state.sessions.length <= 1}
-                className="h-9 flex-1 rounded-xl border-slate-200 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"
+                className="h-11 flex-1 rounded-xl border-slate-200 text-xs text-slate-700 hover:bg-slate-50 sm:h-9 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"
             >
                 {state.actionId === "others" ? (
                     <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />

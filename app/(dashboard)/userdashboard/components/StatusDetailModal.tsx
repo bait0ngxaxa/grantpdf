@@ -16,21 +16,36 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
     project,
     onClose,
 }): React.JSX.Element | null => {
+    React.useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        const handleKeyDown = (event: KeyboardEvent): void => {
+            if (event.key === "Escape") {
+                onClose();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen || !project) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
             <button
                 type="button"
                 aria-label="ปิดหน้าต่างรายละเอียดสถานะ"
-                className="absolute inset-0 backdrop-blur-sm bg-slate-900/40 dark:bg-slate-900/60"
+                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm duration-200 motion-safe:animate-in motion-safe:fade-in motion-reduce:animate-none dark:bg-slate-900/60"
                 onClick={onClose}
             />
             <div
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="status-detail-modal-title"
-                className="relative w-full bg-white dark:bg-slate-900 p-6 max-w-md rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 z-10"
+                className="relative z-10 w-full max-w-md rounded-2xl border border-slate-100 bg-white p-4 shadow-xl duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:p-6 dark:border-slate-700 dark:bg-slate-900"
             >
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-3">
@@ -48,7 +63,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                         type="button"
                         aria-label="ปิดหน้าต่างรายละเอียดสถานะ"
                         onClick={onClose}
-                        className="p-1.5 rounded-full inline-flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-50 sm:h-8 sm:w-8 dark:hover:bg-slate-800"
                     >
                         <X className="h-5 w-5" />
                     </button>
@@ -98,7 +113,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                 <div className="flex justify-end mt-6">
                     <Button
                         onClick={onClose}
-                        className="cursor-pointer px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white shadow-lg shadow-blue-200 dark:shadow-blue-900/30"
+                        className="h-11 cursor-pointer rounded-xl bg-blue-600 px-6 text-white shadow-lg shadow-blue-200 hover:bg-blue-700 dark:bg-blue-600 dark:shadow-blue-900/30 dark:hover:bg-blue-500"
                     >
                         ปิด
                     </Button>

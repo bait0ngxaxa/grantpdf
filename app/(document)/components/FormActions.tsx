@@ -17,11 +17,11 @@ export function FormActions({
     disabled = false,
 }: FormActionsProps): React.JSX.Element {
     return (
-        <div className="flex justify-center pt-8 border-t border-slate-200/60 dark:border-slate-700/60 mt-8">
+        <div className="mt-8 flex justify-center border-t border-slate-200/60 pt-8 dark:border-slate-700/60">
             <Button
                 type="button"
                 onClick={onPreview}
-                className="cursor-pointer w-full sm:w-auto sm:min-w-[300px] bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-8 py-4 rounded-xl font-bold duration-300 shadow-lg shadow-blue-200 dark:shadow-blue-900/30 hover:shadow-xl hover:shadow-blue-300 dark:hover:shadow-blue-900/50 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none transition"
+                className="h-11 w-full cursor-pointer rounded-xl bg-blue-600 px-8 font-bold text-white shadow-md shadow-blue-200 transition-[background-color,box-shadow,transform] hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-300 disabled:cursor-not-allowed disabled:transform-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:transform-none dark:shadow-blue-900/30 dark:hover:shadow-blue-900/50 sm:w-auto sm:min-w-[300px]"
                 disabled={isSubmitting || disabled}
             >
                 {isSubmitting ? (

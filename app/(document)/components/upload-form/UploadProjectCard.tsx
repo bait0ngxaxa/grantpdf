@@ -22,12 +22,13 @@ export const UploadProjectCard = ({
     onSelect,
 }: UploadProjectCardProps): React.JSX.Element => {
     return (
-        <div
+        <button
+            type="button"
             className={cn(
-                "cursor-pointer rounded-xl border px-3 py-2.5 transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300",
+                "w-full cursor-pointer rounded-xl border px-3 py-2.5 text-left transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 active:scale-[0.99] motion-reduce:transition-none motion-reduce:transform-none dark:focus-visible:ring-offset-slate-900",
                 isSelected
                     ? "border-blue-500 bg-blue-50/50 shadow-md shadow-blue-100 dark:border-blue-500 dark:bg-blue-900/30 dark:shadow-blue-900/30"
-                    : "border-slate-100 bg-white shadow-sm hover:border-blue-200 hover:bg-slate-50/50 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-800 dark:hover:bg-slate-700/50",
+                    : "border-slate-100 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-200 hover:bg-slate-50/50 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-800 dark:hover:bg-slate-700/50",
             )}
             onClick={() => onSelect(project.id)}
         >
@@ -96,6 +97,6 @@ export const UploadProjectCard = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </button>
     );
 };

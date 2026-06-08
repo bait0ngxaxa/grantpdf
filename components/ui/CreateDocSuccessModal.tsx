@@ -103,7 +103,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md rounded-3xl p-6 bg-white dark:bg-slate-900 border-0 shadow-2xl focus:outline-none">
+            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl focus:outline-none sm:max-w-md sm:p-6 dark:border-slate-700 dark:bg-slate-900">
                 <div className="flex flex-col items-center text-center p-2">
                     {/* Success Icon with Animation */}
                     <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 ring-4 ring-green-50 dark:ring-green-900/30 animate-in zoom-in-50 duration-300">

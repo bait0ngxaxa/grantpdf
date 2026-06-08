@@ -44,10 +44,10 @@ export function PreviewModal({
             <DialogContent
                 className={cn(
                     maxWidth,
-                    "flex h-[min(88vh,900px)] w-[calc(100vw-2rem)] flex-col overflow-hidden bg-white p-0 dark:bg-slate-900 border border-slate-200 dark:border-slate-700",
+                    "flex h-[min(88dvh,900px)] w-[calc(100vw-1rem)] flex-col overflow-hidden border border-slate-200 bg-white p-0 shadow-xl sm:w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900",
                 )}
             >
-                <DialogHeader className="flex-shrink-0 border-b border-slate-200 px-6 py-5 dark:border-slate-700">
+                <DialogHeader className="flex-shrink-0 border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5 dark:border-slate-700">
                     <DialogTitle className="text-slate-900 dark:text-slate-100">
                         {title}
                     </DialogTitle>
@@ -58,7 +58,7 @@ export function PreviewModal({
 
                 {/* Error Alert */}
                 {hasError && (
-                    <div className="mx-6 mt-4 flex flex-shrink-0 items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-900/20">
+                    <div className="mx-4 mt-4 flex flex-shrink-0 items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 sm:mx-6 dark:border-red-900/50 dark:bg-red-900/20">
                         <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
                         <div className="text-sm text-red-700 dark:text-red-300">
                             <p className="font-medium">
@@ -70,14 +70,14 @@ export function PreviewModal({
                 )}
 
                 {/* Scrollable content area with word break */}
-                <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
                     <div className="mx-auto w-full max-w-5xl space-y-4 break-words">
                         {children}
                     </div>
                 </div>
 
                 {/* Sticky footer */}
-                <DialogFooter className="flex-shrink-0 border-t border-slate-200 px-6 py-4 dark:border-slate-700">
+                <DialogFooter className="flex-shrink-0 border-t border-slate-200 px-4 py-4 sm:px-6 dark:border-slate-700">
                     <DialogClose asChild>
                         <Button
                             variant="outline"

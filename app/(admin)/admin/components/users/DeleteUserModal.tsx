@@ -20,15 +20,30 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
     isDeleting,
     onConfirm,
 }) => {
+    React.useEffect(() => {
+        if (!isOpen || isDeleting) {
+            return;
+        }
+
+        const handleKeyDown = (event: KeyboardEvent): void => {
+            if (event.key === "Escape") {
+                onClose();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [isDeleting, isOpen, onClose]);
+
     if (!isOpen || !user) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/20 p-3 backdrop-blur-sm animate-in fade-in duration-200 sm:p-4">
             <div
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="delete-user-modal-title"
-                className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 border border-slate-100 dark:border-slate-700"
+                className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-xl animate-in zoom-in-95 duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800"
             >
                 <div className="flex flex-col items-center justify-center text-center mb-6">
                     <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mb-4 shadow-sm">

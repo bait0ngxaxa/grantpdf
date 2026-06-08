@@ -149,7 +149,7 @@ export default function ProjectsList({
                             <button
                                 type="button"
                                 onClick={() => toggleProgramGroup(group.key)}
-                                className="flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
+                                className="group flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
                             >
                                 <ProgramGroupHeader
                                     groupKey={group.key}
@@ -175,40 +175,49 @@ export default function ProjectsList({
 
                             <div
                                 className={cn(
-                                    "overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out",
+                                    "grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-in-out",
                                     isExpanded
-                                        ? "max-h-[5000px] opacity-100"
-                                        : "max-h-0 opacity-0",
+                                        ? "grid-rows-[1fr] opacity-100"
+                                        : "grid-rows-[0fr] opacity-0",
                                 )}
                             >
-                                <div className="space-y-3 p-4 sm:p-5">
-                                    {paginatedProjects.items.map((project) => (
-                                        <ProjectCard
-                                            key={project.id}
-                                            project={project}
-                                            showNewBadge={!viewedProjects.has(project.id)}
-                                        />
-                                    ))}
-                                </div>
-                                {paginatedProjects.totalPages > 1 && (
-                                    <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
-                                        <Pagination
-                                            currentPage={
-                                                paginatedProjects.currentPage
-                                            }
-                                            totalPages={
-                                                paginatedProjects.totalPages
-                                            }
-                                            onPageChange={(page) =>
-                                                setProgramGroupPage(
-                                                    group.key,
-                                                    page,
-                                                )
-                                            }
-                                            className="mt-4"
-                                        />
+                                <div
+                                    className={cn(
+                                        "min-h-0 overflow-hidden transition-transform duration-300 ease-out motion-reduce:transition-none",
+                                        isExpanded
+                                            ? "translate-y-0"
+                                            : "-translate-y-1",
+                                    )}
+                                >
+                                    <div className="space-y-3 p-4 sm:p-5">
+                                        {paginatedProjects.items.map((project) => (
+                                            <ProjectCard
+                                                key={project.id}
+                                                project={project}
+                                                showNewBadge={!viewedProjects.has(project.id)}
+                                            />
+                                        ))}
                                     </div>
-                                )}
+                                    {paginatedProjects.totalPages > 1 && (
+                                        <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
+                                            <Pagination
+                                                currentPage={
+                                                    paginatedProjects.currentPage
+                                                }
+                                                totalPages={
+                                                    paginatedProjects.totalPages
+                                                }
+                                                onPageChange={(page) =>
+                                                    setProgramGroupPage(
+                                                        group.key,
+                                                        page,
+                                                    )
+                                                }
+                                                className="mt-4"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     );

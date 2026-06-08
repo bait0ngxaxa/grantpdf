@@ -57,8 +57,8 @@ export const ProjectSelection = (): React.JSX.Element => {
     };
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
-            <h1 className="text-3xl font-bold text-center mb-8 text-slate-800 dark:text-slate-100 text-balance">
+        <div className="flex flex-1 flex-col items-center justify-center p-4 sm:p-6">
+            <h1 className="mb-6 text-center text-2xl font-bold text-slate-800 text-balance dark:text-slate-100 sm:mb-8 sm:text-3xl">
                 เลือกโครงการสำหรับเอกสาร
             </h1>
 
@@ -99,7 +99,7 @@ export const ProjectSelection = (): React.JSX.Element => {
 
             {!isLoading && !error && projects.length > 0 && (
                 <>
-                    <div className="w-full max-w-4xl space-y-4 max-h-[60vh] overflow-y-auto px-2 py-2">
+                    <div className="max-h-[60dvh] w-full max-w-4xl space-y-4 overflow-y-auto px-2 py-2">
                         {groupedProjects.map((group) => {
                             const isExpanded = expandedProgramGroups.has(
                                 group.key,
@@ -120,7 +120,7 @@ export const ProjectSelection = (): React.JSX.Element => {
                                         onClick={() =>
                                             toggleProgramGroup(group.key)
                                         }
-                                        className="flex w-full items-center justify-between gap-4 bg-white px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:px-6"
+                                        className="group flex w-full items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-inset dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:px-6"
                                     >
                                         <ProgramGroupHeader
                                             groupKey={group.key}
@@ -141,39 +141,48 @@ export const ProjectSelection = (): React.JSX.Element => {
 
                                     <div
                                         className={cn(
-                                            "overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out",
+                                            "grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-in-out",
                                             isExpanded
-                                                ? "max-h-[4000px] opacity-100"
-                                                : "max-h-0 opacity-0",
+                                                ? "grid-rows-[1fr] opacity-100"
+                                                : "grid-rows-[0fr] opacity-0",
                                         )}
                                     >
-                                        <div className="space-y-3 bg-slate-50/60 p-4 dark:bg-slate-900/40 sm:p-5">
-                                            {paginatedProjects.items.map((project) => (
-                                                <ProjectCard
-                                                    key={project.id}
-                                                    project={project}
-                                                />
-                                            ))}
-                                        </div>
-                                        {paginatedProjects.totalPages > 1 && (
-                                            <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
-                                                <Pagination
-                                                    currentPage={
-                                                        paginatedProjects.currentPage
-                                                    }
-                                                    totalPages={
-                                                        paginatedProjects.totalPages
-                                                    }
-                                                    onPageChange={(page) =>
-                                                        setProgramGroupPage(
-                                                            group.key,
-                                                            page,
-                                                        )
-                                                    }
-                                                    className="mt-4"
-                                                />
+                                        <div
+                                            className={cn(
+                                                "min-h-0 overflow-hidden transition-transform duration-300 ease-out motion-reduce:transition-none",
+                                                isExpanded
+                                                    ? "translate-y-0"
+                                                    : "-translate-y-1",
+                                            )}
+                                        >
+                                            <div className="space-y-3 bg-slate-50/60 p-4 dark:bg-slate-900/40 sm:p-5">
+                                                {paginatedProjects.items.map((project) => (
+                                                    <ProjectCard
+                                                        key={project.id}
+                                                        project={project}
+                                                    />
+                                                ))}
                                             </div>
-                                        )}
+                                            {paginatedProjects.totalPages > 1 && (
+                                                <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
+                                                    <Pagination
+                                                        currentPage={
+                                                            paginatedProjects.currentPage
+                                                        }
+                                                        totalPages={
+                                                            paginatedProjects.totalPages
+                                                        }
+                                                        onPageChange={(page) =>
+                                                            setProgramGroupPage(
+                                                                group.key,
+                                                                page,
+                                                            )
+                                                        }
+                                                        className="mt-4"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             );
@@ -187,17 +196,17 @@ export const ProjectSelection = (): React.JSX.Element => {
                         </div>
                     )}
 
-                    <div className="flex justify-center mt-8 gap-4">
+                    <div className="mt-8 grid w-full max-w-4xl grid-cols-1 gap-3 sm:flex sm:justify-center sm:gap-4">
                         <Button
                             asChild
                             variant="outline"
-                            className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl"
+                            className="h-11 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700"
                         >
                             <Link href={ROUTES.DASHBOARD}>กลับไปแดชบอร์ด</Link>
                         </Button>
                         <Button
                             asChild
-                            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition"
+                            className="h-11 rounded-xl bg-blue-600 text-white shadow-md transition hover:bg-blue-700"
                         >
                             <Link href={ROUTES.DASHBOARD}>สร้างโครงการใหม่</Link>
                         </Button>

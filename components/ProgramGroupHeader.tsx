@@ -71,7 +71,7 @@ function ProgramGroupChevron({
     return (
         <div
             className={cn(
-                "self-end rounded-full bg-slate-50 p-2 text-slate-400 transition-transform duration-300 dark:bg-slate-700 dark:text-slate-300 sm:self-auto",
+                "self-end rounded-full bg-slate-50 p-2 text-slate-400 transition-transform duration-300 motion-reduce:transition-none dark:bg-slate-700 dark:text-slate-300 sm:self-auto",
                 isExpanded && "rotate-180",
             )}
         >
@@ -100,7 +100,7 @@ export function ProgramGroupHeader({
             <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                 <div
                     className={cn(
-                        "flex flex-shrink-0 items-center justify-center ring-1",
+                        "flex flex-shrink-0 items-center justify-center ring-1 transition-transform duration-200 group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:transform-none",
                         iconBoxSize,
                         iconTone,
                     )}

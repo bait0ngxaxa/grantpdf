@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import type { ProgramSummary } from "@/type/models";
 import { getProgramAccent } from "@/components/programAccent";
 import { ProgramIdentityIcon } from "@/components/ProgramIdentityIcon";
+import { cn } from "@/lib/utils";
 
 export function ProgramSelectionCard({
     program,
@@ -15,16 +16,28 @@ export function ProgramSelectionCard({
     return (
         <button
             type="button"
+            disabled={!program.isActive}
             onClick={() => onSelect(program.id)}
-            className={`group relative flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${accent.card} ${accent.hoverShadow}`}
+            className={cn(
+                "group relative flex min-h-24 cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left shadow-sm transition-[border-color,box-shadow,transform,background-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-sm motion-reduce:transition-none motion-reduce:transform-none",
+                program.isActive && "hover:-translate-y-0.5 hover:shadow-md",
+                accent.card,
+                program.isActive && accent.hoverShadow,
+            )}
         >
-            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 transition-transform duration-200 group-hover:scale-105 ${accent.icon}`}>
+            <div
+                className={cn(
+                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none",
+                    !program.isActive && "group-hover:scale-100",
+                    accent.icon,
+                )}
+            >
                 <ProgramIdentityIcon accentKey={accent.key} />
             </div>
             <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-center gap-2">
                     <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent.dot}`} />
-                    <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+                    <p className="line-clamp-2 text-sm font-bold leading-5 text-slate-800 dark:text-slate-100">
                         {program.name}
                     </p>
                 </div>
@@ -34,12 +47,18 @@ export function ProgramSelectionCard({
                     </span>
                 ) : null}
                 {program.description ? (
-                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
                         {program.description}
                     </p>
                 ) : null}
             </div>
-            <ChevronRight className={`mt-3 h-4 w-4 shrink-0 text-slate-300 transition-all group-hover:translate-x-0.5 ${accent.text}`} />
+            <ChevronRight
+                className={cn(
+                    "mt-3 h-4 w-4 shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:transform-none",
+                    !program.isActive && "group-hover:translate-x-0",
+                    accent.text,
+                )}
+            />
         </button>
     );
 }
@@ -53,7 +72,9 @@ export function SelectedProgramBadge({
 }): React.JSX.Element {
     const accent = getProgramAccent(program);
     return (
-        <div className={`flex items-center gap-3 rounded-2xl border px-3 py-3 shadow-sm ${accent.panel}`}>
+        <div
+            className={`flex items-center gap-3 rounded-2xl border px-3 py-3 shadow-sm ${accent.panel}`}
+        >
             <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1 ${accent.icon}`}>
                 <ProgramIdentityIcon accentKey={accent.key} className="h-4 w-4" />
             </div>
@@ -71,7 +92,7 @@ export function SelectedProgramBadge({
             <button
                 type="button"
                 onClick={onChange}
-                className={`shrink-0 cursor-pointer rounded-full bg-white/80 px-3 py-1 text-xs font-bold underline-offset-2 hover:underline dark:bg-slate-800/80 ${accent.text}`}
+                className={`inline-flex h-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-white/80 px-3 text-xs font-bold underline-offset-2 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 dark:bg-slate-800/80 dark:focus-visible:ring-offset-slate-900 ${accent.text}`}
             >
                 เปลี่ยน
             </button>

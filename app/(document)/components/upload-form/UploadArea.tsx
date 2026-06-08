@@ -52,13 +52,13 @@ export function UploadArea({
         <div className="space-y-5">
             <div>
                 <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900 text-balance dark:text-slate-100">
-                    <UploadCloud className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <UploadCloud className="h-5 w-5 text-green-600 dark:text-green-400" />
                     อัปโหลดไฟล์เอกสาร
                 </h3>
 
                 <div
                     className={cn(
-                        "relative min-h-[24rem] rounded-2xl border-2 border-dashed p-8 text-center transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:p-10 lg:min-h-[28rem]",
+                        "relative min-h-[22rem] rounded-2xl border-2 border-dashed p-5 text-center transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:min-h-[24rem] sm:p-8 lg:min-h-[28rem] lg:p-10",
                         selectedFile
                             ? "border-green-400 dark:border-green-600 bg-green-50/50 dark:bg-green-900/20"
                             : "border-gray-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800",
@@ -67,7 +67,7 @@ export function UploadArea({
                     onDrop={onDrop}
                 >
                     {selectedFile ? (
-                        <div className="flex min-h-[18rem] flex-col items-center justify-center space-y-4">
+                        <div className="flex min-h-[16rem] flex-col items-center justify-center space-y-4 sm:min-h-[18rem]">
                             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-green-100 bg-white shadow-sm dark:border-green-900 dark:bg-slate-800">
                                 <FileText className="h-10 w-10 text-green-600 dark:text-green-400" />
                             </div>
@@ -81,15 +81,17 @@ export function UploadArea({
                             </div>
                             {onClearFile && !isUploading && (
                                 <button
+                                    type="button"
+                                    aria-label="ล้างไฟล์ที่เลือก"
                                     onClick={onClearFile}
-                                    className="absolute top-4 right-4 text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                    className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-red-400 sm:right-4 sm:top-4 sm:h-9 sm:w-9"
                                 >
-                                    <X className="w-5 h-5" />
+                                    <X className="h-5 w-5" />
                                 </button>
                             )}
                         </div>
                     ) : (
-                        <div className="flex min-h-[18rem] flex-col items-center justify-center space-y-4 py-4">
+                        <div className="flex min-h-[16rem] flex-col items-center justify-center space-y-4 py-4 sm:min-h-[18rem]">
                             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/50">
                                 <UploadCloud className="h-10 w-10 text-blue-500" />
                             </div>
@@ -121,7 +123,7 @@ export function UploadArea({
                         <Button
                             onClick={() => fileInputRef.current?.click()}
                             variant="outline"
-                            className="mt-6 cursor-pointer hover:bg-white dark:hover:bg-slate-700"
+                            className="mt-6 h-11 cursor-pointer rounded-xl hover:bg-white dark:hover:bg-slate-700"
                             disabled={isUploading}
                         >
                             เลือกไฟล์จากเครื่อง
@@ -130,7 +132,7 @@ export function UploadArea({
                         <Button
                             onClick={onUpload}
                             disabled={isUploading}
-                            className="mt-6 min-w-[200px] cursor-pointer px-8 py-2"
+                            className="mt-6 h-11 min-w-[200px] cursor-pointer rounded-xl px-8"
                             size="lg"
                         >
                             {isUploading ? (
@@ -149,6 +151,7 @@ export function UploadArea({
 
                     {uploadMessage && (
                         <div
+                            role="status"
                             className={cn(
                                 "mx-auto mt-5 flex max-w-md items-start gap-3 rounded-xl border px-4 py-3 text-left animate-in fade-in",
                                 uploadSuccess
@@ -171,9 +174,12 @@ export function UploadArea({
 
             {/* Warning when file selected but no project */}
             {selectedFile && !hasSelectedProject && (
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-900/50 rounded-lg flex items-center gap-3 animate-in fade-in">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 flex-shrink-0" />
-                    <p className="text-yellow-800 dark:text-yellow-400 text-sm">
+                <div
+                    role="status"
+                    className="flex items-center gap-3 rounded-xl border border-yellow-200 bg-yellow-50 p-4 animate-in fade-in dark:border-yellow-900/50 dark:bg-yellow-900/30"
+                >
+                    <AlertCircle className="h-5 w-5 flex-shrink-0 text-yellow-600 dark:text-yellow-500" />
+                    <p className="text-sm text-yellow-800 dark:text-yellow-400">
                         กรุณาเลือกโครงการทางด้านซ้ายก่อนอัพโหลดไฟล์
                     </p>
                 </div>

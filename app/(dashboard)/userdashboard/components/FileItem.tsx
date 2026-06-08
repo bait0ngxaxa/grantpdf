@@ -80,6 +80,7 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                             {file.attachmentFiles &&
                                 file.attachmentFiles.length > 0 && (
                                     <button
+                                        type="button"
                                         onClick={() =>
                                             setIsAttachmentExpanded(
                                                 !isAttachmentExpanded,
@@ -103,6 +104,7 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
 
                 <div className="flex items-center space-x-2 flex-shrink-0 pl-11 sm:pl-0">
                     <button
+                        type="button"
                         onClick={() =>
                             download({ fileId: file.id, type: "userFile" })
                         }
@@ -121,7 +123,9 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                         )}
                     </button>
                     <button
+                        type="button"
                         onClick={() => handleDeleteFile(file.id)}
+                        aria-label="ลบไฟล์"
                         className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                         title="ลบไฟล์"
                     >

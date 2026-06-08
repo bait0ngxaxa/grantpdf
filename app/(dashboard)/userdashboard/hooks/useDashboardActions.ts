@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import type { Project } from "@/type";
 import { API_ROUTES } from "@/lib/constants";
 import { toast } from "sonner";
+import { hasProjectDraftChanges } from "@/lib/projectDraftChanges";
 
 interface DashboardActionsParams {
     fetchUserData: () => Promise<void>;
@@ -162,6 +163,16 @@ export function useDashboardActions(params: DashboardActionsParams) {
     // Update project action
     const onConfirmUpdateProject = useCallback(async () => {
         if (!projectToEdit || !editProjectName.trim()) return;
+        if (
+            !hasProjectDraftChanges(
+                projectToEdit,
+                editProjectName,
+                editProjectDescription,
+            )
+        ) {
+            return;
+        }
+
         setIsUpdatingProject(true);
 
         try {

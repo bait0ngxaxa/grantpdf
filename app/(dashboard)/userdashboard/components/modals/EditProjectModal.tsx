@@ -17,12 +17,14 @@ import {
 } from "@/lib/validation/constants";
 import { Pencil, Loader2 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
+import { hasProjectDraftChanges } from "@/lib/projectDraftChanges";
 
 export const EditProjectModal: React.FC = () => {
     const {
         showEditProjectModal,
         setShowEditProjectModal,
         setProjectToEdit,
+        projectToEdit,
         editProjectName,
         setEditProjectName,
         editProjectDescription,
@@ -38,9 +40,19 @@ export const EditProjectModal: React.FC = () => {
         setEditProjectDescription("");
     };
 
+    const hasChanges = React.useMemo(
+        () =>
+            hasProjectDraftChanges(
+                projectToEdit,
+                editProjectName,
+                editProjectDescription,
+            ),
+        [projectToEdit, editProjectName, editProjectDescription],
+    );
+
     return (
         <Dialog open={showEditProjectModal} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[500px] rounded-3xl p-6 bg-white dark:bg-slate-800 border-0 shadow-2xl">
+            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:max-w-[500px] sm:p-6 dark:border-slate-700 dark:bg-slate-800">
                 <DialogHeader>
                     <div className="flex items-center gap-3 mb-2">
                         <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-xl text-blue-600 dark:text-blue-400">
@@ -99,7 +111,11 @@ export const EditProjectModal: React.FC = () => {
                     </Button>
                     <Button
                         onClick={onConfirmUpdateProject}
-                        disabled={!editProjectName.trim() || isUpdatingProject}
+                        disabled={
+                            !editProjectName.trim() ||
+                            !hasChanges ||
+                            isUpdatingProject
+                        }
                         className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 h-11 px-6 font-semibold"
                     >
                         {isUpdatingProject ? (

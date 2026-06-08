@@ -23,7 +23,7 @@ export function DocumentActionBar({
     return (
         <>
             <div className="h-28 sm:h-20" aria-hidden="true" />
-            <div className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-5xl rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl shadow-slate-200/70 backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-slate-950/50">
+            <div className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-5xl rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl shadow-slate-200/70 backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-slate-950/50 sm:inset-x-4 sm:bottom-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0 px-1">
                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -38,7 +38,7 @@ export function DocumentActionBar({
                             type="button"
                             onClick={onPreview}
                             disabled={isSubmitting || disabled}
-                            className="h-11 cursor-pointer rounded-lg bg-blue-600 px-6 font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-11 cursor-pointer rounded-xl bg-blue-600 px-6 font-semibold text-white shadow-sm transition-[background-color,box-shadow,transform] hover:bg-blue-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none motion-reduce:transition-none motion-reduce:transform-none"
                         >
                             {isSubmitting ? (
                                 <>

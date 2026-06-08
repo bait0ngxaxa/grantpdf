@@ -44,6 +44,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
         setShowCreateProjectModal,
     } = useUserDashboardContext();
 
+    const sidebarRef = React.useRef<HTMLDivElement>(null);
     const [, startTransition] = React.useTransition();
     const closeSidebarOnMobile = (): void => {
         if (window.matchMedia("(max-width: 1023px)").matches) {
@@ -51,11 +52,64 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
         }
     };
 
+    React.useEffect(() => {
+        if (!isSidebarOpen) {
+            return;
+        }
+
+        const handleKeyDown = (event: KeyboardEvent): void => {
+            const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+            if (!isMobile) {
+                return;
+            }
+
+            if (event.key === "Escape") {
+                setIsSidebarOpen(false);
+                return;
+            }
+
+            if (event.key !== "Tab" || !sidebarRef.current) {
+                return;
+            }
+
+            const focusableElements = sidebarRef.current.querySelectorAll(
+                'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            );
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+            if (!(firstElement instanceof HTMLElement) || !(lastElement instanceof HTMLElement)) {
+                return;
+            }
+
+            if (!sidebarRef.current.contains(document.activeElement)) {
+                event.preventDefault();
+                if (event.shiftKey) {
+                    lastElement.focus();
+                } else {
+                    firstElement.focus();
+                }
+                return;
+            }
+
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [isSidebarOpen, setIsSidebarOpen]);
+
     return (
         <>
             {/* Mobile sidebar overlay */}
             {isSidebarOpen && (
                 <div
+                    aria-hidden="true"
                     className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm transition-opacity dark:bg-slate-900/50 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
@@ -63,6 +117,10 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
 
             {/* Sidebar */}
             <div
+                id="userdashboard-sidebar"
+                ref={sidebarRef}
+                role="navigation"
+                aria-label="เมนูหลัก"
                 className={cn(
                     "fixed left-0 top-0 z-50 flex h-full transform flex-col border-r border-blue-100/70 bg-gradient-to-b from-white/98 via-white/95 to-blue-50/70 shadow-[8px_0_36px_-24px_rgba(37,99,235,0.8)] backdrop-blur-2xl transition-[width,transform] duration-300 dark:border-slate-800/80 dark:from-slate-950/98 dark:via-slate-900/95 dark:to-blue-950/35 dark:shadow-[8px_0_36px_-24px_rgba(59,130,246,0.5)] lg:translate-x-0",
                     isSidebarOpen
@@ -124,7 +182,9 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     : "ขยายเมนูด้านข้าง"
                             }
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-slate-600 shadow-sm shadow-blue-100/60 transition-[border-color,background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:text-blue-300 dark:focus-visible:ring-offset-slate-900"
+                            aria-controls="userdashboard-sidebar"
+                            aria-expanded={isSidebarOpen}
+                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-slate-600 shadow-sm shadow-blue-100/60 transition-[border-color,background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:text-blue-300 dark:focus-visible:ring-offset-slate-900 lg:h-9 lg:w-9"
                         >
                             {isSidebarOpen ? (
                                 <PanelLeftClose className="h-4 w-4" />

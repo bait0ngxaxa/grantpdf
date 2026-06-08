@@ -104,30 +104,30 @@ export const CreateProjectModal: React.FC = () => {
 
     return (
         <Dialog open={showCreateProjectModal} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-[600px] rounded-3xl p-6 bg-white dark:bg-slate-800 border-0 shadow-2xl">
+            <DialogContent className="overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:max-w-[640px] sm:p-6 dark:border-slate-700 dark:bg-slate-800">
                 {step === "select-program" ? (
                     <>
-                        <DialogHeader>
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-xl text-indigo-600 dark:text-indigo-400">
-                                    <Plus className="h-6 w-6" />
+                        <DialogHeader className="space-y-3">
+                            <div className="mb-1 flex min-w-0 items-center gap-3">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">
+                                    <Plus className="h-5 w-5" />
                                 </div>
-                                <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                                <DialogTitle className="text-xl font-bold leading-7 text-slate-800 text-balance dark:text-slate-100 sm:text-2xl">
                                     เลือกโครงการหลัก
                                 </DialogTitle>
                             </div>
-                            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+                            <DialogDescription className="text-sm leading-6 text-slate-500 dark:text-slate-400">
                                 เลือกโครงการหลักที่ต้องการสร้างโครงการย่อยภายใต้
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="py-4">
+                        <div className="py-4 sm:py-5">
                             {isLoadingPrograms ? (
-                                <div className="flex justify-center py-12">
+                                <div className="flex min-h-52 items-center justify-center">
                                     <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1">
+                                <div className="-mx-1 grid max-h-[min(52dvh,420px)] grid-cols-1 gap-3 overflow-y-auto px-1 py-1 sm:grid-cols-2">
                                     {programs.map((program) => (
                                         <ProgramSelectionCard
                                             key={program.id}
@@ -139,7 +139,7 @@ export const CreateProjectModal: React.FC = () => {
                             )}
                         </div>
 
-                        <DialogFooter>
+                        <DialogFooter className="border-t border-slate-100 pt-3 dark:border-slate-700 sm:pt-4">
                             <Button
                                 variant="ghost"
                                 onClick={handleClose}
@@ -151,16 +151,16 @@ export const CreateProjectModal: React.FC = () => {
                     </>
                 ) : (
                     <>
-                        <DialogHeader>
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-xl text-blue-600 dark:text-blue-400">
-                                    <Plus className="h-6 w-6" />
+                        <DialogHeader className="space-y-3">
+                            <div className="mb-1 flex min-w-0 items-center gap-3">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+                                    <Plus className="h-5 w-5" />
                                 </div>
-                                <DialogTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                                <DialogTitle className="text-xl font-bold leading-7 text-slate-800 text-balance dark:text-slate-100 sm:text-2xl">
                                     สร้างโครงการใหม่
                                 </DialogTitle>
                             </div>
-                            <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
+                            <DialogDescription className="text-sm leading-6 text-slate-500 dark:text-slate-400">
                                 กรอกข้อมูลเพื่อสร้างโครงการใหม่
                             </DialogDescription>
                         </DialogHeader>
@@ -173,7 +173,7 @@ export const CreateProjectModal: React.FC = () => {
                             />
                         )}
 
-                        <div className="space-y-5 py-4">
+                        <div className="space-y-5 py-4 sm:py-5">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                     ชื่อโครงการ{" "}
@@ -215,7 +215,7 @@ export const CreateProjectModal: React.FC = () => {
                                 </p>
                             </div>
                         </div>
-                        <DialogFooter className="gap-2 sm:gap-0">
+                        <DialogFooter className="gap-2 border-t border-slate-100 pt-3 dark:border-slate-700 sm:gap-0 sm:pt-4">
                             <Button
                                 variant="ghost"
                                 onClick={handleBack}

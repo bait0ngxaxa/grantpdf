@@ -82,6 +82,7 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                             {file.attachmentFiles &&
                                 file.attachmentFiles.length > 0 && (
                                     <button
+                                        type="button"
                                         onClick={toggleAttachmentExpansion}
                                         className="flex items-center text-xs text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full"
                                     >
@@ -103,6 +104,7 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                 <div className="flex items-center space-x-2 flex-shrink-0 pl-12 sm:pl-0">
                     {file.storagePath && (
                         <button
+                            type="button"
                             onClick={() =>
                                 download({
                                     fileId: file.id,
