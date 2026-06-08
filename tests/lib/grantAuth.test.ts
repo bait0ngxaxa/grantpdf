@@ -16,15 +16,26 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
+vi.mock("@/lib/services/sessionCacheService", () => ({
+    getCachedGrantSession: vi.fn(),
+    setCachedGrantSession: vi.fn(),
+}));
+
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/accessToken";
 import { SESSION } from "@/lib/constants";
 import { getGrantSession } from "@/lib/grantAuth";
+import {
+    getCachedGrantSession,
+    setCachedGrantSession,
+} from "@/lib/services/sessionCacheService";
 
 const mockedCookies = vi.mocked(cookies);
 const mockedVerifyAccessToken = vi.mocked(verifyAccessToken);
 const mockedFindUnique = vi.mocked(prisma.authSession.findUnique);
+const mockedGetCachedGrantSession = vi.mocked(getCachedGrantSession);
+const mockedSetCachedGrantSession = vi.mocked(setCachedGrantSession);
 
 function mockCookieStore(token: string | null): void {
     mockedCookies.mockResolvedValue({
@@ -51,6 +62,8 @@ function buildSessionRecord(overrides: Partial<{
     };
 }> = {}) {
     return {
+        sessionId: "session-1",
+        familyId: "family-1",
         expiresAt: new Date(Date.now() + 60_000),
         revokedAt: null,
         sessionVersion: 2,
@@ -68,6 +81,7 @@ function buildSessionRecord(overrides: Partial<{
 describe("getGrantSession", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockedGetCachedGrantSession.mockResolvedValue(null);
     });
 
     it("returns null when access cookie is missing", async () => {
@@ -114,8 +128,33 @@ describe("getGrantSession", () => {
                 email: "grant@example.com",
                 role: "admin",
                 sessionVersion: 2,
+                sessionId: "session-1",
+                sessionFamilyId: "family-1",
             },
         });
+        expect(mockedSetCachedGrantSession).toHaveBeenCalledWith(
+            expect.objectContaining({
+                sessionId: "session-1",
+                familyId: "family-1",
+            })
+        );
+    });
+
+    it("returns cached session without querying DB when cache is active", async () => {
+        mockCookieStore("access-token");
+        mockedVerifyAccessToken.mockResolvedValue({
+            userId: 7,
+            role: "admin",
+            sessionId: "session-1",
+            sessionVersion: 2,
+        });
+        mockedGetCachedGrantSession.mockResolvedValue(buildSessionRecord());
+
+        const result = await getGrantSession();
+
+        expect(mockedFindUnique).not.toHaveBeenCalled();
+        expect(mockedSetCachedGrantSession).not.toHaveBeenCalled();
+        expect(result?.user.sessionId).toBe("session-1");
     });
 
     it("returns null for revoked DB session", async () => {

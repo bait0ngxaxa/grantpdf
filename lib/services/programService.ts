@@ -1,8 +1,16 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { ProgramSummary } from "@/type/models";
+import {
+    deleteJsonCache,
+    getJsonCache,
+    setJsonCache,
+} from "@/lib/services/redisJsonCache";
 
 const PROGRAM_CREATE_RETRY_LIMIT = 3;
+const PROGRAM_CACHE_TTL_SECONDS = 10 * 60;
+const ACTIVE_PROGRAMS_CACHE_KEY = "grant:programs:active";
+const ALL_PROGRAMS_CACHE_KEY = "grant:programs:all";
 
 function toProgramSummary(program: {
     id: number;
@@ -20,8 +28,35 @@ function toProgramSummary(program: {
     };
 }
 
+function isProgramSummary(value: unknown): value is ProgramSummary {
+    if (!value || typeof value !== "object") return false;
+    const program = value as Record<string, unknown>;
+    return (
+        typeof program.id === "string" &&
+        typeof program.name === "string" &&
+        (program.description === undefined ||
+            typeof program.description === "string") &&
+        typeof program.sortOrder === "number" &&
+        typeof program.isActive === "boolean"
+    );
+}
+
+function isProgramSummaryList(value: unknown): value is ProgramSummary[] {
+    return Array.isArray(value) && value.every(isProgramSummary);
+}
+
+async function invalidateProgramCache(): Promise<void> {
+    await deleteJsonCache([ACTIVE_PROGRAMS_CACHE_KEY, ALL_PROGRAMS_CACHE_KEY]);
+}
+
 /** Active programs sorted by sortOrder — used by user-facing UI */
 export async function getActivePrograms(): Promise<ProgramSummary[]> {
+    const cached = await getJsonCache(
+        ACTIVE_PROGRAMS_CACHE_KEY,
+        isProgramSummaryList,
+    );
+    if (cached) return cached;
+
     const programs = await prisma.program.findMany({
         where: { isActive: true },
         orderBy: { sortOrder: "asc" },
@@ -34,11 +69,20 @@ export async function getActivePrograms(): Promise<ProgramSummary[]> {
         },
     });
 
-    return programs.map(toProgramSummary);
+    const result = programs.map(toProgramSummary);
+    await setJsonCache(
+        ACTIVE_PROGRAMS_CACHE_KEY,
+        result,
+        PROGRAM_CACHE_TTL_SECONDS,
+    );
+    return result;
 }
 
 /** All programs (including inactive) — used by admin */
 export async function getAllPrograms(): Promise<ProgramSummary[]> {
+    const cached = await getJsonCache(ALL_PROGRAMS_CACHE_KEY, isProgramSummaryList);
+    if (cached) return cached;
+
     const programs = await prisma.program.findMany({
         orderBy: { sortOrder: "asc" },
         select: {
@@ -50,7 +94,9 @@ export async function getAllPrograms(): Promise<ProgramSummary[]> {
         },
     });
 
-    return programs.map(toProgramSummary);
+    const result = programs.map(toProgramSummary);
+    await setJsonCache(ALL_PROGRAMS_CACHE_KEY, result, PROGRAM_CACHE_TTL_SECONDS);
+    return result;
 }
 
 /** Verify a program exists and is active */
@@ -117,6 +163,7 @@ export async function createProgram(
                 { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
             );
 
+            await invalidateProgramCache();
             return toProgramSummary(program);
         } catch (error) {
             if (isUniqueConstraintError(error)) {
@@ -184,5 +231,6 @@ export async function updateProgram(
         throw error;
     }
 
+    await invalidateProgramCache();
     return toProgramSummary(program);
 }

@@ -3,6 +3,7 @@ import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import type { SafeUser, UpdateUserData } from "./types";
 import { isValidRole } from "./constants";
 import type { Prisma } from "@prisma/client";
+import { deleteUserSessionCache } from "@/lib/services/sessionCacheService";
 
 interface AuditContext {
     actorUserId: string | null;
@@ -44,7 +45,8 @@ export async function updateUser(
         throw new Error("บทบาทไม่ถูกต้อง");
     }
 
-    return prisma.$transaction(async (tx) => {
+    let shouldDeleteSessionCache = false;
+    const result = await prisma.$transaction(async (tx) => {
         const currentUser = await tx.user.findUnique({
             where: { id },
             select: {
@@ -69,6 +71,7 @@ export async function updateUser(
         });
 
         if (invalidateSession) {
+            shouldDeleteSessionCache = true;
             await tx.authSession.updateMany({
                 where: {
                     userId: id,
@@ -85,12 +88,19 @@ export async function updateUser(
             id: updatedUser.id.toString(),
         };
     });
+
+    if (shouldDeleteSessionCache) {
+        await deleteUserSessionCache(id);
+    }
+
+    return result;
 }
 
 export async function deleteUser(id: number): Promise<void> {
     await prisma.user.delete({
         where: { id },
     });
+    await deleteUserSessionCache(id);
 }
 
 export async function updateUserWithAudit(
@@ -102,7 +112,8 @@ export async function updateUserWithAudit(
         throw new Error("INVALID_ROLE");
     }
 
-    return prisma.$transaction(async (tx) => {
+    let shouldDeleteSessionCache = false;
+    const result = await prisma.$transaction(async (tx) => {
         const beforeUser = await tx.user.findUnique({
             where: { id },
             select: {
@@ -132,6 +143,7 @@ export async function updateUserWithAudit(
         });
 
         if (invalidateSession) {
+            shouldDeleteSessionCache = true;
             await tx.authSession.updateMany({
                 where: {
                     userId: id,
@@ -174,6 +186,12 @@ export async function updateUserWithAudit(
             id: updatedUser.id.toString(),
         };
     });
+
+    if (shouldDeleteSessionCache) {
+        await deleteUserSessionCache(id);
+    }
+
+    return result;
 }
 
 export async function deleteUserWithAudit(
@@ -221,4 +239,5 @@ export async function deleteUserWithAudit(
             },
         });
     });
+    await deleteUserSessionCache(id);
 }

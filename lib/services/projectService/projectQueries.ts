@@ -6,6 +6,7 @@ import type {
     RawProject,
     PaginatedProjectsResult,
 } from "./types";
+import { getJsonCache, setJsonCache } from "@/lib/services/redisJsonCache";
 import { collectAttachmentPaths, filterOutAttachments } from "./sanitizers";
 import {
     buildProjectAccessWhere,
@@ -69,6 +70,50 @@ interface UserProjectStatsResult {
         name: string;
         created_at: string;
     } | null;
+}
+
+const USER_STATS_CACHE_TTL_SECONDS = 30;
+
+function getUserStatsCacheKey(userId: number): string {
+    return `grant:stats:user:${userId}`;
+}
+
+function isProjectStatusCounts(value: unknown): value is ProjectStatusCounts {
+    if (!value || typeof value !== "object") return false;
+    const counts = value as Record<string, unknown>;
+    return (
+        typeof counts.pending === "number" &&
+        typeof counts.approved === "number" &&
+        typeof counts.rejected === "number" &&
+        typeof counts.editing === "number" &&
+        typeof counts.closed === "number"
+    );
+}
+
+function isLatestUserProject(
+    value: unknown,
+): value is UserProjectStatsResult["latestProject"] {
+    if (value === null) return true;
+    if (!value || typeof value !== "object") return false;
+    const project = value as Record<string, unknown>;
+    return (
+        typeof project.id === "string" &&
+        typeof project.name === "string" &&
+        typeof project.created_at === "string"
+    );
+}
+
+function isUserProjectStatsResult(
+    value: unknown,
+): value is UserProjectStatsResult {
+    if (!value || typeof value !== "object") return false;
+    const stats = value as Record<string, unknown>;
+    return (
+        typeof stats.total === "number" &&
+        typeof stats.totalFiles === "number" &&
+        isLatestUserProject(stats.latestProject) &&
+        isProjectStatusCounts(stats.statusCounts)
+    );
 }
 
 function buildActiveUserFilesWhere(userId: number): {
@@ -154,6 +199,10 @@ function mapStatusGroupsToCounts(
 export async function getUserProjectStats(
     userId: number,
 ): Promise<UserProjectStatsResult> {
+    const cacheKey = getUserStatsCacheKey(userId);
+    const cached = await getJsonCache(cacheKey, isUserProjectStatsResult);
+    if (cached) return cached;
+
     const projectAccessWhere = buildUserProjectsAccessWhere(userId);
     const activeUserFilesWhere = buildActiveUserFilesWhere(userId);
 
@@ -180,7 +229,7 @@ export async function getUserProjectStats(
         }),
     ]);
 
-    return {
+    const result = {
         total,
         totalFiles,
         statusCounts: mapStatusGroupsToCounts(statusGroups),
@@ -192,6 +241,9 @@ export async function getUserProjectStats(
               }
             : null,
     };
+
+    await setJsonCache(cacheKey, result, USER_STATS_CACHE_TTL_SECONDS);
+    return result;
 }
 
 export async function getProjectsByUserIdPaginated({

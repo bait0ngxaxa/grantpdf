@@ -6,21 +6,13 @@ import {
     type AccessTokenPayload,
 } from "@/lib/accessToken";
 import type { Session } from "@/lib/authTypes";
+import {
+    getCachedGrantSession,
+    setCachedGrantSession,
+    type CachedGrantSessionRecord,
+} from "@/lib/services/sessionCacheService";
 
-type GrantSessionRecord = {
-    sessionId: string;
-    familyId: string;
-    expiresAt: Date;
-    revokedAt: Date | null;
-    sessionVersion: number;
-    user: {
-        id: number;
-        name: string;
-        email: string;
-        role: string;
-        sessionVersion: number;
-    };
-};
+type GrantSessionRecord = CachedGrantSessionRecord;
 
 function isActiveGrantSession(
     record: GrantSessionRecord,
@@ -60,6 +52,11 @@ export async function getGrantSession(): Promise<Session | null> {
         return null;
     }
 
+    const cachedRecord = await getCachedGrantSession(payload.sessionId);
+    if (cachedRecord && isActiveGrantSession(cachedRecord, payload)) {
+        return buildSession(cachedRecord);
+    }
+
     const record = await prisma.authSession.findUnique({
         where: { sessionId: payload.sessionId },
         select: {
@@ -84,5 +81,6 @@ export async function getGrantSession(): Promise<Session | null> {
         return null;
     }
 
+    await setCachedGrantSession(record);
     return buildSession(record);
 }

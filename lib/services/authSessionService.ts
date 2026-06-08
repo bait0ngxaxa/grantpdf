@@ -6,6 +6,11 @@ import {
     verifyAccessToken,
     type AccessTokenPayload,
 } from "@/lib/accessToken";
+import {
+    deleteFamilySessionCache,
+    deleteSessionCache,
+    deleteUserSessionCache,
+} from "@/lib/services/sessionCacheService";
 
 const REFRESH_TOKEN_BYTES = 48;
 const TOKEN_ID_BYTES = 24;
@@ -145,9 +150,11 @@ export async function rotateRefreshSession(
 ): Promise<RotateRefreshSessionResult> {
     const refreshTokenHash = hashRefreshToken(refreshToken);
     const now = new Date();
+    let sessionCacheToDelete: string | null = null;
+    let familyCacheToDelete: string | null = null;
 
-    return prisma.$transaction(
-        async (tx) => {
+    const result = await prisma.$transaction(
+        async (tx): Promise<RotateRefreshSessionResult> => {
             const session = await tx.authSession.findUnique({
                 where: { refreshTokenHash },
                 include: {
@@ -170,10 +177,12 @@ export async function rotateRefreshSession(
                 }
 
                 await revokeFamily(tx, session.familyId, now);
+                familyCacheToDelete = session.familyId;
                 return { status: "reused" };
             }
             if (rejectStatus) {
                 await revokeFamily(tx, session.familyId, now);
+                familyCacheToDelete = session.familyId;
                 return { status: rejectStatus };
             }
 
@@ -215,9 +224,11 @@ export async function rotateRefreshSession(
                 }
 
                 await revokeFamily(tx, session.familyId, now);
+                familyCacheToDelete = session.familyId;
                 return { status: "reused" };
             }
 
+            sessionCacheToDelete = session.sessionId;
             await tx.authSession.create({
                 data: {
                     userId: session.user.id,
@@ -252,6 +263,14 @@ export async function rotateRefreshSession(
             timeout: 15_000,
         }
     );
+
+    if (familyCacheToDelete) {
+        await deleteFamilySessionCache(familyCacheToDelete);
+    } else if (sessionCacheToDelete) {
+        await deleteSessionCache(sessionCacheToDelete);
+    }
+
+    return result;
 }
 
 export async function revokeSession(sessionId: string): Promise<void> {
@@ -262,9 +281,19 @@ export async function revokeSession(sessionId: string): Promise<void> {
         },
         data: { revokedAt: new Date() },
     });
+    await deleteSessionCache(sessionId);
 }
 
 export async function revokeRefreshSession(refreshToken: string): Promise<void> {
+    const session = await prisma.authSession.findUnique({
+        where: {
+            refreshTokenHash: hashRefreshToken(refreshToken),
+        },
+        select: {
+            sessionId: true,
+        },
+    });
+
     await prisma.authSession.updateMany({
         where: {
             refreshTokenHash: hashRefreshToken(refreshToken),
@@ -272,6 +301,10 @@ export async function revokeRefreshSession(refreshToken: string): Promise<void> 
         },
         data: { revokedAt: new Date() },
     });
+
+    if (session) {
+        await deleteSessionCache(session.sessionId);
+    }
 }
 
 export async function revokeAllUserSessions(userId: number): Promise<void> {
@@ -282,4 +315,5 @@ export async function revokeAllUserSessions(userId: number): Promise<void> {
         },
         data: { revokedAt: new Date() },
     });
+    await deleteUserSessionCache(userId);
 }

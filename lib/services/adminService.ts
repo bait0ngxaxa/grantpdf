@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { PROJECT_STATUS } from "@/lib/constants";
+import { getJsonCache, setJsonCache } from "@/lib/services/redisJsonCache";
 
 interface AdminStatusCounts {
     pending: number;
@@ -29,11 +30,69 @@ export interface AdminStatsResult {
     statusCounts: AdminStatusCounts;
 }
 
+const ADMIN_STATS_CACHE_KEY = "grant:stats:admin";
+const DASHBOARD_STATS_CACHE_TTL_SECONDS = 30;
+
+function isAdminStatusCounts(value: unknown): value is AdminStatusCounts {
+    if (!value || typeof value !== "object") return false;
+    const counts = value as Record<string, unknown>;
+    return (
+        typeof counts.pending === "number" &&
+        typeof counts.approved === "number" &&
+        typeof counts.rejected === "number" &&
+        typeof counts.editing === "number" &&
+        typeof counts.closed === "number"
+    );
+}
+
+function isLatestUser(value: unknown): value is AdminStatsResult["latestUser"] {
+    if (value === null) return true;
+    if (!value || typeof value !== "object") return false;
+    const user = value as Record<string, unknown>;
+    return (
+        typeof user.name === "string" &&
+        typeof user.email === "string" &&
+        typeof user.created_at === "string"
+    );
+}
+
+function isLatestProject(
+    value: unknown,
+): value is AdminStatsResult["latestProject"] {
+    if (value === null) return true;
+    if (!value || typeof value !== "object") return false;
+    const project = value as Record<string, unknown>;
+    return (
+        typeof project.id === "string" &&
+        typeof project.name === "string" &&
+        typeof project.created_at === "string" &&
+        (project.userName === null || typeof project.userName === "string")
+    );
+}
+
+function isAdminStatsResult(value: unknown): value is AdminStatsResult {
+    if (!value || typeof value !== "object") return false;
+    const stats = value as Record<string, unknown>;
+    return (
+        typeof stats.totalProjects === "number" &&
+        typeof stats.totalFiles === "number" &&
+        typeof stats.totalUsers === "number" &&
+        typeof stats.todayProjects === "number" &&
+        typeof stats.todayFiles === "number" &&
+        isLatestUser(stats.latestUser) &&
+        isLatestProject(stats.latestProject) &&
+        isAdminStatusCounts(stats.statusCounts)
+    );
+}
+
 /**
  * Fetch all admin dashboard stats in a single parallel query batch.
  * Used by both the API route and server-side layout prefetch.
  */
 export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
+    const cached = await getJsonCache(ADMIN_STATS_CACHE_KEY, isAdminStatsResult);
+    if (cached) return cached;
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -104,7 +163,7 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         statusCountMap.set(group.status, group._count._all);
     }
 
-    return {
+    const result = {
         totalProjects,
         totalFiles,
         totalUsers,
@@ -120,4 +179,11 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
             closed: statusCountMap.get(PROJECT_STATUS.CLOSED) ?? 0,
         },
     };
+
+    await setJsonCache(
+        ADMIN_STATS_CACHE_KEY,
+        result,
+        DASHBOARD_STATS_CACHE_TTL_SECONDS,
+    );
+    return result;
 }

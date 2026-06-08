@@ -11,6 +11,7 @@ import {
     verifyPasswordResetToken,
 } from "@/lib/passwordReset";
 import { getStringField } from "@/lib/utils";
+import { deleteUserSessionCache } from "@/lib/services/sessionCacheService";
 
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
@@ -118,6 +119,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
                 { status: 400 }
             );
         }
+
+        await deleteUserSessionCache(userId);
 
         logAudit("PASSWORD_RESET_SUCCESS", String(decodedToken.userId), {
             targetType: "user",
