@@ -126,6 +126,14 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     );
   };
 
+  const handleAllowCoOwnersChange = (allow: boolean): void => {
+    setAllowCoOwners(allow);
+
+    if (!allow) {
+      setCoOwnerSearch("");
+    }
+  };
+
   const hasCoOwnerChanges =
     allowCoOwners !== selectedProjectForStatus?.allowCoOwners ||
     selectedCoOwnerAdminIds.join(",") !==
@@ -317,7 +325,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                       type="checkbox"
                       checked={allowCoOwners}
                       onChange={(event) =>
-                        setAllowCoOwners(event.target.checked)
+                        handleAllowCoOwnersChange(event.target.checked)
                       }
                       className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
@@ -366,7 +374,11 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                       value={coOwnerSearch}
                       onChange={(event) => setCoOwnerSearch(event.target.value)}
                       placeholder="ค้นหาชื่อหรืออีเมล"
-                      disabled={isAdminOwnersLoading || adminOwnerOptions.length === 0}
+                      disabled={
+                        !allowCoOwners ||
+                        isAdminOwnersLoading ||
+                        adminOwnerOptions.length === 0
+                      }
                       className="min-h-11 w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:disabled:bg-slate-800"
                     />
                   </label>

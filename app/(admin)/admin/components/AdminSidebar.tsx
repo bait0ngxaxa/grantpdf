@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui";
@@ -341,9 +341,11 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                         <div className="flex items-center space-x-3 mb-3 relative z-10">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-orange-100 bg-linear-to-br from-orange-100 via-amber-50 to-white shadow-sm ring-2 ring-white transition-transform duration-300 group-hover:scale-105 dark:border-slate-700 dark:from-orange-900/40 dark:via-amber-900/25 dark:to-slate-800 dark:ring-slate-700">
                                 <span className="text-base font-bold text-orange-600 dark:text-orange-400">
-                                    {session?.user?.name?.charAt(0) ||
-                                        session?.user?.email?.charAt(0) ||
-                                        "A"}
+                                    {getAvatarInitial(
+                                        session?.user?.name,
+                                        session?.user?.email,
+                                        "A",
+                                    )}
                                 </span>
                             </div>
                             <div className="flex-1 min-w-0">

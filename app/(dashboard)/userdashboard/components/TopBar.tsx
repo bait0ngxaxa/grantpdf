@@ -18,7 +18,7 @@ import { ROUTES, ROLES } from "@/lib/constants";
 import { signOutWithSessionRevoke } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
-import { cn } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/utils";
 
 type TopBarMenuItem = {
     name: string;
@@ -153,10 +153,11 @@ function UserAvatarMenu({
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
-    const initial =
-        session?.user?.name?.charAt(0).toUpperCase() ||
-        session?.user?.email?.charAt(0).toUpperCase() ||
-        "U";
+    const initial = getAvatarInitial(
+        session?.user?.name,
+        session?.user?.email,
+        "U",
+    );
     const displayName = session?.user?.name || "ผู้ใช้";
 
     useEffect(() => {

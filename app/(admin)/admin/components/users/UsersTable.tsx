@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/utils";
 import { Button, Pagination } from "@/components/ui";
 import { Edit, Trash2, Search, Users } from "lucide-react";
 import { ROLES } from "@/lib/constants";
@@ -89,7 +89,11 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                                     <td className="px-4 py-3 sm:px-6 sm:py-4">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs">
-                                                {user.name.charAt(0)}
+                                                {getAvatarInitial(
+                                                    user.name,
+                                                    user.email,
+                                                    "U",
+                                                )}
                                             </div>
                                             <span className="font-semibold text-slate-800 dark:text-slate-100">
                                                 {user.name}

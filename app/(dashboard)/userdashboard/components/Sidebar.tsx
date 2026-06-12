@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/utils";
 import Image from "next/image";
 import {
     Folder,
@@ -291,9 +291,11 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                         <div className="flex items-center space-x-3 mb-3 relative z-10">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-100 bg-gradient-to-br from-blue-100 via-indigo-50 to-white shadow-sm ring-2 ring-white transition-transform duration-300 group-hover:scale-105 dark:border-slate-700 dark:from-blue-900 dark:via-indigo-900 dark:to-slate-800 dark:ring-slate-700">
                                 <span className="text-base font-bold text-blue-600 dark:text-blue-400">
-                                    {session?.user?.name?.charAt(0) ||
-                                        session?.user?.email?.charAt(0) ||
-                                        "U"}
+                                    {getAvatarInitial(
+                                        session?.user?.name,
+                                        session?.user?.email,
+                                        "U",
+                                    )}
                                 </span>
                             </div>
                             <div className="flex-1 min-w-0">

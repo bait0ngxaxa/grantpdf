@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getStatusColor, truncateFileName } from "@/lib/utils";
+import { getAvatarInitial, getStatusColor, truncateFileName } from "@/lib/utils";
 import { PROJECT_STATUS } from "@/type/models";
 
 describe("getStatusColor", () => {
@@ -80,5 +80,30 @@ describe("truncateFileName", () => {
     it("should handle custom max length", () => {
         const result = truncateFileName("medium_length_file.txt", 15);
         expect(result.length).toBeLessThanOrEqual(15);
+    });
+});
+
+describe("getAvatarInitial", () => {
+    it("should skip Thai leading vowels", () => {
+        expect(getAvatarInitial("เกษร", "user@example.com", "U")).toBe("ก");
+        expect(getAvatarInitial("แอน", "user@example.com", "U")).toBe("อ");
+    });
+
+    it("should skip common Thai name prefixes", () => {
+        expect(getAvatarInitial("นายสมชาย", "user@example.com", "U")).toBe("ส");
+        expect(getAvatarInitial("นาง มาลี", "user@example.com", "U")).toBe("ม");
+        expect(getAvatarInitial("นางสาว เกษร", "user@example.com", "U")).toBe("ก");
+    });
+
+    it("should skip Thai marks and use fallback email", () => {
+        expect(getAvatarInitial(" เแ", "member@example.com", "U")).toBe("M");
+    });
+
+    it("should uppercase latin initials", () => {
+        expect(getAvatarInitial("alice", "user@example.com", "U")).toBe("A");
+    });
+
+    it("should return default initial when no candidate has usable characters", () => {
+        expect(getAvatarInitial(" เแ", "  ", "U")).toBe("U");
     });
 });

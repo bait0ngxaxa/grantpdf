@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useAdminDashboardContext } from "../contexts";
 import { signOutWithSessionRevoke } from "@/lib/authClient";
-import { cn } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/utils";
 
 type AdminTopBarMenuItem = {
     name: string;
@@ -55,8 +55,8 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
                 isSidebarOpen && "lg:left-72",
             )}
         >
-            <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <div className="flex min-w-0 items-center justify-between gap-2 sm:gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
                     <button
                         type="button"
                         className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-white text-slate-600 shadow-sm shadow-orange-100/70 transition-[border-color,background-color,box-shadow,transform,color] hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 hover:shadow-md hover:shadow-orange-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-orange-800 dark:hover:bg-orange-950/30 dark:hover:text-orange-300 sm:h-10 sm:w-10 lg:hidden"
@@ -67,12 +67,12 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
                     >
                         <Menu className="h-5 w-5" />
                     </button>
-                    <div className="flex min-w-0 items-center gap-3 text-slate-800 dark:text-slate-100">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-white shadow-sm shadow-orange-100/70 dark:border-orange-900/50 dark:bg-orange-950/30 dark:shadow-none">
+                    <div className="flex min-w-0 flex-1 items-center gap-2 text-slate-800 dark:text-slate-100 sm:gap-3">
+                        <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-white shadow-sm shadow-orange-100/70 dark:border-orange-900/50 dark:bg-orange-950/30 dark:shadow-none sm:flex">
                             {activeMenu.icon}
                         </div>
                         <div className="min-w-0">
-                            <h1 className="min-w-0 truncate text-lg font-black text-slate-900 text-balance dark:text-white sm:text-2xl">
+                            <h1 className="min-w-0 truncate text-base font-black text-slate-900 dark:text-white sm:text-2xl">
                                 {activeMenu.name}
                             </h1>
                             <p className="mt-0.5 hidden truncate text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
@@ -81,7 +81,7 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
                         </div>
                     </div>
                 </div>
-                <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-4">
+                <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-4">
                     <ThemeToggle />
                     <AdminAvatarMenu session={session} />
                 </div>
@@ -100,10 +100,11 @@ function AdminAvatarMenu({
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
-    const initial =
-        session?.user?.name?.charAt(0).toUpperCase() ||
-        session?.user?.email?.charAt(0).toUpperCase() ||
-        "A";
+    const initial = getAvatarInitial(
+        session?.user?.name,
+        session?.user?.email,
+        "A",
+    );
     const displayName = session?.user?.name || "Admin";
 
     useEffect(() => {
