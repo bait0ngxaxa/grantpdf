@@ -46,7 +46,8 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
         activeTab,
         setActiveTab,
         todayProjects,
-        todayFiles,
+        todayProjectFiles,
+        todayReportFiles,
         totalProjects,
     } = useAdminDashboardContext();
 
@@ -57,6 +58,8 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
             setIsSidebarOpen(false);
         }
     };
+    const formatStat = (value: number): string =>
+        new Intl.NumberFormat("th-TH").format(value);
 
     React.useEffect(() => {
         if (!isSidebarOpen) {
@@ -224,16 +227,25 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                     โครงการใหม่
                                 </span>
                                 <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-slate-100 dark:border-slate-600">
-                                    {todayProjects}
+                                    {formatStat(todayProjects)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center group">
                                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                                     <div className="w-1.5 h-1.5 rounded-full bg-amber-500 group-hover:scale-125 transition-transform" />
-                                    ไฟล์ใหม่
+                                    ไฟล์ในโครงการ
                                 </span>
                                 <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-slate-100 dark:border-slate-600">
-                                    {todayFiles}
+                                    {formatStat(todayProjectFiles)}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center group">
+                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-sky-500 group-hover:scale-125 transition-transform" />
+                                    ไฟล์ส่งรายงาน
+                                </span>
+                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-slate-100 dark:border-slate-600">
+                                    {formatStat(todayReportFiles)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center group">
@@ -242,7 +254,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                     รวมโครงการ
                                 </span>
                                 <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-slate-100 dark:border-slate-600">
-                                    {totalProjects}
+                                    {formatStat(totalProjects)}
                                 </span>
                             </div>
                         </div>

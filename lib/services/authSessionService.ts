@@ -146,7 +146,8 @@ function isWithinConcurrentRotationGrace(
 }
 
 export async function rotateRefreshSession(
-    refreshToken: string
+    refreshToken: string,
+    ip?: string | null,
 ): Promise<RotateRefreshSessionResult> {
     const refreshTokenHash = hashRefreshToken(refreshToken);
     const now = new Date();
@@ -188,6 +189,7 @@ export async function rotateRefreshSession(
 
             const nextRefreshToken = generateRefreshToken();
             const nextSessionId = generateTokenId();
+            const nextIp = ip ?? session.ip;
             const expiresAt = addSeconds(
                 now,
                 SESSION.REFRESH_TOKEN_MAX_AGE_SECONDS
@@ -202,6 +204,7 @@ export async function rotateRefreshSession(
                 data: {
                     rotatedAt: now,
                     lastUsedAt: now,
+                    ip: nextIp,
                 },
             });
 
@@ -237,7 +240,7 @@ export async function rotateRefreshSession(
                     refreshTokenHash: hashRefreshToken(nextRefreshToken),
                     sessionVersion: session.user.sessionVersion,
                     expiresAt,
-                    ip: session.ip,
+                    ip: nextIp,
                     userAgent: session.userAgent,
                 },
             });

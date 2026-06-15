@@ -15,7 +15,8 @@ export const DashboardOverview: React.FC = (): React.JSX.Element => {
         totalUsers,
         latestProject,
         todayProjects,
-        todayFiles,
+        todayProjectFiles,
+        todayReportFiles,
         statusCounts,
         setActiveTab,
     } = useAdminDashboardContext();
@@ -31,7 +32,8 @@ export const DashboardOverview: React.FC = (): React.JSX.Element => {
                 totalProjects={totalProjects}
                 todayProjects={todayProjects}
                 totalFiles={totalFiles}
-                todayFiles={todayFiles}
+                todayProjectFiles={todayProjectFiles}
+                todayReportFiles={todayReportFiles}
                 setActiveTab={setActiveTab}
             />
 

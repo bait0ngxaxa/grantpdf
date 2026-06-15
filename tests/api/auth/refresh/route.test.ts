@@ -23,10 +23,13 @@ import { POST } from "@/app/api/(auth)/auth/refresh/route";
 const mockedRotateRefreshSession = vi.mocked(rotateRefreshSession);
 const mockedApplyRateLimit = vi.mocked(applyRateLimit);
 
-function buildRequest(cookie?: string): Request {
+function buildRequest(cookie?: string, ip?: string): Request {
     const headers = new Headers();
     if (cookie) {
         headers.set("cookie", cookie);
+    }
+    if (ip) {
+        headers.set("x-forwarded-for", ip);
     }
 
     return new Request("http://localhost/api/auth/refresh", {
@@ -57,7 +60,10 @@ describe("refresh route", () => {
         });
 
         const response = await POST(
-            buildRequest(`${SESSION.REFRESH_COOKIE_NAME}=refresh-token`) as never
+            buildRequest(
+                `${SESSION.REFRESH_COOKIE_NAME}=refresh-token`,
+                "203.0.113.9",
+            ) as never
         );
         const body = await response.json();
 
@@ -66,7 +72,10 @@ describe("refresh route", () => {
             accessToken: "next-access-token",
             expiresAt: "2026-06-01T00:00:00.000Z",
         });
-        expect(mockedRotateRefreshSession).toHaveBeenCalledWith("refresh-token");
+        expect(mockedRotateRefreshSession).toHaveBeenCalledWith(
+            "refresh-token",
+            "203.0.113.9",
+        );
         expect(response.headers.get("set-cookie")).toContain(
             "next-refresh-token"
         );

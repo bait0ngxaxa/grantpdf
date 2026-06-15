@@ -163,7 +163,7 @@ describe("authSessionService", () => {
         mockedUpdateMany.mockResolvedValue({ count: 1 } as never);
         mockedCreate.mockResolvedValue(createSession({ id: BigInt(2) }) as never);
 
-        const result = await rotateRefreshSession("refresh-token");
+        const result = await rotateRefreshSession("refresh-token", "203.0.113.9");
 
         expect(result.status).toBe("rotated");
         expect(mockedUpdateMany).toHaveBeenCalledWith({
@@ -175,6 +175,7 @@ describe("authSessionService", () => {
             data: expect.objectContaining({
                 rotatedAt: expect.any(Date),
                 lastUsedAt: expect.any(Date),
+                ip: "203.0.113.9",
             }),
         });
         expect(mockedCreate).toHaveBeenCalledWith({
@@ -182,7 +183,7 @@ describe("authSessionService", () => {
                 userId: 7,
                 familyId: "family-1",
                 sessionVersion: 2,
-                ip: "127.0.0.1",
+                ip: "203.0.113.9",
                 userAgent: "vitest",
             }),
         });

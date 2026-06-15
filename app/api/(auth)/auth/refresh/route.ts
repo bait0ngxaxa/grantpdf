@@ -8,7 +8,7 @@ import {
     setRefreshTokenCookie,
 } from "@/lib/authSessionCookies";
 import { rotateRefreshSession } from "@/lib/services";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
 
 function buildUnauthorizedResponse(headers: Record<string, string>): NextResponse {
     const response = NextResponse.json(
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     let result: Awaited<ReturnType<typeof rotateRefreshSession>>;
     try {
-        result = await rotateRefreshSession(refreshToken);
+        result = await rotateRefreshSession(refreshToken, getClientIP(req));
     } catch (error) {
         if (isPrismaTransactionStartTimeout(error)) {
             return buildRetryableRefreshResponse(rateLimitResult.headers);

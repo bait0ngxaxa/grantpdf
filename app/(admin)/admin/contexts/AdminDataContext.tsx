@@ -30,6 +30,8 @@ interface AdminDataContextType {
     latestProject: LatestProject | null;
     todayProjects: number;
     todayFiles: number;
+    todayProjectFiles: number;
+    todayReportFiles: number;
     totalFiles: number;
     statusCounts: { pending: number; approved: number; rejected: number; editing: number; closed: number };
     fetchProjects: () => Promise<void>;

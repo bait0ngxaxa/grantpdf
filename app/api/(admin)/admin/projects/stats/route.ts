@@ -1,4 +1,4 @@
-// Admin dashboard stats: todayProjects, todayFiles, totalUsers, latestUser
+// Admin dashboard stats: todayProjects, todayProjectFiles, todayReportFiles, totalUsers, latestUser
 import { NextResponse } from "next/server";
 import { getAdminDashboardStats } from "@/lib/services/adminService";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";

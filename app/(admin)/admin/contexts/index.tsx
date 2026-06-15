@@ -86,6 +86,8 @@ interface AdminDashboardContextType {
     latestProject: LatestProject | null;
     todayProjects: number;
     todayFiles: number;
+    todayProjectFiles: number;
+    todayReportFiles: number;
     statusCounts: { pending: number; approved: number; rejected: number; editing: number; closed: number };
     fetchProjects: () => Promise<void>;
 }

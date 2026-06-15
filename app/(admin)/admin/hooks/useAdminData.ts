@@ -189,6 +189,8 @@ export const useAdminData = ({
         : null;
     const todayProjects = statsData?.todayProjects ?? 0;
     const todayFiles = statsData?.todayFiles ?? 0;
+    const todayProjectFiles = statsData?.todayProjectFiles ?? 0;
+    const todayReportFiles = statsData?.todayReportFiles ?? 0;
     const statusCounts = statsData?.statusCounts ?? {
         pending: 0,
         approved: 0,
@@ -216,6 +218,8 @@ export const useAdminData = ({
         latestProject,
         todayProjects,
         todayFiles,
+        todayProjectFiles,
+        todayReportFiles,
         statusCounts,
         fetchProjects: async () => {
             await mutateProjects();

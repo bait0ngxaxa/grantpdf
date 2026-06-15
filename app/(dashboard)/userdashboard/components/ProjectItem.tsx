@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Eye,
   FileUp,
+  ClipboardList,
 } from "lucide-react";
 
 interface ProjectItemProps {
@@ -46,6 +47,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
   const statusClassName = getStatusColor(
     project.status || PROJECT_STATUS.IN_PROGRESS,
   );
+  const reportCount = project.reports?.length ?? 0;
   const programAccent = project.programName
     ? getProgramAccent({
         id: project.programId ?? project.programName,
@@ -133,9 +135,20 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
           </button>
         </div>
 
-        <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">
-          <FileText className="h-3.5 w-3.5" />
-          <span>{project._count.files} เอกสาร</span>
+        <div className="flex min-w-0 flex-col items-start gap-1 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">
+          <span className="inline-flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            <span>{project._count.files} เอกสาร</span>
+          </span>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5",
+              hasUnreadReportUpdate && "text-orange-600 dark:text-orange-300",
+            )}
+          >
+            <ClipboardList className="h-3.5 w-3.5" />
+            <span>{reportCount} รายงาน</span>
+          </span>
         </div>
 
         <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500 xl:justify-self-start dark:text-slate-400">

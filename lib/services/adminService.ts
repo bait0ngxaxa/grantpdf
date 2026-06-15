@@ -16,6 +16,8 @@ export interface AdminStatsResult {
     totalUsers: number;
     todayProjects: number;
     todayFiles: number;
+    todayProjectFiles: number;
+    todayReportFiles: number;
     latestUser: {
         name: string;
         email: string;
@@ -76,10 +78,12 @@ function isAdminStatsResult(value: unknown): value is AdminStatsResult {
     return (
         typeof stats.totalProjects === "number" &&
         typeof stats.totalFiles === "number" &&
-        typeof stats.totalUsers === "number" &&
-        typeof stats.todayProjects === "number" &&
-        typeof stats.todayFiles === "number" &&
-        isLatestUser(stats.latestUser) &&
+            typeof stats.totalUsers === "number" &&
+            typeof stats.todayProjects === "number" &&
+            typeof stats.todayFiles === "number" &&
+            typeof stats.todayProjectFiles === "number" &&
+            typeof stats.todayReportFiles === "number" &&
+            isLatestUser(stats.latestUser) &&
         isLatestProject(stats.latestProject) &&
         isAdminStatusCounts(stats.statusCounts)
     );
@@ -103,7 +107,8 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         totalProjects,
         totalFiles,
         todayProjects,
-        todayFiles,
+        todayRegularFiles,
+        todayReportFiles,
         latestUserRaw,
         latestProjectRaw,
         statusGroups,
@@ -118,7 +123,13 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
             },
         }),
         prisma.userFile.count({
-            where: { created_at: { gte: today, lt: tomorrow } },
+            where: {
+                created_at: { gte: today, lt: tomorrow },
+                projectReports: { none: {} },
+            },
+        }),
+        prisma.projectReport.count({
+            where: { submittedAt: { gte: today, lt: tomorrow } },
         }),
         prisma.user.findFirst({
             orderBy: { created_at: "desc" },
@@ -168,7 +179,9 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         totalFiles,
         totalUsers,
         todayProjects,
-        todayFiles,
+        todayFiles: todayRegularFiles + todayReportFiles,
+        todayProjectFiles: todayRegularFiles,
+        todayReportFiles,
         latestUser,
         latestProject,
         statusCounts: {
