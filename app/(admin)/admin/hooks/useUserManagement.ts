@@ -49,6 +49,7 @@ export interface UserManagementHook {
     fetchError: string | null;
     selectedUser: UserData | null;
     editFormData: EditFormData;
+    canSaveEdit: boolean;
     isSaving: boolean;
     isDeleting: boolean;
     isEditModalOpen: boolean;
@@ -129,6 +130,27 @@ export function useUserManagement(): UserManagementHook {
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const canSaveEdit = useMemo(() => {
+        if (!selectedUser) {
+            return false;
+        }
+
+        const hasRequiredFields =
+            editFormData.name.trim().length > 0 &&
+            editFormData.email.trim().length > 0 &&
+            editFormData.role !== "";
+
+        if (!hasRequiredFields) {
+            return false;
+        }
+
+        return (
+            editFormData.name !== selectedUser.name ||
+            editFormData.email !== selectedUser.email ||
+            editFormData.role !== selectedUser.role
+        );
+    }, [editFormData, selectedUser]);
+
     const openEditModal = useCallback((user: UserData) => {
         setSelectedUser(user);
         setEditFormData({
@@ -168,7 +190,7 @@ export function useUserManagement(): UserManagementHook {
     const handleUpdateUser = useCallback(
         async (e: React.FormEvent) => {
             e.preventDefault();
-            if (!selectedUser) return;
+            if (!selectedUser || !canSaveEdit) return;
 
             setIsSaving(true);
             try {
@@ -209,7 +231,7 @@ export function useUserManagement(): UserManagementHook {
                 setIsSaving(false);
             }
         },
-        [selectedUser, editFormData, mutate, closeEditModal],
+        [selectedUser, canSaveEdit, editFormData, mutate, closeEditModal],
     );
 
     const openDeleteModal = useCallback((user: UserData) => {
@@ -277,6 +299,7 @@ export function useUserManagement(): UserManagementHook {
         fetchError,
         selectedUser,
         editFormData,
+        canSaveEdit,
 
         isSaving,
         isDeleting,

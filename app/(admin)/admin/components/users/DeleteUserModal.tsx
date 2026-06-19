@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui";
-import { Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { Trash2, AlertTriangle, Loader2, X } from "lucide-react";
 import type { UserApiData } from "@/type";
 
 type UserData = UserApiData;
@@ -38,13 +38,29 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
     if (!isOpen || !user) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/20 p-3 backdrop-blur-sm animate-in fade-in duration-200 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+            <button
+                type="button"
+                aria-label="ปิดหน้าต่างยืนยันการลบผู้ใช้งาน"
+                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200"
+                onClick={isDeleting ? undefined : onClose}
+                disabled={isDeleting}
+            />
             <div
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="delete-user-modal-title"
-                className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-xl animate-in zoom-in-95 duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800"
+                className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-xl animate-in zoom-in-95 duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800"
             >
+                <button
+                    type="button"
+                    aria-label="ปิดหน้าต่างยืนยันการลบผู้ใช้งาน"
+                    onClick={onClose}
+                    disabled={isDeleting}
+                    className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                >
+                    <X className="h-5 w-5" />
+                </button>
                 <div className="flex flex-col items-center justify-center text-center mb-6">
                     <div className="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mb-4 shadow-sm">
                         <Trash2 className="h-8 w-8" />
@@ -108,13 +124,6 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                     </Button>
                 </div>
             </div>
-            {/* Backdrop click to close */}
-            <button
-                type="button"
-                aria-label="ปิดหน้าต่างยืนยันการลบผู้ใช้งาน"
-                className="absolute inset-0 z-[-1]"
-                onClick={onClose}
-            />
         </div>
     );
 };

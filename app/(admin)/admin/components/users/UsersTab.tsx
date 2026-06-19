@@ -24,6 +24,7 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
         fetchError,
         selectedUser,
         editFormData,
+        canSaveEdit,
         isSaving,
         isDeleting,
         isEditModalOpen,
@@ -106,6 +107,7 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
                 onFormChange={handleEditFormChange}
                 onSubmit={handleUpdateUser}
                 isSaving={isSaving}
+                canSave={canSaveEdit}
             />
 
             <DeleteUserModal

@@ -87,13 +87,19 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                                 <h3
                                     id="project-files-modal-title"
                                     className="truncate text-xl font-bold text-slate-800 dark:text-slate-100"
+                                    title={project.name}
                                 >
                                     {project.name}
                                 </h3>
                                 <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                    <span>{project.userName}</span>
+                                    <span title={project.userName}>
+                                        {project.userName}
+                                    </span>
                                     {project.programName && (
-                                        <span className="inline-flex items-center rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300">
+                                        <span
+                                            className="inline-flex max-w-full items-center truncate rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300"
+                                            title={project.programName}
+                                        >
                                             {project.programName}
                                         </span>
                                     )}
@@ -105,7 +111,7 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                         type="button"
                         aria-label="ปิดหน้าต่างรายการเอกสาร"
                         onClick={onClose}
-                        className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
                     >
                         <X className="h-5 w-5" />
                     </button>

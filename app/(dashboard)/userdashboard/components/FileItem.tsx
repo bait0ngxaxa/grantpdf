@@ -57,8 +57,11 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
                     {/* File Info */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">
-                            <span className="font-medium text-slate-900 dark:text-slate-100 truncate break-all">
-                                {truncateFileName(file.originalFileName, 40)}
+                            <span
+                                className="font-medium text-slate-900 dark:text-slate-100 truncate break-all"
+                                title={file.originalFileName}
+                            >
+                                {truncateFileName(file.originalFileName, 64)}
                             </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 text-sm text-slate-500 dark:text-slate-400">

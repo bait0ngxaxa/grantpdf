@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input, Button } from "@/components/ui";
 import { toast } from "sonner";
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import {
   AUTH_CARD_CLASS,
@@ -308,6 +308,14 @@ export default function SignupClient(): React.JSX.Element {
             aria-labelledby="signup-confirm-modal-title"
             className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-0 shadow-lg sm:max-h-[calc(100dvh-2rem)] dark:bg-slate-900"
           >
+            <button
+              type="button"
+              aria-label="ปิดหน้าต่างยืนยันการสมัคร"
+              onClick={handleCloseConfirmModal}
+              className="absolute right-3 top-3 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/95 text-slate-600 shadow-sm transition-colors hover:bg-white hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-700"
+            >
+              <X className="h-5 w-5" />
+            </button>
             <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 p-5 text-center text-white sm:p-6">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/18 ring-1 ring-white/20 sm:h-14 sm:w-14">
                 <CheckCircle2 className="h-7 w-7 text-white" />

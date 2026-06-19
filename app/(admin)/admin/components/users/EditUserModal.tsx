@@ -1,6 +1,6 @@
 import React, { type FormEvent } from "react";
 import { Button, Input } from "@/components/ui";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2, X } from "lucide-react";
 import { ROLES, type UserRole } from "@/lib/constants";
 import type { UserApiData } from "@/type";
 
@@ -23,6 +23,7 @@ interface EditUserModalProps {
     ) => void;
     onSubmit: (e: FormEvent) => void;
     isSaving: boolean;
+    canSave: boolean;
 }
 
 export const EditUserModal: React.FC<EditUserModalProps> = ({
@@ -33,6 +34,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
     onFormChange,
     onSubmit,
     isSaving,
+    canSave,
 }) => {
     React.useEffect(() => {
         if (!isOpen) {
@@ -52,13 +54,27 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
     if (!isOpen || !user) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/20 p-3 backdrop-blur-sm animate-in fade-in duration-200 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+            <button
+                type="button"
+                aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
+                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200"
+                onClick={onClose}
+            />
             <div
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="edit-user-modal-title"
-                className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-xl animate-in zoom-in-95 duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800"
+                className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-xl animate-in zoom-in-95 duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800"
             >
+                <button
+                    type="button"
+                    aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
+                    onClick={onClose}
+                    className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                >
+                    <X className="h-5 w-5" />
+                </button>
                 <div className="mb-6">
                     <h3
                         id="edit-user-modal-title"
@@ -142,7 +158,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isSaving}
+                            disabled={isSaving || !canSave}
                             className="px-6 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md shadow-blue-200 font-medium transition"
                         >
                             {isSaving ? (
@@ -157,13 +173,6 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                     </div>
                 </form>
             </div>
-            {/* Backdrop click to close */}
-            <button
-                type="button"
-                aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
-                className="absolute inset-0 z-[-1]"
-                onClick={onClose}
-            />
         </div>
     );
 };

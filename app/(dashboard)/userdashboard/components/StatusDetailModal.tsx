@@ -63,7 +63,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                         type="button"
                         aria-label="ปิดหน้าต่างรายละเอียดสถานะ"
                         onClick={onClose}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-50 sm:h-8 sm:w-8 dark:hover:bg-slate-800"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                     >
                         <X className="h-5 w-5" />
                     </button>
