@@ -132,7 +132,11 @@ export const useAdminData = ({
 }: UseAdminDataParams = {}) => {
     const statsKey = `${API_ROUTES.ADMIN_PROJECTS}/stats`;
 
-    const { data: statsData, isLoading: isLoadingStats } =
+    const {
+        data: statsData,
+        isLoading: isLoadingStats,
+        mutate: mutateStats,
+    } =
         useSWR<AdminStatsResponse>(statsKey, {
             fallbackData: initialStats,
             revalidateOnMount: initialStats ? false : undefined,
@@ -222,7 +226,7 @@ export const useAdminData = ({
         todayReportFiles,
         statusCounts,
         fetchProjects: async () => {
-            await mutateProjects();
+            await Promise.all([mutateProjects(), mutateStats()]);
         },
     };
 };

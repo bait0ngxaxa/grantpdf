@@ -24,7 +24,7 @@ export async function GET(): Promise<NextResponse> {
         return NextResponse.json(stats, {
             status: 200,
             headers: {
-                "Cache-Control": "private, max-age=15, stale-while-revalidate=30",
+                "Cache-Control": "private, no-store",
             },
         });
     } catch (error) {

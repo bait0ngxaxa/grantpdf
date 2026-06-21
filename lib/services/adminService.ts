@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { PROJECT_STATUS } from "@/lib/constants";
 import { getJsonCache, setJsonCache } from "@/lib/services/redisJsonCache";
+import {
+    ADMIN_DASHBOARD_STATS_CACHE_KEY,
+    DASHBOARD_STATS_CACHE_TTL_SECONDS,
+} from "@/lib/services/dashboardStatsCache";
 
 interface AdminStatusCounts {
     pending: number;
@@ -31,9 +35,6 @@ export interface AdminStatsResult {
     } | null;
     statusCounts: AdminStatusCounts;
 }
-
-const ADMIN_STATS_CACHE_KEY = "grant:stats:admin";
-const DASHBOARD_STATS_CACHE_TTL_SECONDS = 30;
 
 function isAdminStatusCounts(value: unknown): value is AdminStatusCounts {
     if (!value || typeof value !== "object") return false;
@@ -94,7 +95,10 @@ function isAdminStatsResult(value: unknown): value is AdminStatsResult {
  * Used by both the API route and server-side layout prefetch.
  */
 export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
-    const cached = await getJsonCache(ADMIN_STATS_CACHE_KEY, isAdminStatsResult);
+    const cached = await getJsonCache(
+        ADMIN_DASHBOARD_STATS_CACHE_KEY,
+        isAdminStatsResult,
+    );
     if (cached) return cached;
 
     const today = new Date();
@@ -194,7 +198,7 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
     };
 
     await setJsonCache(
-        ADMIN_STATS_CACHE_KEY,
+        ADMIN_DASHBOARD_STATS_CACHE_KEY,
         result,
         DASHBOARD_STATS_CACHE_TTL_SECONDS,
     );

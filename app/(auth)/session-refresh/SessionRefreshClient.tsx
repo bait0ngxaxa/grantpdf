@@ -81,7 +81,6 @@ export default function SessionRefreshClient({
 
             if (response?.ok) {
                 router.replace(getSafeCallbackUrl(callbackUrl));
-                router.refresh();
                 return;
             }
 

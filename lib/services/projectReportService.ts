@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import { REPORT_STATUS } from "@/lib/constants";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import type { Prisma } from "@prisma/client";
 import type {
     AdminProjectReport,
@@ -266,6 +267,7 @@ export async function createProjectReportWithFile({
         });
     });
 
+    await invalidateDashboardStats([userId]);
     return sanitizeProjectReport(report as unknown as RawProjectReport);
 }
 

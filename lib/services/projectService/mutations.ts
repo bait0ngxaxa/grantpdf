@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import { VALID_STATUSES_SET, PROJECT_STATUS } from "@/lib/constants";
 import { buildProjectAccessWhere } from "./projectAccess";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 
 function uniquePositiveIds(ids: number[]): number[] {
     const uniqueIds = new Set<number>();
@@ -20,6 +21,16 @@ function uniquePositiveIds(ids: number[]): number[] {
     }
 
     return [...uniqueIds];
+}
+
+function getProjectDashboardUserIds(project: {
+    userId: number;
+    coOwners?: Array<{ adminUserId: number }>;
+}): number[] {
+    return [
+        project.userId,
+        ...(project.coOwners?.map((coOwner) => coOwner.adminUserId) ?? []),
+    ];
 }
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -178,12 +189,16 @@ export async function updateProjectStatus({
                     email: true,
                 },
             },
+            coOwners: {
+                select: { adminUserId: true },
+            },
             _count: {
                 select: { files: true },
             },
         },
     });
 
+    await invalidateDashboardStats(getProjectDashboardUserIds(updatedProject));
     return toAdminProject(updatedProject);
 }
 
@@ -210,6 +225,10 @@ export async function updateProjectStatusWithAudit(
                 status: true,
                 statusNote: true,
                 programId: true,
+                userId: true,
+                coOwners: {
+                    select: { adminUserId: true },
+                },
             },
         });
 
@@ -234,10 +253,14 @@ export async function updateProjectStatusWithAudit(
 
         await createProjectStatusAudit(tx, beforeProject, updated, params, audit);
 
-        return updated;
+        return {
+            updated,
+            affectedUserIds: getProjectDashboardUserIds(beforeProject),
+        };
     });
 
-    return toAdminProject(updatedProject);
+    await invalidateDashboardStats(updatedProject.affectedUserIds);
+    return toAdminProject(updatedProject.updated);
 }
 
 export async function updateProjectCoOwners({
@@ -259,12 +282,15 @@ export async function updateProjectCoOwners({
 
     const requestedAdminIds = allowCoOwners ? uniquePositiveIds(adminUserIds) : [];
 
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
         const project = await tx.project.findUnique({
             where: { id: projectId },
             select: {
                 id: true,
                 userId: true,
+                coOwners: {
+                    select: { adminUserId: true },
+                },
             },
         });
 
@@ -346,8 +372,18 @@ export async function updateProjectCoOwners({
                 name: coOwner.adminUser.name || "Unknown User",
                 email: coOwner.adminUser.email,
             })),
+            affectedUserIds: [
+                ...getProjectDashboardUserIds(project),
+                ...requestedAdminIds,
+            ],
         };
     });
+
+    await invalidateDashboardStats(result.affectedUserIds);
+    return {
+        allowCoOwners: result.allowCoOwners,
+        coOwners: result.coOwners,
+    };
 }
 
 export async function createProject(
@@ -411,6 +447,7 @@ export async function createProject(
                   });
         });
 
+        await invalidateDashboardStats([userId]);
         return toProjectWithStringId(project);
     } catch (error) {
         if (!isUniqueConstraintError(error)) {
@@ -459,6 +496,7 @@ export async function createProject(
                 })
             : await getProjectForCreate(existing.id);
 
+        await invalidateDashboardStats([userId]);
         return toProjectWithStringId(project);
     }
 }
@@ -561,6 +599,7 @@ export async function createProjectWithAudit(
         return created;
     });
 
+    await invalidateDashboardStats([userId]);
     return {
         ...project,
         id: project.id.toString(),
@@ -578,13 +617,24 @@ export async function updateProjectWithAudit(
     const normalizedDescription =
         description && description.trim() !== "" ? description.trim() : null;
 
-    let updatedProject: Awaited<ReturnType<typeof prisma.project.update>>;
+    let updatedProject: {
+        project: Awaited<ReturnType<typeof prisma.project.update>>;
+        affectedUserIds: number[];
+    };
 
     try {
         updatedProject = await prisma.$transaction(async (tx) => {
             const existing = await tx.project.findFirst({
                 where: buildProjectAccessWhere(projectId, userId),
-                select: { id: true, name: true, description: true },
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    userId: true,
+                    coOwners: {
+                        select: { adminUserId: true },
+                    },
+                },
             });
 
             if (!existing) {
@@ -626,7 +676,10 @@ export async function updateProjectWithAudit(
                 },
             });
 
-            return updated;
+            return {
+                project: updated,
+                affectedUserIds: getProjectDashboardUserIds(existing),
+            };
         });
     } catch (error) {
         if (
@@ -638,9 +691,10 @@ export async function updateProjectWithAudit(
         throw error;
     }
 
+    await invalidateDashboardStats(updatedProject.affectedUserIds);
     return {
-        ...updatedProject,
-        id: updatedProject.id.toString(),
+        ...updatedProject.project,
+        id: updatedProject.project.id.toString(),
     };
 }
 
@@ -649,10 +703,18 @@ export async function deleteProjectWithAudit(
     userId: number,
     audit: ProjectAuditContext,
 ): Promise<void> {
-    await prisma.$transaction(async (tx) => {
+    const affectedUserIds = await prisma.$transaction(async (tx) => {
         const existing = await tx.project.findFirst({
             where: buildProjectAccessWhere(projectId, userId),
-            select: { id: true, name: true, description: true, userId: true },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                userId: true,
+                coOwners: {
+                    select: { adminUserId: true },
+                },
+            },
         });
 
         if (!existing) {
@@ -689,5 +751,9 @@ export async function deleteProjectWithAudit(
                 }),
             },
         });
+
+        return getProjectDashboardUserIds(existing);
     });
+
+    await invalidateDashboardStats(affectedUserIds);
 }

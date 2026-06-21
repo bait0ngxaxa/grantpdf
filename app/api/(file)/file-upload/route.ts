@@ -24,6 +24,7 @@ import {
     failUploadIdempotency,
     startUploadIdempotency,
 } from "@/lib/uploadIdempotency";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -199,6 +200,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         if (!userFile) throw new Error("FILE_RECORD_CREATE_FAILED");
+
+        await invalidateDashboardStats([userId]);
 
         // Log file upload
         logAudit("FILE_UPLOAD", session.user.id, {

@@ -4,6 +4,7 @@ import type { SafeUser, UpdateUserData } from "./types";
 import { isValidRole } from "./constants";
 import type { Prisma } from "@prisma/client";
 import { deleteUserSessionCache } from "@/lib/services/sessionCacheService";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 
 interface AuditContext {
     actorUserId: string | null;
@@ -93,6 +94,8 @@ export async function updateUser(
         await deleteUserSessionCache(id);
     }
 
+    await invalidateDashboardStats([id]);
+
     return result;
 }
 
@@ -101,6 +104,7 @@ export async function deleteUser(id: number): Promise<void> {
         where: { id },
     });
     await deleteUserSessionCache(id);
+    await invalidateDashboardStats([id]);
 }
 
 export async function updateUserWithAudit(
@@ -191,6 +195,8 @@ export async function updateUserWithAudit(
         await deleteUserSessionCache(id);
     }
 
+    await invalidateDashboardStats([id]);
+
     return result;
 }
 
@@ -240,4 +246,5 @@ export async function deleteUserWithAudit(
         });
     });
     await deleteUserSessionCache(id);
+    await invalidateDashboardStats([id]);
 }

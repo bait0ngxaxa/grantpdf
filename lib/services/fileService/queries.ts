@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import type { AdminDocumentFile } from "@/type/models";
 import type { RawFile, FileForDeletion } from "./types";
 import { sanitizeFile, filterOutAttachmentFiles } from "./sanitizers";
@@ -167,5 +168,10 @@ export async function getFileForDeletion(
 }
 
 export async function deleteFileRecord(id: number): Promise<void> {
-    await prisma.userFile.delete({ where: { id } });
+    const deletedFile = await prisma.userFile.delete({
+        where: { id },
+        select: { userId: true },
+    });
+
+    await invalidateDashboardStats([deletedFile.userId]);
 }

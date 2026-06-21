@@ -22,6 +22,7 @@ import { fileTypeFromBuffer } from "file-type";
 import { normalizePhoneNumber } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
 import { SIGNATURE_UPLOAD } from "@/lib/constants";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 
 const ALLOWED_SIGNATURE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
 const MAX_SIGNATURE_SIZE_BYTES = SIGNATURE_UPLOAD.MAX_SIZE_MB * 1024 * 1024;
@@ -393,6 +394,8 @@ export async function handleApprovalGeneration(
             });
         },
     );
+
+    await invalidateDashboardStats([userId]);
 
     return buildSuccessResponse(relativeStoragePath, projectResult);
 }

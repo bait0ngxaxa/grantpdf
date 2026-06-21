@@ -25,7 +25,7 @@ describe("SessionRefreshClient", () => {
         window.localStorage.clear();
     });
 
-    it("refreshes session and returns to safe callback URL", async () => {
+    it("redirects once without refreshing the session-refresh route again", async () => {
         vi.mocked(fetch).mockResolvedValue({ ok: true } as Response);
 
         render(<SessionRefreshClient callbackUrl="/userdashboard?page=1" />);
@@ -34,7 +34,8 @@ describe("SessionRefreshClient", () => {
         await waitFor(() => {
             expect(replaceMock).toHaveBeenCalledWith("/userdashboard?page=1");
         });
-        expect(refreshMock).toHaveBeenCalledOnce();
+        expect(replaceMock).toHaveBeenCalledOnce();
+        expect(refreshMock).not.toHaveBeenCalled();
         expect(fetch).toHaveBeenCalledWith("/api/auth/refresh", {
             method: "POST",
             cache: "no-store",
@@ -75,7 +76,7 @@ describe("SessionRefreshClient", () => {
             expect(replaceMock).toHaveBeenCalledWith("/userdashboard");
         });
         expect(fetch).toHaveBeenCalledTimes(2);
-        expect(refreshMock).toHaveBeenCalledOnce();
+        expect(refreshMock).not.toHaveBeenCalled();
     });
 
     it("waits for another tab refresh instead of issuing a competing request", async () => {
@@ -96,6 +97,6 @@ describe("SessionRefreshClient", () => {
 
         expect(fetch).not.toHaveBeenCalled();
         expect(replaceMock).toHaveBeenCalledWith("/userdashboard");
-        expect(refreshMock).toHaveBeenCalledOnce();
+        expect(refreshMock).not.toHaveBeenCalled();
     });
 });

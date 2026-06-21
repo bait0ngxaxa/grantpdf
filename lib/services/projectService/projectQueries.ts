@@ -7,6 +7,10 @@ import type {
     PaginatedProjectsResult,
 } from "./types";
 import { getJsonCache, setJsonCache } from "@/lib/services/redisJsonCache";
+import {
+    DASHBOARD_STATS_CACHE_TTL_SECONDS,
+    getUserDashboardStatsCacheKey,
+} from "@/lib/services/dashboardStatsCache";
 import { collectAttachmentPaths, filterOutAttachments } from "./sanitizers";
 import {
     buildProjectAccessWhere,
@@ -70,12 +74,6 @@ interface UserProjectStatsResult {
         name: string;
         created_at: string;
     } | null;
-}
-
-const USER_STATS_CACHE_TTL_SECONDS = 30;
-
-function getUserStatsCacheKey(userId: number): string {
-    return `grant:stats:user:${userId}`;
 }
 
 function isProjectStatusCounts(value: unknown): value is ProjectStatusCounts {
@@ -199,7 +197,7 @@ function mapStatusGroupsToCounts(
 export async function getUserProjectStats(
     userId: number,
 ): Promise<UserProjectStatsResult> {
-    const cacheKey = getUserStatsCacheKey(userId);
+    const cacheKey = getUserDashboardStatsCacheKey(userId);
     const cached = await getJsonCache(cacheKey, isUserProjectStatsResult);
     if (cached) return cached;
 
@@ -242,7 +240,7 @@ export async function getUserProjectStats(
             : null,
     };
 
-    await setJsonCache(cacheKey, result, USER_STATS_CACHE_TTL_SECONDS);
+    await setJsonCache(cacheKey, result, DASHBOARD_STATS_CACHE_TTL_SECONDS);
     return result;
 }
 

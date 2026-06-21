@@ -11,7 +11,7 @@ export async function GET(): Promise<NextResponse> {
         const stats = await getAdminDashboardStats();
         return NextResponse.json(stats, {
             headers: {
-                "Cache-Control": "private, max-age=15, stale-while-revalidate=30",
+                "Cache-Control": "private, no-store",
             },
         });
     } catch (error) {

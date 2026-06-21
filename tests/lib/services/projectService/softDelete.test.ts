@@ -113,7 +113,15 @@ describe("deleteProjectWithAudit", () => {
                     },
                 ],
             },
-            select: { id: true, name: true, description: true, userId: true },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                userId: true,
+                coOwners: {
+                    select: { adminUserId: true },
+                },
+            },
         });
         expect(tx.project.update).not.toHaveBeenCalled();
         expect(tx.auditLog.create).not.toHaveBeenCalled();

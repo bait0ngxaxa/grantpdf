@@ -8,6 +8,7 @@ import { logAudit } from "@/lib/auditLog";
 import { signupSchema } from "@/lib/validation/schemas";
 import { RATE_LIMIT } from "@/lib/constants";
 import { getStringField } from "@/lib/utils";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
@@ -63,6 +64,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 password: hashedPassword,
             },
         });
+
+        await invalidateDashboardStats([]);
 
         // Log successful signup
         logAudit("SIGNUP", String(newUser.id), {

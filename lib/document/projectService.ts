@@ -7,6 +7,7 @@ import {
     createProject,
 } from "@/lib/services/projectService";
 import type { ProjectResult } from "./types";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 
 /**
  * Find or create a project for document generation.
@@ -129,7 +130,7 @@ export async function createUserFileRecord(
         ? trimmedFileName
         : `${trimmedFileName}.${normalizedExtension}`;
 
-    return await prisma.userFile.create({
+    const userFile = await prisma.userFile.create({
         data: {
             originalFileName: fileNameWithExt,
             storagePath: storagePath,
@@ -138,4 +139,7 @@ export async function createUserFileRecord(
             projectId: projectId,
         },
     });
+
+    await invalidateDashboardStats([userId]);
+    return userFile;
 }
