@@ -5,7 +5,7 @@ import {
     handleDocumentError,
 } from "@/lib/document";
 import { applyRateLimit } from "@/lib/ratelimit";
-import { RATE_LIMIT } from "@/lib/constants";
+import { IDEMPOTENCY_HEADERS, RATE_LIMIT } from "@/lib/constants";
 import { logAudit } from "@/lib/auditLog";
 import {
     normalizeIdempotencyKey,
@@ -173,8 +173,8 @@ function getClientIp(req: Request): string | undefined {
 
 function getIdempotencyKey(req: Request, formData: FormData): string | null {
     const headerKey =
-        req.headers.get("idempotency-key") ??
-        req.headers.get("x-idempotency-key");
+        req.headers.get(IDEMPOTENCY_HEADERS.PRIMARY) ??
+        req.headers.get(IDEMPOTENCY_HEADERS.LEGACY);
     if (headerKey) {
         return headerKey;
     }

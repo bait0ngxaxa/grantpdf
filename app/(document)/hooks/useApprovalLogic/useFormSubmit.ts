@@ -21,6 +21,7 @@ export function useFormSubmit({
     signatureCanvasData,
     attachmentFiles,
     uploadAttachmentFiles,
+    cleanupUploadedFiles,
 }: UseFormSubmitProps) {
     const handleApprovalSubmit = useCallback(
         async (e: FormEvent<HTMLFormElement>): Promise<void> => {
@@ -59,6 +60,7 @@ export function useFormSubmit({
             setMessage(null);
             setIsError(false);
 
+            let uploadedAttachments: string[] = [];
             try {
                 const data = new FormData();
 
@@ -111,8 +113,7 @@ export function useFormSubmit({
 
                 // Upload attachment files
                 if (attachmentFiles.length > 0) {
-                    const uploadedAttachments =
-                        await uploadAttachmentFiles(attachmentFiles);
+                    uploadedAttachments = await uploadAttachmentFiles(attachmentFiles);
                     data.append(
                         "attachmentFileIds",
                         JSON.stringify(uploadedAttachments),
@@ -146,19 +147,15 @@ export function useFormSubmit({
                     ) {
                         setIsSuccessModalOpen(true);
                     } else {
-                        setMessage("ไม่สามารถสร้างเอกสาร Word ได้");
-                        setIsError(true);
+                        throw new Error("ไม่สามารถสร้างเอกสาร Word ได้");
                     }
                 } else {
-                    const errorText = await response.text();
-                    setMessage(
-                        `เกิดข้อผิดพลาด: ${
-                            errorText || "ไม่สามารถสร้างเอกสาร Word ได้"
-                        }`,
+                    throw new Error(
+                        (await response.text()) || "ไม่สามารถสร้างเอกสาร Word ได้",
                     );
-                    setIsError(true);
                 }
             } catch (error: unknown) {
+                await cleanupUploadedFiles(uploadedAttachments);
                 setMessage(
                     error instanceof Error
                         ? error.message
@@ -177,6 +174,7 @@ export function useFormSubmit({
             signatureCanvasData,
             attachmentFiles,
             uploadAttachmentFiles,
+            cleanupUploadedFiles,
             setMessage,
             setIsError,
             setIsSubmitting,

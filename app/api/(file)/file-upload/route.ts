@@ -19,6 +19,11 @@ import {
 import { toPublicApiError } from "@/lib/apiError";
 import { parsePositiveIntId } from "@/lib/id";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
+import {
+    completeUploadIdempotency,
+    failUploadIdempotency,
+    startUploadIdempotency,
+} from "@/lib/uploadIdempotency";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -40,6 +45,7 @@ const generateUniqueFilename = (originalName: string): string => {
 };
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+    let idempotencyRecordId: bigint | null = null;
     try {
         const session = await auth();
         if (!session || !session.user?.id) {
@@ -147,28 +153,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             );
         }
 
-        // 2-phase file write:
-        // 1) write to tmp
-        // 2) atomically move to final path
-        // 3) create DB record
-        // If DB create fails, remove moved file as compensation.
-        let tempFilePath: string | null = null;
-        let finalFilePath: string | null = null;
+        const idempotency = await startUploadIdempotency(
+            request,
+            userId,
+            "file_upload",
+        );
+        if (idempotency.type === "response") return idempotency.response;
+        idempotencyRecordId = idempotency.recordId;
 
         await ensureStorageDir("tmp");
         await ensureStorageDir("attachments");
-        tempFilePath = getStoragePath("tmp", tempFileName);
-        finalFilePath = getStoragePath("attachments", uniqueFileName);
+        const tempFilePath = getStoragePath("tmp", tempFileName);
+        const finalFilePath = getStoragePath("attachments", uniqueFileName);
         const relativeStoragePath = getRelativeStoragePath(
             "attachments",
             uniqueFileName
         );
 
-        await writeFile(tempFilePath, buffer);
-        await rename(tempFilePath, finalFilePath);
-
-        let userFile: Awaited<ReturnType<typeof prisma.userFile.create>>;
+        let movedToFinalPath = false;
+        let userFile: Awaited<ReturnType<typeof prisma.userFile.create>> | null = null;
         try {
+            await writeFile(tempFilePath, buffer);
+            await rename(tempFilePath, finalFilePath);
+            movedToFinalPath = true;
             userFile = await prisma.userFile.create({
                 data: {
                     originalFileName: file.name,
@@ -178,20 +185,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                     projectId,
                 },
             });
-        } catch (dbError) {
-            if (finalFilePath) {
+        } catch (error) {
+            if (movedToFinalPath) {
                 await unlink(finalFilePath).catch(() => {
                     console.warn(
-                        `Failed to cleanup moved file after DB error: ${finalFilePath}`
+                        `Failed to clean up uploaded file: ${finalFilePath}`,
                     );
                 });
             }
-            throw dbError;
+            throw error;
         } finally {
-            if (tempFilePath) {
-                await unlink(tempFilePath).catch(() => undefined);
-            }
+            await unlink(tempFilePath).catch(() => undefined);
         }
+
+        if (!userFile) throw new Error("FILE_RECORD_CREATE_FAILED");
 
         // Log file upload
         logAudit("FILE_UPLOAD", session.user.id, {
@@ -203,7 +210,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             },
         });
 
-        return NextResponse.json({
+        const responseBody = {
             success: true,
             message: "อัปโหลดไฟล์สำเร็จ",
             file: {
@@ -216,8 +223,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 name: project.name,
                 description: project.description,
             },
-        });
+        };
+        await completeUploadIdempotency(idempotencyRecordId, responseBody).catch(
+            (error: unknown) => {
+                console.error("Failed to save upload idempotency response:", error);
+            },
+        );
+
+        return NextResponse.json(responseBody);
     } catch (error) {
+        if (idempotencyRecordId !== null) {
+            await failUploadIdempotency(idempotencyRecordId, error).catch(
+                (idempotencyError: unknown) => {
+                    console.error("Failed to update upload idempotency state:", idempotencyError);
+                },
+            );
+        }
         console.error("File upload error:", error);
         const mappedError = toPublicApiError(error, "ไม่สามารถอัปโหลดไฟล์ได้");
         return NextResponse.json(

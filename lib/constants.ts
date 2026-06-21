@@ -191,6 +191,11 @@ export const API_ROUTES = {
     ADMIN_REPORTS: "/api/admin/reports",
 } as const;
 
+export const IDEMPOTENCY_HEADERS = {
+    PRIMARY: "Idempotency-Key",
+    LEGACY: "X-Idempotency-Key",
+} as const;
+
 export const TEXT_LIMITS = {
     FILE_NAME_MAX_LENGTH: 30,
 } as const;
@@ -212,6 +217,9 @@ export const FILE_UPLOAD = {
     },
     DEFAULT_MAX_SIZE_MB: 15,
     TIMEOUT_MS: 60_000,
+    RETRY_MAX_ATTEMPTS: 3,
+    RETRY_BASE_DELAY_MS: 500,
+    RETRY_MAX_DELAY_MS: 4_000,
 } as const;
 
 export const SIGNATURE_UPLOAD = {

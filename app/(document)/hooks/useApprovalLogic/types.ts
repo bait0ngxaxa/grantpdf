@@ -70,4 +70,5 @@ export interface UseFormSubmitProps extends UseApprovalLogicProps {
     signatureCanvasData: string | null;
     attachmentFiles: File[];
     uploadAttachmentFiles: (files: File[]) => Promise<string[]>;
+    cleanupUploadedFiles: (fileIds: string[]) => Promise<void>;
 }

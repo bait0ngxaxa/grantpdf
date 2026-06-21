@@ -7,6 +7,7 @@ vi.mock("@/lib/prisma", () => ({
             create: vi.fn(),
             findUnique: vi.fn(),
             update: vi.fn(),
+            updateMany: vi.fn(),
         },
     },
 }));
@@ -22,6 +23,7 @@ import {
 const mockedCreate = vi.mocked(prisma.documentIdempotency.create);
 const mockedFindUnique = vi.mocked(prisma.documentIdempotency.findUnique);
 const mockedUpdate = vi.mocked(prisma.documentIdempotency.update);
+const mockedUpdateMany = vi.mocked(prisma.documentIdempotency.updateMany);
 
 function createP2002Error(): Prisma.PrismaClientKnownRequestError {
     return new Prisma.PrismaClientKnownRequestError("duplicate", {
@@ -70,6 +72,7 @@ describe("documentIdempotencyService", () => {
         it("returns replay when unique conflict and existing completed row exists", async () => {
             mockedCreate.mockRejectedValue(createP2002Error());
             mockedFindUnique.mockResolvedValue({
+                id: BigInt(124),
                 status: "completed",
                 responseStatus: 200,
                 responseBody: {
@@ -77,7 +80,6 @@ describe("documentIdempotencyService", () => {
                     storagePath: "storage/documents/replay.docx",
                 },
             } as never);
-
             const result = await startDocumentIdempotency({
                 userId: 1,
                 documentType: "tor",
@@ -99,6 +101,7 @@ describe("documentIdempotencyService", () => {
         it("returns in_progress when unique conflict and existing row is processing", async () => {
             mockedCreate.mockRejectedValue(createP2002Error());
             mockedFindUnique.mockResolvedValue({
+                id: BigInt(125),
                 status: "processing",
                 responseStatus: null,
                 responseBody: null,
@@ -113,9 +116,10 @@ describe("documentIdempotencyService", () => {
             expect(result).toEqual({ type: "in_progress" });
         });
 
-        it("returns failed when unique conflict and existing row is failed", async () => {
+        it("returns failed when a failed request is not explicitly retryable", async () => {
             mockedCreate.mockRejectedValue(createP2002Error());
             mockedFindUnique.mockResolvedValue({
+                id: BigInt(126),
                 status: "failed",
                 responseStatus: null,
                 responseBody: null,
@@ -128,6 +132,34 @@ describe("documentIdempotencyService", () => {
             });
 
             expect(result).toEqual({ type: "failed" });
+            expect(mockedUpdateMany).not.toHaveBeenCalled();
+        });
+
+        it("restarts a retryable failed request using the same key", async () => {
+            mockedCreate.mockRejectedValue(createP2002Error());
+            mockedFindUnique.mockResolvedValue({
+                id: BigInt(127),
+                status: "failed",
+                responseStatus: null,
+                responseBody: null,
+            } as never);
+            mockedUpdateMany.mockResolvedValue({ count: 1 } as never);
+
+            const result = await startDocumentIdempotency({
+                userId: 1,
+                documentType: "tor",
+                idempotencyKey: "idem-key-005",
+                retryFailed: true,
+            });
+
+            expect(result).toEqual({
+                type: "started",
+                recordId: BigInt(127),
+            });
+            expect(mockedUpdateMany).toHaveBeenCalledWith({
+                where: { id: BigInt(127), status: "failed" },
+                data: expect.objectContaining({ status: "processing" }),
+            });
         });
 
         it("rethrows non-P2002 errors", async () => {

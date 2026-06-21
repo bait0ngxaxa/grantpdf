@@ -1,12 +1,20 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
-export type DocumentType = "tor" | "approval" | "contract" | "formproject" | "summary";
+export type DocumentType =
+    | "tor"
+    | "approval"
+    | "contract"
+    | "formproject"
+    | "summary"
+    | "file_upload"
+    | "project_report";
 
 interface StartIdempotencyParams {
     userId: number;
     documentType: DocumentType;
     idempotencyKey: string;
+    retryFailed?: boolean;
 }
 
 interface CompleteIdempotencyParams {
@@ -83,6 +91,7 @@ export async function startDocumentIdempotency(
             },
         },
         select: {
+            id: true,
             status: true,
             responseStatus: true,
             responseBody: true,
@@ -111,7 +120,21 @@ export async function startDocumentIdempotency(
         return { type: "in_progress" };
     }
 
-    return { type: "failed" };
+    if (!params.retryFailed) return { type: "failed" };
+
+    const resumed = await prisma.documentIdempotency.updateMany({
+        where: { id: existing.id, status: "failed" },
+        data: {
+            status: "processing",
+            responseStatus: null,
+            responseBody: Prisma.JsonNull,
+            errorMessage: null,
+            completed_at: null,
+        },
+    });
+    return resumed.count === 1
+        ? { type: "started", recordId: existing.id }
+        : { type: "in_progress" };
 }
 
 export async function completeDocumentIdempotency(

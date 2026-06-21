@@ -3,7 +3,8 @@
 import { useCallback } from "react";
 import { type UseFileUploadProps } from "./types";
 import {
-    fetchWithUploadTimeout,
+    createUploadIdempotencyKey,
+    fetchWithUploadRetry,
     isUploadTimeoutError,
 } from "../uploadRequest";
 
@@ -21,6 +22,25 @@ function readUploadErrorMessage(data: unknown): string | null {
     }
 
     return null;
+}
+
+async function cleanupUploadedFiles(fileIds: string[]): Promise<void> {
+    await Promise.all(
+        fileIds.map(async (fileId) => {
+            try {
+                const response = await fetchWithUploadRetry(
+                    `/api/user-docs/${encodeURIComponent(fileId)}`,
+                    { method: "DELETE" },
+                    createUploadIdempotencyKey(),
+                );
+                if (!response.ok && response.status !== 404) {
+                    console.error(`Failed to clean up uploaded file ${fileId}`);
+                }
+            } catch (error) {
+                console.error(`Failed to clean up uploaded file ${fileId}:`, error);
+            }
+        }),
+    );
 }
 
 export function useFileUpload({ session, projectId }: UseFileUploadProps) {
@@ -48,10 +68,11 @@ export function useFileUpload({ session, projectId }: UseFileUploadProps) {
                 }
 
                 try {
-                    const response = await fetchWithUploadTimeout("/api/file-upload", {
-                        method: "POST",
-                        body: uploadFormData,
-                    });
+                    const response = await fetchWithUploadRetry(
+                        "/api/file-upload",
+                        { method: "POST", body: uploadFormData },
+                        createUploadIdempotencyKey(),
+                    );
 
                     const result: unknown = await response.json().catch(() => null);
                     if (!response.ok) {
@@ -79,6 +100,7 @@ export function useFileUpload({ session, projectId }: UseFileUploadProps) {
                         );
                     }
                 } catch (error) {
+                    await cleanupUploadedFiles(uploadedIds);
                     console.error(`Error uploading file ${file.name}:`, error);
                     if (isUploadTimeoutError(error)) {
                         throw new Error(ATTACHMENT_UPLOAD_TIMEOUT_MESSAGE);
@@ -92,5 +114,5 @@ export function useFileUpload({ session, projectId }: UseFileUploadProps) {
         [session, projectId],
     );
 
-    return { uploadAttachmentFiles };
+    return { uploadAttachmentFiles, cleanupUploadedFiles };
 }

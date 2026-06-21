@@ -39,7 +39,10 @@ export function useApprovalLogic(
     } = useAttachmentHandlers({ setFormData });
 
     // File upload
-    const { uploadAttachmentFiles } = useFileUpload({ session, projectId });
+    const { uploadAttachmentFiles, cleanupUploadedFiles } = useFileUpload({
+        session,
+        projectId,
+    });
 
     // Form submission
     const { handleApprovalSubmit } = useFormSubmit({
@@ -48,6 +51,7 @@ export function useApprovalLogic(
         signatureCanvasData,
         attachmentFiles,
         uploadAttachmentFiles,
+        cleanupUploadedFiles,
     });
 
     // Preview validation

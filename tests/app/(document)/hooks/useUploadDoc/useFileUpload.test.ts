@@ -2,12 +2,13 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useFileUpload } from "@/app/(document)/hooks/useUploadDoc/useFileUpload";
 
-const { fetchWithUploadTimeoutMock } = vi.hoisted(() => ({
-    fetchWithUploadTimeoutMock: vi.fn(),
+const { fetchWithUploadRetryMock } = vi.hoisted(() => ({
+    fetchWithUploadRetryMock: vi.fn(),
 }));
 
 vi.mock("@/app/(document)/hooks/uploadRequest", () => ({
-    fetchWithUploadTimeout: fetchWithUploadTimeoutMock,
+    createUploadIdempotencyKey: () => "upload-key-123",
+    fetchWithUploadRetry: fetchWithUploadRetryMock,
     isUploadTimeoutError: (error: unknown) =>
         error instanceof Error && error.name === "UploadTimeoutError",
 }));
@@ -28,7 +29,7 @@ describe("useUploadDoc useFileUpload", () => {
     it("shows timeout message when normal file upload times out", async () => {
         const timeoutError = new Error("UPLOAD_TIMEOUT");
         timeoutError.name = "UploadTimeoutError";
-        fetchWithUploadTimeoutMock.mockRejectedValue(timeoutError);
+        fetchWithUploadRetryMock.mockRejectedValue(timeoutError);
 
         const selectedFile = new File(["content"], "เอกสาร.pdf", {
             type: "application/pdf",
@@ -50,7 +51,7 @@ describe("useUploadDoc useFileUpload", () => {
             await result.current.handleUpload();
         });
 
-        expect(fetchWithUploadTimeoutMock).toHaveBeenCalledOnce();
+        expect(fetchWithUploadRetryMock).toHaveBeenCalledOnce();
         expect(setUploadMessage).toHaveBeenLastCalledWith(
             "อัปโหลดไฟล์ไม่สำเร็จภายในเวลาที่กำหนด กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง",
         );

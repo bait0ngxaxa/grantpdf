@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { getFileForDeletion, deleteFileRecord } from "@/lib/services";
-import { stat, unlink } from "fs/promises";
+import { unlink } from "fs/promises";
 import { logAudit } from "@/lib/auditLog";
 import { getFullPathFromStoragePath } from "@/lib/fileStorage";
 import { parsePositiveIntId } from "@/lib/id";
@@ -48,9 +48,14 @@ export async function DELETE(
         if (document.storagePath) {
             const fullPath = getFullPathFromStoragePath(document.storagePath);
             try {
-                await stat(fullPath);
                 await unlink(fullPath);
-            } catch {
+            } catch (error) {
+                const isMissingFile =
+                    typeof error === "object" &&
+                    error !== null &&
+                    "code" in error &&
+                    error.code === "ENOENT";
+                if (!isMissingFile) throw error;
                 console.warn(`File not found: ${fullPath}`);
             }
         }

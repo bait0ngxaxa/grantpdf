@@ -26,6 +26,11 @@ import {
     getProjectReportsForUser,
 } from "@/lib/services";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
+import {
+    completeUploadIdempotency,
+    failUploadIdempotency,
+    startUploadIdempotency,
+} from "@/lib/uploadIdempotency";
 
 interface RouteContext {
     params: Promise<{ id: string }>;
@@ -98,14 +103,22 @@ async function persistReportFile(file: File): Promise<{
     await ensureStorageDir("reports");
     const tempFilePath = getStoragePath("tmp", tempFileName);
     const finalFilePath = getStoragePath("reports", uniqueFileName);
-    await writeFile(tempFilePath, buffer);
-    await rename(tempFilePath, finalFilePath);
+    let movedToFinalPath = false;
+    try {
+        await writeFile(tempFilePath, buffer);
+        await rename(tempFilePath, finalFilePath);
+        movedToFinalPath = true;
 
-    return {
-        fileExtension: path.extname(file.name).substring(1).toLowerCase(),
-        relativeStoragePath: getRelativeStoragePath("reports", uniqueFileName),
-        finalFilePath,
-    };
+        return {
+            fileExtension: path.extname(file.name).substring(1).toLowerCase(),
+            relativeStoragePath: getRelativeStoragePath("reports", uniqueFileName),
+            finalFilePath,
+        };
+    } finally {
+        if (!movedToFinalPath) {
+            await unlink(tempFilePath).catch(() => undefined);
+        }
+    }
 }
 
 export async function GET(
@@ -138,6 +151,7 @@ export async function POST(
     context: RouteContext,
 ): Promise<NextResponse> {
     let finalFilePath: string | null = null;
+    let idempotencyRecordId: bigint | null = null;
     try {
         const session = await auth();
         if (!session?.user?.id) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
@@ -178,6 +192,14 @@ export async function POST(
         if (fileError) throw publicApiError(400, fileError);
 
         await ensureOwnProject(projectId, userId);
+        const idempotency = await startUploadIdempotency(
+            req,
+            userId,
+            "project_report",
+        );
+        if (idempotency.type === "response") return idempotency.response;
+        idempotencyRecordId = idempotency.recordId;
+
         const storedFile = await persistReportFile(fileEntry);
         finalFilePath = storedFile.finalFilePath;
         const report = await createProjectReportWithFile({
@@ -195,13 +217,37 @@ export async function POST(
             details: { projectId: projectId.toString(), reportId: report.id },
         });
 
+        const responseBody = {
+            success: true,
+            message: "ส่งรายงานโครงการสำเร็จ",
+            report,
+        };
+        await completeUploadIdempotency(idempotencyRecordId, responseBody).catch(
+            (idempotencyError: unknown) => {
+                console.error(
+                    "Failed to save project report idempotency response:",
+                    idempotencyError,
+                );
+            },
+        );
+
         return NextResponse.json(
-            { success: true, message: "ส่งรายงานโครงการสำเร็จ", report },
+            responseBody,
             { headers: rateLimitResult.headers },
         );
     } catch (error) {
         if (finalFilePath) {
             await unlink(finalFilePath).catch(() => undefined);
+        }
+        if (idempotencyRecordId !== null) {
+            await failUploadIdempotency(idempotencyRecordId, error).catch(
+                (idempotencyError: unknown) => {
+                    console.error(
+                        "Failed to update project report idempotency state:",
+                        idempotencyError,
+                    );
+                },
+            );
         }
         console.error("Error submitting project report:", error);
         const mappedError = toPublicApiError(error, "ไม่สามารถส่งรายงานโครงการได้");

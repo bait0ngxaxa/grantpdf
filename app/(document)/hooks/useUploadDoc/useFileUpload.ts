@@ -3,7 +3,8 @@
 import { useCallback } from "react";
 import { type FileUploadProps } from "./types";
 import {
-    fetchWithUploadTimeout,
+    createUploadIdempotencyKey,
+    fetchWithUploadRetry,
     isUploadTimeoutError,
 } from "../uploadRequest";
 
@@ -40,10 +41,10 @@ export function useFileUpload({
             formData.append("file", selectedFile);
             formData.append("projectId", selectedProjectId);
 
-            const response = await fetchWithUploadTimeout("/api/file-upload", {
+            const response = await fetchWithUploadRetry("/api/file-upload", {
                 method: "POST",
                 body: formData,
-            });
+            }, createUploadIdempotencyKey());
 
             const result = await response.json();
 

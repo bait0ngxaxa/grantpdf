@@ -18,6 +18,10 @@ import {
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
 } from "@/lib/constants";
+import {
+    createUploadIdempotencyKey,
+    fetchWithUploadRetry,
+} from "@/lib/upload/clientRequest";
 import { PROJECT_REPORT_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
 import { getReportStatusColor, getReportTypeColor } from "@/lib/utils";
 import type { Project, ProjectReport } from "@/type";
@@ -164,10 +168,11 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
             formData.append("note", note);
             formData.append("file", file);
 
-            const response = await fetch(getApiUrl(project.id), {
-                method: "POST",
-                body: formData,
-            });
+            const response = await fetchWithUploadRetry(
+                getApiUrl(project.id),
+                { method: "POST", body: formData },
+                createUploadIdempotencyKey(),
+            );
             const data: unknown = await response.json().catch(() => null);
             if (!response.ok) {
                 throw new Error(getErrorMessage(data, "ไม่สามารถส่งรายงานได้"));
