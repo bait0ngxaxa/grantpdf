@@ -140,6 +140,11 @@
     50% { background-position: 100% 50%; }
 }
 
+@keyframes skeleton-shimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}
+
 .animate-shine {
     animation: shine 8s linear infinite;
 }
@@ -154,9 +159,34 @@
     background-size: 200% 100%;
 }
 
+.skeleton-shimmer::after {
+    animation: skeleton-shimmer 1.6s linear infinite;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        oklch(1 0 0 / 0.48) 50%,
+        transparent 100%
+    );
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    transform: translateX(-100%);
+}
+
+.dark .skeleton-shimmer::after {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        oklch(1 0 0 / 0.1) 50%,
+        transparent 100%
+    );
+}
+
 @media (prefers-reduced-motion: reduce) {
     .homepage-gradient-motion,
-    .homepage-accent-motion {
+    .homepage-accent-motion,
+    .skeleton-shimmer::after {
         animation: none;
     }
 }
