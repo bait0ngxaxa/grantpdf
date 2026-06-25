@@ -1,4 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import {
+    deleteFamilySessionCache,
+    deleteUserSessionCache,
+} from "@/lib/services/sessionCacheService";
 
 export type DeviceSessionStatus = "active" | "expired" | "revoked";
 
@@ -149,6 +153,7 @@ export async function revokeUserSessionFamily(input: {
         },
         data: { revokedAt: new Date() },
     });
+    await deleteFamilySessionCache(input.familyId);
     return result.count;
 }
 
@@ -164,5 +169,6 @@ export async function revokeOtherUserSessionFamilies(input: {
         },
         data: { revokedAt: new Date() },
     });
+    await deleteUserSessionCache(input.userId);
     return result.count;
 }

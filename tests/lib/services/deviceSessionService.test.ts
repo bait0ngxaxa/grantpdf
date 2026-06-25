@@ -11,15 +11,26 @@ vi.mock("@/lib/prisma", () => {
     return { prisma: prismaMock };
 });
 
+vi.mock("@/lib/services/sessionCacheService", () => ({
+    deleteFamilySessionCache: vi.fn(),
+    deleteUserSessionCache: vi.fn(),
+}));
+
 import { prisma } from "@/lib/prisma";
 import {
     getUserDeviceSessions,
     revokeOtherUserSessionFamilies,
     revokeUserSessionFamily,
 } from "@/lib/services/deviceSessionService";
+import {
+    deleteFamilySessionCache,
+    deleteUserSessionCache,
+} from "@/lib/services/sessionCacheService";
 
 const mockedFindMany = vi.mocked(prisma.authSession.findMany);
 const mockedUpdateMany = vi.mocked(prisma.authSession.updateMany);
+const mockedDeleteFamilySessionCache = vi.mocked(deleteFamilySessionCache);
+const mockedDeleteUserSessionCache = vi.mocked(deleteUserSessionCache);
 
 function createSessionRow(
     overrides: Partial<{
@@ -117,6 +128,9 @@ describe("deviceSessionService", () => {
             },
             data: { revokedAt: expect.any(Date) },
         });
+        expect(mockedDeleteFamilySessionCache).toHaveBeenCalledWith(
+            "family-other",
+        );
     });
 
     it("revokes only other session families", async () => {
@@ -136,5 +150,6 @@ describe("deviceSessionService", () => {
             },
             data: { revokedAt: expect.any(Date) },
         });
+        expect(mockedDeleteUserSessionCache).toHaveBeenCalledWith(7);
     });
 });
