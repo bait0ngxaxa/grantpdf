@@ -2,7 +2,12 @@
 
 import React, { useMemo, useState } from "react";
 import ProjectCard from "./ProjectCard";
-import { Skeleton, EmptyState, Pagination } from "@/components/ui";
+import {
+    EmptyState,
+    Pagination,
+    ProjectGroupSkeleton,
+    Skeleton,
+} from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { Archive } from "lucide-react";
 import {
@@ -79,14 +84,13 @@ export default function ProjectsList({
 
     if (isLoading) {
         return (
-            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 space-y-4">
+            <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
                 <div className="flex items-center justify-between">
                     <Skeleton className="h-7 w-44 rounded-lg" />
                     <Skeleton className="h-8 w-36 rounded-lg" />
                 </div>
-                <Skeleton className="h-28 w-full rounded-2xl" />
-                <Skeleton className="h-28 w-full rounded-2xl" />
-                <Skeleton className="h-28 w-full rounded-2xl" />
+                <ProjectGroupSkeleton rows={2} />
+                <ProjectGroupSkeleton rows={1} />
             </div>
         );
     }
@@ -112,18 +116,18 @@ export default function ProjectsList({
     }
 
     return (
-        <div className="min-w-0 rounded-3xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
+        <div className="min-w-0 rounded-3xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-800">
             <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div className="flex min-w-0 items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
                         <Archive className="h-6 w-6" />
                     </div>
-                    <h2 className="min-w-0 text-lg font-bold break-words text-slate-800 text-balance dark:text-slate-100 sm:text-xl">
+                    <h2 className="min-w-0 text-lg font-bold text-balance break-words text-slate-800 sm:text-xl dark:text-slate-100">
                         โครงการตามโครงการหลัก
                     </h2>
                 </div>
                 {projects.length > 0 && (
-                    <div className="text-sm break-words text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-100 dark:border-slate-600">
+                    <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 text-sm break-words text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400">
                         {groupedProjects.length} โครงการหลัก จาก{" "}
                         {projects.length} โครงการย่อย
                     </div>
@@ -149,7 +153,7 @@ export default function ProjectsList({
                             <button
                                 type="button"
                                 onClick={() => toggleProgramGroup(group.key)}
-                                className="group flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
+                                className="group flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 sm:flex-row sm:items-center sm:px-6 dark:bg-slate-800 dark:hover:bg-slate-700/70"
                             >
                                 <ProgramGroupHeader
                                     groupKey={group.key}
@@ -190,16 +194,22 @@ export default function ProjectsList({
                                     )}
                                 >
                                     <div className="space-y-3 p-4 sm:p-5">
-                                        {paginatedProjects.items.map((project) => (
-                                            <ProjectCard
-                                                key={project.id}
-                                                project={project}
-                                                showNewBadge={!viewedProjects.has(project.id)}
-                                            />
-                                        ))}
+                                        {paginatedProjects.items.map(
+                                            (project) => (
+                                                <ProjectCard
+                                                    key={project.id}
+                                                    project={project}
+                                                    showNewBadge={
+                                                        !viewedProjects.has(
+                                                            project.id,
+                                                        )
+                                                    }
+                                                />
+                                            ),
+                                        )}
                                     </div>
                                     {paginatedProjects.totalPages > 1 && (
-                                        <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
+                                        <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 dark:border-slate-700">
                                             <Pagination
                                                 currentPage={
                                                     paginatedProjects.currentPage

@@ -10,7 +10,7 @@ import { ProjectItem } from "./ProjectItem";
 import { EmptyProjectsState } from "./EmptyProjectsState";
 import { ProjectSearchAndFilter } from "./ProjectSearchAndFilter";
 import { StatusDetailModal } from "./StatusDetailModal";
-import { Pagination, Skeleton } from "@/components/ui";
+import { Pagination, ProjectGroupSkeleton } from "@/components/ui";
 import {
     fileStatIcon,
     ProgramGroupHeader,
@@ -182,9 +182,8 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
             <div className="space-y-6">
                 {isLoading && projects.length === 0 ? (
                     <div className="space-y-4">
-                        <Skeleton className="h-36 w-full rounded-3xl" />
-                        <Skeleton className="h-36 w-full rounded-3xl" />
-                        <Skeleton className="h-36 w-full rounded-3xl" />
+                        <ProjectGroupSkeleton rows={2} />
+                        <ProjectGroupSkeleton rows={1} />
                     </div>
                 ) : projects.length > 0 ? (
                     groupedProjects.map((group) => {
@@ -202,8 +201,10 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                             >
                                 <button
                                     type="button"
-                                    onClick={() => toggleProgramGroup(group.key)}
-                                    className="group flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:flex-row sm:items-center sm:px-6"
+                                    onClick={() =>
+                                        toggleProgramGroup(group.key)
+                                    }
+                                    className="group flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 sm:flex-row sm:items-center sm:px-6 dark:bg-slate-800 dark:hover:bg-slate-700/70"
                                 >
                                     <ProgramGroupHeader
                                         groupKey={group.key}
@@ -238,29 +239,36 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                                                 : "-translate-y-1",
                                         )}
                                     >
-                                        <div className="space-y-3 bg-slate-50/60 p-4 dark:bg-slate-900/40 sm:p-5">
-                                        {paginatedProjects.items.map((project) => (
-                                            <ProjectItem
-                                                key={project.id}
-                                                project={project}
-                                                hasUnreadStatusNote={hasUnreadStatusNote(
-                                                    project,
-                                                )}
-                                                hasUnreadReportUpdate={
-                                                    getUnreadReportKeys(project)
-                                                        .length > 0
-                                                }
-                                                onStatusClick={() =>
-                                                    openStatusDetailModal(project)
-                                                }
-                                                onReportClick={() =>
-                                                    openReportDetailModal(project)
-                                                }
-                                            />
-                                        ))}
+                                        <div className="space-y-3 bg-slate-50/60 p-4 sm:p-5 dark:bg-slate-900/40">
+                                            {paginatedProjects.items.map(
+                                                (project) => (
+                                                    <ProjectItem
+                                                        key={project.id}
+                                                        project={project}
+                                                        hasUnreadStatusNote={hasUnreadStatusNote(
+                                                            project,
+                                                        )}
+                                                        hasUnreadReportUpdate={
+                                                            getUnreadReportKeys(
+                                                                project,
+                                                            ).length > 0
+                                                        }
+                                                        onStatusClick={() =>
+                                                            openStatusDetailModal(
+                                                                project,
+                                                            )
+                                                        }
+                                                        onReportClick={() =>
+                                                            openReportDetailModal(
+                                                                project,
+                                                            )
+                                                        }
+                                                    />
+                                                ),
+                                            )}
                                         </div>
                                         {paginatedProjects.totalPages > 1 && (
-                                            <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
+                                            <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 dark:border-slate-700">
                                                 <Pagination
                                                     currentPage={
                                                         paginatedProjects.currentPage

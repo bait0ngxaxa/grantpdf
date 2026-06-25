@@ -25,6 +25,8 @@ interface UpdateReportResponse {
     message?: string;
 }
 
+const REPORT_SKELETON_ROWS = [1, 2] as const;
+
 function getErrorMessage(value: unknown, fallback: string): string {
     if (
         typeof value === "object" &&
@@ -37,6 +39,41 @@ function getErrorMessage(value: unknown, fallback: string): string {
     return fallback;
 }
 
+function ReportItemSkeleton(): React.JSX.Element {
+    return (
+        <li className="grid gap-3 px-4 py-4 sm:grid-cols-[auto_minmax(0,1fr)]">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="min-w-0 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex gap-2">
+                        <Skeleton className="h-7 w-24 rounded-full" />
+                        <Skeleton className="h-7 w-28 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-36 rounded-full" />
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/70">
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-1 items-start gap-2.5">
+                            <Skeleton className="mt-0.5 h-4 w-4 shrink-0 rounded" />
+                            <div className="min-w-0 flex-1 space-y-2">
+                                <Skeleton className="h-3 w-20" />
+                                <Skeleton className="h-4 w-4/5 max-w-96" />
+                            </div>
+                        </div>
+                        <Skeleton className="h-8 w-28 rounded-xl" />
+                    </div>
+                </div>
+                <div className="grid gap-2 lg:grid-cols-3">
+                    <Skeleton className="h-20 rounded-xl" />
+                    <Skeleton className="h-20 rounded-xl" />
+                    <Skeleton className="h-20 rounded-xl" />
+                </div>
+                <Skeleton className="h-28 rounded-xl" />
+            </div>
+        </li>
+    );
+}
+
 export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
     isOpen,
     project,
@@ -44,7 +81,9 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
 }) => {
     const [reports, setReports] = useState<AdminProjectReport[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [updatingReportId, setUpdatingReportId] = useState<string | null>(null);
+    const [updatingReportId, setUpdatingReportId] = useState<string | null>(
+        null,
+    );
     const [adminNotes, setAdminNotes] = useState<Record<string, string>>({});
     const { download, isDownloading } = useSignedDownload();
     const { fetchProjects } = useAdminDashboardContext();
@@ -63,12 +102,16 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
             );
             const data: unknown = await response.json().catch(() => null);
             if (!response.ok) {
-                throw new Error(getErrorMessage(data, "ไม่สามารถโหลดรายงานได้"));
+                throw new Error(
+                    getErrorMessage(data, "ไม่สามารถโหลดรายงานได้"),
+                );
             }
             setReports((data as ReportsResponse).reports);
         } catch (error) {
             const message =
-                error instanceof Error ? error.message : "ไม่สามารถโหลดรายงานได้";
+                error instanceof Error
+                    ? error.message
+                    : "ไม่สามารถโหลดรายงานได้";
             toast.error(message);
         } finally {
             setIsLoading(false);
@@ -160,7 +203,7 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="project-reports-modal-title"
-                className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:max-h-[calc(100dvh-2rem)] dark:border-slate-700 dark:bg-slate-800"
+                className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl duration-200 motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:max-h-[calc(100dvh-2rem)] dark:border-slate-700 dark:bg-slate-800"
             >
                 <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5 dark:border-slate-700">
                     <div className="flex min-w-0 items-center gap-3">
@@ -204,10 +247,11 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
 
                 <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
                     {isLoading ? (
-                        <div className="space-y-3">
-                            <Skeleton className="h-28 w-full rounded-2xl" />
-                            <Skeleton className="h-28 w-full rounded-2xl" />
-                        </div>
+                        <ol className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white dark:divide-slate-800 dark:border-slate-700 dark:bg-slate-900/40">
+                            {REPORT_SKELETON_ROWS.map((row) => (
+                                <ReportItemSkeleton key={row} />
+                            ))}
+                        </ol>
                     ) : reports.length === 0 ? (
                         <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-6 text-center dark:border-slate-600 dark:bg-slate-900/30">
                             <FileText className="h-10 w-10 text-slate-400" />

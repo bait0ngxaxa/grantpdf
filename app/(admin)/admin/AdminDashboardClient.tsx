@@ -9,19 +9,30 @@ import { DashboardSkeleton } from "@/components/ui";
 
 // P1: Lazy-load tabs that are not visible on first render
 const UsersTab = dynamic(
-    () => import("./components/users/UsersTab").then((m) => ({ default: m.UsersTab })),
-    { loading: () => <DashboardSkeleton compact /> },
+    () =>
+        import("./components/users/UsersTab").then((m) => ({
+            default: m.UsersTab,
+        })),
+    { loading: () => <DashboardSkeleton compact variant="admin" /> },
 );
 const ProjectsTab = dynamic(
-    () => import("./components/project/ProjectsTab").then((m) => ({ default: m.ProjectsTab })),
-    { loading: () => <DashboardSkeleton compact /> },
+    () =>
+        import("./components/project/ProjectsTab").then((m) => ({
+            default: m.ProjectsTab,
+        })),
+    { loading: () => <DashboardSkeleton compact variant="admin" /> },
 );
 const AuditLogsTab = dynamic(
-    () => import("./components/audit/AuditLogsTab").then((m) => ({ default: m.AuditLogsTab })),
-    { loading: () => <DashboardSkeleton compact /> },
+    () =>
+        import("./components/audit/AuditLogsTab").then((m) => ({
+            default: m.AuditLogsTab,
+        })),
+    { loading: () => <DashboardSkeleton compact variant="admin" /> },
 );
-const AdminModals = dynamic(
-    () => import("./components/AdminModals").then((m) => ({ default: m.AdminModals })),
+const AdminModals = dynamic(() =>
+    import("./components/AdminModals").then((m) => ({
+        default: m.AdminModals,
+    })),
 );
 
 export default function AdminDashboardClient(): React.JSX.Element | null {
@@ -30,7 +41,7 @@ export default function AdminDashboardClient(): React.JSX.Element | null {
     const { isLoading, hasInitialDataLoaded } = useAdminDataData();
 
     if (!hasInitialDataLoaded && isLoading) {
-        return <DashboardSkeleton />;
+        return <DashboardSkeleton variant="admin" />;
     }
 
     return (

@@ -2,7 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Button, Pagination, Skeleton, EmptyState } from "@/components/ui";
+import {
+    Button,
+    EmptyState,
+    Pagination,
+    ProjectGroupSkeleton,
+} from "@/components/ui";
 import { Building2, FolderTree } from "lucide-react";
 import {
     fileStatIcon,
@@ -65,9 +70,8 @@ export function ProjectList({
 
             {isLoading && (
                 <div className="space-y-4">
-                    <Skeleton className="h-20 w-full rounded-2xl" />
-                    <Skeleton className="h-20 w-full rounded-2xl" />
-                    <Skeleton className="h-20 w-full rounded-2xl" />
+                    <ProjectGroupSkeleton compact rows={2} />
+                    <ProjectGroupSkeleton compact rows={1} />
                 </div>
             )}
 
@@ -131,7 +135,7 @@ export function ProjectList({
                                         ))}
                                     </div>
                                     {paginated.totalPages > 1 && (
-                                        <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
+                                        <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 dark:border-slate-700">
                                             <Pagination
                                                 currentPage={
                                                     paginated.currentPage
@@ -191,7 +195,7 @@ function ProgramGroupAccordion({
             <button
                 type="button"
                 onClick={onToggle}
-                className="group flex w-full items-start justify-between gap-3 bg-white px-3 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-inset dark:bg-slate-800 dark:hover:bg-slate-700/70"
+                className="group flex w-full items-start justify-between gap-3 bg-white px-3 py-3 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:outline-none focus-visible:ring-inset dark:bg-slate-800 dark:hover:bg-slate-700/70"
             >
                 <ProgramGroupHeader
                     groupKey={groupKey}

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ProjectCard } from "./ProjectCard";
 import {
     Pagination,
-    Skeleton,
     EmptyState as SharedEmptyState,
+    ProjectGroupSkeleton,
 } from "@/components/ui";
 import { Building2 } from "lucide-react";
 import {
@@ -21,11 +21,7 @@ import { paginateGroupItems } from "@/lib/programGroupPagination";
 import { cn } from "@/lib/utils";
 
 export const ProjectSelection = (): React.JSX.Element => {
-    const {
-        projects,
-        isLoading,
-        error,
-    } = useCreateDocsContext();
+    const { projects, isLoading, error } = useCreateDocsContext();
     const [expandedProgramGroups, setExpandedProgramGroups] = useState<
         Set<string>
     >(new Set());
@@ -58,15 +54,14 @@ export const ProjectSelection = (): React.JSX.Element => {
 
     return (
         <div className="flex flex-1 flex-col items-center justify-center p-4 sm:p-6">
-            <h1 className="mb-6 text-center text-2xl font-bold text-slate-800 text-balance dark:text-slate-100 sm:mb-8 sm:text-3xl">
+            <h1 className="mb-6 text-center text-2xl font-bold text-balance text-slate-800 sm:mb-8 sm:text-3xl dark:text-slate-100">
                 เลือกโครงการสำหรับเอกสาร
             </h1>
 
             {isLoading ? (
                 <div className="w-full max-w-4xl space-y-4">
-                    <Skeleton className="h-28 w-full rounded-2xl" />
-                    <Skeleton className="h-28 w-full rounded-2xl" />
-                    <Skeleton className="h-28 w-full rounded-2xl" />
+                    <ProjectGroupSkeleton rows={2} />
+                    <ProjectGroupSkeleton rows={1} />
                 </div>
             ) : null}
 
@@ -76,10 +71,7 @@ export const ProjectSelection = (): React.JSX.Element => {
                     description={error || "ไม่สามารถโหลดข้อมูลได้"}
                     icon={Building2}
                 >
-                    <Button
-                        asChild
-                        className="mt-4"
-                    >
+                    <Button asChild className="mt-4">
                         <Link href={ROUTES.DASHBOARD}>กลับไปแดชบอร์ด</Link>
                     </Button>
                 </SharedEmptyState>
@@ -120,7 +112,7 @@ export const ProjectSelection = (): React.JSX.Element => {
                                         onClick={() =>
                                             toggleProgramGroup(group.key)
                                         }
-                                        className="group flex w-full items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-inset dark:bg-slate-800 dark:hover:bg-slate-700/70 sm:px-6"
+                                        className="group flex w-full items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:outline-none focus-visible:ring-inset sm:px-6 dark:bg-slate-800 dark:hover:bg-slate-700/70"
                                     >
                                         <ProgramGroupHeader
                                             groupKey={group.key}
@@ -155,16 +147,19 @@ export const ProjectSelection = (): React.JSX.Element => {
                                                     : "-translate-y-1",
                                             )}
                                         >
-                                            <div className="space-y-3 bg-slate-50/60 p-4 dark:bg-slate-900/40 sm:p-5">
-                                                {paginatedProjects.items.map((project) => (
-                                                    <ProjectCard
-                                                        key={project.id}
-                                                        project={project}
-                                                    />
-                                                ))}
+                                            <div className="space-y-3 bg-slate-50/60 p-4 sm:p-5 dark:bg-slate-900/40">
+                                                {paginatedProjects.items.map(
+                                                    (project) => (
+                                                        <ProjectCard
+                                                            key={project.id}
+                                                            project={project}
+                                                        />
+                                                    ),
+                                                )}
                                             </div>
-                                            {paginatedProjects.totalPages > 1 && (
-                                                <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-700 sm:px-5">
+                                            {paginatedProjects.totalPages >
+                                                1 && (
+                                                <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 dark:border-slate-700">
                                                     <Pagination
                                                         currentPage={
                                                             paginatedProjects.currentPage
@@ -190,7 +185,7 @@ export const ProjectSelection = (): React.JSX.Element => {
                     </div>
 
                     {projects.length > 0 && (
-                        <div className="text-center mt-4 text-sm text-slate-500 dark:text-slate-400">
+                        <div className="mt-4 text-center text-sm text-slate-500 dark:text-slate-400">
                             แสดง {groupedProjects.length} โครงการหลัก จาก{" "}
                             {projects.length} โครงการย่อยทั้งหมด
                         </div>
@@ -200,7 +195,7 @@ export const ProjectSelection = (): React.JSX.Element => {
                         <Button
                             asChild
                             variant="outline"
-                            className="h-11 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700"
+                            className="h-11 rounded-xl bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700"
                         >
                             <Link href={ROUTES.DASHBOARD}>กลับไปแดชบอร์ด</Link>
                         </Button>
@@ -208,7 +203,9 @@ export const ProjectSelection = (): React.JSX.Element => {
                             asChild
                             className="h-11 rounded-xl bg-blue-600 text-white shadow-md transition hover:bg-blue-700"
                         >
-                            <Link href={ROUTES.DASHBOARD}>สร้างโครงการใหม่</Link>
+                            <Link href={ROUTES.DASHBOARD}>
+                                สร้างโครงการใหม่
+                            </Link>
                         </Button>
                     </div>
                 </>

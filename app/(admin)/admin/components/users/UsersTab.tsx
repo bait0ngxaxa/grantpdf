@@ -6,8 +6,10 @@ import { UsersTable } from "./UsersTable";
 import { EditUserModal } from "./EditUserModal";
 import { DeleteUserModal } from "./DeleteUserModal";
 import { useUserManagement } from "../../hooks/useUserManagement";
-import { Skeleton } from "@/components/ui";
+import { Skeleton, TableSkeleton } from "@/components/ui";
 import { XCircle } from "lucide-react";
+
+const USER_STAT_SKELETONS = [1, 2, 3] as const;
 
 export const UsersTab: React.FC = (): React.JSX.Element => {
     const {
@@ -42,18 +44,24 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
     if (isInitialUsersLoading) {
         return (
             <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Skeleton className="h-28 rounded-2xl" />
-                    <Skeleton className="h-28 rounded-2xl" />
-                    <Skeleton className="h-28 rounded-2xl" />
+                <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+                    {USER_STAT_SKELETONS.map((item) => (
+                        <div
+                            key={item}
+                            className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                        >
+                            <div className="flex items-center gap-4">
+                                <Skeleton className="h-14 w-14 shrink-0 rounded-2xl" />
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-28" />
+                                    <Skeleton className="h-8 w-16" />
+                                    <Skeleton className="h-3 w-36" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 space-y-4">
-                    <Skeleton className="h-10 w-full rounded-xl" />
-                    <Skeleton className="h-12 w-full rounded-xl" />
-                    <Skeleton className="h-12 w-full rounded-xl" />
-                    <Skeleton className="h-12 w-full rounded-xl" />
-                    <Skeleton className="h-12 w-full rounded-xl" />
-                </div>
+                <TableSkeleton withToolbar columns={6} rows={4} />
             </div>
         );
     }
@@ -64,9 +72,9 @@ export const UsersTab: React.FC = (): React.JSX.Element => {
             {fetchError && (
                 <div
                     role="alert"
-                    className="alert alert-error mb-6 bg-red-50 border border-red-200 text-red-800 rounded-2xl"
+                    className="alert alert-error mb-6 rounded-2xl border border-red-200 bg-red-50 text-red-800"
                 >
-                    <XCircle className="stroke-current shrink-0 h-6 w-6" />
+                    <XCircle className="h-6 w-6 shrink-0 stroke-current" />
                     <span>{fetchError}</span>
                 </div>
             )}

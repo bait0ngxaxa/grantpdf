@@ -4,7 +4,12 @@ export { SuccessModal } from "./SuccessModal";
 export { LoadingSpinner } from "./LoadingSpinner";
 export { Skeleton } from "./Skeleton";
 export { DashboardSkeleton } from "./DashboardSkeleton";
-export { CreateDocsSkeleton } from "./CreateDocsSkeleton";
+export {
+    CreateDocsSkeleton,
+    CreateDocsTopBarSkeleton,
+} from "./CreateDocsSkeleton";
+export { ProjectGroupSkeleton } from "./ProjectGroupSkeleton";
+export { TableSkeleton } from "./TableSkeleton";
 export { FormSkeleton } from "./FormSkeleton";
 export { EmptyState } from "./EmptyState";
 export { AttachmentList } from "./AttachmentList";

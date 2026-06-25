@@ -8,15 +8,23 @@ import { DashboardSkeleton } from "@/components/ui";
 
 // P1: Lazy-load tabs that are not visible on first render
 const ProjectsTab = dynamic(
-    () => import("./components/ProjectsTab").then((m) => ({ default: m.ProjectsTab })),
-    { loading: () => <DashboardSkeleton compact /> },
+    () =>
+        import("./components/ProjectsTab").then((m) => ({
+            default: m.ProjectsTab,
+        })),
+    { loading: () => <DashboardSkeleton compact variant="user" /> },
 );
 const CreateProjectTab = dynamic(
-    () => import("./components/CreateProjectTab").then((m) => ({ default: m.CreateProjectTab })),
-    { loading: () => <DashboardSkeleton compact /> },
+    () =>
+        import("./components/CreateProjectTab").then((m) => ({
+            default: m.CreateProjectTab,
+        })),
+    { loading: () => <DashboardSkeleton compact variant="user" /> },
 );
-const DashboardModals = dynamic(
-    () => import("./components/DashboardModals").then((m) => ({ default: m.DashboardModals })),
+const DashboardModals = dynamic(() =>
+    import("./components/DashboardModals").then((m) => ({
+        default: m.DashboardModals,
+    })),
 );
 
 export default function UserDashboardClient(): React.JSX.Element | null {
@@ -25,12 +33,12 @@ export default function UserDashboardClient(): React.JSX.Element | null {
         useUserDashboardContext();
 
     if (!hasInitialDataLoaded && isLoading) {
-        return <DashboardSkeleton />;
+        return <DashboardSkeleton variant="user" />;
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-transparent text-red-500 text-center p-4">
+            <div className="flex min-h-screen items-center justify-center bg-transparent p-4 text-center text-red-500">
                 <p>{error}</p>
             </div>
         );
