@@ -19,6 +19,7 @@ import { signOutWithSessionRevoke } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
 import { cn, getAvatarInitial } from "@/lib/utils";
+import { NotificationBell } from "@/components/notifications";
 
 type TopBarMenuItem = {
     name: string;
@@ -95,6 +96,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
                     </div>
                 </div>
                 <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 md:gap-4">
+                    <NotificationBell tone="user" />
                     <ThemeToggle />
 
                     {session?.user?.role === ROLES.ADMIN && (

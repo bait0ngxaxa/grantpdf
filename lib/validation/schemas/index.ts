@@ -45,6 +45,15 @@ export {
 } from "./projectReport.schema";
 
 export {
+    notificationListQuerySchema,
+    notificationAudienceQuerySchema,
+    markNotificationsReadSchema,
+    type NotificationListQueryInput,
+    type NotificationAudienceQueryInput,
+    type MarkNotificationsReadInput,
+} from "./notification.schema";
+
+export {
     PROJECT_NAME_MAX_LENGTH,
     PROJECT_DESCRIPTION_MAX_LENGTH,
     PROJECT_STATUS_NOTE_MAX_LENGTH,

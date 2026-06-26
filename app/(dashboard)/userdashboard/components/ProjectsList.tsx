@@ -1,9 +1,33 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Project } from "@/type";
 import { useUserDashboardContext } from "../contexts";
-import { groupProjectsByProgram } from "@/lib/programGrouping";
+import {
+    groupProjectsByProgram,
+    type ProgramGroup,
+} from "@/lib/programGrouping";
+import { useUnreadNotificationMarkers } from "@/lib/hooks";
+import {
+    NOTIFICATION_AUDIENCE,
+    NOTIFICATION_TYPE,
+    type NotificationType,
+} from "@/lib/notifications/constants";
+import {
+    buildNotificationProjectElementId,
+    NOTIFICATION_ACTION_QUERY,
+    NOTIFICATION_ACTION_TARGET,
+    parseNotificationActionTarget,
+    parseNotificationProjectId,
+    removeNotificationActionParams,
+} from "@/lib/notifications/deepLink";
 
 import { ProjectsListHeader } from "./ProjectsListHeader";
 import { ProjectItem } from "./ProjectItem";
@@ -19,26 +43,49 @@ import { cn } from "@/lib/utils";
 import { PAGINATION } from "@/lib/constants";
 import { paginateGroupItems } from "@/lib/programGroupPagination";
 
-const readStringSetFromStorage = (key: string): Set<string> => {
-    const storedValue = localStorage.getItem(key);
-    if (!storedValue) {
-        return new Set();
+interface NotificationFocusLocation {
+    groupKey: string;
+    page: number;
+    project: Project;
+}
+
+function findNotificationFocusLocation(
+    groups: ProgramGroup<Project>[],
+    projectId: string | null,
+): NotificationFocusLocation | null {
+    if (!projectId) return null;
+
+    for (const group of groups) {
+        const projectIndex = group.items.findIndex(
+            (project) => project.id === projectId,
+        );
+        if (projectIndex === -1) continue;
+
+        return {
+            groupKey: group.key,
+            page:
+                Math.floor(
+                    projectIndex / PAGINATION.PROGRAM_GROUP_PROJECTS_PER_PAGE,
+                ) + 1,
+            project: group.items[projectIndex],
+        };
     }
 
-    const parsedValue: unknown = JSON.parse(storedValue);
-    if (!Array.isArray(parsedValue)) {
-        return new Set();
-    }
-
-    return new Set(parsedValue.filter((item) => typeof item === "string"));
-};
+    return null;
+}
 
 export const ProjectsList: React.FC = (): React.JSX.Element => {
+    const pathname = usePathname();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const searchParamsText = searchParams.toString();
+    const handledNotificationFocusRef = useRef<string | null>(null);
     const {
         projects,
         totalProjects,
         isLoading,
         setShowCreateProjectModal,
+        openProjectFilesModal,
         openReportModal,
         searchTerm,
         setSearchTerm,
@@ -59,89 +106,159 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
     const [programGroupPages, setProgramGroupPages] = useState<
         Record<string, number>
     >({});
-
-    // Track which status notes have been viewed (stored in localStorage)
-    const [viewedStatusNotes, setViewedStatusNotes] = useState<Set<string>>(
-        new Set(),
+    const {
+        projectStatusProjectIds,
+        reportReviewedProjectIds,
+        getUnreadIdsForProject,
+        markRead,
+    } = useUnreadNotificationMarkers(NOTIFICATION_AUDIENCE.USER);
+    const notificationProjectId = parseNotificationProjectId(
+        searchParams.get(NOTIFICATION_ACTION_QUERY.PROJECT_ID),
     );
-    const [viewedReportUpdates, setViewedReportUpdates] = useState<Set<string>>(
-        new Set(),
+    const notificationTarget = parseNotificationActionTarget(
+        searchParams.get(NOTIFICATION_ACTION_QUERY.TARGET),
     );
+    const notificationFocusKey = notificationProjectId
+        ? [
+              notificationProjectId,
+              notificationTarget,
+              searchParams.get(NOTIFICATION_ACTION_QUERY.FOCUS) ?? "",
+          ].join(":")
+        : null;
 
-    useEffect(() => {
-        const frameId = window.requestAnimationFrame(() => {
-            try {
-                setViewedStatusNotes(
-                    readStringSetFromStorage("viewedStatusNotes"),
-                );
-                setViewedReportUpdates(
-                    readStringSetFromStorage("viewedReportUpdates"),
-                );
-            } catch {
-                setViewedStatusNotes(new Set());
-                setViewedReportUpdates(new Set());
-            }
-        });
-
-        return () => window.cancelAnimationFrame(frameId);
-    }, []);
-
-    // Check if project has unread status note
     const hasUnreadStatusNote = (project: Project): boolean => {
         if (!project.statusNote) return false;
-        const noteKey = `${project.id}_${project.updated_at}`;
-        return !viewedStatusNotes.has(noteKey);
+        return projectStatusProjectIds.has(project.id);
     };
 
-    const getUnreadReportKeys = (project: Project): string[] => {
-        return (project.reports || [])
-            .filter((report) => report.reviewedAt)
-            .map((report) => `${project.id}_${report.id}_${report.reviewedAt}`)
-            .filter((key) => !viewedReportUpdates.has(key));
+    const hasUnreadReportUpdate = (project: Project): boolean => {
+        return reportReviewedProjectIds.has(project.id);
     };
 
-    const openStatusDetailModal = (project: Project): void => {
+    const markProjectNotificationsRead = useCallback(
+        (projectId: string, types: NotificationType[]): void => {
+            const notificationIds = getUnreadIdsForProject(projectId, types);
+            if (notificationIds.length > 0) {
+                void markRead(notificationIds);
+            }
+        },
+        [getUnreadIdsForProject, markRead],
+    );
+
+    const openStatusDetailModal = useCallback((project: Project): void => {
         setSelectedStatusProject(project);
         setShowStatusModal(true);
+        markProjectNotificationsRead(project.id, [
+            NOTIFICATION_TYPE.PROJECT_STATUS_UPDATED,
+        ]);
+    }, [markProjectNotificationsRead]);
 
-        // Mark this status note as read
-        if (project.statusNote) {
-            const noteKey = `${project.id}_${project.updated_at}`;
-            const newViewed = new Set(viewedStatusNotes);
-            newViewed.add(noteKey);
-            setViewedStatusNotes(newViewed);
-            localStorage.setItem(
-                "viewedStatusNotes",
-                JSON.stringify([...newViewed]),
-            );
-        }
-    };
-
-    const closeStatusDetailModal = (): void => {
+    const closeStatusDetailModal = useCallback((): void => {
         setShowStatusModal(false);
         setSelectedStatusProject(null);
-    };
+    }, []);
 
-    const openReportDetailModal = (project: Project): void => {
-        const reportKeys = getUnreadReportKeys(project);
-        if (reportKeys.length > 0) {
-            const newViewed = new Set(viewedReportUpdates);
-            for (const key of reportKeys) {
-                newViewed.add(key);
-            }
-            setViewedReportUpdates(newViewed);
-            localStorage.setItem(
-                "viewedReportUpdates",
-                JSON.stringify([...newViewed]),
-            );
-        }
+    const openReportDetailModal = useCallback((project: Project): void => {
+        markProjectNotificationsRead(project.id, [
+            NOTIFICATION_TYPE.PROJECT_REPORT_REVIEWED,
+        ]);
         openReportModal(project);
-    };
+    }, [markProjectNotificationsRead, openReportModal]);
 
     const groupedProjects = useMemo(
         () => groupProjectsByProgram(projects),
         [projects],
     );
+    const notificationFocusLocation = findNotificationFocusLocation(
+        groupedProjects,
+        notificationProjectId,
+    );
+    const notificationFocusGroupKey = notificationFocusLocation?.groupKey;
+    const notificationFocusPage = notificationFocusLocation?.page;
+    const notificationFocusProject = notificationFocusLocation?.project;
+
+    useEffect(() => {
+        if (!notificationFocusGroupKey || !notificationFocusPage) return;
+
+        const frameId = window.requestAnimationFrame(() => {
+            setExpandedProgramGroups((prev) => {
+                if (prev.has(notificationFocusGroupKey)) return prev;
+                const next = new Set(prev);
+                next.add(notificationFocusGroupKey);
+                return next;
+            });
+            setProgramGroupPages((prev) => {
+                if (prev[notificationFocusGroupKey] === notificationFocusPage) {
+                    return prev;
+                }
+
+                return {
+                    ...prev,
+                    [notificationFocusGroupKey]: notificationFocusPage,
+                };
+            });
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, [notificationFocusGroupKey, notificationFocusPage]);
+
+    useEffect(() => {
+        if (
+            !notificationFocusProject ||
+            !notificationFocusGroupKey ||
+            !notificationFocusPage ||
+            !notificationFocusKey
+        ) {
+            return;
+        }
+        if (handledNotificationFocusRef.current === notificationFocusKey) return;
+        if (!expandedProgramGroups.has(notificationFocusGroupKey)) return;
+
+        const currentPage = programGroupPages[notificationFocusGroupKey] ?? 1;
+        if (currentPage !== notificationFocusPage) return;
+
+        handledNotificationFocusRef.current = notificationFocusKey;
+        const frameId = window.requestAnimationFrame(() => {
+            const element = document.getElementById(
+                buildNotificationProjectElementId(
+                    "user",
+                    notificationFocusProject.id,
+                ),
+            );
+            element?.scrollIntoView({ behavior: "smooth", block: "center" });
+            element?.focus({ preventScroll: true });
+
+            if (notificationTarget === NOTIFICATION_ACTION_TARGET.STATUS) {
+                openStatusDetailModal(notificationFocusProject);
+            } else if (
+                notificationTarget === NOTIFICATION_ACTION_TARGET.REPORTS
+            ) {
+                openReportDetailModal(notificationFocusProject);
+            } else if (notificationTarget === NOTIFICATION_ACTION_TARGET.FILES) {
+                openProjectFilesModal(notificationFocusProject);
+            }
+            router.replace(
+                removeNotificationActionParams(pathname, searchParamsText),
+                { scroll: false },
+            );
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, [
+        expandedProgramGroups,
+        notificationFocusKey,
+        notificationFocusGroupKey,
+        notificationFocusPage,
+        notificationFocusProject,
+        notificationTarget,
+        openProjectFilesModal,
+        openReportDetailModal,
+        openStatusDetailModal,
+        pathname,
+        programGroupPages,
+        router,
+        searchParamsText,
+    ]);
 
     const toggleProgramGroup = (groupKey: string): void => {
         setExpandedProgramGroups((prev) => {
@@ -245,13 +362,21 @@ export const ProjectsList: React.FC = (): React.JSX.Element => {
                                                     <ProjectItem
                                                         key={project.id}
                                                         project={project}
+                                                        focusElementId={buildNotificationProjectElementId(
+                                                            "user",
+                                                            project.id,
+                                                        )}
+                                                        isNotificationFocused={
+                                                            notificationProjectId ===
+                                                            project.id
+                                                        }
                                                         hasUnreadStatusNote={hasUnreadStatusNote(
                                                             project,
                                                         )}
                                                         hasUnreadReportUpdate={
-                                                            getUnreadReportKeys(
+                                                            hasUnreadReportUpdate(
                                                                 project,
-                                                            ).length > 0
+                                                            )
                                                         }
                                                         onStatusClick={() =>
                                                             openStatusDetailModal(

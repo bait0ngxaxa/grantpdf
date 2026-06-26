@@ -9,7 +9,6 @@ export const ProjectsTab = (): React.JSX.Element => {
     const {
         projects,
         isLoading,
-        viewedProjects,
         searchTerm,
         setSearchTerm,
         sortBy,
@@ -36,7 +35,6 @@ export const ProjectsTab = (): React.JSX.Element => {
             <ProjectsList
                 projects={projects}
                 isLoading={isLoading}
-                viewedProjects={viewedProjects}
                 searchTerm={searchTerm}
                 sortBy={sortBy}
                 selectedStatus={selectedStatus}

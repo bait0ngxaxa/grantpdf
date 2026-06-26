@@ -59,6 +59,24 @@ export {
     updateProjectReportStatusWithAudit,
 } from "./projectReportService";
 
+// Notification Service
+export {
+    getNotificationsForUser,
+    getUnreadNotificationCount,
+    getUnseenNotificationCount,
+    markNotificationsRead,
+    markAllNotificationsRead,
+    markAllNotificationsSeen,
+} from "./notificationService";
+export {
+    notifyProjectCreated,
+    notifyProjectStatusUpdated,
+    notifyProjectReportSubmitted,
+    notifyProjectReportReviewed,
+    notifyProjectCoOwnersAssigned,
+    notifyProjectDocumentUploaded,
+} from "./notificationEventService";
+
 // Audit Service
 export { getAuditLogsPaginated } from "./auditService";
 export type { GetAuditLogsParams } from "./auditService";

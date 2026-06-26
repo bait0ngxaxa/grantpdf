@@ -189,6 +189,10 @@ export const API_ROUTES = {
     ADMIN_USERS: "/api/admin/users",
     ADMIN_AUDIT: "/api/admin/audit",
     ADMIN_REPORTS: "/api/admin/reports",
+    NOTIFICATIONS: "/api/notifications",
+    NOTIFICATIONS_READ: "/api/notifications/read",
+    NOTIFICATIONS_READ_ALL: "/api/notifications/read-all",
+    NOTIFICATIONS_SEEN_ALL: "/api/notifications/seen-all",
 } as const;
 
 export const IDEMPOTENCY_HEADERS = {
@@ -273,6 +277,11 @@ export const RATE_LIMIT = {
         DOCUMENT_GENERATE: {
             ROUTE_KEY: "user:document-generate",
             LIMIT: 12,
+            WINDOW_MS: 60_000,
+        },
+        NOTIFICATION_MUTATION: {
+            ROUTE_KEY: "user:notification-mutation",
+            LIMIT: 120,
             WINDOW_MS: 60_000,
         },
     },

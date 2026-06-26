@@ -13,6 +13,7 @@ import {
 import { useAdminDashboardContext } from "../contexts";
 import { signOutWithSessionRevoke } from "@/lib/authClient";
 import { cn, getAvatarInitial } from "@/lib/utils";
+import { NotificationBell } from "@/components/notifications";
 
 type AdminTopBarMenuItem = {
     name: string;
@@ -82,6 +83,7 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
                     </div>
                 </div>
                 <div className="flex shrink-0 items-center justify-end gap-2 sm:gap-4">
+                    <NotificationBell tone="admin" />
                     <ThemeToggle />
                     <AdminAvatarMenu session={session} />
                 </div>

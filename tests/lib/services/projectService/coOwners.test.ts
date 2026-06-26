@@ -22,6 +22,12 @@ interface MockTransactionClient {
         upsert: ReturnType<typeof vi.fn>;
         findMany: ReturnType<typeof vi.fn>;
     };
+    notificationRecipient: {
+        findMany: ReturnType<typeof vi.fn>;
+    };
+    notificationEvent: {
+        create: ReturnType<typeof vi.fn>;
+    };
 }
 
 function createTransactionClient(): MockTransactionClient {
@@ -38,6 +44,12 @@ function createTransactionClient(): MockTransactionClient {
             upsert: vi.fn(),
             findMany: vi.fn(),
         },
+        notificationRecipient: {
+            findMany: vi.fn(),
+        },
+        notificationEvent: {
+            create: vi.fn(),
+        },
     };
 }
 
@@ -52,10 +64,17 @@ describe("updateProjectCoOwners", () => {
         mockedTransaction.mockImplementation(async (callback) =>
             callback(tx as never),
         );
-        tx.project.findUnique.mockResolvedValue({ id: 10, userId: 2 });
+        tx.project.findUnique.mockResolvedValue({
+            id: 10,
+            name: "โครงการทดสอบ",
+            userId: 2,
+            coOwners: [],
+        });
         tx.project.update.mockResolvedValue({ id: 10 });
         tx.projectCoOwner.deleteMany.mockResolvedValue({ count: 0 });
         tx.projectCoOwner.findMany.mockResolvedValue([]);
+        tx.notificationRecipient.findMany.mockResolvedValue([]);
+        tx.notificationEvent.create.mockResolvedValue({ id: BigInt(1) });
     });
 
     it("disables co-owners and removes existing assignments", async () => {
@@ -152,5 +171,105 @@ describe("updateProjectCoOwners", () => {
                 },
             ],
         });
+        expect(tx.notificationEvent.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    type: "PROJECT_CO_OWNER_ASSIGNED",
+                    actionUrl: "/userdashboard?projectId=10&notificationTarget=project",
+                    recipients: {
+                        create: [{ recipientUserId: 3, audience: "user" }],
+                    },
+                }),
+            }),
+        );
+    });
+
+    it("notifies an existing co-owner that does not have an assignment notification yet", async () => {
+        tx.project.findUnique.mockResolvedValue({
+            id: 10,
+            name: "โครงการทดสอบ",
+            userId: 2,
+            coOwners: [{ adminUserId: 1 }],
+        });
+        tx.user.findMany.mockResolvedValue([{ id: 1 }]);
+        tx.notificationRecipient.findMany.mockResolvedValue([]);
+        tx.projectCoOwner.findMany.mockResolvedValue([
+            {
+                adminUser: {
+                    id: 1,
+                    name: "แอดมินหลัก",
+                    email: "admin@test.com",
+                },
+            },
+        ]);
+
+        await updateProjectCoOwners({
+            projectId: 10,
+            allowCoOwners: true,
+            adminUserIds: [1],
+            assignedById: 1,
+        });
+
+        expect(tx.notificationRecipient.findMany).toHaveBeenCalledWith({
+            where: {
+                recipientUserId: { in: [1] },
+                audience: "user",
+                event: {
+                    projectId: 10,
+                    type: "PROJECT_CO_OWNER_ASSIGNED",
+                },
+            },
+            select: { recipientUserId: true },
+        });
+        expect(tx.notificationEvent.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    type: "PROJECT_CO_OWNER_ASSIGNED",
+                    actionUrl: "/userdashboard?projectId=10&notificationTarget=project",
+                    recipients: {
+                        create: [{ recipientUserId: 1, audience: "user" }],
+                    },
+                }),
+            }),
+        );
+    });
+
+    it("notifies an existing co-owner again when the previous notification used another audience", async () => {
+        tx.project.findUnique.mockResolvedValue({
+            id: 10,
+            name: "โครงการทดสอบ",
+            userId: 2,
+            coOwners: [{ adminUserId: 3 }],
+        });
+        tx.user.findMany.mockResolvedValue([{ id: 3 }]);
+        tx.notificationRecipient.findMany.mockResolvedValue([]);
+        tx.projectCoOwner.findMany.mockResolvedValue([
+            {
+                adminUser: {
+                    id: 3,
+                    name: "ผู้ใช้ร่วม",
+                    email: "member@test.com",
+                },
+            },
+        ]);
+
+        await updateProjectCoOwners({
+            projectId: 10,
+            allowCoOwners: true,
+            adminUserIds: [3],
+            assignedById: 1,
+        });
+
+        expect(tx.notificationEvent.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    type: "PROJECT_CO_OWNER_ASSIGNED",
+                    actionUrl: "/userdashboard?projectId=10&notificationTarget=project",
+                    recipients: {
+                        create: [{ recipientUserId: 3, audience: "user" }],
+                    },
+                }),
+            }),
+        );
     });
 });

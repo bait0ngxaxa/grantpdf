@@ -27,7 +27,6 @@ interface AdminDashboardContextType {
     isSidebarOpen: boolean;
     setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
     expandedProjects: Set<string>;
-    viewedProjects: Set<string>;
     expandedRows: Set<string>;
     toggleProjectExpansion: (projectId: string) => void;
     toggleRowExpansion: (fileId: string) => void;
@@ -43,7 +42,6 @@ interface AdminDashboardContextType {
     setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
     selectedProgramFilterId: string;
     setSelectedProgramFilterId: React.Dispatch<React.SetStateAction<string>>;
-    markProjectViewed: (projectId: string) => void;
 
     // Modal States
     isStatusModalOpen: boolean;

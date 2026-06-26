@@ -9,7 +9,6 @@ interface AdminUIContextType {
     isSidebarOpen: boolean;
     setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
     expandedProjects: Set<string>;
-    viewedProjects: Set<string>;
     expandedRows: Set<string>;
     searchTerm: string;
     setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
@@ -21,7 +20,6 @@ interface AdminUIContextType {
     setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
     selectedProgramFilterId: string;
     setSelectedProgramFilterId: React.Dispatch<React.SetStateAction<string>>;
-    markProjectViewed: (projectId: string) => void;
     toggleProjectExpansion: (projectId: string) => void;
     toggleRowExpansion: (fileId: string) => void;
 }

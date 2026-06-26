@@ -25,6 +25,7 @@ import {
     startUploadIdempotency,
 } from "@/lib/uploadIdempotency";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
+import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -177,14 +178,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             await writeFile(tempFilePath, buffer);
             await rename(tempFilePath, finalFilePath);
             movedToFinalPath = true;
-            userFile = await prisma.userFile.create({
-                data: {
-                    originalFileName: file.name,
-                    storagePath: relativeStoragePath,
-                    fileExtension: fileExtension,
-                    userId,
+            userFile = await prisma.$transaction(async (tx) => {
+                const createdFile = await tx.userFile.create({
+                    data: {
+                        originalFileName: file.name,
+                        storagePath: relativeStoragePath,
+                        fileExtension: fileExtension,
+                        userId,
+                        projectId,
+                    },
+                });
+                await notifyProjectDocumentUploaded(tx, {
+                    fileId: createdFile.id,
                     projectId,
-                },
+                    fileName: createdFile.originalFileName,
+                    actorUserId: userId,
+                });
+                return createdFile;
             });
         } catch (error) {
             if (movedToFinalPath) {

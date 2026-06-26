@@ -8,6 +8,7 @@ import {
 } from "@/lib/services/projectService";
 import type { ProjectResult } from "./types";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
+import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 
 /**
  * Find or create a project for document generation.
@@ -130,14 +131,23 @@ export async function createUserFileRecord(
         ? trimmedFileName
         : `${trimmedFileName}.${normalizedExtension}`;
 
-    const userFile = await prisma.userFile.create({
-        data: {
-            originalFileName: fileNameWithExt,
-            storagePath: storagePath,
-            fileExtension: normalizedExtension,
-            userId: userId,
-            projectId: projectId,
-        },
+    const userFile = await prisma.$transaction(async (tx) => {
+        const createdFile = await tx.userFile.create({
+            data: {
+                originalFileName: fileNameWithExt,
+                storagePath: storagePath,
+                fileExtension: normalizedExtension,
+                userId: userId,
+                projectId: projectId,
+            },
+        });
+        await notifyProjectDocumentUploaded(tx, {
+            fileId: createdFile.id,
+            projectId,
+            fileName: createdFile.originalFileName,
+            actorUserId: userId,
+        });
+        return createdFile;
     });
 
     await invalidateDashboardStats([userId]);

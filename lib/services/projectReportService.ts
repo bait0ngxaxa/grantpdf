@@ -2,6 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
 import { REPORT_STATUS } from "@/lib/constants";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
+import {
+    notifyProjectReportReviewed,
+    notifyProjectReportSubmitted,
+} from "@/lib/services/notificationEventService";
 import type { Prisma } from "@prisma/client";
 import type {
     AdminProjectReport,
@@ -56,6 +60,7 @@ interface RawProjectReport {
     };
     project?: {
         name: string;
+        coOwners?: Array<{ adminUserId: number }>;
         program?: {
             name: string;
         } | null;
@@ -96,6 +101,7 @@ const ADMIN_REPORT_SELECT = {
     project: {
         select: {
             name: true,
+            coOwners: { select: { adminUserId: true } },
             program: { select: { name: true } },
         },
     },
@@ -242,7 +248,7 @@ export async function createProjectReportWithFile({
             data: { originalFileName, storagePath, fileExtension, userId, projectId },
         });
 
-        return tx.projectReport.create({
+        const report = await tx.projectReport.create({
             data: {
                 reportType,
                 note,
@@ -265,6 +271,15 @@ export async function createProjectReportWithFile({
                 file: { select: REPORT_FILE_SELECT },
             },
         });
+
+        await notifyProjectReportSubmitted(tx, {
+            reportId: report.id,
+            projectId,
+            reportType,
+            actorUserId: userId,
+        });
+
+        return report;
     });
 
     await invalidateDashboardStats([userId]);
@@ -387,6 +402,19 @@ export async function updateProjectReportStatusWithAudit({
         const rawReport = updated as RawProjectReport;
 
         await createReportStatusAudit(tx, rawReport, audit);
+        await notifyProjectReportReviewed(tx, {
+            reportId: rawReport.id,
+            projectId: rawReport.projectId,
+            projectName: rawReport.project?.name ?? "ไม่พบชื่อโครงการ",
+            reportType: rawReport.reportType,
+            status: rawReport.status,
+            ownerUserId: rawReport.userId,
+            coOwnerUserIds:
+                rawReport.project?.coOwners?.map(
+                    (coOwner) => coOwner.adminUserId,
+                ) ?? [],
+            actorUserId: reviewedBy,
+        });
 
         return rawReport;
     });

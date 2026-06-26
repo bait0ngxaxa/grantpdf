@@ -24,6 +24,8 @@ interface ProjectItemProps {
   project: Project;
   hasUnreadStatusNote: boolean;
   hasUnreadReportUpdate: boolean;
+  focusElementId?: string;
+  isNotificationFocused?: boolean;
   onStatusClick: () => void;
   onReportClick: () => void;
 }
@@ -32,6 +34,8 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
   project,
   hasUnreadStatusNote,
   hasUnreadReportUpdate,
+  focusElementId,
+  isNotificationFocused = false,
   onStatusClick,
   onReportClick,
 }): React.JSX.Element => {
@@ -56,7 +60,15 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
     : null;
 
   return (
-    <div className="min-w-0 rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:px-4">
+    <div
+      id={focusElementId}
+      tabIndex={-1}
+      className={cn(
+        "scroll-mt-28 min-w-0 rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-none hover:border-slate-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:px-4",
+        isNotificationFocused &&
+          "border-blue-300 ring-2 ring-blue-400/45 shadow-md shadow-blue-100/80 dark:border-blue-700 dark:ring-blue-400/35 dark:shadow-blue-950/30",
+      )}
+    >
       <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(7.5rem,9.5rem)_5.5rem_6.5rem_auto] xl:items-center">
         <div className="min-w-0">
           <div className="flex items-start gap-3">
@@ -110,10 +122,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
 
         <div className="relative min-w-0 xl:justify-self-center">
           {hasUnreadStatusNote && (
-            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:animate-none" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-orange-500" />
-            </span>
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-800" />
           )}
           <button
             type="button"
@@ -170,10 +179,7 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
           </Button>
           <div className="relative min-w-0">
             {hasUnreadReportUpdate && (
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-orange-500" />
-              </span>
+              <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-800" />
             )}
             <Button
               size="sm"

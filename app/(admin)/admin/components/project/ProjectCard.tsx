@@ -5,7 +5,6 @@ import { Button } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
 import { getStatusColor, cn } from "@/lib/utils";
-import { REPORT_STATUS } from "@/lib/constants";
 import { getProgramAccent } from "@/components/programAccent";
 import { ProgramIdentityIcon } from "@/components/ProgramIdentityIcon";
 import {
@@ -23,93 +22,52 @@ import {
 
 import { useAdminModalStates } from "../../hooks";
 
-const readStringSetFromStorage = (key: string): Set<string> => {
-    const storedValue = localStorage.getItem(key);
-    if (!storedValue) {
-        return new Set();
-    }
-
-    const parsedValue: unknown = JSON.parse(storedValue);
-    if (!Array.isArray(parsedValue)) {
-        return new Set();
-    }
-
-    return new Set(parsedValue.filter((item) => typeof item === "string"));
-};
-
 interface ProjectCardProps {
     project: AdminProject;
     showNewBadge?: boolean;
+    hasUnreadReport?: boolean;
+    hasUnreadDocument?: boolean;
+    focusElementId?: string;
+    isNotificationFocused?: boolean;
+    onProjectViewed?: () => void;
+    onFilesViewed?: () => void;
+    onReportsViewed?: () => void;
 }
 
 export default function ProjectCard({
     project,
     showNewBadge = false,
+    hasUnreadReport = false,
+    hasUnreadDocument = false,
+    focusElementId,
+    isNotificationFocused = false,
+    onProjectViewed,
+    onFilesViewed,
+    onReportsViewed,
 }: ProjectCardProps): React.JSX.Element {
-    const [viewedPendingReportKeys, setViewedPendingReportKeys] =
-        React.useState<Set<string>>(new Set());
     const {
         openProjectFilesModal,
         openProjectReportsModal,
         openStatusModal,
     } = useAdminModalStates();
 
-    React.useEffect(() => {
-        const frameId = window.requestAnimationFrame(() => {
-            try {
-                setViewedPendingReportKeys(
-                    readStringSetFromStorage("viewedPendingReportKeys"),
-                );
-            } catch {
-                setViewedPendingReportKeys(new Set());
-            }
-        });
-
-        return () => window.cancelAnimationFrame(frameId);
-    }, []);
-
     const onEditProjectStatus = (targetProject: AdminProject) => {
+        onProjectViewed?.();
         openStatusModal(targetProject);
     };
 
     const onViewProjectFiles = (targetProject: AdminProject) => {
+        onProjectViewed?.();
+        onFilesViewed?.();
         openProjectFilesModal(targetProject);
     };
 
-    const getPendingReportKeys = (targetProject: AdminProject): string[] => {
-        return (targetProject.reports || [])
-            .filter((report) => report.status === REPORT_STATUS.PENDING_REVIEW)
-            .map((report) => `${targetProject.id}_${report.id}`);
-    };
-
-    const markPendingReportsViewed = (targetProject: AdminProject): void => {
-        const pendingKeys = getPendingReportKeys(targetProject);
-        if (pendingKeys.length === 0) {
-            return;
-        }
-
-        const nextViewedKeys = new Set(viewedPendingReportKeys);
-        for (const key of pendingKeys) {
-            nextViewedKeys.add(key);
-        }
-
-        setViewedPendingReportKeys(nextViewedKeys);
-        if (typeof window !== "undefined") {
-            localStorage.setItem(
-                "viewedPendingReportKeys",
-                JSON.stringify([...nextViewedKeys]),
-            );
-        }
-    };
-
     const onViewProjectReports = (targetProject: AdminProject) => {
-        markPendingReportsViewed(targetProject);
+        onProjectViewed?.();
+        onReportsViewed?.();
         openProjectReportsModal(targetProject);
     };
 
-    const hasPendingReport = getPendingReportKeys(project).some(
-        (key) => !viewedPendingReportKeys.has(key),
-    );
     const reportCount = project.reports?.length ?? 0;
     const programAccent = project.programName
         ? getProgramAccent({
@@ -134,7 +92,15 @@ export default function ProjectCard({
     };
 
     return (
-        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:px-4">
+        <div
+            id={focusElementId}
+            tabIndex={-1}
+            className={cn(
+                "scroll-mt-28 min-w-0 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-none hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:px-4",
+                isNotificationFocused &&
+                    "border-orange-300 ring-2 ring-orange-400/45 shadow-md shadow-orange-100/80 dark:border-orange-700 dark:ring-orange-400/35 dark:shadow-orange-950/30",
+            )}
+        >
             <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(16rem,1fr)_minmax(6.5rem,9rem)_minmax(6.5rem,7.75rem)_minmax(6.5rem,7.25rem)_5.5rem_auto] xl:items-start">
                 <div className="min-w-0">
                     <div className="flex items-start gap-2.5">
@@ -167,11 +133,8 @@ export default function ProjectCard({
                             <div className="mt-1 flex flex-wrap items-center gap-2">
                                 {showNewBadge && (
                                     <div className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-rose-200/60 bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-600 dark:border-rose-800/50 dark:bg-rose-900/20 dark:text-rose-400">
-                                        <span className="relative flex h-1.5 w-1.5">
-                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-75 motion-reduce:animate-none" />
-                                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-600 dark:bg-rose-400" />
-                                        </span>
-                                        New
+                                        <span className="h-1.5 w-1.5 rounded-full bg-rose-600 dark:bg-rose-400" />
+                                        ใหม่
                                     </div>
                                 )}
                                 {project.programName && programAccent && (
@@ -236,7 +199,8 @@ export default function ProjectCard({
                     <span
                         className={cn(
                             "inline-flex items-center gap-1.5",
-                            hasPendingReport && "text-orange-600 dark:text-orange-300",
+                            hasUnreadReport &&
+                                "text-orange-600 dark:text-orange-300",
                         )}
                     >
                         <ClipboardList className="h-3.5 w-3.5" />
@@ -252,20 +216,22 @@ export default function ProjectCard({
                 </div>
 
                 <div className="grid min-w-0 grid-cols-2 items-center gap-2 pt-0.5 sm:flex sm:flex-wrap sm:justify-end xl:flex-nowrap xl:gap-1.5 xl:self-start xl:justify-self-end">
-                    <Button
-                        size="sm"
-                        onClick={() => onViewProjectFiles(project)}
-                        className="h-11 w-full shrink-0 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-600 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 sm:h-8 sm:w-auto"
-                    >
-                        <Eye className="mr-1.5 h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
-                        ดูไฟล์
-                    </Button>
                     <div className="relative min-w-0">
-                        {hasPendingReport && (
-                            <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75 motion-reduce:animate-none" />
-                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-orange-500" />
-                            </span>
+                        {hasUnreadDocument && (
+                            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-800" />
+                        )}
+                        <Button
+                            size="sm"
+                            onClick={() => onViewProjectFiles(project)}
+                            className="h-11 w-full shrink-0 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-600 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 sm:h-8 sm:w-auto"
+                        >
+                            <Eye className="mr-1.5 h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
+                            ดูไฟล์
+                        </Button>
+                    </div>
+                    <div className="relative min-w-0">
+                        {hasUnreadReport && (
+                            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-800" />
                         )}
                         <Button
                             size="sm"

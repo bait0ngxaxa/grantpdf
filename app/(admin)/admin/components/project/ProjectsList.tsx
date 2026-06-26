@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ProjectCard from "./ProjectCard";
 import {
     EmptyState,
@@ -10,6 +17,20 @@ import {
 } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { Archive } from "lucide-react";
+import { useUnreadNotificationMarkers } from "@/lib/hooks";
+import {
+    NOTIFICATION_AUDIENCE,
+    NOTIFICATION_TYPE,
+    type NotificationType,
+} from "@/lib/notifications/constants";
+import {
+    buildNotificationProjectElementId,
+    NOTIFICATION_ACTION_QUERY,
+    NOTIFICATION_ACTION_TARGET,
+    parseNotificationActionTarget,
+    parseNotificationProjectId,
+    removeNotificationActionParams,
+} from "@/lib/notifications/deepLink";
 import {
     fileStatIcon,
     ProgramGroupHeader,
@@ -17,28 +38,64 @@ import {
 import {
     buildAdminProjectGroupViews,
     hasActiveAdminProjectFilters,
+    type AdminProjectGroupView,
 } from "@/lib/adminProjectGrouping";
 import { paginateGroupItems } from "@/lib/programGroupPagination";
 import { cn } from "@/lib/utils";
 import { PAGINATION } from "@/lib/constants";
+import { useAdminModalStates } from "../../hooks";
 
 interface ProjectsListProps {
     projects: AdminProject[];
     isLoading: boolean;
-    viewedProjects: Set<string>;
     searchTerm: string;
     sortBy: string;
     selectedStatus: string;
 }
 
+interface NotificationFocusLocation {
+    groupKey: string;
+    page: number;
+    project: AdminProject;
+}
+
+function findNotificationFocusLocation(
+    groups: AdminProjectGroupView[],
+    projectId: string | null,
+): NotificationFocusLocation | null {
+    if (!projectId) return null;
+
+    for (const group of groups) {
+        const projectIndex = group.items.findIndex(
+            (project) => project.id === projectId,
+        );
+        if (projectIndex === -1) continue;
+
+        return {
+            groupKey: group.key,
+            page:
+                Math.floor(
+                    projectIndex / PAGINATION.PROGRAM_GROUP_PROJECTS_PER_PAGE,
+                ) + 1,
+            project: group.items[projectIndex],
+        };
+    }
+
+    return null;
+}
+
 export default function ProjectsList({
     projects,
     isLoading,
-    viewedProjects,
     searchTerm,
     sortBy,
     selectedStatus,
 }: ProjectsListProps): React.JSX.Element {
+    const pathname = usePathname();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const searchParamsText = searchParams.toString();
+    const handledNotificationFocusRef = useRef<string | null>(null);
     const [expandedProgramGroups, setExpandedProgramGroups] = useState<
         Set<string>
     >(new Set());
@@ -58,6 +115,146 @@ export default function ProjectsList({
         searchTerm,
         selectedStatus,
     );
+    const {
+        projectCreatedProjectIds,
+        reportSubmittedProjectIds,
+        documentUploadedProjectIds,
+        getUnreadIdsForProject,
+        markRead,
+    } = useUnreadNotificationMarkers(NOTIFICATION_AUDIENCE.ADMIN);
+    const {
+        openProjectFilesModal,
+        openProjectReportsModal,
+        openStatusModal,
+    } = useAdminModalStates();
+    const notificationProjectId = parseNotificationProjectId(
+        searchParams.get(NOTIFICATION_ACTION_QUERY.PROJECT_ID),
+    );
+    const notificationTarget = parseNotificationActionTarget(
+        searchParams.get(NOTIFICATION_ACTION_QUERY.TARGET),
+    );
+    const notificationFocusKey = notificationProjectId
+        ? [
+              notificationProjectId,
+              notificationTarget,
+              searchParams.get(NOTIFICATION_ACTION_QUERY.FOCUS) ?? "",
+          ].join(":")
+        : null;
+
+    const markProjectNotificationsRead = useCallback(
+        (projectId: string, types: NotificationType[]): void => {
+            const notificationIds = getUnreadIdsForProject(projectId, types);
+            if (notificationIds.length > 0) {
+                void markRead(notificationIds);
+            }
+        },
+        [getUnreadIdsForProject, markRead],
+    );
+
+    const notificationFocusLocation = findNotificationFocusLocation(
+        groupedProjects,
+        notificationProjectId,
+    );
+    const notificationFocusGroupKey = notificationFocusLocation?.groupKey;
+    const notificationFocusPage = notificationFocusLocation?.page;
+    const notificationFocusProject = notificationFocusLocation?.project;
+
+    useEffect(() => {
+        if (!notificationFocusGroupKey || !notificationFocusPage) return;
+
+        const frameId = window.requestAnimationFrame(() => {
+            setExpandedProgramGroups((prev) => {
+                if (prev.has(notificationFocusGroupKey)) return prev;
+                const next = new Set(prev);
+                next.add(notificationFocusGroupKey);
+                return next;
+            });
+            setProgramGroupPages((prev) => {
+                if (prev[notificationFocusGroupKey] === notificationFocusPage) {
+                    return prev;
+                }
+
+                return {
+                    ...prev,
+                    [notificationFocusGroupKey]: notificationFocusPage,
+                };
+            });
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, [notificationFocusGroupKey, notificationFocusPage]);
+
+    useEffect(() => {
+        if (
+            !notificationFocusProject ||
+            !notificationFocusGroupKey ||
+            !notificationFocusPage ||
+            !notificationFocusKey
+        ) {
+            return;
+        }
+        if (handledNotificationFocusRef.current === notificationFocusKey) return;
+
+        const shouldBeExpanded =
+            hasActiveFilters ||
+            expandedProgramGroups.has(notificationFocusGroupKey);
+        if (!shouldBeExpanded) return;
+
+        const currentPage = programGroupPages[notificationFocusGroupKey] ?? 1;
+        if (currentPage !== notificationFocusPage) return;
+
+        handledNotificationFocusRef.current = notificationFocusKey;
+        const frameId = window.requestAnimationFrame(() => {
+            const element = document.getElementById(
+                buildNotificationProjectElementId(
+                    "admin",
+                    notificationFocusProject.id,
+                ),
+            );
+            element?.scrollIntoView({ behavior: "smooth", block: "center" });
+            element?.focus({ preventScroll: true });
+
+            if (notificationTarget === NOTIFICATION_ACTION_TARGET.REPORTS) {
+                markProjectNotificationsRead(notificationFocusProject.id, [
+                    NOTIFICATION_TYPE.PROJECT_REPORT_SUBMITTED,
+                ]);
+                openProjectReportsModal(notificationFocusProject);
+            } else if (notificationTarget === NOTIFICATION_ACTION_TARGET.FILES) {
+                markProjectNotificationsRead(notificationFocusProject.id, [
+                    NOTIFICATION_TYPE.PROJECT_DOCUMENT_UPLOADED,
+                ]);
+                openProjectFilesModal(notificationFocusProject);
+            } else if (notificationTarget === NOTIFICATION_ACTION_TARGET.STATUS) {
+                openStatusModal(notificationFocusProject);
+            } else {
+                markProjectNotificationsRead(notificationFocusProject.id, [
+                    NOTIFICATION_TYPE.PROJECT_CREATED,
+                ]);
+            }
+            router.replace(
+                removeNotificationActionParams(pathname, searchParamsText),
+                { scroll: false },
+            );
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, [
+        expandedProgramGroups,
+        hasActiveFilters,
+        markProjectNotificationsRead,
+        notificationFocusKey,
+        notificationFocusGroupKey,
+        notificationFocusPage,
+        notificationFocusProject,
+        notificationTarget,
+        openProjectFilesModal,
+        openProjectReportsModal,
+        openStatusModal,
+        pathname,
+        programGroupPages,
+        router,
+        searchParamsText,
+    ]);
 
     const toggleProgramGroup = (groupKey: string): void => {
         if (hasActiveFilters) {
@@ -199,9 +396,51 @@ export default function ProjectsList({
                                                 <ProjectCard
                                                     key={project.id}
                                                     project={project}
+                                                    focusElementId={buildNotificationProjectElementId(
+                                                        "admin",
+                                                        project.id,
+                                                    )}
+                                                    isNotificationFocused={
+                                                        notificationProjectId ===
+                                                        project.id
+                                                    }
                                                     showNewBadge={
-                                                        !viewedProjects.has(
+                                                        projectCreatedProjectIds.has(
                                                             project.id,
+                                                        )
+                                                    }
+                                                    hasUnreadReport={
+                                                        reportSubmittedProjectIds.has(
+                                                            project.id,
+                                                        )
+                                                    }
+                                                    hasUnreadDocument={
+                                                        documentUploadedProjectIds.has(
+                                                            project.id,
+                                                        )
+                                                    }
+                                                    onProjectViewed={() =>
+                                                        markProjectNotificationsRead(
+                                                            project.id,
+                                                            [
+                                                                NOTIFICATION_TYPE.PROJECT_CREATED,
+                                                            ],
+                                                        )
+                                                    }
+                                                    onFilesViewed={() =>
+                                                        markProjectNotificationsRead(
+                                                            project.id,
+                                                            [
+                                                                NOTIFICATION_TYPE.PROJECT_DOCUMENT_UPLOADED,
+                                                            ],
+                                                        )
+                                                    }
+                                                    onReportsViewed={() =>
+                                                        markProjectNotificationsRead(
+                                                            project.id,
+                                                            [
+                                                                NOTIFICATION_TYPE.PROJECT_REPORT_SUBMITTED,
+                                                            ],
                                                         )
                                                     }
                                                 />

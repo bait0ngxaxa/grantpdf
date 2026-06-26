@@ -23,6 +23,7 @@ import { normalizePhoneNumber } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
 import { SIGNATURE_UPLOAD } from "@/lib/constants";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
+import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 
 const ALLOWED_SIGNATURE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
 const MAX_SIGNATURE_SIZE_BYTES = SIGNATURE_UPLOAD.MAX_SIZE_MB * 1024 * 1024;
@@ -380,16 +381,23 @@ export async function handleApprovalGeneration(
                     },
                 });
 
-                if (attachmentFiles.length === 0) return;
+                if (attachmentFiles.length > 0) {
+                    await tx.attachmentFile.createMany({
+                        data: attachmentFiles.map((attachmentFile) => ({
+                            fileName: attachmentFile.originalFileName,
+                            filePath: attachmentFile.storagePath,
+                            fileSize: attachmentFile.fileSize,
+                            mimeType: attachmentFile.mimeType,
+                            userFileId: savedFile.id,
+                        })),
+                    });
+                }
 
-                await tx.attachmentFile.createMany({
-                    data: attachmentFiles.map((attachmentFile) => ({
-                        fileName: attachmentFile.originalFileName,
-                        filePath: attachmentFile.storagePath,
-                        fileSize: attachmentFile.fileSize,
-                        mimeType: attachmentFile.mimeType,
-                        userFileId: savedFile.id,
-                    })),
+                await notifyProjectDocumentUploaded(tx, {
+                    fileId: savedFile.id,
+                    projectId: projectResult.id,
+                    fileName: savedFile.originalFileName,
+                    actorUserId: userId,
                 });
             });
         },

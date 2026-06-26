@@ -10,6 +10,15 @@ import type {
 import { VALID_STATUSES_SET, PROJECT_STATUS } from "@/lib/constants";
 import { buildProjectAccessWhere } from "./projectAccess";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
+import {
+    notifyProjectCoOwnersAssigned,
+    notifyProjectCreated,
+    notifyProjectStatusUpdated,
+} from "@/lib/services/notificationEventService";
+import {
+    NOTIFICATION_AUDIENCE,
+    NOTIFICATION_TYPE,
+} from "@/lib/notifications/constants";
 
 function uniquePositiveIds(ids: number[]): number[] {
     const uniqueIds = new Set<number>();
@@ -31,6 +40,45 @@ function getProjectDashboardUserIds(project: {
         project.userId,
         ...(project.coOwners?.map((coOwner) => coOwner.adminUserId) ?? []),
     ];
+}
+
+function getAssignableCoOwnerIds(
+    requestedUserIds: number[],
+    ownerUserId: number,
+): number[] {
+    return requestedUserIds.filter((id) => id !== ownerUserId);
+}
+
+function getCoOwnerNotificationTargetIds(
+    assignableUserIds: number[],
+    previousUserIds: Set<number>,
+    notifiedUserIds: Set<number>,
+): number[] {
+    return assignableUserIds.filter(
+        (id) => !previousUserIds.has(id) || !notifiedUserIds.has(id),
+    );
+}
+
+async function getNotifiedCoOwnerAssignmentUserIds(
+    tx: Prisma.TransactionClient,
+    projectId: number,
+    userIds: number[],
+): Promise<Set<number>> {
+    if (userIds.length === 0) return new Set<number>();
+
+    const recipients = await tx.notificationRecipient.findMany({
+        where: {
+            recipientUserId: { in: userIds },
+            audience: NOTIFICATION_AUDIENCE.USER,
+            event: {
+                projectId,
+                type: NOTIFICATION_TYPE.PROJECT_CO_OWNER_ASSIGNED,
+            },
+        },
+        select: { recipientUserId: true },
+    });
+
+    return new Set(recipients.map((recipient) => recipient.recipientUserId));
 }
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -236,13 +284,14 @@ export async function updateProjectStatusWithAudit(
             throw new Error("PROJECT_NOT_FOUND");
         }
 
+        const updatedAt = new Date();
         const updated = await tx.project.update({
             where: { id: params.projectId },
             data: {
                 status: params.status,
                 statusNote: params.statusNote || null,
                 programId: params.programId,
-                updated_at: new Date(),
+                updated_at: updatedAt,
             },
             include: {
                 program: { select: { id: true, name: true } },
@@ -252,6 +301,17 @@ export async function updateProjectStatusWithAudit(
         });
 
         await createProjectStatusAudit(tx, beforeProject, updated, params, audit);
+        await notifyProjectStatusUpdated(tx, {
+            projectId: updated.id,
+            projectName: updated.name,
+            ownerUserId: beforeProject.userId,
+            coOwnerUserIds: beforeProject.coOwners.map(
+                (coOwner) => coOwner.adminUserId,
+            ),
+            status: params.status,
+            actorUserId: parseActorUserId(audit.actorUserId),
+            updatedAt,
+        });
 
         return {
             updated,
@@ -287,6 +347,7 @@ export async function updateProjectCoOwners({
             where: { id: projectId },
             select: {
                 id: true,
+                name: true,
                 userId: true,
                 coOwners: {
                     select: { adminUserId: true },
@@ -312,11 +373,31 @@ export async function updateProjectCoOwners({
             }
         }
 
+        const previousAdminIds = new Set(
+            (project.coOwners ?? []).map((coOwner) => coOwner.adminUserId),
+        );
+        const assignableCoOwnerIds = getAssignableCoOwnerIds(
+            requestedAdminIds,
+            project.userId,
+        );
+        const notifiedCoOwnerUserIds =
+            await getNotifiedCoOwnerAssignmentUserIds(
+                tx,
+                projectId,
+                assignableCoOwnerIds,
+            );
+        const notificationTargetIds = getCoOwnerNotificationTargetIds(
+            assignableCoOwnerIds,
+            previousAdminIds,
+            notifiedCoOwnerUserIds,
+        );
+        const assignedAt = new Date();
+
         await tx.project.update({
             where: { id: projectId },
             data: {
                 allowCoOwners,
-                updated_at: new Date(),
+                updated_at: assignedAt,
             },
             select: { id: true },
         });
@@ -363,6 +444,14 @@ export async function updateProjectCoOwners({
                 },
             },
             orderBy: { created_at: "asc" },
+        });
+
+        await notifyProjectCoOwnersAssigned(tx, {
+            projectId,
+            projectName: project.name,
+            assignedUserIds: notificationTargetIds,
+            actorUserId: assignedById,
+            assignedAt,
         });
 
         return {
@@ -413,7 +502,8 @@ export async function createProject(
                 throw new Error("PROJECT_NAME_CONFLICT");
             }
 
-            return existing
+            const shouldNotify = existing === null || existing.deletedAt !== null;
+            const created = await (existing
                 ? tx.project.update({
                       where: { id: existing.id },
                       data: {
@@ -444,7 +534,15 @@ export async function createProject(
                           files: true,
                           _count: { select: { files: true } },
                       },
-                  });
+                  }));
+            if (shouldNotify) {
+                await notifyProjectCreated(tx, {
+                    projectId: created.id,
+                    projectName: created.name,
+                    actorUserId: userId,
+                });
+            }
+            return created;
         });
 
         await invalidateDashboardStats([userId]);
@@ -595,6 +693,14 @@ export async function createProjectWithAudit(
                 }),
             },
         });
+
+        if (existing === null || existing.deletedAt !== null) {
+            await notifyProjectCreated(tx, {
+                projectId: created.id,
+                projectName: created.name,
+                actorUserId: userId,
+            });
+        }
 
         return created;
     });

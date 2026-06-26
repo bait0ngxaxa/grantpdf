@@ -27,6 +27,8 @@ model User {
   projectReports ProjectReport[]
   documentIdempotencyKeys DocumentIdempotency[]
   authSessions AuthSession[]
+  notificationEventsAuthored NotificationEvent[] @relation("NotificationActor")
+  notificationRecipients NotificationRecipient[] @relation("NotificationRecipientUser")
 
   @@index([created_at])
   @@index([name])
@@ -95,6 +97,7 @@ model Project {
   coOwners ProjectCoOwner[]
   files UserFile[]
   reports ProjectReport[]
+  notificationEvents NotificationEvent[]
 
   @@index([programId])
   @@index([programId, created_at])
@@ -170,6 +173,7 @@ model ProjectReport {
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   file    UserFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  notificationEvents NotificationEvent[]
 
   @@index([projectId, submittedAt])
   @@index([userId, submittedAt])
@@ -251,4 +255,49 @@ model AuditLog {
   @@index([targetType, targetId, created_at])
   @@index([requestId])
   @@map("audit_logs")
+}
+
+model NotificationEvent {
+  id              BigInt   @id @default(autoincrement())
+  type            String   @db.VarChar(64)
+  actorUserId     Int?
+  projectId       Int?
+  projectReportId Int?
+  title           String   @db.VarChar(160)
+  message         String   @db.VarChar(500)
+  actionUrl       String?  @db.VarChar(300)
+  metadata        Json?
+  dedupeKey       String?  @unique @db.VarChar(191)
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+
+  actor        User? @relation("NotificationActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  project      Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectReport ProjectReport? @relation(fields: [projectReportId], references: [id], onDelete: SetNull)
+  recipients   NotificationRecipient[]
+
+  @@index([type, created_at])
+  @@index([projectId, created_at])
+  @@index([projectReportId, created_at])
+  @@index([actorUserId, created_at])
+}
+
+model NotificationRecipient {
+  id              BigInt    @id @default(autoincrement())
+  eventId         BigInt
+  recipientUserId Int
+  audience        String    @default("user") @db.VarChar(16)
+  seenAt          DateTime? @db.Timestamp(6)
+  readAt          DateTime? @db.Timestamp(6)
+  archivedAt      DateTime? @db.Timestamp(6)
+  created_at      DateTime  @default(now()) @db.Timestamp(6)
+
+  event     NotificationEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  recipient User @relation("NotificationRecipientUser", fields: [recipientUserId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, recipientUserId])
+  @@index([recipientUserId, audience, readAt, created_at], map: "NotifRec_user_aud_read_created_idx")
+  @@index([recipientUserId, audience, archivedAt, created_at], map: "NotifRec_user_aud_arch_created_idx")
+  @@index([recipientUserId, readAt, created_at])
+  @@index([recipientUserId, archivedAt, created_at])
+  @@index([eventId])
 }
