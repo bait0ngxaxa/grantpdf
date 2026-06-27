@@ -45,7 +45,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="status-detail-modal-title"
-                className="relative z-10 w-full max-w-md rounded-2xl border border-slate-100 bg-white p-4 shadow-xl duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:p-6 dark:border-slate-700 dark:bg-slate-900"
+                className="relative z-10 w-full max-w-md rounded-2xl border border-slate-100 bg-white p-4 shadow-[0_8px_14px_rgba(15,23,42,0.12)] duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:p-6 dark:border-slate-700 dark:bg-slate-900 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
             >
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-3">

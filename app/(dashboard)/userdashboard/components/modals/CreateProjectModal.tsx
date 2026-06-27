@@ -24,11 +24,36 @@ import { useUserDashboardContext } from "../../contexts";
 import { API_ROUTES } from "@/lib/constants";
 import type { ProgramSummary } from "@/type/models";
 import {
-    ProgramSelectionCard,
+    ProgramSelectionList,
     SelectedProgramBadge,
 } from "./ProgramSelectionCard";
 
 type ModalStep = "select-program" | "project-form";
+
+interface ProgramsResponse {
+    programs: ProgramSummary[];
+}
+
+function isProgramsResponse(value: unknown): value is ProgramsResponse {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        "programs" in value &&
+        Array.isArray((value as { programs?: unknown }).programs) &&
+        (value as { programs: unknown[] }).programs.every(isProgramSummary)
+    );
+}
+
+function isProgramSummary(value: unknown): value is ProgramSummary {
+    if (typeof value !== "object" || value === null) return false;
+    const program = value as Partial<ProgramSummary>;
+    return (
+        typeof program.id === "string" &&
+        typeof program.name === "string" &&
+        typeof program.sortOrder === "number" &&
+        typeof program.isActive === "boolean"
+    );
+}
 
 export const CreateProjectModal: React.FC = () => {
     const {
@@ -48,16 +73,26 @@ export const CreateProjectModal: React.FC = () => {
     const [step, setStep] = useState<ModalStep>("select-program");
     const [programs, setPrograms] = useState<ProgramSummary[]>([]);
     const [isLoadingPrograms, setIsLoadingPrograms] = useState(false);
+    const [programLoadError, setProgramLoadError] = useState<string | null>(
+        null,
+    );
 
     const fetchPrograms = useCallback(async (): Promise<void> => {
         setIsLoadingPrograms(true);
+        setProgramLoadError(null);
         try {
             const res = await fetch(API_ROUTES.PROGRAMS);
-            if (!res.ok) throw new Error("Failed to fetch programs");
-            const data = (await res.json()) as { programs: ProgramSummary[] };
+            const data: unknown = await res.json().catch(() => null);
+            if (!res.ok || !isProgramsResponse(data)) {
+                throw new Error("ไม่สามารถโหลดรายการโครงการหลักได้");
+            }
             setPrograms(data.programs);
-        } catch (err) {
-            console.error("Error fetching programs:", err);
+        } catch (error) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "ไม่สามารถโหลดรายการโครงการหลักได้";
+            setProgramLoadError(message);
         } finally {
             setIsLoadingPrograms(false);
         }
@@ -91,6 +126,7 @@ export const CreateProjectModal: React.FC = () => {
     };
 
     const handleClose = (): void => {
+        if (isCreatingProject) return;
         setShowCreateProjectModal(false);
         setNewProjectName("");
         setNewProjectDescription("");
@@ -99,12 +135,17 @@ export const CreateProjectModal: React.FC = () => {
     };
 
     const handleBack = (): void => {
+        if (isCreatingProject) return;
         setStep("select-program");
     };
 
+    const handleOpenChange = (open: boolean): void => {
+        if (!open) handleClose();
+    };
+
     return (
-        <Dialog open={showCreateProjectModal} onOpenChange={handleClose}>
-            <DialogContent className="overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:max-w-[640px] sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+        <Dialog open={showCreateProjectModal} onOpenChange={handleOpenChange}>
+            <DialogContent className="overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 sm:max-w-[640px] sm:p-6 dark:border-slate-700 dark:bg-slate-800">
                 {step === "select-program" ? (
                     <>
                         <DialogHeader className="space-y-3">
@@ -122,27 +163,20 @@ export const CreateProjectModal: React.FC = () => {
                         </DialogHeader>
 
                         <div className="py-4 sm:py-5">
-                            {isLoadingPrograms ? (
-                                <div className="flex min-h-52 items-center justify-center">
-                                    <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-                                </div>
-                            ) : (
-                                <div className="-mx-1 grid max-h-[min(52dvh,420px)] grid-cols-1 gap-3 overflow-y-auto px-1 py-1 sm:grid-cols-2">
-                                    {programs.map((program) => (
-                                        <ProgramSelectionCard
-                                            key={program.id}
-                                            program={program}
-                                            onSelect={handleSelectProgram}
-                                        />
-                                    ))}
-                                </div>
-                            )}
+                            <ProgramSelectionList
+                                programs={programs}
+                                isLoading={isLoadingPrograms}
+                                error={programLoadError}
+                                onRetry={() => void fetchPrograms()}
+                                onSelect={handleSelectProgram}
+                            />
                         </div>
 
                         <DialogFooter className="border-t border-slate-100 pt-3 dark:border-slate-700 sm:pt-4">
                             <Button
                                 variant="ghost"
                                 onClick={handleClose}
+                                disabled={isCreatingProject}
                                 className="rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 h-11"
                             >
                                 ยกเลิก
@@ -184,6 +218,7 @@ export const CreateProjectModal: React.FC = () => {
                                     onChange={(e) =>
                                         setNewProjectName(e.target.value)
                                     }
+                                    disabled={isCreatingProject}
                                     maxLength={PROJECT_NAME_MAX_LENGTH}
                                     placeholder="ระบุชื่อโครงการของคุณ"
                                     className="rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus-visible:border-blue-500 focus-visible:ring-blue-500/20 h-11"
@@ -205,6 +240,7 @@ export const CreateProjectModal: React.FC = () => {
                                     onChange={(e) =>
                                         setNewProjectDescription(e.target.value)
                                     }
+                                    disabled={isCreatingProject}
                                     maxLength={PROJECT_DESCRIPTION_MAX_LENGTH}
                                     className="w-full p-4 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-2xl h-32 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/10 transition-colors resize-none text-slate-700 text-sm"
                                     placeholder="ระบุคำอธิบายเกี่ยวกับโครงการนี้ (ไม่บังคับ)"
@@ -219,6 +255,7 @@ export const CreateProjectModal: React.FC = () => {
                             <Button
                                 variant="ghost"
                                 onClick={handleBack}
+                                disabled={isCreatingProject}
                                 className="rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 h-11"
                             >
                                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -233,7 +270,7 @@ export const CreateProjectModal: React.FC = () => {
                             >
                                 {isCreatingProject ? (
                                     <>
-                                        <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+                                        <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white motion-reduce:animate-none" />
                                         กำลังสร้าง…
                                     </>
                                 ) : (

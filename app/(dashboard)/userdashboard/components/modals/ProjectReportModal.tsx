@@ -243,7 +243,7 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="overflow-y-auto rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:max-w-[680px] sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+            <DialogContent className="overflow-y-auto rounded-2xl border border-slate-100 bg-white p-4 sm:max-w-[680px] sm:p-6 dark:border-slate-700 dark:bg-slate-800">
                 <DialogHeader>
                     <div className="mb-2 flex items-center gap-3">
                         <div className="rounded-xl bg-blue-100 p-2 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">

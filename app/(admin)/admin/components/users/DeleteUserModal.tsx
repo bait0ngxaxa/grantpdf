@@ -42,7 +42,7 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
             <button
                 type="button"
                 aria-label="ปิดหน้าต่างยืนยันการลบผู้ใช้งาน"
-                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200"
+                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200"
                 onClick={isDeleting ? undefined : onClose}
                 disabled={isDeleting}
             />
@@ -50,7 +50,7 @@ export const DeleteUserModal: React.FC<DeleteUserModalProps> = ({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="delete-user-modal-title"
-                className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-xl animate-in zoom-in-95 duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800"
+                className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_14px_rgba(15,23,42,0.12)] motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
             >
                 <button
                     type="button"

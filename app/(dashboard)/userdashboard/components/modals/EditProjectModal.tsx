@@ -34,10 +34,15 @@ export const EditProjectModal: React.FC = () => {
     } = useUserDashboardContext();
 
     const handleClose = (): void => {
+        if (isUpdatingProject) return;
         setShowEditProjectModal(false);
         setProjectToEdit(null);
         setEditProjectName("");
         setEditProjectDescription("");
+    };
+
+    const handleOpenChange = (open: boolean): void => {
+        if (!open) handleClose();
     };
 
     const hasChanges = React.useMemo(
@@ -51,8 +56,8 @@ export const EditProjectModal: React.FC = () => {
     );
 
     return (
-        <Dialog open={showEditProjectModal} onOpenChange={handleClose}>
-            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:max-w-[500px] sm:p-6 dark:border-slate-700 dark:bg-slate-800">
+        <Dialog open={showEditProjectModal} onOpenChange={handleOpenChange}>
+            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 sm:max-w-[500px] sm:p-6 dark:border-slate-700 dark:bg-slate-800">
                 <DialogHeader>
                     <div className="flex items-center gap-3 mb-2">
                         <div className="bg-blue-100 dark:bg-blue-900/50 p-2 rounded-xl text-blue-600 dark:text-blue-400">
@@ -74,6 +79,7 @@ export const EditProjectModal: React.FC = () => {
                         <Input
                             value={editProjectName}
                             onChange={(e) => setEditProjectName(e.target.value)}
+                            disabled={isUpdatingProject}
                             maxLength={PROJECT_NAME_MAX_LENGTH}
                             className="rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 focus-visible:border-blue-500 focus-visible:ring-blue-500/20 h-11"
                             placeholder="ระบุชื่อโครงการ"
@@ -91,6 +97,7 @@ export const EditProjectModal: React.FC = () => {
                             onChange={(e) =>
                                 setEditProjectDescription(e.target.value)
                             }
+                            disabled={isUpdatingProject}
                             maxLength={PROJECT_DESCRIPTION_MAX_LENGTH}
                             className="w-full p-4 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-2xl h-32 focus:outline-none focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/10 transition-colors resize-none text-slate-700 text-sm"
                             placeholder="ระบุคำอธิบายเกี่ยวกับโครงการนี้ (ถ้ามี)"
@@ -105,6 +112,7 @@ export const EditProjectModal: React.FC = () => {
                     <Button
                         variant="ghost"
                         onClick={handleClose}
+                        disabled={isUpdatingProject}
                         className="rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 h-11"
                     >
                         ยกเลิก
@@ -120,7 +128,7 @@ export const EditProjectModal: React.FC = () => {
                     >
                         {isUpdatingProject ? (
                             <>
-                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white motion-reduce:animate-none" />
                                 กำลังอัปเดต…
                             </>
                         ) : (

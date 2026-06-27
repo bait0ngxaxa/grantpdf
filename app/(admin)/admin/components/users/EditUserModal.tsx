@@ -36,20 +36,25 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
     isSaving,
     canSave,
 }) => {
+    const handleClose = React.useCallback((): void => {
+        if (isSaving) return;
+        onClose();
+    }, [isSaving, onClose]);
+
     React.useEffect(() => {
-        if (!isOpen) {
+        if (!isOpen || isSaving) {
             return;
         }
 
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === "Escape") {
-                onClose();
+                handleClose();
             }
         };
 
         document.addEventListener("keydown", handleKeyDown);
         return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [isOpen, onClose]);
+    }, [handleClose, isOpen, isSaving]);
 
     if (!isOpen || !user) return null;
 
@@ -58,31 +63,33 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
             <button
                 type="button"
                 aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
-                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200"
-                onClick={onClose}
+                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200"
+                onClick={handleClose}
+                disabled={isSaving}
             />
             <div
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="edit-user-modal-title"
-                className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-xl animate-in zoom-in-95 duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800"
+                className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_14px_rgba(15,23,42,0.12)] motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
             >
                 <button
                     type="button"
                     aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
-                    onClick={onClose}
-                    className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                    onClick={handleClose}
+                    disabled={isSaving}
+                    className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
                 >
                     <X className="h-5 w-5" />
                 </button>
                 <div className="mb-6">
                     <h3
                         id="edit-user-modal-title"
-                        className="text-xl font-bold text-slate-800 dark:text-slate-100 text-balance"
+                        className="break-words text-xl font-bold text-slate-800 text-balance dark:text-slate-100"
                     >
                         แก้ไขผู้ใช้งาน
                     </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-400">
                         อัปเดตข้อมูลของ {user.name}
                     </p>
                 </div>
@@ -99,6 +106,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                             value={editFormData.name}
                             onChange={onFormChange}
                             required
+                            disabled={isSaving}
                         />
                     </div>
 
@@ -133,6 +141,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                                 value={editFormData.role}
                                 onChange={onFormChange}
                                 required
+                                disabled={isSaving}
                             >
                                 <option value={ROLES.MEMBER}>
                                     สมาชิก (Member)
@@ -151,7 +160,8 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                         <Button
                             type="button"
                             variant="ghost"
-                            onClick={onClose}
+                            onClick={handleClose}
+                            disabled={isSaving}
                             className="px-6 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium transition-colors"
                         >
                             ยกเลิก
@@ -159,11 +169,11 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                         <Button
                             type="submit"
                             disabled={isSaving || !canSave}
-                            className="px-6 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md shadow-blue-200 font-medium transition"
+                            className="rounded-xl bg-blue-600 px-6 font-medium text-white transition-colors hover:bg-blue-700"
                         >
                             {isSaving ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />
                                     กำลังบันทึก…
                                 </>
                             ) : (

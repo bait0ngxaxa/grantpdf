@@ -134,6 +134,11 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     }
   };
 
+  const requestClose = React.useCallback((): void => {
+    if (isUpdatingStatus) return;
+    closeStatusModal();
+  }, [closeStatusModal, isUpdatingStatus]);
+
   const hasCoOwnerChanges =
     allowCoOwners !== selectedProjectForStatus?.allowCoOwners ||
     selectedCoOwnerAdminIds.join(",") !==
@@ -158,13 +163,13 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
 
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === "Escape") {
-        closeStatusModal();
+        requestClose();
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [closeStatusModal, isStatusModalOpen]);
+  }, [isStatusModalOpen, requestClose]);
 
   return (
     <>
@@ -174,13 +179,14 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
             type="button"
             aria-label="ปิดหน้าต่างจัดการสถานะ"
             className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm duration-200 motion-safe:animate-in motion-safe:fade-in motion-reduce:animate-none"
-            onClick={closeStatusModal}
+            onClick={requestClose}
+            disabled={isUpdatingStatus}
           />
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="project-status-modal-title"
-            className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto rounded-2xl border border-slate-100 bg-white p-4 shadow-xl duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:max-h-[calc(100dvh-2rem)] sm:p-6 dark:border-slate-700 dark:bg-slate-800"
+            className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto rounded-2xl border border-slate-100 bg-white p-4 shadow-[0_8px_14px_rgba(15,23,42,0.12)] duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:max-h-[calc(100dvh-2rem)] sm:p-6 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
           >
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -197,8 +203,9 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
               <button
                 type="button"
                 aria-label="ปิดหน้าต่างจัดการสถานะ"
-                onClick={closeStatusModal}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                onClick={requestClose}
+                disabled={isUpdatingStatus}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -357,7 +364,13 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                           key={user.id}
                           type="button"
                           disabled={!allowCoOwners}
-                          onClick={() => setSelectedCoOwnerAdminIds([])}
+                          onClick={() =>
+                            setSelectedCoOwnerAdminIds(
+                              selectedCoOwnerAdminIds.filter(
+                                (id) => id !== user.id,
+                              ),
+                            )
+                          }
                           className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-200"
                         >
                           <span className="truncate">{user.name}</span>
@@ -386,7 +399,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                   <div className="max-h-44 space-y-1 overflow-y-auto lg:max-h-52">
                   {isAdminOwnersLoading ? (
                     <div className="flex items-center gap-2 px-2 py-3 text-xs text-slate-500 dark:text-slate-400">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />
                       กำลังโหลดรายชื่อผู้ใช้…
                     </div>
                   ) : availableCoOwnerOptions.length === 0 ? (
@@ -468,7 +481,8 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Button
                 variant="outline"
-                onClick={closeStatusModal}
+                onClick={requestClose}
+                disabled={isUpdatingStatus}
                 className="h-11 cursor-pointer rounded-xl border-slate-200 px-6 text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
               >
                 ยกเลิก
@@ -489,7 +503,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
               >
                 {isUpdatingStatus ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />
                     กำลังอัปเดต…
                   </>
                 ) : (

@@ -102,20 +102,20 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
     }, [isOpen]);
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl focus:outline-none sm:max-w-md sm:p-6 dark:border-slate-700 dark:bg-slate-900">
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 focus:outline-none sm:max-w-md sm:p-6 dark:border-slate-700 dark:bg-slate-900">
                 <div className="flex flex-col items-center text-center p-2">
                     {/* Success Icon with Animation */}
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 ring-4 ring-green-50 dark:ring-green-900/30 animate-in zoom-in-50 duration-300">
+                    <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-50 text-green-600 ring-4 ring-green-50 motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:duration-300 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-900/30">
                         <CheckCircle2 className="w-10 h-10" />
                     </div>
 
-                    <DialogTitle className="font-bold text-2xl mb-3 text-center text-slate-800 dark:text-slate-100">
+                    <DialogTitle className="mb-3 break-words text-center text-2xl font-bold text-slate-800 dark:text-slate-100">
                         สร้าง{documentType}สำเร็จ!
                     </DialogTitle>
 
                     <DialogDescription
-                        className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed w-full"
+                        className="mb-8 w-full break-words leading-relaxed text-slate-500 dark:text-slate-400"
                         asChild
                     >
                         <div>
@@ -124,12 +124,15 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
                             </p>
 
                             {/* File Card info */}
-                            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3 text-left w-full shadow-sm mb-4">
-                                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                            <div className="mb-4 flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-left dark:border-slate-700 dark:bg-slate-800/50">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                                     <FileText className="w-5 h-5" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">
+                                    <p
+                                        className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200"
+                                        title={downloadFileName}
+                                    >
                                         {downloadFileName}
                                     </p>
                                     <p className="text-xs text-slate-400">
@@ -138,7 +141,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
                                 </div>
                             </div>
 
-                            <p className="text-xs text-slate-400 animate-pulse">
+                            <p className="text-xs text-slate-400 motion-safe:animate-pulse">
                                 กำลังนำทางไปยังหน้าหลักอัตโนมัติภายใน 3
                                 วินาที…
                             </p>
@@ -148,7 +151,7 @@ export const CreateDocSuccessModal: React.FC<CreateDocSuccessModalProps> = ({
                     <div className="flex flex-col space-y-3 w-full">
                         <Button
                             onClick={handleRedirect}
-                            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-lg shadow-blue-200 dark:shadow-none h-12 text-base font-semibold duration-300 transform hover:-translate-y-0.5 transition"
+                            className="h-12 w-full rounded-xl bg-blue-600 text-base font-semibold text-white transition-colors hover:bg-blue-700"
                         >
                             กลับไปหน้าหลัก
                         </Button>

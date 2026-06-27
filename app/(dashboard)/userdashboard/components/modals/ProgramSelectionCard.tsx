@@ -1,5 +1,6 @@
 import React from "react";
-import { ChevronRight } from "lucide-react";
+import { AlertCircle, ChevronRight, Loader2, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ProgramSummary } from "@/type/models";
 import { getProgramAccent } from "@/components/programAccent";
 import { ProgramIdentityIcon } from "@/components/ProgramIdentityIcon";
@@ -96,6 +97,81 @@ export function SelectedProgramBadge({
             >
                 เปลี่ยน
             </button>
+        </div>
+    );
+}
+
+export function ProgramSelectionList({
+    programs,
+    isLoading,
+    error,
+    onRetry,
+    onSelect,
+}: {
+    programs: ProgramSummary[];
+    isLoading: boolean;
+    error: string | null;
+    onRetry: () => void;
+    onSelect: (programId: string) => void;
+}): React.JSX.Element {
+    if (isLoading) {
+        return (
+            <div className="flex min-h-52 flex-col items-center justify-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                <Loader2 className="h-8 w-8 animate-spin text-indigo-500 motion-reduce:animate-none" />
+                กำลังโหลดรายการโครงการหลัก
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div
+                role="alert"
+                className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-red-100 bg-red-50/70 px-4 text-center dark:border-red-900/40 dark:bg-red-950/20"
+            >
+                <AlertCircle className="h-9 w-9 text-red-500 dark:text-red-300" />
+                <p className="mt-3 text-sm font-semibold text-red-800 dark:text-red-100">
+                    โหลดรายการโครงการหลักไม่สำเร็จ
+                </p>
+                <p className="mt-1 max-w-sm break-words text-xs leading-5 text-red-700 dark:text-red-200">
+                    {error}
+                </p>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onRetry}
+                    className="mt-4 h-9 rounded-lg text-xs font-bold"
+                >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    ลองโหลดอีกครั้ง
+                </Button>
+            </div>
+        );
+    }
+
+    if (programs.length === 0) {
+        return (
+            <div className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 text-center dark:border-slate-700 dark:bg-slate-900/30">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    ยังไม่มีโครงการหลักให้เลือก
+                </p>
+                <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500 dark:text-slate-400">
+                    กรุณาเพิ่มหรือเปิดใช้งานโครงการหลักก่อนสร้างโครงการใหม่
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="-mx-1 grid max-h-[min(52dvh,420px)] grid-cols-1 gap-3 overflow-y-auto px-1 py-1 sm:grid-cols-2">
+            {programs.map((program) => (
+                <ProgramSelectionCard
+                    key={program.id}
+                    program={program}
+                    onSelect={onSelect}
+                />
+            ))}
         </div>
     );
 }

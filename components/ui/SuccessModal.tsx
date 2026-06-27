@@ -28,14 +28,14 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:max-w-md sm:p-6 dark:border-slate-700 dark:bg-slate-900">
+            <DialogContent className="rounded-2xl border border-slate-100 bg-white p-4 sm:max-w-md sm:p-6 dark:border-slate-700 dark:bg-slate-900">
                 <div className="flex flex-col items-center p-2 text-center sm:p-4">
                     <div
                         className={cn(
-                            "w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg",
+                            "mb-6 flex h-20 w-20 items-center justify-center rounded-full ring-4",
                             isError
-                                ? "bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 ring-4 ring-red-50 dark:ring-red-900/30"
-                                : "bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400 ring-4 ring-green-50 dark:ring-green-900/30",
+                                ? "bg-red-50 text-red-500 ring-red-50 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-900/30"
+                                : "bg-green-50 text-green-500 ring-green-50 dark:bg-green-900/20 dark:text-green-400 dark:ring-green-900/30",
                         )}
                     >
                         {isError ? (
@@ -46,7 +46,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                     </div>
                     <DialogTitle
                         className={cn(
-                            "font-bold text-2xl mb-3 text-center",
+                            "mb-3 break-words text-center text-2xl font-bold",
                             isError
                                 ? "text-slate-800 dark:text-slate-100"
                                 : "text-slate-800 dark:text-slate-100",
@@ -54,16 +54,16 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
                     >
                         {isError ? "เกิดข้อผิดพลาด" : "ดำเนินการสำเร็จ"}
                     </DialogTitle>
-                    <DialogDescription className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
+                    <DialogDescription className="mb-8 break-words leading-relaxed text-slate-500 dark:text-slate-400">
                         {message}
                     </DialogDescription>
                     <Button
                         onClick={onClose}
                         className={cn(
-                            "w-full rounded-xl h-12 text-lg font-semibold shadow-lg transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300 transform hover:-translate-y-0.5",
+                            "h-12 w-full rounded-xl text-lg font-semibold transition-colors",
                             isError
-                                ? "bg-red-500 hover:bg-red-600 text-white shadow-red-200 dark:shadow-none"
-                                : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-blue-200 dark:shadow-none",
+                                ? "bg-red-600 text-white hover:bg-red-700"
+                                : "bg-blue-600 text-white hover:bg-blue-700",
                         )}
                     >
                         ตกลง

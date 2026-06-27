@@ -44,7 +44,7 @@ export function PreviewModal({
             <DialogContent
                 className={cn(
                     maxWidth,
-                    "flex h-[min(88dvh,900px)] w-[calc(100vw-1rem)] flex-col overflow-hidden border border-slate-200 bg-white p-0 shadow-xl sm:w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900",
+                    "flex h-[min(88dvh,900px)] w-[calc(100vw-1rem)] flex-col overflow-hidden border border-slate-200 bg-white p-0 sm:w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900",
                 )}
             >
                 <DialogHeader className="flex-shrink-0 border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5 dark:border-slate-700">
