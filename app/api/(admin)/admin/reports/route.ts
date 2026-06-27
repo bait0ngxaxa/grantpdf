@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { PAGINATION } from "@/lib/constants";
-import { toPublicApiError } from "@/lib/apiError";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import { parsePositiveInt } from "@/lib/queryParams";
 import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
@@ -10,18 +9,13 @@ import {
 } from "@/lib/services";
 import { parsePositiveIntId } from "@/lib/id";
 import { updateProjectReportStatusSchema } from "@/lib/validation/schemas";
-
-function getClientIp(req: Request): string | undefined {
-    return (
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        req.headers.get("x-real-ip") ||
-        undefined
-    );
-}
-
-function getRequestId(req: Request): string | undefined {
-    return req.headers.get("x-request-id") || undefined;
-}
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import { buildAuditContext } from "@/lib/api/requestContext";
+import {
+    publicErrorResponse,
+    unauthorizedResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -48,11 +42,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching admin reports:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถดึงรายงานได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
-        );
+        return publicErrorResponse(error, "ไม่สามารถดึงรายงานได้");
     }
 }
 
@@ -61,22 +51,20 @@ export async function PATCH(req: Request): Promise<NextResponse> {
         const rateLimitResponse = await applyAdminMutationRateLimit(req);
         if (rateLimitResponse) return rateLimitResponse;
 
+        const body = await readJsonBody(req);
+        const parsed = updateProjectReportStatusSchema.safeParse(body);
+        if (!parsed.success) {
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
+        }
+
         const guard = await requireAdminSession();
         if (isGuardError(guard)) return guard;
         const { session } = guard;
         const reviewedBy = parsePositiveIntId(session.user.id);
         if (reviewedBy === null) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 },
-            );
-        }
-
-        const body: unknown = await req.json();
-        const parsed = updateProjectReportStatusSchema.safeParse(body);
-        if (!parsed.success) {
-            const message = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: message }, { status: 400 });
+            return unauthorizedResponse();
         }
 
         const report = await updateProjectReportStatusWithAudit({
@@ -84,13 +72,7 @@ export async function PATCH(req: Request): Promise<NextResponse> {
             status: parsed.data.status,
             adminNote: parsed.data.adminNote,
             reviewedBy,
-            audit: {
-                actorUserId: session.user.id,
-                actorEmail: session.user.email ?? undefined,
-                ip: getClientIp(req),
-                userAgent: req.headers.get("user-agent") ?? undefined,
-                requestId: getRequestId(req),
-            },
+            audit: buildAuditContext(session, req),
         });
 
         return NextResponse.json({
@@ -110,10 +92,6 @@ export async function PATCH(req: Request): Promise<NextResponse> {
         }
 
         console.error("Error updating admin report:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถอัปเดตรายงานได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
-        );
+        return publicErrorResponse(error, "ไม่สามารถอัปเดตรายงานได้");
     }
 }

@@ -8,21 +8,14 @@ import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
 import { parsePositiveIntId } from "@/lib/id";
 import { updateAdminProjectSchema } from "@/lib/validation/schemas";
-import { toPublicApiError } from "@/lib/apiError";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
 import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
-
-function getClientIp(req: Request): string | undefined {
-    return (
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        req.headers.get("x-real-ip") ||
-        undefined
-    );
-}
-
-function getRequestId(req: Request): string | undefined {
-    return req.headers.get("x-request-id") || undefined;
-}
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import { buildAuditContext } from "@/lib/api/requestContext";
+import {
+    publicErrorResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -57,11 +50,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching admin projects:", error);
-        const mappedError = toPublicApiError(error, "Failed to fetch projects");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
-        );
+        return publicErrorResponse(error, "Failed to fetch projects");
     }
 }
 
@@ -70,18 +59,18 @@ export async function PUT(req: Request): Promise<NextResponse> {
         const rateLimitResponse = await applyAdminMutationRateLimit(req);
         if (rateLimitResponse) return rateLimitResponse;
 
-        const guard = await requireAdminSession();
-        if (isGuardError(guard)) return guard;
-        const { session } = guard;
-
-        const body: unknown = await req.json();
+        const body = await readJsonBody(req);
         const parsed = updateAdminProjectSchema.safeParse(body);
         if (!parsed.success) {
-            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: firstError }, { status: 400 });
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
         }
 
         const { projectId, status, statusNote, programId } = parsed.data;
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
+        const { session } = guard;
 
         if (programId !== undefined && programId !== null) {
             const validProgram = await programExistsById(programId);
@@ -100,13 +89,7 @@ export async function PUT(req: Request): Promise<NextResponse> {
                 statusNote,
                 programId,
             },
-            {
-                actorUserId: session.user.id,
-                actorEmail: session.user.email || undefined,
-                ip: getClientIp(req),
-                userAgent: req.headers.get("user-agent") ?? undefined,
-                requestId: getRequestId(req),
-            },
+            buildAuditContext(session, req),
         );
 
         return NextResponse.json({
@@ -131,10 +114,6 @@ export async function PUT(req: Request): Promise<NextResponse> {
             );
         }
 
-        const mappedError = toPublicApiError(error, "Failed to update project status");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
-        );
+        return publicErrorResponse(error, "Failed to update project status");
     }
 }

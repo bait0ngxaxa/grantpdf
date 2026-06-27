@@ -19,7 +19,14 @@ import {
 import { parsePositiveIntId } from "@/lib/id";
 import { applyRateLimit } from "@/lib/ratelimit";
 import { logAudit } from "@/lib/auditLog";
-import { publicApiError, toPublicApiError } from "@/lib/apiError";
+import { publicApiError } from "@/lib/apiError";
+import { getFirstValidationMessage } from "@/lib/api/body";
+import { buildAuditContext } from "@/lib/api/requestContext";
+import {
+    publicErrorResponse,
+    rateLimitExceededResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 import { projectReportSchema } from "@/lib/validation/schemas";
 import {
     createProjectReportWithFile,
@@ -138,11 +145,7 @@ export async function GET(
         return NextResponse.json({ reports });
     } catch (error) {
         console.error("Error fetching project reports:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถดึงรายงานโครงการได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
-        );
+        return publicErrorResponse(error, "ไม่สามารถดึงรายงานโครงการได้");
     }
 }
 
@@ -153,22 +156,16 @@ export async function POST(
     let finalFilePath: string | null = null;
     let idempotencyRecordId: bigint | null = null;
     try {
-        const session = await auth();
-        if (!session?.user?.id) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-
         const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
             limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
             windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
-            identifier: session.user.id,
         });
         if (!rateLimitResult.success) {
-            return NextResponse.json(
-                { error: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง" },
-                { status: 429, headers: rateLimitResult.headers },
+            return rateLimitExceededResponse(
+                rateLimitResult,
+                "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
             );
         }
 
@@ -184,12 +181,18 @@ export async function POST(
             note: formData.get("note") || undefined,
         });
         if (!parsed.success) {
-            const message = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            throw publicApiError(400, message);
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
         }
 
         const fileError = validateReportFile(fileEntry);
         if (fileError) throw publicApiError(400, fileError);
+
+        const session = await auth();
+        if (!session?.user?.id) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
+        const userId = parsePositiveIntId(session.user.id);
+        if (userId === null) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
 
         await ensureOwnProject(projectId, userId);
         const idempotency = await startUploadIdempotency(
@@ -212,8 +215,12 @@ export async function POST(
             note: parsed.data.note,
         });
 
-        logAudit("PROJECT_REPORT_SUBMIT", session.user.id, {
-            userEmail: session.user.email ?? undefined,
+        const auditContext = buildAuditContext(session, req);
+        logAudit("PROJECT_REPORT_SUBMIT", auditContext.actorUserId, {
+            userEmail: auditContext.actorEmail,
+            ip: auditContext.ip,
+            userAgent: auditContext.userAgent,
+            requestId: auditContext.requestId,
             details: { projectId: projectId.toString(), reportId: report.id },
         });
 
@@ -250,10 +257,6 @@ export async function POST(
             );
         }
         console.error("Error submitting project report:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถส่งรายงานโครงการได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
-        );
+        return publicErrorResponse(error, "ไม่สามารถส่งรายงานโครงการได้");
     }
 }

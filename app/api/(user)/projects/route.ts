@@ -10,14 +10,18 @@ import { PAGINATION, RATE_LIMIT } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
 import { createProjectSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError, toPublicApiError } from "@/lib/apiError";
-import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
+import { publicApiError } from "@/lib/apiError";
+import { applyRateLimit } from "@/lib/ratelimit";
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import { buildAuditContext } from "@/lib/api/requestContext";
+import {
+    publicErrorResponse,
+    rateLimitExceededResponse,
+    unauthorizedResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 const PROJECT_SUMMARY_VIEW = "summary";
-
-function getRequestId(req: Request): string | undefined {
-    return req.headers.get("x-request-id") || undefined;
-}
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -68,52 +72,41 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching projects:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถดึงข้อมูลโครงการได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
-        );
+        return publicErrorResponse(error, "ไม่สามารถดึงข้อมูลโครงการได้");
     }
 }
 
 // POST: สร้างโครงการใหม่ (ต้องเลือกโครงการหลักก่อน)
 export async function POST(req: Request): Promise<NextResponse> {
     try {
-        const session = await auth();
-
-        if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 },
-            );
-        }
-
         const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
             limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
             windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
-            identifier: session.user.id,
         });
 
         if (!rateLimitResult.success) {
-            return NextResponse.json(
-                {
-                    error: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
-                    retryAfter: rateLimitResult.retryAfter,
-                },
-                { status: 429, headers: rateLimitResult.headers },
+            return rateLimitExceededResponse(
+                rateLimitResult,
+                "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
             );
         }
 
-        const body: unknown = await req.json();
+        const body = await readJsonBody(req);
         const parsed = createProjectSchema.safeParse(body);
         if (!parsed.success) {
-            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: firstError }, { status: 400 });
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
         }
 
         const { name, description, programId } = parsed.data;
+        const session = await auth();
+
+        if (!session?.user?.id) {
+            return unauthorizedResponse();
+        }
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
@@ -135,13 +128,7 @@ export async function POST(req: Request): Promise<NextResponse> {
             name,
             safeDescription,
             programId,
-            {
-                actorUserId: session.user.id,
-                actorEmail: session.user.email ?? undefined,
-                ip: getClientIP(req),
-                userAgent: req.headers.get("user-agent") ?? undefined,
-                requestId: getRequestId(req),
-            },
+            buildAuditContext(session, req),
         );
 
         return NextResponse.json(project, { headers: rateLimitResult.headers });
@@ -156,10 +143,6 @@ export async function POST(req: Request): Promise<NextResponse> {
         }
 
         console.error("Error creating project:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถสร้างโครงการได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
-        );
+        return publicErrorResponse(error, "ไม่สามารถสร้างโครงการได้");
     }
 }
