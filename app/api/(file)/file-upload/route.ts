@@ -16,8 +16,13 @@ import {
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
 } from "@/lib/constants";
-import { toPublicApiError } from "@/lib/apiError";
 import { parsePositiveIntId } from "@/lib/id";
+import { buildAuditContext } from "@/lib/api/requestContext";
+import {
+    publicErrorResponse,
+    unauthorizedResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
 import {
     completeUploadIdempotency,
@@ -51,10 +56,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
         const session = await auth();
         if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 }
-            );
+            return unauthorizedResponse();
         }
 
         const formData = await request.formData();
@@ -62,33 +64,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const projectIdEntry = formData.get("projectId");
 
         if (!(fileEntry instanceof File)) {
-            return NextResponse.json(
-                { error: "กรุณาเลือกไฟล์ที่ต้องการอัปโหลด" },
-                { status: 400 }
-            );
+            return validationErrorResponse("กรุณาเลือกไฟล์ที่ต้องการอัปโหลด");
         }
 
         if (typeof projectIdEntry !== "string") {
-            return NextResponse.json(
-                { error: "กรุณาระบุรหัสโครงการ" },
-                { status: 400 }
-            );
+            return validationErrorResponse("กรุณาระบุรหัสโครงการ");
         }
 
         const projectId = parsePositiveIntId(projectIdEntry);
         if (projectId === null) {
-            return NextResponse.json(
-                { error: "รหัสโครงการไม่ถูกต้อง" },
-                { status: 400 }
-            );
+            return validationErrorResponse("รหัสโครงการไม่ถูกต้อง");
         }
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 }
-            );
+            return unauthorizedResponse();
         }
 
         const file = fileEntry;
@@ -111,13 +101,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
 
         if (!isAllowed) {
-            return NextResponse.json(
-                {
-                    error:
-                        "ไม่รองรับประเภทไฟล์นี้ รองรับเฉพาะ: " +
-                        allowedExtensions.join(", "),
-                },
-                { status: 400 }
+            return validationErrorResponse(
+                "ไม่รองรับประเภทไฟล์นี้ รองรับเฉพาะ: " +
+                    allowedExtensions.join(", "),
             );
         }
 
@@ -125,11 +111,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const maxSizeMb = getMaxUploadSizeMbByFileName(file.name);
 
         if (file.size > maxSizeBytes) {
-            return NextResponse.json(
-                {
-                    error: `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${maxSizeMb}MB)`,
-                },
-                { status: 400 }
+            return validationErrorResponse(
+                `ไฟล์มีขนาดใหญ่เกินไป (สูงสุด ${maxSizeMb}MB)`,
             );
         }
 
@@ -214,8 +197,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         await invalidateDashboardStats([userId]);
 
         // Log file upload
-        logAudit("FILE_UPLOAD", session.user.id, {
-            userEmail: session.user.email || undefined,
+        const auditContext = buildAuditContext(session, request);
+        logAudit("FILE_UPLOAD", auditContext.actorUserId, {
+            userEmail: auditContext.actorEmail,
+            ip: auditContext.ip,
+            userAgent: auditContext.userAgent,
+            requestId: auditContext.requestId,
             details: {
                 fileName: file.name,
                 fileId: userFile.id.toString(),
@@ -253,10 +240,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             );
         }
         console.error("File upload error:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถอัปโหลดไฟล์ได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
-        );
+        return publicErrorResponse(error, "ไม่สามารถอัปโหลดไฟล์ได้");
     }
 }

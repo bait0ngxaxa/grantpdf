@@ -4,6 +4,7 @@ import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
 import { parsePositiveIntId } from "@/lib/id";
 import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
+import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -36,9 +37,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching admin files:", error);
-        return NextResponse.json(
-            { error: "ไม่สามารถดึงข้อมูลไฟล์ได้" },
-            { status: 500 },
-        );
+        return publicErrorResponse(error, "ไม่สามารถดึงข้อมูลไฟล์ได้");
     }
 }

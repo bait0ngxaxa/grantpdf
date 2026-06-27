@@ -6,14 +6,18 @@ interface RateLimitedResponseInput {
     headers: HeadersInit;
 }
 
-export function validationErrorResponse(message: string): NextResponse {
-    return NextResponse.json({ error: message }, { status: 400 });
+export function validationErrorResponse(
+    message: string,
+    headers?: HeadersInit,
+): NextResponse {
+    return NextResponse.json({ error: message }, { status: 400, headers });
 }
 
 export function unauthorizedResponse(
     message: string = "กรุณาเข้าสู่ระบบ",
+    headers?: HeadersInit,
 ): NextResponse {
-    return NextResponse.json({ error: message }, { status: 401 });
+    return NextResponse.json({ error: message }, { status: 401, headers });
 }
 
 export function rateLimitExceededResponse(

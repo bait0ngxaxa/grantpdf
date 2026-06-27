@@ -8,7 +8,11 @@ import { Readable } from "stream";
 
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError, toPublicApiError } from "@/lib/apiError";
+import { publicApiError } from "@/lib/apiError";
+import {
+    publicErrorResponse,
+    unauthorizedResponse,
+} from "@/lib/api/responses";
 
 export async function GET(
     _req: NextRequest,
@@ -17,10 +21,7 @@ export async function GET(
     try {
         const session = await auth();
         if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 }
-            );
+            return unauthorizedResponse();
         }
 
         const { id } = await params;
@@ -30,7 +31,7 @@ export async function GET(
         }
         const sessionUserId = parsePositiveIntId(session.user.id);
         if (sessionUserId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
+            return unauthorizedResponse();
         }
 
         const attachment = await prisma.attachmentFile.findUnique({
@@ -89,10 +90,6 @@ export async function GET(
         });
     } catch (error) {
         console.error("Error downloading attachment:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถดาวน์โหลดไฟล์แนบได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
-        );
+        return publicErrorResponse(error, "ไม่สามารถดาวน์โหลดไฟล์แนบได้");
     }
 }

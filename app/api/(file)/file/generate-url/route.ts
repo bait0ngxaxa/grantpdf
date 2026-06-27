@@ -4,30 +4,33 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { generateSignedUrl } from "@/lib/signedUrl";
 import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError, toPublicApiError } from "@/lib/apiError";
 import { generateSignedUrlSchema } from "@/lib/validation/schemas";
 import { ROLES } from "@/lib/constants";
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import {
+    publicErrorResponse,
+    unauthorizedResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
+        const body = await readJsonBody(req);
+        const parsed = generateSignedUrlSchema.safeParse(body);
+        if (!parsed.success) {
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
+        }
+
         const session = await auth();
         if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 }
-            );
+            return unauthorizedResponse();
         }
 
         const sessionUserId = parsePositiveIntId(session.user.id);
         if (sessionUserId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        }
-
-        const body: unknown = await req.json();
-        const parsed = generateSignedUrlSchema.safeParse(body);
-        if (!parsed.success) {
-            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: firstError }, { status: 400 });
+            return unauthorizedResponse();
         }
         const { fileId, type, expiresIn, fromAdminPanel } = parsed.data;
 
@@ -95,10 +98,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         });
     } catch (error) {
         console.error("Error generating signed URL:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถสร้างลิงก์ดาวน์โหลดได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
+        return publicErrorResponse(
+            error,
+            "ไม่สามารถสร้างลิงก์ดาวน์โหลดได้",
         );
     }
 }

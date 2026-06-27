@@ -27,6 +27,15 @@ import {
     summarySchema,
     torSchema,
 } from "@/lib/validation/schemas";
+import {
+    getClientIp,
+    getRequestId,
+    getUserAgent,
+} from "@/lib/api/requestContext";
+import {
+    rateLimitExceededResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 type DocumentType = "tor" | "approval" | "contract" | "formproject" | "summary";
 
@@ -163,14 +172,6 @@ function validateDocumentPayload(
     return result;
 }
 
-function getClientIp(req: Request): string | undefined {
-    return (
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        req.headers.get("x-real-ip") ||
-        undefined
-    );
-}
-
 function getIdempotencyKey(req: Request, formData: FormData): string | null {
     const headerKey =
         req.headers.get(IDEMPOTENCY_HEADERS.PRIMARY) ??
@@ -229,12 +230,9 @@ export async function POST(
         });
 
         if (!rateLimitResult.success) {
-            return NextResponse.json(
-                {
-                    error: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
-                    retryAfter: rateLimitResult.retryAfter,
-                },
-                { status: 429, headers: rateLimitResult.headers },
+            return rateLimitExceededResponse(
+                rateLimitResult,
+                "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
             );
         }
 
@@ -248,18 +246,18 @@ export async function POST(
             type !== "formproject" &&
             type !== "summary"
         ) {
-            return NextResponse.json(
-                { error: "ประเภทเอกสารไม่ถูกต้อง" },
-                { status: 400, headers: rateLimitResult.headers },
+            return validationErrorResponse(
+                "ประเภทเอกสารไม่ถูกต้อง",
+                rateLimitResult.headers,
             );
         }
 
         const formData = await req.formData();
         const validationError = validateDocumentPayload(type, formData);
         if (validationError) {
-            return NextResponse.json(
-                { error: validationError },
-                { status: 400, headers: rateLimitResult.headers },
+            return validationErrorResponse(
+                validationError,
+                rateLimitResult.headers,
             );
         }
 
@@ -267,9 +265,9 @@ export async function POST(
         if (rawIdempotencyKey) {
             const normalizedKey = normalizeIdempotencyKey(rawIdempotencyKey);
             if (!normalizedKey) {
-                return NextResponse.json(
-                    { error: "Idempotency-Key ไม่ถูกต้อง" },
-                    { status: 400, headers: rateLimitResult.headers },
+                return validationErrorResponse(
+                    "Idempotency-Key ไม่ถูกต้อง",
+                    rateLimitResult.headers,
                 );
             }
 
@@ -284,8 +282,8 @@ export async function POST(
                     outcome: "success",
                     userEmail: auditUserEmail,
                     ip: getClientIp(req),
-                    userAgent: req.headers.get("user-agent") ?? undefined,
-                    requestId: req.headers.get("x-request-id") ?? undefined,
+                    userAgent: getUserAgent(req),
+                    requestId: getRequestId(req),
                     targetType: "document",
                     details: {
                         documentType: auditType,
@@ -366,8 +364,8 @@ export async function POST(
             outcome: isSuccess ? "success" : "failure",
             userEmail: auditUserEmail,
             ip: getClientIp(req),
-            userAgent: req.headers.get("user-agent") ?? undefined,
-            requestId: req.headers.get("x-request-id") ?? undefined,
+            userAgent: getUserAgent(req),
+            requestId: getRequestId(req),
             targetType: "document",
             details: {
                 documentType: auditType,
@@ -397,8 +395,8 @@ export async function POST(
                 outcome: "failure",
                 userEmail: auditUserEmail,
                 ip: getClientIp(req),
-                userAgent: req.headers.get("user-agent") ?? undefined,
-                requestId: req.headers.get("x-request-id") ?? undefined,
+                userAgent: getUserAgent(req),
+                requestId: getRequestId(req),
                 targetType: "document",
                 details: {
                     documentType: auditType,

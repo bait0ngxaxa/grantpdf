@@ -9,10 +9,15 @@ import { signupSchema } from "@/lib/validation/schemas";
 import { RATE_LIMIT } from "@/lib/constants";
 import { getStringField } from "@/lib/utils";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import {
+    rateLimitExceededResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
-        const body: unknown = await req.json();
+        const body = await readJsonBody(req);
         const ip = getClientIP(req);
         const emailIdentifier = getStringField(body, "email");
         const rateLimitResult = await applyRateLimit({
@@ -24,22 +29,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         });
 
         if (!rateLimitResult.success) {
-            return NextResponse.json(
-                {
-                    error: "มีการร้องขอมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
-                    retryAfter: rateLimitResult.retryAfter,
-                },
-                {
-                    status: 429,
-                    headers: rateLimitResult.headers,
-                }
+            return rateLimitExceededResponse(
+                rateLimitResult,
+                "มีการร้องขอมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
             );
         }
 
         const parsed = signupSchema.safeParse(body);
         if (!parsed.success) {
-            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: firstError }, { status: 400 });
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
         }
 
         const { name, email, password } = parsed.data;

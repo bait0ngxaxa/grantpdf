@@ -9,8 +9,8 @@ import { verifySignedToken } from "@/lib/signedUrl";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 import { logAudit } from "@/lib/auditLog";
 import { parsePositiveIntId } from "@/lib/id";
-import { toPublicApiError } from "@/lib/apiError";
 import { ROLES } from "@/lib/constants";
+import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(
     _req: NextRequest,
@@ -152,10 +152,6 @@ export async function GET(
         });
     } catch (error: unknown) {
         console.error("Error downloading file:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถดาวน์โหลดไฟล์ได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
-        );
+        return publicErrorResponse(error, "ไม่สามารถดาวน์โหลดไฟล์ได้");
     }
 }

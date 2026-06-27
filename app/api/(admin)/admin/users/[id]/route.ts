@@ -5,23 +5,15 @@ import {
 } from "@/lib/services";
 import { updateAdminUserSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
-import { toPublicApiError } from "@/lib/apiError";
 import { ROLES } from "@/lib/constants";
 import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
 import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
-
-function getClientIp(req: NextRequest): string | undefined {
-    const forwarded = req.headers.get("x-forwarded-for");
-    if (forwarded) {
-        const [firstIp] = forwarded.split(",");
-        return firstIp?.trim() || undefined;
-    }
-    return req.headers.get("x-real-ip") || undefined;
-}
-
-function getRequestId(req: NextRequest): string | undefined {
-    return req.headers.get("x-request-id") || undefined;
-}
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import { buildAuditContext } from "@/lib/api/requestContext";
+import {
+    publicErrorResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function PUT(
     req: NextRequest,
@@ -31,16 +23,9 @@ export async function PUT(
         const rateLimitResponse = await applyAdminMutationRateLimit(req);
         if (rateLimitResponse) return rateLimitResponse;
 
-        const guard = await requireAdminSession();
-
-        if (isGuardError(guard)) return guard;
-        const { session } = guard;
-
         const awaitParams = await params;
         const userId = awaitParams.id;
         const parsedUserId = parsePositiveIntId(userId);
-        const body: unknown = await req.json();
-
         if (parsedUserId === null) {
             return NextResponse.json(
                 { error: "รหัสผู้ใช้งานไม่ถูกต้อง" },
@@ -48,12 +33,18 @@ export async function PUT(
             );
         }
 
+        const body = await readJsonBody(req);
         const parsedBody = updateAdminUserSchema.safeParse(body);
         if (!parsedBody.success) {
-            const firstError = parsedBody.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: firstError }, { status: 400 });
+            return validationErrorResponse(
+                getFirstValidationMessage(parsedBody.error),
+            );
         }
         const { name, role } = parsedBody.data;
+        const guard = await requireAdminSession();
+
+        if (isGuardError(guard)) return guard;
+        const { session } = guard;
 
         if (userId === session.user.id && role !== ROLES.ADMIN) {
             return NextResponse.json(
@@ -62,13 +53,11 @@ export async function PUT(
             );
         }
 
-        const updatedUser = await updateUserWithAudit(parsedUserId, { name, role }, {
-            actorUserId: session.user.id,
-            actorEmail: session.user.email ?? undefined,
-            ip: getClientIp(req),
-            userAgent: req.headers.get("user-agent") ?? undefined,
-            requestId: getRequestId(req),
-        });
+        const updatedUser = await updateUserWithAudit(
+            parsedUserId,
+            { name, role },
+            buildAuditContext(session, req),
+        );
 
         return NextResponse.json(
             { message: "อัปเดตผู้ใช้งานสำเร็จ", user: updatedUser },
@@ -90,10 +79,9 @@ export async function PUT(
         }
 
         console.error("Error updating user:", error);
-        const mappedError = toPublicApiError(error, "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้งาน");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
+        return publicErrorResponse(
+            error,
+            "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้งาน",
         );
     }
 }
@@ -106,21 +94,20 @@ export async function DELETE(
         const rateLimitResponse = await applyAdminMutationRateLimit(req);
         if (rateLimitResponse) return rateLimitResponse;
 
-        const guard = await requireAdminSession();
-
-        if (isGuardError(guard)) return guard;
-        const { session } = guard;
-
         const awaitParams = await params;
         const userId = awaitParams.id;
         const parsedUserId = parsePositiveIntId(userId);
-
         if (parsedUserId === null) {
             return NextResponse.json(
                 { error: "รหัสผู้ใช้งานไม่ถูกต้อง" },
                 { status: 400 },
             );
         }
+
+        const guard = await requireAdminSession();
+
+        if (isGuardError(guard)) return guard;
+        const { session } = guard;
 
         if (userId === session.user.id) {
             return NextResponse.json(
@@ -129,13 +116,10 @@ export async function DELETE(
             );
         }
 
-        await deleteUserWithAudit(parsedUserId, {
-            actorUserId: session.user.id,
-            actorEmail: session.user.email ?? undefined,
-            ip: getClientIp(req),
-            userAgent: req.headers.get("user-agent") ?? undefined,
-            requestId: getRequestId(req),
-        });
+        await deleteUserWithAudit(
+            parsedUserId,
+            buildAuditContext(session, req),
+        );
 
         return NextResponse.json(
             { message: "ลบผู้ใช้งานสำเร็จ" },
@@ -150,10 +134,9 @@ export async function DELETE(
         }
 
         console.error("Error deleting user:", error);
-        const mappedError = toPublicApiError(error, "เกิดข้อผิดพลาดในการลบผู้ใช้งาน");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
+        return publicErrorResponse(
+            error,
+            "เกิดข้อผิดพลาดในการลบผู้ใช้งาน",
         );
     }
 }

@@ -7,19 +7,21 @@ import { unlink } from "fs/promises";
 import { logAudit } from "@/lib/auditLog";
 import { getFullPathFromStoragePath } from "@/lib/fileStorage";
 import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError, toPublicApiError } from "@/lib/apiError";
+import { publicApiError } from "@/lib/apiError";
+import { buildAuditContext } from "@/lib/api/requestContext";
+import {
+    publicErrorResponse,
+    unauthorizedResponse,
+} from "@/lib/api/responses";
 
 export async function DELETE(
-    _req: NextRequest,
+    req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
         const session = await auth();
         if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 }
-            );
+            return unauthorizedResponse();
         }
 
         const { id } = await params;
@@ -63,8 +65,12 @@ export async function DELETE(
         await deleteFileRecord(docId);
 
         // Log user file deletion
-        logAudit("FILE_DELETE", session.user.id, {
-            userEmail: session.user.email || undefined,
+        const auditContext = buildAuditContext(session, req);
+        logAudit("FILE_DELETE", auditContext.actorUserId, {
+            userEmail: auditContext.actorEmail,
+            ip: auditContext.ip,
+            userAgent: auditContext.userAgent,
+            requestId: auditContext.requestId,
             details: {
                 deletedFileId: document.id,
                 deletedFileName: document.originalFileName,
@@ -84,10 +90,6 @@ export async function DELETE(
         );
     } catch (error: unknown) {
         console.error("Error deleting document:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถลบเอกสารได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
-        );
+        return publicErrorResponse(error, "ไม่สามารถลบเอกสารได้");
     }
 }

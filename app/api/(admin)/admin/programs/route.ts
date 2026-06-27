@@ -3,6 +3,11 @@ import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
 import { getAllPrograms, createProgram } from "@/lib/services";
 import { createProgramSchema } from "@/lib/validation/schemas";
 import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import {
+    publicErrorResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function GET(): Promise<NextResponse> {
     try {
@@ -13,10 +18,7 @@ export async function GET(): Promise<NextResponse> {
         return NextResponse.json({ programs });
     } catch (error) {
         console.error("Error fetching programs:", error);
-        return NextResponse.json(
-            { error: "ไม่สามารถดึงข้อมูลโครงการหลักได้" },
-            { status: 500 },
-        );
+        return publicErrorResponse(error, "ไม่สามารถดึงข้อมูลโครงการหลักได้");
     }
 }
 
@@ -25,15 +27,16 @@ export async function POST(req: Request): Promise<NextResponse> {
         const rateLimitResponse = await applyAdminMutationRateLimit(req);
         if (rateLimitResponse) return rateLimitResponse;
 
-        const guard = await requireAdminSession();
-        if (isGuardError(guard)) return guard;
-
-        const body: unknown = await req.json();
+        const body = await readJsonBody(req);
         const parsed = createProgramSchema.safeParse(body);
         if (!parsed.success) {
-            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: firstError }, { status: 400 });
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
         }
+
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const program = await createProgram(parsed.data);
         return NextResponse.json(program, { status: 201 });
@@ -56,9 +59,6 @@ export async function POST(req: Request): Promise<NextResponse> {
         }
 
         console.error("Error creating program:", error);
-        return NextResponse.json(
-            { error: "ไม่สามารถสร้างโครงการหลักได้" },
-            { status: 500 },
-        );
+        return publicErrorResponse(error, "ไม่สามารถสร้างโครงการหลักได้");
     }
 }

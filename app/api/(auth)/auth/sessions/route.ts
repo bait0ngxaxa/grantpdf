@@ -9,14 +9,17 @@ import {
     revokeUserSessionFamily,
 } from "@/lib/services";
 import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
+import { readJsonBody } from "@/lib/api/body";
+import {
+    rateLimitExceededResponse,
+    unauthorizedResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
+import { getUserAgent } from "@/lib/api/requestContext";
 
 const revokeSessionSchema = z.object({
     sessionFamilyId: z.string().min(16).max(128),
 });
-
-function buildUnauthorizedResponse(): NextResponse {
-    return NextResponse.json({ error: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
-}
 
 async function getSessionContext(): Promise<{
     userId: number;
@@ -49,14 +52,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     });
 
     if (!rateLimitResult.success) {
-        return NextResponse.json(
-            { error: "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง" },
-            { status: 429, headers: rateLimitResult.headers }
+        return rateLimitExceededResponse(
+            rateLimitResult,
+            "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
         );
     }
 
     const context = await getSessionContext();
-    if (!context) return buildUnauthorizedResponse();
+    if (!context) return unauthorizedResponse();
 
     const sessions = await getUserDeviceSessions(context);
     return NextResponse.json({ sessions }, { headers: rateLimitResult.headers });
@@ -71,23 +74,23 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
     });
 
     if (!rateLimitResult.success) {
-        return NextResponse.json(
-            { error: "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง" },
-            { status: 429, headers: rateLimitResult.headers }
+        return rateLimitExceededResponse(
+            rateLimitResult,
+            "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
         );
     }
 
-    const body: unknown = await req.json().catch(() => null);
+    const body = await readJsonBody(req);
     const parsed = revokeSessionSchema.safeParse(body);
     if (!parsed.success) {
-        return NextResponse.json(
-            { error: "ข้อมูลเซสชันไม่ถูกต้อง" },
-            { status: 400, headers: rateLimitResult.headers }
+        return validationErrorResponse(
+            "ข้อมูลเซสชันไม่ถูกต้อง",
+            rateLimitResult.headers,
         );
     }
 
     const context = await getSessionContext();
-    if (!context) return buildUnauthorizedResponse();
+    if (!context) return unauthorizedResponse();
 
     if (parsed.data.sessionFamilyId === context.currentFamilyId) {
         return NextResponse.json(
@@ -104,7 +107,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
     logAudit("SESSION_REVOKE", String(context.userId), {
         userEmail: context.email ?? undefined,
         ip: getClientIP(req),
-        userAgent: req.headers.get("user-agent") ?? undefined,
+        userAgent: getUserAgent(req),
         targetType: "authSession",
         targetId: parsed.data.sessionFamilyId,
         details: { revokedCount },

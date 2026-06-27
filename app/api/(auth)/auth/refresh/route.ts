@@ -9,6 +9,7 @@ import {
 } from "@/lib/authSessionCookies";
 import { rotateRefreshSession } from "@/lib/services";
 import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
+import { rateLimitExceededResponse } from "@/lib/api/responses";
 
 function buildUnauthorizedResponse(headers: Record<string, string>): NextResponse {
     const response = NextResponse.json(
@@ -51,12 +52,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     if (!rateLimitResult.success) {
-        return NextResponse.json(
+        return rateLimitExceededResponse(
             {
-                error: "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
+                ...rateLimitResult,
                 retryAfter: rateLimitResult.retryAfter ?? 1,
             },
-            { status: 429, headers: rateLimitResult.headers }
+            "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
         );
     }
 

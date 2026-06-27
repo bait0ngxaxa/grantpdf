@@ -5,10 +5,11 @@ import { parsePositiveIntId } from "@/lib/id";
 import { logAudit } from "@/lib/auditLog";
 import { revokeOtherUserSessionFamilies } from "@/lib/services";
 import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
-
-function buildUnauthorizedResponse(): NextResponse {
-    return NextResponse.json({ error: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
-}
+import {
+    rateLimitExceededResponse,
+    unauthorizedResponse,
+} from "@/lib/api/responses";
+import { getUserAgent } from "@/lib/api/requestContext";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const rateLimitResult = await applyRateLimit({
@@ -19,9 +20,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     if (!rateLimitResult.success) {
-        return NextResponse.json(
-            { error: "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง" },
-            { status: 429, headers: rateLimitResult.headers }
+        return rateLimitExceededResponse(
+            rateLimitResult,
+            "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
         );
     }
 
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const currentFamilyId = session?.user?.sessionFamilyId;
 
     if (!userId || !currentFamilyId) {
-        return buildUnauthorizedResponse();
+        return unauthorizedResponse();
     }
 
     const revokedCount = await revokeOtherUserSessionFamilies({
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     logAudit("SESSION_REVOKE_OTHERS", String(userId), {
         userEmail: session.user.email ?? undefined,
         ip: getClientIP(req),
-        userAgent: req.headers.get("user-agent") ?? undefined,
+        userAgent: getUserAgent(req),
         targetType: "authSession",
         details: { revokedCount },
     });

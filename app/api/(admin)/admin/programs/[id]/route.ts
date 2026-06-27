@@ -4,6 +4,11 @@ import { updateProgram } from "@/lib/services";
 import { updateProgramSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/id";
 import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import {
+    publicErrorResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function PUT(
     req: NextRequest,
@@ -12,9 +17,6 @@ export async function PUT(
     try {
         const rateLimitResponse = await applyAdminMutationRateLimit(req);
         if (rateLimitResponse) return rateLimitResponse;
-
-        const guard = await requireAdminSession();
-        if (isGuardError(guard)) return guard;
 
         const { id } = await params;
         const programId = parsePositiveIntId(id);
@@ -25,12 +27,16 @@ export async function PUT(
             );
         }
 
-        const body: unknown = await req.json();
+        const body = await readJsonBody(req);
         const parsed = updateProgramSchema.safeParse(body);
         if (!parsed.success) {
-            const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: firstError }, { status: 400 });
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
         }
+
+        const guard = await requireAdminSession();
+        if (isGuardError(guard)) return guard;
 
         const program = await updateProgram(programId, parsed.data);
         return NextResponse.json(program);
@@ -50,9 +56,6 @@ export async function PUT(
         }
 
         console.error("Error updating program:", error);
-        return NextResponse.json(
-            { error: "ไม่สามารถอัปเดตโครงการหลักได้" },
-            { status: 500 },
-        );
+        return publicErrorResponse(error, "ไม่สามารถอัปเดตโครงการหลักได้");
     }
 }

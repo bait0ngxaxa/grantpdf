@@ -1,13 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { parsePositiveIntId } from "@/lib/id";
-import { toPublicApiError } from "@/lib/apiError";
 import { notificationListQuerySchema } from "@/lib/validation/schemas";
 import { getNotificationsForUser } from "@/lib/services";
-
-function unauthorizedResponse(): NextResponse {
-    return NextResponse.json({ error: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
-}
+import { getFirstValidationMessage } from "@/lib/api/body";
+import {
+    publicErrorResponse,
+    unauthorizedResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
@@ -23,8 +24,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             audience: searchParams.get("audience") ?? undefined,
         });
         if (!parsed.success) {
-            const message = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: message }, { status: 400 });
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
         }
 
         const result = await getNotificationsForUser({
@@ -37,13 +39,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching notifications:", error);
-        const mappedError = toPublicApiError(
-            error,
-            "ไม่สามารถดึงการแจ้งเตือนได้",
-        );
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
-        );
+        return publicErrorResponse(error, "ไม่สามารถดึงการแจ้งเตือนได้");
     }
 }

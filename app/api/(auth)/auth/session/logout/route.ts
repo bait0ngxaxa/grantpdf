@@ -7,6 +7,7 @@ import {
 } from "@/lib/authSessionCookies";
 import { revokeRefreshSession } from "@/lib/services";
 import { applyRateLimit } from "@/lib/ratelimit";
+import { rateLimitExceededResponse } from "@/lib/api/responses";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const rateLimitResult = await applyRateLimit({
@@ -17,12 +18,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     if (!rateLimitResult.success) {
-        return NextResponse.json(
+        return rateLimitExceededResponse(
             {
-                error: "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
+                ...rateLimitResult,
                 retryAfter: rateLimitResult.retryAfter ?? 1,
             },
-            { status: 429, headers: rateLimitResult.headers }
+            "มีการเรียกใช้งานมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
         );
     }
 

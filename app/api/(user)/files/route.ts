@@ -4,17 +4,17 @@ import { getUserFilesPaginated } from "@/lib/services";
 import { PAGINATION } from "@/lib/constants";
 import { parsePositiveInt } from "@/lib/queryParams";
 import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError, toPublicApiError } from "@/lib/apiError";
+import {
+    publicErrorResponse,
+    unauthorizedResponse,
+} from "@/lib/api/responses";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const session = await auth();
 
         if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 }
-            );
+            return unauthorizedResponse();
         }
 
         const { searchParams } = new URL(req.url);
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
         const userId = parsePositiveIntId(session.user.id);
         if (userId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
+            return unauthorizedResponse();
         }
         const result = await getUserFilesPaginated({
             userId,
@@ -43,10 +43,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         return NextResponse.json(result);
     } catch (error) {
         console.error("Error fetching user files:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถดึงข้อมูลไฟล์ได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
-        );
+        return publicErrorResponse(error, "ไม่สามารถดึงข้อมูลไฟล์ได้");
     }
 }

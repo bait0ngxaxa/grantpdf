@@ -9,8 +9,12 @@ import { stat } from "fs/promises";
 import { createReadStream } from "fs";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
 import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError, toPublicApiError } from "@/lib/apiError";
+import { publicApiError } from "@/lib/apiError";
 import { ROLES } from "@/lib/constants";
+import {
+    publicErrorResponse,
+    unauthorizedResponse,
+} from "@/lib/api/responses";
 
 const SAFE_PATH_PREFIX = "storage/";
 
@@ -52,10 +56,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         // 1. Auth check
         const session = await auth();
         if (!session?.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 }
-            );
+            return unauthorizedResponse();
         }
 
         // 2. Input validation — prevent path traversal
@@ -135,10 +136,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         });
     } catch (error: unknown) {
         console.error("Error previewing file:", error);
-        const mappedError = toPublicApiError(error, "ไม่สามารถแสดงตัวอย่างไฟล์ได้");
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status }
-        );
+        return publicErrorResponse(error, "ไม่สามารถแสดงตัวอย่างไฟล์ได้");
     }
 }

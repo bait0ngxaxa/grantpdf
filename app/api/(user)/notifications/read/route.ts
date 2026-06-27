@@ -3,13 +3,15 @@ import { auth } from "@/lib/auth";
 import { RATE_LIMIT } from "@/lib/constants";
 import { parsePositiveIntId } from "@/lib/id";
 import { applyRateLimit } from "@/lib/ratelimit";
-import { toPublicApiError } from "@/lib/apiError";
 import { markNotificationsReadSchema } from "@/lib/validation/schemas";
 import { markNotificationsRead } from "@/lib/services";
-
-function unauthorizedResponse(): NextResponse {
-    return NextResponse.json({ error: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
-}
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import {
+    publicErrorResponse,
+    rateLimitExceededResponse,
+    unauthorizedResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
 
 export async function PATCH(req: Request): Promise<NextResponse> {
     try {
@@ -20,17 +22,18 @@ export async function PATCH(req: Request): Promise<NextResponse> {
             windowMs: RATE_LIMIT.USER.NOTIFICATION_MUTATION.WINDOW_MS,
         });
         if (!rateLimitResult.success) {
-            return NextResponse.json(
-                { error: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง" },
-                { status: 429, headers: rateLimitResult.headers },
+            return rateLimitExceededResponse(
+                rateLimitResult,
+                "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
             );
         }
 
-        const body: unknown = await req.json();
+        const body = await readJsonBody(req);
         const parsed = markNotificationsReadSchema.safeParse(body);
         if (!parsed.success) {
-            const message = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-            return NextResponse.json({ error: message }, { status: 400 });
+            return validationErrorResponse(
+                getFirstValidationMessage(parsed.error),
+            );
         }
 
         const session = await auth();
@@ -47,13 +50,6 @@ export async function PATCH(req: Request): Promise<NextResponse> {
         );
     } catch (error) {
         console.error("Error marking notifications read:", error);
-        const mappedError = toPublicApiError(
-            error,
-            "ไม่สามารถอัปเดตการแจ้งเตือนได้",
-        );
-        return NextResponse.json(
-            { error: mappedError.publicMessage },
-            { status: mappedError.status },
-        );
+        return publicErrorResponse(error, "ไม่สามารถอัปเดตการแจ้งเตือนได้");
     }
 }

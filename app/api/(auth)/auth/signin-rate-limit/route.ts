@@ -6,9 +6,11 @@ import {
     getRateLimitHeaders,
     getRateLimitStatus,
 } from "@/lib/ratelimit";
+import { readJsonBody } from "@/lib/api/body";
+import { rateLimitExceededResponse } from "@/lib/api/responses";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-    const body: unknown = await req.json().catch(() => null);
+    const body = await readJsonBody(req);
     const email = getStringField(body, "email");
     const key = createRateLimitKey(
         req,
@@ -32,12 +34,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
 
     if (blocked) {
-        return NextResponse.json(
-            {
-                error: "มีการพยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
-                retryAfter: status.retryAfter ?? 1,
-            },
-            { status: 429, headers }
+        return rateLimitExceededResponse(
+            { retryAfter: status.retryAfter ?? 1, headers },
+            "มีการพยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
         );
     }
 

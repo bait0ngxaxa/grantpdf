@@ -13,6 +13,12 @@ import {
     applyRateLimit,
     getClientIP,
 } from "@/lib/ratelimit";
+import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
+import {
+    rateLimitExceededResponse,
+    validationErrorResponse,
+} from "@/lib/api/responses";
+import { getUserAgent } from "@/lib/api/requestContext";
 
 type SigninUser = {
     id: number;
@@ -47,11 +53,12 @@ async function findUserByEmail(email: string): Promise<SigninUser | null> {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-    const body: unknown = await req.json().catch(() => null);
+    const body = await readJsonBody(req);
     const parsed = signinSchema.safeParse(body);
     if (!parsed.success) {
-        const firstError = parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
-        return NextResponse.json({ error: firstError }, { status: 400 });
+        return validationErrorResponse(
+            getFirstValidationMessage(parsed.error),
+        );
     }
 
     const { email, password } = parsed.data;
@@ -73,12 +80,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             ip,
         });
 
-        return NextResponse.json(
+        return rateLimitExceededResponse(
             {
-                error: "มีการพยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
+                ...rateLimitResult,
                 retryAfter: rateLimitResult.retryAfter ?? 1,
             },
-            { status: 429, headers: rateLimitResult.headers }
+            "มีการพยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่อีกครั้งภายหลัง",
         );
     }
 
@@ -101,7 +108,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         role: user.role || ROLES.MEMBER,
         sessionVersion: user.sessionVersion,
         ip,
-        userAgent: req.headers.get("user-agent"),
+        userAgent: getUserAgent(req),
     });
 
     logAudit("LOGIN_SUCCESS", String(user.id), {
