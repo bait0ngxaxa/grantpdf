@@ -6,7 +6,7 @@ import { Button } from "@/components/ui";
 import { useNotifications } from "@/lib/hooks";
 import { buildNotificationFocusUrl } from "@/lib/notifications/deepLink";
 import type { NotificationItem } from "@/lib/notifications/types";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { NotificationMenuList } from "./NotificationMenuList";
 

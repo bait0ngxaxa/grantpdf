@@ -1,24 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PAGINATION } from "@/lib/constants";
+import { PAGINATION } from "@/lib/shared/constants";
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/server/auth/session", () => ({
     auth: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/projectService", () => ({
     createProjectWithAudit: vi.fn(),
     getProjectSummariesByUserId: vi.fn(),
     getProjectsByUserIdPaginated: vi.fn(),
+}));
+
+vi.mock("@/lib/services/programService", () => ({
     programExists: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/server/auth/session";
 import {
     createProjectWithAudit,
     getProjectSummariesByUserId,
     getProjectsByUserIdPaginated,
-    programExists,
-} from "@/lib/services";
+} from "@/lib/services/projectService";
+import { programExists } from "@/lib/services/programService";
 import { GET, POST } from "@/app/api/(user)/projects/route";
 import {
     PROJECT_DESCRIPTION_MAX_LENGTH,

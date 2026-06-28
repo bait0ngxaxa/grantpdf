@@ -1,19 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextResponse } from "next/server";
 
-vi.mock("@/lib/auth-helpers", () => ({
+vi.mock("@/lib/server/auth/guards", () => ({
     requireAdminSession: vi.fn(),
     isGuardError: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/userService", () => ({
     getAllUsersPaginated: vi.fn(),
 }));
 
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
-import { getAllUsersPaginated } from "@/lib/services";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
+import { getAllUsersPaginated } from "@/lib/services/userService";
 import { GET } from "@/app/api/(admin)/admin/users/route";
-import { PAGINATION } from "@/lib/constants";
+import { PAGINATION } from "@/lib/shared/constants";
 
 const mockedRequireAdminSession = vi.mocked(requireAdminSession);
 const mockedIsGuardError = vi.mocked(isGuardError);

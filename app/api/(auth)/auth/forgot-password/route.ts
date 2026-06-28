@@ -1,16 +1,16 @@
 // app/api/auth/forgot-password/route.ts
 import { NextResponse, type NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import { forgotPasswordSchema } from "@/lib/validation/schemas";
-import { sendPasswordResetEmail } from "@/lib/email";
-import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
-import { RATE_LIMIT } from "@/lib/constants";
-import { getStringField } from "@/lib/utils";
-import { logAudit } from "@/lib/auditLog";
+import { sendPasswordResetEmail } from "@/lib/server/email/email";
+import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
+import { RATE_LIMIT } from "@/lib/shared/constants";
+import { getStringField } from "@/lib/shared/utils";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     createPasswordResetToken,
     resolvePasswordResetBaseUrl,
-} from "@/lib/passwordReset";
+} from "@/lib/server/auth/passwordReset";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {
     rateLimitExceededResponse,

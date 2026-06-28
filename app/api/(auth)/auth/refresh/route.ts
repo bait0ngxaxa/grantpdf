@@ -1,14 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { RATE_LIMIT } from "@/lib/constants";
+import { RATE_LIMIT } from "@/lib/shared/constants";
 import {
     clearAccessTokenCookie,
     clearRefreshTokenCookie,
     getRefreshTokenFromRequest,
     setAccessTokenCookie,
     setRefreshTokenCookie,
-} from "@/lib/authSessionCookies";
-import { rotateRefreshSession } from "@/lib/services";
-import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
+} from "@/lib/server/auth/sessionCookies";
+import { rotateRefreshSession } from "@/lib/services/authSessionService";
+import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
 import { rateLimitExceededResponse } from "@/lib/api/responses";
 
 function buildUnauthorizedResponse(headers: Record<string, string>): NextResponse {

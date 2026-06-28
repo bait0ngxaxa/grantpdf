@@ -1,6 +1,6 @@
 import React from "react";
 import { Laptop, Loader2, MonitorSmartphone } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 export type DeviceSessionStatus = "active" | "expired" | "revoked";
 

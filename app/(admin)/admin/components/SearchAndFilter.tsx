@@ -7,7 +7,7 @@ import {
     SORT_OPTIONS,
     STATUS_FILTER,
     STATUS_ORDER,
-} from "@/lib/constants";
+} from "@/lib/shared/constants";
 import type { ProgramSummary } from "@/type/models";
 
 interface SearchAndFilterProps {

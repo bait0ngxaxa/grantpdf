@@ -11,8 +11,8 @@ import {
     Users,
 } from "lucide-react";
 import { useAdminDashboardContext } from "../contexts";
-import { signOutWithSessionRevoke } from "@/lib/authClient";
-import { cn, getAvatarInitial } from "@/lib/utils";
+import { signOutWithSessionRevoke } from "@/lib/client/auth";
+import { cn, getAvatarInitial } from "@/lib/shared/utils";
 import { NotificationBell } from "@/components/notifications";
 
 type AdminTopBarMenuItem = {

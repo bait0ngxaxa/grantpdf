@@ -5,13 +5,13 @@ import useSWR from "swr";
 import { FileText, FolderOpen, X } from "lucide-react";
 import { FileListSkeleton } from "@/components/ui/FileListSkeleton";
 import type { AdminProject } from "@/type/models";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 import FileItem from "../project/FileItem";
-import { cn, getStatusColor } from "@/lib/utils";
+import { cn, getStatusColor } from "@/lib/shared/utils";
 import {
   fetchAllProjectFiles,
   type ProjectFilesResponse,
-} from "@/lib/projectFilesClient";
+} from "@/lib/client/projects/filesClient";
 
 interface ProjectFilesModalProps {
   isOpen: boolean;

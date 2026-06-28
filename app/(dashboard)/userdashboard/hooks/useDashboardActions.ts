@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import type { Project } from "@/type";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 import { toast } from "sonner";
-import { hasProjectDraftChanges } from "@/lib/projectDraftChanges";
+import { hasProjectDraftChanges } from "@/lib/domain/projects/draftChanges";
 
 interface DashboardActionsParams {
     fetchUserData: () => Promise<void>;

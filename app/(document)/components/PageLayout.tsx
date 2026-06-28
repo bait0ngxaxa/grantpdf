@@ -5,7 +5,7 @@ import { Button } from "@/components/ui";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGlobalModal } from "@/lib/hooks/useGlobalModal";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 interface PageLayoutProps {
     children: ReactNode;

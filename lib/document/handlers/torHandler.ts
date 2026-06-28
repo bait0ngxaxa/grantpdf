@@ -10,7 +10,7 @@ import {
 } from "@/lib/document";
 import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
 import { NextResponse } from "next/server";
-import { formatNumericWithCommas } from "@/lib/utils";
+import { formatNumericWithCommas } from "@/lib/shared/utils";
 import { normalizePhoneNumber } from "@/lib/validation/schemas";
 
 function parseActivitiesData(

@@ -1,6 +1,6 @@
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import useSWR from "swr";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 import type { AuditLogsApiResponse } from "@/type/api";
 
 interface AuditLogFilters {

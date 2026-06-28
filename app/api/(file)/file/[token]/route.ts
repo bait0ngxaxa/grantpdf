@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/server/db";
+import { auth } from "@/lib/server/auth/session";
 import { createReadStream } from "fs";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
-import { verifySignedToken } from "@/lib/signedUrl";
-import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
-import { logAudit } from "@/lib/auditLog";
-import { parsePositiveIntId } from "@/lib/id";
-import { ROLES } from "@/lib/constants";
+import { verifySignedToken } from "@/lib/server/storage/signedUrl";
+import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
+import { logAudit } from "@/lib/server/audit/auditLog";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { ROLES } from "@/lib/shared/constants";
 import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(

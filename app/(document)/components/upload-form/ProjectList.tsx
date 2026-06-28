@@ -13,10 +13,10 @@ import {
     fileStatIcon,
     ProgramGroupHeader,
 } from "@/components/ProgramGroupHeader";
-import { PAGINATION, ROUTES } from "@/lib/constants";
-import { groupProjectsByProgram } from "@/lib/programGrouping";
-import { paginateGroupItems } from "@/lib/programGroupPagination";
-import { cn } from "@/lib/utils";
+import { PAGINATION, ROUTES } from "@/lib/shared/constants";
+import { groupProjectsByProgram } from "@/lib/domain/projects/programGrouping";
+import { paginateGroupItems } from "@/lib/domain/projects/groupPagination";
+import { cn } from "@/lib/shared/utils";
 import { UploadProjectCard } from "./UploadProjectCard";
 import type { ProjectSummary } from "@/type";
 

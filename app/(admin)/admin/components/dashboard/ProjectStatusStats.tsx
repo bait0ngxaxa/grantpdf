@@ -1,6 +1,6 @@
 import React from "react";
 import { BarChart3 } from "lucide-react";
-import { STATUS_CONFIG, STATUS_ORDER } from "@/lib/constants";
+import { STATUS_CONFIG, STATUS_ORDER } from "@/lib/shared/constants";
 
 interface ProjectStatusStatsProps {
     projectStatusStats: {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         $transaction: vi.fn(),
     },
@@ -10,7 +10,7 @@ vi.mock("@/lib/services/dashboardStatsCache", () => ({
     invalidateDashboardStats: vi.fn(),
 }));
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import { createUserFileRecord } from "@/lib/document/projectService";
 
 interface MockTransactionClient {

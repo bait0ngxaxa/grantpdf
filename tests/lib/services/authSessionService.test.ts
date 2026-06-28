@@ -42,7 +42,7 @@ vi.mock("jose", () => {
     };
 });
 
-vi.mock("@/lib/prisma", () => {
+vi.mock("@/lib/server/db", () => {
     const prismaMock = {
         authSession: {
             create: vi.fn(),
@@ -58,7 +58,7 @@ vi.mock("@/lib/prisma", () => {
     return { prisma: prismaMock };
 });
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import {
     createRefreshSession,
     hashRefreshToken,

@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import type { ProgramSummary } from "@/type/models";
 import {
     deleteJsonCache,

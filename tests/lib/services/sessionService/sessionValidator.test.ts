@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import { validateSession } from "@/lib/services/sessionService/sessionValidator";
 import { isSessionError } from "@/lib/services/sessionService/types";
 
-vi.mock("@/lib/grantAuth", () => ({
+vi.mock("@/lib/server/auth/grantSession", () => ({
     getGrantSession: vi.fn(),
 }));
 
-import { getGrantSession } from "@/lib/grantAuth";
+import { getGrantSession } from "@/lib/server/auth/grantSession";
 
 const mockedGetGrantSession = vi.mocked(getGrantSession);
 

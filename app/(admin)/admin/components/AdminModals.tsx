@@ -7,7 +7,7 @@ import {
     ProjectStatusModal,
 } from "./modals";
 import { useAdminModalStates, useProjectStatusActions } from "../hooks";
-import { getStatusColor } from "@/lib/utils";
+import { getStatusColor } from "@/lib/shared/utils";
 
 export const AdminModals = () => {
     const {

@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { PROJECT_STATUS } from "@/type/models";
-import { getStatusColor, cn } from "@/lib/utils";
+import { getStatusColor, cn } from "@/lib/shared/utils";
 import type { Project } from "@/type";
 import { CheckCircle, X } from "lucide-react";
 

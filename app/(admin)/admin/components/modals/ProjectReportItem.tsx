@@ -2,9 +2,9 @@
 
 import React from "react";
 import { Button } from "@/components/ui";
-import { REPORT_STATUS } from "@/lib/constants";
+import { REPORT_STATUS } from "@/lib/shared/constants";
 import { PROJECT_REPORT_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
-import { getReportStatusColor, getReportTypeColor } from "@/lib/utils";
+import { getReportStatusColor, getReportTypeColor } from "@/lib/shared/utils";
 import type { AdminProjectReport } from "@/type";
 import {
     CalendarClock,

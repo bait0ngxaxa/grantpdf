@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getGrantSession } from "@/lib/grantAuth";
+import { getGrantSession } from "@/lib/server/auth/grantSession";
 import type { SessionValidationResult } from "./types";
 
 export async function validateSession(): Promise<

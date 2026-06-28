@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useMemo } from "react";
-import type { Session } from "@/lib/authTypes";
-import { ROLES } from "@/lib/constants";
+import type { Session } from "@/lib/server/auth/types";
+import { ROLES } from "@/lib/shared/constants";
 
 interface DocumentAuthContextType {
     session: Session;

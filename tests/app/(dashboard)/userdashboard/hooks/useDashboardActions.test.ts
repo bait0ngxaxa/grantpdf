@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useDashboardActions } from "@/app/(dashboard)/userdashboard/hooks/useDashboardActions";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 
 const { toastSuccess, toastError } = vi.hoisted(() => ({
     toastSuccess: vi.fn(),

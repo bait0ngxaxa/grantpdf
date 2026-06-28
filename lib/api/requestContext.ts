@@ -1,4 +1,5 @@
-import type { Session } from "@/lib/authTypes";
+import type { Session } from "@/lib/server/auth/types";
+import { readClientIp } from "@/lib/shared/request/clientIp";
 
 export interface AuditRequestContext {
     actorUserId: string;
@@ -9,16 +10,7 @@ export interface AuditRequestContext {
 }
 
 export function getClientIp(request: Request): string | undefined {
-    const forwarded = request.headers.get("x-forwarded-for");
-    if (forwarded) {
-        return forwarded.split(",")[0]?.trim() || undefined;
-    }
-
-    return (
-        request.headers.get("x-real-ip") ||
-        request.headers.get("cf-connecting-ip") ||
-        undefined
-    );
+    return readClientIp(request);
 }
 
 export function getRequestId(request: Request): string | undefined {

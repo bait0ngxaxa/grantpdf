@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SESSION } from "@/lib/constants";
+import { SESSION } from "@/lib/shared/constants";
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/authSessionService", () => ({
     rotateRefreshSession: vi.fn(),
 }));
 
-vi.mock("@/lib/ratelimit", async () => {
-    const actual = await vi.importActual<typeof import("@/lib/ratelimit")>(
-        "@/lib/ratelimit"
+vi.mock("@/lib/server/rate-limit/rateLimit", async () => {
+    const actual = await vi.importActual<typeof import("@/lib/server/rate-limit/rateLimit")>(
+        "@/lib/server/rate-limit/rateLimit"
     );
 
     return {
@@ -16,8 +16,8 @@ vi.mock("@/lib/ratelimit", async () => {
     };
 });
 
-import { rotateRefreshSession } from "@/lib/services";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { rotateRefreshSession } from "@/lib/services/authSessionService";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { POST } from "@/app/api/(auth)/auth/refresh/route";
 
 const mockedRotateRefreshSession = vi.mocked(rotateRefreshSession);

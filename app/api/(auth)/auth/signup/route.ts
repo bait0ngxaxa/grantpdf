@@ -1,13 +1,13 @@
 // /app/api/auth/signup/route.ts
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import bcrypt from "bcryptjs";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
-import { logAudit } from "@/lib/auditLog";
+import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import { signupSchema } from "@/lib/validation/schemas";
-import { RATE_LIMIT } from "@/lib/constants";
-import { getStringField } from "@/lib/utils";
+import { RATE_LIMIT } from "@/lib/shared/constants";
+import { getStringField } from "@/lib/shared/utils";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {

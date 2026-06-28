@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import type { AdminProject } from "@/type/models";
 import type { AdminStatsResult } from "@/lib/services/adminService";
-import { API_ROUTES, PAGINATION, STATUS_FILTER } from "@/lib/constants";
+import { API_ROUTES, PAGINATION, STATUS_FILTER } from "@/lib/shared/constants";
 
 export type AdminStatsResponse = AdminStatsResult;
 

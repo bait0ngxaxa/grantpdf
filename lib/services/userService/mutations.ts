@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { parseActorUserId, toPrismaJsonValue } from "@/lib/auditUtils";
+import { prisma } from "@/lib/server/db";
+import { parseActorUserId, toPrismaJsonValue } from "@/lib/server/audit/auditUtils";
 import type { SafeUser, UpdateUserData } from "./types";
 import { isValidRole } from "./constants";
 import type { Prisma } from "@prisma/client";

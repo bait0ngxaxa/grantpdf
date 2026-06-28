@@ -4,16 +4,16 @@ import {
     NOTIFICATION_FEED,
 } from "@/lib/notifications/constants";
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/server/auth/session", () => ({
     auth: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/notificationService", () => ({
     getNotificationsForUser: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
-import { getNotificationsForUser } from "@/lib/services";
+import { auth } from "@/lib/server/auth/session";
+import { getNotificationsForUser } from "@/lib/services/notificationService";
 import { GET } from "@/app/api/(user)/notifications/route";
 
 const mockedAuth = vi.mocked(auth);

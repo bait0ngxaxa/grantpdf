@@ -1,13 +1,13 @@
 // User file deletion endpoint
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
-import { getFileForDeletion, deleteFileRecord } from "@/lib/services";
+import { auth } from "@/lib/server/auth/session";
+import { getFileForDeletion, deleteFileRecord } from "@/lib/services/fileService";
 import { unlink } from "fs/promises";
-import { logAudit } from "@/lib/auditLog";
-import { getFullPathFromStoragePath } from "@/lib/fileStorage";
-import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError } from "@/lib/apiError";
+import { logAudit } from "@/lib/server/audit/auditLog";
+import { getFullPathFromStoragePath } from "@/lib/server/storage";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { publicApiError } from "@/lib/shared/http/apiError";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {
     publicErrorResponse,

@@ -10,7 +10,7 @@ import {
     saveDocumentToStorage,
     buildSuccessResponse,
 } from "@/lib/document";
-import { formatNumericWithCommas } from "@/lib/utils";
+import { formatNumericWithCommas } from "@/lib/shared/utils";
 
 export async function handleSummaryGeneration(
     formData: FormData,

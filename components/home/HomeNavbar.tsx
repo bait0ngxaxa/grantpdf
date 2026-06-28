@@ -5,7 +5,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import { Button, ThemeToggle } from "@/components/ui";
 import { LogIn, UserPlus } from "lucide-react";
 

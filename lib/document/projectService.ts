@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { parsePositiveIntId } from "@/lib/id";
+import { prisma } from "@/lib/server/db";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import {
     findProjectByIdAndUser,
     findProjectByNameAndUser,

@@ -6,7 +6,7 @@ import {
     releaseRefreshLock,
     requestGrantSessionRefresh,
     tryAcquireRefreshLock,
-} from "@/lib/authRefreshCoordinator";
+} from "@/lib/client/auth/refreshCoordinator";
 
 const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 

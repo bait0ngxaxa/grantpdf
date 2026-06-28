@@ -1,8 +1,8 @@
 import React from "react";
-import { cn, getAvatarInitial } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/shared/utils";
 import { Button, Pagination } from "@/components/ui";
 import { Edit, Trash2, Search, Users } from "lucide-react";
-import { ROLES } from "@/lib/constants";
+import { ROLES } from "@/lib/shared/constants";
 import type { UserApiData } from "@/type";
 
 type UserData = UserApiData;

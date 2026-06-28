@@ -1,4 +1,4 @@
-import { ROLES } from "@/lib/constants";
+import { ROLES } from "@/lib/shared/constants";
 
 export const VALID_ROLES = [ROLES.MEMBER, ROLES.ADMIN] as const;
 

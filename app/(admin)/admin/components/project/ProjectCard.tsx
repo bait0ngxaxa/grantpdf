@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { PROJECT_STATUS } from "@/type/models";
-import { getStatusColor, cn } from "@/lib/utils";
+import { getStatusColor, cn } from "@/lib/shared/utils";
 import { getProgramAccent } from "@/components/programAccent";
 import { ProgramIdentityIcon } from "@/components/ProgramIdentityIcon";
 import {
@@ -255,4 +255,3 @@ export default function ProjectCard({
         </div>
     );
 }
-

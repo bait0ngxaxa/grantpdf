@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import jwt from "jsonwebtoken";
 
-vi.mock("@/lib/prisma", () => {
+vi.mock("@/lib/server/db", () => {
     const prismaMock = {
         user: {
             updateMany: vi.fn(),
@@ -18,7 +18,7 @@ vi.mock("@/lib/prisma", () => {
     return { prisma: prismaMock };
 });
 
-vi.mock("@/lib/ratelimit", () => ({
+vi.mock("@/lib/server/rate-limit/rateLimit", () => ({
     applyRateLimit: vi.fn(() => ({
         success: true,
         retryAfter: 0,
@@ -33,13 +33,13 @@ vi.mock("bcryptjs", () => ({
     },
 }));
 
-vi.mock("@/lib/auditLog", () => ({
+vi.mock("@/lib/server/audit/auditLog", () => ({
     logAudit: vi.fn(),
 }));
 
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
-import { logAudit } from "@/lib/auditLog";
+import { prisma } from "@/lib/server/db";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import { PUT } from "@/app/api/(auth)/auth/reset-password/route";
 
 const mockedHash = vi.mocked(bcrypt.hash);

@@ -13,7 +13,7 @@ const mockTx = {
     },
 };
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         $transaction: vi.fn(),
         user: {
@@ -24,9 +24,9 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import { updateUserWithAudit } from "@/lib/services/userService/mutations";
-import { ROLES } from "@/lib/constants";
+import { ROLES } from "@/lib/shared/constants";
 
 const mockedTransaction = vi.mocked(prisma.$transaction);
 

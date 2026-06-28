@@ -13,7 +13,7 @@ import { useUserDashboardContext } from "../contexts";
 import {
     groupProjectsByProgram,
     type ProgramGroup,
-} from "@/lib/programGrouping";
+} from "@/lib/domain/projects/programGrouping";
 import { useUnreadNotificationMarkers } from "@/lib/hooks";
 import {
     NOTIFICATION_AUDIENCE,
@@ -39,9 +39,9 @@ import {
     fileStatIcon,
     ProgramGroupHeader,
 } from "@/components/ProgramGroupHeader";
-import { cn } from "@/lib/utils";
-import { PAGINATION } from "@/lib/constants";
-import { paginateGroupItems } from "@/lib/programGroupPagination";
+import { cn } from "@/lib/shared/utils";
+import { PAGINATION } from "@/lib/shared/constants";
+import { paginateGroupItems } from "@/lib/domain/projects/groupPagination";
 
 interface NotificationFocusLocation {
     groupKey: string;

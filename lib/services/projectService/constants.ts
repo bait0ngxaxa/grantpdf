@@ -61,4 +61,4 @@ export const ORPHAN_FILES_INCLUDE = {
 };
 
 // Re-export from SSOT (lib/constants.ts)
-export { VALID_STATUSES_SET } from "@/lib/constants";
+export { VALID_STATUSES_SET } from "@/lib/shared/constants";

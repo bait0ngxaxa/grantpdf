@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
-import { getUserProjectStats } from "@/lib/services";
+import { auth } from "@/lib/server/auth/session";
+import { getUserProjectStats } from "@/lib/services/projectService";
 import { redirect } from "next/navigation";
 import { DashboardWrapper } from "./DashboardWrapper";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import { AuthRefreshProvider, SWRProvider } from "@/components/providers";
 
 export const metadata: Metadata = {

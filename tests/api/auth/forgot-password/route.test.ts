@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         user: {
             findUnique: vi.fn(),
@@ -8,11 +8,11 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
-vi.mock("@/lib/email", () => ({
+vi.mock("@/lib/server/email/email", () => ({
     sendPasswordResetEmail: vi.fn(),
 }));
 
-vi.mock("@/lib/ratelimit", () => ({
+vi.mock("@/lib/server/rate-limit/rateLimit", () => ({
     applyRateLimit: vi.fn(() => ({
         success: true,
         retryAfter: 0,
@@ -21,13 +21,13 @@ vi.mock("@/lib/ratelimit", () => ({
     getClientIP: vi.fn(() => "127.0.0.1"),
 }));
 
-vi.mock("@/lib/auditLog", () => ({
+vi.mock("@/lib/server/audit/auditLog", () => ({
     logAudit: vi.fn(),
 }));
 
-import { prisma } from "@/lib/prisma";
-import { sendPasswordResetEmail } from "@/lib/email";
-import { logAudit } from "@/lib/auditLog";
+import { prisma } from "@/lib/server/db";
+import { sendPasswordResetEmail } from "@/lib/server/email/email";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import { POST } from "@/app/api/(auth)/auth/forgot-password/route";
 
 const mockedFindUnique = vi.mocked(prisma.user.findUnique);

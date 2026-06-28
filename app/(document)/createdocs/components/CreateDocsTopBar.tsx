@@ -5,8 +5,8 @@ import { useCreateDocsContext } from "../contexts";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { Button } from "@/components/ui";
 import Link from "next/link";
-import { ROUTES } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { ROUTES } from "@/lib/shared/constants";
+import { cn } from "@/lib/shared/utils";
 
 export const CreateDocsTopBar = (): React.JSX.Element => {
     const {
@@ -134,4 +134,3 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
         </div>
     );
 };
-

@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PAGINATION } from "@/lib/constants";
+import { PAGINATION } from "@/lib/shared/constants";
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/server/auth/session", () => ({
     auth: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/projectService", () => ({
     getUserFilesPaginated: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
-import { getUserFilesPaginated } from "@/lib/services";
+import { auth } from "@/lib/server/auth/session";
+import { getUserFilesPaginated } from "@/lib/services/projectService";
 import { GET } from "@/app/api/(user)/files/route";
 
 const mockedAuth = vi.mocked(auth);

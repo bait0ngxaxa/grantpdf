@@ -4,7 +4,7 @@ import {
     ensureStorageDir,
     getStoragePath,
     getRelativeStoragePath,
-} from "@/lib/fileStorage";
+} from "@/lib/server/storage";
 import type { DocumentSaveResult } from "./types";
 
 type PersistRecordCallback = (relativeStoragePath: string) => Promise<void>;

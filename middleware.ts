@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { ROUTES, ROLES } from "@/lib/constants";
-import { buildRedirectUrl } from "@/lib/redirectUrl";
-import { verifyAccessToken, type AccessTokenPayload } from "@/lib/accessToken";
+import { ROUTES, ROLES } from "@/lib/shared/constants";
+import { buildRedirectUrl } from "@/lib/shared/routing/redirectUrl";
+import { verifyAccessToken, type AccessTokenPayload } from "@/lib/server/auth/accessToken";
 import {
     getAccessTokenFromRequest,
     getRefreshTokenFromRequest,
     getSessionHintFromRequest,
-} from "@/lib/authSessionCookies";
+} from "@/lib/server/auth/sessionCookies";
 
 const CSP_NONCE_HEADER = "x-nonce";
 const ADMIN_PREFIXES = [ROUTES.ADMIN];

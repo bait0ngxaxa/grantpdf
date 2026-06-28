@@ -1,5 +1,5 @@
 import React from "react";
-import { cn, getAvatarInitial } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/shared/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui";
@@ -12,7 +12,7 @@ import {
     PanelLeftClose,
     PanelLeftOpen,
 } from "lucide-react";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import { useAdminDashboardContext } from "../contexts";
 
 const menuItems = [
@@ -387,4 +387,3 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
         </>
     );
 };
-

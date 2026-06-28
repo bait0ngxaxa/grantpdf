@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { NextResponse } from "next/server";
-import { SESSION } from "@/lib/constants";
+import { SESSION } from "@/lib/shared/constants";
 import {
     clearAccessTokenCookie,
     clearRefreshTokenCookie,
     setAccessTokenCookie,
     setRefreshTokenCookie,
-} from "@/lib/authSessionCookies";
+} from "@/lib/server/auth/sessionCookies";
 
 function getSetCookieHeader(response: NextResponse): string {
     return response.headers.get("set-cookie") ?? "";

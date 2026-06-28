@@ -14,14 +14,14 @@ import {
     getMimeType,
     normalizeRichEditorText,
 } from "../fixThaiwordUtils";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import { getFullPathFromStoragePath } from "@/lib/fileStorage";
+import { getFullPathFromStoragePath } from "@/lib/server/storage";
 import { fileTypeFromBuffer } from "file-type";
 import { normalizePhoneNumber } from "@/lib/validation/schemas";
-import { parsePositiveIntId } from "@/lib/id";
-import { SIGNATURE_UPLOAD } from "@/lib/constants";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { SIGNATURE_UPLOAD } from "@/lib/shared/constants";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 

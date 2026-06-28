@@ -2,24 +2,24 @@ import { type NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { rename, unlink, writeFile } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/server/auth/session";
+import { prisma } from "@/lib/server/db";
 import {
     FILE_UPLOAD,
     RATE_LIMIT,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
-} from "@/lib/constants";
+} from "@/lib/shared/constants";
 import {
     ensureStorageDir,
     getRelativeStoragePath,
     getStoragePath,
     validateFileMime,
-} from "@/lib/fileStorage";
-import { parsePositiveIntId } from "@/lib/id";
-import { applyRateLimit } from "@/lib/ratelimit";
-import { logAudit } from "@/lib/auditLog";
-import { publicApiError } from "@/lib/apiError";
+} from "@/lib/server/storage";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
+import { logAudit } from "@/lib/server/audit/auditLog";
+import { publicApiError } from "@/lib/shared/http/apiError";
 import { getFirstValidationMessage } from "@/lib/api/body";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {
@@ -31,13 +31,13 @@ import { projectReportSchema } from "@/lib/validation/schemas";
 import {
     createProjectReportWithFile,
     getProjectReportsForUser,
-} from "@/lib/services";
+} from "@/lib/services/projectReportService";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
 import {
     completeUploadIdempotency,
     failUploadIdempotency,
     startUploadIdempotency,
-} from "@/lib/uploadIdempotency";
+} from "@/lib/server/storage/uploadIdempotency";
 
 interface RouteContext {
     params: Promise<{ id: string }>;

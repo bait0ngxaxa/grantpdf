@@ -3,8 +3,8 @@
 import React from "react";
 import { Loader2, LogOut, RefreshCw, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui";
-import { signOutWithSessionRevoke } from "@/lib/authClient";
-import { cn } from "@/lib/utils";
+import { signOutWithSessionRevoke } from "@/lib/client/auth";
+import { cn } from "@/lib/shared/utils";
 import {
     DeviceSessionRow,
     type DeviceSession,

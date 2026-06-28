@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useFileHandlers } from "@/app/(document)/hooks/useUploadDoc/useFileHandlers";
-import { FILE_UPLOAD } from "@/lib/constants";
+import { FILE_UPLOAD } from "@/lib/shared/constants";
 
 describe("useFileHandlers - Security Tests", () => {
     const mockSetSelectedFile = vi.fn();

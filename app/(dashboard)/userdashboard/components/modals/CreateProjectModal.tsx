@@ -21,7 +21,7 @@ import {
     ArrowLeft,
 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 import type { ProgramSummary } from "@/type/models";
 import {
     ProgramSelectionList,

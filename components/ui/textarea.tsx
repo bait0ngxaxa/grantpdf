@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 // คำนวณขนาดที่พิมพ์ได้ในหน้ากระดาษ A4
 const A4_HEIGHT_CM = 29.7;

@@ -39,10 +39,10 @@ import {
     buildAdminProjectGroupViews,
     hasActiveAdminProjectFilters,
     type AdminProjectGroupView,
-} from "@/lib/adminProjectGrouping";
-import { paginateGroupItems } from "@/lib/programGroupPagination";
-import { cn } from "@/lib/utils";
-import { PAGINATION } from "@/lib/constants";
+} from "@/lib/domain/projects/adminGrouping";
+import { paginateGroupItems } from "@/lib/domain/projects/groupPagination";
+import { cn } from "@/lib/shared/utils";
+import { PAGINATION } from "@/lib/shared/constants";
 import { useAdminModalStates } from "../../hooks";
 
 interface ProjectsListProps {

@@ -1,8 +1,8 @@
 // เส้นแสดง dashboard user ทั่วไป
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { getFilesByUserId } from "@/lib/services";
-import { parsePositiveIntId } from "@/lib/id";
+import { auth } from "@/lib/server/auth/session";
+import { getFilesByUserId } from "@/lib/services/fileService";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import {
     publicErrorResponse,
     unauthorizedResponse,

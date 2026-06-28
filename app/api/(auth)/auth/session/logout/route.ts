@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { RATE_LIMIT } from "@/lib/constants";
+import { RATE_LIMIT } from "@/lib/shared/constants";
 import {
     clearAccessTokenCookie,
     clearRefreshTokenCookie,
     getRefreshTokenFromRequest,
-} from "@/lib/authSessionCookies";
-import { revokeRefreshSession } from "@/lib/services";
-import { applyRateLimit } from "@/lib/ratelimit";
+} from "@/lib/server/auth/sessionCookies";
+import { revokeRefreshSession } from "@/lib/services/authSessionService";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { rateLimitExceededResponse } from "@/lib/api/responses";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

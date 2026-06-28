@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Prisma } from "@prisma/client";
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         documentIdempotency: {
             create: vi.fn(),
@@ -12,7 +12,7 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import {
     normalizeIdempotencyKey,
     startDocumentIdempotency,

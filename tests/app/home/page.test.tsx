@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ROUTES, SESSION } from "@/lib/constants";
+import { ROUTES, SESSION } from "@/lib/shared/constants";
 
 const mocks = vi.hoisted(() => {
     return {
@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => {
     };
 });
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/server/auth/session", () => ({
     auth: mocks.auth,
 }));
 

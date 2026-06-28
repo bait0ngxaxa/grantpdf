@@ -1,16 +1,16 @@
 // app/api/auth/reset-password/route.ts
 import { NextResponse, type NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import bcrypt from "bcryptjs";
 import { resetPasswordSchema } from "@/lib/validation/schemas";
-import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
-import { RATE_LIMIT } from "@/lib/constants";
-import { logAudit } from "@/lib/auditLog";
+import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
+import { RATE_LIMIT } from "@/lib/shared/constants";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     type PasswordResetTokenPayload,
     verifyPasswordResetToken,
-} from "@/lib/passwordReset";
-import { getStringField } from "@/lib/utils";
+} from "@/lib/server/auth/passwordReset";
+import { getStringField } from "@/lib/shared/utils";
 import { deleteUserSessionCache } from "@/lib/services/sessionCacheService";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {

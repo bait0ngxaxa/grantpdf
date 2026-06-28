@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { cn, formatNumericWithCommas } from "@/lib/utils";
+import { cn, formatNumericWithCommas } from "@/lib/shared/utils";
 
 interface PreviewFieldProps {
     label: string;

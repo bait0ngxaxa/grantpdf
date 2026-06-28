@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Skeleton } from "@/components/ui";
-import { API_ROUTES, PAGINATION } from "@/lib/constants";
+import { API_ROUTES, PAGINATION } from "@/lib/shared/constants";
 import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 import type { AdminProject, AdminProjectReport } from "@/type";
 import { FileText, RotateCcw, X } from "lucide-react";

@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { getUserFilesPaginated } from "@/lib/services";
-import { PAGINATION } from "@/lib/constants";
-import { parsePositiveInt } from "@/lib/queryParams";
-import { parsePositiveIntId } from "@/lib/id";
+import { auth } from "@/lib/server/auth/session";
+import { getUserFilesPaginated } from "@/lib/services/projectService";
+import { PAGINATION } from "@/lib/shared/constants";
+import { parsePositiveInt } from "@/lib/shared/http/queryParams";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import {
     publicErrorResponse,
     unauthorizedResponse,

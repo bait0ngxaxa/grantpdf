@@ -11,7 +11,7 @@ import type {
     LatestProject,
     LatestUser,
 } from "@/type/models";
-import type { Session } from "@/lib/authTypes";
+import type { Session } from "@/lib/server/auth/types";
 
 import { AdminUIProvider, useAdminUI } from "./AdminUIContext";
 import { AdminDataProvider, useAdminDataData } from "./AdminDataContext";

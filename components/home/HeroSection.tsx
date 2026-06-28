@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import {
   Building2,
   ChevronRight,

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/server/db";
+import { auth } from "@/lib/server/auth/session";
 import { createReadStream } from "fs";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
-import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
-import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError } from "@/lib/apiError";
+import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { publicApiError } from "@/lib/shared/http/apiError";
 import {
     publicErrorResponse,
     unauthorizedResponse,

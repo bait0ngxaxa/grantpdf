@@ -1,7 +1,7 @@
 // Admin dashboard stats: todayProjects, todayProjectFiles, todayReportFiles, totalUsers, latestUser
 import { NextResponse } from "next/server";
 import { getAdminDashboardStats } from "@/lib/services/adminService";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
 
 export async function GET(): Promise<NextResponse> {
     try {

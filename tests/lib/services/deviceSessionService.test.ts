@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/prisma", () => {
+vi.mock("@/lib/server/db", () => {
     const prismaMock = {
         authSession: {
             findMany: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock("@/lib/services/sessionCacheService", () => ({
     deleteUserSessionCache: vi.fn(),
 }));
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import {
     getUserDeviceSessions,
     revokeOtherUserSessionFamilies,

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/server/auth/session";
+import { prisma } from "@/lib/server/db";
 import path from "path";
 import { rename, unlink, writeFile } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
@@ -9,14 +9,14 @@ import {
     getStoragePath,
     getRelativeStoragePath,
     validateFileMime,
-} from "@/lib/fileStorage";
-import { logAudit } from "@/lib/auditLog";
+} from "@/lib/server/storage";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     FILE_UPLOAD,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
-} from "@/lib/constants";
-import { parsePositiveIntId } from "@/lib/id";
+} from "@/lib/shared/constants";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {
     publicErrorResponse,
@@ -28,7 +28,7 @@ import {
     completeUploadIdempotency,
     failUploadIdempotency,
     startUploadIdempotency,
-} from "@/lib/uploadIdempotency";
+} from "@/lib/server/storage/uploadIdempotency";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 

@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getAllFilesPaginated } from "@/lib/services";
-import { PAGINATION } from "@/lib/constants";
-import { parsePositiveInt } from "@/lib/queryParams";
-import { parsePositiveIntId } from "@/lib/id";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
+import { getAllFilesPaginated } from "@/lib/services/projectService";
+import { PAGINATION } from "@/lib/shared/constants";
+import { parsePositiveInt } from "@/lib/shared/http/queryParams";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
 import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {

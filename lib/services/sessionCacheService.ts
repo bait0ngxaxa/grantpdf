@@ -1,5 +1,5 @@
-import { getRedisClient } from "@/lib/redis";
-import { SESSION } from "@/lib/constants";
+import { getRedisClient } from "@/lib/server/db";
+import { SESSION } from "@/lib/shared/constants";
 
 export type CachedGrantSessionRecord = {
     sessionId: string;

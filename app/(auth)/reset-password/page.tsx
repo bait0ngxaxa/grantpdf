@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/server/auth/session";
 import { redirect } from "next/navigation";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import { type Metadata } from "next";
 import ResetPasswordClient from "./ResetPasswordClient";
 

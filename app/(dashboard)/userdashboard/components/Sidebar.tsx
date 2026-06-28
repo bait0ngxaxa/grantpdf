@@ -1,5 +1,5 @@
 import React from "react";
-import { cn, getAvatarInitial } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/shared/utils";
 import Image from "next/image";
 import {
     Folder,
@@ -313,4 +313,3 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
         </>
     );
 };
-

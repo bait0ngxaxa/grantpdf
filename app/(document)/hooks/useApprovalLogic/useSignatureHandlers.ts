@@ -7,7 +7,7 @@ import {
     optimizeSignatureImageFile,
     SIGNATURE_MAX_SIZE_BYTES,
 } from "./helpers";
-import { SIGNATURE_UPLOAD } from "@/lib/constants";
+import { SIGNATURE_UPLOAD } from "@/lib/shared/constants";
 
 export function useSignatureHandlers(): UseSignatureHandlersReturn {
     const [signatureFile, setSignatureFile] = useState<File | null>(null);

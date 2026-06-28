@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/server/auth/session", () => ({
     auth: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/fileService", () => ({
     getFileForDeletion: vi.fn(),
     deleteFileRecord: vi.fn(),
 }));
@@ -17,19 +17,19 @@ vi.mock("fs/promises", () => {
     };
 });
 
-vi.mock("@/lib/fileStorage", () => ({
+vi.mock("@/lib/server/storage", () => ({
     getFullPathFromStoragePath: vi.fn(),
 }));
 
-vi.mock("@/lib/auditLog", () => ({
+vi.mock("@/lib/server/audit/auditLog", () => ({
     logAudit: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
-import { getFileForDeletion, deleteFileRecord } from "@/lib/services";
+import { auth } from "@/lib/server/auth/session";
+import { getFileForDeletion, deleteFileRecord } from "@/lib/services/fileService";
 import { unlink } from "fs/promises";
-import { getFullPathFromStoragePath } from "@/lib/fileStorage";
-import { logAudit } from "@/lib/auditLog";
+import { getFullPathFromStoragePath } from "@/lib/server/storage";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import { DELETE } from "@/app/api/(user)/user-docs/[id]/route";
 
 const mockedAuth = vi.mocked(auth);

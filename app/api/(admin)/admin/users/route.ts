@@ -1,9 +1,9 @@
 // เส้นดึงข้อมูล user จาก table user ทั้งหมด (paginated)
 import { type NextRequest, NextResponse } from "next/server";
-import { getAllUsersPaginated } from "@/lib/services";
-import { PAGINATION } from "@/lib/constants";
-import { parsePositiveInt } from "@/lib/queryParams";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
+import { getAllUsersPaginated } from "@/lib/services/userService";
+import { PAGINATION } from "@/lib/shared/constants";
+import { parsePositiveInt } from "@/lib/shared/http/queryParams";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {

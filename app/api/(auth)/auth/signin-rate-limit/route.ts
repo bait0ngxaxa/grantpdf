@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { RATE_LIMIT } from "@/lib/constants";
-import { getStringField } from "@/lib/utils";
+import { RATE_LIMIT } from "@/lib/shared/constants";
+import { getStringField } from "@/lib/shared/utils";
 import {
     createRateLimitKey,
     getRateLimitHeaders,
     getRateLimitStatus,
-} from "@/lib/ratelimit";
+} from "@/lib/server/rate-limit/rateLimit";
 import { readJsonBody } from "@/lib/api/body";
 import { rateLimitExceededResponse } from "@/lib/api/responses";
 

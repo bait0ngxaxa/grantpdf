@@ -2,12 +2,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
     updateUserWithAudit,
     deleteUserWithAudit,
-} from "@/lib/services";
+} from "@/lib/services/userService";
 import { updateAdminUserSchema } from "@/lib/validation/schemas";
-import { parsePositiveIntId } from "@/lib/id";
-import { ROLES } from "@/lib/constants";
-import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
-import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { ROLES } from "@/lib/shared/constants";
+import { isGuardError, requireAdminSession } from "@/lib/server/auth/guards";
+import { applyAdminMutationRateLimit } from "@/lib/server/rate-limit/adminMutationRateLimit";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {

@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 
 export interface UseNavigationProps {
     selectedProjectId: string | null;

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { ProgramSummary } from "@/type/models";
 import { getProgramAccent } from "@/components/programAccent";
 import { ProgramIdentityIcon } from "@/components/ProgramIdentityIcon";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 export function ProgramSelectionCard({
     program,

@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { getMimeTypeByExtension } from "@/lib/shared/files/mime";
 
 const ZWSP = "\u200B";
 const THAI_CHAR_REGEX = /[\u0E00-\u0E7F]/;
@@ -143,38 +144,7 @@ export const generateUniqueFilename = (originalName: string): string => {
  * Get MIME type from file extension.
  */
 export const getMimeType = (fileExtension: string): string => {
-    const ext = fileExtension.toLowerCase();
-    switch (ext) {
-        case "pdf":
-            return "application/pdf";
-        case "doc":
-            return "application/msword";
-        case "docx":
-            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        case "jpg":
-        case "jpeg":
-            return "image/jpeg";
-        case "png":
-            return "image/png";
-        case "gif":
-            return "image/gif";
-        case "txt":
-            return "text/plain";
-        case "xls":
-            return "application/vnd.ms-excel";
-        case "xlsx":
-            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        case "ppt":
-            return "application/vnd.ms-powerpoint";
-        case "pptx":
-            return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-        case "zip":
-            return "application/zip";
-        case "rar":
-            return "application/x-rar-compressed";
-        default:
-            return "application/octet-stream";
-    }
+    return getMimeTypeByExtension(fileExtension);
 };
 
 export default fixThaiDistributed;

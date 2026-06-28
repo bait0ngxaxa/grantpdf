@@ -1,5 +1,5 @@
-import { ROLES } from "@/lib/constants";
-import { toPrismaJsonValue } from "@/lib/auditUtils";
+import { ROLES } from "@/lib/shared/constants";
+import { toPrismaJsonValue } from "@/lib/server/audit/auditUtils";
 import {
     NOTIFICATION_AUDIENCE,
     NOTIFICATION_TYPE,

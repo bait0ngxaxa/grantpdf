@@ -1,26 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextResponse } from "next/server";
 
-vi.mock("@/lib/auth-helpers", () => ({
+vi.mock("@/lib/server/auth/guards", () => ({
     requireAdminSession: vi.fn(),
     isGuardError: vi.fn(),
 }));
 
-vi.mock("@/lib/auditLog", () => ({
+vi.mock("@/lib/server/audit/auditLog", () => ({
     logAudit: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
-    getCoOwnerUserOptions: vi.fn(),
+vi.mock("@/lib/services/projectService", () => ({
     updateProjectCoOwners: vi.fn(),
 }));
 
-import { logAudit } from "@/lib/auditLog";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
+vi.mock("@/lib/services/userService", () => ({
+    getCoOwnerUserOptions: vi.fn(),
+}));
+
+import { logAudit } from "@/lib/server/audit/auditLog";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
 import {
-    getCoOwnerUserOptions,
     updateProjectCoOwners,
-} from "@/lib/services";
+} from "@/lib/services/projectService";
+import { getCoOwnerUserOptions } from "@/lib/services/userService";
 import {
     GET,
     PUT,

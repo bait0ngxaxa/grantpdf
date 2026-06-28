@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 
 export const AUDIT_LOG_RETENTION_DAYS = 90;
 

@@ -1,4 +1,4 @@
-import type { UserRole } from "@/lib/constants";
+import type { UserRole } from "@/lib/shared/constants";
 import type {
     Project,
     ProjectSummary,

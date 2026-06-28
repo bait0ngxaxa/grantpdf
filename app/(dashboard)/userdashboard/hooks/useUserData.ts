@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import type { ProjectsApiResponse } from "@/type/api";
 import type { LatestProject } from "@/type/models";
-import { API_ROUTES, PAGINATION, STATUS_FILTER } from "@/lib/constants";
+import { API_ROUTES, PAGINATION, STATUS_FILTER } from "@/lib/shared/constants";
 
 export type { Project, UserFile } from "@/type";
 

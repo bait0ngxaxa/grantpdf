@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasProjectDraftChanges } from "@/lib/projectDraftChanges";
+import { hasProjectDraftChanges } from "@/lib/domain/projects/draftChanges";
 
 const baseProject = {
     name: "โครงการทดสอบ",

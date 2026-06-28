@@ -7,8 +7,8 @@ import {
     CheckCircle,
     AlertCircle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { FILE_UPLOAD } from "@/lib/constants";
+import { cn } from "@/lib/shared/utils";
+import { FILE_UPLOAD } from "@/lib/shared/constants";
 
 const ACCEPTED_FILE_TYPES = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(",");
 const ACCEPTED_FILE_TYPES_LABEL = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ");
@@ -188,4 +188,3 @@ export function UploadArea({
         </div>
     );
 }
-

@@ -1,14 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { RATE_LIMIT } from "@/lib/constants";
-import { getGrantSession } from "@/lib/grantAuth";
-import { parsePositiveIntId } from "@/lib/id";
-import { logAudit } from "@/lib/auditLog";
+import { RATE_LIMIT } from "@/lib/shared/constants";
+import { getGrantSession } from "@/lib/server/auth/grantSession";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     getUserDeviceSessions,
     revokeUserSessionFamily,
-} from "@/lib/services";
-import { applyRateLimit, getClientIP } from "@/lib/ratelimit";
+} from "@/lib/services/deviceSessionService";
+import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
 import { readJsonBody } from "@/lib/api/body";
 import {
     rateLimitExceededResponse,

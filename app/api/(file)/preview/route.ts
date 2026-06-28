@@ -3,14 +3,14 @@
 
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/server/auth/session";
+import { prisma } from "@/lib/server/db";
 import { stat } from "fs/promises";
 import { createReadStream } from "fs";
-import { getFullPathFromStoragePath, getMimeType } from "@/lib/fileStorage";
-import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError } from "@/lib/apiError";
-import { ROLES } from "@/lib/constants";
+import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { publicApiError } from "@/lib/shared/http/apiError";
+import { ROLES } from "@/lib/shared/constants";
 import {
     publicErrorResponse,
     unauthorizedResponse,

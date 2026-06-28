@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PROJECT_STATUS } from "@/type/models";
 import type { AdminProject } from "@/type/models";
-import { buildAdminProjectGroupViews } from "@/lib/adminProjectGrouping";
+import { buildAdminProjectGroupViews } from "@/lib/domain/projects/adminGrouping";
 
 function buildProject(overrides: Partial<AdminProject>): AdminProject {
     return {

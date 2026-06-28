@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         auditLog: {
             create: vi.fn(),
@@ -9,8 +9,8 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
-import { prisma } from "@/lib/prisma";
-import { logAudit } from "@/lib/auditLog";
+import { prisma } from "@/lib/server/db";
+import { logAudit } from "@/lib/server/audit/auditLog";
 
 const mockedAuditCreate = vi.mocked(prisma.auditLog.create);
 const mockedAuditDeleteMany = vi.mocked(prisma.auditLog.deleteMany);

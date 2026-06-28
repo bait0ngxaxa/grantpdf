@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { getActivePrograms } from "@/lib/services";
+import { auth } from "@/lib/server/auth/session";
+import { getActivePrograms } from "@/lib/services/programService";
 
 export async function GET(): Promise<NextResponse> {
     try {

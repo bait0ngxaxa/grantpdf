@@ -5,8 +5,8 @@ import { Sidebar } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
 import { UserDashboardProvider, useUserDashboardContext } from "./contexts";
 import type { UserProjectStats } from "./hooks/useUserData";
-import type { Session } from "@/lib/authTypes";
-import { cn } from "@/lib/utils";
+import type { Session } from "@/lib/server/auth/types";
+import { cn } from "@/lib/shared/utils";
 
 interface DashboardWrapperProps {
     children: React.ReactNode;

@@ -1,7 +1,7 @@
 import React, { type FormEvent } from "react";
 import { Button, Input } from "@/components/ui";
 import { ChevronDown, Loader2, X } from "lucide-react";
-import { ROLES, type UserRole } from "@/lib/constants";
+import { ROLES, type UserRole } from "@/lib/shared/constants";
 import type { UserApiData } from "@/type";
 
 type UserData = UserApiData;

@@ -9,7 +9,7 @@ import {
     DialogDescription,
 } from "@/components/ui";
 import { FileText, CheckCircle2 } from "lucide-react";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 
 interface CreateDocSuccessModalProps {
     isOpen: boolean;

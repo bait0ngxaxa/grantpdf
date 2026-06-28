@@ -5,7 +5,7 @@ import {
     getRateLimitHeaders,
     getRateLimitSubject,
     resetRateLimit,
-} from "@/lib/ratelimit";
+} from "@/lib/server/rate-limit/rateLimit";
 
 function buildRequest(
     ip: string | null,
@@ -86,4 +86,3 @@ describe("ratelimit helpers", () => {
         expect(second.headers["Retry-After"]).toBeDefined();
     });
 });
-

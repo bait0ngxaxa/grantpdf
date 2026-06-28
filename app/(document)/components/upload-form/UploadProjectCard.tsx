@@ -8,7 +8,7 @@ import {
     Check,
     ChevronRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 interface UploadProjectCardProps {
     project: ProjectSummary;

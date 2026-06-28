@@ -2,14 +2,14 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
     getAllProjectsPaginated,
     updateProjectStatusWithAudit,
-    programExistsById,
-} from "@/lib/services";
-import { PAGINATION } from "@/lib/constants";
-import { parsePositiveInt } from "@/lib/queryParams";
-import { parsePositiveIntId } from "@/lib/id";
+} from "@/lib/services/projectService";
+import { programExistsById } from "@/lib/services/programService";
+import { PAGINATION } from "@/lib/shared/constants";
+import { parsePositiveInt } from "@/lib/shared/http/queryParams";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { updateAdminProjectSchema } from "@/lib/validation/schemas";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
-import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
+import { applyAdminMutationRateLimit } from "@/lib/server/rate-limit/adminMutationRateLimit";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {

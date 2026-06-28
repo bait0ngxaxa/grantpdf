@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { useUserDashboardContext } from "./contexts";
 import { DashboardSkeleton } from "@/components/ui";
-import { STATUS_FILTER } from "@/lib/constants";
+import { STATUS_FILTER } from "@/lib/shared/constants";
 import {
     NOTIFICATION_ACTION_QUERY,
     parseNotificationProjectId,

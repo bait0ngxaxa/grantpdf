@@ -10,7 +10,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 interface PreviewModalProps {
     isOpen: boolean;

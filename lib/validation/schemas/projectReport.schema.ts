@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { REPORT_STATUS, REPORT_TYPES } from "@/lib/constants";
+import { REPORT_STATUS, REPORT_TYPES } from "@/lib/shared/constants";
 import { PROJECT_REPORT_NOTE_MAX_LENGTH } from "../constants";
 
 export const projectReportSchema = z.object({

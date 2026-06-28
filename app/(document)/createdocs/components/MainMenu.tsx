@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FileText, FileBarChart, Building2, UploadCloud } from "lucide-react";
 import { useCreateDocsContext } from "../contexts";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 export const MainMenu = (): React.JSX.Element => {
     const {
@@ -148,4 +148,3 @@ export const MainMenu = (): React.JSX.Element => {
         </div>
     );
 };
-

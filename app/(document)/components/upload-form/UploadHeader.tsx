@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, UploadCloud, FileText } from "lucide-react";
-import { FILE_UPLOAD, ROUTES } from "@/lib/constants";
+import { FILE_UPLOAD, ROUTES } from "@/lib/shared/constants";
 
 const ACCEPTED_FILE_TYPES_LABEL = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ");
 

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { AttachmentList } from "@/components/ui";
 import type { AdminDocumentFile } from "@/type/models";
-import { truncateFileName, cn } from "@/lib/utils";
+import { truncateFileName, cn } from "@/lib/shared/utils";
 import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 import {
     File,
@@ -148,4 +148,3 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
         </React.Fragment>
     );
 }
-

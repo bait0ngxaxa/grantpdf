@@ -7,9 +7,9 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { X, User, Mail, BadgeCheck } from "lucide-react";
-import { cn, getAvatarInitial } from "@/lib/utils";
-import type { Session } from "@/lib/authTypes";
-import { ROLES } from "@/lib/constants";
+import { cn, getAvatarInitial } from "@/lib/shared/utils";
+import type { Session } from "@/lib/server/auth/types";
+import { ROLES } from "@/lib/shared/constants";
 import { DeviceSessionsPanel } from "./DeviceSessionsPanel";
 
 interface ProfileModalProps {

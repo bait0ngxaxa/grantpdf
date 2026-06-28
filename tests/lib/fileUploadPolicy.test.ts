@@ -3,7 +3,7 @@ import {
     FILE_UPLOAD,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
-} from "@/lib/constants";
+} from "@/lib/shared/constants";
 
 describe("file upload policy", () => {
     it("caps supported file uploads at 15 MB", () => {

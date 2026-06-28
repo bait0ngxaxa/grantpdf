@@ -28,7 +28,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { sanitizeRichTextHtml } from "@/lib/security/htmlSanitizer";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 type RichTextNode = {
     type?: string;

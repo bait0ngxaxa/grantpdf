@@ -2,7 +2,7 @@ import React from "react";
 import { ChevronDown, FileText, FolderTree } from "lucide-react";
 import { ProgramIdentityIcon } from "@/components/ProgramIdentityIcon";
 import { getProgramAccent } from "@/components/programAccent";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 export interface ProgramGroupStat {
     label: string;

@@ -5,8 +5,8 @@ import { AdminSidebar } from "./components/AdminSidebar";
 import { AdminTopBar } from "./components/AdminTopBar";
 import { AdminDashboardProvider, useAdminDashboardContext } from "./contexts";
 import type { AdminStatsResult } from "@/lib/services/adminService";
-import type { Session } from "@/lib/authTypes";
-import { cn } from "@/lib/utils";
+import type { Session } from "@/lib/server/auth/types";
+import { cn } from "@/lib/shared/utils";
 
 interface AdminDashboardWrapperProps {
     children: React.ReactNode;
@@ -56,4 +56,3 @@ function AdminDashboardShell({
         </div>
     );
 }
-

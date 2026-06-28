@@ -5,7 +5,7 @@ import {
     FILE_UPLOAD,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
-} from "@/lib/constants";
+} from "@/lib/shared/constants";
 import { type FileHandlersProps } from "./types";
 
 const ACCEPTED_FILE_TYPES_LABEL = FILE_UPLOAD.ALLOWED_EXTENSIONS.join(", ");

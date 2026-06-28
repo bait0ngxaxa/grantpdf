@@ -9,7 +9,7 @@ import {
     API_ROUTES,
     PAGINATION,
     type UserRole,
-} from "@/lib/constants";
+} from "@/lib/shared/constants";
 import type { UserApiData } from "@/type";
 import { toast } from "sonner";
 

@@ -17,13 +17,13 @@ import {
     getFileExtension,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
-} from "@/lib/constants";
+} from "@/lib/shared/constants";
 import {
     createUploadIdempotencyKey,
     fetchWithUploadRetry,
 } from "@/lib/upload/clientRequest";
 import { PROJECT_REPORT_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
-import { getReportStatusColor, getReportTypeColor } from "@/lib/utils";
+import { getReportStatusColor, getReportTypeColor } from "@/lib/shared/utils";
 import type { Project, ProjectReport } from "@/type";
 import {
     CheckCircle2,

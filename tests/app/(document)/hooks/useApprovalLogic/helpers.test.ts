@@ -4,7 +4,7 @@ import {
     validateAttachments,
     validateSignature,
 } from "@/app/(document)/hooks/useApprovalLogic/helpers";
-import { SIGNATURE_UPLOAD } from "@/lib/constants";
+import { SIGNATURE_UPLOAD } from "@/lib/shared/constants";
 
 const SIGNATURE_MAX_SIZE_PLUS_ONE_BYTE =
     SIGNATURE_UPLOAD.MAX_SIZE_MB * 1024 * 1024 + 1;

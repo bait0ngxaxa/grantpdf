@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         project: {
             count: vi.fn(),
@@ -12,7 +12,7 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import { getAllProjectsPaginated } from "@/lib/services/projectService/adminProjectQueries";
 
 const mockedProjectCount = vi.mocked(prisma.project.count);

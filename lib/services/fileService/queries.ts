@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import type { AdminDocumentFile } from "@/type/models";
 import type { RawFile, FileForDeletion } from "./types";

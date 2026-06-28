@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         auditLog: {
             deleteMany: vi.fn(),
@@ -8,7 +8,7 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import {
     AUDIT_LOG_RETENTION_DAYS,
     getAuditLogRetentionCutoffDate,

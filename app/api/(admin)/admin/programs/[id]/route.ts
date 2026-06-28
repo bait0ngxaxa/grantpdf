@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
-import { updateProgram } from "@/lib/services";
+import { isGuardError, requireAdminSession } from "@/lib/server/auth/guards";
+import { updateProgram } from "@/lib/services/programService";
 import { updateProgramSchema } from "@/lib/validation/schemas";
-import { parsePositiveIntId } from "@/lib/id";
-import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { applyAdminMutationRateLimit } from "@/lib/server/rate-limit/adminMutationRateLimit";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {
     publicErrorResponse,

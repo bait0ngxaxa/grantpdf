@@ -14,11 +14,11 @@ import {
     ShieldCheck,
     User,
 } from "lucide-react";
-import { ROUTES, ROLES } from "@/lib/constants";
-import { signOutWithSessionRevoke } from "@/lib/authClient";
+import { ROUTES, ROLES } from "@/lib/shared/constants";
+import { signOutWithSessionRevoke } from "@/lib/client/auth";
 import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
-import { cn, getAvatarInitial } from "@/lib/utils";
+import { cn, getAvatarInitial } from "@/lib/shared/utils";
 import { NotificationBell } from "@/components/notifications";
 
 type TopBarMenuItem = {

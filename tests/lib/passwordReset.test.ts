@@ -4,7 +4,7 @@ import {
     createPasswordResetToken,
     resolvePasswordResetBaseUrl,
     verifyPasswordResetToken,
-} from "@/lib/passwordReset";
+} from "@/lib/server/auth/passwordReset";
 
 const originalPassResetSecret = process.env.PASSRESET_TOKEN_SECRET;
 const originalAuthUrl = process.env.AUTH_URL;

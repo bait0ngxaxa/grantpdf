@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { type ProjectListReturn } from "./types";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 import useSWR from "swr";
 import type { ProjectSummariesApiResponse } from "@/type";
 

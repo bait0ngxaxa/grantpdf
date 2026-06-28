@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Input, Button } from "@/components/ui";
 import { toast } from "sonner";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {

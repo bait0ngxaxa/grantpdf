@@ -1,4 +1,12 @@
-import type { AdminProject, AdminDocumentFile } from "@/type/models";
+import type {
+    AdminDocumentFile,
+    AdminProject,
+    AttachmentFile,
+} from "@/type/models";
+import {
+    sanitizeAdminDocumentFile,
+    sanitizeAttachmentFiles,
+} from "@/lib/domain/files";
 import type {
     RawProject,
     RawFile,
@@ -8,16 +16,8 @@ import type {
 
 export function sanitizeAttachments(
     attachments: RawAttachment[] | undefined,
-): AdminDocumentFile["attachmentFiles"] {
-    return (
-        attachments?.map((attachment) => ({
-            id: attachment.id.toString(),
-            fileName: attachment.fileName,
-            filePath: attachment.filePath ?? undefined,
-            fileSize: attachment.fileSize,
-            mimeType: attachment.mimeType,
-        })) || []
-    );
+): AttachmentFile[] {
+    return sanitizeAttachmentFiles(attachments);
 }
 
 export function sanitizeFiles(
@@ -25,28 +25,9 @@ export function sanitizeFiles(
     userName: string,
     userEmail: string,
 ): AdminDocumentFile[] {
-    return files.map((file) => {
-        const fileOwnerName = file.user?.name || userName;
-        const fileOwnerEmail = file.user?.email || userEmail;
-
-        return {
-            id: file.id.toString(),
-            userId: file.userId.toString(),
-            originalFileName: file.originalFileName,
-            storagePath: file.storagePath,
-            fileExtension: file.fileExtension,
-            downloadStatus: file.downloadStatus || "pending",
-            downloadedAt: file.downloadedAt?.toISOString(),
-            created_at: file.created_at.toISOString(),
-            updated_at: file.updated_at.toISOString(),
-            fileName: file.originalFileName,
-            createdAt: file.created_at.toISOString(),
-            lastModified: file.updated_at.toISOString(),
-            userName: fileOwnerName,
-            userEmail: fileOwnerEmail,
-            attachmentFiles: sanitizeAttachments(file.attachmentFiles),
-        };
-    });
+    return files.map((file) =>
+        sanitizeAdminDocumentFile(file, { userName, userEmail }),
+    );
 }
 
 export function sanitizeProjects(projects: RawProject[]): AdminProject[] {
@@ -86,23 +67,7 @@ export function sanitizeProjects(projects: RawProject[]): AdminProject[] {
 }
 
 export function sanitizeOrphanFiles(files: RawFile[]): AdminDocumentFile[] {
-    return files.map((file) => ({
-        id: file.id.toString(),
-        userId: file.userId.toString(),
-        originalFileName: file.originalFileName,
-        storagePath: file.storagePath,
-        fileExtension: file.fileExtension,
-        downloadStatus: file.downloadStatus || "pending",
-        downloadedAt: file.downloadedAt?.toISOString(),
-        created_at: file.created_at.toISOString(),
-        updated_at: file.updated_at.toISOString(),
-        fileName: file.originalFileName,
-        createdAt: file.created_at.toISOString(),
-        lastModified: file.updated_at.toISOString(),
-        userName: file.user?.name || "Unknown User",
-        userEmail: file.user?.email || "Unknown Email",
-        attachmentFiles: sanitizeAttachments(file.attachmentFiles),
-    }));
+    return files.map((file) => sanitizeAdminDocumentFile(file));
 }
 
 export function collectAttachmentPaths(

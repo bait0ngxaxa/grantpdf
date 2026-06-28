@@ -1,7 +1,7 @@
 "use client";
 
 import { type ChangeEvent, type FormEvent } from "react";
-import { type Session } from "@/lib/authTypes";
+import { type Session } from "@/lib/server/auth/types";
 
 // =====================================================
 // Config Types

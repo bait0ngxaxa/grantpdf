@@ -1,21 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, PUT } from "@/app/api/(admin)/admin/users/[id]/route";
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/userService", () => ({
     updateUserWithAudit: vi.fn(),
     deleteUserWithAudit: vi.fn(),
 }));
 
-vi.mock("@/lib/auth-helpers", () => ({
+vi.mock("@/lib/server/auth/guards", () => ({
     requireAdminSession: vi.fn(),
     isGuardError: vi.fn(),
 }));
 
-import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
+import { isGuardError, requireAdminSession } from "@/lib/server/auth/guards";
 import {
     deleteUserWithAudit,
     updateUserWithAudit,
-} from "@/lib/services";
+} from "@/lib/services/userService";
 
 const mockedRequireAdminSession = vi.mocked(requireAdminSession);
 const mockedIsGuardError = vi.mocked(isGuardError);

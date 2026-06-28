@@ -17,7 +17,7 @@ vi.mock("@/lib/document", () => ({
     ),
 }));
 
-vi.mock("@/lib/ratelimit", () => ({
+vi.mock("@/lib/server/rate-limit/rateLimit", () => ({
     applyRateLimit: vi.fn(() => ({
         success: true,
         remaining: 10,
@@ -26,11 +26,11 @@ vi.mock("@/lib/ratelimit", () => ({
     })),
 }));
 
-vi.mock("@/lib/auditLog", () => ({
+vi.mock("@/lib/server/audit/auditLog", () => ({
     logAudit: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/documentIdempotencyService", () => ({
     normalizeIdempotencyKey: vi.fn((key: string) => key),
     startDocumentIdempotency: vi.fn(),
     completeDocumentIdempotency: vi.fn(),
@@ -61,7 +61,7 @@ import {
     startDocumentIdempotency,
     completeDocumentIdempotency,
     failDocumentIdempotency,
-} from "@/lib/services";
+} from "@/lib/services/documentIdempotencyService";
 import { handleTorGeneration } from "@/lib/document/handlers";
 
 const mockedValidateSession = vi.mocked(validateSession);

@@ -4,11 +4,11 @@ vi.mock("next/headers", () => ({
     cookies: vi.fn(),
 }));
 
-vi.mock("@/lib/accessToken", () => ({
+vi.mock("@/lib/server/auth/accessToken", () => ({
     verifyAccessToken: vi.fn(),
 }));
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         authSession: {
             findUnique: vi.fn(),
@@ -22,10 +22,10 @@ vi.mock("@/lib/services/sessionCacheService", () => ({
 }));
 
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma";
-import { verifyAccessToken } from "@/lib/accessToken";
-import { SESSION } from "@/lib/constants";
-import { getGrantSession } from "@/lib/grantAuth";
+import { prisma } from "@/lib/server/db";
+import { verifyAccessToken } from "@/lib/server/auth/accessToken";
+import { SESSION } from "@/lib/shared/constants";
+import { getGrantSession } from "@/lib/server/auth/grantSession";
 import {
     getCachedGrantSession,
     setCachedGrantSession,

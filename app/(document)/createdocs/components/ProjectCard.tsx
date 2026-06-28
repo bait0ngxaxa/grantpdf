@@ -9,7 +9,7 @@ import {
     Check,
     ChevronRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 interface ProjectCardProps {
     project: ProjectSummary;
@@ -98,4 +98,3 @@ export const ProjectCard = ({
         </button>
     );
 };
-

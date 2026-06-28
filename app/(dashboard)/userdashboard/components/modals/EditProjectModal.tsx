@@ -17,7 +17,7 @@ import {
 } from "@/lib/validation/constants";
 import { Pencil, Loader2 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
-import { hasProjectDraftChanges } from "@/lib/projectDraftChanges";
+import { hasProjectDraftChanges } from "@/lib/domain/projects/draftChanges";
 
 export const EditProjectModal: React.FC = () => {
     const {

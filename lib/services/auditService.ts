@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import { purgeExpiredAuditLogs } from "@/lib/services/auditRetentionService";
 import type { Prisma } from "@prisma/client";
 import type { AuditLogsApiResponse, AuditLogApiData } from "@/type/api";

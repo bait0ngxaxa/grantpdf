@@ -1,22 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/auth-helpers", () => ({
+vi.mock("@/lib/server/auth/guards", () => ({
     requireAdminSession: vi.fn(),
     isGuardError: vi.fn(),
 }));
 
-vi.mock("@/lib/ratelimit", () => ({
+vi.mock("@/lib/server/rate-limit/rateLimit", () => ({
     applyRateLimit: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/programService", () => ({
     getAllPrograms: vi.fn(),
     createProgram: vi.fn(),
 }));
 
-import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
-import { applyRateLimit } from "@/lib/ratelimit";
-import { createProgram } from "@/lib/services";
+import { isGuardError, requireAdminSession } from "@/lib/server/auth/guards";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
+import { createProgram } from "@/lib/services/programService";
 import { POST } from "@/app/api/(admin)/admin/programs/route";
 
 const mockedRequireAdminSession = vi.mocked(requireAdminSession);

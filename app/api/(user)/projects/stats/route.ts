@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { getUserProjectStats } from "@/lib/services";
-import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError } from "@/lib/apiError";
+import { auth } from "@/lib/server/auth/session";
+import { getUserProjectStats } from "@/lib/services/projectService";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { publicApiError } from "@/lib/shared/http/apiError";
 import {
     publicErrorResponse,
     unauthorizedResponse,

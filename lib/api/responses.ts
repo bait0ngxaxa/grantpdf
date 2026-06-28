@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { toPublicApiError } from "@/lib/apiError";
+import { toPublicApiError } from "@/lib/shared/http/apiError";
 
 interface RateLimitedResponseInput {
     retryAfter?: number;

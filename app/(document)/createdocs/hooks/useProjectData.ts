@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import type { ProjectSummariesApiResponse, ProjectSummary } from "@/type";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 
 export interface UseProjectDataReturn {
     projects: ProjectSummary[];

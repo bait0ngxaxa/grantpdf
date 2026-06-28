@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 
 export function getCurrentBuddhistYear(): number {
     const bangkokNow = new Date(

@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { PAGINATION } from "@/lib/constants";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
-import { parsePositiveInt } from "@/lib/queryParams";
-import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
+import { PAGINATION } from "@/lib/shared/constants";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
+import { parsePositiveInt } from "@/lib/shared/http/queryParams";
+import { applyAdminMutationRateLimit } from "@/lib/server/rate-limit/adminMutationRateLimit";
 import {
     getProjectReportsForAdmin,
     updateProjectReportStatusWithAudit,
-} from "@/lib/services";
-import { parsePositiveIntId } from "@/lib/id";
+} from "@/lib/services/projectReportService";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { updateProjectReportStatusSchema } from "@/lib/validation/schemas";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import { buildAuditContext } from "@/lib/api/requestContext";

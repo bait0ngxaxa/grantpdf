@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import bcrypt from "bcryptjs";
-import { SESSION } from "@/lib/constants";
+import { SESSION } from "@/lib/shared/constants";
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         user: {
             findUnique: vi.fn(),
@@ -16,17 +16,17 @@ vi.mock("bcryptjs", () => ({
     },
 }));
 
-vi.mock("@/lib/auditLog", () => ({
+vi.mock("@/lib/server/audit/auditLog", () => ({
     logAudit: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/authSessionService", () => ({
     createRefreshSession: vi.fn(),
 }));
 
-vi.mock("@/lib/ratelimit", async () => {
-    const actual = await vi.importActual<typeof import("@/lib/ratelimit")>(
-        "@/lib/ratelimit"
+vi.mock("@/lib/server/rate-limit/rateLimit", async () => {
+    const actual = await vi.importActual<typeof import("@/lib/server/rate-limit/rateLimit")>(
+        "@/lib/server/rate-limit/rateLimit"
     );
 
     return {
@@ -36,10 +36,10 @@ vi.mock("@/lib/ratelimit", async () => {
     };
 });
 
-import { prisma } from "@/lib/prisma";
-import { logAudit } from "@/lib/auditLog";
-import { createRefreshSession } from "@/lib/services";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { prisma } from "@/lib/server/db";
+import { logAudit } from "@/lib/server/audit/auditLog";
+import { createRefreshSession } from "@/lib/services/authSessionService";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { POST } from "@/app/api/(auth)/auth/session/signin/route";
 
 const mockedFindUnique = vi.mocked(prisma.user.findUnique);

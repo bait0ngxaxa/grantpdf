@@ -1,6 +1,6 @@
 import React from "react";
-import { cn } from "@/lib/utils";
-import { STATUS_CONFIG, STATUS_ORDER } from "@/lib/constants";
+import { cn } from "@/lib/shared/utils";
+import { STATUS_CONFIG, STATUS_ORDER } from "@/lib/shared/constants";
 
 interface StatusCount {
     pending: number;

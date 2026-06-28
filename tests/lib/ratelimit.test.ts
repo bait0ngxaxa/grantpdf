@@ -5,7 +5,7 @@ import {
     resetRateLimit,
     getRateLimitStats,
     getClientIP,
-} from "@/lib/ratelimit";
+} from "@/lib/server/rate-limit/rateLimit";
 
 async function exhaustLimit(
     key: string,

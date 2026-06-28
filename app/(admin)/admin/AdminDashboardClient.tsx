@@ -7,7 +7,7 @@ import { DashboardOverview } from "./components/dashboard/DashboardOverview";
 import { useAdminUI } from "./contexts/AdminUIContext";
 import { useAdminDataData } from "./contexts/AdminDataContext";
 import { DashboardSkeleton } from "@/components/ui";
-import { STATUS_FILTER } from "@/lib/constants";
+import { STATUS_FILTER } from "@/lib/shared/constants";
 import {
     NOTIFICATION_ACTION_QUERY,
     parseNotificationProjectId,

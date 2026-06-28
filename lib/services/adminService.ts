@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { PROJECT_STATUS } from "@/lib/constants";
+import { prisma } from "@/lib/server/db";
+import { PROJECT_STATUS } from "@/lib/shared/constants";
 import { getJsonCache, setJsonCache } from "@/lib/services/redisJsonCache";
 import {
     ADMIN_DASHBOARD_STATS_CACHE_KEY,

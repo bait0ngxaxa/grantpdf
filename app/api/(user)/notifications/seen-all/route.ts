@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { RATE_LIMIT } from "@/lib/constants";
-import { parsePositiveIntId } from "@/lib/id";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { auth } from "@/lib/server/auth/session";
+import { RATE_LIMIT } from "@/lib/shared/constants";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { notificationAudienceQuerySchema } from "@/lib/validation/schemas";
-import { markAllNotificationsSeen } from "@/lib/services";
+import { markAllNotificationsSeen } from "@/lib/services/notificationService";
 import { getFirstValidationMessage } from "@/lib/api/body";
 import {
     publicErrorResponse,

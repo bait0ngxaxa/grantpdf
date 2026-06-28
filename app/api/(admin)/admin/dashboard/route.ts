@@ -1,8 +1,8 @@
 //เส้นดึงข้อมูลจาก table userFile มาแสดงผล dashboard admin
 
 import { NextResponse } from "next/server";
-import { getAllFilesForAdmin } from "@/lib/services";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
+import { getAllFilesForAdmin } from "@/lib/services/fileService";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
 
 export async function GET(): Promise<NextResponse> {
     try {

@@ -1,18 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
-import { RATE_LIMIT, ROLES } from "@/lib/constants";
-import { logAudit } from "@/lib/auditLog";
+import { prisma } from "@/lib/server/db";
+import { RATE_LIMIT, ROLES } from "@/lib/shared/constants";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     setAccessTokenCookie,
     setRefreshTokenCookie,
-} from "@/lib/authSessionCookies";
-import { createRefreshSession } from "@/lib/services";
+} from "@/lib/server/auth/sessionCookies";
+import { createRefreshSession } from "@/lib/services/authSessionService";
 import { signinSchema } from "@/lib/validation/schemas";
 import {
     applyRateLimit,
     getClientIP,
-} from "@/lib/ratelimit";
+} from "@/lib/server/rate-limit/rateLimit";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {
     rateLimitExceededResponse,

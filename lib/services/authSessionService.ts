@@ -1,11 +1,11 @@
 import { randomBytes, createHash } from "crypto";
-import { prisma } from "@/lib/prisma";
-import { SESSION } from "@/lib/constants";
+import { prisma } from "@/lib/server/db";
+import { SESSION } from "@/lib/shared/constants";
 import {
     createAccessToken,
     verifyAccessToken,
     type AccessTokenPayload,
-} from "@/lib/accessToken";
+} from "@/lib/server/auth/accessToken";
 import {
     deleteFamilySessionCache,
     deleteSessionCache,

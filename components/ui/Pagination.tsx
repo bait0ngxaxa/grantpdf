@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 interface PaginationProps {
     currentPage: number;
@@ -121,4 +121,3 @@ export const Pagination: React.FC<PaginationProps> = ({
         </div>
     );
 };
-

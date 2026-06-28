@@ -14,8 +14,8 @@ import {
   UserCog,
   X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { STATUS_ORDER } from "@/lib/constants";
+import { cn } from "@/lib/shared/utils";
+import { STATUS_ORDER } from "@/lib/shared/constants";
 import { PROJECT_STATUS_NOTE_MAX_LENGTH } from "@/lib/validation/constants";
 import { getProgramAccent } from "@/components/programAccent";
 

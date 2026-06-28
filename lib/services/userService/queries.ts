@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { ROLES } from "@/lib/constants";
+import { prisma } from "@/lib/server/db";
+import { ROLES } from "@/lib/shared/constants";
 import type { SafeUser } from "./types";
 
 export async function getAllUsers(): Promise<SafeUser[]> {

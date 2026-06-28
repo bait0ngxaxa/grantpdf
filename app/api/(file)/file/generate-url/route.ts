@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { generateSignedUrl } from "@/lib/signedUrl";
-import { parsePositiveIntId } from "@/lib/id";
+import { prisma } from "@/lib/server/db";
+import { auth } from "@/lib/server/auth/session";
+import { generateSignedUrl } from "@/lib/server/storage/signedUrl";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { generateSignedUrlSchema } from "@/lib/validation/schemas";
-import { ROLES } from "@/lib/constants";
+import { ROLES } from "@/lib/shared/constants";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {
     publicErrorResponse,

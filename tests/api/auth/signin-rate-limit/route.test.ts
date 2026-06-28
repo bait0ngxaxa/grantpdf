@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { POST } from "@/app/api/(auth)/auth/signin-rate-limit/route";
-import { RATE_LIMIT } from "@/lib/constants";
-import { createRateLimitKey, rateLimit, resetRateLimit } from "@/lib/ratelimit";
+import { RATE_LIMIT } from "@/lib/shared/constants";
+import { createRateLimitKey, rateLimit, resetRateLimit } from "@/lib/server/rate-limit/rateLimit";
 
 function buildRequest(email: string, ip: string = "203.0.113.10"): Request {
     return new Request("http://localhost/api/auth/signin-rate-limit", {
@@ -87,4 +87,3 @@ describe("signin-rate-limit route", () => {
         expect(freshResponse.status).toBe(200);
     });
 });
-

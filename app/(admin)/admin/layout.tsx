@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/server/auth/session";
 import { getAdminDashboardStats } from "@/lib/services/adminService";
 import { redirect } from "next/navigation";
 import { AdminDashboardWrapper } from "./AdminDashboardWrapper";
-import { isAdmin } from "@/lib/auth-helpers";
-import { ROUTES } from "@/lib/constants";
+import { isAdmin } from "@/lib/server/auth/guards";
+import { ROUTES } from "@/lib/shared/constants";
 import { AuthRefreshProvider, SWRProvider } from "@/components/providers";
 
 export const metadata: Metadata = {
@@ -48,4 +48,3 @@ export default async function AdminDashboardLayout({
         </SWRProvider>
     );
 }
-

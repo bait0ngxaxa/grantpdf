@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/prisma", () => ({
+vi.mock("@/lib/server/db", () => ({
     prisma: {
         user: {
             count: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import { getAdminDashboardStats } from "@/lib/services/adminService";
 
 const mockedUserCount = vi.mocked(prisma.user.count);

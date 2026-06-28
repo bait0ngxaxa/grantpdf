@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import SessionRefreshClient from "@/app/(auth)/session-refresh/SessionRefreshClient";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 
 const replaceMock = vi.fn();
 const refreshMock = vi.fn();

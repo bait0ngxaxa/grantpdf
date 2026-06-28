@@ -8,7 +8,7 @@ import {
     type LoadingModalState,
 } from "./GlobalModalContext";
 import { SuccessModal, Skeleton } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 
 import {
     Dialog,
@@ -208,4 +208,3 @@ export function GlobalModalProvider({
         </GlobalModalContext.Provider>
     );
 }
-

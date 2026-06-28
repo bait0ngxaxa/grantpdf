@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/server/auth/session";
 import { type Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import HomeNavbar from "@/components/home/HomeNavbar";
 import HeroSection from "@/components/home/HeroSection";
 import FeatureGrid from "@/components/home/TemplateGrid";
-import { ROUTES, SESSION } from "@/lib/constants";
+import { ROUTES, SESSION } from "@/lib/shared/constants";
 
 export const metadata: Metadata = {
   title: "E-GRANT ONLINE RHHSDI - ระบบสร้างและจัดการเอกสารอัตโนมัติ",

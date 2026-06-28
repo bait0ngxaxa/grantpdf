@@ -1,14 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/server/auth/session";
 import { updateProjectSchema } from "@/lib/validation/schemas";
-import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError } from "@/lib/apiError";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { publicApiError } from "@/lib/shared/http/apiError";
 import {
     updateProjectWithAudit,
     deleteProjectWithAudit,
-} from "@/lib/services";
-import { applyRateLimit } from "@/lib/ratelimit";
-import { RATE_LIMIT } from "@/lib/constants";
+} from "@/lib/services/projectService";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
+import { RATE_LIMIT } from "@/lib/shared/constants";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {

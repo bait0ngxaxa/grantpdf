@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth";
-import { ROUTES } from "@/lib/constants";
+import { auth } from "@/lib/server/auth/session";
+import { ROUTES } from "@/lib/shared/constants";
 import { redirect } from "next/navigation";
 import {
     AuthRefreshProvider,

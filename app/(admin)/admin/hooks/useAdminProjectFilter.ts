@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { PROJECT_STATUS } from "@/type/models";
-import { FILE_TYPES, STATUS_FILTER } from "@/lib/constants";
-import { parseProjectSearchTerm } from "@/lib/projectSearch";
+import { FILE_TYPES, STATUS_FILTER } from "@/lib/shared/constants";
+import { parseProjectSearchTerm } from "@/lib/domain/projects/search";
 import { type AdminProject, type AdminDocumentFile } from "@/type/models";
 
 interface UseAdminProjectFilterProps {

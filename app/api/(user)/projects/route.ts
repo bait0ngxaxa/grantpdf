@@ -1,17 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/server/auth/session";
 import {
     getProjectSummariesByUserId,
     getProjectsByUserIdPaginated,
     createProjectWithAudit,
-    programExists,
-} from "@/lib/services";
-import { PAGINATION, RATE_LIMIT } from "@/lib/constants";
-import { parsePositiveInt } from "@/lib/queryParams";
+} from "@/lib/services/projectService";
+import { programExists } from "@/lib/services/programService";
+import { PAGINATION, RATE_LIMIT } from "@/lib/shared/constants";
+import { parsePositiveInt } from "@/lib/shared/http/queryParams";
 import { createProjectSchema } from "@/lib/validation/schemas";
-import { parsePositiveIntId } from "@/lib/id";
-import { publicApiError } from "@/lib/apiError";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { publicApiError } from "@/lib/shared/http/apiError";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {

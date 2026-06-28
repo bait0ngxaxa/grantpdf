@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getAvatarInitial, getStatusColor, truncateFileName } from "@/lib/utils";
+import { getAvatarInitial, getStatusColor, truncateFileName } from "@/lib/shared/utils";
 import { PROJECT_STATUS } from "@/type/models";
 
 describe("getStatusColor", () => {

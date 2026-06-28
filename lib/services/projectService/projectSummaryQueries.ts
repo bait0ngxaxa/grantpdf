@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/server/db";
 import type { ProjectSummary } from "@/type/models";
 import { buildUserProjectsAccessWhere } from "./projectAccess";
 

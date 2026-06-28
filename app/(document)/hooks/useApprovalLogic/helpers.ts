@@ -1,4 +1,4 @@
-import { SIGNATURE_UPLOAD } from "@/lib/constants";
+import { SIGNATURE_UPLOAD } from "@/lib/shared/constants";
 
 /**
  * Convert data URL (base64) to File object

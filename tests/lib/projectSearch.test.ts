@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseProjectSearchTerm } from "@/lib/projectSearch";
+import { parseProjectSearchTerm } from "@/lib/domain/projects/search";
 
 describe("parseProjectSearchTerm", () => {
     it("parses numeric search as an exact project id candidate", () => {

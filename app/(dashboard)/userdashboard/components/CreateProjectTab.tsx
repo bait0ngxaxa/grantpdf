@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import { Plus, Building2, FileText, Upload } from "lucide-react";
 
 import { useUserDashboardContext } from "../contexts";

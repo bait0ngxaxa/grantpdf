@@ -1,21 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@/lib/server/auth/session", () => ({
     auth: vi.fn(),
 }));
 
-vi.mock("@/lib/ratelimit", () => ({
+vi.mock("@/lib/server/rate-limit/rateLimit", () => ({
     applyRateLimit: vi.fn(),
 }));
 
-vi.mock("@/lib/services", () => ({
+vi.mock("@/lib/services/projectService", () => ({
     updateProjectWithAudit: vi.fn(),
     deleteProjectWithAudit: vi.fn(),
 }));
 
-import { auth } from "@/lib/auth";
-import { applyRateLimit } from "@/lib/ratelimit";
-import { deleteProjectWithAudit } from "@/lib/services";
+import { auth } from "@/lib/server/auth/session";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
+import { deleteProjectWithAudit } from "@/lib/services/projectService";
 import { DELETE } from "@/app/api/(user)/projects/[id]/route";
 
 const mockedAuth = vi.mocked(auth);

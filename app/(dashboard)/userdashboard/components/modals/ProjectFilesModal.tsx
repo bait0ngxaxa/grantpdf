@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { FileListSkeleton } from "@/components/ui/FileListSkeleton";
 import { FileText, FolderOpen, X } from "lucide-react";
 import type { Project } from "@/type";
-import { API_ROUTES, ROUTES } from "@/lib/constants";
+import { API_ROUTES, ROUTES } from "@/lib/shared/constants";
 import type { AdminDocumentFile } from "@/type/models";
 import FileItem from "../FileItem";
-import { cn, getStatusColor } from "@/lib/utils";
+import { cn, getStatusColor } from "@/lib/shared/utils";
 import {
   fetchAllProjectFiles,
   type ProjectFilesResponse,
-} from "@/lib/projectFilesClient";
+} from "@/lib/client/projects/filesClient";
 
 interface ProjectFilesModalProps {
   isOpen: boolean;

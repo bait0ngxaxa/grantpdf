@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { parsePositiveIntId } from "@/lib/id";
+import { auth } from "@/lib/server/auth/session";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { notificationListQuerySchema } from "@/lib/validation/schemas";
-import { getNotificationsForUser } from "@/lib/services";
+import { getNotificationsForUser } from "@/lib/services/notificationService";
 import { getFirstValidationMessage } from "@/lib/api/body";
 import {
     publicErrorResponse,

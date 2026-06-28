@@ -6,7 +6,7 @@ import {
     getRelativeStoragePath,
     ALLOWED_MIME_TYPES,
     MIME_TYPES,
-} from "@/lib/fileStorage";
+} from "@/lib/server/storage";
 
 // Mock file-type module
 vi.mock("file-type", () => ({

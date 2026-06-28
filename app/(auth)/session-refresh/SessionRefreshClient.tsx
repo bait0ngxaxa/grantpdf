@@ -3,13 +3,13 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardSkeleton } from "@/components/ui";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import {
     createRefreshOwnerId,
     releaseRefreshLock,
     requestGrantSessionRefresh,
     tryAcquireRefreshLock,
-} from "@/lib/authRefreshCoordinator";
+} from "@/lib/client/auth/refreshCoordinator";
 
 interface SessionRefreshClientProps {
     callbackUrl?: string;

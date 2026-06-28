@@ -1,4 +1,4 @@
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 import { useAdminDashboardContext } from "../contexts";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type {

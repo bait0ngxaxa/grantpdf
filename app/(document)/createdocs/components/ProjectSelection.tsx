@@ -14,11 +14,11 @@ import {
     fileStatIcon,
     ProgramGroupHeader,
 } from "@/components/ProgramGroupHeader";
-import { PAGINATION, ROUTES } from "@/lib/constants";
+import { PAGINATION, ROUTES } from "@/lib/shared/constants";
 import { useCreateDocsContext } from "../contexts";
-import { groupProjectsByProgram } from "@/lib/programGrouping";
-import { paginateGroupItems } from "@/lib/programGroupPagination";
-import { cn } from "@/lib/utils";
+import { groupProjectsByProgram } from "@/lib/domain/projects/programGrouping";
+import { paginateGroupItems } from "@/lib/domain/projects/groupPagination";
+import { cn } from "@/lib/shared/utils";
 
 export const ProjectSelection = (): React.JSX.Element => {
     const { projects, isLoading, error } = useCreateDocsContext();

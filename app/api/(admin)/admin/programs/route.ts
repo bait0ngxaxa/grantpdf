@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { isGuardError, requireAdminSession } from "@/lib/auth-helpers";
-import { getAllPrograms, createProgram } from "@/lib/services";
+import { isGuardError, requireAdminSession } from "@/lib/server/auth/guards";
+import { getAllPrograms, createProgram } from "@/lib/services/programService";
 import { createProgramSchema } from "@/lib/validation/schemas";
-import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
+import { applyAdminMutationRateLimit } from "@/lib/server/rate-limit/adminMutationRateLimit";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {
     publicErrorResponse,

@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/ratelimit", () => ({
+vi.mock("@/lib/server/rate-limit/rateLimit", () => ({
     applyRateLimit: vi.fn(),
 }));
 
-import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
-import { RATE_LIMIT } from "@/lib/constants";
-import { applyRateLimit } from "@/lib/ratelimit";
+import { applyAdminMutationRateLimit } from "@/lib/server/rate-limit/adminMutationRateLimit";
+import { RATE_LIMIT } from "@/lib/shared/constants";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 
 const mockedApplyRateLimit = vi.mocked(applyRateLimit);
 

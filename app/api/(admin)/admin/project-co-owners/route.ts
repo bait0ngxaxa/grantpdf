@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { logAudit } from "@/lib/auditLog";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
+import { logAudit } from "@/lib/server/audit/auditLog";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
 import { updateProjectCoOwnersSchema } from "@/lib/validation/schemas";
-import { getCoOwnerUserOptions, updateProjectCoOwners } from "@/lib/services";
-import { parsePositiveIntId } from "@/lib/id";
-import { applyAdminMutationRateLimit } from "@/lib/adminMutationRateLimit";
+import { updateProjectCoOwners } from "@/lib/services/projectService";
+import { getCoOwnerUserOptions } from "@/lib/services/userService";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { applyAdminMutationRateLimit } from "@/lib/server/rate-limit/adminMutationRateLimit";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {

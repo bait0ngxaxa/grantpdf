@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import type { AttachmentFile } from "@/type/models";
-import { truncateFileName, cn } from "@/lib/utils";
+import { truncateFileName, cn } from "@/lib/shared/utils";
 import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 import {
     FileText,

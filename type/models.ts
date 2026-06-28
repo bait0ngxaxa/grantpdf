@@ -125,5 +125,5 @@ export interface LatestProject {
 }
 
 // Re-export from SSOT (lib/constants.ts)
-export { PROJECT_STATUS } from "@/lib/constants";
-export type { ProjectStatus } from "@/lib/constants";
+export { PROJECT_STATUS } from "@/lib/shared/constants";
+export type { ProjectStatus } from "@/lib/shared/constants";

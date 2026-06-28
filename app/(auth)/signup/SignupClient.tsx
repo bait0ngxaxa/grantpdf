@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Input, Button } from "@/components/ui";
 import { toast } from "sonner";
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, X } from "lucide-react";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/shared/constants";
 import {
   AUTH_CARD_CLASS,
   AUTH_INPUT_CLASS,

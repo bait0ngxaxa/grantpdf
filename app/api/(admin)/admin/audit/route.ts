@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getAuditLogsPaginated } from "@/lib/services";
-import { parseActorUserId } from "@/lib/auditUtils";
-import { requireAdminSession, isGuardError } from "@/lib/auth-helpers";
-import { parsePositiveInt } from "@/lib/queryParams";
+import { getAuditLogsPaginated } from "@/lib/services/auditService";
+import { parseActorUserId } from "@/lib/server/audit/auditUtils";
+import { requireAdminSession, isGuardError } from "@/lib/server/auth/guards";
+import { parsePositiveInt } from "@/lib/shared/http/queryParams";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;

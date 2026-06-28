@@ -4,15 +4,15 @@ import {
     isSessionError,
     handleDocumentError,
 } from "@/lib/document";
-import { applyRateLimit } from "@/lib/ratelimit";
-import { IDEMPOTENCY_HEADERS, RATE_LIMIT } from "@/lib/constants";
-import { logAudit } from "@/lib/auditLog";
+import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
+import { IDEMPOTENCY_HEADERS, RATE_LIMIT } from "@/lib/shared/constants";
+import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     normalizeIdempotencyKey,
     startDocumentIdempotency,
     completeDocumentIdempotency,
     failDocumentIdempotency,
-} from "@/lib/services";
+} from "@/lib/services/documentIdempotencyService";
 import {
     handleTorGeneration,
     handleApprovalGeneration,

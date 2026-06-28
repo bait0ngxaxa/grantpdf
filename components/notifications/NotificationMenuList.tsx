@@ -4,7 +4,7 @@ import React from "react";
 import { Button, Skeleton } from "@/components/ui";
 import { NOTIFICATION_TYPE } from "@/lib/notifications/constants";
 import type { NotificationItem } from "@/lib/notifications/types";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/shared/utils";
 import {
     AlertCircle,
     Bell,

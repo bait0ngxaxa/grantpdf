@@ -1,4 +1,4 @@
-import { getRedisClient } from "@/lib/redis";
+import { getRedisClient } from "@/lib/server/db";
 
 type CacheValidator<T> = (value: unknown) => value is T;
 

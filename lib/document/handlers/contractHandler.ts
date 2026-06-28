@@ -10,7 +10,7 @@ import {
     buildSuccessResponse,
 } from "@/lib/document";
 import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
-import { formatNumericWithCommas } from "@/lib/utils";
+import { formatNumericWithCommas } from "@/lib/shared/utils";
 import { getNextContractNumber } from "./contractNumber";
 
 const AUTO_CONTRACT_TYPES = new Set(["ABS", "DMR", "SIP"]);

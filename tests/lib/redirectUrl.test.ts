@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRedirectUrl } from "@/lib/redirectUrl";
+import { buildRedirectUrl } from "@/lib/shared/routing/redirectUrl";
 
 function buildRequest(
     headers: Headers,

@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
-import { API_ROUTES } from "@/lib/constants";
+import { API_ROUTES } from "@/lib/shared/constants";
 import {
     clampNotificationFeedLimit,
     NOTIFICATION_FEED,
