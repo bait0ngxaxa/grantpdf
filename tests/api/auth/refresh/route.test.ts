@@ -29,7 +29,7 @@ function buildRequest(cookie?: string, ip?: string): Request {
         headers.set("cookie", cookie);
     }
     if (ip) {
-        headers.set("x-forwarded-for", ip);
+        headers.set("x-real-ip", ip);
     }
 
     return new Request("http://localhost/api/auth/refresh", {

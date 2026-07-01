@@ -173,7 +173,7 @@ describe("Rate Limiting - Security Tests", () => {
     });
 
     describe("getClientIP", () => {
-        it("should extract IP from x-forwarded-for header", () => {
+        it("should extract the rightmost IP from x-forwarded-for header", () => {
             const mockRequest = {
                 headers: {
                     get: vi.fn((header: string) => {
@@ -185,7 +185,7 @@ describe("Rate Limiting - Security Tests", () => {
                 },
             } as unknown as Request;
 
-            expect(getClientIP(mockRequest)).toBe("203.0.113.50");
+            expect(getClientIP(mockRequest)).toBe("70.41.3.18");
         });
 
         it("should extract IP from x-real-ip header", () => {
@@ -200,7 +200,7 @@ describe("Rate Limiting - Security Tests", () => {
             expect(getClientIP(mockRequest)).toBe("192.168.1.100");
         });
 
-        it("should extract IP from cf-connecting-ip header (Cloudflare)", () => {
+        it("should ignore cf-connecting-ip without nginx normalization", () => {
             const mockRequest = {
                 headers: {
                     get: vi.fn((header: string) =>
@@ -209,7 +209,7 @@ describe("Rate Limiting - Security Tests", () => {
                 },
             } as unknown as Request;
 
-            expect(getClientIP(mockRequest)).toBe("10.0.0.1");
+            expect(getClientIP(mockRequest)).toBe("unknown");
         });
 
         it('should return "unknown" when no IP headers present', () => {
@@ -222,7 +222,7 @@ describe("Rate Limiting - Security Tests", () => {
             expect(getClientIP(mockRequest)).toBe("unknown");
         });
 
-        it("should prioritize x-forwarded-for over other headers", () => {
+        it("should prioritize x-real-ip over forwarded headers", () => {
             const mockRequest = {
                 headers: {
                     get: vi.fn((header: string) => {
@@ -234,7 +234,21 @@ describe("Rate Limiting - Security Tests", () => {
                 },
             } as unknown as Request;
 
-            expect(getClientIP(mockRequest)).toBe("1.1.1.1");
+            expect(getClientIP(mockRequest)).toBe("2.2.2.2");
+        });
+
+        it("should reject invalid x-real-ip without falling back to x-forwarded-for", () => {
+            const mockRequest = {
+                headers: {
+                    get: vi.fn((header: string) => {
+                        if (header === "x-real-ip") return "not-an-ip";
+                        if (header === "x-forwarded-for") return "203.0.113.70";
+                        return null;
+                    }),
+                },
+            } as unknown as Request;
+
+            expect(getClientIP(mockRequest)).toBe("unknown");
         });
     });
 

@@ -13,7 +13,7 @@ function buildRequest(
 ): Request {
     const headers = new Headers();
     if (ip) {
-        headers.set("x-forwarded-for", ip);
+        headers.set("x-real-ip", ip);
     }
     headers.set("user-agent", userAgent);
     headers.set("accept-language", "th-TH");

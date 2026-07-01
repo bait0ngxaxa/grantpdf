@@ -33,3 +33,17 @@
 ## 6. Defensive Coding & Git
 
 - **Defensive:** Handle `null/undefined` explicitly, re-verify roles server-side on every mutation, use exponential backoff for retries.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues; external PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The repo uses the default canonical triage labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repo uses a single-context domain documentation layout. See `docs/agents/domain.md`.

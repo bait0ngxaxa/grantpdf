@@ -95,7 +95,7 @@ server {
     # Header มาตรฐานที่ส่งต่อไป Next.js
     proxy_http_version 1.1;
     proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $realip_remote_addr;
+    proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto https;
     proxy_set_header Upgrade $http_upgrade;
@@ -337,7 +337,7 @@ sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log
 ถ้าต้องการให้ log เห็น IP จริงจาก Cloudflare ชัดเจน ให้เพิ่มใน `http` block ของ `/etc/nginx/nginx.conf`:
 
 ```nginx
-log_format cloudflare '$realip_remote_addr - $remote_user [$time_local] '
+log_format cloudflare '$remote_addr - $remote_user [$time_local] '
                       '"$request" $status $body_bytes_sent '
                       '"$http_referer" "$http_user_agent" '
                       'cf_ray="$http_cf_ray" forwarded_for="$http_x_forwarded_for"';

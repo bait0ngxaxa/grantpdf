@@ -8,7 +8,7 @@ function buildRequest(email: string, ip: string = "203.0.113.10"): Request {
         method: "POST",
         headers: {
             "content-type": "application/json",
-            "x-forwarded-for": ip,
+            "x-real-ip": ip,
         },
         body: JSON.stringify({ email }),
     });
