@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { RATE_LIMIT } from "@/lib/shared/constants";
-import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { notificationAudienceQuerySchema } from "@/lib/validation/schemas";
 import { markAllNotificationsSeen } from "@/lib/services/notificationService";
@@ -9,7 +8,6 @@ import { getFirstValidationMessage } from "@/lib/api/body";
 import {
     publicErrorResponse,
     rateLimitExceededResponse,
-    unauthorizedResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 
@@ -38,12 +36,11 @@ export async function PATCH(req: Request): Promise<NextResponse> {
             );
         }
 
-        const session = await auth();
-        const userId = parsePositiveIntId(session?.user?.id);
-        if (userId === null) return unauthorizedResponse();
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const updated = await markAllNotificationsSeen(
-            userId,
+            guard.userId,
             parsed.data.audience,
         );
         return NextResponse.json(

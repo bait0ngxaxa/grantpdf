@@ -28,13 +28,39 @@ describe("ratelimit helpers", () => {
         await resetRateLimit(key);
     });
 
-    it("createRateLimitKey should use identifier hash instead of IP when identifier exists", () => {
+    it("createRateLimitKey should scope identifier hash by request subject", () => {
         const req = buildRequest("198.51.100.10");
         const key = createRateLimitKey(req, "auth:test", "tester@example.com");
 
-        expect(key.startsWith("auth:test:id:")).toBe(true);
-        expect(key).not.toContain("198.51.100.10");
+        expect(key.startsWith("auth:test:ip:198.51.100.10:id:")).toBe(true);
         expect(key).not.toContain("tester@example.com");
+    });
+
+    it("createRateLimitKey should use separate keys for the same identifier from different IPs", () => {
+        const firstRequest = buildRequest("198.51.100.10");
+        const secondRequest = buildRequest("198.51.100.11");
+
+        const firstKey = createRateLimitKey(
+            firstRequest,
+            "auth:test",
+            "tester@example.com"
+        );
+        const secondKey = createRateLimitKey(
+            secondRequest,
+            "auth:test",
+            "tester@example.com"
+        );
+
+        expect(firstKey).not.toBe(secondKey);
+    });
+
+    it("createRateLimitKey should use separate keys for different identifiers from the same IP", () => {
+        const req = buildRequest("198.51.100.10");
+
+        const firstKey = createRateLimitKey(req, "auth:test", "a@example.com");
+        const secondKey = createRateLimitKey(req, "auth:test", "b@example.com");
+
+        expect(firstKey).not.toBe(secondKey);
     });
 
     it("getRateLimitSubject should generate stable fallback for unknown ip", () => {

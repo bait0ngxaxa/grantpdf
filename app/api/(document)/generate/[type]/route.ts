@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import {
-    validateSession,
-    isSessionError,
     handleDocumentError,
 } from "@/lib/document";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { IDEMPOTENCY_HEADERS, RATE_LIMIT } from "@/lib/shared/constants";
 import { logAudit } from "@/lib/server/audit/auditLog";
@@ -213,11 +212,9 @@ export async function POST(
     let idempotencyRecordId: bigint | null = null;
 
     try {
-        const sessionResult = await validateSession();
-        if (isSessionError(sessionResult)) {
-            return sessionResult;
-        }
-        const { userId, session } = sessionResult;
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
+        const { userId, session } = guard;
         auditUserId = String(userId);
         auditUserEmail = session.user.email ?? undefined;
 

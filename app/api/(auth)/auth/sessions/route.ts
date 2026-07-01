@@ -1,8 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { RATE_LIMIT } from "@/lib/shared/constants";
-import { getGrantSession } from "@/lib/server/auth/grantSession";
-import { parsePositiveIntId } from "@/lib/shared/http/id";
+import {
+    isGuardError,
+    requireSessionFamily,
+    type SessionFamilyGuardSuccess,
+} from "@/lib/server/auth/guards";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     getUserDeviceSessions,
@@ -12,7 +15,6 @@ import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
 import { readJsonBody } from "@/lib/api/body";
 import {
     rateLimitExceededResponse,
-    unauthorizedResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 import { getUserAgent } from "@/lib/api/requestContext";
@@ -21,25 +23,17 @@ const revokeSessionSchema = z.object({
     sessionFamilyId: z.string().min(16).max(128),
 });
 
-async function getSessionContext(): Promise<{
+function buildDeviceSessionContext(guard: SessionFamilyGuardSuccess): {
     userId: number;
     currentFamilyId: string;
     sessionVersion: number;
     email?: string | null;
-} | null> {
-    const session = await getGrantSession();
-    const userId = parsePositiveIntId(session?.user?.id);
-    const currentFamilyId = session?.user?.sessionFamilyId;
-
-    if (!userId || !currentFamilyId) {
-        return null;
-    }
-
+} {
     return {
-        userId,
-        currentFamilyId,
-        sessionVersion: session.user.sessionVersion ?? 0,
-        email: session.user.email,
+        userId: guard.userId,
+        currentFamilyId: guard.currentFamilyId,
+        sessionVersion: guard.sessionVersion,
+        email: guard.session.user.email,
     };
 }
 
@@ -58,10 +52,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         );
     }
 
-    const context = await getSessionContext();
-    if (!context) return unauthorizedResponse();
+    const guard = await requireSessionFamily();
+    if (isGuardError(guard)) return guard;
 
-    const sessions = await getUserDeviceSessions(context);
+    const sessions = await getUserDeviceSessions(buildDeviceSessionContext(guard));
     return NextResponse.json({ sessions }, { headers: rateLimitResult.headers });
 }
 
@@ -89,8 +83,9 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
         );
     }
 
-    const context = await getSessionContext();
-    if (!context) return unauthorizedResponse();
+    const guard = await requireSessionFamily();
+    if (isGuardError(guard)) return guard;
+    const context = buildDeviceSessionContext(guard);
 
     if (parsed.data.sessionFamilyId === context.currentFamilyId) {
         return NextResponse.json(

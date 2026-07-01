@@ -1,7 +1,11 @@
 // User file deletion endpoint
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import {
+    isGuardError,
+    requireResourceOwner,
+    requireUserSession,
+} from "@/lib/server/auth/guards";
 import { getFileForDeletion, deleteFileRecord } from "@/lib/services/fileService";
 import { unlink } from "fs/promises";
 import { logAudit } from "@/lib/server/audit/auditLog";
@@ -9,20 +13,15 @@ import { getFullPathFromStoragePath } from "@/lib/server/storage";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
 import { buildAuditContext } from "@/lib/api/requestContext";
-import {
-    publicErrorResponse,
-    unauthorizedResponse,
-} from "@/lib/api/responses";
+import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
-            return unauthorizedResponse();
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const { id } = await params;
         const docId = parsePositiveIntId(id);
@@ -39,13 +38,12 @@ export async function DELETE(
             );
         }
 
-        // User can only delete their own files
-        if (document.userId !== session.user.id) {
-            return NextResponse.json(
-                { error: "ไม่มีสิทธิ์ลบเอกสารนี้" },
-                { status: 403 }
-            );
-        }
+        const ownerError = requireResourceOwner(
+            guard,
+            document.userId,
+            "ไม่มีสิทธิ์ลบเอกสารนี้",
+        );
+        if (ownerError) return ownerError;
 
         if (document.storagePath) {
             const fullPath = getFullPathFromStoragePath(document.storagePath);
@@ -65,7 +63,7 @@ export async function DELETE(
         await deleteFileRecord(docId);
 
         // Log user file deletion
-        const auditContext = buildAuditContext(session, req);
+        const auditContext = buildAuditContext(guard.session, req);
         logAudit("FILE_DELETE", auditContext.actorUserId, {
             userEmail: auditContext.actorEmail,
             ip: auditContext.ip,

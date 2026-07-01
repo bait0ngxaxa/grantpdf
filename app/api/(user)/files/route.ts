@@ -1,21 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { getUserFilesPaginated } from "@/lib/services/projectService";
 import { PAGINATION } from "@/lib/shared/constants";
 import { parsePositiveInt } from "@/lib/shared/http/queryParams";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
-import {
-    publicErrorResponse,
-    unauthorizedResponse,
-} from "@/lib/api/responses";
+import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
-        const session = await auth();
-
-        if (!session || !session.user?.id) {
-            return unauthorizedResponse();
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const { searchParams } = new URL(req.url);
         const page = parsePositiveInt(searchParams.get("page"), 1);
@@ -29,12 +23,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         );
         const projectId = parsePositiveIntId(searchParams.get("projectId"));
 
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            return unauthorizedResponse();
-        }
         const result = await getUserFilesPaginated({
-            userId,
+            userId: guard.userId,
             page,
             limit: safeLimit,
             projectId: projectId ?? undefined,

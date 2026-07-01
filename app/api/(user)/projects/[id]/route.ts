@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { updateProjectSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
@@ -14,7 +14,6 @@ import { buildAuditContext } from "@/lib/api/requestContext";
 import {
     publicErrorResponse,
     rateLimitExceededResponse,
-    unauthorizedResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 
@@ -52,23 +51,15 @@ export async function PUT(
             );
         }
         const { name, description } = parsed.data;
-        const session = await auth();
-
-        if (!session?.user?.id) {
-            return unauthorizedResponse();
-        }
-
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const updatedProject = await updateProjectWithAudit(
             projectId,
-            userId,
+            guard.userId,
             name,
             description && description.trim() !== "" ? description : undefined,
-            buildAuditContext(session, req),
+            buildAuditContext(guard.session, req),
         );
 
         return NextResponse.json({
@@ -120,21 +111,13 @@ export async function DELETE(
             throw publicApiError(400, "รหัสโครงการไม่ถูกต้อง");
         }
 
-        const session = await auth();
-
-        if (!session?.user?.id) {
-            return unauthorizedResponse();
-        }
-
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         await deleteProjectWithAudit(
             projectId,
-            userId,
-            buildAuditContext(session, req),
+            guard.userId,
+            buildAuditContext(guard.session, req),
         );
 
         return NextResponse.json(

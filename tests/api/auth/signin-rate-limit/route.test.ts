@@ -62,7 +62,7 @@ describe("signin-rate-limit route", () => {
         expect(response.headers.get("Retry-After")).toBeTruthy();
     });
 
-    it("tracks quota separately by identifier hash", async () => {
+    it("tracks quota by email and IP together", async () => {
         const blockedRequest = buildRequest("blocked@example.com");
         const blockedKey = createRateLimitKey(
             blockedRequest,
@@ -82,8 +82,12 @@ describe("signin-rate-limit route", () => {
         const freshResponse = await POST(
             buildRequest("fresh@example.com") as never
         );
+        const freshIpResponse = await POST(
+            buildRequest("blocked@example.com", "203.0.113.11") as never
+        );
 
         expect(blockedResponse.status).toBe(429);
         expect(freshResponse.status).toBe(200);
+        expect(freshIpResponse.status).toBe(200);
     });
 });

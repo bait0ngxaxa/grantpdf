@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { ROUTES, ROLES } from "@/lib/shared/constants";
+import {
+    CLOUDFLARE_WEB_ANALYTICS_CONNECT_SRC,
+    CLOUDFLARE_WEB_ANALYTICS_SCRIPT_ORIGIN,
+    ROUTES,
+    ROLES,
+} from "@/lib/shared/constants";
 import { buildRedirectUrl } from "@/lib/shared/routing/redirectUrl";
 import { verifyAccessToken, type AccessTokenPayload } from "@/lib/server/auth/accessToken";
 import {
@@ -27,9 +32,6 @@ function isDevelopment(): boolean {
     return process.env.NODE_ENV !== "production";
 }
 
-const CLOUDFLARE_INSIGHTS_SCRIPT_SRC = "https://static.cloudflareinsights.com";
-const CLOUDFLARE_INSIGHTS_CONNECT_SRC = "https://cloudflareinsights.com";
-
 function createNonce(): string {
     const bytes = new Uint8Array(16);
     crypto.getRandomValues(bytes);
@@ -39,7 +41,7 @@ function createNonce(): string {
 export function buildContentSecurityPolicy(nonce: string): string {
     const scriptSrc = isDevelopment()
         ? "'self' 'unsafe-inline' 'unsafe-eval' http: https:"
-        : `'self' 'unsafe-inline' ${CLOUDFLARE_INSIGHTS_SCRIPT_SRC}`;
+        : `'self' 'nonce-${nonce}' ${CLOUDFLARE_WEB_ANALYTICS_SCRIPT_ORIGIN}`;
 
     const directives = [
         "default-src 'self'",
@@ -47,7 +49,7 @@ export function buildContentSecurityPolicy(nonce: string): string {
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https:",
         "font-src 'self' data:",
-        `connect-src 'self' ${CLOUDFLARE_INSIGHTS_CONNECT_SRC} https: blob: data: ws: wss:`,
+        `connect-src 'self' ${CLOUDFLARE_WEB_ANALYTICS_CONNECT_SRC} https: blob: data: ws: wss:`,
         "media-src 'self' blob: data:",
         "worker-src 'self' blob:",
         "frame-src 'none'",

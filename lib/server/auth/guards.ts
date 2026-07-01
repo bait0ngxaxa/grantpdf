@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { getGrantSession } from "@/lib/server/auth/grantSession";
+import { auth } from "@/lib/server/auth/session";
+import { unauthorizedResponse } from "@/lib/api/responses";
 import { ROLES } from "@/lib/shared/constants";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
 import type { Session } from "@/lib/server/auth/types";
 
 /**
@@ -13,9 +15,84 @@ export function isAdmin(
     return session?.user?.role === ROLES.ADMIN;
 }
 
+interface UserGuardSuccess {
+    session: Session;
+    userId: number;
+}
+
+interface SessionFamilyGuardSuccess extends UserGuardSuccess {
+    currentFamilyId: string;
+    sessionVersion: number;
+}
+
 interface AdminGuardSuccess {
     session: Session;
     userId: string;
+}
+
+type GuardResult<T> = T | NextResponse;
+
+export type {
+    UserGuardSuccess,
+    SessionFamilyGuardSuccess,
+    AdminGuardSuccess,
+};
+
+export async function requireUserSession(): Promise<
+    GuardResult<UserGuardSuccess>
+> {
+    const session = await auth();
+    const userId = parsePositiveIntId(session?.user?.id);
+
+    if (userId === null || !session) {
+        return unauthorizedResponse();
+    }
+
+    return { session, userId };
+}
+
+export async function getOptionalUserSession(): Promise<UserGuardSuccess | null> {
+    const session = await auth();
+    const userId = parsePositiveIntId(session?.user?.id);
+
+    if (userId === null || !session) return null;
+    return { session, userId };
+}
+
+export async function requireSessionFamily(): Promise<
+    GuardResult<SessionFamilyGuardSuccess>
+> {
+    const guard = await requireUserSession();
+    if (isGuardError(guard)) return guard;
+
+    const currentFamilyId = guard.session.user.sessionFamilyId;
+    if (!currentFamilyId) return unauthorizedResponse();
+
+    return {
+        ...guard,
+        currentFamilyId,
+        sessionVersion: guard.session.user.sessionVersion ?? 0,
+    };
+}
+
+export function requireResourceOwner(
+    guard: UserGuardSuccess,
+    ownerUserId: unknown,
+    message: string,
+): NextResponse | null {
+    if (guard.userId === parsePositiveIntId(ownerUserId)) return null;
+    return NextResponse.json({ error: message }, { status: 403 });
+}
+
+export function requireResourceOwnerOrAdmin(
+    guard: UserGuardSuccess,
+    ownerUserId: unknown,
+    message: string,
+): NextResponse | null {
+    if (guard.userId === parsePositiveIntId(ownerUserId) || isAdmin(guard.session)) {
+        return null;
+    }
+    return NextResponse.json({ error: message }, { status: 403 });
 }
 
 /**
@@ -23,9 +100,9 @@ interface AdminGuardSuccess {
  * Returns the session + userId or a 401/403 NextResponse.
  */
 export async function requireAdminSession(): Promise<
-    AdminGuardSuccess | NextResponse
+    GuardResult<AdminGuardSuccess>
 > {
-    const session = await getGrantSession();
+    const session = await auth();
 
     if (!session?.user?.id) {
         return NextResponse.json(
@@ -48,7 +125,7 @@ export async function requireAdminSession(): Promise<
  * Type guard to check if requireAdminSession returned a NextResponse (error).
  */
 export function isGuardError(
-    result: AdminGuardSuccess | NextResponse,
+    result: GuardResult<unknown>,
 ): result is NextResponse {
     return result instanceof NextResponse;
 }

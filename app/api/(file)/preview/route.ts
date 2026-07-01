@@ -3,18 +3,16 @@
 
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import {
+    isGuardError,
+    requireResourceOwnerOrAdmin,
+    requireUserSession,
+} from "@/lib/server/auth/guards";
 import { prisma } from "@/lib/server/db";
 import { stat } from "fs/promises";
 import { createReadStream } from "fs";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
-import { parsePositiveIntId } from "@/lib/shared/http/id";
-import { publicApiError } from "@/lib/shared/http/apiError";
-import { ROLES } from "@/lib/shared/constants";
-import {
-    publicErrorResponse,
-    unauthorizedResponse,
-} from "@/lib/api/responses";
+import { publicErrorResponse } from "@/lib/api/responses";
 
 const SAFE_PATH_PREFIX = "storage/";
 
@@ -54,10 +52,8 @@ async function resolveFileOwnership(
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         // 1. Auth check
-        const session = await auth();
-        if (!session?.user?.id) {
-            return unauthorizedResponse();
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         // 2. Input validation — prevent path traversal
         const storagePath = req.nextUrl.searchParams.get("path");
@@ -78,19 +74,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
 
         // 4. Permission check — must be owner or admin
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        }
-        const isOwner = ownership.ownerId === userId;
-        const isAdmin = session.user.role === ROLES.ADMIN;
-
-        if (!isOwner && !isAdmin) {
-            return NextResponse.json(
-                { error: "ไม่มีสิทธิ์เข้าถึงไฟล์นี้" },
-                { status: 403 }
-            );
-        }
+        const ownerError = requireResourceOwnerOrAdmin(
+            guard,
+            ownership.ownerId,
+            "ไม่มีสิทธิ์เข้าถึงไฟล์นี้",
+        );
+        if (ownerError) return ownerError;
 
         // 5. Read file via streaming (non-blocking)
         const fullPath = getFullPathFromStoragePath(storagePath);

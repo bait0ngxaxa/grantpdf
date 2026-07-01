@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/server/db";
-import { auth } from "@/lib/server/auth/session";
+import {
+    getOptionalUserSession,
+    isAdmin,
+} from "@/lib/server/auth/guards";
 import { createReadStream } from "fs";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
 import { verifySignedToken } from "@/lib/server/storage/signedUrl";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { logAudit } from "@/lib/server/audit/auditLog";
-import { parsePositiveIntId } from "@/lib/shared/http/id";
-import { ROLES } from "@/lib/shared/constants";
 import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(
@@ -32,7 +33,7 @@ export async function GET(
         const { fileId, userId, type, fromAdminPanel } = verification.payload;
 
         // Get current session (optional - for additional permission check)
-        const session = await auth();
+        const sessionGuard = await getOptionalUserSession();
 
         // Fetch file from database based on type
         let file: {
@@ -83,13 +84,10 @@ export async function GET(
 
         // Permission check: user must be owner OR admin OR the token was issued for this user
         const isOwner = file.userId === userId;
-        const isAdmin = session?.user?.role === ROLES.ADMIN;
-        const sessionUserId = session?.user?.id
-            ? parsePositiveIntId(session.user.id)
-            : null;
-        const isTokenUser = sessionUserId !== null && sessionUserId === userId;
+        const admin = sessionGuard ? isAdmin(sessionGuard.session) : false;
+        const isTokenUser = sessionGuard?.userId === userId;
 
-        if (!isOwner && !isAdmin && !isTokenUser) {
+        if (!isOwner && !admin && !isTokenUser) {
             return NextResponse.json(
                 { error: "ไม่มีสิทธิ์เข้าถึงไฟล์นี้" },
                 { status: 403 }
@@ -125,11 +123,11 @@ export async function GET(
         }
 
         // Log download - differentiate admin vs user
-        const downloadAction = isAdmin
+        const downloadAction = admin
             ? "ADMIN_FILE_DOWNLOAD"
             : "FILE_DOWNLOAD";
-        logAudit(downloadAction, session?.user?.id || String(userId), {
-            userEmail: session?.user?.email || undefined,
+        logAudit(downloadAction, sessionGuard?.session.user.id || String(userId), {
+            userEmail: sessionGuard?.session.user.email || undefined,
             details: {
                 fileId: file.id.toString(),
                 fileName: file.originalFileName,

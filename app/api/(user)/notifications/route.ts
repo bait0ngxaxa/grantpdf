@@ -1,20 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/server/auth/session";
-import { parsePositiveIntId } from "@/lib/shared/http/id";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { notificationListQuerySchema } from "@/lib/validation/schemas";
 import { getNotificationsForUser } from "@/lib/services/notificationService";
 import { getFirstValidationMessage } from "@/lib/api/body";
 import {
     publicErrorResponse,
-    unauthorizedResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
-        const session = await auth();
-        const userId = parsePositiveIntId(session?.user?.id);
-        if (userId === null) return unauthorizedResponse();
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const { searchParams } = new URL(req.url);
         const parsed = notificationListQuerySchema.safeParse({
@@ -30,7 +27,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
 
         const result = await getNotificationsForUser({
-            userId,
+            userId: guard.userId,
             cursor: parsed.data.cursor,
             limit: parsed.data.limit,
             unreadOnly: parsed.data.unreadOnly,

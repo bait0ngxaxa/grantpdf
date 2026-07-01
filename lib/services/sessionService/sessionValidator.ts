@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
-import { getGrantSession } from "@/lib/server/auth/grantSession";
+import type { NextResponse } from "next/server";
+import {
+    isGuardError,
+    requireUserSession,
+} from "@/lib/server/auth/guards";
 import type { SessionValidationResult } from "./types";
 
 export async function validateSession(): Promise<
     SessionValidationResult | NextResponse
 > {
-    const session = await getGrantSession();
-
-    if (!session || !session.user || !session.user.id) {
-        return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const guard = await requireUserSession();
+    if (isGuardError(guard)) return guard;
 
     return {
-        userId: Number(session.user.id),
-        session,
+        userId: guard.userId,
+        session: guard.session,
     };
 }

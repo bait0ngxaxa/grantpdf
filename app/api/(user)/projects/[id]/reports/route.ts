@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { rename, unlink, writeFile } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { prisma } from "@/lib/server/db";
 import {
     FILE_UPLOAD,
@@ -133,14 +133,12 @@ export async function GET(
     context: RouteContext,
 ): Promise<NextResponse> {
     try {
-        const session = await auth();
-        if (!session?.user?.id) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const projectId = await resolveProjectId(context);
-        await ensureOwnProject(projectId, userId);
-        const reports = await getProjectReportsForUser(projectId, userId);
+        await ensureOwnProject(projectId, guard.userId);
+        const reports = await getProjectReportsForUser(projectId, guard.userId);
 
         return NextResponse.json({ reports });
     } catch (error) {
@@ -189,15 +187,13 @@ export async function POST(
         const fileError = validateReportFile(fileEntry);
         if (fileError) throw publicApiError(400, fileError);
 
-        const session = await auth();
-        if (!session?.user?.id) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
-        await ensureOwnProject(projectId, userId);
+        await ensureOwnProject(projectId, guard.userId);
         const idempotency = await startUploadIdempotency(
             req,
-            userId,
+            guard.userId,
             "project_report",
         );
         if (idempotency.type === "response") return idempotency.response;
@@ -206,7 +202,7 @@ export async function POST(
         const storedFile = await persistReportFile(fileEntry);
         finalFilePath = storedFile.finalFilePath;
         const report = await createProjectReportWithFile({
-            userId,
+            userId: guard.userId,
             projectId,
             originalFileName: fileEntry.name,
             storagePath: storedFile.relativeStoragePath,
@@ -215,7 +211,7 @@ export async function POST(
             note: parsed.data.note,
         });
 
-        const auditContext = buildAuditContext(session, req);
+        const auditContext = buildAuditContext(guard.session, req);
         logAudit("PROJECT_REPORT_SUBMIT", auditContext.actorUserId, {
             userEmail: auditContext.actorEmail,
             ip: auditContext.ip,

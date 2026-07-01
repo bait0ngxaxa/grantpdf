@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/server/db";
-import { auth } from "@/lib/server/auth/session";
+import {
+    isAdmin,
+    isGuardError,
+    requireResourceOwnerOrAdmin,
+    requireUserSession,
+} from "@/lib/server/auth/guards";
 import { generateSignedUrl } from "@/lib/server/storage/signedUrl";
-import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { generateSignedUrlSchema } from "@/lib/validation/schemas";
-import { ROLES } from "@/lib/shared/constants";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {
     publicErrorResponse,
-    unauthorizedResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 
@@ -23,18 +25,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        const session = await auth();
-        if (!session || !session.user?.id) {
-            return unauthorizedResponse();
-        }
-
-        const sessionUserId = parsePositiveIntId(session.user.id);
-        if (sessionUserId === null) {
-            return unauthorizedResponse();
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
         const { fileId, type, expiresIn, fromAdminPanel } = parsed.data;
 
-        const isAdmin = session.user.role === ROLES.ADMIN;
+        const admin = isAdmin(guard.session);
 
         // Verify user has access to this file
         if (type === "userFile") {
@@ -51,12 +46,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             }
 
             // Only owner or admin can generate URL
-            if (file.userId !== sessionUserId && !isAdmin) {
-                return NextResponse.json(
-                    { error: "ไม่มีสิทธิ์เข้าถึงไฟล์นี้" },
-                    { status: 403 }
-                );
-            }
+            const ownerError = requireResourceOwnerOrAdmin(
+                guard,
+                file.userId,
+                "ไม่มีสิทธิ์เข้าถึงไฟล์นี้",
+            );
+            if (ownerError) return ownerError;
         } else if (type === "attachment") {
             const attachment = await prisma.attachmentFile.findUnique({
                 where: { id: fileId },
@@ -74,21 +69,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 );
             }
 
-            if (attachment.userFile.userId !== sessionUserId && !isAdmin) {
-                return NextResponse.json(
-                    { error: "ไม่มีสิทธิ์เข้าถึงไฟล์แนบนี้" },
-                    { status: 403 }
-                );
-            }
+            const ownerError = requireResourceOwnerOrAdmin(
+                guard,
+                attachment.userFile.userId,
+                "ไม่มีสิทธิ์เข้าถึงไฟล์แนบนี้",
+            );
+            if (ownerError) return ownerError;
         }
 
         // Generate signed URL - only pass fromAdminPanel if user is actually admin
         const signedUrl = await generateSignedUrl(
             fileId,
-            sessionUserId,
+            guard.userId,
             type,
             expiresIn,
-            isAdmin && fromAdminPanel
+            admin && fromAdminPanel
         );
 
         return NextResponse.json({

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/server/db";
-import { auth } from "@/lib/server/auth/session";
+import {
+    isGuardError,
+    requireResourceOwner,
+    requireUserSession,
+} from "@/lib/server/auth/guards";
 import { createReadStream } from "fs";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
@@ -9,31 +13,21 @@ import { Readable } from "stream";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
-import {
-    publicErrorResponse,
-    unauthorizedResponse,
-} from "@/lib/api/responses";
+import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
-            return unauthorizedResponse();
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const { id } = await params;
         const attachmentId = parsePositiveIntId(id);
         if (attachmentId === null) {
             throw publicApiError(400, "รหัสไฟล์แนบไม่ถูกต้อง");
         }
-        const sessionUserId = parsePositiveIntId(session.user.id);
-        if (sessionUserId === null) {
-            return unauthorizedResponse();
-        }
-
         const attachment = await prisma.attachmentFile.findUnique({
             where: { id: attachmentId },
             include: {
@@ -52,12 +46,12 @@ export async function GET(
             );
         }
 
-        if (attachment.userFile.userId !== sessionUserId) {
-            return NextResponse.json(
-                { error: "ไม่มีสิทธิ์เข้าถึงไฟล์แนบนี้" },
-                { status: 403 }
-            );
-        }
+        const ownerError = requireResourceOwner(
+            guard,
+            attachment.userFile.userId,
+            "ไม่มีสิทธิ์เข้าถึงไฟล์แนบนี้",
+        );
+        if (ownerError) return ownerError;
 
         // ใช้ storage path ใหม่
         const fullPath = getFullPathFromStoragePath(attachment.filePath);

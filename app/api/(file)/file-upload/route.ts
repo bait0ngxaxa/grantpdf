@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { prisma } from "@/lib/server/db";
 import path from "path";
 import { rename, unlink, writeFile } from "fs/promises";
@@ -20,7 +20,6 @@ import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {
     publicErrorResponse,
-    unauthorizedResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
@@ -54,10 +53,8 @@ const generateUniqueFilename = (originalName: string): string => {
 export async function POST(request: NextRequest): Promise<NextResponse> {
     let idempotencyRecordId: bigint | null = null;
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
-            return unauthorizedResponse();
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const formData = await request.formData();
         const fileEntry = formData.get("file");
@@ -76,15 +73,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             return validationErrorResponse("รหัสโครงการไม่ถูกต้อง");
         }
 
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            return unauthorizedResponse();
-        }
-
         const file = fileEntry;
 
         const project = await prisma.project.findFirst({
-            where: buildProjectAccessWhere(projectId, userId),
+            where: buildProjectAccessWhere(projectId, guard.userId),
         });
 
         if (!project) {
@@ -140,7 +132,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         const idempotency = await startUploadIdempotency(
             request,
-            userId,
+            guard.userId,
             "file_upload",
         );
         if (idempotency.type === "response") return idempotency.response;
@@ -167,7 +159,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                         originalFileName: file.name,
                         storagePath: relativeStoragePath,
                         fileExtension: fileExtension,
-                        userId,
+                        userId: guard.userId,
                         projectId,
                     },
                 });
@@ -175,7 +167,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                     fileId: createdFile.id,
                     projectId,
                     fileName: createdFile.originalFileName,
-                    actorUserId: userId,
+                    actorUserId: guard.userId,
                 });
                 return createdFile;
             });
@@ -194,10 +186,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         if (!userFile) throw new Error("FILE_RECORD_CREATE_FAILED");
 
-        await invalidateDashboardStats([userId]);
+        await invalidateDashboardStats([guard.userId]);
 
         // Log file upload
-        const auditContext = buildAuditContext(session, request);
+        const auditContext = buildAuditContext(guard.session, request);
         logAudit("FILE_UPLOAD", auditContext.actorUserId, {
             userEmail: auditContext.actorEmail,
             ip: auditContext.ip,

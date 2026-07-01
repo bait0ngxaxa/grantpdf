@@ -164,11 +164,12 @@ export function createRateLimitKey(
     routeKey: string,
     identifier?: string,
 ): string {
+    const subject = getRateLimitSubject(request);
     if (identifier && identifier.trim() !== "") {
-        return `${routeKey}:id:${hashText(normalizeIdentifier(identifier))}`;
+        return `${routeKey}:${subject}:id:${hashText(normalizeIdentifier(identifier))}`;
     }
 
-    return `${routeKey}:${getRateLimitSubject(request)}`;
+    return `${routeKey}:${subject}`;
 }
 
 export function getRateLimitHeaders(

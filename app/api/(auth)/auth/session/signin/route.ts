@@ -125,7 +125,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 role: user.role,
                 sessionVersion: user.sessionVersion,
             },
-            accessToken: session.accessToken,
             expiresAt: session.expiresAt.toISOString(),
         },
         { status: 200, headers: rateLimitResult.headers }

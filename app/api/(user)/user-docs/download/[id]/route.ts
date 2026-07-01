@@ -1,40 +1,31 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/server/db";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { createReadStream } from "fs";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
-import {
-    publicErrorResponse,
-    unauthorizedResponse,
-} from "@/lib/api/responses";
+import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
     try {
-        const session = await auth();
-        if (!session || !session.user?.id) {
-            return unauthorizedResponse();
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const { id } = await params;
         const fileId = parsePositiveIntId(id);
         if (fileId === null) {
             throw publicApiError(400, "รหัสไฟล์ไม่ถูกต้อง");
         }
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            return unauthorizedResponse();
-        }
 
         const file = await prisma.userFile.findFirst({
-            where: { id: fileId, userId },
+            where: { id: fileId, userId: guard.userId },
             select: {
                 id: true,
                 originalFileName: true,

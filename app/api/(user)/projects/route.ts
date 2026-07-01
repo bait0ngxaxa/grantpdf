@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import {
     getProjectSummariesByUserId,
     getProjectsByUserIdPaginated,
@@ -10,14 +10,12 @@ import { PAGINATION, RATE_LIMIT } from "@/lib/shared/constants";
 import { parsePositiveInt } from "@/lib/shared/http/queryParams";
 import { createProjectSchema } from "@/lib/validation/schemas";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
-import { publicApiError } from "@/lib/shared/http/apiError";
 import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import { buildAuditContext } from "@/lib/api/requestContext";
 import {
     publicErrorResponse,
     rateLimitExceededResponse,
-    unauthorizedResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 
@@ -25,23 +23,13 @@ const PROJECT_SUMMARY_VIEW = "summary";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
-        const session = await auth();
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
-        if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 }
-            );
-        }
-
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        }
         const { searchParams } = new URL(req.url);
         const view = searchParams.get("view");
         if (view === PROJECT_SUMMARY_VIEW) {
-            const projects = await getProjectSummariesByUserId(userId);
+            const projects = await getProjectSummariesByUserId(guard.userId);
 
             return NextResponse.json({ projects });
         }
@@ -60,7 +48,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const status = searchParams.get("status") ?? undefined;
         const sortBy = searchParams.get("sortBy") ?? undefined;
         const result = await getProjectsByUserIdPaginated({
-            userId,
+            userId: guard.userId,
             page,
             limit,
             programId: programId ?? undefined,
@@ -102,16 +90,8 @@ export async function POST(req: Request): Promise<NextResponse> {
         }
 
         const { name, description, programId } = parsed.data;
-        const session = await auth();
-
-        if (!session?.user?.id) {
-            return unauthorizedResponse();
-        }
-
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         // Verify program exists and is active
         const validProgram = await programExists(programId);
@@ -124,11 +104,11 @@ export async function POST(req: Request): Promise<NextResponse> {
 
         const safeDescription = description && description.trim() !== "" ? description : undefined;
         const project = await createProjectWithAudit(
-            userId,
+            guard.userId,
             name,
             safeDescription,
             programId,
-            buildAuditContext(session, req),
+            buildAuditContext(guard.session, req),
         );
 
         return NextResponse.json(project, { headers: rateLimitResult.headers });

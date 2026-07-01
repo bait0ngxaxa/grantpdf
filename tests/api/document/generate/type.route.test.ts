@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/(document)/generate/[type]/route";
 
 vi.mock("@/lib/document", () => ({
-    validateSession: vi.fn(),
-    isSessionError: vi.fn(() => false),
     handleDocumentError: vi.fn((error: unknown) =>
         Response.json(
             {
@@ -15,6 +13,10 @@ vi.mock("@/lib/document", () => ({
             { status: 500 },
         ),
     ),
+}));
+
+vi.mock("@/lib/server/auth/session", () => ({
+    auth: vi.fn(),
 }));
 
 vi.mock("@/lib/server/rate-limit/rateLimit", () => ({
@@ -56,7 +58,7 @@ vi.mock("@/lib/validation/schemas", () => {
     };
 });
 
-import { validateSession } from "@/lib/document";
+import { auth } from "@/lib/server/auth/session";
 import {
     startDocumentIdempotency,
     completeDocumentIdempotency,
@@ -64,7 +66,7 @@ import {
 } from "@/lib/services/documentIdempotencyService";
 import { handleTorGeneration } from "@/lib/document/handlers";
 
-const mockedValidateSession = vi.mocked(validateSession);
+const mockedAuth = vi.mocked(auth);
 const mockedStartDocumentIdempotency = vi.mocked(startDocumentIdempotency);
 const mockedCompleteDocumentIdempotency = vi.mocked(completeDocumentIdempotency);
 const mockedFailDocumentIdempotency = vi.mocked(failDocumentIdempotency);
@@ -109,13 +111,10 @@ describe("document generate route idempotency", () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        mockedValidateSession.mockResolvedValue({
-            userId: 1,
-            session: {
-                user: {
-                    id: "1",
-                    email: "tester@example.com",
-                },
+        mockedAuth.mockResolvedValue({
+            user: {
+                id: "1",
+                email: "tester@example.com",
             },
         } as never);
 

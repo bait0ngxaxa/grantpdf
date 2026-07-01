@@ -171,6 +171,7 @@ describe("grant signin route", () => {
             role: "admin",
             sessionVersion: 2,
         });
+        expect(body).not.toHaveProperty("accessToken");
         expect(mockedCreateRefreshSession).toHaveBeenCalledWith({
             userId: 7,
             role: "admin",

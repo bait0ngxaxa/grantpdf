@@ -69,9 +69,9 @@ describe("refresh route", () => {
 
         expect(response.status).toBe(200);
         expect(body).toEqual({
-            accessToken: "next-access-token",
             expiresAt: "2026-06-01T00:00:00.000Z",
         });
+        expect(body).not.toHaveProperty("accessToken");
         expect(mockedRotateRefreshSession).toHaveBeenCalledWith(
             "refresh-token",
             "203.0.113.9",

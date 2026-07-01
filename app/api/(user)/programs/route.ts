@@ -1,17 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { getActivePrograms } from "@/lib/services/programService";
 
 export async function GET(): Promise<NextResponse> {
     try {
-        const session = await auth();
-
-        if (!session || !session.user?.id) {
-            return NextResponse.json(
-                { error: "กรุณาเข้าสู่ระบบ" },
-                { status: 401 },
-            );
-        }
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
         const programs = await getActivePrograms();
 

@@ -87,7 +87,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const response = NextResponse.json(
         {
-            accessToken: result.accessToken,
             expiresAt: result.expiresAt.toISOString(),
         },
         { status: 200, headers: rateLimitResult.headers }

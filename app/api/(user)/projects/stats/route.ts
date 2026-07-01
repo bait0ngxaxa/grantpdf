@@ -1,26 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/server/auth/session";
+import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { getUserProjectStats } from "@/lib/services/projectService";
-import { parsePositiveIntId } from "@/lib/shared/http/id";
-import { publicApiError } from "@/lib/shared/http/apiError";
-import {
-    publicErrorResponse,
-    unauthorizedResponse,
-} from "@/lib/api/responses";
+import { publicErrorResponse } from "@/lib/api/responses";
 
 export async function GET(): Promise<NextResponse> {
     try {
-        const session = await auth();
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
 
-        if (!session || !session.user?.id) {
-            return unauthorizedResponse();
-        }
-
-        const userId = parsePositiveIntId(session.user.id);
-        if (userId === null) {
-            throw publicApiError(401, "กรุณาเข้าสู่ระบบ");
-        }
-        const stats = await getUserProjectStats(userId);
+        const stats = await getUserProjectStats(guard.userId);
 
         return NextResponse.json(stats, {
             status: 200,
