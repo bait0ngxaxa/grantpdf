@@ -29,8 +29,6 @@ function isDevelopment(): boolean {
 
 const CLOUDFLARE_INSIGHTS_SCRIPT_SRC = "https://static.cloudflareinsights.com";
 const CLOUDFLARE_INSIGHTS_CONNECT_SRC = "https://cloudflareinsights.com";
-const CLOUDFLARE_INSIGHTS_INLINE_SCRIPT_HASH =
-    "'sha256-n46vPwSWuMC0W703pBofImv82Z26xo4LXymv0E9caPk='";
 
 function createNonce(): string {
     const bytes = new Uint8Array(16);
@@ -41,7 +39,7 @@ function createNonce(): string {
 export function buildContentSecurityPolicy(nonce: string): string {
     const scriptSrc = isDevelopment()
         ? "'self' 'unsafe-inline' 'unsafe-eval' http: https:"
-        : `'self' 'nonce-${nonce}' ${CLOUDFLARE_INSIGHTS_INLINE_SCRIPT_HASH} ${CLOUDFLARE_INSIGHTS_SCRIPT_SRC}`;
+        : `'self' 'unsafe-inline' ${CLOUDFLARE_INSIGHTS_SCRIPT_SRC}`;
 
     const directives = [
         "default-src 'self'",

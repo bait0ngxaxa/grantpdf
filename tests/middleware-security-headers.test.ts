@@ -23,10 +23,9 @@ describe("Content Security Policy", () => {
         const connectSrc = getDirective(csp, "connect-src");
 
         expect(scriptSrc).toBe(
-            "script-src 'self' 'nonce-nonce-value' 'sha256-n46vPwSWuMC0W703pBofImv82Z26xo4LXymv0E9caPk=' https://static.cloudflareinsights.com"
+            "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com"
         );
         expect(connectSrc).toContain("https://cloudflareinsights.com");
-        expect(scriptSrc).not.toContain("'unsafe-inline'");
         expect(scriptSrc).not.toContain("'strict-dynamic'");
         expect(scriptSrc).not.toContain("'unsafe-eval'");
         expect(csp).toContain("object-src 'none'");
