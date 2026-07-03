@@ -16,6 +16,16 @@ type MenuItemType = {
     icon: React.ReactNode;
 };
 
+type SidebarTooltip = {
+    name: string;
+    left: number;
+    top: number;
+};
+
+type MenuButtonEvent =
+    | React.FocusEvent<HTMLButtonElement>
+    | React.MouseEvent<HTMLButtonElement>;
+
 const menuItems: MenuItemType[] = [
     {
         id: "dashboard",
@@ -45,12 +55,33 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
     } = useUserDashboardContext();
 
     const sidebarRef = React.useRef<HTMLDivElement>(null);
+    const [sidebarTooltip, setSidebarTooltip] = React.useState<SidebarTooltip | null>(
+        null,
+    );
     const [, startTransition] = React.useTransition();
     const closeSidebarOnMobile = (): void => {
         if (window.matchMedia("(max-width: 1023px)").matches) {
             setIsSidebarOpen(false);
         }
     };
+    const showSidebarTooltip = (
+        name: string,
+        event: MenuButtonEvent,
+        collapsedOnly = false,
+    ): void => {
+        const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+        if (!isDesktop || (collapsedOnly && isSidebarOpen)) {
+            return;
+        }
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        setSidebarTooltip({
+            name,
+            left: rect.right + 12,
+            top: rect.top + rect.height / 2,
+        });
+    };
+    const hideSidebarTooltip = (): void => setSidebarTooltip(null);
 
     React.useEffect(() => {
         if (!isSidebarOpen) {
@@ -124,12 +155,12 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                 className={cn(
                     "fixed left-0 top-0 z-50 flex h-full transform flex-col border-r border-blue-100/70 bg-gradient-to-b from-white/98 via-white/95 to-blue-50/70 shadow-[8px_0_36px_-24px_rgba(37,99,235,0.8)] backdrop-blur-2xl transition-[width,transform] duration-300 dark:border-slate-800/80 dark:from-slate-950/98 dark:via-slate-900/95 dark:to-blue-950/35 dark:shadow-[8px_0_36px_-24px_rgba(59,130,246,0.5)] lg:translate-x-0",
                     isSidebarOpen
-                        ? "w-72 translate-x-0"
+                        ? "w-72 translate-x-0 lg:w-64 xl:w-72"
                         : "w-72 -translate-x-full lg:w-20 lg:translate-x-0",
                 )}
             >
                 {/* Header */}
-                <div className={cn("p-6 pb-2", !isSidebarOpen && "lg:px-4")}>
+                <div className={cn("p-5 pb-2 xl:p-6 xl:pb-2", !isSidebarOpen && "lg:px-4")}>
                     <div
                         className={cn(
                             "mb-8 flex items-center gap-3",
@@ -158,7 +189,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     !isSidebarOpen && "hidden",
                                 )}
                             >
-                                <h2 className="mb-1 text-xl font-black leading-none text-slate-900 text-balance dark:text-slate-100">
+                                <h2 className="mb-1 text-lg font-black leading-none text-slate-900 text-balance dark:text-slate-100 xl:text-xl">
                                     E-GRANT ONLINE
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
@@ -176,12 +207,25 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     ? "ยุบเมนูด้านข้าง"
                                     : "ขยายเมนูด้านข้าง"
                             }
-                            title={
-                                isSidebarOpen
-                                    ? "ยุบเมนูด้านข้าง"
-                                    : "ขยายเมนูด้านข้าง"
-                            }
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            onBlur={hideSidebarTooltip}
+                            onFocus={(event) =>
+                                showSidebarTooltip(
+                                    isSidebarOpen
+                                        ? "ยุบเมนูด้านข้าง"
+                                        : "ขยายเมนูด้านข้าง",
+                                    event,
+                                )
+                            }
+                            onMouseEnter={(event) =>
+                                showSidebarTooltip(
+                                    isSidebarOpen
+                                        ? "ยุบเมนูด้านข้าง"
+                                        : "ขยายเมนูด้านข้าง",
+                                    event,
+                                )
+                            }
+                            onMouseLeave={hideSidebarTooltip}
                             aria-controls="userdashboard-sidebar"
                             aria-expanded={isSidebarOpen}
                             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-slate-600 shadow-sm shadow-blue-100/60 transition-[border-color,background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md hover:shadow-blue-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-blue-800 dark:hover:bg-blue-950/30 dark:hover:text-blue-300 dark:focus-visible:ring-offset-slate-900 lg:h-9 lg:w-9"
@@ -198,7 +242,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                 {/* Navigation Menu */}
                 <nav
                     className={cn(
-                        "custom-scrollbar flex-1 overflow-y-auto px-4 py-4",
+                        "custom-scrollbar flex-1 overflow-y-auto px-3 py-4 xl:px-4",
                         !isSidebarOpen && "lg:px-3",
                     )}
                 >
@@ -214,6 +258,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                         {menuItems.map((item) => (
                             <li key={item.id}>
                                 <button
+                                    aria-label={item.name}
                                     onClick={() => {
                                         if (item.id === "create-project") {
                                             setShowCreateProjectModal(true);
@@ -224,8 +269,16 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                         }
                                         closeSidebarOnMobile();
                                     }}
+                                    onBlur={hideSidebarTooltip}
+                                    onFocus={(event) =>
+                                        showSidebarTooltip(item.name, event, true)
+                                    }
+                                    onMouseEnter={(event) =>
+                                        showSidebarTooltip(item.name, event, true)
+                                    }
+                                    onMouseLeave={hideSidebarTooltip}
                                     className={cn(
-                                        "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border px-4 py-3.5 text-left font-medium transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300",
+                                        "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border px-3 py-3 text-left font-medium transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300 xl:px-4 xl:py-3.5",
                                         !isSidebarOpen &&
                                             "lg:justify-center lg:px-0",
                                         activeTab === item.id
@@ -310,6 +363,20 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                     </div>
                 </div>
             </div>
+
+            {sidebarTooltip && (
+                <div
+                    role="tooltip"
+                    className="pointer-events-none fixed left-24 z-50 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 motion-reduce:transition-none dark:border-slate-200 dark:bg-slate-100 dark:text-slate-950 lg:block"
+                    style={{
+                        left: sidebarTooltip.left,
+                        top: sidebarTooltip.top,
+                    }}
+                >
+                    <span className="absolute left-0 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-slate-950 dark:bg-slate-100" />
+                    {sidebarTooltip.name}
+                </div>
+            )}
         </>
     );
 };

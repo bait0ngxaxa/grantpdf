@@ -38,6 +38,16 @@ const menuItems = [
     },
 ];
 
+type SidebarTooltip = {
+    name: string;
+    left: number;
+    top: number;
+};
+
+type MenuButtonEvent =
+    | React.FocusEvent<HTMLButtonElement>
+    | React.MouseEvent<HTMLButtonElement>;
+
 export const AdminSidebar: React.FC = (): React.JSX.Element => {
     const {
         session,
@@ -45,21 +55,36 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
         setIsSidebarOpen,
         activeTab,
         setActiveTab,
-        todayProjects,
-        todayProjectFiles,
-        todayReportFiles,
-        totalProjects,
     } = useAdminDashboardContext();
 
     const sidebarRef = React.useRef<HTMLDivElement>(null);
+    const [sidebarTooltip, setSidebarTooltip] = React.useState<SidebarTooltip | null>(
+        null,
+    );
     const [, startTransition] = React.useTransition();
     const closeSidebarOnMobile = (): void => {
         if (window.matchMedia("(max-width: 1023px)").matches) {
             setIsSidebarOpen(false);
         }
     };
-    const formatStat = (value: number): string =>
-        new Intl.NumberFormat("th-TH").format(value);
+    const showSidebarTooltip = (
+        name: string,
+        event: MenuButtonEvent,
+        collapsedOnly = false,
+    ): void => {
+        const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+        if (!isDesktop || (collapsedOnly && isSidebarOpen)) {
+            return;
+        }
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        setSidebarTooltip({
+            name,
+            left: rect.right + 12,
+            top: rect.top + rect.height / 2,
+        });
+    };
+    const hideSidebarTooltip = (): void => setSidebarTooltip(null);
 
     React.useEffect(() => {
         if (!isSidebarOpen) {
@@ -133,12 +158,12 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                 className={cn(
                     "fixed left-0 top-0 z-50 flex h-full transform flex-col border-r border-orange-100/70 bg-linear-to-b from-white/98 via-orange-50/35 to-amber-50/65 shadow-[8px_0_36px_-24px_rgba(249,115,22,0.45)] backdrop-blur-2xl transition-[width,transform] duration-300 dark:border-orange-900/35 dark:from-slate-950/98 dark:via-orange-950/12 dark:to-slate-900/75 dark:shadow-[8px_0_36px_-24px_rgba(251,146,60,0.28)] lg:translate-x-0",
                     isSidebarOpen
-                        ? "w-72 translate-x-0"
+                        ? "w-72 translate-x-0 lg:w-64 xl:w-72"
                         : "w-72 -translate-x-full lg:w-20 lg:translate-x-0",
                 )}
             >
                 {/* Header */}
-                <div className={cn("p-6 pb-2", !isSidebarOpen && "lg:px-4")}>
+                <div className={cn("p-5 pb-2 xl:p-6 xl:pb-2", !isSidebarOpen && "lg:px-4")}>
                     <div
                         className={cn(
                             "mb-8 flex items-center gap-3",
@@ -167,7 +192,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                     !isSidebarOpen && "hidden",
                                 )}
                             >
-                                <h2 className="mb-1 text-xl font-black leading-none text-slate-900 text-balance dark:text-slate-100">
+                                <h2 className="mb-1 text-lg font-black leading-none text-slate-900 text-balance dark:text-slate-100 xl:text-xl">
                                     Admin Panel
                                 </h2>
                                 <div className="flex items-center space-x-1.5">
@@ -185,12 +210,25 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                     ? "ยุบเมนูด้านข้าง"
                                     : "ขยายเมนูด้านข้าง"
                             }
-                            title={
-                                isSidebarOpen
-                                    ? "ยุบเมนูด้านข้าง"
-                                    : "ขยายเมนูด้านข้าง"
-                            }
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            onBlur={hideSidebarTooltip}
+                            onFocus={(event) =>
+                                showSidebarTooltip(
+                                    isSidebarOpen
+                                        ? "ยุบเมนูด้านข้าง"
+                                        : "ขยายเมนูด้านข้าง",
+                                    event,
+                                )
+                            }
+                            onMouseEnter={(event) =>
+                                showSidebarTooltip(
+                                    isSidebarOpen
+                                        ? "ยุบเมนูด้านข้าง"
+                                        : "ขยายเมนูด้านข้าง",
+                                    event,
+                                )
+                            }
+                            onMouseLeave={hideSidebarTooltip}
                             aria-controls="admin-sidebar"
                             aria-expanded={isSidebarOpen}
                             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-white text-slate-600 shadow-sm shadow-orange-100/50 transition-[border-color,background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700 hover:shadow-md hover:shadow-orange-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/35 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-orange-800 dark:hover:bg-orange-950/20 dark:hover:text-orange-300 dark:focus-visible:ring-offset-slate-900 lg:h-9 lg:w-9"
@@ -203,68 +241,12 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                         </button>
                     </div>
 
-                    {/* Quick Stats Section */}
-                    <div
-                        className={cn(
-                            "mt-6 mb-6 rounded-xl border border-orange-100/65 bg-linear-to-br from-orange-50/55 to-white p-4 shadow-inner shadow-orange-100/35 dark:border-orange-900/35 dark:from-orange-950/14 dark:to-slate-900/65",
-                            !isSidebarOpen && "lg:hidden",
-                        )}
-                    >
-                        <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-balance">
-                                สถิติวันนี้
-                            </h4>
-                            <span className="flex h-1.5 w-1.5 relative">
-                                <span className="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500" />
-                            </span>
-                        </div>
-
-                        <div className="space-y-2.5">
-                            <div className="flex justify-between items-center group">
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 group-hover:scale-125 transition-transform" />
-                                    โครงการใหม่
-                                </span>
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-slate-100 dark:border-slate-600">
-                                    {formatStat(todayProjects)}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center group">
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 group-hover:scale-125 transition-transform" />
-                                    ไฟล์ในโครงการ
-                                </span>
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-slate-100 dark:border-slate-600">
-                                    {formatStat(todayProjectFiles)}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center group">
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-sky-500 group-hover:scale-125 transition-transform" />
-                                    ไฟล์ส่งรายงาน
-                                </span>
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-slate-100 dark:border-slate-600">
-                                    {formatStat(todayReportFiles)}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center group">
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:scale-125 transition-transform" />
-                                    รวมโครงการ
-                                </span>
-                                <span className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md shadow-sm border border-slate-100 dark:border-slate-600">
-                                    {formatStat(totalProjects)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Navigation Menu */}
                 <nav
                     className={cn(
-                        "custom-scrollbar flex-1 overflow-y-auto px-4",
+                        "custom-scrollbar flex-1 overflow-y-auto px-3 xl:px-4",
                         !isSidebarOpen && "lg:px-3",
                     )}
                 >
@@ -280,14 +262,23 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                         {menuItems.map((item) => (
                             <li key={item.id}>
                                 <button
+                                    aria-label={item.name}
                                     onClick={() => {
                                         startTransition(() => {
                                             setActiveTab(item.id);
                                         });
                                         closeSidebarOnMobile();
                                     }}
+                                    onBlur={hideSidebarTooltip}
+                                    onFocus={(event) =>
+                                        showSidebarTooltip(item.name, event, true)
+                                    }
+                                    onMouseEnter={(event) =>
+                                        showSidebarTooltip(item.name, event, true)
+                                    }
+                                    onMouseLeave={hideSidebarTooltip}
                                     className={cn(
-                                        "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border px-4 py-3.5 text-left font-medium transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300",
+                                        "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border px-3 py-3 text-left font-medium transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300 xl:px-4 xl:py-3.5",
                                         !isSidebarOpen &&
                                             "lg:justify-center lg:px-0",
                                         activeTab === item.id
@@ -384,6 +375,20 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                     </div>
                 </div>
             </div>
+
+            {sidebarTooltip && (
+                <div
+                    role="tooltip"
+                    className="pointer-events-none fixed left-24 z-50 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 motion-reduce:transition-none dark:border-slate-200 dark:bg-slate-100 dark:text-slate-950 lg:block"
+                    style={{
+                        left: sidebarTooltip.left,
+                        top: sidebarTooltip.top,
+                    }}
+                >
+                    <span className="absolute left-0 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-slate-950 dark:bg-slate-100" />
+                    {sidebarTooltip.name}
+                </div>
+            )}
         </>
     );
 };

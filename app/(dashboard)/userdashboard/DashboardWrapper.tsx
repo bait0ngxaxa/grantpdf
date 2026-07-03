@@ -43,13 +43,13 @@ function DashboardShell({
             <div
                 className={cn(
                     "min-h-screen min-w-0 max-w-full transition-[margin] duration-300 lg:ml-20",
-                    isSidebarOpen && "lg:ml-72",
+                    isSidebarOpen && "lg:ml-64 xl:ml-72",
                 )}
             >
                 <TopBar />
 
                 {/* Content Area */}
-                <div className="min-w-0 max-w-full px-3 pb-4 pt-24 sm:px-6 sm:pb-6 sm:pt-28 md:px-8 md:pb-8">
+                <div className="min-w-0 max-w-full px-3 pb-4 pt-24 sm:px-6 sm:pb-6 sm:pt-28 md:px-6 md:pb-8 xl:px-8">
                     {children}
                 </div>
             </div>

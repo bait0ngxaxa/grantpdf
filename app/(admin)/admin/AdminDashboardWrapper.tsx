@@ -43,7 +43,7 @@ function AdminDashboardShell({
             <div
                 className={cn(
                     "min-h-screen min-w-0 max-w-full transition-[margin] duration-300 lg:ml-20",
-                    isSidebarOpen && "lg:ml-72",
+                    isSidebarOpen && "lg:ml-64 xl:ml-72",
                 )}
             >
                 <AdminTopBar />

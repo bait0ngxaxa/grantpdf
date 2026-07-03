@@ -53,7 +53,7 @@ export const AdminTopBar: React.FC = (): React.JSX.Element => {
         <div
             className={cn(
                 "fixed left-0 right-0 top-0 z-30 border-b border-orange-100/70 bg-gradient-to-r from-white/95 via-white/90 to-orange-50/70 px-3 py-3 shadow-[0_12px_34px_-26px_rgba(249,115,22,0.72)] backdrop-blur-2xl transition-[left,color,background-color,border-color] duration-300 dark:border-slate-800/70 dark:from-slate-950/95 dark:via-slate-900/90 dark:to-orange-950/30 dark:shadow-[0_12px_34px_-26px_rgba(251,146,60,0.45)] sm:px-6 sm:py-4 lg:left-20",
-                isSidebarOpen && "lg:left-72",
+                isSidebarOpen && "lg:left-64 xl:left-72",
             )}
         >
             <div className="flex min-w-0 items-center justify-between gap-2 sm:gap-3">
