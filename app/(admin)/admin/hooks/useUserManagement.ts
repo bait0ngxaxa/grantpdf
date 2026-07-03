@@ -4,7 +4,7 @@ import {
     useDeferredValue,
     useMemo,
 } from "react";
-import useSWR from "swr";
+import useSWR, { mutate as mutateGlobal } from "swr";
 import {
     API_ROUTES,
     PAGINATION,
@@ -15,6 +15,8 @@ import { toast } from "sonner";
 
 type UserData = UserApiData;
 type EditableRole = UserRole | "";
+
+const ADMIN_STATS_KEY = `${API_ROUTES.ADMIN_PROJECTS}/stats`;
 
 interface RoleCounts {
     admin: number;
@@ -268,7 +270,7 @@ export function useUserManagement(): UserManagementHook {
                 throw new Error(message);
             }
 
-            await mutate();
+            await Promise.all([mutate(), mutateGlobal(ADMIN_STATS_KEY)]);
             closeDeleteModal();
 
             toast.success("ลบผู้ใช้สำเร็จ!");

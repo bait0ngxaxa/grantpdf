@@ -31,6 +31,13 @@ export async function purgeExpiredAuditLogsOncePerInterval(
         return 0;
     }
 
+    const previousRetentionCheckAt = lastRetentionCheckAt;
     lastRetentionCheckAt = nowMs;
-    return purgeExpiredAuditLogs(now);
+
+    try {
+        return await purgeExpiredAuditLogs(now);
+    } catch (error) {
+        lastRetentionCheckAt = previousRetentionCheckAt;
+        throw error;
+    }
 }

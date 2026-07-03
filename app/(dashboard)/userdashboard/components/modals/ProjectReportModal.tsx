@@ -39,6 +39,7 @@ interface ProjectReportModalProps {
     isOpen: boolean;
     project: Project | null;
     onClose: () => void;
+    onReportSubmitted?: () => Promise<void>;
 }
 
 interface ReportsResponse {
@@ -107,6 +108,7 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
     isOpen,
     project,
     onClose,
+    onReportSubmitted,
 }) => {
     const [reportType, setReportType] = useState<string>(REPORT_TYPES.PROGRESS);
     const [note, setNote] = useState("");
@@ -180,6 +182,7 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
 
             const result = data as SubmitReportResponse;
             setReports((current) => [result.report, ...current]);
+            await onReportSubmitted?.();
             resetForm();
             toast.success(result.message ?? "ส่งรายงานโครงการสำเร็จ");
         } catch (error) {

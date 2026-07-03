@@ -22,6 +22,7 @@ export const DashboardModals = () => {
         isReportModalOpen,
         selectedProjectForReport,
         closeReportModal,
+        fetchUserData,
     } = useUserDashboardContext();
 
     return (
@@ -45,6 +46,7 @@ export const DashboardModals = () => {
                 isOpen={isReportModalOpen}
                 project={selectedProjectForReport}
                 onClose={closeReportModal}
+                onReportSubmitted={fetchUserData}
             />
         </>
     );

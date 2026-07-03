@@ -121,4 +121,24 @@ describe("useDashboardActions", () => {
         expect(params.setEditProjectDescription).toHaveBeenCalledWith("");
         expect(toastSuccess).toHaveBeenCalledWith("อัปเดตโครงการสำเร็จ");
     });
+
+    it("refreshes project metadata after deleting a file", async () => {
+        const params = {
+            ...createBaseParams(),
+            fileToDelete: "42",
+        };
+        const { result } = renderHook(() => useDashboardActions(params));
+
+        await act(async () => {
+            await result.current.onConfirmDeleteFile();
+        });
+
+        expect(fetch).toHaveBeenCalledWith(`${API_ROUTES.USER_DOCS}/42`, {
+            method: "DELETE",
+        });
+        expect(params.fetchUserData).toHaveBeenCalledTimes(1);
+        expect(params.setShowDeleteModal).toHaveBeenCalledWith(false);
+        expect(params.setFileToDelete).toHaveBeenCalledWith(null);
+        expect(toastSuccess).toHaveBeenCalledWith("ลบไฟล์สำเร็จ");
+    });
 });

@@ -59,4 +59,19 @@ describe("auditRetentionService", () => {
 
         expect(mockedAuditDeleteMany).toHaveBeenCalledTimes(2);
     });
+
+    it("retries within the same interval when a purge attempt fails", async () => {
+        const failedRun = new Date("2026-05-16T00:00:00.000Z");
+        const retryRun = new Date("2026-05-16T00:01:00.000Z");
+        mockedAuditDeleteMany
+            .mockRejectedValueOnce(new Error("db_down") as never)
+            .mockResolvedValueOnce({ count: 2 } as never);
+
+        await expect(purgeExpiredAuditLogsOncePerInterval(failedRun)).rejects.toThrow(
+            "db_down",
+        );
+        await expect(purgeExpiredAuditLogsOncePerInterval(retryRun)).resolves.toBe(2);
+
+        expect(mockedAuditDeleteMany).toHaveBeenCalledTimes(2);
+    });
 });
