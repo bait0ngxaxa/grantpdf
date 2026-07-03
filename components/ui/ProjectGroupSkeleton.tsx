@@ -41,9 +41,9 @@ function ProjectRowSkeleton({
     }
 
     return (
-        <div className="rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm sm:px-4 dark:border-slate-700 dark:bg-slate-800">
-            <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(7.5rem,9.5rem)_5.5rem_6.5rem_auto] xl:items-center">
-                <div className="min-w-0">
+        <div className="@container rounded-2xl border border-slate-100 bg-white px-3 py-3 shadow-sm sm:px-4 dark:border-slate-700 dark:bg-slate-800">
+            <div className="grid min-w-0 gap-3 @4xl:grid-cols-[minmax(0,1fr)_auto] @4xl:items-start @6xl:grid-cols-[minmax(0,1fr)_minmax(20rem,25rem)_auto] @6xl:items-center">
+                <div className="min-w-0 @4xl:col-start-1 @4xl:row-start-1 @6xl:col-auto @6xl:row-auto">
                     <div className="flex items-start gap-3">
                         <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
                         <div className="min-w-0 flex-1 space-y-2">
@@ -53,16 +53,18 @@ function ProjectRowSkeleton({
                         </div>
                     </div>
                 </div>
-                <Skeleton className="h-7 w-32 rounded-full xl:justify-self-center" />
-                <div className="space-y-1.5">
-                    <Skeleton className="h-3.5 w-16 rounded-full" />
-                    <Skeleton className="h-3.5 w-16 rounded-full" />
+                <div className="grid min-w-0 gap-2 @4xl:col-start-1 @4xl:row-start-2 @6xl:col-auto @6xl:row-auto @6xl:grid-cols-[minmax(7.5rem,9rem)_minmax(12rem,15rem)] @6xl:items-center">
+                    <Skeleton className="h-7 w-32 rounded-full @6xl:justify-self-center" />
+                    <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:gap-x-3 sm:gap-y-1">
+                        <Skeleton className="h-3.5 w-16 rounded-full" />
+                        <Skeleton className="h-3.5 w-16 rounded-full" />
+                        <Skeleton className="h-3.5 w-24 rounded-full" />
+                    </div>
                 </div>
-                <Skeleton className="h-3.5 w-24 rounded-full" />
-                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-                    <Skeleton className="h-11 rounded-lg sm:h-8 sm:w-16" />
-                    <Skeleton className="h-11 rounded-lg sm:h-8 sm:w-16" />
-                    <Skeleton className="col-span-2 h-11 rounded-lg sm:col-span-1 sm:h-8 sm:w-28" />
+                <div className="grid grid-cols-2 gap-2 @4xl:col-start-2 @4xl:row-span-2 @4xl:row-start-1 @4xl:self-start sm:flex sm:flex-wrap sm:justify-end @6xl:col-auto @6xl:row-auto @6xl:flex-nowrap @6xl:self-center">
+                    <Skeleton className="h-11 rounded-lg sm:h-8 sm:w-16 sm:shrink-0" />
+                    <Skeleton className="h-11 rounded-lg sm:h-8 sm:w-16 sm:shrink-0" />
+                    <Skeleton className="col-span-2 h-11 rounded-lg sm:col-span-1 sm:h-8 sm:w-28 sm:shrink-0" />
                     <div className="col-span-2 flex justify-end gap-1 border-t border-slate-100 pt-2 sm:col-span-1 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-2 dark:border-slate-700">
                         <Skeleton className="h-11 w-11 rounded-lg sm:h-8 sm:w-8" />
                         <Skeleton className="h-11 w-11 rounded-lg sm:h-8 sm:w-8" />

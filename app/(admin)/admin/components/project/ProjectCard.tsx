@@ -45,11 +45,8 @@ export default function ProjectCard({
     onFilesViewed,
     onReportsViewed,
 }: ProjectCardProps): React.JSX.Element {
-    const {
-        openProjectFilesModal,
-        openProjectReportsModal,
-        openStatusModal,
-    } = useAdminModalStates();
+    const { openProjectFilesModal, openProjectReportsModal, openStatusModal } =
+        useAdminModalStates();
 
     const onEditProjectStatus = (targetProject: AdminProject) => {
         onProjectViewed?.();
@@ -78,14 +75,14 @@ export default function ProjectCard({
     const getStatusIcon = (status: string): React.JSX.Element | null => {
         switch (status) {
             case PROJECT_STATUS.APPROVED:
-                return <Check className="w-3.5 h-3.5 mr-1.5" />;
+                return <Check className="mr-1.5 h-3.5 w-3.5" />;
             case PROJECT_STATUS.REJECTED:
             case PROJECT_STATUS.CLOSED:
-                return <X className="w-3.5 h-3.5 mr-1.5" />;
+                return <X className="mr-1.5 h-3.5 w-3.5" />;
             case PROJECT_STATUS.EDIT:
-                return <Pencil className="w-3.5 h-3.5 mr-1.5" />;
+                return <Pencil className="mr-1.5 h-3.5 w-3.5" />;
             case PROJECT_STATUS.IN_PROGRESS:
-                return <Clock className="w-3.5 h-3.5 mr-1.5" />;
+                return <Clock className="mr-1.5 h-3.5 w-3.5" />;
             default:
                 return null;
         }
@@ -96,13 +93,13 @@ export default function ProjectCard({
             id={focusElementId}
             tabIndex={-1}
             className={cn(
-                "scroll-mt-28 min-w-0 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 focus-visible:outline-none hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 sm:px-4",
+                "@container min-w-0 scroll-mt-28 rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-slate-300 hover:shadow-md focus-visible:outline-none sm:px-4 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600",
                 isNotificationFocused &&
-                    "border-orange-300 ring-2 ring-orange-400/45 shadow-md shadow-orange-100/80 dark:border-orange-700 dark:ring-orange-400/35 dark:shadow-orange-950/30",
+                    "border-orange-300 shadow-md ring-2 shadow-orange-100/80 ring-orange-400/45 dark:border-orange-700 dark:shadow-orange-950/30 dark:ring-orange-400/35",
             )}
         >
-            <div className="grid min-w-0 gap-3 xl:grid-cols-[minmax(16rem,1fr)_minmax(6.5rem,9rem)_minmax(6.5rem,7.75rem)_minmax(6.5rem,7.25rem)_5.5rem_auto] xl:items-start">
-                <div className="min-w-0">
+            <div className="grid min-w-0 gap-3 @4xl:grid-cols-[minmax(0,1fr)_auto] @4xl:items-start @6xl:grid-cols-[minmax(16rem,1fr)_minmax(22rem,30rem)_auto]">
+                <div className="min-w-0 @4xl:col-start-1 @4xl:row-start-1 @6xl:col-auto @6xl:row-auto">
                     <div className="flex items-start gap-2.5">
                         <div
                             className={cn(
@@ -124,7 +121,7 @@ export default function ProjectCard({
                         <div className="min-w-0 flex-1">
                             <div className="flex items-start gap-2">
                                 <h3
-                                    className="line-clamp-3 min-w-0 flex-1 break-words text-sm font-bold leading-5 text-slate-800 dark:text-slate-100"
+                                    className="line-clamp-3 min-w-0 flex-1 text-sm leading-5 font-bold break-words text-slate-800 dark:text-slate-100"
                                     title={project.name}
                                 >
                                     {project.name}
@@ -132,7 +129,7 @@ export default function ProjectCard({
                             </div>
                             <div className="mt-1 flex flex-wrap items-center gap-2">
                                 {showNewBadge && (
-                                    <div className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-rose-200/60 bg-rose-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-rose-600 dark:border-rose-800/50 dark:bg-rose-900/20 dark:text-rose-400">
+                                    <div className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-rose-200/60 bg-rose-50 px-2 py-0.5 text-[10px] font-bold tracking-wide text-rose-600 uppercase dark:border-rose-800/50 dark:bg-rose-900/20 dark:text-rose-400">
                                         <span className="h-1.5 w-1.5 rounded-full bg-rose-600 dark:bg-rose-400" />
                                         ใหม่
                                     </div>
@@ -174,69 +171,75 @@ export default function ProjectCard({
                     </div>
                 </div>
 
-                <div className="flex min-w-0 items-center gap-2 pt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 xl:self-start xl:justify-self-start">
-                    <User className="h-3.5 w-3.5" />
-                    <span className="truncate">{project.userName}</span>
+                <div className="grid min-w-0 gap-2 pt-0.5 @4xl:col-start-1 @4xl:row-start-2 @6xl:col-auto @6xl:row-auto @6xl:grid-cols-[minmax(10rem,15rem)_minmax(12rem,15rem)] @6xl:items-start">
+                    <div className="flex min-w-0 flex-col items-start gap-1">
+                        <span className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <User className="h-3.5 w-3.5" />
+                            <span className="truncate">{project.userName}</span>
+                        </span>
+                        <span className="min-w-0">
+                            <span
+                                className={cn(
+                                    "inline-flex max-w-full min-w-0 items-center justify-center rounded-lg border px-2.5 py-1 text-[11px] font-semibold sm:min-w-[7rem]",
+                                    getStatusColor(project.status),
+                                )}
+                            >
+                                {getStatusIcon(project.status)}
+                                <span className="min-w-0 break-words">
+                                    {project.status}
+                                </span>
+                            </span>
+                        </span>
+                    </div>
+
+                    <div className="flex min-w-0 flex-col items-start gap-1 text-xs font-medium text-slate-500 sm:flex-row sm:flex-wrap sm:gap-x-3 sm:gap-y-1 dark:text-slate-400">
+                        <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <FileText className="h-3.5 w-3.5" />
+                            <span>{project._count.files} ไฟล์</span>
+                        </span>
+                        <span
+                            className={cn(
+                                "inline-flex min-w-0 items-center gap-1.5",
+                                hasUnreadReport &&
+                                    "text-orange-600 dark:text-orange-300",
+                            )}
+                        >
+                            <ClipboardList className="h-3.5 w-3.5" />
+                            <span>{reportCount} รายงาน</span>
+                        </span>
+                        <span className="inline-flex min-w-0 items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span className="whitespace-nowrap">
+                                {new Date(project.created_at).toLocaleDateString(
+                                    "th-TH",
+                                )}
+                            </span>
+                        </span>
+                    </div>
                 </div>
 
-                <div className="min-w-0 pt-0.5 xl:self-start xl:justify-self-center">
-                    <span
-                        className={cn(
-                            "inline-flex max-w-full min-w-0 items-center justify-center rounded-lg border px-2.5 py-1 text-[11px] font-semibold sm:min-w-[7rem]",
-                            getStatusColor(project.status),
-                        )}
-                    >
-                        {getStatusIcon(project.status)}
-                        <span className="min-w-0 break-words">{project.status}</span>
-                    </span>
-                </div>
-
-                <div className="flex min-w-0 flex-col items-start gap-1 pt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 xl:self-start xl:justify-self-start">
-                    <span className="inline-flex items-center gap-1.5">
-                        <FileText className="h-3.5 w-3.5" />
-                        <span>{project._count.files} ไฟล์</span>
-                    </span>
-                    <span
-                        className={cn(
-                            "inline-flex items-center gap-1.5",
-                            hasUnreadReport &&
-                                "text-orange-600 dark:text-orange-300",
-                        )}
-                    >
-                        <ClipboardList className="h-3.5 w-3.5" />
-                        <span>{reportCount} รายงาน</span>
-                    </span>
-                </div>
-
-                <div className="flex min-w-0 items-center gap-2 pt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 xl:self-start xl:justify-self-start">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span>
-                        {new Date(project.created_at).toLocaleDateString("th-TH")}
-                    </span>
-                </div>
-
-                <div className="grid min-w-0 grid-cols-2 items-center gap-2 pt-0.5 sm:flex sm:flex-wrap sm:justify-end xl:flex-nowrap xl:gap-1.5 xl:self-start xl:justify-self-end">
-                    <div className="relative min-w-0">
+                <div className="grid min-w-0 grid-cols-2 items-center gap-2 pt-0.5 @4xl:col-start-2 @4xl:row-span-2 @4xl:row-start-1 @4xl:self-start sm:flex sm:flex-wrap sm:justify-end @6xl:col-auto @6xl:row-auto @6xl:flex-nowrap @6xl:gap-1.5 @6xl:justify-self-end">
+                    <div className="relative min-w-0 sm:shrink-0">
                         {hasUnreadDocument && (
-                            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-800" />
+                            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-800" />
                         )}
                         <Button
                             size="sm"
                             onClick={() => onViewProjectFiles(project)}
-                            className="h-11 w-full shrink-0 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-600 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 sm:h-8 sm:w-auto"
+                            className="h-11 w-full shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-bold whitespace-nowrap text-slate-600 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow-md sm:h-8 sm:w-auto dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                         >
                             <Eye className="mr-1.5 h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
                             ดูไฟล์
                         </Button>
                     </div>
-                    <div className="relative min-w-0">
+                    <div className="relative min-w-0 sm:shrink-0">
                         {hasUnreadReport && (
-                            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-800" />
+                            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-800" />
                         )}
                         <Button
                             size="sm"
                             onClick={() => onViewProjectReports(project)}
-                            className="h-11 w-full shrink-0 whitespace-nowrap rounded-lg border border-blue-100 bg-blue-50/70 px-2.5 text-xs font-bold text-blue-700 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-100 hover:text-blue-800 hover:shadow-md dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200 dark:hover:bg-blue-900/45 sm:h-8 sm:w-auto"
+                            className="h-11 w-full shrink-0 rounded-lg border border-blue-100 bg-blue-50/70 px-2.5 text-xs font-bold whitespace-nowrap text-blue-700 shadow-sm transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-100 hover:text-blue-800 hover:shadow-md sm:h-8 sm:w-auto dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200 dark:hover:bg-blue-900/45"
                         >
                             <FileText className="mr-1.5 h-3.5 w-3.5" />
                             รายงาน
@@ -245,7 +248,7 @@ export default function ProjectCard({
                     <Button
                         size="sm"
                         onClick={() => onEditProjectStatus(project)}
-                        className="col-span-2 h-11 w-full shrink-0 whitespace-nowrap rounded-lg bg-blue-600 px-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 dark:bg-blue-600 dark:hover:bg-blue-500 sm:col-span-1 sm:h-8 sm:w-auto"
+                        className="col-span-2 h-11 w-full shrink-0 rounded-lg bg-blue-600 px-3 text-xs font-bold whitespace-nowrap text-white shadow-md shadow-blue-500/20 transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 sm:col-span-1 sm:h-8 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-500"
                     >
                         <Pencil className="mr-1.5 h-3.5 w-3.5" />
                         จัดการ
