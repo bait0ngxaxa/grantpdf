@@ -185,6 +185,7 @@ export const ProjectReportModal: React.FC<ProjectReportModalProps> = ({
             await onReportSubmitted?.();
             resetForm();
             toast.success(result.message ?? "ส่งรายงานโครงการสำเร็จ");
+            onClose();
         } catch (error) {
             const message =
                 error instanceof Error ? error.message : "ไม่สามารถส่งรายงานได้";

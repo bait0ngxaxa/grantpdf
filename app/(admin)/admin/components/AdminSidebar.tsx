@@ -10,10 +10,10 @@ import {
     ScrollText,
     ArrowLeft,
     PanelLeftClose,
-    PanelLeftOpen,
 } from "lucide-react";
 import { ROUTES } from "@/lib/shared/constants";
 import { useAdminDashboardContext } from "../contexts";
+import { SidebarLogoToggle } from "@/components/ui/SidebarLogoToggle";
 
 const menuItems = [
     {
@@ -64,6 +64,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
     const [, startTransition] = React.useTransition();
     const closeSidebarOnMobile = (): void => {
         if (window.matchMedia("(max-width: 1023px)").matches) {
+            setSidebarTooltip(null);
             setIsSidebarOpen(false);
         }
     };
@@ -98,6 +99,7 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
             }
 
             if (event.key === "Escape") {
+                setSidebarTooltip(null);
                 setIsSidebarOpen(false);
                 return;
             }
@@ -145,7 +147,10 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                 <div
                     aria-hidden="true"
                     className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm transition-opacity dark:bg-slate-900/50 lg:hidden"
-                    onClick={() => setIsSidebarOpen(false)}
+                    onClick={() => {
+                        hideSidebarTooltip();
+                        setIsSidebarOpen(false);
+                    }}
                 />
             )}
 
@@ -203,42 +208,40 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
                                 </div>
                             </div>
                         </div>
-                        <button
-                            type="button"
-                            aria-label={
-                                isSidebarOpen
-                                    ? "ยุบเมนูด้านข้าง"
-                                    : "ขยายเมนูด้านข้าง"
-                            }
-                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                            onBlur={hideSidebarTooltip}
-                            onFocus={(event) =>
-                                showSidebarTooltip(
-                                    isSidebarOpen
-                                        ? "ยุบเมนูด้านข้าง"
-                                        : "ขยายเมนูด้านข้าง",
-                                    event,
-                                )
-                            }
-                            onMouseEnter={(event) =>
-                                showSidebarTooltip(
-                                    isSidebarOpen
-                                        ? "ยุบเมนูด้านข้าง"
-                                        : "ขยายเมนูด้านข้าง",
-                                    event,
-                                )
-                            }
-                            onMouseLeave={hideSidebarTooltip}
-                            aria-controls="admin-sidebar"
-                            aria-expanded={isSidebarOpen}
-                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-white text-slate-600 shadow-sm shadow-orange-100/50 transition-[border-color,background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700 hover:shadow-md hover:shadow-orange-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/35 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-orange-800 dark:hover:bg-orange-950/20 dark:hover:text-orange-300 dark:focus-visible:ring-offset-slate-900 lg:h-9 lg:w-9"
-                        >
-                            {isSidebarOpen ? (
+                        {!isSidebarOpen && (
+                            <SidebarLogoToggle
+                                controlsId="admin-sidebar"
+                                onHideTooltip={hideSidebarTooltip}
+                                onOpen={() => setIsSidebarOpen(true)}
+                                onShowTooltip={(event) =>
+                                    showSidebarTooltip("ขยายเมนูด้านข้าง", event)
+                                }
+                                tone="orange"
+                            />
+                        )}
+                        {isSidebarOpen && (
+                            <button
+                                type="button"
+                                aria-label="ยุบเมนูด้านข้าง"
+                                onClick={() => {
+                                    hideSidebarTooltip();
+                                    setIsSidebarOpen(false);
+                                }}
+                                onBlur={hideSidebarTooltip}
+                                onFocus={(event) =>
+                                    showSidebarTooltip("ยุบเมนูด้านข้าง", event)
+                                }
+                                onMouseEnter={(event) =>
+                                    showSidebarTooltip("ยุบเมนูด้านข้าง", event)
+                                }
+                                onMouseLeave={hideSidebarTooltip}
+                                aria-controls="admin-sidebar"
+                                aria-expanded={isSidebarOpen}
+                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-white text-slate-600 shadow-sm shadow-orange-100/50 transition-[border-color,background-color,box-shadow,color,transform] duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700 hover:shadow-md hover:shadow-orange-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/35 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:shadow-none dark:hover:border-orange-800 dark:hover:bg-orange-950/20 dark:hover:text-orange-300 dark:focus-visible:ring-offset-slate-900 lg:h-9 lg:w-9"
+                            >
                                 <PanelLeftClose className="h-4 w-4" />
-                            ) : (
-                                <PanelLeftOpen className="h-4 w-4" />
-                            )}
-                        </button>
+                            </button>
+                        )}
                     </div>
 
                 </div>
@@ -379,13 +382,13 @@ export const AdminSidebar: React.FC = (): React.JSX.Element => {
             {sidebarTooltip && (
                 <div
                     role="tooltip"
-                    className="pointer-events-none fixed left-24 z-50 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 motion-reduce:transition-none dark:border-slate-200 dark:bg-slate-100 dark:text-slate-950 lg:block"
+                    className="pointer-events-none fixed left-24 z-50 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-orange-100 bg-white px-3 py-2 text-sm font-semibold text-orange-700 shadow-md shadow-orange-950/10 ring-1 ring-orange-50 motion-reduce:transition-none dark:border-orange-900/55 dark:bg-slate-900 dark:text-orange-200 dark:shadow-orange-950/25 dark:ring-orange-900/40 lg:block"
                     style={{
                         left: sidebarTooltip.left,
                         top: sidebarTooltip.top,
                     }}
                 >
-                    <span className="absolute left-0 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-slate-950 dark:bg-slate-100" />
+                    <span className="absolute left-0 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 border-b border-l border-orange-100 bg-white dark:border-orange-900/55 dark:bg-slate-900" />
                     {sidebarTooltip.name}
                 </div>
             )}

@@ -28,30 +28,15 @@ export default function RootLayout({
                 <ThemeProvider>{children}</ThemeProvider>
                 <Toaster
                     position="top-right"
-                    offset={20}
+                    richColors
                     toastOptions={{
-                        style: {
-                            background: "#ffffff",
-                            border: "1px solid rgba(226, 232, 240, 0.95)",
-                            fontFamily: "var(--font-google-sans)",
-                            boxShadow:
-                                "0 16px 36px -24px rgba(15, 23, 42, 0.45), 0 8px 20px -18px rgba(15, 23, 42, 0.32)",
-                            borderRadius: "12px",
-                        },
                         classNames: {
-                            toast: "bg-white text-slate-900",
-                            title: "font-semibold tracking-tight",
-                            description: "text-slate-500",
                             success:
-                                "[&_[data-icon]]:text-emerald-600 [&_[data-title]]:text-emerald-700 [&_[data-description]]:text-emerald-700/80 [&_[data-close-button]]:text-emerald-700",
+                                "border-emerald-200 bg-emerald-50 text-emerald-900 [&_[data-description]]:text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950 dark:text-emerald-100 dark:[&_[data-description]]:text-emerald-200",
                             error:
-                                "[&_[data-icon]]:text-red-600 [&_[data-title]]:text-red-700 [&_[data-description]]:text-red-700/80 [&_[data-close-button]]:text-red-700",
-                            actionButton:
-                                "rounded-lg bg-slate-900 text-white hover:bg-slate-700",
-                            cancelButton:
-                                "rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200",
-                            closeButton:
-                                "border border-slate-200 bg-white text-slate-500",
+                                "border-rose-200 bg-rose-50 text-rose-900 [&_[data-description]]:text-rose-800 dark:border-rose-900/50 dark:bg-rose-950 dark:text-rose-100 dark:[&_[data-description]]:text-rose-200",
+                            warning:
+                                "border-amber-200 bg-amber-50 text-amber-950 [&_[data-description]]:text-amber-900 dark:border-amber-900/50 dark:bg-amber-950 dark:text-amber-100 dark:[&_[data-description]]:text-amber-200",
                         },
                     }}
                 />

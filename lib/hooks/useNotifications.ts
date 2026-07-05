@@ -210,7 +210,8 @@ export function useNotifications(
             ? extraPageState.pages
             : EMPTY_NOTIFICATION_PAGES;
     const lastLoadedPage = extraPages.at(-1);
-    const nextCursor = lastLoadedPage?.nextCursor ?? data?.nextCursor;
+    const nextCursor =
+        extraPages.length > 0 ? lastLoadedPage?.nextCursor : data?.nextCursor;
 
     const revalidateNotifications = useCallback(async (): Promise<void> => {
         await mutateGlobal(

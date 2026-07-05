@@ -104,5 +104,9 @@ describe("ProjectReportModal", () => {
         await waitFor(() => {
             expect(onReportSubmitted).toHaveBeenCalledOnce();
         });
+        expect(onClose).toHaveBeenCalledOnce();
+        expect(toastMocks.success).toHaveBeenCalledWith(
+            "ส่งรายงานโครงการสำเร็จ",
+        );
     });
 });
