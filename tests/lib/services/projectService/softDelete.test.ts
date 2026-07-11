@@ -64,6 +64,7 @@ describe("deleteProjectWithAudit", () => {
         expect(tx.project.update).toHaveBeenCalledWith({
             where: { id: 10 },
             data: {
+                name: "โครงการอ้างอิง__deleted_10",
                 deletedAt: expect.any(Date),
                 updated_at: expect.any(Date),
             },
@@ -76,6 +77,39 @@ describe("deleteProjectWithAudit", () => {
                 }),
             }),
         );
+    });
+
+    it("releases the original name so the owner can create a new project with it", async () => {
+        await deleteProjectWithAudit(10, 7, { actorUserId: "7" });
+
+        expect(tx.project.update).toHaveBeenCalledWith({
+            where: { id: 10 },
+            data: {
+                name: "โครงการอ้างอิง__deleted_10",
+                deletedAt: expect.any(Date),
+                updated_at: expect.any(Date),
+            },
+        });
+    });
+
+    it("keeps an archived name within the database limit", async () => {
+        tx.project.findFirst.mockResolvedValue({
+            id: 10,
+            name: "ก".repeat(255),
+            description: "ใช้เก็บเอกสารอ้างอิง",
+            userId: 7,
+        });
+
+        await deleteProjectWithAudit(10, 7, { actorUserId: "7" });
+
+        expect(tx.project.update).toHaveBeenCalledWith({
+            where: { id: 10 },
+            data: {
+                name: `${"ก".repeat(243)}__deleted_10`,
+                deletedAt: expect.any(Date),
+                updated_at: expect.any(Date),
+            },
+        });
     });
 
     it("throws PROJECT_NOT_FOUND when the active project is missing", async () => {

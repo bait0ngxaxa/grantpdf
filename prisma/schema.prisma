@@ -19,7 +19,7 @@ model User {
   sessionVersion      Int      @default(0)
   role                String   @default("member")
   created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
   files      UserFile[]
   projects   Project[]
   coOwnedProjects ProjectCoOwner[] @relation("ProjectCoOwnerAdmin")
@@ -68,7 +68,7 @@ model Program {
   isActive    Boolean  @default(true)
 
   created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
 
   projects   Project[]
 
@@ -87,7 +87,7 @@ model Project {
   programId   Int?
 
   created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
   deletedAt  DateTime? @map("deleted_at") @db.Timestamp(6)
 
   userId Int
@@ -137,7 +137,7 @@ model UserFile {
   downloadedAt     DateTime? 
 
   created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
 
   // Foreign keys
   userId Int
@@ -190,7 +190,7 @@ model AttachmentFile {
   mimeType String
 
   created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
 
   // Foreign key linking to the UserFile model
   userFileId Int
@@ -209,7 +209,7 @@ model ContractCounter {
   currentNumber Int      @default(1) 
   
   created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
 
   @@unique([contractType, buddhistYear])
 }

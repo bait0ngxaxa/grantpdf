@@ -1,6 +1,7 @@
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/server/audit/auditUtils";
 import { prisma } from "@/lib/server/db";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
+import { PROJECT_NAME_MAX_LENGTH } from "@/lib/validation/constants";
 import type { Project } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { buildProjectAccessWhere } from "./projectAccess";
@@ -22,6 +23,11 @@ function normalizeProjectText(
         description:
             description && description.trim() !== "" ? description.trim() : null,
     };
+}
+
+function getArchivedProjectName(name: string, projectId: number): string {
+    const suffix = `__deleted_${projectId}`;
+    return `${name.slice(0, PROJECT_NAME_MAX_LENGTH - suffix.length)}${suffix}`;
 }
 
 export async function updateProjectWithAudit(
@@ -138,6 +144,7 @@ export async function deleteProjectWithAudit(
         await tx.project.update({
             where: { id: projectId },
             data: {
+                name: getArchivedProjectName(existing.name, existing.id),
                 deletedAt: new Date(),
                 updated_at: new Date(),
             },
