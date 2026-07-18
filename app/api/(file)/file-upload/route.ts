@@ -30,6 +30,7 @@ import {
 } from "@/lib/server/storage/uploadIdempotency";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
+import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -52,6 +53,7 @@ const generateUniqueFilename = (originalName: string): string => {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     let idempotencyRecordId: bigint | null = null;
+    let idempotencyLeaseToken = "";
     try {
         const guard = await requireUserSession();
         if (isGuardError(guard)) return guard;
@@ -130,13 +132,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             );
         }
 
+        const requestHash = await createDocumentRequestHash(formData);
         const idempotency = await startUploadIdempotency(
             request,
             guard.userId,
             "file_upload",
+            requestHash,
         );
         if (idempotency.type === "response") return idempotency.response;
         idempotencyRecordId = idempotency.recordId;
+        idempotencyLeaseToken = idempotency.leaseToken;
 
         await ensureStorageDir("tmp");
         await ensureStorageDir("attachments");
@@ -216,7 +221,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 description: project.description,
             },
         };
-        await completeUploadIdempotency(idempotencyRecordId, responseBody).catch(
+        await completeUploadIdempotency(
+            idempotencyRecordId,
+            idempotencyLeaseToken,
+            responseBody,
+        ).catch(
             (error: unknown) => {
                 console.error("Failed to save upload idempotency response:", error);
             },
@@ -225,7 +234,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json(responseBody);
     } catch (error) {
         if (idempotencyRecordId !== null) {
-            await failUploadIdempotency(idempotencyRecordId, error).catch(
+            await failUploadIdempotency(
+                idempotencyRecordId,
+                idempotencyLeaseToken,
+                error,
+            ).catch(
                 (idempotencyError: unknown) => {
                     console.error("Failed to update upload idempotency state:", idempotencyError);
                 },

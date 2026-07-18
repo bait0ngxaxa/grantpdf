@@ -221,7 +221,10 @@ model DocumentIdempotency {
   userId         Int
   documentType   String   @map("document_type")
   idempotencyKey String   @map("idempotency_key")
-  status         String   @default("processing")
+  requestHash    String?   @map("request_hash") @db.VarChar(64)
+  leaseToken     String?   @map("lease_token") @db.VarChar(64)
+  leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamp(6)
+  status         String    @default("processing")
   responseStatus Int?     @map("response_status")
   responseBody   Json?    @map("response_body")
   errorMessage   String?  @map("error_message")

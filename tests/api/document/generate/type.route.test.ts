@@ -39,6 +39,10 @@ vi.mock("@/lib/services/documentIdempotencyService", () => ({
     failDocumentIdempotency: vi.fn(),
 }));
 
+vi.mock("@/lib/services/documentRequestFingerprint", () => ({
+    createDocumentRequestHash: vi.fn().mockResolvedValue("a".repeat(64)),
+}));
+
 vi.mock("@/lib/document/handlers", () => ({
     handleTorGeneration: vi.fn(),
     handleApprovalGeneration: vi.fn(),
@@ -65,12 +69,14 @@ import {
     failDocumentIdempotency,
 } from "@/lib/services/documentIdempotencyService";
 import { handleTorGeneration } from "@/lib/document/handlers";
+import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
 
 const mockedAuth = vi.mocked(auth);
 const mockedStartDocumentIdempotency = vi.mocked(startDocumentIdempotency);
 const mockedCompleteDocumentIdempotency = vi.mocked(completeDocumentIdempotency);
 const mockedFailDocumentIdempotency = vi.mocked(failDocumentIdempotency);
 const mockedHandleTorGeneration = vi.mocked(handleTorGeneration);
+const mockedCreateDocumentRequestHash = vi.mocked(createDocumentRequestHash);
 
 function buildParams(type: string): Promise<{ type: string }> {
     return Promise.resolve({ type });
@@ -121,6 +127,7 @@ describe("document generate route idempotency", () => {
         mockedStartDocumentIdempotency.mockResolvedValue({
             type: "started",
             recordId: BigInt(1),
+            leaseToken: "lease-token-1",
         } as never);
 
         mockedHandleTorGeneration.mockResolvedValue(
@@ -175,6 +182,22 @@ describe("document generate route idempotency", () => {
         expect(mockedHandleTorGeneration).not.toHaveBeenCalled();
     });
 
+    it("rejects a reused key when the request payload differs", async () => {
+        mockedStartDocumentIdempotency.mockResolvedValue({
+            type: "payload_mismatch",
+        } as never);
+
+        const response = await POST(buildRequest("idem-key-payload"), {
+            params: buildParams("tor"),
+        });
+        const body = await response.json();
+
+        expect(response.status).toBe(409);
+        expect(body.error).toContain("ข้อมูลคำขออื่น");
+        expect(mockedCreateDocumentRequestHash).toHaveBeenCalledOnce();
+        expect(mockedHandleTorGeneration).not.toHaveBeenCalled();
+    });
+
     it("returns 409 when same key is still processing", async () => {
         mockedStartDocumentIdempotency.mockResolvedValue({
             type: "in_progress",
@@ -209,6 +232,7 @@ describe("document generate route idempotency", () => {
         mockedStartDocumentIdempotency.mockResolvedValue({
             type: "started",
             recordId: BigInt(99),
+            leaseToken: "lease-token-99",
         } as never);
         mockedHandleTorGeneration.mockRejectedValue(
             new Error("generate_failed"),
@@ -223,6 +247,7 @@ describe("document generate route idempotency", () => {
         expect(body.error).toBe("generate_failed");
         expect(mockedFailDocumentIdempotency).toHaveBeenCalledWith({
             recordId: BigInt(99),
+            leaseToken: "lease-token-99",
             errorMessage: "generate_failed",
         });
         expect(mockedCompleteDocumentIdempotency).not.toHaveBeenCalled();

@@ -33,6 +33,7 @@ import {
     getProjectReportsForUser,
 } from "@/lib/services/projectReportService";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
+import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
 import {
     completeUploadIdempotency,
     failUploadIdempotency,
@@ -153,6 +154,7 @@ export async function POST(
 ): Promise<NextResponse> {
     let finalFilePath: string | null = null;
     let idempotencyRecordId: bigint | null = null;
+    let idempotencyLeaseToken = "";
     try {
         const rateLimitResult = await applyRateLimit({
             request: req,
@@ -191,13 +193,18 @@ export async function POST(
         if (isGuardError(guard)) return guard;
 
         await ensureOwnProject(projectId, guard.userId);
+        const requestHash = await createDocumentRequestHash(formData, {
+            projectId: projectId.toString(),
+        });
         const idempotency = await startUploadIdempotency(
             req,
             guard.userId,
             "project_report",
+            requestHash,
         );
         if (idempotency.type === "response") return idempotency.response;
         idempotencyRecordId = idempotency.recordId;
+        idempotencyLeaseToken = idempotency.leaseToken;
 
         const storedFile = await persistReportFile(fileEntry);
         finalFilePath = storedFile.finalFilePath;
@@ -225,7 +232,11 @@ export async function POST(
             message: "ส่งรายงานโครงการสำเร็จ",
             report,
         };
-        await completeUploadIdempotency(idempotencyRecordId, responseBody).catch(
+        await completeUploadIdempotency(
+            idempotencyRecordId,
+            idempotencyLeaseToken,
+            responseBody,
+        ).catch(
             (idempotencyError: unknown) => {
                 console.error(
                     "Failed to save project report idempotency response:",
@@ -243,7 +254,11 @@ export async function POST(
             await unlink(finalFilePath).catch(() => undefined);
         }
         if (idempotencyRecordId !== null) {
-            await failUploadIdempotency(idempotencyRecordId, error).catch(
+            await failUploadIdempotency(
+                idempotencyRecordId,
+                idempotencyLeaseToken,
+                error,
+            ).catch(
                 (idempotencyError: unknown) => {
                     console.error(
                         "Failed to update project report idempotency state:",

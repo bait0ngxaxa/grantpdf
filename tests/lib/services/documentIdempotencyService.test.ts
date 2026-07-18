@@ -6,7 +6,6 @@ vi.mock("@/lib/server/db", () => ({
         documentIdempotency: {
             create: vi.fn(),
             findUnique: vi.fn(),
-            update: vi.fn(),
             updateMany: vi.fn(),
         },
     },
@@ -22,8 +21,8 @@ import {
 
 const mockedCreate = vi.mocked(prisma.documentIdempotency.create);
 const mockedFindUnique = vi.mocked(prisma.documentIdempotency.findUnique);
-const mockedUpdate = vi.mocked(prisma.documentIdempotency.update);
 const mockedUpdateMany = vi.mocked(prisma.documentIdempotency.updateMany);
+const REQUEST_HASH = "a".repeat(64);
 
 function createP2002Error(): Prisma.PrismaClientKnownRequestError {
     return new Prisma.PrismaClientKnownRequestError("duplicate", {
@@ -60,11 +59,13 @@ describe("documentIdempotencyService", () => {
                 userId: 1,
                 documentType: "tor",
                 idempotencyKey: "idem-key-001",
+                requestHash: REQUEST_HASH,
             });
 
             expect(result).toEqual({
                 type: "started",
                 recordId: BigInt(123),
+                leaseToken: expect.any(String),
             });
             expect(mockedFindUnique).not.toHaveBeenCalled();
         });
@@ -74,6 +75,7 @@ describe("documentIdempotencyService", () => {
             mockedFindUnique.mockResolvedValue({
                 id: BigInt(124),
                 status: "completed",
+                requestHash: REQUEST_HASH,
                 responseStatus: 200,
                 responseBody: {
                     success: true,
@@ -84,6 +86,7 @@ describe("documentIdempotencyService", () => {
                 userId: 1,
                 documentType: "tor",
                 idempotencyKey: "idem-key-002",
+                requestHash: REQUEST_HASH,
             });
 
             expect(result).toEqual({
@@ -98,11 +101,96 @@ describe("documentIdempotencyService", () => {
             });
         });
 
+        it("rejects the same key when the request hash differs", async () => {
+            mockedCreate.mockRejectedValue(createP2002Error());
+            mockedFindUnique.mockResolvedValue({
+                id: BigInt(1234),
+                status: "completed",
+                requestHash: "a".repeat(64),
+                responseStatus: 200,
+                responseBody: {
+                    success: true,
+                    storagePath: "storage/documents/old-request.docx",
+                },
+            } as never);
+
+            const result = await startDocumentIdempotency({
+                userId: 1,
+                documentType: "tor",
+                idempotencyKey: "idem-key-hash-mismatch",
+                requestHash: "b".repeat(64),
+            } as never);
+
+            expect(result).toEqual({ type: "payload_mismatch" });
+        });
+
+        it("reclaims an expired processing lease", async () => {
+            mockedCreate.mockRejectedValue(createP2002Error());
+            mockedFindUnique.mockResolvedValue({
+                id: BigInt(128),
+                status: "processing",
+                requestHash: REQUEST_HASH,
+                leaseToken: "expired-token",
+                leaseExpiresAt: new Date("2020-01-01T00:00:00.000Z"),
+                responseStatus: null,
+                responseBody: null,
+            } as never);
+            mockedUpdateMany.mockResolvedValue({ count: 1 } as never);
+
+            const result = await startDocumentIdempotency({
+                userId: 1,
+                documentType: "tor",
+                idempotencyKey: "idem-key-expired",
+                requestHash: REQUEST_HASH,
+            });
+
+            expect(result).toEqual({
+                type: "started",
+                recordId: BigInt(128),
+                leaseToken: expect.any(String),
+            });
+            const reclaimed = mockedUpdateMany.mock.calls[0]?.[0];
+            expect(reclaimed?.where).toMatchObject({
+                id: BigInt(128),
+                status: "processing",
+            });
+            expect(reclaimed?.data.leaseToken).toEqual(expect.any(String));
+            expect(reclaimed?.data.leaseExpiresAt).toBeInstanceOf(Date);
+        });
+
+        it("reclaims a legacy processing row without a lease or request hash", async () => {
+            mockedCreate.mockRejectedValue(createP2002Error());
+            mockedFindUnique.mockResolvedValue({
+                id: BigInt(129),
+                status: "processing",
+                requestHash: null,
+                responseStatus: null,
+                responseBody: null,
+            } as never);
+            mockedUpdateMany.mockResolvedValue({ count: 1 } as never);
+
+            const result = await startDocumentIdempotency({
+                userId: 1,
+                documentType: "tor",
+                idempotencyKey: "idem-key-legacy",
+                requestHash: REQUEST_HASH,
+            });
+
+            expect(result).toEqual({
+                type: "started",
+                recordId: BigInt(129),
+                leaseToken: expect.any(String),
+            });
+        });
+
         it("returns in_progress when unique conflict and existing row is processing", async () => {
             mockedCreate.mockRejectedValue(createP2002Error());
             mockedFindUnique.mockResolvedValue({
                 id: BigInt(125),
                 status: "processing",
+                requestHash: REQUEST_HASH,
+                leaseToken: "active-token",
+                leaseExpiresAt: new Date("2099-01-01T00:00:00.000Z"),
                 responseStatus: null,
                 responseBody: null,
             } as never);
@@ -111,6 +199,7 @@ describe("documentIdempotencyService", () => {
                 userId: 1,
                 documentType: "tor",
                 idempotencyKey: "idem-key-003",
+                requestHash: REQUEST_HASH,
             });
 
             expect(result).toEqual({ type: "in_progress" });
@@ -121,6 +210,7 @@ describe("documentIdempotencyService", () => {
             mockedFindUnique.mockResolvedValue({
                 id: BigInt(126),
                 status: "failed",
+                requestHash: REQUEST_HASH,
                 responseStatus: null,
                 responseBody: null,
             } as never);
@@ -129,6 +219,7 @@ describe("documentIdempotencyService", () => {
                 userId: 1,
                 documentType: "tor",
                 idempotencyKey: "idem-key-004",
+                requestHash: REQUEST_HASH,
             });
 
             expect(result).toEqual({ type: "failed" });
@@ -140,6 +231,7 @@ describe("documentIdempotencyService", () => {
             mockedFindUnique.mockResolvedValue({
                 id: BigInt(127),
                 status: "failed",
+                requestHash: REQUEST_HASH,
                 responseStatus: null,
                 responseBody: null,
             } as never);
@@ -149,12 +241,14 @@ describe("documentIdempotencyService", () => {
                 userId: 1,
                 documentType: "tor",
                 idempotencyKey: "idem-key-005",
+                requestHash: REQUEST_HASH,
                 retryFailed: true,
             });
 
             expect(result).toEqual({
                 type: "started",
                 recordId: BigInt(127),
+                leaseToken: expect.any(String),
             });
             expect(mockedUpdateMany).toHaveBeenCalledWith({
                 where: { id: BigInt(127), status: "failed" },
@@ -170,6 +264,7 @@ describe("documentIdempotencyService", () => {
                     userId: 1,
                     documentType: "tor",
                     idempotencyKey: "idem-key-005",
+                    requestHash: REQUEST_HASH,
                 }),
             ).rejects.toThrow("db_down");
         });
@@ -177,41 +272,68 @@ describe("documentIdempotencyService", () => {
 
     describe("completeDocumentIdempotency", () => {
         it("updates status to completed with response payload", async () => {
-            mockedUpdate.mockResolvedValue({} as never);
+            mockedUpdateMany.mockResolvedValue({ count: 1 } as never);
 
             await completeDocumentIdempotency({
                 recordId: BigInt(10),
+                leaseToken: "lease-token-10",
                 statusCode: 200,
                 responseBody: { success: true },
             });
 
-            expect(mockedUpdate).toHaveBeenCalledOnce();
-            expect(mockedUpdate.mock.calls[0]?.[0]).toMatchObject({
-                where: { id: BigInt(10) },
+            expect(mockedUpdateMany).toHaveBeenCalledOnce();
+            expect(mockedUpdateMany.mock.calls[0]?.[0]).toMatchObject({
+                where: {
+                    id: BigInt(10),
+                    status: "processing",
+                    leaseToken: "lease-token-10",
+                },
                 data: expect.objectContaining({
                     status: "completed",
                     responseStatus: 200,
                     responseBody: { success: true },
                     errorMessage: null,
+                    leaseToken: null,
+                    leaseExpiresAt: null,
                 }),
             });
+        });
+
+        it("rejects completion from a stale lease owner", async () => {
+            mockedUpdateMany.mockResolvedValue({ count: 0 } as never);
+
+            await expect(
+                completeDocumentIdempotency({
+                    recordId: BigInt(10),
+                    leaseToken: "stale-lease-token",
+                    statusCode: 200,
+                    responseBody: { success: true },
+                }),
+            ).rejects.toThrow("IDEMPOTENCY_LEASE_LOST");
         });
     });
 
     describe("failDocumentIdempotency", () => {
         it("updates status to failed and truncates long message", async () => {
-            mockedUpdate.mockResolvedValue({} as never);
+            mockedUpdateMany.mockResolvedValue({ count: 1 } as never);
             const longMessage = "x".repeat(300);
 
             await failDocumentIdempotency({
                 recordId: BigInt(11),
+                leaseToken: "lease-token-11",
                 errorMessage: longMessage,
             });
 
-            expect(mockedUpdate).toHaveBeenCalledOnce();
-            const called = mockedUpdate.mock.calls[0]?.[0];
-            expect(called?.where).toEqual({ id: BigInt(11) });
+            expect(mockedUpdateMany).toHaveBeenCalledOnce();
+            const called = mockedUpdateMany.mock.calls[0]?.[0];
+            expect(called?.where).toEqual({
+                id: BigInt(11),
+                status: "processing",
+                leaseToken: "lease-token-11",
+            });
             expect(called?.data.status).toBe("failed");
+            expect(called?.data.leaseToken).toBeNull();
+            expect(called?.data.leaseExpiresAt).toBeNull();
             expect((called?.data.errorMessage as string).length).toBe(191);
         });
     });

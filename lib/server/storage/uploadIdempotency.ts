@@ -9,13 +9,14 @@ import {
 import { IDEMPOTENCY_HEADERS } from "@/lib/shared/constants";
 
 type StartUploadIdempotencyResult =
-    | { type: "started"; recordId: bigint }
+    | { type: "started"; recordId: bigint; leaseToken: string }
     | { type: "response"; response: NextResponse };
 
 export async function startUploadIdempotency(
     request: Request,
     userId: number,
     documentType: IdempotentDocumentType,
+    requestHash: string,
 ): Promise<StartUploadIdempotencyResult> {
     const idempotencyKey = normalizeIdempotencyKey(
         request.headers.get(IDEMPOTENCY_HEADERS.PRIMARY),
@@ -34,9 +35,23 @@ export async function startUploadIdempotency(
         userId,
         documentType,
         idempotencyKey,
+        requestHash,
         retryFailed: true,
     });
     if (result.type === "started") return result;
+
+    if (result.type === "payload_mismatch") {
+        return {
+            type: "response",
+            response: NextResponse.json(
+                {
+                    error:
+                        "Idempotency-Key นี้ถูกใช้กับข้อมูลอัปโหลดอื่นแล้ว กรุณาใช้ key ใหม่",
+                },
+                { status: 409 },
+            ),
+        };
+    }
 
     if (result.type === "replay") {
         return {
@@ -58,10 +73,12 @@ export async function startUploadIdempotency(
 
 export async function completeUploadIdempotency(
     recordId: bigint,
+    leaseToken: string,
     responseBody: Record<string, unknown>,
 ): Promise<void> {
     await completeDocumentIdempotency({
         recordId,
+        leaseToken,
         statusCode: 200,
         responseBody,
     });
@@ -69,8 +86,9 @@ export async function completeUploadIdempotency(
 
 export async function failUploadIdempotency(
     recordId: bigint,
+    leaseToken: string,
     error: unknown,
 ): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : "UPLOAD_FAILED";
-    await failDocumentIdempotency({ recordId, errorMessage });
+    await failDocumentIdempotency({ recordId, leaseToken, errorMessage });
 }

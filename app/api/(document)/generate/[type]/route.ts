@@ -12,6 +12,7 @@ import {
     completeDocumentIdempotency,
     failDocumentIdempotency,
 } from "@/lib/services/documentIdempotencyService";
+import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
 import {
     handleTorGeneration,
     handleApprovalGeneration,
@@ -210,6 +211,7 @@ export async function POST(
     let auditUserEmail: string | undefined;
     let auditType: string | null = null;
     let idempotencyRecordId: bigint | null = null;
+    let idempotencyLeaseToken = "";
 
     try {
         const guard = await requireUserSession();
@@ -268,10 +270,12 @@ export async function POST(
                 );
             }
 
+            const requestHash = await createDocumentRequestHash(formData);
             const idempotency = await startDocumentIdempotency({
                 userId,
                 documentType: type,
                 idempotencyKey: normalizedKey,
+                requestHash,
             });
 
             if (idempotency.type === "replay") {
@@ -298,6 +302,16 @@ export async function POST(
                 });
             }
 
+            if (idempotency.type === "payload_mismatch") {
+                return NextResponse.json(
+                    {
+                        error:
+                            "Idempotency-Key นี้ถูกใช้กับข้อมูลคำขออื่นแล้ว กรุณาใช้ key ใหม่",
+                    },
+                    { status: 409, headers: rateLimitResult.headers },
+                );
+            }
+
             if (idempotency.type === "in_progress") {
                 return NextResponse.json(
                     { error: "คำขอนี้กำลังประมวลผลอยู่ กรุณารอสักครู่" },
@@ -316,6 +330,7 @@ export async function POST(
             }
 
             idempotencyRecordId = idempotency.recordId;
+            idempotencyLeaseToken = idempotency.leaseToken;
         }
 
         let response: Response;
@@ -340,18 +355,25 @@ export async function POST(
         const responseBody = await tryReadJsonBody(response);
         if (
             idempotencyRecordId &&
+            idempotencyLeaseToken &&
             response.status >= 200 &&
             response.status < 300 &&
             responseBody
         ) {
             await completeDocumentIdempotency({
                 recordId: idempotencyRecordId,
+                leaseToken: idempotencyLeaseToken,
                 statusCode: response.status,
                 responseBody,
             });
-        } else if (idempotencyRecordId && !(response.status >= 200 && response.status < 300)) {
+        } else if (
+            idempotencyRecordId &&
+            idempotencyLeaseToken &&
+            !(response.status >= 200 && response.status < 300)
+        ) {
             await failDocumentIdempotency({
                 recordId: idempotencyRecordId,
+                leaseToken: idempotencyLeaseToken,
                 errorMessage: `HTTP_${response.status}`,
             });
         }
@@ -379,9 +401,10 @@ export async function POST(
             },
         });
     } catch (error) {
-        if (idempotencyRecordId) {
+        if (idempotencyRecordId && idempotencyLeaseToken) {
             await failDocumentIdempotency({
                 recordId: idempotencyRecordId,
+                leaseToken: idempotencyLeaseToken,
                 errorMessage:
                     error instanceof Error ? error.message : "unknown_error",
             });
