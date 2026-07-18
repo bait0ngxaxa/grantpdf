@@ -1,4 +1,4 @@
-import { FILE_TYPES, STATUS_FILTER } from "@/lib/shared/constants";
+import { FILE_DELETION_STATUS, FILE_TYPES, STATUS_FILTER } from "@/lib/shared/constants";
 import { parseProjectSearchTerm } from "@/lib/domain/projects/search";
 import { Prisma } from "@prisma/client";
 
@@ -32,6 +32,7 @@ export function buildAdminProjectsWhere(
                                             originalFileName: {
                                                 contains: params.search,
                                             },
+                                            deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                                             projectReports: { none: {} },
                                         },
                                     },
@@ -48,6 +49,7 @@ export function buildAdminProjectsWhere(
                   files: {
                       some: {
                           fileExtension: params.fileType,
+                          deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                           projectReports: { none: {} },
                       },
                   },
@@ -81,6 +83,7 @@ export function buildAdminProjectsWhereSql(
                         SELECT 1
                         FROM \`UserFile\` uf_search
                         WHERE uf_search.projectId = p.id
+                          AND uf_search.deletion_status = ${FILE_DELETION_STATUS.ACTIVE}
                           AND uf_search.originalFileName LIKE ${keyword}
                           AND NOT EXISTS (
                               SELECT 1
@@ -103,6 +106,7 @@ export function buildAdminProjectsWhereSql(
                 SELECT 1
                 FROM \`UserFile\` uf
                 WHERE uf.projectId = p.id
+                  AND uf.deletion_status = ${FILE_DELETION_STATUS.ACTIVE}
                   AND uf.fileExtension = ${params.fileType}
                   AND NOT EXISTS (
                       SELECT 1

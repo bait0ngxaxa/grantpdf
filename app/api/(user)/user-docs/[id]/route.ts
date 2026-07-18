@@ -6,7 +6,11 @@ import {
     requireResourceOwner,
     requireUserSession,
 } from "@/lib/server/auth/guards";
-import { getFileForDeletion, deleteFileRecord } from "@/lib/services/fileService";
+import {
+    getFileForDeletion,
+    markFileDeleting,
+    markFileDeleted,
+} from "@/lib/services/fileService";
 import { unlink } from "fs/promises";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import { getFullPathFromStoragePath } from "@/lib/server/storage";
@@ -45,6 +49,14 @@ export async function DELETE(
         );
         if (ownerError) return ownerError;
 
+        const markedForDeletion = await markFileDeleting(docId);
+        if (!markedForDeletion) {
+            return NextResponse.json(
+                { error: "ไม่พบเอกสาร" },
+                { status: 404 },
+            );
+        }
+
         if (document.storagePath) {
             const fullPath = getFullPathFromStoragePath(document.storagePath);
             try {
@@ -60,7 +72,7 @@ export async function DELETE(
             }
         }
 
-        await deleteFileRecord(docId);
+        await markFileDeleted(docId, guard.userId);
 
         // Log user file deletion
         const auditContext = buildAuditContext(guard.session, req);

@@ -9,6 +9,7 @@ import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
 import { publicErrorResponse } from "@/lib/api/responses";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 
 export async function GET(
     _req: NextRequest,
@@ -25,7 +26,11 @@ export async function GET(
         }
 
         const file = await prisma.userFile.findFirst({
-            where: { id: fileId, userId: guard.userId },
+            where: {
+                id: fileId,
+                userId: guard.userId,
+                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+            },
             select: {
                 id: true,
                 originalFileName: true,

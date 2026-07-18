@@ -47,7 +47,8 @@ export {
     fileExists,
     getFileById,
     getFileForDeletion,
-    deleteFileRecord,
+    markFileDeleting,
+    markFileDeleted,
 } from "./fileService";
 
 // Project Report Service

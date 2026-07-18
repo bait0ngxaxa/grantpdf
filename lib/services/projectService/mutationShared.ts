@@ -1,3 +1,4 @@
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import { prisma } from "@/lib/server/db";
 import type { AdminProject } from "@/type/models";
 import { Prisma, type Project } from "@prisma/client";
@@ -81,7 +82,7 @@ export async function getProjectForCreate(
     return prisma.project.findUniqueOrThrow({
         where: { id },
         include: {
-            files: true,
+            files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
             _count: {
                 select: { files: true },
             },

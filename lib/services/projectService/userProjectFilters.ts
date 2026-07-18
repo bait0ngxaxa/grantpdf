@@ -1,4 +1,4 @@
-import { SORT_OPTIONS, STATUS_FILTER } from "@/lib/shared/constants";
+import { FILE_DELETION_STATUS, SORT_OPTIONS, STATUS_FILTER } from "@/lib/shared/constants";
 import type { Prisma } from "@prisma/client";
 import { buildUserProjectsAccessWhere } from "./projectAccess";
 
@@ -12,11 +12,13 @@ export const USER_PROJECT_SORT_ORDER_MAP: Record<
 
 export function buildActiveUserFilesWhere(userId: number): {
     userId: number;
+    deletionStatus: typeof FILE_DELETION_STATUS.ACTIVE;
     projectReports: { none: Record<string, never> };
     project: { deletedAt: null };
 } {
     return {
         userId,
+        deletionStatus: FILE_DELETION_STATUS.ACTIVE,
         projectReports: { none: {} },
         project: { deletedAt: null },
     };
@@ -56,6 +58,7 @@ export function buildUserProjectsWhere(params: {
                                       originalFileName: {
                                           contains: params.search,
                                       },
+                                      deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                                       projectReports: { none: {} },
                                   },
                               },

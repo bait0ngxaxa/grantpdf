@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/server/db";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import type {
     RawFile,
     PaginatedFilesResult,
@@ -16,6 +17,7 @@ export async function getUserFilesPaginated({
     const skip = (page - 1) * limit;
     const where = {
         userId,
+        deletionStatus: FILE_DELETION_STATUS.ACTIVE,
         ...(projectId ? { projectId, projectReports: { none: {} } } : {}),
     };
 
@@ -62,6 +64,7 @@ export async function getAllFilesPaginated({
     const skip = (page - 1) * limit;
 
     const where = {
+        deletionStatus: FILE_DELETION_STATUS.ACTIVE,
         ...(projectId ? { projectId, projectReports: { none: {} } } : {}),
         ...(search
             ? {

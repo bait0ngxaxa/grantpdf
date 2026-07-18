@@ -6,7 +6,8 @@ vi.mock("@/lib/server/auth/session", () => ({
 
 vi.mock("@/lib/services/fileService", () => ({
     getFileForDeletion: vi.fn(),
-    deleteFileRecord: vi.fn(),
+    markFileDeleting: vi.fn(),
+    markFileDeleted: vi.fn(),
 }));
 
 vi.mock("fs/promises", () => {
@@ -26,7 +27,11 @@ vi.mock("@/lib/server/audit/auditLog", () => ({
 }));
 
 import { auth } from "@/lib/server/auth/session";
-import { getFileForDeletion, deleteFileRecord } from "@/lib/services/fileService";
+import {
+    getFileForDeletion,
+    markFileDeleting,
+    markFileDeleted,
+} from "@/lib/services/fileService";
 import { unlink } from "fs/promises";
 import { getFullPathFromStoragePath } from "@/lib/server/storage";
 import { logAudit } from "@/lib/server/audit/auditLog";
@@ -34,7 +39,8 @@ import { DELETE } from "@/app/api/(user)/user-docs/[id]/route";
 
 const mockedAuth = vi.mocked(auth);
 const mockedGetFileForDeletion = vi.mocked(getFileForDeletion);
-const mockedDeleteFileRecord = vi.mocked(deleteFileRecord);
+const mockedMarkFileDeleting = vi.mocked(markFileDeleting);
+const mockedMarkFileDeleted = vi.mocked(markFileDeleted);
 const mockedUnlink = vi.mocked(unlink);
 const mockedGetFullPathFromStoragePath = vi.mocked(getFullPathFromStoragePath);
 const mockedLogAudit = vi.mocked(logAudit);
@@ -52,6 +58,8 @@ describe("user-docs [id] route DELETE", () => {
                 email: "tester@example.com",
             },
         } as never);
+        mockedMarkFileDeleting.mockResolvedValue(true);
+        mockedMarkFileDeleted.mockResolvedValue(undefined);
     });
 
     it("returns 401 when session is missing", async () => {
@@ -88,10 +96,10 @@ describe("user-docs [id] route DELETE", () => {
 
         expect(response.status).toBe(403);
         expect(body).toEqual({ error: "ไม่มีสิทธิ์ลบเอกสารนี้" });
-        expect(mockedDeleteFileRecord).not.toHaveBeenCalled();
+        expect(mockedMarkFileDeleting).not.toHaveBeenCalled();
     });
 
-    it("deletes file with resolved storage path and removes db record", async () => {
+    it("deletes file with resolved storage path and marks the record deleted", async () => {
         mockedGetFileForDeletion.mockResolvedValue({
             id: "11",
             userId: "1",
@@ -119,7 +127,8 @@ describe("user-docs [id] route DELETE", () => {
         expect(mockedUnlink).toHaveBeenCalledWith(
             "C:\\repo\\storage\\documents\\doc.pdf",
         );
-        expect(mockedDeleteFileRecord).toHaveBeenCalledWith(11);
+        expect(mockedMarkFileDeleting).toHaveBeenCalledWith(11);
+        expect(mockedMarkFileDeleted).toHaveBeenCalledWith(11, 1);
         expect(mockedLogAudit).toHaveBeenCalledOnce();
     });
 
@@ -147,7 +156,7 @@ describe("user-docs [id] route DELETE", () => {
 
         expect(response.status).toBe(200);
         expect(mockedUnlink).toHaveBeenCalledOnce();
-        expect(mockedDeleteFileRecord).toHaveBeenCalledWith(11);
+        expect(mockedMarkFileDeleted).toHaveBeenCalledWith(11, 1);
     });
 
     it("keeps the db record when physical file deletion fails", async () => {
@@ -170,6 +179,35 @@ describe("user-docs [id] route DELETE", () => {
         });
 
         expect(response.status).toBe(500);
-        expect(mockedDeleteFileRecord).not.toHaveBeenCalled();
+        expect(mockedMarkFileDeleting).toHaveBeenCalledWith(11);
+        expect(mockedMarkFileDeleted).not.toHaveBeenCalled();
+    });
+
+    it("marks the record deleting before unlink when final db transition can fail", async () => {
+        mockedGetFileForDeletion.mockResolvedValue({
+            id: "11",
+            userId: "1",
+            originalFileName: "doc.pdf",
+            storagePath: "storage/documents/doc.pdf",
+            deletionStatus: "active",
+        } as never);
+        mockedMarkFileDeleting.mockResolvedValue(true);
+        mockedGetFullPathFromStoragePath.mockReturnValue(
+            "C:\\repo\\storage\\documents\\doc.pdf",
+        );
+        mockedUnlink.mockResolvedValue(undefined);
+        mockedMarkFileDeleted.mockRejectedValue(new Error("DB_UNAVAILABLE"));
+
+        const request = new Request("http://localhost/api/user-docs/11", {
+            method: "DELETE",
+        });
+        const response = await DELETE(request as never, {
+            params: buildParams("11"),
+        });
+
+        expect(response.status).toBe(500);
+        expect(mockedMarkFileDeleting).toHaveBeenCalledWith(11);
+        expect(mockedMarkFileDeleting).toHaveBeenCalledBefore(mockedUnlink);
+        expect(mockedMarkFileDeleted).toHaveBeenCalledWith(11, 1);
     });
 });

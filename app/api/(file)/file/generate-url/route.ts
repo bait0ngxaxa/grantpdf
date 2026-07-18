@@ -14,6 +14,7 @@ import {
     publicErrorResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
@@ -33,8 +34,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         // Verify user has access to this file
         if (type === "userFile") {
-            const file = await prisma.userFile.findUnique({
-                where: { id: fileId },
+            const file = await prisma.userFile.findFirst({
+                where: {
+                    id: fileId,
+                    deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                },
                 select: { userId: true },
             });
 
@@ -53,8 +57,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
             if (ownerError) return ownerError;
         } else if (type === "attachment") {
-            const attachment = await prisma.attachmentFile.findUnique({
-                where: { id: fileId },
+            const attachment = await prisma.attachmentFile.findFirst({
+                where: {
+                    id: fileId,
+                    userFile: {
+                        deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                    },
+                },
                 include: {
                     userFile: {
                         select: { userId: true },

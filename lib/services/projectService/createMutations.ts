@@ -1,4 +1,5 @@
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/server/audit/auditUtils";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import { prisma } from "@/lib/server/db";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectCreated } from "@/lib/services/notificationEventService";
@@ -77,8 +78,12 @@ export async function createProject(
                           updated_at: new Date(),
                       },
                       include: {
-                          files: true,
-                          _count: { select: { files: true } },
+                          files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                          _count: {
+                              select: {
+                                  files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                              },
+                          },
                       },
                   })
                 : tx.project.create({
@@ -89,8 +94,12 @@ export async function createProject(
                           programId: programId ?? null,
                       },
                       include: {
-                          files: true,
-                          _count: { select: { files: true } },
+                          files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                          _count: {
+                              select: {
+                                  files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                              },
+                          },
                       },
                   }));
             if (shouldNotify) {
@@ -125,8 +134,12 @@ export async function createProject(
                           updated_at: new Date(),
                       },
                       include: {
-                          files: true,
-                          _count: { select: { files: true } },
+                          files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                          _count: {
+                              select: {
+                                  files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                              },
+                          },
                       },
                   })
                 : existing.deletedAt !== null
@@ -138,8 +151,12 @@ export async function createProject(
                             updated_at: new Date(),
                         },
                         include: {
-                            files: true,
-                            _count: { select: { files: true } },
+                            files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                            _count: {
+                                select: {
+                                    files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                                },
+                            },
                         },
                     })
                   : await getProjectForCreate(existing.id);
@@ -184,8 +201,12 @@ export async function createProjectWithAudit(
                       updated_at: new Date(),
                   },
                   include: {
-                      files: true,
-                      _count: { select: { files: true } },
+                      files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                      _count: {
+                          select: {
+                              files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                          },
+                      },
                   },
               })
             : await tx.project.create({
@@ -196,8 +217,12 @@ export async function createProjectWithAudit(
                       programId: programId ?? null,
                   },
                   include: {
-                      files: true,
-                      _count: { select: { files: true } },
+                      files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                      _count: {
+                          select: {
+                              files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                          },
+                      },
                   },
               });
 

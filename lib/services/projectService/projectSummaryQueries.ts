@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/server/db";
 import type { ProjectSummary } from "@/type/models";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import { buildUserProjectsAccessWhere } from "./projectAccess";
 
 export async function getProjectSummariesByUserId(
@@ -19,7 +20,11 @@ export async function getProjectSummariesByUserId(
                 },
             },
             created_at: true,
-            _count: { select: { files: true } },
+            _count: {
+                select: {
+                    files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                },
+            },
         },
         orderBy: { created_at: "desc" },
     });

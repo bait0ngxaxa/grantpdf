@@ -1,4 +1,5 @@
 export * from "./fileTypes";
+export * from "./fileDeletionStatus";
 export * from "./idempotency";
 export * from "./pagination";
 export * from "./projectStatus";

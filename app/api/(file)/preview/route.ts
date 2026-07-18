@@ -13,6 +13,7 @@ import { stat } from "fs/promises";
 import { createReadStream } from "fs";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { publicErrorResponse } from "@/lib/api/responses";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 
 const SAFE_PATH_PREFIX = "storage/";
 
@@ -26,7 +27,10 @@ async function resolveFileOwnership(
     storagePath: string
 ): Promise<{ ownerId: number; displayName: string } | null> {
     const userFile = await prisma.userFile.findFirst({
-        where: { storagePath },
+        where: {
+            storagePath,
+            deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+        },
         select: { userId: true, originalFileName: true },
     });
 
@@ -35,7 +39,10 @@ async function resolveFileOwnership(
     }
 
     const attachmentFile = await prisma.attachmentFile.findFirst({
-        where: { filePath: storagePath },
+        where: {
+            filePath: storagePath,
+            userFile: { deletionStatus: FILE_DELETION_STATUS.ACTIVE },
+        },
         include: { userFile: { select: { userId: true } } },
     });
 

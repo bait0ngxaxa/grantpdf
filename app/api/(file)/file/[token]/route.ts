@@ -12,6 +12,7 @@ import { verifySignedToken } from "@/lib/server/storage/signedUrl";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import { publicErrorResponse } from "@/lib/api/responses";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 
 export async function GET(
     _req: NextRequest,
@@ -44,8 +45,11 @@ export async function GET(
         } | null = null;
 
         if (type === "userFile") {
-            file = await prisma.userFile.findUnique({
-                where: { id: fileId },
+            file = await prisma.userFile.findFirst({
+                where: {
+                    id: fileId,
+                    deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                },
                 select: {
                     id: true,
                     originalFileName: true,
@@ -54,8 +58,13 @@ export async function GET(
                 },
             });
         } else if (type === "attachment") {
-            const attachment = await prisma.attachmentFile.findUnique({
-                where: { id: fileId },
+            const attachment = await prisma.attachmentFile.findFirst({
+                where: {
+                    id: fileId,
+                    userFile: {
+                        deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                    },
+                },
                 include: {
                     userFile: {
                         select: {

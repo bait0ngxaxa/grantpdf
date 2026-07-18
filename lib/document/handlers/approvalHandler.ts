@@ -15,6 +15,7 @@ import {
     normalizeRichEditorText,
 } from "../fixThaiwordUtils";
 import { prisma } from "@/lib/server/db";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import { getFullPathFromStoragePath } from "@/lib/server/storage";
@@ -117,6 +118,7 @@ async function resolveOwnedAttachmentFiles(
         where: {
             id: { in: attachmentFileIds },
             userId,
+            deletionStatus: FILE_DELETION_STATUS.ACTIVE,
         },
         select: {
             id: true,

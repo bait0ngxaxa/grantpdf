@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 
 vi.mock("@/lib/server/db", () => ({
     prisma: {
@@ -42,6 +43,7 @@ describe("user project queries", () => {
         expect(mockedUserFileCount).toHaveBeenCalledWith({
             where: {
                 userId: 7,
+                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                 projectReports: { none: {} },
                 project: { deletedAt: null },
             },
@@ -58,6 +60,7 @@ describe("user project queries", () => {
         expect(mockedUserFileCount).toHaveBeenCalledWith({
             where: {
                 userId: 7,
+                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                 projectReports: { none: {} },
                 project: { deletedAt: null },
             },
@@ -93,6 +96,7 @@ describe("user project queries", () => {
                             {
                                 files: {
                                     some: {
+                                        deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                                         originalFileName: {
                                             contains: "budget",
                                         },

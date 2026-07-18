@@ -30,4 +30,5 @@ export interface FileForDeletion {
     originalFileName: string;
     storagePath: string;
     userId: string;
+    deletionStatus: string;
 }

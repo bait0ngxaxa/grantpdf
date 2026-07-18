@@ -42,6 +42,7 @@ describe("getAllProjectsPaginated", () => {
                     {
                         files: {
                             some: {
+                                deletionStatus: "active",
                                 originalFileName: { contains: "budget" },
                                 projectReports: { none: {} },
                             },

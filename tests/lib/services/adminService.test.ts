@@ -59,6 +59,7 @@ describe("adminService", () => {
                     gte: expect.any(Date),
                     lt: expect.any(Date),
                 }),
+                deletionStatus: "active",
                 projectReports: { none: {} },
             },
         });

@@ -135,6 +135,7 @@ model UserFile {
   fileExtension    String
   downloadStatus   String @default("pending") 
   downloadedAt     DateTime? 
+  deletionStatus   String @default("active") @map("deletion_status") @db.VarChar(16)
 
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @updatedAt @db.Timestamp(6)
@@ -153,6 +154,7 @@ model UserFile {
   @@index([projectId])
   @@index([projectId, created_at])
   @@index([created_at])
+  @@index([deletionStatus, created_at])
 }
 
 model ProjectReport {

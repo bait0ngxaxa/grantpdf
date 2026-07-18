@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/server/db";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import { REPORT_FILE_SELECT } from "./selects";
 import {
     sanitizeAdminProjectReport,
@@ -15,7 +16,10 @@ export async function getProjectReportsForUser(
     _userId: number,
 ): Promise<ProjectReport[]> {
     const reports = await prisma.projectReport.findMany({
-        where: { projectId },
+        where: {
+            projectId,
+            file: { deletionStatus: FILE_DELETION_STATUS.ACTIVE },
+        },
         select: {
             id: true,
             projectId: true,
@@ -52,6 +56,7 @@ export async function getProjectReportsForAdmin({
 }): Promise<PaginatedAdminReportsResult> {
     const skip = (page - 1) * limit;
     const where = {
+        file: { deletionStatus: FILE_DELETION_STATUS.ACTIVE },
         ...(status && status !== "สถานะทั้งหมด" ? { status } : {}),
         ...(projectId ? { projectId } : {}),
         ...(search

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/server/db";
-import { PROJECT_STATUS } from "@/lib/shared/constants";
+import { FILE_DELETION_STATUS, PROJECT_STATUS } from "@/lib/shared/constants";
 import { getJsonCache, setJsonCache } from "@/lib/services/redisJsonCache";
 import {
     ADMIN_DASHBOARD_STATS_CACHE_KEY,
@@ -119,7 +119,9 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
     ] = await Promise.all([
         prisma.user.count(),
         prisma.project.count({ where: { deletedAt: null } }),
-        prisma.userFile.count(),
+        prisma.userFile.count({
+            where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE },
+        }),
         prisma.project.count({
             where: {
                 deletedAt: null,
@@ -129,6 +131,7 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         prisma.userFile.count({
             where: {
                 created_at: { gte: today, lt: tomorrow },
+                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                 projectReports: { none: {} },
             },
         }),

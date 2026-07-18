@@ -1,5 +1,5 @@
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/server/audit/auditUtils";
-import { PROJECT_STATUS, VALID_STATUSES_SET } from "@/lib/shared/constants";
+import { FILE_DELETION_STATUS, PROJECT_STATUS, VALID_STATUSES_SET } from "@/lib/shared/constants";
 import { prisma } from "@/lib/server/db";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectStatusUpdated } from "@/lib/services/notificationEventService";
@@ -84,7 +84,11 @@ export async function updateProjectStatus(
             program: { select: { id: true, name: true } },
             user: { select: { id: true, name: true, email: true } },
             coOwners: { select: { adminUserId: true } },
-            _count: { select: { files: true } },
+            _count: {
+                select: {
+                    files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                },
+            },
         },
     });
 
@@ -128,7 +132,11 @@ export async function updateProjectStatusWithAudit(
             include: {
                 program: { select: { id: true, name: true } },
                 user: { select: { id: true, name: true, email: true } },
-                _count: { select: { files: true } },
+                _count: {
+                    select: {
+                        files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                    },
+                },
             },
         });
 

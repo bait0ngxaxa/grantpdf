@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/server/db";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import type { AdminDocumentFile } from "@/type/models";
 import type { RawFile, FileForDeletion } from "./types";
 import { sanitizeFile, filterOutAttachmentFiles } from "./sanitizers";
@@ -20,6 +21,7 @@ export async function getAllFilesForAdmin(
 ): Promise<AdminDocumentFile[]> {
     const safeLimit = normalizeAdminFileLimit(limit);
     const allUserFiles = await prisma.userFile.findMany({
+        where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE },
         orderBy: {
             created_at: "desc",
         },
@@ -63,7 +65,7 @@ export async function getFilesByUserId(
     userId: number,
 ): Promise<AdminDocumentFile[]> {
     const userFiles = await prisma.userFile.findMany({
-        where: { userId },
+        where: { userId, deletionStatus: FILE_DELETION_STATUS.ACTIVE },
         orderBy: {
             created_at: "desc",
         },
@@ -99,8 +101,8 @@ export async function getFilesByUserId(
 }
 
 export async function fileExists(id: number): Promise<boolean> {
-    const file = await prisma.userFile.findUnique({
-        where: { id },
+    const file = await prisma.userFile.findFirst({
+        where: { id, deletionStatus: FILE_DELETION_STATUS.ACTIVE },
         select: { id: true },
     });
     return file !== null;
@@ -109,8 +111,8 @@ export async function fileExists(id: number): Promise<boolean> {
 export async function getFileById(
     id: number,
 ): Promise<AdminDocumentFile | null> {
-    const file = await prisma.userFile.findUnique({
-        where: { id },
+    const file = await prisma.userFile.findFirst({
+        where: { id, deletionStatus: FILE_DELETION_STATUS.ACTIVE },
         select: {
             id: true,
             originalFileName: true,
@@ -147,13 +149,22 @@ export async function getFileById(
 export async function getFileForDeletion(
     id: number,
 ): Promise<FileForDeletion | null> {
-    const file = await prisma.userFile.findUnique({
-        where: { id },
+    const file = await prisma.userFile.findFirst({
+        where: {
+            id,
+            deletionStatus: {
+                in: [
+                    FILE_DELETION_STATUS.ACTIVE,
+                    FILE_DELETION_STATUS.DELETING,
+                ],
+            },
+        },
         select: {
             id: true,
             originalFileName: true,
             storagePath: true,
             userId: true,
+            deletionStatus: true,
         },
     });
 
@@ -164,14 +175,34 @@ export async function getFileForDeletion(
         originalFileName: file.originalFileName,
         storagePath: file.storagePath,
         userId: file.userId.toString(),
+        deletionStatus: file.deletionStatus,
     };
 }
 
-export async function deleteFileRecord(id: number): Promise<void> {
-    const deletedFile = await prisma.userFile.delete({
-        where: { id },
-        select: { userId: true },
+export async function markFileDeleting(id: number): Promise<boolean> {
+    const result = await prisma.userFile.updateMany({
+        where: {
+            id,
+            deletionStatus: {
+                in: [
+                    FILE_DELETION_STATUS.ACTIVE,
+                    FILE_DELETION_STATUS.DELETING,
+                ],
+            },
+        },
+        data: { deletionStatus: FILE_DELETION_STATUS.DELETING },
     });
 
-    await invalidateDashboardStats([deletedFile.userId]);
+    return result.count > 0;
+}
+
+export async function markFileDeleted(id: number, userId: number): Promise<void> {
+    const result = await prisma.userFile.updateMany({
+        where: { id, deletionStatus: FILE_DELETION_STATUS.DELETING },
+        data: { deletionStatus: FILE_DELETION_STATUS.DELETED },
+    });
+
+    if (result.count > 0) {
+        await invalidateDashboardStats([userId]);
+    }
 }

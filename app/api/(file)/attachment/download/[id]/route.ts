@@ -14,6 +14,7 @@ import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
 import { publicErrorResponse } from "@/lib/api/responses";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 
 export async function GET(
     _req: NextRequest,
@@ -28,8 +29,13 @@ export async function GET(
         if (attachmentId === null) {
             throw publicApiError(400, "รหัสไฟล์แนบไม่ถูกต้อง");
         }
-        const attachment = await prisma.attachmentFile.findUnique({
-            where: { id: attachmentId },
+        const attachment = await prisma.attachmentFile.findFirst({
+            where: {
+                id: attachmentId,
+                userFile: {
+                    deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                },
+            },
             include: {
                 userFile: {
                     select: {

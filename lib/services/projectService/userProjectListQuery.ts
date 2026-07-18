@@ -1,4 +1,4 @@
-import { SORT_OPTIONS } from "@/lib/shared/constants";
+import { FILE_DELETION_STATUS, SORT_OPTIONS } from "@/lib/shared/constants";
 import { prisma } from "@/lib/server/db";
 import type { AdminProject } from "@/type/models";
 import { collectAttachmentPaths, filterOutAttachments } from "./sanitizers";
@@ -91,7 +91,10 @@ export async function getProjectsByUserIdPaginated({
                 _count: {
                     select: {
                         files: {
-                            where: { projectReports: { none: {} } },
+                            where: {
+                                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                                projectReports: { none: {} },
+                            },
                         },
                     },
                 },

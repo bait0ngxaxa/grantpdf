@@ -15,5 +15,6 @@ export {
     fileExists,
     getFileById,
     getFileForDeletion,
-    deleteFileRecord,
+    markFileDeleting,
+    markFileDeleted,
 } from "./queries";

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/server/db";
 import type { RawProject, PaginatedProjectsResult } from "./types";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import { PROJECT_INCLUDE } from "./constants";
 import {
     collectAttachmentPaths,
@@ -38,7 +39,12 @@ export async function getAllProjectsPaginated({
 
     const [total, totalFiles] = await Promise.all([
         prisma.project.count({ where }),
-        prisma.userFile.count({ where: { projectReports: { none: {} } } }),
+        prisma.userFile.count({
+            where: {
+                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                projectReports: { none: {} },
+            },
+        }),
     ]);
 
     let projects: RawProject[] = [];

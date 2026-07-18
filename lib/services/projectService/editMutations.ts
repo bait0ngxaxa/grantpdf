@@ -1,4 +1,5 @@
 import { parseActorUserId, toPrismaJsonValue } from "@/lib/server/audit/auditUtils";
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import { prisma } from "@/lib/server/db";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { PROJECT_NAME_MAX_LENGTH } from "@/lib/validation/constants";
@@ -68,8 +69,12 @@ export async function updateProjectWithAudit(
                     description: normalized.description,
                 },
                 include: {
-                    files: true,
-                    _count: { select: { files: true } },
+                    files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                    _count: {
+                        select: {
+                            files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                        },
+                    },
                 },
             });
 

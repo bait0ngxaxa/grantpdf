@@ -1,3 +1,5 @@
+import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+
 /** Shared Prisma select fragment for public user fields */
 const USER_PUBLIC_SELECT = { id: true, name: true, email: true } as const;
 
@@ -42,6 +44,7 @@ export const PROJECT_INCLUDE = {
         select: {
             files: {
                 where: {
+                    deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                     projectReports: {
                         none: {},
                     },
