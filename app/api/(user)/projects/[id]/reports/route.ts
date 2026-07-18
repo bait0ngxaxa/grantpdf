@@ -7,6 +7,7 @@ import { prisma } from "@/lib/server/db";
 import {
     FILE_UPLOAD,
     RATE_LIMIT,
+    STORAGE_QUOTA,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
 } from "@/lib/shared/constants";
@@ -34,6 +35,10 @@ import {
 } from "@/lib/services/projectReportService";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
 import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
+import {
+    releaseStorageQuota,
+    reserveStorageQuota,
+} from "@/lib/services/storageQuotaService";
 import {
     completeUploadIdempotency,
     failUploadIdempotency,
@@ -155,6 +160,10 @@ export async function POST(
     let finalFilePath: string | null = null;
     let idempotencyRecordId: bigint | null = null;
     let idempotencyLeaseToken = "";
+    let storageQuotaReserved = false;
+    let storageQuotaCommitted = false;
+    let reservedStorageBytes = 0;
+    let reservedStorageUserId = 0;
     try {
         const rateLimitResult = await applyRateLimit({
             request: req,
@@ -206,6 +215,17 @@ export async function POST(
         idempotencyRecordId = idempotency.recordId;
         idempotencyLeaseToken = idempotency.leaseToken;
 
+        const hasStorageQuota = await reserveStorageQuota(
+            guard.userId,
+            fileEntry.size,
+        );
+        if (!hasStorageQuota) {
+            throw publicApiError(507, STORAGE_QUOTA.EXCEEDED_MESSAGE);
+        }
+        storageQuotaReserved = true;
+        reservedStorageBytes = fileEntry.size;
+        reservedStorageUserId = guard.userId;
+
         const storedFile = await persistReportFile(fileEntry);
         finalFilePath = storedFile.finalFilePath;
         const report = await createProjectReportWithFile({
@@ -214,9 +234,12 @@ export async function POST(
             originalFileName: fileEntry.name,
             storagePath: storedFile.relativeStoragePath,
             fileExtension: storedFile.fileExtension,
+            fileSize: fileEntry.size,
             reportType: parsed.data.reportType,
             note: parsed.data.note,
         });
+
+        storageQuotaCommitted = true;
 
         const auditContext = buildAuditContext(guard.session, req);
         logAudit("PROJECT_REPORT_SUBMIT", auditContext.actorUserId, {
@@ -250,6 +273,14 @@ export async function POST(
             { headers: rateLimitResult.headers },
         );
     } catch (error) {
+        if (storageQuotaReserved && !storageQuotaCommitted) {
+            await releaseStorageQuota(
+                reservedStorageUserId,
+                reservedStorageBytes,
+            ).catch((releaseError: unknown) => {
+                console.error("Failed to release report storage quota:", releaseError);
+            });
+        }
         if (finalFilePath) {
             await unlink(finalFilePath).catch(() => undefined);
         }

@@ -197,12 +197,41 @@ export async function markFileDeleting(id: number): Promise<boolean> {
 }
 
 export async function markFileDeleted(id: number, userId: number): Promise<void> {
-    const result = await prisma.userFile.updateMany({
-        where: { id, deletionStatus: FILE_DELETION_STATUS.DELETING },
-        data: { deletionStatus: FILE_DELETION_STATUS.DELETED },
+    const deleted = await prisma.$transaction(async (tx) => {
+        const file = await tx.userFile.findFirst({
+            where: {
+                id,
+                deletionStatus: FILE_DELETION_STATUS.DELETING,
+            },
+            select: { fileSize: true },
+        });
+        if (!file) return false;
+
+        const result = await tx.userFile.updateMany({
+            where: { id, deletionStatus: FILE_DELETION_STATUS.DELETING },
+            data: { deletionStatus: FILE_DELETION_STATUS.DELETED },
+        });
+        if (result.count !== 1) return false;
+
+        if (file.fileSize > BigInt(0)) {
+            const released = await tx.user.updateMany({
+                where: {
+                    id: userId,
+                    storageUsedBytes: { gte: file.fileSize },
+                },
+                data: {
+                    storageUsedBytes: { decrement: file.fileSize },
+                },
+            });
+            if (released.count !== 1) {
+                throw new Error("STORAGE_QUOTA_RELEASE_FAILED");
+            }
+        }
+
+        return true;
     });
 
-    if (result.count > 0) {
+    if (deleted) {
         await invalidateDashboardStats([userId]);
     }
 }

@@ -30,8 +30,26 @@ function compareEntries(
     return left.index - right.index;
 }
 
+async function hashFileContent(file: File): Promise<string> {
+    const hash = createHash("sha256");
+    const reader = file.stream().getReader();
+
+    try {
+        while (true) {
+            const result = await reader.read();
+            if (result.done) break;
+            hash.update(result.value);
+        }
+    } finally {
+        reader.releaseLock();
+    }
+
+    return hash.digest("hex");
+}
+
 async function fingerprintEntry(
     entry: IndexedFormEntry,
+    knownFileHashes: ReadonlyMap<File, string>,
 ): Promise<FormEntryFingerprint> {
     if (!isFileEntry(entry.value)) {
         return {
@@ -42,10 +60,8 @@ async function fingerprintEntry(
         };
     }
 
-    const content = Buffer.from(
-        await new Response(entry.value).arrayBuffer(),
-    );
-    const contentHash = createHash("sha256").update(content).digest("hex");
+    const contentHash =
+        knownFileHashes.get(entry.value) ?? (await hashFileContent(entry.value));
 
     return {
         index: entry.index,
@@ -61,6 +77,7 @@ async function fingerprintEntry(
 export async function createDocumentRequestHash(
     formData: FormData,
     context: Readonly<Record<string, string>> = {},
+    knownFileHashes: ReadonlyMap<File, string> = new Map(),
 ): Promise<string> {
     const formEntries = Array.from(formData.entries())
         .filter(([name]) => name !== "idempotencyKey")
@@ -71,7 +88,9 @@ export async function createDocumentRequestHash(
         index: formEntries.length + index,
     }));
     const entries = [...formEntries, ...contextEntries];
-    const fingerprints = await Promise.all(entries.map(fingerprintEntry));
+    const fingerprints = await Promise.all(
+        entries.map((entry) => fingerprintEntry(entry, knownFileHashes)),
+    );
     fingerprints.sort(compareEntries);
     const canonicalFingerprints = fingerprints.map(
         ({ index: _index, ...fingerprint }) => fingerprint,

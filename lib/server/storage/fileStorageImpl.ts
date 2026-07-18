@@ -64,14 +64,13 @@ export interface MimeValidationResult {
     error?: string;
 }
 
-export async function validateFileMime(
-    buffer: Buffer,
-    filename: string
-): Promise<MimeValidationResult> {
+export function validateDetectedFileMime(
+    filename: string,
+    detectedMime: string | undefined,
+): MimeValidationResult {
     const ext = path.extname(filename).toLowerCase();
     const expectedMimes = ALLOWED_MIME_TYPES[ext];
 
-    // Check if extension is allowed
     if (!expectedMimes) {
         return {
             valid: false,
@@ -79,9 +78,7 @@ export async function validateFileMime(
         };
     }
 
-    const detected = await fileTypeFromBuffer(buffer);
-
-    if (!detected) {
+    if (!detectedMime) {
         return {
             valid: false,
             expectedMimes,
@@ -91,16 +88,24 @@ export async function validateFileMime(
         };
     }
 
-    if (expectedMimes.includes(detected.mime)) {
-        return { valid: true, detectedMime: detected.mime };
+    if (expectedMimes.includes(detectedMime)) {
+        return { valid: true, detectedMime };
     }
 
     return {
         valid: false,
-        detectedMime: detected.mime,
+        detectedMime,
         expectedMimes,
         error: `File type mismatch. Detected: ${
-            detected.mime
+            detectedMime
         }, Expected: ${expectedMimes.join(" or ")}`,
     };
+}
+
+export async function validateFileMime(
+    buffer: Buffer,
+    filename: string
+): Promise<MimeValidationResult> {
+    const detected = await fileTypeFromBuffer(buffer);
+    return validateDetectedFileMime(filename, detected?.mime);
 }

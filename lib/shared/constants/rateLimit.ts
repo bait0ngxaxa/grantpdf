@@ -42,6 +42,11 @@ export const RATE_LIMIT = {
             LIMIT: 20,
             WINDOW_MS: 60_000,
         },
+        FILE_UPLOAD: {
+            ROUTE_KEY: "user:file-upload",
+            LIMIT: 10,
+            WINDOW_MS: 60_000,
+        },
         DOCUMENT_GENERATE: {
             ROUTE_KEY: "user:document-generate",
             LIMIT: 12,

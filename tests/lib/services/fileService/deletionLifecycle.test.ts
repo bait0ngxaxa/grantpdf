@@ -7,6 +7,10 @@ vi.mock("@/lib/server/db", () => ({
             findFirst: vi.fn(),
             updateMany: vi.fn(),
         },
+        user: {
+            updateMany: vi.fn(),
+        },
+        $transaction: vi.fn(),
     },
 }));
 
@@ -24,11 +28,24 @@ import {
 
 const mockedFindFirst = vi.mocked(prisma.userFile.findFirst);
 const mockedUpdateMany = vi.mocked(prisma.userFile.updateMany);
+const mockedUserUpdateMany = vi.mocked(prisma.user.updateMany);
+const mockedTransaction = vi.mocked(prisma.$transaction);
 const mockedInvalidateDashboardStats = vi.mocked(invalidateDashboardStats);
 
 describe("file deletion lifecycle", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockedTransaction.mockImplementation(async (callback) =>
+            callback({
+                userFile: {
+                    findFirst: mockedFindFirst,
+                    updateMany: mockedUpdateMany,
+                },
+                user: {
+                    updateMany: mockedUserUpdateMany,
+                },
+            } as never) as never,
+        );
     });
 
     it("claims active and retryable records as deleting", async () => {
@@ -51,15 +68,39 @@ describe("file deletion lifecycle", () => {
     });
 
     it("moves deleting records to deleted and invalidates dashboard stats", async () => {
+        mockedFindFirst.mockResolvedValue({ fileSize: BigInt(0) } as never);
         mockedUpdateMany.mockResolvedValue({ count: 1 });
 
         await expect(markFileDeleted(11, 7)).resolves.toBeUndefined();
 
+        expect(mockedFindFirst).toHaveBeenCalledWith({
+            where: { id: 11, deletionStatus: FILE_DELETION_STATUS.DELETING },
+            select: { fileSize: true },
+        });
         expect(mockedUpdateMany).toHaveBeenCalledWith({
             where: { id: 11, deletionStatus: FILE_DELETION_STATUS.DELETING },
             data: { deletionStatus: FILE_DELETION_STATUS.DELETED },
         });
+        expect(mockedUserUpdateMany).not.toHaveBeenCalled();
         expect(mockedInvalidateDashboardStats).toHaveBeenCalledWith([7]);
+    });
+
+    it("decrements the reserved quota in the same transaction", async () => {
+        mockedFindFirst.mockResolvedValue({ fileSize: BigInt(128) } as never);
+        mockedUpdateMany.mockResolvedValue({ count: 1 });
+        mockedUserUpdateMany.mockResolvedValue({ count: 1 });
+
+        await markFileDeleted(11, 7);
+
+        expect(mockedUserUpdateMany).toHaveBeenCalledWith({
+            where: {
+                id: 7,
+                storageUsedBytes: { gte: BigInt(128) },
+            },
+            data: {
+                storageUsedBytes: { decrement: BigInt(128) },
+            },
+        });
     });
 
     it("loads active and deleting records for idempotent retries", async () => {

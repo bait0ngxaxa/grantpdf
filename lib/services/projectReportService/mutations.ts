@@ -58,12 +58,20 @@ export async function createProjectReportWithFile({
     originalFileName,
     storagePath,
     fileExtension,
+    fileSize,
     reportType,
     note,
 }: CreateProjectReportParams): Promise<ProjectReport> {
     const report = await prisma.$transaction(async (tx) => {
         const userFile = await tx.userFile.create({
-            data: { originalFileName, storagePath, fileExtension, userId, projectId },
+            data: {
+                originalFileName,
+                storagePath,
+                fileExtension,
+                fileSize: BigInt(fileSize),
+                userId,
+                projectId,
+            },
         });
 
         const createdReport = await tx.projectReport.create({

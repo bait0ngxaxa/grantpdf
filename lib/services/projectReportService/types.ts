@@ -10,6 +10,7 @@ export interface CreateProjectReportParams {
     originalFileName: string;
     storagePath: string;
     fileExtension: string;
+    fileSize: number;
     reportType: string;
     note?: string;
 }

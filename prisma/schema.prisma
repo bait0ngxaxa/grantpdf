@@ -17,6 +17,7 @@ model User {
   password            String
   passwordResetVersion Int     @default(0)
   sessionVersion      Int      @default(0)
+  storageUsedBytes    BigInt   @default(0) @map("storage_used_bytes") @db.UnsignedBigInt
   role                String   @default("member")
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @updatedAt @db.Timestamp(6)
@@ -133,6 +134,7 @@ model UserFile {
   originalFileName String @db.VarChar(255)
   storagePath      String
   fileExtension    String
+  fileSize         BigInt @default(0) @map("file_size") @db.UnsignedBigInt
   downloadStatus   String @default("pending") 
   downloadedAt     DateTime? 
   deletionStatus   String @default("active") @map("deletion_status") @db.VarChar(16)

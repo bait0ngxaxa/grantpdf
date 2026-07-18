@@ -9,3 +9,4 @@ export * from "./roles";
 export * from "./routes";
 export * from "./session";
 export * from "./upload";
+export * from "./storageQuota";
