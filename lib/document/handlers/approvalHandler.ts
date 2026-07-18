@@ -15,6 +15,10 @@ import {
     normalizeRichEditorText,
 } from "../fixThaiwordUtils";
 import { prisma } from "@/lib/server/db";
+import {
+    copyAttachmentFiles,
+    removeCopiedAttachmentFiles,
+} from "@/lib/document/attachmentStorage";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
@@ -372,36 +376,43 @@ export async function handleApprovalGeneration(
         projectName,
         "docx",
         async (storagePath: string): Promise<void> => {
-            await prisma.$transaction(async (tx) => {
-                const savedFile = await tx.userFile.create({
-                    data: {
-                        originalFileName: projectName + ".docx",
-                        storagePath: storagePath,
-                        fileExtension: "docx",
-                        userId: userId,
-                        projectId: projectResult.id,
-                    },
-                });
+            const copiedAttachments = await copyAttachmentFiles(attachmentFiles);
 
-                if (attachmentFiles.length > 0) {
-                    await tx.attachmentFile.createMany({
-                        data: attachmentFiles.map((attachmentFile) => ({
-                            fileName: attachmentFile.originalFileName,
-                            filePath: attachmentFile.storagePath,
-                            fileSize: attachmentFile.fileSize,
-                            mimeType: attachmentFile.mimeType,
-                            userFileId: savedFile.id,
-                        })),
+            try {
+                await prisma.$transaction(async (tx) => {
+                    const savedFile = await tx.userFile.create({
+                        data: {
+                            originalFileName: projectName + ".docx",
+                            storagePath: storagePath,
+                            fileExtension: "docx",
+                            userId: userId,
+                            projectId: projectResult.id,
+                        },
                     });
-                }
 
-                await notifyProjectDocumentUploaded(tx, {
-                    fileId: savedFile.id,
-                    projectId: projectResult.id,
-                    fileName: savedFile.originalFileName,
-                    actorUserId: userId,
+                    if (copiedAttachments.files.length > 0) {
+                        await tx.attachmentFile.createMany({
+                            data: copiedAttachments.files.map((attachmentFile) => ({
+                                fileName: attachmentFile.originalFileName,
+                                filePath: attachmentFile.storagePath,
+                                fileSize: attachmentFile.fileSize,
+                                mimeType: attachmentFile.mimeType,
+                                userFileId: savedFile.id,
+                            })),
+                        });
+                    }
+
+                    await notifyProjectDocumentUploaded(tx, {
+                        fileId: savedFile.id,
+                        projectId: projectResult.id,
+                        fileName: savedFile.originalFileName,
+                        actorUserId: userId,
+                    });
                 });
-            });
+            } catch (error: unknown) {
+                await removeCopiedAttachmentFiles(copiedAttachments.paths);
+                throw error;
+            }
         },
     );
 
