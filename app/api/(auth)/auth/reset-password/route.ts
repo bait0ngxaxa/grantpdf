@@ -4,7 +4,7 @@ import { prisma } from "@/lib/server/db";
 import bcrypt from "bcryptjs";
 import { resetPasswordSchema } from "@/lib/validation/schemas";
 import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
-import { RATE_LIMIT } from "@/lib/shared/constants";
+import { RATE_LIMIT, USER_LIFECYCLE_STATUS } from "@/lib/shared/constants";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     type PasswordResetTokenPayload,
@@ -88,6 +88,8 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
             const passwordUpdate = await tx.user.updateMany({
                 where: {
                     id: userId,
+                    status: USER_LIFECYCLE_STATUS.ACTIVE,
+                    deletedAt: null,
                     passwordResetVersion: decodedToken.resetVersion,
                 },
                 data: {

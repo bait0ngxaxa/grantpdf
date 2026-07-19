@@ -1,4 +1,7 @@
-import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+import {
+    FILE_DELETION_STATUS,
+    USER_LIFECYCLE_STATUS,
+} from "@/lib/shared/constants";
 
 /** Shared Prisma select fragment for public user fields */
 const USER_PUBLIC_SELECT = { id: true, name: true, email: true } as const;
@@ -32,6 +35,12 @@ export const PROJECT_INCLUDE = {
         orderBy: { submittedAt: "desc" as const },
     },
     coOwners: {
+        where: {
+            coOwnerUser: {
+                status: USER_LIFECYCLE_STATUS.ACTIVE,
+                deletedAt: null,
+            },
+        },
         select: {
             id: true,
             coOwnerUser: {

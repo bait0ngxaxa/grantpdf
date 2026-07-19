@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/server/db";
-import { SESSION } from "@/lib/shared/constants";
+import { SESSION, USER_LIFECYCLE_STATUS } from "@/lib/shared/constants";
 import {
     verifyAccessToken,
     type AccessTokenPayload,
@@ -21,6 +21,7 @@ function isActiveGrantSession(
     if (record.revokedAt) return false;
     if (record.expiresAt.getTime() <= Date.now()) return false;
     if (record.user.id !== payload.userId) return false;
+    if (record.user.status !== USER_LIFECYCLE_STATUS.ACTIVE) return false;
     if (record.sessionVersion !== payload.sessionVersion) return false;
     return record.sessionVersion === record.user.sessionVersion;
 }
@@ -72,6 +73,7 @@ export async function getGrantSession(): Promise<Session | null> {
                     email: true,
                     role: true,
                     sessionVersion: true,
+                    status: true,
                 },
             },
         },

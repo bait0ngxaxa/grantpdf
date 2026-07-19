@@ -89,6 +89,7 @@ function createSession(overrides: Partial<{
     user: {
         id: number;
         role: string;
+        status: string;
         sessionVersion: number;
     };
 }> = {}) {
@@ -108,6 +109,7 @@ function createSession(overrides: Partial<{
         user: {
             id: 7,
             role: "admin",
+            status: "active",
             sessionVersion: 2,
         },
         ...overrides,
@@ -273,6 +275,7 @@ describe("authSessionService", () => {
                 user: {
                     id: 7,
                     role: "admin",
+                    status: "active",
                     sessionVersion: 2,
                 },
             }) as never

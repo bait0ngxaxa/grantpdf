@@ -3,6 +3,7 @@ import {
     NOTIFICATION_TYPE,
 } from "@/lib/notifications/constants";
 import { prisma } from "@/lib/server/db";
+import { USER_LIFECYCLE_STATUS } from "@/lib/shared/constants";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectCoOwnersAssigned } from "@/lib/services/notificationEventService";
 import type { ProjectCoOwnerSummary } from "@/type/models";
@@ -68,7 +69,11 @@ async function assertCoOwnerUsersExist(
     if (requestedCoOwnerIds.length === 0) return;
 
     const users = await tx.user.findMany({
-        where: { id: { in: requestedCoOwnerIds } },
+        where: {
+            id: { in: requestedCoOwnerIds },
+            status: USER_LIFECYCLE_STATUS.ACTIVE,
+            deletedAt: null,
+        },
         select: { id: true },
     });
     const validUserIds = new Set(users.map((user) => user.id));

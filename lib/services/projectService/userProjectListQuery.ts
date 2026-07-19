@@ -1,4 +1,8 @@
-import { FILE_DELETION_STATUS, SORT_OPTIONS } from "@/lib/shared/constants";
+import {
+    FILE_DELETION_STATUS,
+    SORT_OPTIONS,
+    USER_LIFECYCLE_STATUS,
+} from "@/lib/shared/constants";
 import { prisma } from "@/lib/server/db";
 import type { AdminProject } from "@/type/models";
 import { collectAttachmentPaths, filterOutAttachments } from "./sanitizers";
@@ -80,6 +84,12 @@ export async function getProjectsByUserIdPaginated({
                     orderBy: { submittedAt: "desc" },
                 },
                 coOwners: {
+                    where: {
+                        coOwnerUser: {
+                            status: USER_LIFECYCLE_STATUS.ACTIVE,
+                            deletedAt: null,
+                        },
+                    },
                     select: {
                         id: true,
                         coOwnerUser: {

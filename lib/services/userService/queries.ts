@@ -1,9 +1,18 @@
 import { prisma } from "@/lib/server/db";
-import { ROLES } from "@/lib/shared/constants";
+import {
+    ROLES,
+    USER_LIFECYCLE_STATUS,
+} from "@/lib/shared/constants";
+
+const ACTIVE_USER_WHERE = {
+    status: USER_LIFECYCLE_STATUS.ACTIVE,
+    deletedAt: null,
+};
 import type { SafeUser } from "./types";
 
 export async function getAllUsers(): Promise<SafeUser[]> {
     const users = await prisma.user.findMany({
+        where: ACTIVE_USER_WHERE,
         select: {
             id: true,
             name: true,
@@ -23,8 +32,8 @@ export async function getAllUsers(): Promise<SafeUser[]> {
 }
 
 export async function getUserById(id: number): Promise<SafeUser | null> {
-    const user = await prisma.user.findUnique({
-        where: { id },
+    const user = await prisma.user.findFirst({
+        where: { id, ...ACTIVE_USER_WHERE },
         select: {
             id: true,
             name: true,
@@ -43,15 +52,15 @@ export async function getUserById(id: number): Promise<SafeUser | null> {
 }
 
 export async function userExists(id: number): Promise<boolean> {
-    const user = await prisma.user.findUnique({
-        where: { id },
+    const user = await prisma.user.findFirst({
+        where: { id, ...ACTIVE_USER_WHERE },
         select: { id: true },
     });
     return user !== null;
 }
 
 export async function getUserCount(): Promise<number> {
-    return prisma.user.count();
+    return prisma.user.count({ where: ACTIVE_USER_WHERE });
 }
 
 export interface CoOwnerUserOption {
@@ -62,6 +71,7 @@ export interface CoOwnerUserOption {
 
 export async function getCoOwnerUserOptions(): Promise<CoOwnerUserOption[]> {
     const users = await prisma.user.findMany({
+        where: ACTIVE_USER_WHERE,
         select: {
             id: true,
             name: true,
@@ -103,14 +113,17 @@ export async function getAllUsersPaginated({
     search,
 }: GetAllUsersPaginatedParams): Promise<PaginatedUsersResult> {
     const skip = (page - 1) * limit;
-    const where = search
-        ? {
-              OR: [
-                  { name: { contains: search } },
-                  { email: { contains: search } },
-              ],
-          }
-        : {};
+    const where = {
+        ...ACTIVE_USER_WHERE,
+        ...(search
+            ? {
+                  OR: [
+                      { name: { contains: search } },
+                      { email: { contains: search } },
+                  ],
+              }
+            : {}),
+    };
 
     const [total, users, roleGroups] = await Promise.all([
         prisma.user.count({ where }),

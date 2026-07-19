@@ -12,6 +12,7 @@ export type CachedGrantSessionRecord = {
         name: string;
         email: string;
         role: string;
+        status: string;
         sessionVersion: number;
     };
 };
@@ -72,6 +73,7 @@ function isSerializedRecord(
         isString(user.name) &&
         isString(user.email) &&
         isString(user.role) &&
+        isString(user.status) &&
         isNumber(user.sessionVersion)
     );
 }

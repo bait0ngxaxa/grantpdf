@@ -1,7 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/server/db";
-import { RATE_LIMIT, ROLES } from "@/lib/shared/constants";
+import {
+    RATE_LIMIT,
+    ROLES,
+    USER_LIFECYCLE_STATUS,
+} from "@/lib/shared/constants";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     setAccessTokenCookie,
@@ -28,6 +32,8 @@ type SigninUser = {
     password: string;
     role: string;
     sessionVersion: number;
+    status: string;
+    deletedAt: Date | null;
 };
 
 function buildInvalidCredentialsResponse(
@@ -49,8 +55,16 @@ async function findUserByEmail(email: string): Promise<SigninUser | null> {
             password: true,
             role: true,
             sessionVersion: true,
+            status: true,
+            deletedAt: true,
         },
-    });
+    }).then((user) =>
+        user &&
+        user.status === USER_LIFECYCLE_STATUS.ACTIVE &&
+        user.deletedAt === null
+            ? user
+            : null,
+    );
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

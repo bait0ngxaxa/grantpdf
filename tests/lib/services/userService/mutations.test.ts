@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockTx = {
     user: {
         findUnique: vi.fn(),
+        findFirst: vi.fn(),
         update: vi.fn(),
     },
     auditLog: {
@@ -72,7 +73,7 @@ describe("userService mutations", () => {
 
     describe("updateUserWithAudit", () => {
         it("increments sessionVersion when role changes", async () => {
-            mockTx.user.findUnique.mockResolvedValue(buildUser(ROLES.MEMBER));
+            mockTx.user.findFirst.mockResolvedValue(buildUser(ROLES.MEMBER));
             mockTx.user.update.mockResolvedValue(buildUser(ROLES.ADMIN));
 
             await updateUserWithAudit(
@@ -101,7 +102,7 @@ describe("userService mutations", () => {
         });
 
         it("does not increment sessionVersion when role is unchanged", async () => {
-            mockTx.user.findUnique.mockResolvedValue(buildUser(ROLES.MEMBER));
+            mockTx.user.findFirst.mockResolvedValue(buildUser(ROLES.MEMBER));
             mockTx.user.update.mockResolvedValue(buildUser(ROLES.MEMBER));
 
             await updateUserWithAudit(
@@ -115,7 +116,7 @@ describe("userService mutations", () => {
         });
 
         it("does not increment sessionVersion when only profile data changes", async () => {
-            mockTx.user.findUnique.mockResolvedValue(buildUser(ROLES.MEMBER));
+            mockTx.user.findFirst.mockResolvedValue(buildUser(ROLES.MEMBER));
             mockTx.user.update.mockResolvedValue({
                 ...buildUser(ROLES.MEMBER),
                 name: "ชื่อใหม่",

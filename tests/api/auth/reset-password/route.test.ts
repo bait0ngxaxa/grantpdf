@@ -95,6 +95,8 @@ describe("reset-password route", () => {
         expect(mockedUpdateMany).toHaveBeenCalledWith({
             where: {
                 id: 9,
+                status: "active",
+                deletedAt: null,
                 passwordResetVersion: 4,
             },
             data: {

@@ -58,6 +58,7 @@ function buildSessionRecord(overrides: Partial<{
         name: string;
         email: string;
         role: string;
+        status: string;
         sessionVersion: number;
     };
 }> = {}) {
@@ -72,6 +73,7 @@ function buildSessionRecord(overrides: Partial<{
             name: "Grant User",
             email: "grant@example.com",
             role: "admin",
+            status: "active",
             sessionVersion: 2,
         },
         ...overrides,

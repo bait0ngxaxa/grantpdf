@@ -76,6 +76,8 @@ describe("forgot-password route", () => {
             {
                 id: 7,
                 passwordResetVersion: 2,
+                status: "active",
+                deletedAt: null,
             } as never
         );
 
@@ -112,6 +114,8 @@ describe("forgot-password route", () => {
             {
                 id: 7,
                 passwordResetVersion: 0,
+                status: "active",
+                deletedAt: null,
             } as never
         );
         delete process.env.AUTH_URL;

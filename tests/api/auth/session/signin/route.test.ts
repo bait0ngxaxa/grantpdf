@@ -177,6 +177,8 @@ describe("grant signin route", () => {
             password: "hashed-password",
             role: "admin",
             sessionVersion: 2,
+            status: "active",
+            deletedAt: null,
         } as never);
         mockedCompare.mockResolvedValue(true as never);
 

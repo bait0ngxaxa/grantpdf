@@ -4,7 +4,7 @@ import { prisma } from "@/lib/server/db";
 import { forgotPasswordSchema } from "@/lib/validation/schemas";
 import { sendPasswordResetEmail } from "@/lib/server/email/email";
 import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
-import { RATE_LIMIT } from "@/lib/shared/constants";
+import { RATE_LIMIT, USER_LIFECYCLE_STATUS } from "@/lib/shared/constants";
 import { getStringField } from "@/lib/shared/utils";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import {
@@ -69,11 +69,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             select: {
                 id: true,
                 passwordResetVersion: true,
+                status: true,
+                deletedAt: true,
             },
         });
 
+        const activeUser =
+            user &&
+            user.status === USER_LIFECYCLE_STATUS.ACTIVE &&
+            user.deletedAt === null
+                ? user
+                : null;
+
         // คืน 200 เสมอเพื่อป้องกัน user enumeration attack
-        if (!user) {
+        if (!activeUser) {
             logAudit("PASSWORD_RESET_REQUEST", null, {
                 details: {
                     requestedEmail: email,
@@ -90,8 +99,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         }
 
         const token = createPasswordResetToken(
-            user.id,
-            user.passwordResetVersion
+            activeUser.id,
+            activeUser.passwordResetVersion
         );
 
         const resetUrl = new URL(
@@ -103,10 +112,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         await sendPasswordResetEmail({ email, resetLink });
 
-        logAudit("PASSWORD_RESET_REQUEST", String(user.id), {
+        logAudit("PASSWORD_RESET_REQUEST", String(activeUser.id), {
             userEmail: email,
             targetType: "user",
-            targetId: String(user.id),
+            targetId: String(activeUser.id),
             details: {
                 requestedEmail: email,
                 accountFound: true,

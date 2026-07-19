@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { USER_LIFECYCLE_STATUS } from "@/lib/shared/constants";
 
 export function buildProjectAccessWhere(
     projectId: number,
@@ -11,7 +12,15 @@ export function buildProjectAccessWhere(
             { userId },
             {
                 allowCoOwners: true,
-                coOwners: { some: { coOwnerUserId: userId } },
+                coOwners: {
+                    some: {
+                        coOwnerUserId: userId,
+                        coOwnerUser: {
+                            status: USER_LIFECYCLE_STATUS.ACTIVE,
+                            deletedAt: null,
+                        },
+                    },
+                },
             },
         ],
     };
@@ -26,7 +35,15 @@ export function buildUserProjectsAccessWhere(
             { userId },
             {
                 allowCoOwners: true,
-                coOwners: { some: { coOwnerUserId: userId } },
+                coOwners: {
+                    some: {
+                        coOwnerUserId: userId,
+                        coOwnerUser: {
+                            status: USER_LIFECYCLE_STATUS.ACTIVE,
+                            deletedAt: null,
+                        },
+                    },
+                },
             },
         ],
     };

@@ -19,12 +19,18 @@ model User {
   sessionVersion      Int      @default(0)
   storageUsedBytes    BigInt   @default(0) @map("storage_used_bytes") @db.UnsignedBigInt
   role                String   @default("member")
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamp(6)
+  deletedById         Int?      @map("deleted_by_id")
+  status              String    @default("active") @db.VarChar(16)
+  purgeAfter          DateTime? @map("purge_after") @db.Timestamp(6)
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @updatedAt @db.Timestamp(6)
   files      UserFile[]
   projects   Project[]
   coOwnedProjects ProjectCoOwner[] @relation("ProjectCoOwnerUser")
   assignedProjectCoOwners ProjectCoOwner[] @relation("ProjectCoOwnerAssigner")
+  deletedBy User? @relation("UserDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+  deletedUsers User[] @relation("UserDeletedBy")
   projectReports ProjectReport[]
   documentIdempotencyKeys DocumentIdempotency[]
   authSessions AuthSession[]
@@ -33,6 +39,7 @@ model User {
 
   @@index([created_at])
   @@index([name])
+  @@index([status, deletedAt])
 }
 
 model AuthSession {
@@ -115,12 +122,12 @@ model ProjectCoOwner {
   id          Int      @id @default(autoincrement())
   projectId   Int
   coOwnerUserId Int
-  assignedById Int
+  assignedById Int?
   created_at  DateTime @default(now()) @db.Timestamp(6)
 
   project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   coOwnerUser  User    @relation("ProjectCoOwnerUser", fields: [coOwnerUserId], references: [id], onDelete: Cascade)
-  assignedBy User    @relation("ProjectCoOwnerAssigner", fields: [assignedById], references: [id], onDelete: Cascade)
+  assignedBy User?   @relation("ProjectCoOwnerAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
 
   @@unique([projectId, coOwnerUserId])
   @@index([projectId])

@@ -1,4 +1,4 @@
-import { ROLES } from "@/lib/shared/constants";
+import { ROLES, USER_LIFECYCLE_STATUS } from "@/lib/shared/constants";
 import { toPrismaJsonValue } from "@/lib/server/audit/auditUtils";
 import {
     NOTIFICATION_AUDIENCE,
@@ -70,7 +70,11 @@ async function getAdminUserIds(
     tx: Prisma.TransactionClient,
 ): Promise<number[]> {
     const users = await tx.user.findMany({
-        where: { role: ROLES.ADMIN },
+        where: {
+            role: ROLES.ADMIN,
+            status: USER_LIFECYCLE_STATUS.ACTIVE,
+            deletedAt: null,
+        },
         select: { id: true },
     });
     return uniqueRecipientIds(users.map((user) => user.id));

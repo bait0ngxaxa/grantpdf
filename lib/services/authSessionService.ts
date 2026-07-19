@@ -1,6 +1,6 @@
 import { randomBytes, createHash } from "crypto";
 import { prisma } from "@/lib/server/db";
-import { SESSION } from "@/lib/shared/constants";
+import { SESSION, USER_LIFECYCLE_STATUS } from "@/lib/shared/constants";
 import {
     createAccessToken,
     verifyAccessToken,
@@ -126,9 +126,10 @@ function shouldRejectSession(session: {
     revokedAt: Date | null;
     rotatedAt: Date | null;
     sessionVersion: number;
-    user: { sessionVersion: number };
+    user: { sessionVersion: number; status: string };
 }): "expired" | "revoked" | "reused" | null {
     if (session.revokedAt) return "revoked";
+    if (session.user.status !== USER_LIFECYCLE_STATUS.ACTIVE) return "revoked";
     if (session.rotatedAt) return "reused";
     if (session.expiresAt.getTime() <= Date.now()) return "expired";
     if (session.sessionVersion !== session.user.sessionVersion) return "revoked";
@@ -164,6 +165,7 @@ export async function rotateRefreshSession(
                             id: true,
                             role: true,
                             sessionVersion: true,
+                            status: true,
                         },
                     },
                 },
