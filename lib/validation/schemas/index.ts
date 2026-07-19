@@ -1,3 +1,16 @@
+// Nested document payload schemas + types
+export {
+    activitySchema,
+    activitiesSchema,
+    activitiesJsonSchema,
+    attachmentTextSchema,
+    attachmentsSchema,
+    attachmentsJsonSchema,
+    attachmentFileIdsSchema,
+    attachmentFileIdsJsonSchema,
+    type ActivityData,
+} from "./nested.schema";
+
 // Document schemas + types
 export { approvalSchema, type ApprovalData } from "./approval.schema";
 export { contractSchema, type ContractData } from "./contract.schema";

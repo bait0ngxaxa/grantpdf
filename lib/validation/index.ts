@@ -6,7 +6,14 @@ export type {
 } from "./types";
 
 // Zod Schemas and Types (ใช้แทน custom validators/types เดิม)
-export type { ApprovalData, ContractData, FormProjectData, SummaryData, TORData } from "./schemas";
+export type {
+    ActivityData,
+    ApprovalData,
+    ContractData,
+    FormProjectData,
+    SummaryData,
+    TORData,
+} from "./schemas";
 export type { SignupInput, ForgotPasswordInput, ResetPasswordInput } from "./schemas";
 export type {
     CreateProjectInput,
@@ -16,6 +23,14 @@ export type {
     GenerateSignedUrlInput,
 } from "./schemas";
 export {
+    activitySchema,
+    activitiesSchema,
+    activitiesJsonSchema,
+    attachmentTextSchema,
+    attachmentsSchema,
+    attachmentsJsonSchema,
+    attachmentFileIdsSchema,
+    attachmentFileIdsJsonSchema,
     approvalSchema,
     contractSchema,
     formProjectSchema,

@@ -24,8 +24,11 @@ import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import { getFullPathFromStoragePath } from "@/lib/server/storage";
 import { fileTypeFromBuffer } from "file-type";
-import { normalizePhoneNumber } from "@/lib/validation/schemas";
-import { parsePositiveIntId } from "@/lib/shared/http/id";
+import {
+    attachmentFileIdsJsonSchema,
+    attachmentsJsonSchema,
+    normalizePhoneNumber,
+} from "@/lib/validation/schemas";
 import { SIGNATURE_UPLOAD } from "@/lib/shared/constants";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
@@ -84,32 +87,19 @@ function parseAttachmentFileIds(raw: FormDataEntryValue | null): number[] | Next
         );
     }
 
-    let parsed: unknown;
-    try {
-        parsed = JSON.parse(raw);
-    } catch {
+    const result = attachmentFileIdsJsonSchema.safeParse(raw);
+    if (!result.success) {
         return NextResponse.json(
-            { error: "รายการไฟล์แนบไม่ถูกต้อง" },
+            {
+                error:
+                    result.error.issues[0]?.message ??
+                    "รายการรหัสไฟล์แนบไม่ถูกต้อง",
+            },
             { status: 400 },
         );
     }
 
-    if (!Array.isArray(parsed)) {
-        return NextResponse.json(
-            { error: "รายการไฟล์แนบต้องเป็นรายการของรหัสไฟล์" },
-            { status: 400 },
-        );
-    }
-
-    const ids = parsed.map((item) => parsePositiveIntId(item));
-    if (ids.some((id): id is null => id === null)) {
-        return NextResponse.json(
-            { error: "รหัสไฟล์แนบไม่ถูกต้อง" },
-            { status: 400 },
-        );
-    }
-
-    return Array.from(new Set(ids.filter((id): id is number => id !== null)));
+    return result.data;
 }
 
 async function resolveOwnedAttachmentFiles(
@@ -185,14 +175,20 @@ export async function handleApprovalGeneration(
     const fixedRegard = formData.get("regard") as string;
     const accept = formData.get("accept") as string;
 
-    // Parse attachments
-    const attachmentsJson = formData.get("attachments") as string;
-    let attachments: string[] = [];
-    try {
-        attachments = JSON.parse(attachmentsJson || "[]");
-    } catch {
-        attachments = [];
+    const attachmentsResult = attachmentsJsonSchema.safeParse(
+        formData.get("attachments"),
+    );
+    if (!attachmentsResult.success) {
+        return NextResponse.json(
+            {
+                error:
+                    attachmentsResult.error.issues[0]?.message ??
+                    "รายการไฟล์แนบไม่ถูกต้อง",
+            },
+            { status: 400 },
+        );
     }
+    const attachments = attachmentsResult.data;
 
     const attachmentFileIds = parseAttachmentFileIds(
         formData.get("attachmentFileIds"),

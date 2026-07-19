@@ -21,7 +21,10 @@ import {
     handleSummaryGeneration,
 } from "@/lib/document/handlers";
 import {
+    activitiesJsonSchema,
     approvalSchema,
+    attachmentFileIdsJsonSchema,
+    attachmentsJsonSchema,
     contractSchema,
     formProjectSchema,
     summarySchema,
@@ -42,18 +45,6 @@ type DocumentType = "tor" | "approval" | "contract" | "formproject" | "summary";
 function getTextField(formData: FormData, key: string): string {
     const raw = formData.get(key);
     return typeof raw === "string" ? raw : "";
-}
-
-function parseStringArrayJson(raw: string): string[] {
-    if (!raw) return [];
-
-    try {
-        const parsed: unknown = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return [];
-        return parsed.filter((item): item is string => typeof item === "string");
-    } catch {
-        return [];
-    }
 }
 
 function validateDocumentPayload(
@@ -81,17 +72,20 @@ function validateDocumentPayload(
                 partner: getTextField(formData, "partner"),
                 date: getTextField(formData, "date"),
             }),
-        approval: () =>
-            approvalSchema.safeParse({
+        approval: () => {
+            const attachments = attachmentsJsonSchema.safeParse(
+                formData.get("attachments"),
+            );
+            if (!attachments.success) return attachments;
+
+            return approvalSchema.safeParse({
                 head: getTextField(formData, "head"),
                 fileName: getTextField(formData, "fileName"),
                 projectName: getTextField(formData, "projectName"),
                 date: getTextField(formData, "date"),
                 topicdetail: getTextField(formData, "topicdetail"),
                 todetail: getTextField(formData, "todetail"),
-                attachments: parseStringArrayJson(
-                    getTextField(formData, "attachments"),
-                ),
+                attachments: attachments.data,
                 detail: getTextField(formData, "detail"),
                 name: getTextField(formData, "name"),
                 depart: getTextField(formData, "depart"),
@@ -99,7 +93,8 @@ function validateDocumentPayload(
                 tel: getTextField(formData, "tel"),
                 email: getTextField(formData, "email"),
                 accept: getTextField(formData, "accept"),
-            }),
+            });
+        },
         contract: () =>
             contractSchema.safeParse({
                 fileName: getTextField(formData, "fileName"),
@@ -165,11 +160,32 @@ function validateDocumentPayload(
     } as const;
 
     const parsed = validators[type]();
-    const result = parsed.success
-        ? null
-        : parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+    if (!parsed.success) {
+        return parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง";
+    }
 
-    return result;
+    if (type === "tor") {
+        const activities = activitiesJsonSchema.safeParse(
+            formData.get("activities"),
+        );
+        if (!activities.success) {
+            return activities.error.issues[0]?.message ?? "ข้อมูลกิจกรรมไม่ถูกต้อง";
+        }
+    }
+
+    if (type === "approval") {
+        const attachmentFileIds = attachmentFileIdsJsonSchema.safeParse(
+            formData.get("attachmentFileIds"),
+        );
+        if (!attachmentFileIds.success) {
+            return (
+                attachmentFileIds.error.issues[0]?.message ??
+                "รายการรหัสไฟล์แนบไม่ถูกต้อง"
+            );
+        }
+    }
+
+    return null;
 }
 
 function getIdempotencyKey(req: Request, formData: FormData): string | null {

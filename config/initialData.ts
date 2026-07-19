@@ -1,26 +1,19 @@
 // =====================================================
 // Re-export types from Zod schemas (SSOT)
 // =====================================================
-export type { ApprovalData } from "@/lib/validation/schemas";
+export type { ActivityData, ApprovalData } from "@/lib/validation/schemas";
 export type { ContractData } from "@/lib/validation/schemas";
 export type { FormProjectData } from "@/lib/validation/schemas";
 export type { SummaryData } from "@/lib/validation/schemas";
 export type { TORData } from "@/lib/validation/schemas";
 
 // =====================================================
-// ActivityData (ไม่มี schema เพราะไม่ได้ validate)
-// =====================================================
-export interface ActivityData {
-    activity: string;
-    manager: string;
-    evaluation2: string;
-    duration: string;
-}
-
-// =====================================================
 // Initial Data Constants
 // =====================================================
-import type { TORData } from "@/lib/validation/schemas";
+import type {
+    ActivityData,
+    TORData,
+} from "@/lib/validation/schemas";
 export const initialTORData: TORData = {
     projectName: "",
     fileName: "",

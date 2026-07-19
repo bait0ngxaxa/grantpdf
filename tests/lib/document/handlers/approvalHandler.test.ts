@@ -96,10 +96,10 @@ const mockedFindMany = vi.mocked(prisma.userFile.findMany);
 const mockedTransaction = vi.mocked(prisma.$transaction);
 const mockedSaveDocumentToStorage = vi.mocked(saveDocumentToStorage);
 
-function createFormData(): FormData {
+function createFormData(attachments = "[]"): FormData {
     const formData = new FormData();
     formData.set("projectName", "โครงการทดสอบ");
-    formData.set("attachments", "[]");
+    formData.set("attachments", attachments);
     formData.set("attachmentFileIds", JSON.stringify([7]));
     return formData;
 }
@@ -144,6 +144,19 @@ describe("approval handler attachment storage", () => {
             },
         );
     });
+
+    it.each(["{", JSON.stringify({})])(
+        "rejects malformed attachment text payload (%s)",
+        async (attachments) => {
+            const response = await handleApprovalGeneration(
+                createFormData(attachments),
+                1,
+            );
+
+            expect(response.status).toBe(400);
+            expect(mockedSaveDocumentToStorage).not.toHaveBeenCalled();
+        },
+    );
 
     it("copies selected attachment content before creating Approval attachment row", async () => {
         const response = await handleApprovalGeneration(createFormData(), 1);

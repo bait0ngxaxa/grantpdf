@@ -7,6 +7,7 @@ import {
     DOCUMENT_FILE_NAME_MAX_LENGTH,
     PROJECT_NAME_MAX_LENGTH,
 } from "./shared";
+import { attachmentsSchema } from "./nested.schema";
 
 export const approvalSchema = z.object({
     head: requiredString("เลขที่หนังสือ"),
@@ -22,7 +23,7 @@ export const approvalSchema = z.object({
     date: requiredString("วันที่"),
     topicdetail: requiredString("รายละเอียดเรื่อง"),
     todetail: requiredString("รายละเอียดถึง"),
-    attachments: z.array(z.string()).default([]),
+    attachments: attachmentsSchema.default([]),
     detail: requiredString("รายละเอียด"),
     name: requiredString("ชื่อผู้ลงนาม"),
     depart: requiredString("หน่วยงาน"),

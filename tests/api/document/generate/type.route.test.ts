@@ -51,9 +51,13 @@ vi.mock("@/lib/document/handlers", () => ({
     handleSummaryGeneration: vi.fn(),
 }));
 
-vi.mock("@/lib/validation/schemas", () => {
+vi.mock("@/lib/validation/schemas", async (importOriginal) => {
+    const actual = await importOriginal<
+        typeof import("@/lib/validation/schemas")
+    >();
     const ok = { safeParse: vi.fn(() => ({ success: true })) };
     return {
+        ...actual,
         torSchema: ok,
         approvalSchema: ok,
         contractSchema: ok,
@@ -68,13 +72,19 @@ import {
     completeDocumentIdempotency,
     failDocumentIdempotency,
 } from "@/lib/services/documentIdempotencyService";
-import { handleTorGeneration } from "@/lib/document/handlers";
+import {
+    handleApprovalGeneration,
+    handleTorGeneration,
+} from "@/lib/document/handlers";
 import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
 
 const mockedAuth = vi.mocked(auth);
 const mockedStartDocumentIdempotency = vi.mocked(startDocumentIdempotency);
 const mockedCompleteDocumentIdempotency = vi.mocked(completeDocumentIdempotency);
 const mockedFailDocumentIdempotency = vi.mocked(failDocumentIdempotency);
+const mockedHandleApprovalGeneration = vi.mocked(
+    handleApprovalGeneration,
+);
 const mockedHandleTorGeneration = vi.mocked(handleTorGeneration);
 const mockedCreateDocumentRequestHash = vi.mocked(createDocumentRequestHash);
 
@@ -82,7 +92,10 @@ function buildParams(type: string): Promise<{ type: string }> {
     return Promise.resolve({ type });
 }
 
-function buildRequest(idempotencyKey: string): Request {
+function buildRequest(
+    idempotencyKey: string,
+    activities = "[]",
+): Request {
     const formData = new FormData();
     formData.set("projectName", "โครงการทดสอบ");
     formData.set("fileName", "เอกสารทดสอบ");
@@ -101,6 +114,7 @@ function buildRequest(idempotencyKey: string): Request {
     formData.set("projectmanage", "การจัดการ");
     formData.set("partner", "ภาคี");
     formData.set("date", "2026-04-07");
+    formData.set("activities", activities);
 
     return new Request("http://localhost/api/generate/tor", {
         method: "POST",
@@ -109,6 +123,30 @@ function buildRequest(idempotencyKey: string): Request {
             "x-forwarded-for": "203.0.113.20",
             "x-request-id": "req-test-001",
         },
+        body: formData,
+    });
+}
+
+function buildApprovalRequest(attachments: string): Request {
+    const formData = new FormData();
+    formData.set("head", "เลขที่หนังสือ");
+    formData.set("fileName", "หนังสือขออนุมัติ");
+    formData.set("projectName", "โครงการทดสอบ");
+    formData.set("date", "2026-04-07");
+    formData.set("topicdetail", "รายละเอียดเรื่อง");
+    formData.set("todetail", "รายละเอียดถึง");
+    formData.set("attachments", attachments);
+    formData.set("attachmentFileIds", "[]");
+    formData.set("detail", "รายละเอียด");
+    formData.set("name", "ผู้ลงนาม");
+    formData.set("depart", "หน่วยงาน");
+    formData.set("coor", "ผู้ประสานงาน");
+    formData.set("tel", "0812345678");
+    formData.set("email", "tester@example.com");
+    formData.set("accept", "ผู้อนุมัติ");
+
+    return new Request("http://localhost/api/generate/approval", {
+        method: "POST",
         body: formData,
     });
 }
@@ -130,6 +168,9 @@ describe("document generate route idempotency", () => {
             leaseToken: "lease-token-1",
         } as never);
 
+        mockedHandleApprovalGeneration.mockResolvedValue(
+            Response.json({ success: true }, { status: 200 }),
+        );
         mockedHandleTorGeneration.mockResolvedValue(
             Response.json(
                 {
@@ -227,6 +268,31 @@ describe("document generate route idempotency", () => {
         expect(typeof body.error).toBe("string");
         expect(mockedHandleTorGeneration).not.toHaveBeenCalled();
     });
+
+    it.each(["{", JSON.stringify({})])(
+        "rejects malformed approval attachments (%s)",
+        async (attachments) => {
+            const response = await POST(buildApprovalRequest(attachments), {
+                params: buildParams("approval"),
+            });
+
+            expect(response.status).toBe(400);
+            expect(mockedHandleApprovalGeneration).not.toHaveBeenCalled();
+        },
+    );
+
+    it.each(["{", JSON.stringify({})])(
+        "rejects malformed TOR activities (%s)",
+        async (activities) => {
+            const response = await POST(
+                buildRequest("idem-invalid-activities", activities),
+                { params: buildParams("tor") },
+            );
+
+            expect(response.status).toBe(400);
+            expect(mockedHandleTorGeneration).not.toHaveBeenCalled();
+        },
+    );
 
     it("marks idempotency as failed when handler throws", async () => {
         mockedStartDocumentIdempotency.mockResolvedValue({

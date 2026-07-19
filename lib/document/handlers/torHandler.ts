@@ -11,49 +11,28 @@ import {
 import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
 import { NextResponse } from "next/server";
 import { formatNumericWithCommas } from "@/lib/shared/utils";
-import { normalizePhoneNumber } from "@/lib/validation/schemas";
+import {
+    activitiesJsonSchema,
+    normalizePhoneNumber,
+    type ActivityData,
+} from "@/lib/validation/schemas";
 
 function parseActivitiesData(
     raw: FormDataEntryValue | null,
-): Record<string, unknown>[] | NextResponse {
-    if (raw === null || raw === "") return [];
-
-    if (typeof raw !== "string") {
+): ActivityData[] | NextResponse {
+    const result = activitiesJsonSchema.safeParse(raw);
+    if (!result.success) {
         return NextResponse.json(
-            { error: "ข้อมูลกิจกรรมไม่ถูกต้อง" },
+            {
+                error:
+                    result.error.issues[0]?.message ??
+                    "ข้อมูลกิจกรรมไม่ถูกต้อง",
+            },
             { status: 400 },
         );
     }
 
-    let parsed: unknown;
-    try {
-        parsed = JSON.parse(raw);
-    } catch {
-        return NextResponse.json(
-            { error: "ข้อมูลกิจกรรมไม่ถูกต้อง" },
-            { status: 400 },
-        );
-    }
-
-    if (!Array.isArray(parsed)) {
-        return NextResponse.json(
-            { error: "ข้อมูลกิจกรรมต้องเป็นรายการ" },
-            { status: 400 },
-        );
-    }
-
-    const hasInvalidItem = parsed.some(
-        (item) =>
-            typeof item !== "object" || item === null || Array.isArray(item),
-    );
-    if (hasInvalidItem) {
-        return NextResponse.json(
-            { error: "รายการกิจกรรมไม่ถูกต้อง" },
-            { status: 400 },
-        );
-    }
-
-    return parsed as Record<string, unknown>[];
+    return result.data;
 }
 
 export async function handleTorGeneration(
