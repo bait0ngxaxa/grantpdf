@@ -9,6 +9,7 @@ export interface RateLimitResult {
     remaining: number;
     resetTime: number;
     retryAfter?: number;
+    unavailable?: boolean;
 }
 
 interface RateLimitState {

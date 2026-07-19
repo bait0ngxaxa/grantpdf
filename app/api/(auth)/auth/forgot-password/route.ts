@@ -14,6 +14,7 @@ import {
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {
     rateLimitExceededResponse,
+    rateLimitUnavailableResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 
@@ -27,8 +28,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             routeKey: RATE_LIMIT.AUTH.FORGOT_PASSWORD.ROUTE_KEY,
             limit: RATE_LIMIT.AUTH.FORGOT_PASSWORD.LIMIT,
             windowMs: RATE_LIMIT.AUTH.FORGOT_PASSWORD.WINDOW_MS,
+            failurePolicy: "fail-closed",
             identifier: emailIdentifier,
         });
+
+        if (rateLimitResult.unavailable) {
+            return rateLimitUnavailableResponse(
+                rateLimitResult.headers,
+                "ระบบป้องกันการใช้งานไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง",
+            );
+        }
 
         if (!rateLimitResult.success) {
             logAudit("PASSWORD_RESET_REQUEST", null, {

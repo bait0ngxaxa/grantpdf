@@ -120,6 +120,31 @@ describe("grant signin route", () => {
         );
     });
 
+    it("returns 503 when auth rate-limit storage is unavailable", async () => {
+        mockedApplyRateLimit.mockResolvedValue({
+            success: false,
+            unavailable: true,
+            remaining: 0,
+            resetTime: Date.now() + 60_000,
+            headers: {},
+        });
+
+        const response = await POST(
+            buildRequest({
+                email: "tester@example.com",
+                password: "secret",
+            }) as never,
+        );
+        const body = await response.json();
+
+        expect(response.status).toBe(503);
+        expect(body.error).toBe(
+            "ระบบป้องกันการเข้าสู่ระบบไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง",
+        );
+        expect(mockedLogAudit).not.toHaveBeenCalled();
+        expect(mockedFindUnique).not.toHaveBeenCalled();
+    });
+
     it("returns 401 when credentials are invalid", async () => {
         mockedFindUnique.mockResolvedValue(null);
 

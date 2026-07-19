@@ -7,7 +7,10 @@ import {
     getRateLimitStatus,
 } from "@/lib/server/rate-limit/rateLimit";
 import { readJsonBody } from "@/lib/api/body";
-import { rateLimitExceededResponse } from "@/lib/api/responses";
+import {
+    rateLimitExceededResponse,
+    rateLimitUnavailableResponse,
+} from "@/lib/api/responses";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await readJsonBody(req);
@@ -20,7 +23,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const status = await getRateLimitStatus(
         key,
         RATE_LIMIT.AUTH.SIGNIN.LIMIT,
-        RATE_LIMIT.AUTH.SIGNIN.WINDOW_MS
+        RATE_LIMIT.AUTH.SIGNIN.WINDOW_MS,
+        "fail-closed",
     );
     const blocked = status.remaining <= 0;
     const headers = getRateLimitHeaders(
@@ -32,6 +36,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         },
         RATE_LIMIT.AUTH.SIGNIN.LIMIT
     );
+
+    if (status.unavailable) {
+        return rateLimitUnavailableResponse(
+            headers,
+            "ระบบป้องกันการเข้าสู่ระบบไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง",
+        );
+    }
 
     if (blocked) {
         return rateLimitExceededResponse(

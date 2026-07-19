@@ -25,6 +25,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             routeKey: RATE_LIMIT.AUTH.SIGNUP.ROUTE_KEY,
             limit: RATE_LIMIT.AUTH.SIGNUP.LIMIT,
             windowMs: RATE_LIMIT.AUTH.SIGNUP.WINDOW_MS,
+            failurePolicy: "fail-closed",
             identifier: emailIdentifier,
         });
 

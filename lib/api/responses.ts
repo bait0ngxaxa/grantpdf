@@ -3,6 +3,7 @@ import { toPublicApiError } from "@/lib/shared/http/apiError";
 
 interface RateLimitedResponseInput {
     retryAfter?: number;
+    unavailable?: boolean;
     headers: HeadersInit;
 }
 
@@ -20,10 +21,24 @@ export function unauthorizedResponse(
     return NextResponse.json({ error: message }, { status: 401, headers });
 }
 
+export function rateLimitUnavailableResponse(
+    headers: HeadersInit,
+    message: string = "ระบบป้องกันการใช้งานไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง",
+): NextResponse {
+    return NextResponse.json(
+        { error: message },
+        { status: 503, headers },
+    );
+}
+
 export function rateLimitExceededResponse(
     result: RateLimitedResponseInput,
     message: string,
 ): NextResponse {
+    if (result.unavailable) {
+        return rateLimitUnavailableResponse(result.headers);
+    }
+
     const body =
         result.retryAfter === undefined
             ? { error: message }

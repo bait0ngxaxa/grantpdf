@@ -1,1 +1,8 @@
-export { getRedisClient, redisClient } from "./redisClient";
+export {
+    checkRedisHealth,
+    getRedisClient,
+    getRedisHealth,
+    redisClient,
+    reportRedisFailure,
+    reportRedisSuccess,
+} from "./redisClient";

@@ -1,5 +1,8 @@
 // lib/ratelimit.ts
-import { getRedisClient } from "@/lib/server/db";
+import {
+    getRedisClient,
+    reportRedisFailure,
+} from "@/lib/server/db";
 import {
     getRateLimitMemoryStats,
     getRateLimitStatusMemory,
@@ -13,12 +16,17 @@ import {
 } from "@/lib/server/rate-limit/scripts";
 import { getClientIpOrUnknown } from "@/lib/shared/request/clientIp";
 
+export type RateLimitFailurePolicy =
+    | "fail-closed"
+    | "memory-fallback";
+
 interface ApplyRateLimitOptions {
     request: Request;
     routeKey: string;
     limit: number;
     windowMs: number;
     identifier?: string;
+    failurePolicy?: RateLimitFailurePolicy;
 }
 
 const REDIS_KEY_TTL_BUFFER_MS = 60_000;
@@ -35,6 +43,34 @@ function assertRateLimitConfig(limit: number, windowMs: number): void {
     if (!Number.isFinite(windowMs) || windowMs < 1) {
         throw new Error("Rate limit window must be greater than zero");
     }
+}
+
+function buildUnavailableResult(
+    limit: number,
+    windowMs: number,
+): RateLimitResult {
+    return {
+        success: false,
+        unavailable: true,
+        remaining: 0,
+        resetTime: Date.now() + windowMs,
+        retryAfter: Math.max(1, Math.ceil(windowMs / 1000)),
+    };
+}
+
+function handleRedisFailure(
+    error: unknown,
+    policy: RateLimitFailurePolicy,
+    key: string,
+    limit: number,
+    windowMs: number,
+): RateLimitResult {
+    reportRedisFailure(error);
+    if (policy === "fail-closed") {
+        return buildUnavailableResult(limit, windowMs);
+    }
+
+    return rateLimitMemory(key, limit, windowMs);
 }
 
 function toNumber(value: unknown): number {
@@ -74,52 +110,98 @@ export async function rateLimit(
     key: string,
     limit: number = 5,
     windowMs: number = 60_000,
+    failurePolicy: RateLimitFailurePolicy = "memory-fallback",
 ): Promise<RateLimitResult> {
     assertRateLimitConfig(limit, windowMs);
 
     if (!shouldUseRedis()) {
+        if (failurePolicy === "fail-closed" && process.env.NODE_ENV !== "test") {
+            return buildUnavailableResult(limit, windowMs);
+        }
         return rateLimitMemory(key, limit, windowMs);
     }
 
-    const client = await getRedisClient();
-    const ttlMs = windowMs + REDIS_KEY_TTL_BUFFER_MS;
-    const reply = await client.eval(RATE_LIMIT_SCRIPT, {
-        keys: [key],
-        arguments: [
-            Date.now().toString(),
-            limit.toString(),
-            windowMs.toString(),
-            ttlMs.toString(),
-        ],
-    });
-    return parseRateLimitReply(reply);
+    try {
+        const client = await getRedisClient();
+        const ttlMs = windowMs + REDIS_KEY_TTL_BUFFER_MS;
+        const reply = await client.eval(RATE_LIMIT_SCRIPT, {
+            keys: [key],
+            arguments: [
+                Date.now().toString(),
+                limit.toString(),
+                windowMs.toString(),
+                ttlMs.toString(),
+            ],
+        });
+        return parseRateLimitReply(reply);
+    } catch (error) {
+        return handleRedisFailure(
+            error,
+            failurePolicy,
+            key,
+            limit,
+            windowMs,
+        );
+    }
 }
 
 export async function getRateLimitStatus(
     key: string,
     limit: number = 5,
     windowMs: number = 60_000,
+    failurePolicy: RateLimitFailurePolicy = "memory-fallback",
 ): Promise<Omit<RateLimitResult, "success">> {
     assertRateLimitConfig(limit, windowMs);
 
     if (!shouldUseRedis()) {
+        if (failurePolicy === "fail-closed" && process.env.NODE_ENV !== "test") {
+            return {
+                remaining: 0,
+                resetTime: Date.now() + windowMs,
+                retryAfter: Math.max(1, Math.ceil(windowMs / 1000)),
+                unavailable: true,
+            };
+        }
         return getRateLimitStatusMemory(key, limit, windowMs);
     }
 
-    const client = await getRedisClient();
-    const reply = await client.eval(RATE_LIMIT_STATUS_SCRIPT, {
-        keys: [key],
-        arguments: [Date.now().toString(), limit.toString(), windowMs.toString()],
-    });
-    return parseStatusReply(reply);
+    try {
+        const client = await getRedisClient();
+        const reply = await client.eval(RATE_LIMIT_STATUS_SCRIPT, {
+            keys: [key],
+            arguments: [
+                Date.now().toString(),
+                limit.toString(),
+                windowMs.toString(),
+            ],
+        });
+        return parseStatusReply(reply);
+    } catch (error) {
+        reportRedisFailure(error);
+        if (failurePolicy === "fail-closed") {
+            return {
+                remaining: 0,
+                resetTime: Date.now() + windowMs,
+                retryAfter: Math.max(1, Math.ceil(windowMs / 1000)),
+                unavailable: true,
+            };
+        }
+
+        return getRateLimitStatusMemory(key, limit, windowMs);
+    }
 }
 
 export async function resetRateLimit(key: string): Promise<void> {
     resetRateLimitMemory(key);
 
     if (!shouldUseRedis()) return;
-    const client = await getRedisClient();
-    await client.del(key);
+
+    try {
+        const client = await getRedisClient();
+        await client.del(key);
+    } catch (error) {
+        reportRedisFailure(error);
+    }
 }
 
 export function getRateLimitStats(): { totalIPs: number; memoryUsage: string } {
@@ -197,7 +279,12 @@ export async function applyRateLimit(
         options.routeKey,
         options.identifier,
     );
-    const result = await rateLimit(key, options.limit, options.windowMs);
+    const result = await rateLimit(
+        key,
+        options.limit,
+        options.windowMs,
+        options.failurePolicy,
+    );
     return {
         ...result,
         headers: getRateLimitHeaders(result, options.limit),

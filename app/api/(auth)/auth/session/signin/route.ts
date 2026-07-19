@@ -16,6 +16,7 @@ import {
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
 import {
     rateLimitExceededResponse,
+    rateLimitUnavailableResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
 import { getUserAgent } from "@/lib/api/requestContext";
@@ -68,8 +69,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         routeKey: RATE_LIMIT.AUTH.SIGNIN.ROUTE_KEY,
         limit: RATE_LIMIT.AUTH.SIGNIN.LIMIT,
         windowMs: RATE_LIMIT.AUTH.SIGNIN.WINDOW_MS,
+        failurePolicy: "fail-closed",
         identifier: email,
     });
+
+    if (rateLimitResult.unavailable) {
+        return rateLimitUnavailableResponse(
+            rateLimitResult.headers,
+            "ระบบป้องกันการเข้าสู่ระบบไม่พร้อมใช้งาน กรุณาลองใหม่อีกครั้ง",
+        );
+    }
 
     if (!rateLimitResult.success) {
         logAudit("LOGIN_FAILED", null, {

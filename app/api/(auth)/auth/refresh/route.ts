@@ -49,6 +49,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         routeKey: RATE_LIMIT.AUTH.REFRESH.ROUTE_KEY,
         limit: RATE_LIMIT.AUTH.REFRESH.LIMIT,
         windowMs: RATE_LIMIT.AUTH.REFRESH.WINDOW_MS,
+        failurePolicy: "fail-closed",
     });
 
     if (!rateLimitResult.success) {
