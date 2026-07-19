@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 
 // ============================================================================
 // Document Types
@@ -8,6 +9,20 @@ export interface DocumentSaveResult {
     filePath: string;
     relativeStoragePath: string;
 }
+
+export interface DocumentIdempotencyContext {
+    complete(
+        tx: Prisma.TransactionClient,
+        resourceId: number,
+        responseBody: Record<string, unknown>,
+    ): Promise<void>;
+}
+
+export type DocumentRecordCompletion = (
+    tx: Prisma.TransactionClient,
+    resourceId: number,
+    relativeStoragePath: string,
+) => Promise<void>;
 
 // ============================================================================
 // Project Types

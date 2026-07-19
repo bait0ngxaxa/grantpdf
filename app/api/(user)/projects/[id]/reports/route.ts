@@ -7,7 +7,6 @@ import { prisma } from "@/lib/server/db";
 import {
     FILE_UPLOAD,
     RATE_LIMIT,
-    STORAGE_QUOTA,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
 } from "@/lib/shared/constants";
@@ -23,7 +22,10 @@ import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import { publicApiError } from "@/lib/shared/http/apiError";
 import { getFirstValidationMessage } from "@/lib/api/body";
-import { buildAuditContext } from "@/lib/api/requestContext";
+import {
+    buildAuditContext,
+    getClientIp,
+} from "@/lib/api/requestContext";
 import {
     publicErrorResponse,
     rateLimitExceededResponse,
@@ -34,14 +36,15 @@ import {
     createProjectReportWithFile,
     getProjectReportsForUser,
 } from "@/lib/services/projectReportService";
+import {
+    completeDocumentIdempotency,
+    markDocumentIdempotencyRecoveryRequired,
+    startDocumentIdempotencyHeartbeat,
+    type IdempotencyCompletionContext,
+} from "@/lib/services/documentIdempotencyService";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
 import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
 import {
-    releaseStorageQuota,
-    reserveStorageQuota,
-} from "@/lib/services/storageQuotaService";
-import {
-    completeUploadIdempotency,
     failUploadIdempotency,
     startUploadIdempotency,
 } from "@/lib/server/storage/uploadIdempotency";
@@ -170,10 +173,7 @@ export async function POST(
     let finalFilePath: string | null = null;
     let idempotencyRecordId: bigint | null = null;
     let idempotencyLeaseToken = "";
-    let storageQuotaReserved = false;
-    let storageQuotaCommitted = false;
-    let reservedStorageBytes = 0;
-    let reservedStorageUserId = 0;
+    let stopHeartbeat: (() => void) | null = null;
     try {
         const guard = await requireUserSession();
         if (isGuardError(guard)) return guard;
@@ -183,7 +183,7 @@ export async function POST(
             routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
             limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
             windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
-            identifier: String(guard.userId),
+            identifier: `${guard.userId}:${getClientIp(req) ?? "unknown"}`,
         });
         if (!rateLimitResult.success) {
             return rateLimitExceededResponse(
@@ -225,17 +225,26 @@ export async function POST(
         if (idempotency.type === "response") return idempotency.response;
         idempotencyRecordId = idempotency.recordId;
         idempotencyLeaseToken = idempotency.leaseToken;
+        stopHeartbeat = startDocumentIdempotencyHeartbeat({
+            recordId: idempotencyRecordId,
+            leaseToken: idempotencyLeaseToken,
+        });
 
-        const hasStorageQuota = await reserveStorageQuota(
-            guard.userId,
-            fileEntry.size,
-        );
-        if (!hasStorageQuota) {
-            throw publicApiError(507, STORAGE_QUOTA.EXCEEDED_MESSAGE);
-        }
-        storageQuotaReserved = true;
-        reservedStorageBytes = fileEntry.size;
-        reservedStorageUserId = guard.userId;
+        const idempotencyContext: IdempotencyCompletionContext = {
+            recordId: idempotencyRecordId,
+            leaseToken: idempotencyLeaseToken,
+            complete: async (tx, resourceId, responseBody) => {
+                await completeDocumentIdempotency({
+                    db: tx,
+                    recordId: idempotencyRecordId as bigint,
+                    leaseToken: idempotencyLeaseToken,
+                    statusCode: 200,
+                    responseBody,
+                    resourceType: "project_report",
+                    resourceId,
+                });
+            },
+        };
 
         const storedFile = await persistReportFile(fileEntry);
         finalFilePath = storedFile.finalFilePath;
@@ -248,9 +257,8 @@ export async function POST(
             fileSize: fileEntry.size,
             reportType: parsed.data.reportType,
             note: parsed.data.note,
+            idempotency: idempotencyContext,
         });
-
-        storageQuotaCommitted = true;
 
         const auditContext = buildAuditContext(guard.session, req);
         logAudit("PROJECT_REPORT_SUBMIT", auditContext.actorUserId, {
@@ -266,32 +274,12 @@ export async function POST(
             message: "ส่งรายงานโครงการสำเร็จ",
             report,
         };
-        await completeUploadIdempotency(
-            idempotencyRecordId,
-            idempotencyLeaseToken,
-            responseBody,
-        ).catch(
-            (idempotencyError: unknown) => {
-                console.error(
-                    "Failed to save project report idempotency response:",
-                    idempotencyError,
-                );
-            },
-        );
 
         return NextResponse.json(
             responseBody,
             { headers: rateLimitResult.headers },
         );
     } catch (error) {
-        if (storageQuotaReserved && !storageQuotaCommitted) {
-            await releaseStorageQuota(
-                reservedStorageUserId,
-                reservedStorageBytes,
-            ).catch((releaseError: unknown) => {
-                console.error("Failed to release report storage quota:", releaseError);
-            });
-        }
         if (finalFilePath) {
             await unlink(finalFilePath).catch(() => undefined);
         }
@@ -300,16 +288,29 @@ export async function POST(
                 idempotencyRecordId,
                 idempotencyLeaseToken,
                 error,
-            ).catch(
-                (idempotencyError: unknown) => {
+            ).catch(async (idempotencyError: unknown) => {
+                console.error(
+                    "Failed to update project report idempotency state:",
+                    idempotencyError,
+                );
+                await markDocumentIdempotencyRecoveryRequired({
+                    recordId: idempotencyRecordId as bigint,
+                    leaseToken: idempotencyLeaseToken,
+                    errorMessage:
+                        idempotencyError instanceof Error
+                            ? idempotencyError.message
+                            : "PROJECT_REPORT_IDEMPOTENCY_RECOVERY_REQUIRED",
+                }).catch((recoveryError: unknown) => {
                     console.error(
-                        "Failed to update project report idempotency state:",
-                        idempotencyError,
+                        "Failed to mark project report idempotency recovery:",
+                        recoveryError,
                     );
-                },
-            );
+                });
+            });
         }
         console.error("Error submitting project report:", error);
         return publicErrorResponse(error, "ไม่สามารถส่งรายงานโครงการได้");
+    } finally {
+        stopHeartbeat?.();
     }
 }

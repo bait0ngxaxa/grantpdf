@@ -17,6 +17,7 @@ import {
     startDocumentIdempotency,
     completeDocumentIdempotency,
     failDocumentIdempotency,
+    renewDocumentIdempotencyLease,
 } from "@/lib/services/documentIdempotencyService";
 
 const mockedCreate = vi.mocked(prisma.documentIdempotency.create);
@@ -183,6 +184,34 @@ describe("documentIdempotencyService", () => {
             });
         });
 
+
+
+        it("does not reclaim expired work when a business resource already exists", async () => {
+            mockedCreate.mockRejectedValue(createP2002Error());
+            mockedFindUnique.mockResolvedValue({
+                id: BigInt(130),
+                status: "processing",
+                requestHash: REQUEST_HASH,
+                leaseToken: "expired-token",
+                leaseExpiresAt: new Date("2020-01-01T00:00:00.000Z"),
+                resourceType: "user_file",
+                resourceId: BigInt(777),
+                resultReference: { storagePath: "storage/attachments/existing.pdf" },
+                responseStatus: null,
+                responseBody: null,
+            } as never);
+
+            const result = await startDocumentIdempotency({
+                userId: 1,
+                documentType: "file_upload",
+                idempotencyKey: "idem-key-resource-exists",
+                requestHash: REQUEST_HASH,
+            });
+
+            expect(result).toEqual({ type: "recovery_required" });
+            expect(mockedUpdateMany).not.toHaveBeenCalled();
+        });
+
         it("returns in_progress when unique conflict and existing row is processing", async () => {
             mockedCreate.mockRejectedValue(createP2002Error());
             mockedFindUnique.mockResolvedValue({
@@ -337,4 +366,28 @@ describe("documentIdempotencyService", () => {
             expect((called?.data.errorMessage as string).length).toBe(191);
         });
     });
+
+    describe("renewDocumentIdempotencyLease", () => {
+        it("extends an active lease for the current owner", async () => {
+            mockedUpdateMany.mockResolvedValue({ count: 1 } as never);
+
+            await renewDocumentIdempotencyLease({
+                recordId: BigInt(131),
+                leaseToken: "active-token",
+            });
+
+            expect(mockedUpdateMany).toHaveBeenCalledWith({
+                where: {
+                    id: BigInt(131),
+                    status: "processing",
+                    leaseToken: "active-token",
+                },
+                data: {
+                    leaseExpiresAt: expect.any(Date),
+                    heartbeatAt: expect.any(Date),
+                },
+            });
+        });
+    });
+
 });

@@ -226,10 +226,14 @@ model DocumentIdempotency {
   requestHash    String?   @map("request_hash") @db.VarChar(64)
   leaseToken     String?   @map("lease_token") @db.VarChar(64)
   leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamp(6)
+  heartbeatAt   DateTime? @map("heartbeat_at") @db.Timestamp(6)
   status         String    @default("processing")
   responseStatus Int?     @map("response_status")
   responseBody   Json?    @map("response_body")
   errorMessage   String?  @map("error_message")
+  resourceType   String?  @map("resource_type") @db.VarChar(64)
+  resourceId     BigInt?  @map("resource_id")
+  resultReference Json?   @map("result_reference")
   created_at     DateTime @default(now()) @db.Timestamp(6)
   updated_at     DateTime @updatedAt @db.Timestamp(6)
   completed_at   DateTime? @map("completed_at") @db.Timestamp(6)
@@ -239,6 +243,7 @@ model DocumentIdempotency {
   @@unique([userId, documentType, idempotencyKey])
   @@index([userId, created_at])
   @@index([status, created_at])
+  @@index([resourceType, resourceId])
   @@map("document_idempotency")
 }
 

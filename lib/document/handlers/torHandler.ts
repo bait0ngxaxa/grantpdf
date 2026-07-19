@@ -1,3 +1,4 @@
+import type { DocumentIdempotencyContext } from "@/lib/document";
 import {
     loadTemplate,
     createDocxRenderer,
@@ -7,6 +8,7 @@ import {
     isProjectError,
     createUserFileRecord,
     buildSuccessResponse,
+    createDocumentRecordCompletion,
 } from "@/lib/document";
 import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
 import { NextResponse } from "next/server";
@@ -38,6 +40,7 @@ function parseActivitiesData(
 export async function handleTorGeneration(
     formData: FormData,
     userId: number,
+    idempotency?: DocumentIdempotencyContext,
 ): Promise<Response> {
     // Extract form fields
     const projectName = formData.get("projectName") as string;
@@ -160,20 +163,28 @@ export async function handleTorGeneration(
         return projectResult;
     }
 
+    const completion = createDocumentRecordCompletion(
+        idempotency,
+        projectResult,
+    );
+
     // Save document + create database record (with cleanup on DB failure)
     const { relativeStoragePath } = await saveDocumentToStorage(
         outputBuffer,
         fileName,
         "docx",
-        async (storagePath: string): Promise<void> => {
-            await createUserFileRecord(
+        async (storagePath: string, tx): Promise<number> => {
+            const savedFile = await createUserFileRecord(
                 userId,
                 projectResult.id,
                 fileName,
                 storagePath,
                 "docx",
+                tx,
             );
+            return savedFile.id;
         },
+        completion,
     );
 
     return buildSuccessResponse(relativeStoragePath, projectResult);

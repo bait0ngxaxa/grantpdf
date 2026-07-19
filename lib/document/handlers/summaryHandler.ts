@@ -1,3 +1,4 @@
+import type { DocumentIdempotencyContext } from "@/lib/document";
 import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
@@ -9,12 +10,14 @@ import {
     createUserFileRecord,
     saveDocumentToStorage,
     buildSuccessResponse,
+    createDocumentRecordCompletion,
 } from "@/lib/document";
 import { formatNumericWithCommas } from "@/lib/shared/utils";
 
 export async function handleSummaryGeneration(
     formData: FormData,
     userId: number,
+    idempotency?: DocumentIdempotencyContext,
 ): Promise<Response> {
     // Extract form fields
     const fileName = formData.get("fileName") as string;
@@ -159,6 +162,11 @@ export async function handleSummaryGeneration(
         return projectResult;
     }
 
+    const completion = createDocumentRecordCompletion(
+        idempotency,
+        projectResult,
+    );
+
     // Generate output
     const buffer = await workbook.xlsx.writeBuffer();
     const outputBuffer = Buffer.from(buffer);
@@ -168,15 +176,18 @@ export async function handleSummaryGeneration(
         outputBuffer,
         fileName,
         "xlsx",
-        async (storagePath: string): Promise<void> => {
-            await createUserFileRecord(
+        async (storagePath: string, tx): Promise<number> => {
+            const savedFile = await createUserFileRecord(
                 userId,
                 projectResult.id,
                 fileName,
                 storagePath,
                 "xlsx",
+                tx,
             );
+            return savedFile.id;
         },
+        completion,
     );
 
     return buildSuccessResponse(relativeStoragePath, projectResult);

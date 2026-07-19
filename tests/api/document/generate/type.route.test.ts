@@ -37,6 +37,8 @@ vi.mock("@/lib/services/documentIdempotencyService", () => ({
     startDocumentIdempotency: vi.fn(),
     completeDocumentIdempotency: vi.fn(),
     failDocumentIdempotency: vi.fn(),
+    markDocumentIdempotencyRecoveryRequired: vi.fn(),
+    startDocumentIdempotencyHeartbeat: vi.fn(),
 }));
 
 vi.mock("@/lib/services/documentRequestFingerprint", () => ({
@@ -167,6 +169,8 @@ describe("document generate route idempotency", () => {
             recordId: BigInt(1),
             leaseToken: "lease-token-1",
         } as never);
+        mockedCompleteDocumentIdempotency.mockResolvedValue(undefined);
+        mockedFailDocumentIdempotency.mockResolvedValue(undefined);
 
         mockedHandleApprovalGeneration.mockResolvedValue(
             Response.json({ success: true }, { status: 200 }),
@@ -188,6 +192,17 @@ describe("document generate route idempotency", () => {
     });
 
     it("stores completion when request starts and succeeds", async () => {
+        mockedHandleTorGeneration.mockImplementationOnce(
+            async (_formData, _userId, idempotency) => {
+                await idempotency?.complete(
+                    {} as never,
+                    101,
+                    { success: true },
+                );
+                return Response.json({ success: true }, { status: 200 });
+            },
+        );
+
         const response = await POST(buildRequest("idem-key-001"), {
             params: buildParams("tor"),
         });

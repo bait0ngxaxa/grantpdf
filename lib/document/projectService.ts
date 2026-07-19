@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/server/db";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import {
@@ -113,6 +114,7 @@ export async function createUserFileRecord(
     originalFileName: string,
     storagePath: string,
     extension: string = "docx",
+    transaction?: Prisma.TransactionClient,
 ): Promise<{ id: number }> {
     const trimmedFileName = originalFileName.trim();
     const normalizedExtension = extension.trim().replace(/^\./, "").toLowerCase();
@@ -131,14 +133,16 @@ export async function createUserFileRecord(
         ? trimmedFileName
         : `${trimmedFileName}.${normalizedExtension}`;
 
-    const userFile = await prisma.$transaction(async (tx) => {
+    const persist = async (
+        tx: Prisma.TransactionClient,
+    ): Promise<{ id: number }> => {
         const createdFile = await tx.userFile.create({
             data: {
                 originalFileName: fileNameWithExt,
-                storagePath: storagePath,
+                storagePath,
                 fileExtension: normalizedExtension,
-                userId: userId,
-                projectId: projectId,
+                userId,
+                projectId,
             },
         });
         await notifyProjectDocumentUploaded(tx, {
@@ -148,8 +152,11 @@ export async function createUserFileRecord(
             actorUserId: userId,
         });
         return createdFile;
-    });
+    };
 
+    if (transaction) return persist(transaction);
+
+    const userFile = await prisma.$transaction(persist);
     await invalidateDashboardStats([userId]);
     return userFile;
 }

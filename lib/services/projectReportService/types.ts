@@ -3,6 +3,7 @@ import type {
     ProjectReport,
     UserFile,
 } from "@/type/models";
+import type { IdempotencyCompletionContext } from "@/lib/services/documentIdempotencyService";
 
 export interface CreateProjectReportParams {
     userId: number;
@@ -13,6 +14,7 @@ export interface CreateProjectReportParams {
     fileSize: number;
     reportType: string;
     note?: string;
+    idempotency?: IdempotencyCompletionContext;
 }
 
 export interface ReportAuditContext {

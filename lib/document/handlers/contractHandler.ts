@@ -1,3 +1,4 @@
+import type { DocumentIdempotencyContext } from "@/lib/document";
 import { NextResponse } from "next/server";
 import {
     loadTemplate,
@@ -8,6 +9,7 @@ import {
     isProjectError,
     createUserFileRecord,
     buildSuccessResponse,
+    createDocumentRecordCompletion,
 } from "@/lib/document";
 import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
 import { formatNumericWithCommas } from "@/lib/shared/utils";
@@ -18,6 +20,7 @@ const AUTO_CONTRACT_TYPES = new Set(["ABS", "DMR", "SIP"]);
 export async function handleContractGeneration(
     formData: FormData,
     userId: number,
+    idempotency?: DocumentIdempotencyContext,
 ): Promise<Response> {
     // Extract form fields
     const fileName = formData.get("fileName") as string;
@@ -109,20 +112,28 @@ export async function handleContractGeneration(
         return projectResult;
     }
 
+    const completion = createDocumentRecordCompletion(
+        idempotency,
+        projectResult,
+    );
+
     // Save document + create database record (with cleanup on DB failure)
     const { relativeStoragePath } = await saveDocumentToStorage(
         outputBuffer,
         fileName,
         "docx",
-        async (storagePath: string): Promise<void> => {
-            await createUserFileRecord(
+        async (storagePath: string, tx): Promise<number> => {
+            const savedFile = await createUserFileRecord(
                 userId,
                 projectResult.id,
                 fileName,
                 storagePath,
                 "docx",
+                tx,
             );
+            return savedFile.id;
         },
+        completion,
     );
 
     return buildSuccessResponse(relativeStoragePath, projectResult);

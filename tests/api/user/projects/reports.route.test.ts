@@ -65,7 +65,6 @@ vi.mock("@/lib/services/storageQuotaService", () => ({
 }));
 
 vi.mock("@/lib/server/storage/uploadIdempotency", () => ({
-    completeUploadIdempotency: vi.fn(),
     failUploadIdempotency: vi.fn(),
     startUploadIdempotency: vi.fn(),
 }));
@@ -84,7 +83,6 @@ import { prisma } from "@/lib/server/db";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
 import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
 import {
-    completeUploadIdempotency,
     failUploadIdempotency,
     startUploadIdempotency,
 } from "@/lib/server/storage/uploadIdempotency";
@@ -96,6 +94,7 @@ import {
     reserveStorageQuota,
 } from "@/lib/services/storageQuotaService";
 import { REPORT_TYPES } from "@/lib/shared/constants";
+import { getClientIp } from "@/lib/api/requestContext";
 
 const mockedIsGuardError = vi.mocked(isGuardError);
 const mockedRequireUserSession = vi.mocked(requireUserSession);
@@ -108,7 +107,6 @@ const mockedValidateDetectedFileMime = vi.mocked(validateDetectedFileMime);
 const mockedProjectFindFirst = vi.mocked(prisma.project.findFirst);
 const mockedBuildProjectAccessWhere = vi.mocked(buildProjectAccessWhere);
 const mockedCreateDocumentRequestHash = vi.mocked(createDocumentRequestHash);
-const mockedCompleteUploadIdempotency = vi.mocked(completeUploadIdempotency);
 const mockedFailUploadIdempotency = vi.mocked(failUploadIdempotency);
 const mockedStartUploadIdempotency = vi.mocked(startUploadIdempotency);
 const mockedCreateProjectReportWithFile = vi.mocked(createProjectReportWithFile);
@@ -189,7 +187,7 @@ describe("project reports POST route resource guards", () => {
             routeKey: expect.any(String),
             limit: expect.any(Number),
             windowMs: expect.any(Number),
-            identifier: "7",
+            identifier: `7:${getClientIp(request)}`,
         });
     });
 
@@ -230,7 +228,6 @@ describe("project reports POST route resource guards", () => {
         mockedCreateProjectReportWithFile.mockResolvedValue({
             id: 99,
         } as never);
-        mockedCompleteUploadIdempotency.mockResolvedValue(undefined);
 
         const file = new File(["%PDF-1.7 streamed report"], "report.pdf", {
             type: "application/pdf",

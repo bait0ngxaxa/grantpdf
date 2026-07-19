@@ -27,19 +27,21 @@ import {
     rateLimitExceededResponse,
     validationErrorResponse,
 } from "@/lib/api/responses";
+import { publicApiError } from "@/lib/shared/http/apiError";
 import { buildProjectAccessWhere } from "@/lib/services/projectService";
 import {
-    completeUploadIdempotency,
     failUploadIdempotency,
     startUploadIdempotency,
 } from "@/lib/server/storage/uploadIdempotency";
+import {
+    completeDocumentIdempotency,
+    markDocumentIdempotencyRecoveryRequired,
+    startDocumentIdempotencyHeartbeat,
+} from "@/lib/services/documentIdempotencyService";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
-import {
-    releaseStorageQuota,
-    reserveStorageQuota,
-} from "@/lib/services/storageQuotaService";
+import { reserveStorageQuota } from "@/lib/services/storageQuotaService";
 
 const generateUniqueFilename = (originalName: string): string => {
     const lastDotIndex = originalName.lastIndexOf(".");
@@ -63,11 +65,9 @@ const generateUniqueFilename = (originalName: string): string => {
 export async function POST(request: NextRequest): Promise<NextResponse> {
     let idempotencyRecordId: bigint | null = null;
     let idempotencyLeaseToken = "";
-    let storageQuotaReserved = false;
-    let storageQuotaCommitted = false;
-    let reservedStorageBytes = 0;
-    let reservedStorageUserId = 0;
     let tempFilePath: string | null = null;
+    let finalFilePath: string | null = null;
+    let stopHeartbeat: (() => void) | null = null;
     try {
         const guard = await requireUserSession();
         if (isGuardError(guard)) return guard;
@@ -139,20 +139,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         const fileSize = file.size;
-        const hasStorageQuota = await reserveStorageQuota(
-            guard.userId,
-            fileSize,
-        );
-        if (!hasStorageQuota) {
-            return NextResponse.json(
-                { error: STORAGE_QUOTA.EXCEEDED_MESSAGE },
-                { status: 507 },
-            );
-        }
-        storageQuotaReserved = true;
-        reservedStorageBytes = fileSize;
-        reservedStorageUserId = guard.userId;
-
         const uniqueFileName = generateUniqueFilename(file.name);
         const tempFileName = "tmp_" + uuidv4() + "_" + uniqueFileName;
         const fileExtension = path
@@ -163,7 +149,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         await ensureStorageDir("tmp");
         await ensureStorageDir("attachments");
         tempFilePath = getStoragePath("tmp", tempFileName);
-        const finalFilePath = getStoragePath("attachments", uniqueFileName);
+        finalFilePath = getStoragePath("attachments", uniqueFileName);
         const relativeStoragePath = getRelativeStoragePath(
             "attachments",
             uniqueFileName
@@ -177,8 +163,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
         if (!mimeValidation.valid) {
             await unlink(tempFilePath).catch(() => undefined);
-            await releaseStorageQuota(guard.userId, fileSize);
-            storageQuotaReserved = false;
             return NextResponse.json(
                 {
                     error: mimeValidation.error || "ประเภทไฟล์ไม่ถูกต้อง",
@@ -201,56 +185,79 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
         if (idempotency.type === "response") {
             await unlink(tempFilePath).catch(() => undefined);
-            await releaseStorageQuota(guard.userId, fileSize);
-            storageQuotaReserved = false;
             return idempotency.response;
         }
-        idempotencyRecordId = idempotency.recordId;
-        idempotencyLeaseToken = idempotency.leaseToken;
+        const recordId = idempotency.recordId;
+        const leaseToken = idempotency.leaseToken;
+        idempotencyRecordId = recordId;
+        idempotencyLeaseToken = leaseToken;
+        stopHeartbeat = startDocumentIdempotencyHeartbeat({
+            recordId,
+            leaseToken,
+        });
 
-        let movedToFinalPath = false;
-        let userFile: Awaited<ReturnType<typeof prisma.userFile.create>> | null = null;
-        try {
-            await rename(tempFilePath, finalFilePath);
-            movedToFinalPath = true;
-            userFile = await prisma.$transaction(async (tx) => {
-                const createdFile = await tx.userFile.create({
-                    data: {
-                        originalFileName: file.name,
-                        storagePath: relativeStoragePath,
-                        fileExtension,
-                        fileSize: BigInt(fileSize),
-                        userId: guard.userId,
-                        projectId,
-                    },
-                });
-                await notifyProjectDocumentUploaded(tx, {
-                    fileId: createdFile.id,
-                    projectId,
-                    fileName: createdFile.originalFileName,
-                    actorUserId: guard.userId,
-                });
-                return createdFile;
-            });
-            storageQuotaCommitted = true;
-        } catch (error) {
-            if (movedToFinalPath) {
-                await unlink(finalFilePath).catch(() => {
-                    console.warn(
-                        "Failed to clean up uploaded file: " + finalFilePath,
-                    );
-                });
+        await rename(tempFilePath, finalFilePath);
+        const transactionResult = await prisma.$transaction(async (tx) => {
+            const hasStorageQuota = await reserveStorageQuota(
+                guard.userId,
+                fileSize,
+                tx,
+            );
+            if (!hasStorageQuota) {
+                throw publicApiError(507, STORAGE_QUOTA.EXCEEDED_MESSAGE);
             }
-            throw error;
-        } finally {
-            await unlink(tempFilePath).catch(() => undefined);
-        }
 
-        if (!userFile) throw new Error("FILE_RECORD_CREATE_FAILED");
+            const createdFile = await tx.userFile.create({
+                data: {
+                    originalFileName: file.name,
+                    storagePath: relativeStoragePath,
+                    fileExtension,
+                    fileSize: BigInt(fileSize),
+                    userId: guard.userId,
+                    projectId,
+                },
+            });
+            await notifyProjectDocumentUploaded(tx, {
+                fileId: createdFile.id,
+                projectId,
+                fileName: createdFile.originalFileName,
+                actorUserId: guard.userId,
+            });
 
-        await invalidateDashboardStats([guard.userId]);
+            const responseBody = {
+                success: true,
+                message: "อัปโหลดไฟล์สำเร็จ",
+                file: {
+                    id: createdFile.id.toString(),
+                    originalFileName: createdFile.originalFileName,
+                    storagePath: createdFile.storagePath,
+                },
+                project: {
+                    id: project.id.toString(),
+                    name: project.name,
+                    description: project.description,
+                },
+            };
+            await completeDocumentIdempotency({
+                db: tx,
+                recordId,
+                leaseToken,
+                statusCode: 200,
+                responseBody,
+                resourceType: "user_file",
+                resourceId: createdFile.id,
+            });
 
-        // Log file upload
+            return { createdFile, responseBody };
+        });
+        await unlink(tempFilePath).catch(() => undefined);
+
+        await invalidateDashboardStats([guard.userId]).catch(
+            (statsError: unknown) => {
+                console.error("Failed to invalidate upload dashboard stats:", statsError);
+            },
+        );
+
         const auditContext = buildAuditContext(guard.session, request);
         logAudit("FILE_UPLOAD", auditContext.actorUserId, {
             userEmail: auditContext.actorEmail,
@@ -259,61 +266,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             requestId: auditContext.requestId,
             details: {
                 fileName: file.name,
-                fileId: userFile.id.toString(),
+                fileId: transactionResult.createdFile.id.toString(),
                 projectId: projectId.toString(),
             },
         });
 
-        const responseBody = {
-            success: true,
-            message: "อัปโหลดไฟล์สำเร็จ",
-            file: {
-                id: userFile.id.toString(),
-                originalFileName: userFile.originalFileName,
-                storagePath: userFile.storagePath,
-            },
-            project: {
-                id: project.id.toString(),
-                name: project.name,
-                description: project.description,
-            },
-        };
-        await completeUploadIdempotency(
-            idempotencyRecordId,
-            idempotencyLeaseToken,
-            responseBody,
-        ).catch(
-            (error: unknown) => {
-                console.error("Failed to save upload idempotency response:", error);
-            },
-        );
-
-        return NextResponse.json(responseBody);
+        return NextResponse.json(transactionResult.responseBody);
     } catch (error) {
-        if (storageQuotaReserved && !storageQuotaCommitted) {
-            await releaseStorageQuota(
-                reservedStorageUserId,
-                reservedStorageBytes,
-            ).catch((releaseError: unknown) => {
-                console.error("Failed to release upload storage quota:", releaseError);
-            });
-            storageQuotaReserved = false;
-        }
         if (tempFilePath) {
             await unlink(tempFilePath).catch(() => undefined);
+        }
+        if (finalFilePath) {
+            await unlink(finalFilePath).catch(() => undefined);
         }
         if (idempotencyRecordId !== null) {
             await failUploadIdempotency(
                 idempotencyRecordId,
                 idempotencyLeaseToken,
                 error,
-            ).catch(
-                (idempotencyError: unknown) => {
-                    console.error("Failed to update upload idempotency state:", idempotencyError);
-                },
-            );
+            ).catch(async (idempotencyError: unknown) => {
+                console.error("Failed to update upload idempotency state:", idempotencyError);
+                await markDocumentIdempotencyRecoveryRequired({
+                    recordId: idempotencyRecordId as bigint,
+                    leaseToken: idempotencyLeaseToken,
+                    errorMessage:
+                        idempotencyError instanceof Error
+                            ? idempotencyError.message
+                            : "UPLOAD_IDEMPOTENCY_RECOVERY_REQUIRED",
+                }).catch((recoveryError: unknown) => {
+                    console.error(
+                        "Failed to mark upload idempotency recovery:",
+                        recoveryError,
+                    );
+                });
+            });
         }
         console.error("File upload error:", error);
         return publicErrorResponse(error, "ไม่สามารถอัปโหลดไฟล์ได้");
+    } finally {
+        stopHeartbeat?.();
     }
 }

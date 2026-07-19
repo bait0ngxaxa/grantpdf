@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import type { ProjectResult } from "./types";
+import type {
+    DocumentIdempotencyContext,
+    DocumentRecordCompletion,
+    ProjectResult,
+} from "./types";
 
 export function handleDocumentError(error: unknown): NextResponse {
     console.error("Error generating document:", error);
@@ -8,17 +12,37 @@ export function handleDocumentError(error: unknown): NextResponse {
     });
 }
 
-export function buildSuccessResponse(
+export function createDocumentResponseBody(
     storagePath: string,
     project: ProjectResult,
-): NextResponse {
-    return NextResponse.json({
+): Record<string, unknown> {
+    return {
         success: true,
-        storagePath: storagePath,
+        storagePath,
         project: {
             id: project.id.toString(),
             name: project.name,
             description: project.description,
         },
-    });
+    };
+}
+
+export function createDocumentRecordCompletion(
+    idempotency: DocumentIdempotencyContext | undefined,
+    project: ProjectResult,
+): DocumentRecordCompletion | undefined {
+    if (!idempotency) return undefined;
+    return (tx, resourceId, storagePath) =>
+        idempotency.complete(
+            tx,
+            resourceId,
+            createDocumentResponseBody(storagePath, project),
+        );
+}
+
+export function buildSuccessResponse(
+    storagePath: string,
+    project: ProjectResult,
+): NextResponse {
+    return NextResponse.json(createDocumentResponseBody(storagePath, project));
 }

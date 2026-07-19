@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
     handleDocumentError,
+    type DocumentIdempotencyContext,
 } from "@/lib/document";
 import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
@@ -11,8 +12,11 @@ import {
     startDocumentIdempotency,
     completeDocumentIdempotency,
     failDocumentIdempotency,
+    markDocumentIdempotencyRecoveryRequired,
+    startDocumentIdempotencyHeartbeat,
 } from "@/lib/services/documentIdempotencyService";
 import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
+import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import {
     handleTorGeneration,
     handleApprovalGeneration,
@@ -200,25 +204,6 @@ function getIdempotencyKey(req: Request, formData: FormData): string | null {
     return typeof formKey === "string" ? formKey : null;
 }
 
-async function tryReadJsonBody(
-    response: Response,
-): Promise<Record<string, unknown> | null> {
-    const contentType = response.headers.get("content-type") ?? "";
-    if (!contentType.includes("application/json")) {
-        return null;
-    }
-
-    try {
-        const parsed: unknown = await response.clone().json();
-        if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-            return null;
-        }
-        return parsed as Record<string, unknown>;
-    } catch {
-        return null;
-    }
-}
-
 export async function POST(
     req: Request,
     { params }: { params: Promise<{ type: string }> }
@@ -228,6 +213,8 @@ export async function POST(
     let auditType: string | null = null;
     let idempotencyRecordId: bigint | null = null;
     let idempotencyLeaseToken = "";
+    let idempotencyCompleted = false;
+    let stopHeartbeat: (() => void) | null = null;
 
     try {
         const guard = await requireUserSession();
@@ -345,56 +332,105 @@ export async function POST(
                 );
             }
 
+            if (idempotency.type === "recovery_required") {
+                return NextResponse.json(
+                    {
+                        error:
+                            "คำขอนี้สร้างผลลัพธ์แล้วและอยู่ระหว่างการกู้คืน กรุณาติดต่อผู้ดูแลระบบ",
+                        recoveryRequired: true,
+                    },
+                    { status: 503, headers: rateLimitResult.headers },
+                );
+            }
+
             idempotencyRecordId = idempotency.recordId;
             idempotencyLeaseToken = idempotency.leaseToken;
+            stopHeartbeat = startDocumentIdempotencyHeartbeat({
+                recordId: idempotencyRecordId,
+                leaseToken: idempotencyLeaseToken,
+            });
         }
+
+        const idempotencyContext: DocumentIdempotencyContext | undefined =
+            idempotencyRecordId !== null && idempotencyLeaseToken
+                ? {
+                      complete: async (tx, resourceId, responseBody) => {
+                          await completeDocumentIdempotency({
+                              db: tx,
+                              recordId: idempotencyRecordId as bigint,
+                              leaseToken: idempotencyLeaseToken,
+                              statusCode: 200,
+                              responseBody,
+                              resourceType: "user_file",
+                              resourceId,
+                          });
+                          idempotencyCompleted = true;
+                      },
+                  }
+                : undefined;
 
         let response: Response;
         switch (type) {
             case "tor":
-                response = await handleTorGeneration(formData, userId);
+                response = await handleTorGeneration(
+                    formData,
+                    userId,
+                    idempotencyContext,
+                );
                 break;
             case "approval":
-                response = await handleApprovalGeneration(formData, userId);
+                response = await handleApprovalGeneration(
+                    formData,
+                    userId,
+                    idempotencyContext,
+                );
                 break;
             case "contract":
-                response = await handleContractGeneration(formData, userId);
+                response = await handleContractGeneration(
+                    formData,
+                    userId,
+                    idempotencyContext,
+                );
                 break;
             case "formproject":
-                response = await handleFormProjectGeneration(formData, userId);
+                response = await handleFormProjectGeneration(
+                    formData,
+                    userId,
+                    idempotencyContext,
+                );
                 break;
             case "summary":
-                response = await handleSummaryGeneration(formData, userId);
+                response = await handleSummaryGeneration(
+                    formData,
+                    userId,
+                    idempotencyContext,
+                );
                 break;
-        }
-
-        const responseBody = await tryReadJsonBody(response);
-        if (
-            idempotencyRecordId &&
-            idempotencyLeaseToken &&
-            response.status >= 200 &&
-            response.status < 300 &&
-            responseBody
-        ) {
-            await completeDocumentIdempotency({
-                recordId: idempotencyRecordId,
-                leaseToken: idempotencyLeaseToken,
-                statusCode: response.status,
-                responseBody,
-            });
-        } else if (
-            idempotencyRecordId &&
-            idempotencyLeaseToken &&
-            !(response.status >= 200 && response.status < 300)
-        ) {
-            await failDocumentIdempotency({
-                recordId: idempotencyRecordId,
-                leaseToken: idempotencyLeaseToken,
-                errorMessage: `HTTP_${response.status}`,
-            });
         }
 
         const isSuccess = response.status >= 200 && response.status < 300;
+        if (isSuccess) {
+            await invalidateDashboardStats([userId]).catch(
+                (statsError: unknown) => {
+                    console.error(
+                        "Failed to invalidate document dashboard stats:",
+                        statsError,
+                    );
+                },
+            );
+        }
+        if (idempotencyRecordId !== null && idempotencyLeaseToken) {
+            if (isSuccess && !idempotencyCompleted) {
+                throw new Error("IDEMPOTENCY_COMPLETION_MISSING");
+            }
+            if (!isSuccess) {
+                await failDocumentIdempotency({
+                    recordId: idempotencyRecordId,
+                    leaseToken: idempotencyLeaseToken,
+                    errorMessage: `HTTP_${response.status}`,
+                });
+            }
+        }
         logAudit("DOCUMENT_GENERATE", auditUserId, {
             outcome: isSuccess ? "success" : "failure",
             userEmail: auditUserEmail,
@@ -417,12 +453,30 @@ export async function POST(
             },
         });
     } catch (error) {
-        if (idempotencyRecordId && idempotencyLeaseToken) {
+        if (idempotencyRecordId !== null && idempotencyLeaseToken) {
             await failDocumentIdempotency({
                 recordId: idempotencyRecordId,
                 leaseToken: idempotencyLeaseToken,
                 errorMessage:
                     error instanceof Error ? error.message : "unknown_error",
+            }).catch(async (idempotencyError: unknown) => {
+                console.error(
+                    "Failed to update document idempotency state:",
+                    idempotencyError,
+                );
+                await markDocumentIdempotencyRecoveryRequired({
+                    recordId: idempotencyRecordId as bigint,
+                    leaseToken: idempotencyLeaseToken,
+                    errorMessage:
+                        idempotencyError instanceof Error
+                            ? idempotencyError.message
+                            : "DOCUMENT_IDEMPOTENCY_RECOVERY_REQUIRED",
+                }).catch((recoveryError: unknown) => {
+                    console.error(
+                        "Failed to mark document idempotency recovery:",
+                        recoveryError,
+                    );
+                });
             });
         }
 
@@ -444,5 +498,7 @@ export async function POST(
             });
         }
         return handleDocumentError(error);
+    } finally {
+        stopHeartbeat?.();
     }
 }

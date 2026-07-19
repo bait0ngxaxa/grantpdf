@@ -1,6 +1,8 @@
 // Types
 export type {
     DocumentSaveResult,
+    DocumentIdempotencyContext,
+    DocumentRecordCompletion,
     ProjectResult,
     DocxModule,
     DocxParserOptions,
@@ -29,7 +31,12 @@ export {
 } from "./projectService";
 
 // Response
-export { handleDocumentError, buildSuccessResponse } from "./responseBuilder";
+export {
+    handleDocumentError,
+    buildSuccessResponse,
+    createDocumentResponseBody,
+    createDocumentRecordCompletion,
+} from "./responseBuilder";
 
 // Utils
 export {

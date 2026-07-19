@@ -1,5 +1,6 @@
-import { REPORT_STATUS } from "@/lib/shared/constants";
+import { REPORT_STATUS, STORAGE_QUOTA } from "@/lib/shared/constants";
 import { prisma } from "@/lib/server/db";
+import { publicApiError } from "@/lib/shared/http/apiError";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import {
     notifyProjectReportReviewed,
@@ -12,6 +13,7 @@ import {
     sanitizeAdminProjectReport,
     sanitizeProjectReport,
 } from "./sanitizers";
+import { reserveStorageQuota } from "@/lib/services/storageQuotaService";
 import type {
     AdminProjectReport,
     CreateProjectReportParams,
@@ -61,8 +63,18 @@ export async function createProjectReportWithFile({
     fileSize,
     reportType,
     note,
+    idempotency,
 }: CreateProjectReportParams): Promise<ProjectReport> {
     const report = await prisma.$transaction(async (tx) => {
+        const hasStorageQuota = await reserveStorageQuota(
+            userId,
+            fileSize,
+            tx,
+        );
+        if (!hasStorageQuota) {
+            throw publicApiError(507, STORAGE_QUOTA.EXCEEDED_MESSAGE);
+        }
+
         const userFile = await tx.userFile.create({
             data: {
                 originalFileName,
@@ -105,11 +117,24 @@ export async function createProjectReportWithFile({
             actorUserId: userId,
         });
 
-        return createdReport;
+        const sanitizedReport = sanitizeProjectReport(
+            createdReport as unknown as RawProjectReport,
+        );
+        if (idempotency) {
+            await idempotency.complete(tx, createdReport.id, {
+                success: true,
+                message: "ส่งรายงานโครงการสำเร็จ",
+                report: sanitizedReport,
+            });
+        }
+
+        return sanitizedReport;
     });
 
-    await invalidateDashboardStats([userId]);
-    return sanitizeProjectReport(report as unknown as RawProjectReport);
+    await invalidateDashboardStats([userId]).catch((error: unknown) => {
+        console.error("Failed to invalidate report dashboard stats:", error);
+    });
+    return report;
 }
 
 export async function updateProjectReportStatus({

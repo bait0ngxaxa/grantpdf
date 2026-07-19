@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import {
-    completeDocumentIdempotency,
     failDocumentIdempotency,
     normalizeIdempotencyKey,
     startDocumentIdempotency,
@@ -62,6 +61,19 @@ export async function startUploadIdempotency(
         };
     }
 
+    if (result.type === "recovery_required") {
+        return {
+            type: "response",
+            response: NextResponse.json(
+                {
+                    error: "คำขอนี้สร้างผลลัพธ์แล้วและอยู่ระหว่างการกู้คืน กรุณาติดต่อผู้ดูแลระบบ",
+                    recoveryRequired: true,
+                },
+                { status: 503 },
+            ),
+        };
+    }
+
     return {
         type: "response",
         response: NextResponse.json(
@@ -69,19 +81,6 @@ export async function startUploadIdempotency(
             { status: 409 },
         ),
     };
-}
-
-export async function completeUploadIdempotency(
-    recordId: bigint,
-    leaseToken: string,
-    responseBody: Record<string, unknown>,
-): Promise<void> {
-    await completeDocumentIdempotency({
-        recordId,
-        leaseToken,
-        statusCode: 200,
-        responseBody,
-    });
 }
 
 export async function failUploadIdempotency(

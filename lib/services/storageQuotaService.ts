@@ -1,5 +1,8 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/server/db";
 import { STORAGE_QUOTA } from "@/lib/shared/constants";
+
+type StorageQuotaClient = Pick<Prisma.TransactionClient, "user">;
 
 function toStorageBytes(bytes: number): bigint | null {
     if (!Number.isSafeInteger(bytes) || bytes <= 0) return null;
@@ -9,13 +12,14 @@ function toStorageBytes(bytes: number): bigint | null {
 export async function reserveStorageQuota(
     userId: number,
     bytes: number,
+    client: StorageQuotaClient = prisma,
 ): Promise<boolean> {
     const requestedBytes = toStorageBytes(bytes);
     if (requestedBytes === null || requestedBytes > STORAGE_QUOTA.MAX_BYTES) {
         return false;
     }
 
-    const result = await prisma.user.updateMany({
+    const result = await client.user.updateMany({
         where: {
             id: userId,
             storageUsedBytes: {
@@ -35,11 +39,12 @@ export async function reserveStorageQuota(
 export async function releaseStorageQuota(
     userId: number,
     bytes: number,
+    client: StorageQuotaClient = prisma,
 ): Promise<void> {
     const requestedBytes = toStorageBytes(bytes);
     if (requestedBytes === null) return;
 
-    const result = await prisma.user.updateMany({
+    const result = await client.user.updateMany({
         where: {
             id: userId,
             storageUsedBytes: {

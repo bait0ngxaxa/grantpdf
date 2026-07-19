@@ -1,19 +1,28 @@
 import fs from "fs/promises";
+import type { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/server/db";
 import { generateUniqueFilename } from "./fixThaiwordUtils";
 import {
     ensureStorageDir,
     getStoragePath,
     getRelativeStoragePath,
 } from "@/lib/server/storage";
-import type { DocumentSaveResult } from "./types";
+import type {
+    DocumentRecordCompletion,
+    DocumentSaveResult,
+} from "./types";
 
-type PersistRecordCallback = (relativeStoragePath: string) => Promise<void>;
+type PersistRecordCallback = (
+    relativeStoragePath: string,
+    tx: Prisma.TransactionClient,
+) => Promise<number | null>;
 
 export async function saveDocumentToStorage(
     outputBuffer: Uint8Array,
     fileName: string,
     extension: string = "docx",
     persistRecord?: PersistRecordCallback,
+    completion?: DocumentRecordCompletion,
 ): Promise<DocumentSaveResult> {
     const trimmedFileName = fileName.trim();
     const normalizedExtension = extension.trim().replace(/^\./, "").toLowerCase();
@@ -52,7 +61,15 @@ export async function saveDocumentToStorage(
 
         if (persistRecord) {
             try {
-                await persistRecord(relativeStoragePath);
+                await prisma.$transaction(async (tx) => {
+                    const resourceId = await persistRecord(relativeStoragePath, tx);
+                    if (completion && resourceId === null) {
+                        throw new Error("DOCUMENT_RESOURCE_ID_REQUIRED");
+                    }
+                    if (completion && resourceId !== null) {
+                        await completion(tx, resourceId, relativeStoragePath);
+                    }
+                });
             } catch (error) {
                 await fs.unlink(filePath).catch(() => undefined);
                 throw error;

@@ -1,3 +1,4 @@
+import type { DocumentIdempotencyContext } from "@/lib/document";
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import ImageModule from "docxtemplater-image-module-free";
@@ -8,6 +9,7 @@ import {
     readProgramIdFromForm,
     isProjectError,
     buildSuccessResponse,
+    createDocumentRecordCompletion,
 } from "@/lib/document";
 import {
     fixThaiDistributed,
@@ -159,6 +161,7 @@ async function resolveOwnedAttachmentFiles(
 export async function handleApprovalGeneration(
     formData: FormData,
     userId: number,
+    idempotency?: DocumentIdempotencyContext,
 ): Promise<Response> {
     // Extract form fields
     const head = formData.get("head") as string;
@@ -367,49 +370,54 @@ export async function handleApprovalGeneration(
         return projectResult;
     }
 
+
+    const completion = createDocumentRecordCompletion(
+        idempotency,
+        projectResult,
+    );
     const { relativeStoragePath } = await saveDocumentToStorage(
         outputBuffer,
         projectName,
         "docx",
-        async (storagePath: string): Promise<void> => {
+        async (storagePath: string, tx): Promise<number> => {
             const copiedAttachments = await copyAttachmentFiles(attachmentFiles);
 
             try {
-                await prisma.$transaction(async (tx) => {
-                    const savedFile = await tx.userFile.create({
-                        data: {
-                            originalFileName: projectName + ".docx",
-                            storagePath: storagePath,
-                            fileExtension: "docx",
-                            userId: userId,
-                            projectId: projectResult.id,
-                        },
-                    });
-
-                    if (copiedAttachments.files.length > 0) {
-                        await tx.attachmentFile.createMany({
-                            data: copiedAttachments.files.map((attachmentFile) => ({
-                                fileName: attachmentFile.originalFileName,
-                                filePath: attachmentFile.storagePath,
-                                fileSize: attachmentFile.fileSize,
-                                mimeType: attachmentFile.mimeType,
-                                userFileId: savedFile.id,
-                            })),
-                        });
-                    }
-
-                    await notifyProjectDocumentUploaded(tx, {
-                        fileId: savedFile.id,
+                const savedFile = await tx.userFile.create({
+                    data: {
+                        originalFileName: projectName + ".docx",
+                        storagePath,
+                        fileExtension: "docx",
+                        userId,
                         projectId: projectResult.id,
-                        fileName: savedFile.originalFileName,
-                        actorUserId: userId,
-                    });
+                    },
                 });
+
+                if (copiedAttachments.files.length > 0) {
+                    await tx.attachmentFile.createMany({
+                        data: copiedAttachments.files.map((attachmentFile) => ({
+                            fileName: attachmentFile.originalFileName,
+                            filePath: attachmentFile.storagePath,
+                            fileSize: attachmentFile.fileSize,
+                            mimeType: attachmentFile.mimeType,
+                            userFileId: savedFile.id,
+                        })),
+                    });
+                }
+
+                await notifyProjectDocumentUploaded(tx, {
+                    fileId: savedFile.id,
+                    projectId: projectResult.id,
+                    fileName: savedFile.originalFileName,
+                    actorUserId: userId,
+                });
+                return savedFile.id;
             } catch (error: unknown) {
                 await removeCopiedAttachmentFiles(copiedAttachments.paths);
                 throw error;
             }
         },
+        completion,
     );
 
     await invalidateDashboardStats([userId]);

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Prisma } from "@prisma/client";
 
 const mocks = vi.hoisted(() => ({
     findMany: vi.fn(),
@@ -42,6 +43,7 @@ vi.mock("@/lib/document", () => ({
     buildSuccessResponse: vi.fn().mockReturnValue(
         new Response(JSON.stringify({ success: true }), { status: 200 }),
     ),
+    createDocumentRecordCompletion: vi.fn().mockReturnValue(undefined),
 }));
 
 vi.mock("@/lib/document/fixThaiwordUtils", () => ({
@@ -134,9 +136,14 @@ describe("approval handler attachment storage", () => {
                 _outputBuffer: Uint8Array,
                 _fileName: string,
                 _extension?: string,
-                persistRecord?: (path: string) => Promise<void>,
+                persistRecord?: (
+                    path: string,
+                    tx: Prisma.TransactionClient,
+                ) => Promise<number | null>,
             ) => {
-                await persistRecord?.("storage/documents/approval.docx");
+                await mockedTransaction(async (tx) =>
+                    persistRecord?.("storage/documents/approval.docx", tx),
+                );
                 return {
                     filePath: "storage/documents/approval.docx",
                     relativeStoragePath: "storage/documents/approval.docx",
@@ -176,7 +183,7 @@ describe("approval handler attachment storage", () => {
     });
 
     it("cleans copied attachment content when Approval persistence fails", async () => {
-        mockedTransaction.mockRejectedValue(new Error("DB_UNAVAILABLE"));
+        mocks.userFileCreate.mockRejectedValueOnce(new Error("DB_UNAVAILABLE"));
 
         await expect(handleApprovalGeneration(createFormData(), 1)).rejects.toThrow(
             "DB_UNAVAILABLE",
