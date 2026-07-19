@@ -4,6 +4,11 @@ import { unlink } from "node:fs/promises";
 import { Readable, Transform, type TransformCallback } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { fileTypeStream } from "file-type";
+import {
+    isOfficeOpenXmlExtension,
+    validateOfficeOpenXmlFile,
+    type OfficeOpenXmlValidationResult,
+} from "./officeOpenXml";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 
 class HashingTransform extends Transform {
@@ -26,6 +31,7 @@ class HashingTransform extends Transform {
 export interface StreamedFileMetadata {
     contentHash: string;
     detectedMime: string | undefined;
+    officeStructure?: OfficeOpenXmlValidationResult;
 }
 
 export async function streamFileToPath(
@@ -53,8 +59,13 @@ export async function streamFileToPath(
         throw error;
     }
 
+    const officeStructure = isOfficeOpenXmlExtension(file.name)
+        ? await validateOfficeOpenXmlFile(destinationPath, file.name)
+        : undefined;
+
     return {
         contentHash: hashingStream.getDigest(),
         detectedMime,
+        ...(officeStructure ? { officeStructure } : {}),
     };
 }

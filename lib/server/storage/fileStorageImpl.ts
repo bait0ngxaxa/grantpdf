@@ -5,6 +5,11 @@ import {
     DOCUMENT_MIME_TYPES,
     getMimeTypeFromFileName,
 } from "@/lib/shared/files/mime";
+import {
+    isOfficeOpenXmlExtension,
+    validateOfficeOpenXmlBuffer,
+    type OfficeOpenXmlValidationResult,
+} from "./officeOpenXml";
 
 export const STORAGE_ROOT = path.join(process.cwd(), "storage");
 
@@ -64,9 +69,11 @@ export interface MimeValidationResult {
     error?: string;
 }
 
+
 export function validateDetectedFileMime(
     filename: string,
     detectedMime: string | undefined,
+    officeStructure?: OfficeOpenXmlValidationResult,
 ): MimeValidationResult {
     const ext = path.extname(filename).toLowerCase();
     const expectedMimes = ALLOWED_MIME_TYPES[ext];
@@ -89,6 +96,27 @@ export function validateDetectedFileMime(
     }
 
     if (expectedMimes.includes(detectedMime)) {
+        if (isOfficeOpenXmlExtension(filename)) {
+            if (!officeStructure) {
+                return {
+                    valid: false,
+                    detectedMime,
+                    expectedMimes,
+                    error: "Office Open XML structure validation is required",
+                };
+            }
+            if (!officeStructure.valid) {
+                return {
+                    valid: false,
+                    detectedMime,
+                    expectedMimes,
+                    error: `Invalid Office Open XML structure: ${
+                        officeStructure.error ?? "unknown error"
+                    }`,
+                };
+            }
+        }
+
         return { valid: true, detectedMime };
     }
 
@@ -104,8 +132,15 @@ export function validateDetectedFileMime(
 
 export async function validateFileMime(
     buffer: Buffer,
-    filename: string
+    filename: string,
 ): Promise<MimeValidationResult> {
     const detected = await fileTypeFromBuffer(buffer);
-    return validateDetectedFileMime(filename, detected?.mime);
+    const officeStructure = isOfficeOpenXmlExtension(filename)
+        ? validateOfficeOpenXmlBuffer(buffer, filename)
+        : undefined;
+    return validateDetectedFileMime(
+        filename,
+        detected?.mime,
+        officeStructure,
+    );
 }

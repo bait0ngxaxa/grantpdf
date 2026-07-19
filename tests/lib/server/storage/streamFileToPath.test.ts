@@ -4,12 +4,21 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import PizZip from "pizzip";
 import {
     streamFileToPath,
     type StreamedFileMetadata,
 } from "@/lib/server/storage/streamFileToPath";
 
 const temporaryDirectories: string[] = [];
+
+function createZip(entries: Record<string, string>): Buffer {
+    const zip = new PizZip();
+    Object.entries(entries).forEach(([name, content]) => {
+        zip.file(name, content);
+    });
+    return zip.generate({ type: "nodebuffer", compression: "DEFLATE" });
+}
 
 afterEach(async () => {
     await Promise.all(
@@ -20,6 +29,28 @@ afterEach(async () => {
 });
 
 describe("streamFileToPath", () => {
+    it("records invalid Office structure after streaming a generic ZIP", async () => {
+        const directory = await mkdtemp(
+            path.join(os.tmpdir(), "grant-online-upload-"),
+        );
+        temporaryDirectories.push(directory);
+
+        const content = createZip({ "readme.txt": "not an Office file" });
+        const file = new File(
+            [content as unknown as ArrayBuffer],
+            "document.docx",
+            {
+                type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            },
+        );
+        const destination = path.join(directory, "document.docx");
+
+        const metadata = await streamFileToPath(file, destination);
+
+        expect(metadata.detectedMime).toBe("application/zip");
+        expect(metadata.officeStructure?.valid).toBe(false);
+    });
+
     it("detects and persists the file without calling arrayBuffer", async () => {
         const directory = await mkdtemp(
             path.join(os.tmpdir(), "grant-online-upload-"),

@@ -14,8 +14,17 @@ vi.mock("file-type", () => ({
 }));
 
 import { fileTypeFromBuffer } from "file-type";
+import PizZip from "pizzip";
 
 const mockedFileTypeFromBuffer = vi.mocked(fileTypeFromBuffer);
+
+function createZip(entries: Record<string, string>): Buffer {
+    const zip = new PizZip();
+    Object.entries(entries).forEach(([name, content]) => {
+        zip.file(name, content);
+    });
+    return zip.generate({ type: "nodebuffer", compression: "DEFLATE" });
+}
 
 describe("fileStorage - Security Tests", () => {
     // ============================================
@@ -81,12 +90,34 @@ describe("fileStorage - Security Tests", () => {
                 mime: "application/zip",
             });
 
-            const buffer = Buffer.from("PK fake docx content");
+            const buffer = createZip({
+                "[Content_Types].xml": "<Types></Types>",
+                "word/document.xml": "<w:document></w:document>",
+            });
             const result = await validateFileMime(buffer, "document.docx");
 
             expect(result.valid).toBe(true);
             expect(result.detectedMime).toBe("application/zip");
         });
+
+        it.each(["docx", "xlsx"])(
+            "should REJECT generic ZIP disguised as .%s",
+            async (extension) => {
+                mockedFileTypeFromBuffer.mockResolvedValueOnce({
+                    ext: "zip",
+                    mime: "application/zip",
+                });
+
+                const buffer = createZip({ "readme.txt": "not an Office file" });
+                const result = await validateFileMime(
+                    buffer,
+                    `document.${extension}`,
+                );
+
+                expect(result.valid).toBe(false);
+                expect(result.error).toContain("Office Open XML");
+            },
+        );
 
         it("should REJECT PDF extension with EXE magic bytes", async () => {
             mockedFileTypeFromBuffer.mockResolvedValueOnce({

@@ -173,6 +173,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const mimeValidation = validateDetectedFileMime(
             file.name,
             streamedFile.detectedMime,
+            streamedFile.officeStructure,
         );
         if (!mimeValidation.valid) {
             await unlink(tempFilePath).catch(() => undefined);
