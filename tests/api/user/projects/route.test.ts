@@ -267,4 +267,24 @@ describe("projects route", () => {
             }),
         );
     });
+
+    it("returns 409 when the project name already exists", async () => {
+        mockedAuth.mockResolvedValue({
+            user: { id: "7", email: "tester@example.com" },
+        } as never);
+        mockedCreateProjectWithAudit.mockRejectedValue(
+            new Error("PROJECT_ALREADY_EXISTS"),
+        );
+
+        const request = buildPostRequest({
+            programId: 1,
+            name: "โครงการทดสอบ",
+            description: "รายละเอียดใหม่",
+        });
+        const response = await POST(request);
+        const body = await response.json();
+
+        expect(response.status).toBe(409);
+        expect(body).toEqual({ error: "มีชื่อโครงการนี้อยู่แล้ว" });
+    });
 });

@@ -113,11 +113,9 @@ export async function POST(req: Request): Promise<NextResponse> {
 
         return NextResponse.json(project, { headers: rateLimitResult.headers });
     } catch (error) {
-        if (error instanceof Error && error.message === "PROJECT_NAME_CONFLICT") {
+        if (error instanceof Error && error.message === "PROJECT_ALREADY_EXISTS") {
             return NextResponse.json(
-                {
-                    error: "มีชื่อโครงการนี้อยู่แล้วภายใต้โครงการหลักอื่น กรุณาเปลี่ยนชื่อโครงการ",
-                },
+                { error: "มีชื่อโครงการนี้อยู่แล้ว" },
                 { status: 409 },
             );
         }

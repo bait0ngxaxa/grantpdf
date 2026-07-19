@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Prisma } from "@prisma/client";
 
 vi.mock("@/lib/server/db", () => ({
     prisma: {
@@ -28,6 +29,9 @@ interface MockTransactionClient {
         findMany: ReturnType<typeof vi.fn>;
     };
     notificationEvent: {
+        create: ReturnType<typeof vi.fn>;
+    };
+    auditLog: {
         create: ReturnType<typeof vi.fn>;
     };
 }
@@ -61,6 +65,9 @@ function createTransactionClient(): MockTransactionClient {
         notificationEvent: {
             create: vi.fn(),
         },
+        auditLog: {
+            create: vi.fn(),
+        },
     };
 }
 
@@ -84,6 +91,14 @@ function createProjectRecord(): MockProjectRecord {
 }
 
 const mockedTransaction = vi.mocked(prisma.$transaction);
+const mockedFindUnique = vi.mocked(prisma.project.findUnique);
+
+function createP2002Error(): Prisma.PrismaClientKnownRequestError {
+    return new Prisma.PrismaClientKnownRequestError("duplicate", {
+        code: "P2002",
+        clientVersion: "test",
+    });
+}
 
 describe("createProject", () => {
     let tx: MockTransactionClient;
@@ -132,5 +147,94 @@ describe("createProject", () => {
                 }),
             }),
         );
+    });
+
+    it("rejects an active duplicate instead of silently reusing its description", async () => {
+        const existing = createProjectRecord();
+        tx.project.findUnique.mockResolvedValue({
+            id: existing.id,
+            programId: existing.programId,
+            deletedAt: null,
+        });
+        tx.project.update.mockResolvedValue(existing);
+
+        const { createProjectWithAudit } = await import(
+            "@/lib/services/projectService/mutations"
+        );
+
+        await expect(
+            createProjectWithAudit(
+                7,
+                existing.name,
+                "รายละเอียดใหม่",
+                4,
+                { actorUserId: "7" },
+            ),
+        ).rejects.toThrow("PROJECT_ALREADY_EXISTS");
+
+        expect(tx.project.update).not.toHaveBeenCalled();
+        expect(tx.auditLog.create).not.toHaveBeenCalled();
+    });
+
+    it("does not restore an archived duplicate through create", async () => {
+        const existing = createProjectRecord();
+        tx.project.findUnique.mockResolvedValue({
+            id: existing.id,
+            programId: existing.programId,
+            deletedAt: new Date("2026-06-27T01:00:00.000Z"),
+        });
+        tx.project.update.mockResolvedValue(existing);
+
+        const { createProjectWithAudit } = await import(
+            "@/lib/services/projectService/mutations"
+        );
+
+        await expect(
+            createProjectWithAudit(
+                7,
+                existing.name,
+                "รายละเอียดใหม่",
+                4,
+                { actorUserId: "7" },
+            ),
+        ).rejects.toThrow("PROJECT_ALREADY_EXISTS");
+
+        expect(tx.project.update).not.toHaveBeenCalled();
+        expect(tx.auditLog.create).not.toHaveBeenCalled();
+    });
+
+    it("maps a concurrent unique race to PROJECT_ALREADY_EXISTS", async () => {
+        const existing = createProjectRecord();
+        tx.project.findUnique.mockResolvedValue(null);
+        tx.project.create.mockRejectedValue(createP2002Error());
+        mockedFindUnique.mockResolvedValue({
+            id: existing.id,
+            programId: existing.programId,
+            deletedAt: null,
+        } as never);
+
+        const { createProjectWithAudit } = await import(
+            "@/lib/services/projectService/mutations"
+        );
+
+        await expect(
+            createProjectWithAudit(
+                7,
+                existing.name,
+                "รายละเอียดใหม่",
+                existing.programId,
+                { actorUserId: "7" },
+            ),
+        ).rejects.toThrow("PROJECT_ALREADY_EXISTS");
+
+        expect(mockedFindUnique).toHaveBeenCalledWith({
+            where: {
+                userId_name: {
+                    userId: 7,
+                    name: existing.name,
+                },
+            },
+            select: { id: true, programId: true, deletedAt: true },
+        });
     });
 });

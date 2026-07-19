@@ -175,90 +175,73 @@ export async function createProjectWithAudit(
 ): Promise<{ id: string } & Omit<Project, "id">> {
     const normalized = normalizeProjectText(name, description);
 
-    const project = await prisma.$transaction(async (tx) => {
-        const existing = await tx.project.findUnique({
-            where: { userId_name: { userId, name: normalized.name } },
-            select: { id: true, programId: true, deletedAt: true },
-        });
+    try {
+        const project = await prisma.$transaction(async (tx) => {
+            const existing = await tx.project.findUnique({
+                where: { userId_name: { userId, name: normalized.name } },
+                select: { id: true, programId: true, deletedAt: true },
+            });
 
-        if (shouldRejectProgramConflict(existing, programId)) {
-            throw new Error("PROJECT_NAME_CONFLICT");
-        }
+            if (existing) {
+                throw new Error("PROJECT_ALREADY_EXISTS");
+            }
 
-        const created = existing
-            ? await tx.project.update({
-                  where: { id: existing.id },
-                  data: {
-                      ...(existing.deletedAt !== null
-                          ? { deletedAt: null }
-                          : {}),
-                      ...(existing.programId === null && programId
-                          ? { programId }
-                          : {}),
-                      ...(existing.deletedAt !== null && programId
-                          ? { programId }
-                          : {}),
-                      updated_at: new Date(),
-                  },
-                  include: {
-                      files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
-                      _count: {
-                          select: {
-                              files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
-                          },
-                      },
-                  },
-              })
-            : await tx.project.create({
-                  data: {
-                      userId,
-                      name: normalized.name,
-                      description: normalized.description,
-                      programId: programId ?? null,
-                  },
-                  include: {
-                      files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
-                      _count: {
-                          select: {
-                              files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
-                          },
-                      },
-                  },
-              });
+            const created = await tx.project.create({
+                data: {
+                    userId,
+                    name: normalized.name,
+                    description: normalized.description,
+                    programId: programId ?? null,
+                },
+                include: {
+                    files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                    _count: {
+                        select: {
+                            files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                        },
+                    },
+                },
+            });
 
-        await tx.auditLog.create({
-            data: {
-                action: "PROJECT_CREATE",
-                outcome: "success",
-                actorUserId: parseActorUserId(audit.actorUserId),
-                actorEmail: audit.actorEmail ?? null,
-                targetType: "project",
-                targetId: created.id.toString(),
-                ip: audit.ip ?? null,
-                userAgent: audit.userAgent ?? null,
-                requestId: audit.requestId ?? null,
-                details: toPrismaJsonValue({
-                    projectId: created.id,
-                    projectName: created.name,
-                    description: created.description,
-                    programId: created.programId,
-                    reusedExistingProject: existing !== null,
-                    restoredArchivedProject: existing?.deletedAt !== null,
-                }),
-            },
-        });
+            await tx.auditLog.create({
+                data: {
+                    action: "PROJECT_CREATE",
+                    outcome: "success",
+                    actorUserId: parseActorUserId(audit.actorUserId),
+                    actorEmail: audit.actorEmail ?? null,
+                    targetType: "project",
+                    targetId: created.id.toString(),
+                    ip: audit.ip ?? null,
+                    userAgent: audit.userAgent ?? null,
+                    requestId: audit.requestId ?? null,
+                    details: toPrismaJsonValue({
+                        projectId: created.id,
+                        projectName: created.name,
+                        description: created.description,
+                        programId: created.programId,
+                        reusedExistingProject: false,
+                        restoredArchivedProject: false,
+                    }),
+                },
+            });
 
-        if (existing === null || existing.deletedAt !== null) {
             await notifyProjectCreated(tx, {
                 projectId: created.id,
                 projectName: created.name,
                 actorUserId: userId,
             });
-        }
 
-        return created;
-    });
+            return created;
+        });
 
-    await invalidateDashboardStats([userId]);
-    return toProjectWithStringId(project);
+        await invalidateDashboardStats([userId]);
+        return toProjectWithStringId(project);
+    } catch (error) {
+        if (!isUniqueConstraintError(error)) throw error;
+
+        const existing = await findProjectForCreate(userId, normalized.name);
+        if (!existing) throw error;
+
+        throw new Error("PROJECT_ALREADY_EXISTS");
+    }
 }
