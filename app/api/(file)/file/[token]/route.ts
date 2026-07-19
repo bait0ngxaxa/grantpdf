@@ -13,6 +13,7 @@ import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import { publicErrorResponse } from "@/lib/api/responses";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+import { canAccessProjectFile } from "@/lib/services/projectService";
 
 type DownloadCompletion = () => Promise<void>;
 
@@ -72,6 +73,7 @@ export async function GET(
             originalFileName: string;
             storagePath: string;
             userId: number;
+            projectId: number | null;
         } | null = null;
 
         if (type === "userFile") {
@@ -85,6 +87,7 @@ export async function GET(
                     originalFileName: true,
                     storagePath: true,
                     userId: true,
+                    projectId: true,
                 },
             });
         } else if (type === "attachment") {
@@ -99,6 +102,7 @@ export async function GET(
                     userFile: {
                         select: {
                             userId: true,
+                            projectId: true,
                         },
                     },
                 },
@@ -110,6 +114,7 @@ export async function GET(
                     originalFileName: attachment.fileName,
                     storagePath: attachment.filePath,
                     userId: attachment.userFile.userId,
+                    projectId: attachment.userFile.projectId,
                 };
             }
         }
@@ -125,8 +130,15 @@ export async function GET(
         const isOwner = file.userId === userId;
         const admin = sessionGuard ? isAdmin(sessionGuard.session) : false;
         const isTokenUser = sessionGuard?.userId === userId;
+        const isProjectMember = sessionGuard
+            ? await canAccessProjectFile(
+                  sessionGuard.userId,
+                  file.userId,
+                  file.projectId,
+              )
+            : false;
 
-        if (!isOwner && !admin && !isTokenUser) {
+        if (!isOwner && !admin && !isTokenUser && !isProjectMember) {
             return NextResponse.json(
                 { error: "ไม่มีสิทธิ์เข้าถึงไฟล์นี้" },
                 { status: 403 }

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/server/db";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+import { buildAccessibleUserFileWhere } from "@/lib/services/projectService/fileAccess";
 import type { AdminDocumentFile } from "@/type/models";
 import type { RawFile, FileForDeletion } from "./types";
 import { sanitizeFile, filterOutAttachmentFiles } from "./sanitizers";
@@ -65,7 +66,7 @@ export async function getFilesByUserId(
     userId: number,
 ): Promise<AdminDocumentFile[]> {
     const userFiles = await prisma.userFile.findMany({
-        where: { userId, deletionStatus: FILE_DELETION_STATUS.ACTIVE },
+        where: buildAccessibleUserFileWhere(userId),
         orderBy: {
             created_at: "desc",
         },

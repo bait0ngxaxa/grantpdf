@@ -10,17 +10,16 @@ export const USER_PROJECT_SORT_ORDER_MAP: Record<
     [SORT_OPTIONS.CREATED_AT_DESC]: { created_at: "desc" },
 };
 
-export function buildActiveUserFilesWhere(userId: number): {
-    userId: number;
-    deletionStatus: typeof FILE_DELETION_STATUS.ACTIVE;
-    projectReports: { none: Record<string, never> };
-    project: { deletedAt: null };
-} {
+export function buildActiveUserFilesWhere(
+    userId: number,
+): Prisma.UserFileWhereInput {
     return {
-        userId,
         deletionStatus: FILE_DELETION_STATUS.ACTIVE,
         projectReports: { none: {} },
-        project: { deletedAt: null },
+        OR: [
+            { userId, project: { deletedAt: null } },
+            { project: buildUserProjectsAccessWhere(userId) },
+        ],
     };
 }
 

@@ -4,7 +4,6 @@ import { prisma } from "@/lib/server/db";
 import {
     isAdmin,
     isGuardError,
-    requireResourceOwnerOrAdmin,
     requireUserSession,
 } from "@/lib/server/auth/guards";
 import { generateSignedUrl } from "@/lib/server/storage/signedUrl";
@@ -15,6 +14,7 @@ import {
     validationErrorResponse,
 } from "@/lib/api/responses";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+import { buildAccessibleUserFileWhere } from "@/lib/services/projectService";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
@@ -31,14 +31,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const { fileId, type, expiresIn, fromAdminPanel } = parsed.data;
 
         const admin = isAdmin(guard.session);
+        const accessibleUserFileWhere = admin
+            ? { deletionStatus: FILE_DELETION_STATUS.ACTIVE }
+            : buildAccessibleUserFileWhere(guard.userId);
 
-        // Verify user has access to this file
+        // Verify user has access to this file or its project
         if (type === "userFile") {
             const file = await prisma.userFile.findFirst({
-                where: {
-                    id: fileId,
-                    deletionStatus: FILE_DELETION_STATUS.ACTIVE,
-                },
+                where: { id: fileId, ...accessibleUserFileWhere },
                 select: { userId: true },
             });
 
@@ -49,20 +49,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 );
             }
 
-            // Only owner or admin can generate URL
-            const ownerError = requireResourceOwnerOrAdmin(
-                guard,
-                file.userId,
-                "ไม่มีสิทธิ์เข้าถึงไฟล์นี้",
-            );
-            if (ownerError) return ownerError;
         } else if (type === "attachment") {
             const attachment = await prisma.attachmentFile.findFirst({
                 where: {
                     id: fileId,
-                    userFile: {
-                        deletionStatus: FILE_DELETION_STATUS.ACTIVE,
-                    },
+                    userFile: accessibleUserFileWhere,
                 },
                 include: {
                     userFile: {
@@ -78,12 +69,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                 );
             }
 
-            const ownerError = requireResourceOwnerOrAdmin(
-                guard,
-                attachment.userFile.userId,
-                "ไม่มีสิทธิ์เข้าถึงไฟล์แนบนี้",
-            );
-            if (ownerError) return ownerError;
         }
 
         // Generate signed URL - only pass fromAdminPanel if user is actually admin

@@ -14,6 +14,7 @@ import { createReadStream } from "fs";
 import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { publicErrorResponse } from "@/lib/api/responses";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+import { canAccessProjectFile } from "@/lib/services/projectService";
 
 const SAFE_PATH_PREFIX = "storage/";
 
@@ -25,17 +26,29 @@ function isValidStoragePath(p: string): boolean {
 /** Resolve the file owner ID and display name from UserFile or AttachmentFile */
 async function resolveFileOwnership(
     storagePath: string
-): Promise<{ ownerId: number; displayName: string } | null> {
+): Promise<{
+    ownerId: number;
+    displayName: string;
+    projectId: number | null;
+} | null> {
     const userFile = await prisma.userFile.findFirst({
         where: {
             storagePath,
             deletionStatus: FILE_DELETION_STATUS.ACTIVE,
         },
-        select: { userId: true, originalFileName: true },
+        select: {
+            userId: true,
+            projectId: true,
+            originalFileName: true,
+        },
     });
 
     if (userFile) {
-        return { ownerId: userFile.userId, displayName: userFile.originalFileName };
+        return {
+            ownerId: userFile.userId,
+            displayName: userFile.originalFileName,
+            projectId: userFile.projectId,
+        };
     }
 
     const attachmentFile = await prisma.attachmentFile.findFirst({
@@ -43,13 +56,18 @@ async function resolveFileOwnership(
             filePath: storagePath,
             userFile: { deletionStatus: FILE_DELETION_STATUS.ACTIVE },
         },
-        include: { userFile: { select: { userId: true } } },
+        include: {
+            userFile: {
+                select: { userId: true, projectId: true },
+            },
+        },
     });
 
     if (attachmentFile) {
         return {
             ownerId: attachmentFile.userFile.userId,
             displayName: attachmentFile.fileName,
+            projectId: attachmentFile.userFile.projectId,
         };
     }
 
@@ -80,13 +98,22 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        // 4. Permission check — must be owner or admin
+        // 4. Permission check — owner, admin, or project co-owner
         const ownerError = requireResourceOwnerOrAdmin(
             guard,
             ownership.ownerId,
             "ไม่มีสิทธิ์เข้าถึงไฟล์นี้",
         );
-        if (ownerError) return ownerError;
+        if (
+            ownerError &&
+            !(await canAccessProjectFile(
+                guard.userId,
+                ownership.ownerId,
+                ownership.projectId,
+            ))
+        ) {
+            return ownerError;
+        }
 
         // 5. Read file via streaming (non-blocking)
         const fullPath = getFullPathFromStoragePath(storagePath);

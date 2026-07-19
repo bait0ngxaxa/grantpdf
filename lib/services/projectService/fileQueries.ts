@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/server/db";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+import { buildAccessibleUserFileWhere } from "./fileAccess";
 import type {
     RawFile,
     PaginatedFilesResult,
@@ -16,9 +17,8 @@ export async function getUserFilesPaginated({
 }: GetUserFilesPaginatedParams): Promise<PaginatedFilesResult> {
     const skip = (page - 1) * limit;
     const where = {
-        userId,
-        deletionStatus: FILE_DELETION_STATUS.ACTIVE,
-        ...(projectId ? { projectId, projectReports: { none: {} } } : {}),
+        ...buildAccessibleUserFileWhere(userId, projectId),
+        ...(projectId ? { projectReports: { none: {} } } : {}),
     };
 
     const [total, rawFiles] = await Promise.all([

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/server/db";
-import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
+import {
+    isAdmin,
+    isGuardError,
+    requireUserSession,
+} from "@/lib/server/auth/guards";
 import { createReadStream } from "fs";
 import { stat } from "fs/promises";
 import { Readable } from "stream";
@@ -10,6 +14,7 @@ import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
 import { publicErrorResponse } from "@/lib/api/responses";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+import { buildAccessibleUserFileWhere } from "@/lib/services/projectService";
 
 export async function GET(
     _req: NextRequest,
@@ -25,12 +30,17 @@ export async function GET(
             throw publicApiError(400, "รหัสไฟล์ไม่ถูกต้อง");
         }
 
+        const fileWhere = isAdmin(guard.session)
+            ? {
+                  id: fileId,
+                  deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+              }
+            : {
+                  id: fileId,
+                  ...buildAccessibleUserFileWhere(guard.userId),
+              };
         const file = await prisma.userFile.findFirst({
-            where: {
-                id: fileId,
-                userId: guard.userId,
-                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
-            },
+            where: fileWhere,
             select: {
                 id: true,
                 originalFileName: true,

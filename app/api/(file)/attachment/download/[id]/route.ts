@@ -3,7 +3,7 @@ import { type NextRequest } from "next/server";
 import { prisma } from "@/lib/server/db";
 import {
     isGuardError,
-    requireResourceOwner,
+    requireResourceOwnerOrAdmin,
     requireUserSession,
 } from "@/lib/server/auth/guards";
 import { createReadStream } from "fs";
@@ -15,6 +15,7 @@ import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
 import { publicErrorResponse } from "@/lib/api/responses";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
+import { canAccessProjectFile } from "@/lib/services/projectService";
 
 export async function GET(
     _req: NextRequest,
@@ -40,6 +41,7 @@ export async function GET(
                 userFile: {
                     select: {
                         userId: true,
+                        projectId: true,
                     },
                 },
             },
@@ -52,12 +54,21 @@ export async function GET(
             );
         }
 
-        const ownerError = requireResourceOwner(
+        const ownerError = requireResourceOwnerOrAdmin(
             guard,
             attachment.userFile.userId,
             "ไม่มีสิทธิ์เข้าถึงไฟล์แนบนี้",
         );
-        if (ownerError) return ownerError;
+        if (
+            ownerError &&
+            !(await canAccessProjectFile(
+                guard.userId,
+                attachment.userFile.userId,
+                attachment.userFile.projectId,
+            ))
+        ) {
+            return ownerError;
+        }
 
         // ใช้ storage path ใหม่
         const fullPath = getFullPathFromStoragePath(attachment.filePath);

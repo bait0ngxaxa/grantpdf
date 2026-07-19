@@ -14,8 +14,15 @@ export {
 
 export {
     buildProjectAccessWhere,
+    buildProjectMemberAccessWhere,
     buildUserProjectsAccessWhere,
+    userCanAccessProject,
 } from "./projectAccess";
+
+export {
+    buildAccessibleUserFileWhere,
+    canAccessProjectFile,
+} from "./fileAccess";
 
 // Sanitizers
 export {

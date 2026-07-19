@@ -42,10 +42,22 @@ describe("user project queries", () => {
 
         expect(mockedUserFileCount).toHaveBeenCalledWith({
             where: {
-                userId: 7,
                 deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                 projectReports: { none: {} },
-                project: { deletedAt: null },
+                OR: [
+                    { userId: 7, project: { deletedAt: null } },
+                    {
+                        project: {
+                            deletedAt: null,
+                            OR: [
+                                { userId: 7 },
+                                expect.objectContaining({
+                                    allowCoOwners: true,
+                                }),
+                            ],
+                        },
+                    },
+                ],
             },
         });
     });
@@ -59,10 +71,22 @@ describe("user project queries", () => {
 
         expect(mockedUserFileCount).toHaveBeenCalledWith({
             where: {
-                userId: 7,
                 deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                 projectReports: { none: {} },
-                project: { deletedAt: null },
+                OR: [
+                    { userId: 7, project: { deletedAt: null } },
+                    {
+                        project: {
+                            deletedAt: null,
+                            OR: [
+                                { userId: 7 },
+                                expect.objectContaining({
+                                    allowCoOwners: true,
+                                }),
+                            ],
+                        },
+                    },
+                ],
             },
         });
     });
