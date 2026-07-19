@@ -14,6 +14,36 @@ import { logAudit } from "@/lib/server/audit/auditLog";
 import { publicErrorResponse } from "@/lib/api/responses";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 
+type DownloadCompletion = () => Promise<void>;
+
+function createCompletionTrackedStream(
+    source: ReadableStream<Uint8Array>,
+    onComplete: DownloadCompletion,
+): ReadableStream<Uint8Array> {
+    const reader = source.getReader();
+    let cancelled = false;
+
+    return new ReadableStream<Uint8Array>({
+        async pull(controller): Promise<void> {
+            const result = await reader.read();
+
+            if (cancelled) return;
+
+            if (result.done) {
+                await onComplete();
+                controller.close();
+                return;
+            }
+
+            controller.enqueue(result.value);
+        },
+        async cancel(reason: unknown): Promise<void> {
+            cancelled = true;
+            await reader.cancel(reason);
+        },
+    });
+}
+
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ token: string }> }
@@ -120,32 +150,42 @@ export async function GET(
         const stream = createReadStream(fullPath);
         const contentType = getMimeType(file.originalFileName);
 
-        // Update downloadStatus ONLY when downloaded from Admin Panel
-        if (fromAdminPanel && type === "userFile") {
-            await prisma.userFile.update({
-                where: { id: fileId },
-                data: {
-                    downloadStatus: "done",
-                    downloadedAt: new Date(),
-                },
-            });
-        }
+        const finalizeDownload = async (): Promise<void> => {
+            try {
+                if (fromAdminPanel && type === "userFile") {
+                    await prisma.userFile.update({
+                        where: { id: fileId },
+                        data: {
+                            downloadStatus: "done",
+                            downloadedAt: new Date(),
+                        },
+                    });
+                }
 
-        // Log download - differentiate admin vs user
-        const downloadAction = admin
-            ? "ADMIN_FILE_DOWNLOAD"
-            : "FILE_DOWNLOAD";
-        logAudit(downloadAction, sessionGuard?.session.user.id || String(userId), {
-            userEmail: sessionGuard?.session.user.email || undefined,
-            details: {
-                fileId: file.id.toString(),
-                fileName: file.originalFileName,
-                fileType: type,
-            },
-        });
+                const downloadAction = admin
+                    ? "ADMIN_FILE_DOWNLOAD"
+                    : "FILE_DOWNLOAD";
+                logAudit(
+                    downloadAction,
+                    sessionGuard?.session.user.id || String(userId),
+                    {
+                        userEmail: sessionGuard?.session.user.email || undefined,
+                        details: {
+                            fileId: file.id.toString(),
+                            fileName: file.originalFileName,
+                            fileType: type,
+                        },
+                    },
+                );
+            } catch (error: unknown) {
+                console.error("Error finalizing file download:", error);
+            }
+        };
 
-        // Convert Node.js Readable to Web ReadableStream
-        const webStream = Readable.toWeb(stream) as ReadableStream;
+        const webStream = createCompletionTrackedStream(
+            Readable.toWeb(stream) as unknown as ReadableStream<Uint8Array>,
+            finalizeDownload,
+        );
 
         return new NextResponse(webStream, {
             headers: {
