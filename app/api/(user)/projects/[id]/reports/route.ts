@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import path from "path";
-import { rename, unlink, writeFile } from "fs/promises";
+import { rename, unlink } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
 import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { prisma } from "@/lib/server/db";
@@ -15,7 +15,8 @@ import {
     ensureStorageDir,
     getRelativeStoragePath,
     getStoragePath,
-    validateFileMime,
+    streamFileToPath,
+    validateDetectedFileMime,
 } from "@/lib/server/storage";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
@@ -106,19 +107,28 @@ async function persistReportFile(file: File): Promise<{
 }> {
     const uniqueFileName = generateUniqueFilename(file.name);
     const tempFileName = `tmp_${uuidv4()}_${uniqueFileName}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const mimeValidation = await validateFileMime(buffer, file.name);
-    if (!mimeValidation.valid) {
-        throw publicApiError(400, mimeValidation.error || "ประเภทไฟล์ไม่ถูกต้อง");
-    }
 
     await ensureStorageDir("tmp");
     await ensureStorageDir("reports");
+
     const tempFilePath = getStoragePath("tmp", tempFileName);
     const finalFilePath = getStoragePath("reports", uniqueFileName);
     let movedToFinalPath = false;
+
     try {
-        await writeFile(tempFilePath, buffer);
+        const streamedFile = await streamFileToPath(file, tempFilePath);
+        const mimeValidation = validateDetectedFileMime(
+            file.name,
+            streamedFile.detectedMime,
+            streamedFile.officeStructure,
+        );
+        if (!mimeValidation.valid) {
+            throw publicApiError(
+                400,
+                mimeValidation.error || "ประเภทไฟล์ไม่ถูกต้อง",
+            );
+        }
+
         await rename(tempFilePath, finalFilePath);
         movedToFinalPath = true;
 
@@ -165,11 +175,15 @@ export async function POST(
     let reservedStorageBytes = 0;
     let reservedStorageUserId = 0;
     try {
+        const guard = await requireUserSession();
+        if (isGuardError(guard)) return guard;
+
         const rateLimitResult = await applyRateLimit({
             request: req,
             routeKey: RATE_LIMIT.USER.PROJECT_MUTATION.ROUTE_KEY,
             limit: RATE_LIMIT.USER.PROJECT_MUTATION.LIMIT,
             windowMs: RATE_LIMIT.USER.PROJECT_MUTATION.WINDOW_MS,
+            identifier: String(guard.userId),
         });
         if (!rateLimitResult.success) {
             return rateLimitExceededResponse(
@@ -197,9 +211,6 @@ export async function POST(
 
         const fileError = validateReportFile(fileEntry);
         if (fileError) throw publicApiError(400, fileError);
-
-        const guard = await requireUserSession();
-        if (isGuardError(guard)) return guard;
 
         await ensureOwnProject(projectId, guard.userId);
         const requestHash = await createDocumentRequestHash(formData, {
