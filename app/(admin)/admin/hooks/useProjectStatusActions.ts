@@ -8,7 +8,7 @@ import type {
 } from "@/type/models";
 import { toast } from "sonner";
 
-type AdminOwnerOption = ProjectCoOwnerSummary;
+type CoOwnerUserOption = ProjectCoOwnerSummary;
 
 function areSameStringSets(left: string[], right: string[]): boolean {
     if (left.length !== right.length) {
@@ -22,15 +22,15 @@ function areSameStringSets(left: string[], right: string[]): boolean {
 export const useProjectStatusActions = (): {
     isUpdatingStatus: boolean;
     programs: ProgramSummary[];
-    adminOwnerOptions: AdminOwnerOption[];
+    coOwnerUserOptions: CoOwnerUserOption[];
     isProgramsLoading: boolean;
-    isAdminOwnersLoading: boolean;
+    isCoOwnerUsersLoading: boolean;
     programsError: string | null;
-    adminOwnersError: string | null;
+    coOwnerUsersError: string | null;
     allowCoOwners: boolean;
     setAllowCoOwners: Dispatch<SetStateAction<boolean>>;
-    selectedCoOwnerAdminIds: string[];
-    setSelectedCoOwnerAdminIds: Dispatch<SetStateAction<string[]>>;
+    selectedCoOwnerUserIds: string[];
+    setSelectedCoOwnerUserIds: Dispatch<SetStateAction<string[]>>;
     openStatusModal: (project: AdminProject) => void;
     closeStatusModal: () => void;
     handleUpdateProjectStatus: () => Promise<void>;
@@ -51,17 +51,17 @@ export const useProjectStatusActions = (): {
 
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [programs, setPrograms] = useState<ProgramSummary[]>([]);
-    const [adminOwnerOptions, setAdminOwnerOptions] = useState<
-        AdminOwnerOption[]
+    const [coOwnerUserOptions, setCoOwnerUserOptions] = useState<
+        CoOwnerUserOption[]
     >([]);
     const [isProgramsLoading, setIsProgramsLoading] = useState(false);
-    const [isAdminOwnersLoading, setIsAdminOwnersLoading] = useState(false);
+    const [isCoOwnerUsersLoading, setIsCoOwnerUsersLoading] = useState(false);
     const [programsError, setProgramsError] = useState<string | null>(null);
-    const [adminOwnersError, setAdminOwnersError] = useState<string | null>(
+    const [coOwnerUsersError, setCoOwnerUsersError] = useState<string | null>(
         null,
     );
     const [allowCoOwners, setAllowCoOwners] = useState(false);
-    const [selectedCoOwnerAdminIds, setSelectedCoOwnerAdminIds] = useState<
+    const [selectedCoOwnerUserIds, setSelectedCoOwnerUserIds] = useState<
         string[]
     >([]);
 
@@ -112,13 +112,13 @@ export const useProjectStatusActions = (): {
     }, [isStatusModalOpen, programs.length]);
 
     useEffect(() => {
-        if (!isStatusModalOpen || adminOwnerOptions.length > 0) {
+        if (!isStatusModalOpen || coOwnerUserOptions.length > 0) {
             return;
         }
 
-        const loadAdminOwners = async (): Promise<void> => {
-            setIsAdminOwnersLoading(true);
-            setAdminOwnersError(null);
+        const loadCoOwnerUsers = async (): Promise<void> => {
+            setIsCoOwnerUsersLoading(true);
+            setCoOwnerUsersError(null);
 
             try {
                 const response = await fetch(API_ROUTES.ADMIN_PROJECT_CO_OWNERS);
@@ -127,22 +127,22 @@ export const useProjectStatusActions = (): {
                 }
 
                 const data = (await response.json()) as {
-                    admins?: AdminOwnerOption[];
+                    users?: CoOwnerUserOption[];
                 };
-                setAdminOwnerOptions(data.admins ?? []);
+                setCoOwnerUserOptions(data.users ?? []);
             } catch (error) {
-                setAdminOwnersError(
+                setCoOwnerUsersError(
                     error instanceof Error
                         ? error.message
                         : "ไม่สามารถโหลดรายชื่อผู้ใช้ได้",
                 );
             } finally {
-                setIsAdminOwnersLoading(false);
+                setIsCoOwnerUsersLoading(false);
             }
         };
 
-        void loadAdminOwners();
-    }, [adminOwnerOptions.length, isStatusModalOpen]);
+        void loadCoOwnerUsers();
+    }, [coOwnerUserOptions.length, isStatusModalOpen]);
 
     useEffect(() => {
         if (!isStatusModalOpen || !selectedProjectForStatus) {
@@ -158,7 +158,7 @@ export const useProjectStatusActions = (): {
                 (selectedProjectForStatus.allowCoOwners ?? false) ||
                     assignedCoOwnerIds.length > 0,
             );
-            setSelectedCoOwnerAdminIds(assignedCoOwnerIds);
+            setSelectedCoOwnerUserIds(assignedCoOwnerIds);
         });
 
         return () => window.cancelAnimationFrame(frameId);
@@ -175,7 +175,7 @@ export const useProjectStatusActions = (): {
         setStatusNote(project.statusNote || "");
         setSelectedProgramId(project.programId || "");
         setAllowCoOwners((project.allowCoOwners ?? false) || assignedCoOwnerIds.length > 0);
-        setSelectedCoOwnerAdminIds(assignedCoOwnerIds);
+        setSelectedCoOwnerUserIds(assignedCoOwnerIds);
         setIsStatusModalOpen(true);
     };
 
@@ -187,7 +187,7 @@ export const useProjectStatusActions = (): {
         setStatusNote("");
         setSelectedProgramId("");
         setAllowCoOwners(false);
-        setSelectedCoOwnerAdminIds([]);
+        setSelectedCoOwnerUserIds([]);
     };
 
     // Handle update project status
@@ -206,13 +206,13 @@ export const useProjectStatusActions = (): {
             selectedProgramId !== (selectedProjectForStatus.programId || "");
         const hasCoOwnerChanges =
             allowCoOwners !== originalAllowCoOwners ||
-            !areSameStringSets(selectedCoOwnerAdminIds, originalCoOwnerIds);
+            !areSameStringSets(selectedCoOwnerUserIds, originalCoOwnerIds);
 
         if (!hasStatusChanges && !hasCoOwnerChanges) {
             return;
         }
 
-        if (allowCoOwners && selectedCoOwnerAdminIds.length === 0) {
+        if (allowCoOwners && selectedCoOwnerUserIds.length === 0) {
             toast.error("กรุณาเลือกเจ้าของร่วมอย่างน้อย 1 คน");
             return;
         }
@@ -262,7 +262,7 @@ export const useProjectStatusActions = (): {
                         body: JSON.stringify({
                             projectId: selectedProjectForStatus.id,
                             allowCoOwners,
-                            adminUserIds: selectedCoOwnerAdminIds.map(Number),
+                            coOwnerUserIds: selectedCoOwnerUserIds.map(Number),
                         }),
                     },
                 );
@@ -306,15 +306,15 @@ export const useProjectStatusActions = (): {
     return {
         isUpdatingStatus,
         programs,
-        adminOwnerOptions,
+        coOwnerUserOptions,
         isProgramsLoading,
-        isAdminOwnersLoading,
+        isCoOwnerUsersLoading,
         programsError,
-        adminOwnersError,
+        coOwnerUsersError,
         allowCoOwners,
         setAllowCoOwners,
-        selectedCoOwnerAdminIds,
-        setSelectedCoOwnerAdminIds,
+        selectedCoOwnerUserIds,
+        setSelectedCoOwnerUserIds,
         openStatusModal,
         closeStatusModal,
         handleUpdateProjectStatus,

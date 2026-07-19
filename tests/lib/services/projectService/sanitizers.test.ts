@@ -170,7 +170,7 @@ describe("sanitizeProjects", () => {
                 coOwners: [
                     {
                         id: BigInt(1),
-                        adminUser: {
+                        coOwnerUser: {
                             id: BigInt(200),
                             name: "แอดมินร่วม",
                             email: "co-owner@test.com",

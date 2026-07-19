@@ -66,7 +66,7 @@ describe("admin project co-owners route", () => {
         const body = await response.json();
 
         expect(response.status).toBe(200);
-        expect(body.admins).toEqual([
+        expect(body.users).toEqual([
             {
                 id: "1",
                 name: "ผู้ดูแลระบบ",
@@ -95,7 +95,7 @@ describe("admin project co-owners route", () => {
                 body: JSON.stringify({
                     projectId: 10,
                     allowCoOwners: true,
-                    adminUserIds: [2],
+                    coOwnerUserIds: [2],
                 }),
             },
         );
@@ -107,7 +107,7 @@ describe("admin project co-owners route", () => {
         expect(mockedUpdateProjectCoOwners).toHaveBeenCalledWith({
             projectId: 10,
             allowCoOwners: true,
-            adminUserIds: [2],
+            coOwnerUserIds: [2],
             assignedById: 1,
         });
         expect(mockedLogAudit).toHaveBeenCalledWith(
@@ -130,7 +130,7 @@ describe("admin project co-owners route", () => {
                 body: JSON.stringify({
                     projectId: 10,
                     allowCoOwners: true,
-                    adminUserIds: [0],
+                    coOwnerUserIds: [0],
                 }),
             },
         );
@@ -152,7 +152,7 @@ describe("admin project co-owners route", () => {
                 body: JSON.stringify({
                     projectId: 10,
                     allowCoOwners: true,
-                    adminUserIds: [],
+                    coOwnerUserIds: [],
                 }),
             },
         );
@@ -178,7 +178,7 @@ describe("admin project co-owners route", () => {
                 body: JSON.stringify({
                     projectId: 10,
                     allowCoOwners: true,
-                    adminUserIds: [4],
+                    coOwnerUserIds: [4],
                 }),
             },
         );

@@ -407,7 +407,7 @@ export function formatAuditDetails(
     if (knownAction === "ADMIN_PROJECT_CO_OWNER_UPDATE") {
         const projectId = readNumberField(details, "projectId");
         const allowCoOwners = details.allowCoOwners === true;
-        const adminUserIds = readArrayField(details, "adminUserIds")
+        const coOwnerUserIds = readArrayField(details, "coOwnerUserIds")
             .map((value) => String(value))
             .filter((value) => value.trim().length > 0);
         const parts: string[] = ["อัปเดตเจ้าของร่วมโครงการ"];
@@ -416,8 +416,8 @@ export function formatAuditDetails(
             parts.push(`โครงการ #${projectId}`);
         }
         parts.push(allowCoOwners ? "เปิดใช้งานเจ้าของร่วม" : "ปิดใช้งานเจ้าของร่วม");
-        if (adminUserIds.length > 0) {
-            parts.push(`ผู้ใช้ที่มอบหมาย: ${adminUserIds.join(", ")}`);
+        if (coOwnerUserIds.length > 0) {
+            parts.push(`ผู้ใช้ที่มอบหมาย: ${coOwnerUserIds.join(", ")}`);
         }
         return parts.join(" | ");
     }

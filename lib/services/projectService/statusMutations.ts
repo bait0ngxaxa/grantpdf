@@ -83,7 +83,7 @@ export async function updateProjectStatus(
         include: {
             program: { select: { id: true, name: true } },
             user: { select: { id: true, name: true, email: true } },
-            coOwners: { select: { adminUserId: true } },
+            coOwners: { select: { coOwnerUserId: true } },
             _count: {
                 select: {
                     files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
@@ -112,7 +112,7 @@ export async function updateProjectStatusWithAudit(
                 statusNote: true,
                 programId: true,
                 userId: true,
-                coOwners: { select: { adminUserId: true } },
+                coOwners: { select: { coOwnerUserId: true } },
             },
         });
 
@@ -146,7 +146,7 @@ export async function updateProjectStatusWithAudit(
             projectName: updated.name,
             ownerUserId: beforeProject.userId,
             coOwnerUserIds: beforeProject.coOwners.map(
-                (coOwner) => coOwner.adminUserId,
+                (coOwner) => coOwner.coOwnerUserId,
             ),
             status: params.status,
             actorUserId: parseActorUserId(audit.actorUserId),

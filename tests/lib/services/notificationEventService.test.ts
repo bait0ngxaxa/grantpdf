@@ -128,7 +128,7 @@ describe("notificationEventService", () => {
     it("always notifies admin audience for submitted reports even when the project has co-owners", async () => {
         tx.project.findUnique.mockResolvedValue({
             name: "โครงการรายงาน",
-            coOwners: [{ adminUserId: 1 }],
+            coOwners: [{ coOwnerUserId: 1 }],
         });
         tx.user.findMany.mockResolvedValue([{ id: 1 }, { id: 5 }]);
 

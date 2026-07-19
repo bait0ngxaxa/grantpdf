@@ -28,9 +28,9 @@ function sanitizeUserProjects(projects: RawProject[]): AdminProject[] {
         userEmail: "",
         allowCoOwners: project.allowCoOwners ?? false,
         coOwners: (project.coOwners || []).map((coOwner) => ({
-            id: coOwner.adminUser.id.toString(),
-            name: coOwner.adminUser.name || "Unknown User",
-            email: coOwner.adminUser.email,
+            id: coOwner.coOwnerUser.id.toString(),
+            name: coOwner.coOwnerUser.name || "Unknown User",
+            email: coOwner.coOwnerUser.email,
         })),
         files: [],
         reports: (project.reports || []).map((report) => ({
@@ -82,7 +82,7 @@ export async function getProjectsByUserIdPaginated({
                 coOwners: {
                     select: {
                         id: true,
-                        adminUser: {
+                        coOwnerUser: {
                             select: { id: true, name: true, email: true },
                         },
                     },

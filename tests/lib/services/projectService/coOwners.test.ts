@@ -81,7 +81,7 @@ describe("updateProjectCoOwners", () => {
         const result = await updateProjectCoOwners({
             projectId: 10,
             allowCoOwners: false,
-            adminUserIds: [3],
+            coOwnerUserIds: [3],
             assignedById: 1,
         });
 
@@ -97,7 +97,7 @@ describe("updateProjectCoOwners", () => {
         expect(tx.projectCoOwner.deleteMany).toHaveBeenCalledWith({
             where: {
                 projectId: 10,
-                adminUserId: { notIn: [] },
+                coOwnerUserId: { notIn: [] },
             },
         });
         expect(tx.projectCoOwner.upsert).not.toHaveBeenCalled();
@@ -111,7 +111,7 @@ describe("updateProjectCoOwners", () => {
             updateProjectCoOwners({
                 projectId: 10,
                 allowCoOwners: true,
-                adminUserIds: [3, 4],
+                coOwnerUserIds: [3, 4],
                 assignedById: 1,
             }),
         ).rejects.toThrow("INVALID_CO_OWNER_USER");
@@ -119,11 +119,11 @@ describe("updateProjectCoOwners", () => {
         expect(tx.projectCoOwner.deleteMany).not.toHaveBeenCalled();
     });
 
-    it("upserts unique admin co-owners and skips the primary owner", async () => {
+    it("upserts unique co-owners and skips the primary owner", async () => {
         tx.user.findMany.mockResolvedValue([{ id: 2 }, { id: 3 }]);
         tx.projectCoOwner.findMany.mockResolvedValue([
             {
-                adminUser: {
+                coOwnerUser: {
                     id: 3,
                     name: "แอดมินร่วม",
                     email: "co@test.com",
@@ -134,22 +134,22 @@ describe("updateProjectCoOwners", () => {
         const result = await updateProjectCoOwners({
             projectId: 10,
             allowCoOwners: true,
-            adminUserIds: [2, 3, 3],
+            coOwnerUserIds: [2, 3, 3],
             assignedById: 1,
         });
 
         expect(tx.projectCoOwner.deleteMany).toHaveBeenCalledWith({
             where: {
                 projectId: 10,
-                adminUserId: { notIn: [2, 3] },
+                coOwnerUserId: { notIn: [2, 3] },
             },
         });
         expect(tx.projectCoOwner.upsert).toHaveBeenCalledTimes(1);
         expect(tx.projectCoOwner.upsert).toHaveBeenCalledWith({
             where: {
-                projectId_adminUserId: {
+                projectId_coOwnerUserId: {
                     projectId: 10,
-                    adminUserId: 3,
+                    coOwnerUserId: 3,
                 },
             },
             update: {
@@ -157,7 +157,7 @@ describe("updateProjectCoOwners", () => {
             },
             create: {
                 projectId: 10,
-                adminUserId: 3,
+                coOwnerUserId: 3,
                 assignedById: 1,
             },
         });
@@ -189,13 +189,13 @@ describe("updateProjectCoOwners", () => {
             id: 10,
             name: "โครงการทดสอบ",
             userId: 2,
-            coOwners: [{ adminUserId: 1 }],
+            coOwners: [{ coOwnerUserId: 1 }],
         });
         tx.user.findMany.mockResolvedValue([{ id: 1 }]);
         tx.notificationRecipient.findMany.mockResolvedValue([]);
         tx.projectCoOwner.findMany.mockResolvedValue([
             {
-                adminUser: {
+                coOwnerUser: {
                     id: 1,
                     name: "แอดมินหลัก",
                     email: "admin@test.com",
@@ -206,7 +206,7 @@ describe("updateProjectCoOwners", () => {
         await updateProjectCoOwners({
             projectId: 10,
             allowCoOwners: true,
-            adminUserIds: [1],
+            coOwnerUserIds: [1],
             assignedById: 1,
         });
 
@@ -239,13 +239,13 @@ describe("updateProjectCoOwners", () => {
             id: 10,
             name: "โครงการทดสอบ",
             userId: 2,
-            coOwners: [{ adminUserId: 3 }],
+            coOwners: [{ coOwnerUserId: 3 }],
         });
         tx.user.findMany.mockResolvedValue([{ id: 3 }]);
         tx.notificationRecipient.findMany.mockResolvedValue([]);
         tx.projectCoOwner.findMany.mockResolvedValue([
             {
-                adminUser: {
+                coOwnerUser: {
                     id: 3,
                     name: "ผู้ใช้ร่วม",
                     email: "member@test.com",
@@ -256,7 +256,7 @@ describe("updateProjectCoOwners", () => {
         await updateProjectCoOwners({
             projectId: 10,
             allowCoOwners: true,
-            adminUserIds: [3],
+            coOwnerUserIds: [3],
             assignedById: 1,
         });
 

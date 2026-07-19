@@ -34,7 +34,7 @@ export const PROJECT_INCLUDE = {
     coOwners: {
         select: {
             id: true,
-            adminUser: {
+            coOwnerUser: {
                 select: USER_PUBLIC_SELECT,
             },
         },

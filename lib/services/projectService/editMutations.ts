@@ -54,7 +54,7 @@ export async function updateProjectWithAudit(
                     name: true,
                     description: true,
                     userId: true,
-                    coOwners: { select: { adminUserId: true } },
+                    coOwners: { select: { coOwnerUserId: true } },
                 },
             });
 
@@ -134,7 +134,7 @@ export async function deleteProjectWithAudit(
                 name: true,
                 description: true,
                 userId: true,
-                coOwners: { select: { adminUserId: true } },
+                coOwners: { select: { coOwnerUserId: true } },
             },
         });
 

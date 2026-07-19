@@ -11,7 +11,7 @@ export function buildProjectAccessWhere(
             { userId },
             {
                 allowCoOwners: true,
-                coOwners: { some: { adminUserId: userId } },
+                coOwners: { some: { coOwnerUserId: userId } },
             },
         ],
     };
@@ -26,7 +26,7 @@ export function buildUserProjectsAccessWhere(
             { userId },
             {
                 allowCoOwners: true,
-                coOwners: { some: { adminUserId: userId } },
+                coOwners: { some: { coOwnerUserId: userId } },
             },
         ],
     };

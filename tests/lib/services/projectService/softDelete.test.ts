@@ -143,7 +143,7 @@ describe("deleteProjectWithAudit", () => {
                     { userId: 7 },
                     {
                         allowCoOwners: true,
-                        coOwners: { some: { adminUserId: 7 } },
+                        coOwners: { some: { coOwnerUserId: 7 } },
                     },
                 ],
             },
@@ -153,7 +153,7 @@ describe("deleteProjectWithAudit", () => {
                 description: true,
                 userId: true,
                 coOwners: {
-                    select: { adminUserId: true },
+                    select: { coOwnerUserId: true },
                 },
             },
         });

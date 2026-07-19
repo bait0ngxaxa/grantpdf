@@ -25,7 +25,7 @@ export const ADMIN_REPORT_SELECT = {
     project: {
         select: {
             name: true,
-            coOwners: { select: { adminUserId: true } },
+            coOwners: { select: { coOwnerUserId: true } },
             program: { select: { name: true } },
         },
     },

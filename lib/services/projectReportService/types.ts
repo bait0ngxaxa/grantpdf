@@ -52,7 +52,7 @@ export interface RawProjectReport {
     };
     project?: {
         name: string;
-        coOwners?: Array<{ adminUserId: number }>;
+        coOwners?: Array<{ coOwnerUserId: number }>;
         program?: {
             name: string;
         } | null;

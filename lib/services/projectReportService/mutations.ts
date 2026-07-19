@@ -167,7 +167,7 @@ export async function updateProjectReportStatusWithAudit({
             ownerUserId: rawReport.userId,
             coOwnerUserIds:
                 rawReport.project?.coOwners?.map(
-                    (coOwner) => coOwner.adminUserId,
+                    (coOwner) => coOwner.coOwnerUserId,
                 ) ?? [],
             actorUserId: reviewedBy,
         });

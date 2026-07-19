@@ -62,28 +62,28 @@ describe("project schema validation", () => {
         const result = updateProjectCoOwnersSchema.safeParse({
             projectId: 1,
             allowCoOwners: true,
-            adminUserIds: [2, 3],
+            coOwnerUserIds: [2, 3],
         });
 
         expect(result.success).toBe(true);
     });
 
-    it("rejects invalid project co-owner admin ids", () => {
+    it("rejects invalid project co-owner user ids", () => {
         const result = updateProjectCoOwnersSchema.safeParse({
             projectId: 1,
             allowCoOwners: true,
-            adminUserIds: [0],
+            coOwnerUserIds: [0],
         });
 
         expect(result.success).toBe(false);
         expect(result.error?.issues[0]?.message).toBe("รหัสผู้ใช้ไม่ถูกต้อง");
     });
 
-    it("rejects enabled project co-owners without selected admins", () => {
+    it("rejects enabled project co-owners without selected users", () => {
         const result = updateProjectCoOwnersSchema.safeParse({
             projectId: 1,
             allowCoOwners: true,
-            adminUserIds: [],
+            coOwnerUserIds: [],
         });
 
         expect(result.success).toBe(false);
@@ -92,11 +92,11 @@ describe("project schema validation", () => {
         );
     });
 
-    it("accepts disabled project co-owners without selected admins", () => {
+    it("accepts disabled project co-owners without selected users", () => {
         const result = updateProjectCoOwnersSchema.safeParse({
             projectId: 1,
             allowCoOwners: false,
-            adminUserIds: [],
+            coOwnerUserIds: [],
         });
 
         expect(result.success).toBe(true);

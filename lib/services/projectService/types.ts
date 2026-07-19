@@ -33,7 +33,7 @@ export interface RawProject {
 
 export interface RawProjectCoOwner {
     id: bigint;
-    adminUser: {
+    coOwnerUser: {
         id: bigint;
         name: string | null;
         email: string;
@@ -110,6 +110,6 @@ export interface ProjectAuditContext {
 export interface UpdateProjectCoOwnersParams {
     projectId: number;
     allowCoOwners: boolean;
-    adminUserIds: number[];
+    coOwnerUserIds: number[];
     assignedById: number;
 }

@@ -7,11 +7,11 @@ type ProjectWithFiles = Project & { files: unknown[]; _count: { files: number } 
 
 export function getProjectDashboardUserIds(project: {
     userId: number;
-    coOwners?: Array<{ adminUserId: number }>;
+    coOwners?: Array<{ coOwnerUserId: number }>;
 }): number[] {
     return [
         project.userId,
-        ...(project.coOwners?.map((coOwner) => coOwner.adminUserId) ?? []),
+        ...(project.coOwners?.map((coOwner) => coOwner.coOwnerUserId) ?? []),
     ];
 }
 

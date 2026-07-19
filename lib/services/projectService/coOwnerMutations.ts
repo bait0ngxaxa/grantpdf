@@ -63,17 +63,17 @@ async function getNotifiedCoOwnerAssignmentUserIds(
 
 async function assertCoOwnerUsersExist(
     tx: Prisma.TransactionClient,
-    requestedAdminIds: number[],
+    requestedCoOwnerIds: number[],
 ): Promise<void> {
-    if (requestedAdminIds.length === 0) return;
+    if (requestedCoOwnerIds.length === 0) return;
 
     const users = await tx.user.findMany({
-        where: { id: { in: requestedAdminIds } },
+        where: { id: { in: requestedCoOwnerIds } },
         select: { id: true },
     });
     const validUserIds = new Set(users.map((user) => user.id));
 
-    if (requestedAdminIds.some((id) => !validUserIds.has(id))) {
+    if (requestedCoOwnerIds.some((id) => !validUserIds.has(id))) {
         throw new Error("INVALID_CO_OWNER_USER");
     }
 }
@@ -81,7 +81,7 @@ async function assertCoOwnerUsersExist(
 export async function updateProjectCoOwners({
     projectId,
     allowCoOwners,
-    adminUserIds,
+    coOwnerUserIds,
     assignedById,
 }: UpdateProjectCoOwnersParams): Promise<{
     allowCoOwners: boolean;
@@ -95,7 +95,7 @@ export async function updateProjectCoOwners({
         throw new Error("Invalid assignedById");
     }
 
-    const requestedAdminIds = allowCoOwners ? uniquePositiveIds(adminUserIds) : [];
+    const requestedCoOwnerIds = allowCoOwners ? uniquePositiveIds(coOwnerUserIds) : [];
 
     const result = await prisma.$transaction(async (tx) => {
         const project = await tx.project.findUnique({
@@ -104,7 +104,7 @@ export async function updateProjectCoOwners({
                 id: true,
                 name: true,
                 userId: true,
-                coOwners: { select: { adminUserId: true } },
+                coOwners: { select: { coOwnerUserId: true } },
             },
         });
 
@@ -112,13 +112,13 @@ export async function updateProjectCoOwners({
             throw new Error("PROJECT_NOT_FOUND");
         }
 
-        await assertCoOwnerUsersExist(tx, requestedAdminIds);
+        await assertCoOwnerUsersExist(tx, requestedCoOwnerIds);
 
-        const previousAdminIds = new Set(
-            (project.coOwners ?? []).map((coOwner) => coOwner.adminUserId),
+        const previousCoOwnerIds = new Set(
+            (project.coOwners ?? []).map((coOwner) => coOwner.coOwnerUserId),
         );
         const assignableCoOwnerIds = getAssignableCoOwnerIds(
-            requestedAdminIds,
+            requestedCoOwnerIds,
             project.userId,
         );
         const notifiedCoOwnerUserIds =
@@ -129,7 +129,7 @@ export async function updateProjectCoOwners({
             );
         const notificationTargetIds = getCoOwnerNotificationTargetIds(
             assignableCoOwnerIds,
-            previousAdminIds,
+            previousCoOwnerIds,
             notifiedCoOwnerUserIds,
         );
         const assignedAt = new Date();
@@ -143,24 +143,24 @@ export async function updateProjectCoOwners({
         await tx.projectCoOwner.deleteMany({
             where: {
                 projectId,
-                adminUserId: { notIn: requestedAdminIds },
+                coOwnerUserId: { notIn: requestedCoOwnerIds },
             },
         });
 
-        for (const adminUserId of requestedAdminIds) {
-            if (adminUserId === project.userId) continue;
+        for (const coOwnerUserId of requestedCoOwnerIds) {
+            if (coOwnerUserId === project.userId) continue;
 
             await tx.projectCoOwner.upsert({
-                where: { projectId_adminUserId: { projectId, adminUserId } },
+                where: { projectId_coOwnerUserId: { projectId, coOwnerUserId } },
                 update: { assignedById },
-                create: { projectId, adminUserId, assignedById },
+                create: { projectId, coOwnerUserId, assignedById },
             });
         }
 
         const coOwners = await tx.projectCoOwner.findMany({
             where: { projectId },
             select: {
-                adminUser: {
+                coOwnerUser: {
                     select: { id: true, name: true, email: true },
                 },
             },
@@ -178,13 +178,13 @@ export async function updateProjectCoOwners({
         return {
             allowCoOwners,
             coOwners: coOwners.map((coOwner) => ({
-                id: coOwner.adminUser.id.toString(),
-                name: coOwner.adminUser.name || "Unknown User",
-                email: coOwner.adminUser.email,
+                id: coOwner.coOwnerUser.id.toString(),
+                name: coOwner.coOwnerUser.name || "Unknown User",
+                email: coOwner.coOwnerUser.email,
             })),
             affectedUserIds: [
                 ...getProjectDashboardUserIds(project),
-                ...requestedAdminIds,
+                ...requestedCoOwnerIds,
             ],
         };
     });

@@ -31,15 +31,15 @@ interface ProjectStatusModalProps {
   selectedProgramId: string;
   setSelectedProgramId: (programId: string) => void;
   programs: ProgramSummary[];
-  adminOwnerOptions: ProjectCoOwnerSummary[];
+  coOwnerUserOptions: ProjectCoOwnerSummary[];
   isProgramsLoading: boolean;
-  isAdminOwnersLoading: boolean;
+  isCoOwnerUsersLoading: boolean;
   programsError: string | null;
-  adminOwnersError: string | null;
+  coOwnerUsersError: string | null;
   allowCoOwners: boolean;
   setAllowCoOwners: (allowCoOwners: boolean) => void;
-  selectedCoOwnerAdminIds: string[];
-  setSelectedCoOwnerAdminIds: (adminUserIds: string[]) => void;
+  selectedCoOwnerUserIds: string[];
+  setSelectedCoOwnerUserIds: (coOwnerUserIds: string[]) => void;
   isUpdatingStatus: boolean;
   closeStatusModal: () => void;
   handleUpdateProjectStatus: () => void;
@@ -56,15 +56,15 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
   selectedProgramId,
   setSelectedProgramId,
   programs,
-  adminOwnerOptions,
+  coOwnerUserOptions,
   isProgramsLoading,
-  isAdminOwnersLoading,
+  isCoOwnerUsersLoading,
   programsError,
-  adminOwnersError,
+  coOwnerUsersError,
   allowCoOwners,
   setAllowCoOwners,
-  selectedCoOwnerAdminIds,
-  setSelectedCoOwnerAdminIds,
+  selectedCoOwnerUserIds,
+  setSelectedCoOwnerUserIds,
   isUpdatingStatus,
   closeStatusModal,
   handleUpdateProjectStatus,
@@ -77,26 +77,26 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
   );
   const programAccent = selectedProgram ? getProgramAccent(selectedProgram) : null;
   const selectedCoOwnerIdSet = React.useMemo(
-    () => new Set(selectedCoOwnerAdminIds),
-    [selectedCoOwnerAdminIds],
+    () => new Set(selectedCoOwnerUserIds),
+    [selectedCoOwnerUserIds],
   );
   const primaryOwnerId = selectedProjectForStatus?.userId ?? "";
   const availableCoOwnerOptions = React.useMemo(
     () =>
-      adminOwnerOptions.filter(
+      coOwnerUserOptions.filter(
         (user) => user.id !== primaryOwnerId,
       ),
-    [adminOwnerOptions, primaryOwnerId],
+    [coOwnerUserOptions, primaryOwnerId],
   );
   const selectedCoOwnerOptions = React.useMemo(() => {
     const coOwnerMap = new Map(
       availableCoOwnerOptions.map((user) => [user.id, user]),
     );
 
-    return selectedCoOwnerAdminIds
+    return selectedCoOwnerUserIds
       .map((id) => coOwnerMap.get(id))
       .filter((user): user is ProjectCoOwnerSummary => user !== undefined);
-  }, [availableCoOwnerOptions, selectedCoOwnerAdminIds]);
+  }, [availableCoOwnerOptions, selectedCoOwnerUserIds]);
   const filteredCoOwnerOptions = React.useMemo(() => {
     const query = coOwnerSearch.trim().toLowerCase();
 
@@ -118,11 +118,11 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
   const hiddenCoOwnerCount =
     filteredCoOwnerOptions.length - visibleCoOwnerOptions.length;
 
-  const toggleCoOwner = (adminUserId: string): void => {
-    setSelectedCoOwnerAdminIds(
-      selectedCoOwnerIdSet.has(adminUserId)
-        ? selectedCoOwnerAdminIds.filter((id) => id !== adminUserId)
-        : [...selectedCoOwnerAdminIds, adminUserId],
+  const toggleCoOwner = (coOwnerUserId: string): void => {
+    setSelectedCoOwnerUserIds(
+      selectedCoOwnerIdSet.has(coOwnerUserId)
+        ? selectedCoOwnerUserIds.filter((id) => id !== coOwnerUserId)
+        : [...selectedCoOwnerUserIds, coOwnerUserId],
     );
   };
 
@@ -141,7 +141,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
 
   const hasCoOwnerChanges =
     allowCoOwners !== selectedProjectForStatus?.allowCoOwners ||
-    selectedCoOwnerAdminIds.join(",") !==
+    selectedCoOwnerUserIds.join(",") !==
       (selectedProjectForStatus?.coOwners || [])
         .map((coOwner) => coOwner.id)
         .join(",");
@@ -152,7 +152,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     selectedProgramId !== (selectedProjectForStatus?.programId || "") ||
     hasCoOwnerChanges;
   const coOwnerSelectionError =
-    allowCoOwners && selectedCoOwnerAdminIds.length === 0
+    allowCoOwners && selectedCoOwnerUserIds.length === 0
       ? "กรุณาเลือกเจ้าของร่วมอย่างน้อย 1 คน"
       : null;
 
@@ -343,13 +343,13 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                 <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-600 dark:bg-slate-800/60">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      เลือกแล้ว {selectedCoOwnerAdminIds.length} คน
+                      เลือกแล้ว {selectedCoOwnerUserIds.length} คน
                     </span>
-                    {selectedCoOwnerAdminIds.length > 0 && (
+                    {selectedCoOwnerUserIds.length > 0 && (
                       <button
                         type="button"
                         disabled={!allowCoOwners}
-                        onClick={() => setSelectedCoOwnerAdminIds([])}
+                        onClick={() => setSelectedCoOwnerUserIds([])}
                         className="text-xs font-medium text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-blue-300 dark:hover:text-blue-200"
                       >
                         ล้างทั้งหมด
@@ -365,8 +365,8 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                           type="button"
                           disabled={!allowCoOwners}
                           onClick={() =>
-                            setSelectedCoOwnerAdminIds(
-                              selectedCoOwnerAdminIds.filter(
+                            setSelectedCoOwnerUserIds(
+                              selectedCoOwnerUserIds.filter(
                                 (id) => id !== user.id,
                               ),
                             )
@@ -389,15 +389,15 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                       placeholder="ค้นหาชื่อหรืออีเมล"
                       disabled={
                         !allowCoOwners ||
-                        isAdminOwnersLoading ||
-                        adminOwnerOptions.length === 0
+                        isCoOwnerUsersLoading ||
+                        coOwnerUserOptions.length === 0
                       }
                       className="min-h-11 w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:disabled:bg-slate-800"
                     />
                   </label>
 
                   <div className="max-h-44 space-y-1 overflow-y-auto lg:max-h-52">
-                  {isAdminOwnersLoading ? (
+                  {isCoOwnerUsersLoading ? (
                     <div className="flex items-center gap-2 px-2 py-3 text-xs text-slate-500 dark:text-slate-400">
                       <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />
                       กำลังโหลดรายชื่อผู้ใช้…
@@ -411,9 +411,9 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                       ไม่พบผู้ใช้ที่ตรงกับคำค้นหา
                     </p>
                   ) : (
-                    visibleCoOwnerOptions.map((admin) => (
+                    visibleCoOwnerOptions.map((user) => (
                         <label
-                          key={admin.id}
+                          key={user.id}
                           className={cn(
                             "flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm transition-colors",
                             allowCoOwners
@@ -424,16 +424,16 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                           <input
                             type="checkbox"
                             disabled={!allowCoOwners}
-                            checked={selectedCoOwnerIdSet.has(admin.id)}
-                            onChange={() => toggleCoOwner(admin.id)}
+                            checked={selectedCoOwnerIdSet.has(user.id)}
+                            onChange={() => toggleCoOwner(user.id)}
                             className="h-4 w-4 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500"
                           />
                           <span className="min-w-0">
                             <span className="block truncate font-medium text-slate-700 dark:text-slate-200">
-                              {admin.name}
+                              {user.name}
                             </span>
                             <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
-                              {admin.email}
+                              {user.email}
                             </span>
                           </span>
                         </label>
@@ -447,9 +447,9 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                     )}
                   </div>
                 </div>
-                {adminOwnersError && (
+                {coOwnerUsersError && (
                   <p className="mt-2 text-xs text-red-500">
-                    {adminOwnersError}
+                    {coOwnerUsersError}
                   </p>
                 )}
                 {coOwnerSelectionError && (
@@ -492,7 +492,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                 disabled={
                   isUpdatingStatus ||
                   !!programsError ||
-                  !!adminOwnersError ||
+                  !!coOwnerUsersError ||
                   !!coOwnerSelectionError ||
                   !hasProjectChanges
                 }

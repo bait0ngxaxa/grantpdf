@@ -21,7 +21,7 @@ export async function GET(): Promise<NextResponse> {
 
         const users = await getCoOwnerUserOptions();
 
-        return NextResponse.json({ admins: users });
+        return NextResponse.json({ users });
     } catch (error) {
         console.error("Error fetching co-owner user options:", error);
         return publicErrorResponse(error, "ไม่สามารถดึงรายชื่อผู้ใช้ได้");
@@ -49,11 +49,11 @@ export async function PUT(req: Request): Promise<NextResponse> {
             return unauthorizedResponse();
         }
 
-        const { projectId, allowCoOwners, adminUserIds } = parsed.data;
+        const { projectId, allowCoOwners, coOwnerUserIds } = parsed.data;
         const result = await updateProjectCoOwners({
             projectId,
             allowCoOwners,
-            adminUserIds,
+            coOwnerUserIds,
             assignedById,
         });
 
@@ -68,7 +68,7 @@ export async function PUT(req: Request): Promise<NextResponse> {
             details: {
                 projectId,
                 allowCoOwners,
-                adminUserIds: result.coOwners.map((coOwner) => coOwner.id),
+                coOwnerUserIds: result.coOwners.map((coOwner) => coOwner.id),
             },
         });
 

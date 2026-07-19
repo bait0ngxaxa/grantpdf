@@ -203,7 +203,7 @@ describe("auditLogFormatters", () => {
             formatAuditDetails("ADMIN_PROJECT_CO_OWNER_UPDATE", {
                 projectId: 12,
                 allowCoOwners: true,
-                adminUserIds: ["2", "3"],
+                coOwnerUserIds: ["2", "3"],
             }),
         ).toBe(
             "อัปเดตเจ้าของร่วมโครงการ | โครงการ #12 | เปิดใช้งานเจ้าของร่วม | ผู้ใช้ที่มอบหมาย: 2, 3",
