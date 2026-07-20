@@ -18,7 +18,6 @@ vi.mock("@/lib/server/db", () => ({
 
 vi.mock("@/lib/services/sessionCacheService", () => ({
     getCachedGrantSession: vi.fn(),
-    setCachedGrantSession: vi.fn(),
 }));
 
 import { cookies } from "next/headers";
@@ -26,16 +25,12 @@ import { prisma } from "@/lib/server/db";
 import { verifyAccessToken } from "@/lib/server/auth/accessToken";
 import { SESSION } from "@/lib/shared/constants";
 import { getGrantSession } from "@/lib/server/auth/grantSession";
-import {
-    getCachedGrantSession,
-    setCachedGrantSession,
-} from "@/lib/services/sessionCacheService";
+import { getCachedGrantSession } from "@/lib/services/sessionCacheService";
 
 const mockedCookies = vi.mocked(cookies);
 const mockedVerifyAccessToken = vi.mocked(verifyAccessToken);
 const mockedFindUnique = vi.mocked(prisma.authSession.findUnique);
 const mockedGetCachedGrantSession = vi.mocked(getCachedGrantSession);
-const mockedSetCachedGrantSession = vi.mocked(setCachedGrantSession);
 
 function mockCookieStore(token: string | null): void {
     mockedCookies.mockResolvedValue({
@@ -134,15 +129,9 @@ describe("getGrantSession", () => {
                 sessionFamilyId: "family-1",
             },
         });
-        expect(mockedSetCachedGrantSession).toHaveBeenCalledWith(
-            expect.objectContaining({
-                sessionId: "session-1",
-                familyId: "family-1",
-            })
-        );
     });
 
-    it("returns cached session without querying DB when cache is active", async () => {
+    it("rejects a stale cached session when the DB user is deleted", async () => {
         mockCookieStore("access-token");
         mockedVerifyAccessToken.mockResolvedValue({
             userId: 7,
@@ -151,12 +140,27 @@ describe("getGrantSession", () => {
             sessionVersion: 2,
         });
         mockedGetCachedGrantSession.mockResolvedValue(buildSessionRecord());
+        mockedFindUnique.mockResolvedValue(
+            buildSessionRecord({
+                user: {
+                    id: 7,
+                    name: "Grant User",
+                    email: "grant@example.com",
+                    role: "admin",
+                    status: "deleted",
+                    sessionVersion: 3,
+                },
+            }) as never
+        );
 
         const result = await getGrantSession();
 
-        expect(mockedFindUnique).not.toHaveBeenCalled();
-        expect(mockedSetCachedGrantSession).not.toHaveBeenCalled();
-        expect(result?.user.sessionId).toBe("session-1");
+        expect(mockedFindUnique).toHaveBeenCalledWith({
+            where: { sessionId: "session-1" },
+            select: expect.any(Object),
+        });
+        expect(mockedGetCachedGrantSession).not.toHaveBeenCalled();
+        expect(result).toBeNull();
     });
 
     it("returns null for revoked DB session", async () => {

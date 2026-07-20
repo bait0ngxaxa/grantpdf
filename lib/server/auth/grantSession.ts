@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/server/db";
 import { SESSION, USER_LIFECYCLE_STATUS } from "@/lib/shared/constants";
 import {
@@ -6,13 +7,27 @@ import {
     type AccessTokenPayload,
 } from "@/lib/server/auth/accessToken";
 import type { Session } from "@/lib/server/auth/types";
-import {
-    getCachedGrantSession,
-    setCachedGrantSession,
-    type CachedGrantSessionRecord,
-} from "@/lib/services/sessionCacheService";
+const GRANT_SESSION_SELECT = {
+    sessionId: true,
+    familyId: true,
+    expiresAt: true,
+    revokedAt: true,
+    sessionVersion: true,
+    user: {
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            sessionVersion: true,
+            status: true,
+        },
+    },
+} satisfies Prisma.AuthSessionSelect;
 
-type GrantSessionRecord = CachedGrantSessionRecord;
+type GrantSessionRecord = Prisma.AuthSessionGetPayload<{
+    select: typeof GRANT_SESSION_SELECT;
+}>;
 
 function isActiveGrantSession(
     record: GrantSessionRecord,
@@ -53,36 +68,14 @@ export async function getGrantSession(): Promise<Session | null> {
         return null;
     }
 
-    const cachedRecord = await getCachedGrantSession(payload.sessionId);
-    if (cachedRecord && isActiveGrantSession(cachedRecord, payload)) {
-        return buildSession(cachedRecord);
-    }
-
     const record = await prisma.authSession.findUnique({
         where: { sessionId: payload.sessionId },
-        select: {
-            sessionId: true,
-            familyId: true,
-            expiresAt: true,
-            revokedAt: true,
-            sessionVersion: true,
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true,
-                    sessionVersion: true,
-                    status: true,
-                },
-            },
-        },
+        select: GRANT_SESSION_SELECT,
     });
 
     if (!record || !isActiveGrantSession(record, payload)) {
         return null;
     }
 
-    await setCachedGrantSession(record);
     return buildSession(record);
 }
