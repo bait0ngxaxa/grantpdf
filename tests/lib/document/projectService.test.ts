@@ -10,8 +10,13 @@ vi.mock("@/lib/services/dashboardStatsCache", () => ({
     invalidateDashboardStats: vi.fn(),
 }));
 
+vi.mock("@/lib/services/storageQuotaService", () => ({
+    reserveStorageQuota: vi.fn(),
+}));
+
 import { prisma } from "@/lib/server/db";
 import { createUserFileRecord } from "@/lib/document/projectService";
+import { reserveStorageQuota } from "@/lib/services/storageQuotaService";
 
 interface MockTransactionClient {
     project: {
@@ -19,6 +24,7 @@ interface MockTransactionClient {
     };
     user: {
         findMany: ReturnType<typeof vi.fn>;
+        updateMany: ReturnType<typeof vi.fn>;
     };
     userFile: {
         create: ReturnType<typeof vi.fn>;
@@ -35,6 +41,7 @@ function createTransactionClient(): MockTransactionClient {
         },
         user: {
             findMany: vi.fn(),
+            updateMany: vi.fn(),
         },
         userFile: {
             create: vi.fn(),
@@ -67,15 +74,19 @@ describe("createUserFileRecord", () => {
         tx.project.findUnique.mockResolvedValue({ name: "โครงการเอกสาร" });
         tx.user.findMany.mockResolvedValue([{ id: 1 }, { id: 5 }]);
         tx.notificationEvent.create.mockResolvedValue({ id: BigInt(1) });
+        vi.mocked(reserveStorageQuota).mockResolvedValue(true);
     });
 
     it("creates an admin notification when a document file is added to a project", async () => {
         const result = await createUserFileRecord(
-            7,
-            88,
-            "เอกสารโครงการ",
-            "documents/project.docx",
-            "docx",
+            {
+                userId: 7,
+                projectId: 88,
+                originalFileName: "เอกสารโครงการ",
+                storagePath: "documents/project.docx",
+                fileSize: 256,
+                extension: "docx",
+            },
         );
 
         expect(result).toEqual(
@@ -84,6 +95,10 @@ describe("createUserFileRecord", () => {
                 originalFileName: "เอกสารโครงการ.docx",
             }),
         );
+        expect(reserveStorageQuota).toHaveBeenCalledWith(7, 256, tx);
+        expect(tx.userFile.create).toHaveBeenCalledWith({
+            data: expect.objectContaining({ fileSize: BigInt(256) }),
+        });
         expect(tx.notificationEvent.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 data: expect.objectContaining({

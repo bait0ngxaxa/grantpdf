@@ -31,4 +31,8 @@ export interface FileForDeletion {
     storagePath: string;
     userId: string;
     deletionStatus: string;
+    attachmentFiles: Array<{
+        filePath: string;
+        fileSize: number;
+    }>;
 }

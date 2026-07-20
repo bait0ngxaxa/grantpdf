@@ -105,9 +105,15 @@ describe("user-docs [id] route DELETE", () => {
             userId: "1",
             originalFileName: "doc.pdf",
             storagePath: "storage/documents/doc.pdf",
+            attachmentFiles: [
+                {
+                    filePath: "storage/attachments/copied.pdf",
+                    fileSize: 128,
+                },
+            ],
         } as never);
-        mockedGetFullPathFromStoragePath.mockReturnValue(
-            "C:\\repo\\storage\\documents\\doc.pdf",
+        mockedGetFullPathFromStoragePath.mockImplementation(
+            (storagePath) => `C:\\repo\\${storagePath}`,
         );
         mockedUnlink.mockResolvedValue(undefined);
 
@@ -124,8 +130,14 @@ describe("user-docs [id] route DELETE", () => {
         expect(mockedGetFullPathFromStoragePath).toHaveBeenCalledWith(
             "storage/documents/doc.pdf",
         );
+        expect(mockedGetFullPathFromStoragePath).toHaveBeenCalledWith(
+            "storage/attachments/copied.pdf",
+        );
         expect(mockedUnlink).toHaveBeenCalledWith(
-            "C:\\repo\\storage\\documents\\doc.pdf",
+            "C:\\repo\\storage/documents/doc.pdf",
+        );
+        expect(mockedUnlink).toHaveBeenCalledWith(
+            "C:\\repo\\storage/attachments/copied.pdf",
         );
         expect(mockedMarkFileDeleting).toHaveBeenCalledWith(11);
         expect(mockedMarkFileDeleted).toHaveBeenCalledWith(11, 1);

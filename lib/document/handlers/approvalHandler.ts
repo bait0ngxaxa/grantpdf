@@ -34,6 +34,7 @@ import {
 import { SIGNATURE_UPLOAD } from "@/lib/shared/constants";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
+import { reserveStorageQuota } from "@/lib/services/storageQuotaService";
 
 const ALLOWED_SIGNATURE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
 const MAX_SIGNATURE_SIZE_BYTES = SIGNATURE_UPLOAD.MAX_SIZE_MB * 1024 * 1024;
@@ -383,11 +384,32 @@ export async function handleApprovalGeneration(
             const copiedAttachments = await copyAttachmentFiles(attachmentFiles);
 
             try {
+                const hasDocumentQuota = await reserveStorageQuota(
+                    userId,
+                    outputBuffer.byteLength,
+                    tx,
+                );
+                if (!hasDocumentQuota) {
+                    throw new Error("STORAGE_QUOTA_EXCEEDED");
+                }
+
+                const attachmentBytes = copiedAttachments.files.reduce(
+                    (total, file) => total + file.fileSize,
+                    0,
+                );
+                if (
+                    attachmentBytes > 0 &&
+                    !(await reserveStorageQuota(userId, attachmentBytes, tx))
+                ) {
+                    throw new Error("STORAGE_QUOTA_EXCEEDED");
+                }
+
                 const savedFile = await tx.userFile.create({
                     data: {
                         originalFileName: projectName + ".docx",
                         storagePath,
                         fileExtension: "docx",
+                        fileSize: BigInt(outputBuffer.byteLength),
                         userId,
                         projectId: projectResult.id,
                     },

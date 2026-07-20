@@ -178,12 +178,15 @@ export async function handleSummaryGeneration(
         "xlsx",
         async (storagePath: string, tx): Promise<number> => {
             const savedFile = await createUserFileRecord(
-                userId,
-                projectResult.id,
-                fileName,
-                storagePath,
-                "xlsx",
-                tx,
+                {
+                    userId,
+                    projectId: projectResult.id,
+                    originalFileName: fileName,
+                    storagePath,
+                    fileSize: outputBuffer.byteLength,
+                    extension: "xlsx",
+                    transaction: tx,
+                },
             );
             return savedFile.id;
         },

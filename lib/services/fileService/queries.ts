@@ -166,6 +166,12 @@ export async function getFileForDeletion(
             storagePath: true,
             userId: true,
             deletionStatus: true,
+            attachmentFiles: {
+                select: {
+                    filePath: true,
+                    fileSize: true,
+                },
+            },
         },
     });
 
@@ -177,6 +183,7 @@ export async function getFileForDeletion(
         storagePath: file.storagePath,
         userId: file.userId.toString(),
         deletionStatus: file.deletionStatus,
+        attachmentFiles: file.attachmentFiles,
     };
 }
 
@@ -204,7 +211,10 @@ export async function markFileDeleted(id: number, userId: number): Promise<void>
                 id,
                 deletionStatus: FILE_DELETION_STATUS.DELETING,
             },
-            select: { fileSize: true },
+            select: {
+                fileSize: true,
+                attachmentFiles: { select: { fileSize: true } },
+            },
         });
         if (!file) return false;
 
@@ -214,14 +224,20 @@ export async function markFileDeleted(id: number, userId: number): Promise<void>
         });
         if (result.count !== 1) return false;
 
-        if (file.fileSize > BigInt(0)) {
+        const attachmentBytes = file.attachmentFiles.reduce(
+            (total, attachment) => total + BigInt(attachment.fileSize),
+            BigInt(0),
+        );
+        const reservedBytes = file.fileSize + attachmentBytes;
+
+        if (reservedBytes > BigInt(0)) {
             const released = await tx.user.updateMany({
                 where: {
                     id: userId,
-                    storageUsedBytes: { gte: file.fileSize },
+                    storageUsedBytes: { gte: reservedBytes },
                 },
                 data: {
-                    storageUsedBytes: { decrement: file.fileSize },
+                    storageUsedBytes: { decrement: reservedBytes },
                 },
             });
             if (released.count !== 1) {

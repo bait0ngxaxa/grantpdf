@@ -124,12 +124,15 @@ export async function handleContractGeneration(
         "docx",
         async (storagePath: string, tx): Promise<number> => {
             const savedFile = await createUserFileRecord(
-                userId,
-                projectResult.id,
-                fileName,
-                storagePath,
-                "docx",
-                tx,
+                {
+                    userId,
+                    projectId: projectResult.id,
+                    originalFileName: fileName,
+                    storagePath,
+                    fileSize: outputBuffer.byteLength,
+                    extension: "docx",
+                    transaction: tx,
+                },
             );
             return savedFile.id;
         },

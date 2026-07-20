@@ -57,8 +57,16 @@ export async function DELETE(
             );
         }
 
-        if (document.storagePath) {
-            const fullPath = getFullPathFromStoragePath(document.storagePath);
+        const storagePaths = new Set([
+            document.storagePath,
+            ...(document.attachmentFiles ?? []).map(
+                (attachment) => attachment.filePath,
+            ),
+        ]);
+        for (const storagePath of storagePaths) {
+            if (!storagePath) continue;
+
+            const fullPath = getFullPathFromStoragePath(storagePath);
             try {
                 await unlink(fullPath);
             } catch (error) {

@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
     copyFile: vi.fn(),
     stat: vi.fn(),
     unlink: vi.fn(),
+    reserveStorageQuota: vi.fn(),
 }));
 
 vi.mock("@/lib/server/db", () => ({
@@ -90,6 +91,10 @@ vi.mock("@/lib/services/notificationEventService", () => ({
     notifyProjectDocumentUploaded: vi.fn(),
 }));
 
+vi.mock("@/lib/services/storageQuotaService", () => ({
+    reserveStorageQuota: mocks.reserveStorageQuota,
+}));
+
 import { prisma } from "@/lib/server/db";
 import { saveDocumentToStorage } from "@/lib/document";
 import { handleApprovalGeneration } from "@/lib/document/handlers/approvalHandler";
@@ -120,6 +125,7 @@ describe("approval handler attachment storage", () => {
         mocks.stat.mockResolvedValue({ size: 128 } as never);
         mocks.copyFile.mockResolvedValue(undefined);
         mocks.unlink.mockResolvedValue(undefined);
+        mocks.reserveStorageQuota.mockResolvedValue(true);
         mocks.userFileCreate.mockResolvedValue({
             id: 99,
             originalFileName: "โครงการทดสอบ.docx",
@@ -179,6 +185,21 @@ describe("approval handler attachment storage", () => {
                     filePath: "storage/attachments/copied-source.pdf",
                 }),
             ],
+        });
+        expect(mocks.reserveStorageQuota).toHaveBeenCalledWith(
+            1,
+            1,
+            expect.objectContaining({
+                userFile: expect.objectContaining({ create: mocks.userFileCreate }),
+            }),
+        );
+        expect(mocks.reserveStorageQuota).toHaveBeenCalledWith(
+            1,
+            128,
+            expect.any(Object),
+        );
+        expect(mocks.userFileCreate).toHaveBeenCalledWith({
+            data: expect.objectContaining({ fileSize: BigInt(1) }),
         });
     });
 

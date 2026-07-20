@@ -10,6 +10,17 @@ import {
 import type { ProjectResult } from "./types";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
+import { reserveStorageQuota } from "@/lib/services/storageQuotaService";
+
+interface CreateUserFileRecordInput {
+    userId: number;
+    projectId: number;
+    originalFileName: string;
+    storagePath: string;
+    fileSize: number;
+    extension?: string;
+    transaction?: Prisma.TransactionClient;
+}
 
 /**
  * Find or create a project for document generation.
@@ -109,15 +120,13 @@ export function readProgramIdFromForm(formData: FormData): number | null {
  * Create UserFile record in database.
  */
 export async function createUserFileRecord(
-    userId: number,
-    projectId: number,
-    originalFileName: string,
-    storagePath: string,
-    extension: string = "docx",
-    transaction?: Prisma.TransactionClient,
+    input: CreateUserFileRecordInput,
 ): Promise<{ id: number }> {
-    const trimmedFileName = originalFileName.trim();
-    const normalizedExtension = extension.trim().replace(/^\./, "").toLowerCase();
+    const trimmedFileName = input.originalFileName.trim();
+    const normalizedExtension = (input.extension ?? "docx")
+        .trim()
+        .replace(/^\./, "")
+        .toLowerCase();
 
     if (!trimmedFileName) {
         throw new Error("DOCUMENT_FILE_NAME_REQUIRED");
@@ -136,27 +145,37 @@ export async function createUserFileRecord(
     const persist = async (
         tx: Prisma.TransactionClient,
     ): Promise<{ id: number }> => {
+        const hasStorageQuota = await reserveStorageQuota(
+            input.userId,
+            input.fileSize,
+            tx,
+        );
+        if (!hasStorageQuota) {
+            throw new Error("STORAGE_QUOTA_EXCEEDED");
+        }
+
         const createdFile = await tx.userFile.create({
             data: {
                 originalFileName: fileNameWithExt,
-                storagePath,
+                storagePath: input.storagePath,
                 fileExtension: normalizedExtension,
-                userId,
-                projectId,
+                fileSize: BigInt(input.fileSize),
+                userId: input.userId,
+                projectId: input.projectId,
             },
         });
         await notifyProjectDocumentUploaded(tx, {
             fileId: createdFile.id,
-            projectId,
+            projectId: input.projectId,
             fileName: createdFile.originalFileName,
-            actorUserId: userId,
+            actorUserId: input.userId,
         });
         return createdFile;
     };
 
-    if (transaction) return persist(transaction);
+    if (input.transaction) return persist(input.transaction);
 
     const userFile = await prisma.$transaction(persist);
-    await invalidateDashboardStats([userId]);
+    await invalidateDashboardStats([input.userId]);
     return userFile;
 }

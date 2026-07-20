@@ -68,14 +68,20 @@ describe("file deletion lifecycle", () => {
     });
 
     it("moves deleting records to deleted and invalidates dashboard stats", async () => {
-        mockedFindFirst.mockResolvedValue({ fileSize: BigInt(0) } as never);
+        mockedFindFirst.mockResolvedValue({
+            fileSize: BigInt(0),
+            attachmentFiles: [],
+        } as never);
         mockedUpdateMany.mockResolvedValue({ count: 1 });
 
         await expect(markFileDeleted(11, 7)).resolves.toBeUndefined();
 
         expect(mockedFindFirst).toHaveBeenCalledWith({
             where: { id: 11, deletionStatus: FILE_DELETION_STATUS.DELETING },
-            select: { fileSize: true },
+            select: {
+                fileSize: true,
+                attachmentFiles: { select: { fileSize: true } },
+            },
         });
         expect(mockedUpdateMany).toHaveBeenCalledWith({
             where: { id: 11, deletionStatus: FILE_DELETION_STATUS.DELETING },
@@ -86,7 +92,10 @@ describe("file deletion lifecycle", () => {
     });
 
     it("decrements the reserved quota in the same transaction", async () => {
-        mockedFindFirst.mockResolvedValue({ fileSize: BigInt(128) } as never);
+        mockedFindFirst.mockResolvedValue({
+            fileSize: BigInt(128),
+            attachmentFiles: [{ fileSize: 32 }, { fileSize: 64 }],
+        } as never);
         mockedUpdateMany.mockResolvedValue({ count: 1 });
         mockedUserUpdateMany.mockResolvedValue({ count: 1 });
 
@@ -95,10 +104,17 @@ describe("file deletion lifecycle", () => {
         expect(mockedUserUpdateMany).toHaveBeenCalledWith({
             where: {
                 id: 7,
-                storageUsedBytes: { gte: BigInt(128) },
+                storageUsedBytes: { gte: BigInt(224) },
             },
             data: {
-                storageUsedBytes: { decrement: BigInt(128) },
+                storageUsedBytes: { decrement: BigInt(224) },
+            },
+        });
+        expect(mockedFindFirst).toHaveBeenCalledWith({
+            where: { id: 11, deletionStatus: FILE_DELETION_STATUS.DELETING },
+            select: {
+                fileSize: true,
+                attachmentFiles: { select: { fileSize: true } },
             },
         });
     });
@@ -110,6 +126,7 @@ describe("file deletion lifecycle", () => {
             storagePath: "storage/documents/doc.pdf",
             userId: 7,
             deletionStatus: FILE_DELETION_STATUS.DELETING,
+            attachmentFiles: [],
         } as never);
 
         await expect(getFileForDeletion(11)).resolves.toEqual({
@@ -118,6 +135,7 @@ describe("file deletion lifecycle", () => {
             storagePath: "storage/documents/doc.pdf",
             userId: "7",
             deletionStatus: FILE_DELETION_STATUS.DELETING,
+            attachmentFiles: [],
         });
 
         expect(mockedFindFirst).toHaveBeenCalledWith({
@@ -136,6 +154,12 @@ describe("file deletion lifecycle", () => {
                 storagePath: true,
                 userId: true,
                 deletionStatus: true,
+                attachmentFiles: {
+                    select: {
+                        filePath: true,
+                        fileSize: true,
+                    },
+                },
             },
         });
     });
