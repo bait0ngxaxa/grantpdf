@@ -63,7 +63,10 @@ describe("file deletion lifecycle", () => {
                     ],
                 },
             },
-            data: { deletionStatus: FILE_DELETION_STATUS.DELETING },
+            data: {
+                deletionStatus: FILE_DELETION_STATUS.DELETING,
+                deletionNextAttemptAt: null,
+            },
         });
     });
 
@@ -74,7 +77,7 @@ describe("file deletion lifecycle", () => {
         } as never);
         mockedUpdateMany.mockResolvedValue({ count: 1 });
 
-        await expect(markFileDeleted(11, 7)).resolves.toBeUndefined();
+        await expect(markFileDeleted(11, 7)).resolves.toBe(true);
 
         expect(mockedFindFirst).toHaveBeenCalledWith({
             where: { id: 11, deletionStatus: FILE_DELETION_STATUS.DELETING },
@@ -85,7 +88,11 @@ describe("file deletion lifecycle", () => {
         });
         expect(mockedUpdateMany).toHaveBeenCalledWith({
             where: { id: 11, deletionStatus: FILE_DELETION_STATUS.DELETING },
-            data: { deletionStatus: FILE_DELETION_STATUS.DELETED },
+            data: {
+                deletionStatus: FILE_DELETION_STATUS.DELETED,
+                deletionNextAttemptAt: null,
+                deletionLastError: null,
+            },
         });
         expect(mockedUserUpdateMany).not.toHaveBeenCalled();
         expect(mockedInvalidateDashboardStats).toHaveBeenCalledWith([7]);

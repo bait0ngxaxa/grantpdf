@@ -49,6 +49,9 @@ export {
     getFileForDeletion,
     markFileDeleting,
     markFileDeleted,
+    removeStoredFilePaths,
+    scheduleFileDeletionRetry,
+    reconcileDeletingFiles,
 } from "./fileService";
 
 // Project Report Service

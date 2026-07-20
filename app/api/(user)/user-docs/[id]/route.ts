@@ -10,10 +10,10 @@ import {
     getFileForDeletion,
     markFileDeleting,
     markFileDeleted,
+    removeStoredFilePaths,
+    scheduleFileDeletionRetry,
 } from "@/lib/services/fileService";
-import { unlink } from "fs/promises";
 import { logAudit } from "@/lib/server/audit/auditLog";
-import { getFullPathFromStoragePath } from "@/lib/server/storage";
 import { parsePositiveIntId } from "@/lib/shared/http/id";
 import { publicApiError } from "@/lib/shared/http/apiError";
 import { buildAuditContext } from "@/lib/api/requestContext";
@@ -57,30 +57,20 @@ export async function DELETE(
             );
         }
 
-        const storagePaths = new Set([
-            document.storagePath,
-            ...(document.attachmentFiles ?? []).map(
-                (attachment) => attachment.filePath,
-            ),
-        ]);
-        for (const storagePath of storagePaths) {
-            if (!storagePath) continue;
-
-            const fullPath = getFullPathFromStoragePath(storagePath);
-            try {
-                await unlink(fullPath);
-            } catch (error) {
-                const isMissingFile =
-                    typeof error === "object" &&
-                    error !== null &&
-                    "code" in error &&
-                    error.code === "ENOENT";
-                if (!isMissingFile) throw error;
-                console.warn(`File not found: ${fullPath}`);
-            }
+        try {
+            await removeStoredFilePaths(document);
+            await markFileDeleted(docId, guard.userId);
+        } catch (error: unknown) {
+            await scheduleFileDeletionRetry(docId, error).catch(
+                (retryError: unknown) => {
+                    console.error("Failed to schedule file deletion retry:", {
+                        fileId: docId,
+                        error: retryError,
+                    });
+                },
+            );
+            throw error;
         }
-
-        await markFileDeleted(docId, guard.userId);
 
         // Log user file deletion
         const auditContext = buildAuditContext(guard.session, req);

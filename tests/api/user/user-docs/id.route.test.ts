@@ -8,18 +8,8 @@ vi.mock("@/lib/services/fileService", () => ({
     getFileForDeletion: vi.fn(),
     markFileDeleting: vi.fn(),
     markFileDeleted: vi.fn(),
-}));
-
-vi.mock("fs/promises", () => {
-    const unlink = vi.fn();
-    return {
-        default: { unlink },
-        unlink,
-    };
-});
-
-vi.mock("@/lib/server/storage", () => ({
-    getFullPathFromStoragePath: vi.fn(),
+    removeStoredFilePaths: vi.fn(),
+    scheduleFileDeletionRetry: vi.fn(),
 }));
 
 vi.mock("@/lib/server/audit/auditLog", () => ({
@@ -31,9 +21,9 @@ import {
     getFileForDeletion,
     markFileDeleting,
     markFileDeleted,
+    removeStoredFilePaths,
+    scheduleFileDeletionRetry,
 } from "@/lib/services/fileService";
-import { unlink } from "fs/promises";
-import { getFullPathFromStoragePath } from "@/lib/server/storage";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import { DELETE } from "@/app/api/(user)/user-docs/[id]/route";
 
@@ -41,8 +31,8 @@ const mockedAuth = vi.mocked(auth);
 const mockedGetFileForDeletion = vi.mocked(getFileForDeletion);
 const mockedMarkFileDeleting = vi.mocked(markFileDeleting);
 const mockedMarkFileDeleted = vi.mocked(markFileDeleted);
-const mockedUnlink = vi.mocked(unlink);
-const mockedGetFullPathFromStoragePath = vi.mocked(getFullPathFromStoragePath);
+const mockedRemoveStoredFilePaths = vi.mocked(removeStoredFilePaths);
+const mockedScheduleFileDeletionRetry = vi.mocked(scheduleFileDeletionRetry);
 const mockedLogAudit = vi.mocked(logAudit);
 
 function buildParams(id: string): Promise<{ id: string }> {
@@ -59,7 +49,9 @@ describe("user-docs [id] route DELETE", () => {
             },
         } as never);
         mockedMarkFileDeleting.mockResolvedValue(true);
-        mockedMarkFileDeleted.mockResolvedValue(undefined);
+        mockedMarkFileDeleted.mockResolvedValue(true);
+        mockedRemoveStoredFilePaths.mockResolvedValue(undefined);
+        mockedScheduleFileDeletionRetry.mockResolvedValue(true);
     });
 
     it("returns 401 when session is missing", async () => {
@@ -112,11 +104,6 @@ describe("user-docs [id] route DELETE", () => {
                 },
             ],
         } as never);
-        mockedGetFullPathFromStoragePath.mockImplementation(
-            (storagePath) => `C:\\repo\\${storagePath}`,
-        );
-        mockedUnlink.mockResolvedValue(undefined);
-
         const request = new Request("http://localhost/api/user-docs/11", {
             method: "DELETE",
         });
@@ -127,17 +114,15 @@ describe("user-docs [id] route DELETE", () => {
 
         expect(response.status).toBe(200);
         expect(body.success).toBe(true);
-        expect(mockedGetFullPathFromStoragePath).toHaveBeenCalledWith(
-            "storage/documents/doc.pdf",
-        );
-        expect(mockedGetFullPathFromStoragePath).toHaveBeenCalledWith(
-            "storage/attachments/copied.pdf",
-        );
-        expect(mockedUnlink).toHaveBeenCalledWith(
-            "C:\\repo\\storage/documents/doc.pdf",
-        );
-        expect(mockedUnlink).toHaveBeenCalledWith(
-            "C:\\repo\\storage/attachments/copied.pdf",
+        expect(mockedRemoveStoredFilePaths).toHaveBeenCalledWith(
+            expect.objectContaining({
+                storagePath: "storage/documents/doc.pdf",
+                attachmentFiles: [
+                    expect.objectContaining({
+                        filePath: "storage/attachments/copied.pdf",
+                    }),
+                ],
+            }),
         );
         expect(mockedMarkFileDeleting).toHaveBeenCalledWith(11);
         expect(mockedMarkFileDeleted).toHaveBeenCalledWith(11, 1);
@@ -151,14 +136,6 @@ describe("user-docs [id] route DELETE", () => {
             originalFileName: "doc.pdf",
             storagePath: "storage/documents/doc.pdf",
         } as never);
-        mockedGetFullPathFromStoragePath.mockReturnValue(
-            "C:\\repo\\storage\\documents\\doc.pdf",
-        );
-        const missingFileError = Object.assign(new Error("ENOENT"), {
-            code: "ENOENT",
-        });
-        mockedUnlink.mockRejectedValue(missingFileError);
-
         const request = new Request("http://localhost/api/user-docs/11", {
             method: "DELETE",
         });
@@ -167,7 +144,7 @@ describe("user-docs [id] route DELETE", () => {
         });
 
         expect(response.status).toBe(200);
-        expect(mockedUnlink).toHaveBeenCalledOnce();
+        expect(mockedRemoveStoredFilePaths).toHaveBeenCalledOnce();
         expect(mockedMarkFileDeleted).toHaveBeenCalledWith(11, 1);
     });
 
@@ -178,10 +155,9 @@ describe("user-docs [id] route DELETE", () => {
             originalFileName: "doc.pdf",
             storagePath: "storage/documents/doc.pdf",
         } as never);
-        mockedGetFullPathFromStoragePath.mockReturnValue(
-            "C:\\repo\\storage\\documents\\doc.pdf",
+        mockedRemoveStoredFilePaths.mockRejectedValue(
+            Object.assign(new Error("EACCES"), { code: "EACCES" }),
         );
-        mockedUnlink.mockRejectedValue(Object.assign(new Error("EACCES"), { code: "EACCES" }));
 
         const request = new Request("http://localhost/api/user-docs/11", {
             method: "DELETE",
@@ -193,6 +169,10 @@ describe("user-docs [id] route DELETE", () => {
         expect(response.status).toBe(500);
         expect(mockedMarkFileDeleting).toHaveBeenCalledWith(11);
         expect(mockedMarkFileDeleted).not.toHaveBeenCalled();
+        expect(mockedScheduleFileDeletionRetry).toHaveBeenCalledWith(
+            11,
+            expect.objectContaining({ message: "EACCES" }),
+        );
     });
 
     it("marks the record deleting before unlink when final db transition can fail", async () => {
@@ -204,10 +184,7 @@ describe("user-docs [id] route DELETE", () => {
             deletionStatus: "active",
         } as never);
         mockedMarkFileDeleting.mockResolvedValue(true);
-        mockedGetFullPathFromStoragePath.mockReturnValue(
-            "C:\\repo\\storage\\documents\\doc.pdf",
-        );
-        mockedUnlink.mockResolvedValue(undefined);
+        mockedRemoveStoredFilePaths.mockResolvedValue(undefined);
         mockedMarkFileDeleted.mockRejectedValue(new Error("DB_UNAVAILABLE"));
 
         const request = new Request("http://localhost/api/user-docs/11", {
@@ -219,7 +196,13 @@ describe("user-docs [id] route DELETE", () => {
 
         expect(response.status).toBe(500);
         expect(mockedMarkFileDeleting).toHaveBeenCalledWith(11);
-        expect(mockedMarkFileDeleting).toHaveBeenCalledBefore(mockedUnlink);
+        expect(mockedMarkFileDeleting).toHaveBeenCalledBefore(
+            mockedRemoveStoredFilePaths,
+        );
         expect(mockedMarkFileDeleted).toHaveBeenCalledWith(11, 1);
+        expect(mockedScheduleFileDeletionRetry).toHaveBeenCalledWith(
+            11,
+            expect.objectContaining({ message: "DB_UNAVAILABLE" }),
+        );
     });
 });

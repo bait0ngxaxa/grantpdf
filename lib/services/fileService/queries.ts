@@ -198,13 +198,19 @@ export async function markFileDeleting(id: number): Promise<boolean> {
                 ],
             },
         },
-        data: { deletionStatus: FILE_DELETION_STATUS.DELETING },
+        data: {
+            deletionStatus: FILE_DELETION_STATUS.DELETING,
+            deletionNextAttemptAt: null,
+        },
     });
 
     return result.count > 0;
 }
 
-export async function markFileDeleted(id: number, userId: number): Promise<void> {
+export async function markFileDeleted(
+    id: number,
+    userId: number,
+): Promise<boolean> {
     const deleted = await prisma.$transaction(async (tx) => {
         const file = await tx.userFile.findFirst({
             where: {
@@ -220,7 +226,11 @@ export async function markFileDeleted(id: number, userId: number): Promise<void>
 
         const result = await tx.userFile.updateMany({
             where: { id, deletionStatus: FILE_DELETION_STATUS.DELETING },
-            data: { deletionStatus: FILE_DELETION_STATUS.DELETED },
+            data: {
+                deletionStatus: FILE_DELETION_STATUS.DELETED,
+                deletionNextAttemptAt: null,
+                deletionLastError: null,
+            },
         });
         if (result.count !== 1) return false;
 
@@ -251,4 +261,6 @@ export async function markFileDeleted(id: number, userId: number): Promise<void>
     if (deleted) {
         await invalidateDashboardStats([userId]);
     }
+
+    return deleted;
 }

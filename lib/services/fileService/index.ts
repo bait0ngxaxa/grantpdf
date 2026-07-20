@@ -18,3 +18,11 @@ export {
     markFileDeleting,
     markFileDeleted,
 } from "./queries";
+
+export { removeStoredFilePaths } from "./deletionStorage";
+export { scheduleFileDeletionRetry } from "./deletionRetry";
+export {
+    reconcileDeletingFiles,
+    type FileDeletionReconciliationOptions,
+    type FileDeletionReconciliationResult,
+} from "./reconciliation";
