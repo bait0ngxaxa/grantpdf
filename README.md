@@ -1,107 +1,94 @@
-# GRANT ONLINE - ระบบจัดการโครงการและเอกสารออนไลน์
+# GRANT ONLINE — ระบบจัดการโครงการและเอกสารออนไลน์
 
-## 📋 ภาพรวมระบบ
+ระบบสำหรับสร้างและจัดการเอกสารโครงการ ติดตามสถานะ อัปโหลด/ดาวน์โหลดไฟล์ และบริหารผู้ใช้ แบ่งสิทธิ์เป็นสมาชิกและผู้ดูแลระบบ
 
-**GRANT ONLINE** คือระบบจัดการโครงการและเอกสารออนไลน์แบบครบวงจร ออกแบบมาเพื่อลดงานเอกสารซ้ำซ้อน เพิ่มประสิทธิภาพการทำงาน และอำนวยความสะดวกในการจัดการโครงการตั้งแต่ต้นจนจบ พัฒนาด้วยเทคโนโลยีทันสมัยเพื่อประสิทธิภาพและความปลอดภัยสูงสุด
+## ความสามารถหลัก
 
-### กลุ่มผู้ใช้งาน
+- สร้างเอกสาร TOR, สัญญาจ้าง, หนังสืออนุมัติ, ข้อเสนอโครงการ และแบบสรุปโครงการ
+- จัดเก็บไฟล์ตามโครงการ รองรับ DOC, DOCX, PDF, XLS และ XLSX (สูงสุด 15 MB ต่อไฟล์)
+- แดชบอร์ดสมาชิกและผู้ดูแลระบบ พร้อมค้นหา กรอง แบ่งหน้า และติดตามสถานะ
+- ระบบยืนยันตัวตนที่พัฒนาในโปรเจกต์ด้วย access/refresh token, secure cookie และ session ในฐานข้อมูล
+- ส่งอีเมลรีเซ็ตรหัสผ่านผ่าน SMTP
+- rate limit และ cache ด้วย Redis (production ควรเปิดใช้งาน)
+- ลบไฟล์แบบ reconciliation เพื่อให้ข้อมูลในฐานข้อมูลและไฟล์บนดิสก์สอดคล้องกัน
 
-- **ผู้ใช้ทั่วไป** (สมาชิก): สร้างและจัดการเอกสารโครงการของตนเอง ติดตามสถานะ
-- **ผู้ดูแลระบบ** (แอดมิน): ดูแลภาพรวมระบบ จัดการผู้ใช้ และอนุมัติ/ตรวจสอบโครงการ
+## เทคโนโลยีที่ใช้
 
----
+| ส่วน | เทคโนโลยี |
+| --- | --- |
+| Web | Next.js 15 App Router, React 19, TypeScript |
+| UI | Tailwind CSS 4, Radix UI, Lucide React, Tiptap |
+| Data fetching | SWR |
+| API และ validation | Next.js Route Handlers, Zod 4 |
+| Authentication | JWT (`jose`/`jsonwebtoken`), bcryptjs, database-backed sessions |
+| Database | MySQL 8, Prisma ORM 6 |
+| Cache / rate limit | Redis 7 |
+| เอกสาร | docxtemplater, PizZip, ExcelJS |
+| Testing | Vitest, Testing Library |
+| Edge / proxy | Cloudflare, Nginx |
 
-## ⭐ ความสามารถหลัก
+> โปรเจกต์นี้ไม่ได้ใช้ NextAuth.js หรือ DaisyUI และ Docker Compose ปัจจุบันรันเฉพาะ MySQL กับ Redis แอป Next.js รันบน host
 
-### 1. 📝 สร้างเอกสารอัตโนมัติ (Document Generation)
+## เริ่มต้นพัฒนาในเครื่อง
 
-ระบบรองรับการสร้างเอกสารโครงการ 5 ประเภทผ่านฟอร์มออนไลน์ พร้อมระบบช่วยกรอกข้อมูลอัตโนมัติ:
+### สิ่งที่ต้องมี
 
-- **TOR** - ขอบเขตการดำเนินงาน (Terms of Reference)
-- **สัญญาจ้าง** - หนังสือสัญญารับรองการลงนาม
-- **หนังสืออนุมัติ** - เอกสารขออนุมัติมูลนิธิ
-- **ข้อเสนอโครงการ** - แบบฟอร์มเสนอโครงการ
-- **แบบสรุปโครงการ** - รายงานสรุปผลโครงการ (Excel)
+- Node.js 22 LTS และ npm
+- Docker Engine พร้อม Docker Compose plugin (หรือ MySQL 8 และ Redis 7 ที่ติดตั้งเอง)
+- ฟอนต์และ template เอกสารใน `public/` ซึ่งอยู่ใน repository แล้ว
 
-### 2. 📂 จัดการไฟล์และโครงการ (Project Management)
+### ติดตั้ง
 
-- ระบบจัดเก็บไฟล์แบบแยกโครงการ
-- รองรับการอัปโหลดไฟล์ PDF และ Word
-- ระบบ **Preview เอกสาร PDF ออนไลน์** ไม่ต้องดาวน์โหลดก็ดูได้
-- ค้นหา (Search) และกรอง (Filter) ข้อมูลได้อย่างรวดเร็ว
+```bash
+npm ci
+cp .env.example .env
+docker compose up -d mysql redis
+npx prisma generate
+npx prisma migrate deploy
+npm run dev
+```
 
-### 3. 📊 แดชบอร์ดอัจฉริยะ (Smart Dashboard)
+บน Windows PowerShell ใช้ `Copy-Item .env.example .env` แทน `cp` แล้วเปิด <http://localhost:3000>
 
-#### User Dashboard
+ค่า `DATABASE_URL` สำหรับ compose ชุดพัฒนาต้องเชื่อมผ่าน port `3307` ของ host ส่วน Redis ใช้ `6379` ดูรายละเอียดและตัวอย่างค่าทั้งหมดใน [.env.example](.env.example)
 
-- ภาพรวมโครงการของตัวเอง
-- สถานะเอกสารและการอนุมัติ
-- ทางลัดสร้างเอกสารด่วน
+หากเป็นฐานข้อมูลใหม่และต้องการข้อมูลโครงการตั้งต้น สามารถรัน seed แบบ idempotent ได้ด้วย:
 
-#### Admin Dashboard
+```bash
+npx --yes tsx prisma/seed-programs.ts
+```
 
-- ติดตามภาพรวมโครงการทั้งหมดในระบบ
-- สถิติการใช้งานรายวัน/รายเดือน
-- จัดการสถานะโครงการ (อนุมัติ/แก้ไข/ปิดโครงการ)
+## คำสั่งที่ใช้บ่อย
 
-### 4. 👥 ระบบจัดการผู้ใช้และสิทธิ์ (User & Access Control)
+```bash
+npm run dev            # development server
+npm run lint           # lint
+npx tsc --noEmit       # typecheck
+npm test               # test suite
+npm run test:coverage  # test พร้อม coverage
+```
 
-- **Role-Based Access Control (RBAC)**: แยกสิทธิ์ Member และ Admin ชัดเจน
-- จัดการข้อมูลผู้ใช้งานและรีเซ็ตรหัสผ่าน
-- ระบบตรวจสอบสิทธิ์ที่ปลอดภัยด้วย NextAuth.js
+## Deploy
 
----
+คู่มือ production แบบครบขั้นตอนอยู่ที่ [deploy/README.md](deploy/README.md) ครอบคลุมการเตรียม server/env, database migration, persistent storage, systemd, Nginx/Cloudflare, health check, update และ backup
 
-## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
+เอกสารเฉพาะส่วน:
 
-ระบบถูกพัฒนาด้วย Modern Web Stack ล่าสุด เพื่อประสิทธิภาพและความรวดเร็ว:
+- [ติดตั้ง Nginx](deploy/nginx/README.md)
+- [Cloudflare Origin SSL](deploy/nginx-cloudflare-origin-ssl.md)
+- [Cloudflare Free Plan Security](deploy/cloudflare-free-plan-security.md)
 
-### Core
+## ข้อมูลที่ต้องสำรอง
 
-- **Frontend Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Library**: React 19
-- **State Management/Data Fetching**: SWR (Stale-While-Revalidate) - โหลดข้อมูลเร็วและ Real-time
+สำรองทั้งสองส่วนพร้อมกันเสมอ:
 
-### UI & UX
+- MySQL volume/database — metadata, ผู้ใช้, session และตำแหน่งไฟล์
+- `storage/` — เอกสาร ไฟล์แนบ รายงาน และไฟล์ชั่วคราวระหว่างประมวลผล
 
-- **Styling**: Tailwind CSS v4
-- **Component Library**: DaisyUI v5
-- **Icons**: Lucide React
-- **Validation**: Zod (Schema Validation)
+การสำรองเพียงฐานข้อมูลหรือเพียงไฟล์อย่างเดียวไม่เพียงพอสำหรับกู้ระบบให้สอดคล้องกัน
 
-### Database & Backend
+## ติดต่อ
 
-- **Database**: MySQL / MariaDB
-- **ORM**: Prisma ORM
-- **Authentication**: NextAuth.js (v4) + JWT
+ทีมพัฒนา IT Development NHF
 
-### Document Engine
-
-- **Word**: docxtemplater
-- **Excel**: ExcelJS
-- **ZIP**: PizZip
-
-### Testing & Quality
-
-- **Unit Testing**: Vitest
-- **Linting**: ESLint
-
----
-
-**Key Architectural Features:**
-
-- **Modular Contexts**: การแยก Context (UI, Data, Modal) เพื่อลดความซับซ้อนและเพิ่ม Performance
-- **Server-Side Pagination**: รองรับข้อมูลปริมาณมาก
-- **Secure API Routes**: ตรวจสอบ Session และ Role ทุกครั้งที่มีการเรียกใช้ข้อมูล
-
----
-
-## 📞 ติดต่อทีมพัฒนา
-
-สำหรับข้อสงสัย ปัญหาการใช้งาน หรือข้อเสนอแนะ กรุณาติดต่อ:
-**ทีมพัฒนา IT Development NHF**
-
----
-
-_Last Updated: January 2026_
+_อัปเดตล่าสุด: 23 กรกฎาคม 2026_

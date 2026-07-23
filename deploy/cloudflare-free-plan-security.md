@@ -228,7 +228,7 @@ http.request.uri.path in {"/api/auth/callback/credentials" "/api/auth/signup"}
 
 **เหตุผล:** API endpoints ถูกเรียกผ่าน JavaScript `fetch()` จาก frontend
 Managed Challenge ส่ง HTML challenge page กลับมา → `fetch()` render HTML ไม่ได้
-→ ได้ HTML แทน JSON → NextAuth ตีความไม่ออก → **auth flow พังทั้งระบบ**
+→ ได้ HTML แทน JSON → frontend ตีความ response ไม่ได้ → **auth flow พังทั้งระบบ**
 
 **กฎ:** Managed Challenge ใช้ได้กับ **page navigation** เท่านั้น (user เปิด URL ตรงๆ ใน browser)
 
@@ -270,7 +270,7 @@ Request จาก Internet
 │     - reset-pw:     5/15min  │
 │     - project:     20/min    │
 │     - doc-gen:     12/min    │
-│  ⑧ Auth/Role Check           │  middleware.ts + NextAuth
+│  ⑧ Auth/Role Check           │  middleware + route guards
 │                              │
 └──────────────────────────────┘
 ```

@@ -75,7 +75,7 @@ server {
 
     # CHANGE ME:
     # ต้องเท่ากับหรือมากกว่า limit ฝั่งแอป
-    # โปรเจ็คนี้ตั้ง FILE_UPLOAD.MAX_SIZE = 20MB ดังนั้นตั้ง 20m เป็นค่าขั้นต่ำ
+    # แอปจำกัดไฟล์ที่ 15MB; ตั้ง 20m เพื่อเผื่อ multipart overhead
     client_max_body_size 20m;
 
     # Timeout ฝั่ง client upload
@@ -248,7 +248,7 @@ server ชื่อ-service-nextjs:3000;
 
 4. `client_max_body_size`
 
-ต้องสัมพันธ์กับ limit ฝั่งแอป ปัจจุบันโปรเจ็คตั้งขนาดอัปโหลดไว้ที่ 20MB จึงใช้:
+ต้องสัมพันธ์กับ limit ฝั่งแอป ปัจจุบันแอปจำกัดไฟล์ไว้ที่ 15 MB และใช้ 20m เพื่อเผื่อ multipart overhead:
 
 ```nginx
 client_max_body_size 20m;
@@ -364,7 +364,7 @@ sudo systemctl reload nginx
 
 3. อย่าตั้ง upload timeout ยาวเกินจำเป็น
 
-ค่า `75s` เหมาะกับไฟล์ 20MB ใน network ปกติ ถ้าผู้ใช้งานอยู่ network ช้ามากอาจต้องปรับเพิ่ม แต่ไม่ควรเพิ่มแบบไม่มี limit เพราะจะทำให้ connection ค้างนาน
+ค่า `75s` ใช้กับไฟล์สูงสุด 15 MB ใน network ปกติ ถ้าผู้ใช้งานอยู่ network ช้ามากอาจต้องปรับเพิ่ม แต่ไม่ควรเพิ่มแบบไม่มี limit เพราะจะทำให้ connection ค้างนาน
 
 4. ตรวจสอบ limit ให้ตรงกันทั้งระบบ
 

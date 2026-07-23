@@ -2,8 +2,8 @@
 
 คู่มือนี้ใช้กับไฟล์ config ที่อยู่ในโฟลเดอร์นี้:
 
-- [grant_online.conf](C:/Users/Bait0ng/Desktop/grant_online/deploy/nginx/grant_online.conf:1)
-- [cloudflare-real-ip.conf](C:/Users/Bait0ng/Desktop/grant_online/deploy/nginx/cloudflare-real-ip.conf:1)
+- [grant_online.conf](grant_online.conf)
+- [cloudflare-real-ip.conf](cloudflare-real-ip.conf)
 
 คู่มือนี้เหมาะกับกรณี:
 
@@ -24,7 +24,7 @@
 
 ## 2. ไฟล์ที่ต้องแก้ก่อนใช้งาน
 
-เปิดไฟล์ [grant_online.conf](C:/Users/Bait0ng/Desktop/grant_online/deploy/nginx/grant_online.conf:1) แล้วแก้ 3 จุดหลัก:
+เปิดไฟล์ [grant_online.conf](grant_online.conf) แล้วแก้ 3 จุดหลัก:
 
 1. `server_name`
 
@@ -182,11 +182,11 @@ sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log
 
 1. `client_max_body_size`
 
-ตอนนี้ไฟล์ config ตั้งไว้ `20m` ให้สัมพันธ์กับ limit ฝั่งแอป ถ้าฝั่งแอปเพิ่มเป็น `50MB` ต้องเพิ่มตรงนี้ด้วย
+ตอนนี้แอปจำกัดไฟล์ไว้ที่ `15 MB` และ Nginx ตั้ง `20m` เพื่อเผื่อ multipart overhead ถ้าฝั่งแอปเพิ่ม limit ต้องเพิ่มตรงนี้ด้วย
 
 2. `AUTH_URL`
 
-ในแอปฝั่ง password reset ใช้ canonical URL จาก env ดังนั้น production ควรตั้ง `AUTH_URL` หรือ `NEXTAUTH_URL` เป็น `https://โดเมนจริง`
+ในแอปฝั่ง password reset ใช้ canonical URL จาก env ดังนั้น production ต้องตั้ง `AUTH_URL` เป็น `https://โดเมนจริง`
 
 ตัวอย่าง:
 
@@ -196,7 +196,7 @@ AUTH_URL=https://grant.example.go.th
 
 3. Cloudflare IP ranges
 
-ไฟล์ [cloudflare-real-ip.conf](C:/Users/Bait0ng/Desktop/grant_online/deploy/nginx/cloudflare-real-ip.conf:1) ใช้รายการ IP จาก Cloudflare ถ้ามีการเปลี่ยนในอนาคตต้องอัปเดตไฟล์นี้ด้วย
+ไฟล์ [cloudflare-real-ip.conf](cloudflare-real-ip.conf) ใช้รายการ IP จาก Cloudflare ถ้ามีการเปลี่ยนในอนาคตต้องอัปเดตไฟล์นี้ด้วย
 
 ตรวจสอบได้จาก:
 
