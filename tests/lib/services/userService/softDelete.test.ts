@@ -93,6 +93,9 @@ describe("deleteUserWithAudit lifecycle", () => {
                 deletedAt: null,
             },
             data: expect.objectContaining({
+                email: expect.stringMatching(
+                    /^deleted\+7-[0-9a-f-]+@deleted\.invalid$/,
+                ),
                 status: "deleted",
                 deletedAt: expect.any(Date),
                 deletedById: 1,

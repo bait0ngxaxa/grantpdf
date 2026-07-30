@@ -36,6 +36,7 @@ export type AuditAction =
     | "DOCUMENT_GENERATE"
     // Admin operations
     | "ADMIN_USER_DELETE"
+    | "USER_PURGE"
     | "ADMIN_USER_UPDATE"
     | "ADMIN_PROJECT_UPDATE"
     | "ADMIN_PROJECT_CO_OWNER_UPDATE"

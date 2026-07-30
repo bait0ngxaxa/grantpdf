@@ -6,7 +6,10 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { applyRateLimit, getClientIP } from "@/lib/server/rate-limit/rateLimit";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import { signupSchema } from "@/lib/validation/schemas";
-import { RATE_LIMIT } from "@/lib/shared/constants";
+import {
+    RATE_LIMIT,
+    USER_LIFECYCLE_STATUS,
+} from "@/lib/shared/constants";
 import { getStringField } from "@/lib/shared/utils";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { readJsonBody, getFirstValidationMessage } from "@/lib/api/body";
@@ -45,8 +48,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         const { name, email, password } = parsed.data;
 
-        const existingUser = await prisma.user.findUnique({
-            where: { email },
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                email,
+                status: USER_LIFECYCLE_STATUS.ACTIVE,
+                deletedAt: null,
+            },
+            select: { id: true },
         });
 
         if (existingUser) {

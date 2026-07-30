@@ -40,6 +40,7 @@ model User {
   @@index([created_at])
   @@index([name])
   @@index([status, deletedAt])
+  @@index([status, purgeAfter])
 }
 
 model AuthSession {

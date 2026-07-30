@@ -16,6 +16,7 @@ export {
     getFileById,
     getFileForDeletion,
     markFileDeleting,
+    markUserFilesDeleting,
     markFileDeleted,
 } from "./queries";
 

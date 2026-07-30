@@ -207,6 +207,21 @@ export async function markFileDeleting(id: number): Promise<boolean> {
     return result.count > 0;
 }
 
+export async function markUserFilesDeleting(userId: number): Promise<number> {
+    const result = await prisma.userFile.updateMany({
+        where: {
+            userId,
+            deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+        },
+        data: {
+            deletionStatus: FILE_DELETION_STATUS.DELETING,
+            deletionNextAttemptAt: null,
+        },
+    });
+
+    return result.count;
+}
+
 export async function markFileDeleted(
     id: number,
     userId: number,

@@ -21,3 +21,9 @@ export {
     updateUserWithAudit,
     deleteUserWithAudit,
 } from "./mutations";
+
+export {
+    purgeDeletedUsers,
+    type UserPurgeOptions,
+    type UserPurgeResult,
+} from "./purge";

@@ -44,6 +44,8 @@ chmod 600 .env
 | `SMTP_HOST/PORT/SECURE/USER/PASS` | บังคับเมื่อใช้ reset password | SMTP transport |
 | `FILE_DELETION_RECONCILIATION_ENABLED` | ไม่บังคับ | ค่าอื่นนอกจาก `false` เปิด worker ทุก 60 วินาทีใน production |
 | `FILE_DELETION_RECONCILIATION_SECRET` | บังคับเมื่อเรียก job ผ่าน API | Bearer token สำหรับ `POST /api/internal/file-deletions` |
+| `USER_PURGE_ENABLED` | ไม่บังคับ | ค่าอื่นนอกจาก `false` เปิด worker purge ผู้ใช้ทุก 60 วินาทีใน production |
+| `USER_PURGE_SECRET` | บังคับเมื่อเรียก job ผ่าน API | Bearer token สำหรับ `POST /api/internal/user-purge` |
 | `MYSQL_*` | บังคับกับ compose | สร้าง database/user ครั้งแรก ต้องตรงกับ `DATABASE_URL` |
 
 สร้าง secret แต่ละตัวแยกกันด้วย `openssl rand -base64 48` ห้ามใส่ secret ใน `NEXT_PUBLIC_*` และอย่าเปลี่ยน signing secret โดยไม่มีแผน invalidate session/link เดิม
@@ -120,7 +122,12 @@ sudo systemctl status grant-online
 journalctl -u grant-online -n 100 --no-pager
 ```
 
-Worker ลบไฟล์เริ่มใน production process โดยอัตโนมัติ หากมีหลาย app instances ให้ปิด worker ที่ web instances แล้วเรียก internal endpoint จาก scheduler เพียงชุดเดียว
+Worker reconciliation ไฟล์และ purge ผู้ใช้เริ่มใน production process โดยอัตโนมัติ หากมีหลาย app instances ให้ปิด worker ที่ web instances แล้วเรียก internal endpoints จาก scheduler เพียงชุดเดียว:
+
+- `POST /api/internal/file-deletions` พร้อม `Authorization: Bearer $FILE_DELETION_RECONCILIATION_SECRET`
+- `POST /api/internal/user-purge` พร้อม `Authorization: Bearer $USER_PURGE_SECRET`
+
+User purge จะลบข้อมูลผู้ใช้ที่ `purgeAfter <= now` เฉพาะเมื่อ file deletion reconciliation ทำให้ไฟล์ของผู้ใช้นั้นอยู่สถานะ `deleted` ครบแล้ว
 
 ## Nginx และ Cloudflare
 

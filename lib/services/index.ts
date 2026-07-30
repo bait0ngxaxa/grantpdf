@@ -36,6 +36,7 @@ export {
     deleteUser,
     updateUserWithAudit,
     deleteUserWithAudit,
+    purgeDeletedUsers,
     getUserCount,
     getCoOwnerUserOptions,
 } from "./userService";
@@ -48,6 +49,7 @@ export {
     getFileById,
     getFileForDeletion,
     markFileDeleting,
+    markUserFilesDeleting,
     markFileDeleted,
     removeStoredFilePaths,
     scheduleFileDeletionRetry,

@@ -23,6 +23,7 @@ import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import {
     getFileForDeletion,
     markFileDeleting,
+    markUserFilesDeleting,
     markFileDeleted,
 } from "@/lib/services/fileService";
 
@@ -62,6 +63,23 @@ describe("file deletion lifecycle", () => {
                         FILE_DELETION_STATUS.DELETING,
                     ],
                 },
+            },
+            data: {
+                deletionStatus: FILE_DELETION_STATUS.DELETING,
+                deletionNextAttemptAt: null,
+            },
+        });
+    });
+
+    it("claims every active file for a user purge", async () => {
+        mockedUpdateMany.mockResolvedValue({ count: 3 });
+
+        await expect(markUserFilesDeleting(7)).resolves.toBe(3);
+
+        expect(mockedUpdateMany).toHaveBeenCalledWith({
+            where: {
+                userId: 7,
+                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
             },
             data: {
                 deletionStatus: FILE_DELETION_STATUS.DELETING,

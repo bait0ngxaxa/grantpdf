@@ -31,6 +31,8 @@ describe("storage quota reservation", () => {
         expect(mockedUpdateMany).toHaveBeenCalledWith({
             where: {
                 id: 7,
+                status: "active",
+                deletedAt: null,
                 storageUsedBytes: {
                     lte: STORAGE_QUOTA.MAX_BYTES - BigInt(128),
                 },

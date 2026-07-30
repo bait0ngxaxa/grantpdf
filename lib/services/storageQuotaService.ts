@@ -1,6 +1,9 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/server/db";
-import { STORAGE_QUOTA } from "@/lib/shared/constants";
+import {
+    STORAGE_QUOTA,
+    USER_LIFECYCLE_STATUS,
+} from "@/lib/shared/constants";
 
 type StorageQuotaClient = Pick<Prisma.TransactionClient, "user">;
 
@@ -22,6 +25,8 @@ export async function reserveStorageQuota(
     const result = await client.user.updateMany({
         where: {
             id: userId,
+            status: USER_LIFECYCLE_STATUS.ACTIVE,
+            deletedAt: null,
             storageUsedBytes: {
                 lte: STORAGE_QUOTA.MAX_BYTES - requestedBytes,
             },

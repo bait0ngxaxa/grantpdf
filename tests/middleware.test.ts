@@ -1,4 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
+import { NextRequest } from "next/server";
+import { middleware } from "@/middleware";
 
 // Extract CSRF validation logic for testing
 // Since middleware uses Next.js runtime, we test the core logic
@@ -332,5 +334,47 @@ describe("Middleware Security - CSRF Protection", () => {
             expect(shouldBlockNonAdmin("/admin/users", "user")).toBe(true);
             expect(shouldBlockNonAdmin("/admin/dashboard", "user")).toBe(true);
         });
+    });
+});
+
+describe("Internal job CSRF bypass", () => {
+    afterEach(() => {
+        vi.unstubAllEnvs();
+    });
+
+    it("allows the authenticated user purge scheduler request", async () => {
+        vi.stubEnv("USER_PURGE_SECRET", "test-secret");
+        const request = new NextRequest(
+            "http://localhost/api/internal/user-purge",
+            {
+                method: "POST",
+                headers: {
+                    authorization: "Bearer test-secret",
+                    host: "localhost",
+                },
+            },
+        );
+
+        const response = await middleware(request);
+
+        expect(response.status).toBe(200);
+    });
+
+    it("still blocks a user purge request with an invalid secret", async () => {
+        vi.stubEnv("USER_PURGE_SECRET", "test-secret");
+        const request = new NextRequest(
+            "http://localhost/api/internal/user-purge",
+            {
+                method: "POST",
+                headers: {
+                    authorization: "Bearer wrong-secret",
+                    host: "localhost",
+                },
+            },
+        );
+
+        const response = await middleware(request);
+
+        expect(response.status).toBe(403);
     });
 });

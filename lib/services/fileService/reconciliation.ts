@@ -13,6 +13,7 @@ export interface FileDeletionReconciliationOptions {
     now?: Date;
     staleAfterMs?: number;
     limit?: number;
+    userId?: number;
 }
 
 export interface FileDeletionReconciliationResult {
@@ -44,9 +45,11 @@ async function findDeletingFiles(
     now: Date,
     cutoff: Date,
     limit: number,
+    userId?: number,
 ): Promise<DeletingFileCandidate[]> {
     return prisma.userFile.findMany({
         where: {
+            ...(userId === undefined ? {} : { userId }),
             deletionStatus: FILE_DELETION_STATUS.DELETING,
             OR: [
                 { deletionNextAttemptAt: { lte: now } },
@@ -85,6 +88,7 @@ export async function reconcileDeletingFiles(
         now,
         cutoff,
         normalizeBatchLimit(options.limit),
+        options.userId,
     );
     let completed = 0;
     let failed = 0;

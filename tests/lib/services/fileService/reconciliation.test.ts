@@ -125,6 +125,16 @@ describe("file deletion reconciliation", () => {
         expect(mocks.scheduleFileDeletionRetry).not.toHaveBeenCalled();
     });
 
+    it("can reconcile only files owned by a purging user", async () => {
+        await reconcileDeletingFiles({ userId: 7 });
+
+        expect(mockedFindMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: expect.objectContaining({ userId: 7 }),
+            }),
+        );
+    });
+
     it("keeps failed deletions retryable without finalizing them", async () => {
         mockedFindMany.mockResolvedValue([
             {

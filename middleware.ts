@@ -8,7 +8,10 @@ import {
     getRefreshTokenFromRequest,
     getSessionHintFromRequest,
 } from "@/lib/server/auth/sessionCookies";
-import { isAuthorizedFileDeletionJob } from "@/lib/server/auth/internalJob";
+import {
+    isAuthorizedFileDeletionJob,
+    isAuthorizedUserPurgeJob,
+} from "@/lib/server/auth/internalJob";
 
 const CSP_NONCE_HEADER = "x-nonce";
 const ADMIN_PREFIXES = [ROUTES.ADMIN];
@@ -173,7 +176,11 @@ export async function middleware(
         isApiRequest &&
         CSRF_PROTECTED_METHODS.includes(req.method)
     ) {
-        if (!isAuthorizedFileDeletionJob(req) && !validateCSRF(req)) {
+        if (
+            !isAuthorizedFileDeletionJob(req) &&
+            !isAuthorizedUserPurgeJob(req) &&
+            !validateCSRF(req)
+        ) {
             console.warn(
                 `[CSRF] Blocked cross-origin ${
                     req.method
