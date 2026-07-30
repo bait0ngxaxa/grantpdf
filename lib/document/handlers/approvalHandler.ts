@@ -376,14 +376,15 @@ export async function handleApprovalGeneration(
         idempotency,
         projectResult,
     );
-    const { relativeStoragePath } = await saveDocumentToStorage(
-        outputBuffer,
-        projectName,
-        "docx",
-        async (storagePath: string, tx): Promise<number> => {
-            const copiedAttachments = await copyAttachmentFiles(attachmentFiles);
+    const copiedAttachments = await copyAttachmentFiles(attachmentFiles);
+    let relativeStoragePath: string;
 
-            try {
+    try {
+        ({ relativeStoragePath } = await saveDocumentToStorage(
+            outputBuffer,
+            projectName,
+            "docx",
+            async (storagePath: string, tx): Promise<number> => {
                 const hasDocumentQuota = await reserveStorageQuota(
                     userId,
                     outputBuffer.byteLength,
@@ -434,13 +435,13 @@ export async function handleApprovalGeneration(
                     actorUserId: userId,
                 });
                 return savedFile.id;
-            } catch (error: unknown) {
-                await removeCopiedAttachmentFiles(copiedAttachments.paths);
-                throw error;
-            }
-        },
-        completion,
-    );
+            },
+            completion,
+        ));
+    } catch (error: unknown) {
+        await removeCopiedAttachmentFiles(copiedAttachments.paths);
+        throw error;
+    }
 
     await invalidateDashboardStats([userId]);
 

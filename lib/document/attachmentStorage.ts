@@ -27,27 +27,40 @@ export async function copyAttachmentFiles(
         return { files: [], paths: [] };
     }
 
+    await ensureStorageDir("tmp");
     await ensureStorageDir("attachments");
     const copiedFiles: AttachmentStorageSource[] = [];
     const copiedPaths: string[] = [];
+    const temporaryPaths: string[] = [];
 
     try {
         for (const file of files) {
             const fileName = generateUniqueFilename(file.originalFileName);
+            const temporaryFileName = `tmp_${fileName}`;
+            const temporaryFilePath = getStoragePath(
+                "tmp",
+                temporaryFileName,
+            );
+            const temporaryRelativePath = getRelativeStoragePath(
+                "tmp",
+                temporaryFileName,
+            );
             const destinationPath = getStoragePath("attachments", fileName);
             const relativePath = getRelativeStoragePath("attachments", fileName);
 
             copiedPaths.push(relativePath);
+            temporaryPaths.push(temporaryRelativePath);
             await fs.copyFile(
                 getFullPathFromStoragePath(file.storagePath),
-                destinationPath,
+                temporaryFilePath,
             );
+            await fs.rename(temporaryFilePath, destinationPath);
             copiedFiles.push({ ...file, storagePath: relativePath });
         }
 
         return { files: copiedFiles, paths: copiedPaths };
     } catch (error: unknown) {
-        await removeCopiedAttachmentFiles(copiedPaths);
+        await removeCopiedAttachmentFiles([...copiedPaths, ...temporaryPaths]);
         throw error;
     }
 }

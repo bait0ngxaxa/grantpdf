@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
     attachmentCreateMany: vi.fn(),
     saveDocumentToStorage: vi.fn(),
     copyFile: vi.fn(),
+    rename: vi.fn(),
     stat: vi.fn(),
     unlink: vi.fn(),
     reserveStorageQuota: vi.fn(),
@@ -24,10 +25,12 @@ vi.mock("fs/promises", () => ({
     default: {
         stat: mocks.stat,
         copyFile: mocks.copyFile,
+        rename: mocks.rename,
         unlink: mocks.unlink,
     },
     stat: mocks.stat,
     copyFile: mocks.copyFile,
+    rename: mocks.rename,
     unlink: mocks.unlink,
 }));
 
@@ -77,10 +80,10 @@ vi.mock("docxtemplater-image-module-free", () => ({
 vi.mock("@/lib/server/storage", () => ({
     ensureStorageDir: vi.fn(),
     getFullPathFromStoragePath: (value: string): string => value,
-    getStoragePath: (_type: string, filename: string): string =>
-        `storage/attachments/${filename}`,
-    getRelativeStoragePath: (_type: string, filename: string): string =>
-        `storage/attachments/${filename}`,
+    getStoragePath: (type: string, filename: string): string =>
+        `storage/${type}/${filename}`,
+    getRelativeStoragePath: (type: string, filename: string): string =>
+        `storage/${type}/${filename}`,
 }));
 
 vi.mock("@/lib/services/dashboardStatsCache", () => ({
@@ -124,6 +127,7 @@ describe("approval handler attachment storage", () => {
         ] as never);
         mocks.stat.mockResolvedValue({ size: 128 } as never);
         mocks.copyFile.mockResolvedValue(undefined);
+        mocks.rename.mockResolvedValue(undefined);
         mocks.unlink.mockResolvedValue(undefined);
         mocks.reserveStorageQuota.mockResolvedValue(true);
         mocks.userFileCreate.mockResolvedValue({
@@ -171,12 +175,22 @@ describe("approval handler attachment storage", () => {
         },
     );
 
-    it("copies selected attachment content before creating Approval attachment row", async () => {
+    it("copies selected attachment content before opening the transaction", async () => {
         const response = await handleApprovalGeneration(createFormData(), 1);
 
         expect(response.status).toBe(200);
+        expect(mocks.copyFile.mock.invocationCallOrder[0]).toBeLessThan(
+            mockedTransaction.mock.invocationCallOrder[0],
+        );
+        expect(mocks.rename.mock.invocationCallOrder[0]).toBeLessThan(
+            mockedTransaction.mock.invocationCallOrder[0],
+        );
         expect(mocks.copyFile).toHaveBeenCalledWith(
             "storage/attachments/source.pdf",
+            "storage/tmp/tmp_copied-source.pdf",
+        );
+        expect(mocks.rename).toHaveBeenCalledWith(
+            "storage/tmp/tmp_copied-source.pdf",
             "storage/attachments/copied-source.pdf",
         );
         expect(mocks.attachmentCreateMany).toHaveBeenCalledWith({
@@ -212,5 +226,17 @@ describe("approval handler attachment storage", () => {
         expect(mocks.unlink).toHaveBeenCalledWith(
             "storage/attachments/copied-source.pdf",
         );
+    });
+
+    it("cleans staged attachment content when staging fails", async () => {
+        mocks.rename.mockRejectedValueOnce(new Error("STAGING_FAILED"));
+
+        await expect(handleApprovalGeneration(createFormData(), 1)).rejects.toThrow(
+            "STAGING_FAILED",
+        );
+        expect(mocks.unlink).toHaveBeenCalledWith(
+            "storage/tmp/tmp_copied-source.pdf",
+        );
+        expect(mockedTransaction).not.toHaveBeenCalled();
     });
 });
