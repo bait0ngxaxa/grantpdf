@@ -8,6 +8,10 @@ import {
     validateAttachments,
     validateSignature,
 } from "./helpers";
+import {
+    createUploadIdempotencyKey,
+    withUploadIdempotencyKey,
+} from "../uploadRequest";
 
 export function useFormSubmit({
     formData,
@@ -134,10 +138,13 @@ export function useFormSubmit({
                 }
 
                 // Submit to API
-                const response = await fetch("/api/generate/approval", {
-                    method: "POST",
-                    body: data,
-                });
+                const response = await fetch(
+                    "/api/generate/approval",
+                    withUploadIdempotencyKey(
+                        { method: "POST", body: data },
+                        createUploadIdempotencyKey(),
+                    ),
+                );
 
                 if (response.ok) {
                     const result = await response.json();

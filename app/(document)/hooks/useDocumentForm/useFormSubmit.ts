@@ -3,6 +3,10 @@
 import { useCallback, type FormEvent } from "react";
 import { type UseFormSubmitProps } from "./types";
 import { buildFormData, appendSessionInfo } from "./helpers";
+import {
+    createUploadIdempotencyKey,
+    withUploadIdempotencyKey,
+} from "../uploadRequest";
 
 export function useFormSubmit<T extends object>({
     session,
@@ -50,10 +54,13 @@ export function useFormSubmit<T extends object>({
                     prepareFormData(formData, data);
                 }
 
-                const response = await fetch(apiEndpoint, {
-                    method: "POST",
-                    body: data,
-                });
+                const response = await fetch(
+                    apiEndpoint,
+                    withUploadIdempotencyKey(
+                        { method: "POST", body: data },
+                        createUploadIdempotencyKey(),
+                    ),
+                );
 
                 if (response.ok) {
                     const contentType = response.headers.get("content-type");

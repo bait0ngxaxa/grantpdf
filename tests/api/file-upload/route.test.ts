@@ -55,6 +55,9 @@ vi.mock("@/lib/services/documentRequestFingerprint", () => ({
 
 vi.mock("@/lib/services/documentIdempotencyService", () => ({
     completeDocumentIdempotency: vi.fn(),
+    getRequestIdempotencyKey: vi.fn((request: Request) =>
+        request.headers.get("idempotency-key"),
+    ),
     markDocumentIdempotencyRecoveryRequired: vi.fn(),
     startDocumentIdempotencyHeartbeat: vi.fn(() => vi.fn()),
 }));
@@ -140,6 +143,30 @@ describe("file upload route resource guards", () => {
             userId: 7,
             session: { user: { email: "tester@example.com" } },
         } as never);
+    });
+
+    it("rejects requests without an idempotency key before reading the upload", async () => {
+        const formData = vi.fn();
+        const request = {
+            url: "http://localhost/api/file-upload",
+            method: "POST",
+            headers: new Headers({ "x-real-ip": "203.0.113.10" }),
+            formData,
+        } as unknown as NextRequest;
+
+        mockedApplyRateLimit.mockResolvedValue({
+            success: true,
+            remaining: 9,
+            resetTime: Date.now() + 30_000,
+            headers: {},
+        });
+
+        const response = await POST(request);
+
+        expect(response.status).toBe(400);
+        expect(formData).not.toHaveBeenCalled();
+        expect(mockedStartUploadIdempotency).not.toHaveBeenCalled();
+        expect(mockedTransaction).not.toHaveBeenCalled();
     });
 
     it("rejects rate-limited requests before parsing multipart data", async () => {
@@ -256,7 +283,10 @@ describe("file upload route resource guards", () => {
         const request = {
             url: "http://localhost/api/file-upload",
             method: "POST",
-            headers: new Headers({ "x-real-ip": "203.0.113.10" }),
+            headers: new Headers({
+                "x-real-ip": "203.0.113.10",
+                "idempotency-key": "upload-key-quota",
+            }),
             formData: vi.fn().mockResolvedValue(formData),
         } as unknown as NextRequest;
 

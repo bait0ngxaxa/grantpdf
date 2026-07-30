@@ -14,6 +14,7 @@ import {
 import { logAudit } from "@/lib/server/audit/auditLog";
 import {
     FILE_UPLOAD,
+    IDEMPOTENCY_MESSAGES,
     RATE_LIMIT,
     STORAGE_QUOTA,
     getMaxUploadSizeBytesByFileName,
@@ -35,6 +36,7 @@ import {
 } from "@/lib/server/storage/uploadIdempotency";
 import {
     completeDocumentIdempotency,
+    getRequestIdempotencyKey,
     markDocumentIdempotencyRecoveryRequired,
     startDocumentIdempotencyHeartbeat,
 } from "@/lib/services/documentIdempotencyService";
@@ -83,6 +85,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             return rateLimitExceededResponse(
                 rateLimitResult,
                 "ส่งคำขออัปโหลดบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
+            );
+        }
+
+        if (!getRequestIdempotencyKey(request)) {
+            return validationErrorResponse(
+                IDEMPOTENCY_MESSAGES.REQUIRED_KEY,
+                rateLimitResult.headers,
             );
         }
 

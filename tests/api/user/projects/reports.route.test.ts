@@ -43,7 +43,10 @@ vi.mock("@/lib/api/responses", () => ({
         NextResponse.json({ error: "error" }, { status: 500 }),
     ),
     rateLimitExceededResponse: vi.fn(),
-    validationErrorResponse: vi.fn(),
+    validationErrorResponse: vi.fn(
+        (message: string, headers?: HeadersInit) =>
+            NextResponse.json({ error: message }, { status: 400, headers }),
+    ),
 }));
 
 vi.mock("@/lib/services/projectReportService", () => ({
@@ -67,6 +70,15 @@ vi.mock("@/lib/services/storageQuotaService", () => ({
 vi.mock("@/lib/server/storage/uploadIdempotency", () => ({
     failUploadIdempotency: vi.fn(),
     startUploadIdempotency: vi.fn(),
+}));
+
+vi.mock("@/lib/services/documentIdempotencyService", () => ({
+    completeDocumentIdempotency: vi.fn(),
+    getRequestIdempotencyKey: vi.fn((request: Request) =>
+        request.headers.get("idempotency-key"),
+    ),
+    markDocumentIdempotencyRecoveryRequired: vi.fn(),
+    startDocumentIdempotencyHeartbeat: vi.fn(() => vi.fn()),
 }));
 
 import { POST } from "@/app/api/(user)/projects/[id]/reports/route";
@@ -137,6 +149,30 @@ describe("project reports POST route resource guards", () => {
         });
     });
 
+    it("rejects requests without an idempotency key before reading the report", async () => {
+        mockedRequireUserSession.mockResolvedValue({
+            userId: 7,
+            session: { user: { id: "7", email: "tester@example.com" } },
+        } as never);
+        mockedIsGuardError.mockReturnValue(false);
+        const formData = vi.fn();
+        const request = {
+            url: "http://localhost/api/projects/12/reports",
+            method: "POST",
+            headers: new Headers({ "x-real-ip": "203.0.113.10" }),
+            formData,
+        } as unknown as NextRequest;
+
+        const response = await POST(request, {
+            params: Promise.resolve({ id: "12" }),
+        });
+
+        expect(response.status).toBe(400);
+        expect(formData).not.toHaveBeenCalled();
+        expect(mockedStartUploadIdempotency).not.toHaveBeenCalled();
+        expect(mockedCreateProjectReportWithFile).not.toHaveBeenCalled();
+    });
+
     it("rejects unauthenticated requests before rate limiting or multipart parsing", async () => {
         const formData = vi.fn().mockResolvedValue(new FormData());
         const request = {
@@ -173,7 +209,10 @@ describe("project reports POST route resource guards", () => {
         const request = {
             url: "http://localhost/api/projects/12/reports",
             method: "POST",
-            headers: new Headers({ "x-real-ip": "203.0.113.10" }),
+            headers: new Headers({
+                "x-real-ip": "203.0.113.10",
+                "idempotency-key": "report-key-order",
+            }),
             formData,
         } as unknown as NextRequest;
 
@@ -241,7 +280,10 @@ describe("project reports POST route resource guards", () => {
         const request = {
             url: "http://localhost/api/projects/12/reports",
             method: "POST",
-            headers: new Headers({ "x-real-ip": "203.0.113.10" }),
+            headers: new Headers({
+                "x-real-ip": "203.0.113.10",
+                "idempotency-key": "report-key-stream",
+            }),
             formData: vi.fn().mockResolvedValue(formData),
         } as unknown as NextRequest;
 

@@ -13,6 +13,7 @@ vi.mock("@/lib/server/db", () => ({
 
 import { prisma } from "@/lib/server/db";
 import {
+    getRequestIdempotencyKey,
     normalizeIdempotencyKey,
     startDocumentIdempotency,
     completeDocumentIdempotency,
@@ -49,6 +50,30 @@ describe("documentIdempotencyService", () => {
             expect(normalizeIdempotencyKey("  idem-key-001  ")).toBe(
                 "idem-key-001",
             );
+        });
+    });
+
+    describe("getRequestIdempotencyKey", () => {
+        it("reads and normalizes the primary or legacy request header", () => {
+            const primaryRequest = new Request("http://localhost", {
+                headers: { "Idempotency-Key": "  primary-key-001  " },
+            });
+            const legacyRequest = new Request("http://localhost", {
+                headers: { "X-Idempotency-Key": "legacy-key-001" },
+            });
+
+            expect(getRequestIdempotencyKey(primaryRequest)).toBe(
+                "primary-key-001",
+            );
+            expect(getRequestIdempotencyKey(legacyRequest)).toBe(
+                "legacy-key-001",
+            );
+        });
+
+        it("returns null when the request does not contain a valid key", () => {
+            const request = new Request("http://localhost");
+
+            expect(getRequestIdempotencyKey(request)).toBeNull();
         });
     });
 

@@ -89,6 +89,7 @@ export type { GetAuditLogsParams } from "./auditService";
 
 // Document Idempotency Service
 export {
+    getRequestIdempotencyKey,
     normalizeIdempotencyKey,
     startDocumentIdempotency,
     completeDocumentIdempotency,

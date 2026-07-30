@@ -5,10 +5,13 @@ import {
 } from "@/lib/document";
 import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { applyRateLimit } from "@/lib/server/rate-limit/rateLimit";
-import { IDEMPOTENCY_HEADERS, RATE_LIMIT } from "@/lib/shared/constants";
+import {
+    IDEMPOTENCY_MESSAGES,
+    RATE_LIMIT,
+} from "@/lib/shared/constants";
 import { logAudit } from "@/lib/server/audit/auditLog";
 import {
-    normalizeIdempotencyKey,
+    getRequestIdempotencyKey,
     startDocumentIdempotency,
     completeDocumentIdempotency,
     failDocumentIdempotency,
@@ -192,18 +195,6 @@ function validateDocumentPayload(
     return null;
 }
 
-function getIdempotencyKey(req: Request, formData: FormData): string | null {
-    const headerKey =
-        req.headers.get(IDEMPOTENCY_HEADERS.PRIMARY) ??
-        req.headers.get(IDEMPOTENCY_HEADERS.LEGACY);
-    if (headerKey) {
-        return headerKey;
-    }
-
-    const formKey = formData.get("idempotencyKey");
-    return typeof formKey === "string" ? formKey : null;
-}
-
 export async function POST(
     req: Request,
     { params }: { params: Promise<{ type: string }> }
@@ -254,6 +245,14 @@ export async function POST(
             );
         }
 
+        const idempotencyKey = getRequestIdempotencyKey(req);
+        if (!idempotencyKey) {
+            return validationErrorResponse(
+                IDEMPOTENCY_MESSAGES.REQUIRED_KEY,
+                rateLimitResult.headers,
+            );
+        }
+
         const formData = await req.formData();
         const validationError = validateDocumentPayload(type, formData);
         if (validationError) {
@@ -263,93 +262,82 @@ export async function POST(
             );
         }
 
-        const rawIdempotencyKey = getIdempotencyKey(req, formData);
-        if (rawIdempotencyKey) {
-            const normalizedKey = normalizeIdempotencyKey(rawIdempotencyKey);
-            if (!normalizedKey) {
-                return validationErrorResponse(
-                    "Idempotency-Key ไม่ถูกต้อง",
-                    rateLimitResult.headers,
-                );
-            }
+        const requestHash = await createDocumentRequestHash(formData);
+        const idempotency = await startDocumentIdempotency({
+            userId,
+            documentType: type,
+            idempotencyKey,
+            requestHash,
+        });
 
-            const requestHash = await createDocumentRequestHash(formData);
-            const idempotency = await startDocumentIdempotency({
-                userId,
-                documentType: type,
-                idempotencyKey: normalizedKey,
-                requestHash,
+        if (idempotency.type === "replay") {
+            logAudit("DOCUMENT_GENERATE", auditUserId, {
+                outcome: "success",
+                userEmail: auditUserEmail,
+                ip: getClientIp(req),
+                userAgent: getUserAgent(req),
+                requestId: getRequestId(req),
+                targetType: "document",
+                details: {
+                    documentType: auditType,
+                    replayed: true,
+                    responseStatus: idempotency.replay.statusCode,
+                },
             });
 
-            if (idempotency.type === "replay") {
-                logAudit("DOCUMENT_GENERATE", auditUserId, {
-                    outcome: "success",
-                    userEmail: auditUserEmail,
-                    ip: getClientIp(req),
-                    userAgent: getUserAgent(req),
-                    requestId: getRequestId(req),
-                    targetType: "document",
-                    details: {
-                        documentType: auditType,
-                        replayed: true,
-                        responseStatus: idempotency.replay.statusCode,
-                    },
-                });
-
-                return NextResponse.json(idempotency.replay.responseBody, {
-                    status: idempotency.replay.statusCode,
-                    headers: {
-                        ...rateLimitResult.headers,
-                        "Idempotent-Replayed": "true",
-                    },
-                });
-            }
-
-            if (idempotency.type === "payload_mismatch") {
-                return NextResponse.json(
-                    {
-                        error:
-                            "Idempotency-Key นี้ถูกใช้กับข้อมูลคำขออื่นแล้ว กรุณาใช้ key ใหม่",
-                    },
-                    { status: 409, headers: rateLimitResult.headers },
-                );
-            }
-
-            if (idempotency.type === "in_progress") {
-                return NextResponse.json(
-                    { error: "คำขอนี้กำลังประมวลผลอยู่ กรุณารอสักครู่" },
-                    { status: 409, headers: rateLimitResult.headers },
-                );
-            }
-
-            if (idempotency.type === "failed") {
-                return NextResponse.json(
-                    {
-                        error:
-                            "Idempotency-Key นี้เคยล้มเหลวแล้ว กรุณาใช้ key ใหม่เพื่อส่งคำขออีกครั้ง",
-                    },
-                    { status: 409, headers: rateLimitResult.headers },
-                );
-            }
-
-            if (idempotency.type === "recovery_required") {
-                return NextResponse.json(
-                    {
-                        error:
-                            "คำขอนี้สร้างผลลัพธ์แล้วและอยู่ระหว่างการกู้คืน กรุณาติดต่อผู้ดูแลระบบ",
-                        recoveryRequired: true,
-                    },
-                    { status: 503, headers: rateLimitResult.headers },
-                );
-            }
-
-            idempotencyRecordId = idempotency.recordId;
-            idempotencyLeaseToken = idempotency.leaseToken;
-            stopHeartbeat = startDocumentIdempotencyHeartbeat({
-                recordId: idempotencyRecordId,
-                leaseToken: idempotencyLeaseToken,
+            return NextResponse.json(idempotency.replay.responseBody, {
+                status: idempotency.replay.statusCode,
+                headers: {
+                    ...rateLimitResult.headers,
+                    "Idempotent-Replayed": "true",
+                },
             });
         }
+
+        if (idempotency.type === "payload_mismatch") {
+            return NextResponse.json(
+                {
+                    error:
+                        "Idempotency-Key นี้ถูกใช้กับข้อมูลคำขออื่นแล้ว กรุณาใช้ key ใหม่",
+                },
+                { status: 409, headers: rateLimitResult.headers },
+            );
+        }
+
+        if (idempotency.type === "in_progress") {
+            return NextResponse.json(
+                { error: "คำขอนี้กำลังประมวลผลอยู่ กรุณารอสักครู่" },
+                { status: 409, headers: rateLimitResult.headers },
+            );
+        }
+
+        if (idempotency.type === "failed") {
+            return NextResponse.json(
+                {
+                    error:
+                        "Idempotency-Key นี้เคยล้มเหลวแล้ว กรุณาใช้ key ใหม่เพื่อส่งคำขออีกครั้ง",
+                },
+                { status: 409, headers: rateLimitResult.headers },
+            );
+        }
+
+        if (idempotency.type === "recovery_required") {
+            return NextResponse.json(
+                {
+                    error:
+                        "คำขอนี้สร้างผลลัพธ์แล้วและอยู่ระหว่างการกู้คืน กรุณาติดต่อผู้ดูแลระบบ",
+                    recoveryRequired: true,
+                },
+                { status: 503, headers: rateLimitResult.headers },
+            );
+        }
+
+        idempotencyRecordId = idempotency.recordId;
+        idempotencyLeaseToken = idempotency.leaseToken;
+        stopHeartbeat = startDocumentIdempotencyHeartbeat({
+            recordId: idempotencyRecordId,
+            leaseToken: idempotencyLeaseToken,
+        });
 
         const idempotencyContext: DocumentIdempotencyContext | undefined =
             idempotencyRecordId !== null && idempotencyLeaseToken

@@ -6,6 +6,7 @@ import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { prisma } from "@/lib/server/db";
 import {
     FILE_UPLOAD,
+    IDEMPOTENCY_MESSAGES,
     RATE_LIMIT,
     getMaxUploadSizeBytesByFileName,
     getMaxUploadSizeMbByFileName,
@@ -38,6 +39,7 @@ import {
 } from "@/lib/services/projectReportService";
 import {
     completeDocumentIdempotency,
+    getRequestIdempotencyKey,
     markDocumentIdempotencyRecoveryRequired,
     startDocumentIdempotencyHeartbeat,
     type IdempotencyCompletionContext,
@@ -189,6 +191,13 @@ export async function POST(
             return rateLimitExceededResponse(
                 rateLimitResult,
                 "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่อีกครั้ง",
+            );
+        }
+
+        if (!getRequestIdempotencyKey(req)) {
+            return validationErrorResponse(
+                IDEMPOTENCY_MESSAGES.REQUIRED_KEY,
+                rateLimitResult.headers,
             );
         }
 

@@ -33,6 +33,9 @@ vi.mock("@/lib/server/audit/auditLog", () => ({
 }));
 
 vi.mock("@/lib/services/documentIdempotencyService", () => ({
+    getRequestIdempotencyKey: vi.fn((request: Request) =>
+        request.headers.get("idempotency-key"),
+    ),
     normalizeIdempotencyKey: vi.fn((key: string) => key),
     startDocumentIdempotency: vi.fn(),
     completeDocumentIdempotency: vi.fn(),
@@ -95,7 +98,7 @@ function buildParams(type: string): Promise<{ type: string }> {
 }
 
 function buildRequest(
-    idempotencyKey: string,
+    idempotencyKey?: string,
     activities = "[]",
 ): Request {
     const formData = new FormData();
@@ -118,18 +121,23 @@ function buildRequest(
     formData.set("date", "2026-04-07");
     formData.set("activities", activities);
 
+    const headers = new Headers({
+        "x-forwarded-for": "203.0.113.20",
+        "x-request-id": "req-test-001",
+    });
+    if (idempotencyKey) headers.set("idempotency-key", idempotencyKey);
+
     return new Request("http://localhost/api/generate/tor", {
         method: "POST",
-        headers: {
-            "idempotency-key": idempotencyKey,
-            "x-forwarded-for": "203.0.113.20",
-            "x-request-id": "req-test-001",
-        },
+        headers,
         body: formData,
     });
 }
 
-function buildApprovalRequest(attachments: string): Request {
+function buildApprovalRequest(
+    attachments: string,
+    idempotencyKey = "idem-key-approval",
+): Request {
     const formData = new FormData();
     formData.set("head", "เลขที่หนังสือ");
     formData.set("fileName", "หนังสือขออนุมัติ");
@@ -149,6 +157,7 @@ function buildApprovalRequest(attachments: string): Request {
 
     return new Request("http://localhost/api/generate/approval", {
         method: "POST",
+        headers: { "idempotency-key": idempotencyKey },
         body: formData,
     });
 }
@@ -212,6 +221,17 @@ describe("document generate route idempotency", () => {
         expect(body.success).toBe(true);
         expect(mockedCompleteDocumentIdempotency).toHaveBeenCalledOnce();
         expect(mockedFailDocumentIdempotency).not.toHaveBeenCalled();
+    });
+
+    it("rejects requests without an idempotency key before generation", async () => {
+        const response = await POST(buildRequest(), {
+            params: buildParams("tor"),
+        });
+
+        expect(response.status).toBe(400);
+        expect(mockedStartDocumentIdempotency).not.toHaveBeenCalled();
+        expect(mockedCreateDocumentRequestHash).not.toHaveBeenCalled();
+        expect(mockedHandleTorGeneration).not.toHaveBeenCalled();
     });
 
     it("replays cached response when key already completed", async () => {

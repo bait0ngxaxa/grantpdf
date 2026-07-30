@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/server/db";
-import { IDEMPOTENCY } from "@/lib/shared/constants";
+import {
+    IDEMPOTENCY,
+    IDEMPOTENCY_HEADERS,
+} from "@/lib/shared/constants";
 
 export type DocumentType =
     | "tor"
@@ -82,6 +85,15 @@ export function normalizeIdempotencyKey(rawKey: string | null): string | null {
     const trimmed = rawKey.trim();
     if (trimmed.length < 8 || trimmed.length > 128) return null;
     return trimmed;
+}
+
+export function getRequestIdempotencyKey(
+    request: Request,
+): string | null {
+    const rawKey =
+        request.headers.get(IDEMPOTENCY_HEADERS.PRIMARY) ??
+        request.headers.get(IDEMPOTENCY_HEADERS.LEGACY);
+    return normalizeIdempotencyKey(rawKey);
 }
 
 function isUniqueConstraintError(error: unknown): boolean {

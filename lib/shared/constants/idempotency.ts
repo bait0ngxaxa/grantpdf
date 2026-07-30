@@ -3,6 +3,10 @@ export const IDEMPOTENCY_HEADERS = {
     LEGACY: "X-Idempotency-Key",
 } as const;
 
+export const IDEMPOTENCY_MESSAGES = {
+    REQUIRED_KEY: "กรุณาระบุ Idempotency-Key ที่ถูกต้อง",
+} as const;
+
 export const IDEMPOTENCY = {
     LEASE_DURATION_MS: 5 * 60 * 1000,
     LEASE_HEARTBEAT_INTERVAL_MS: 60 * 1000,

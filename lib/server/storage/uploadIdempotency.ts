@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import {
     failDocumentIdempotency,
-    normalizeIdempotencyKey,
+    getRequestIdempotencyKey,
     startDocumentIdempotency,
     type DocumentType as IdempotentDocumentType,
 } from "@/lib/services/documentIdempotencyService";
-import { IDEMPOTENCY_HEADERS } from "@/lib/shared/constants";
+import { IDEMPOTENCY_MESSAGES } from "@/lib/shared/constants";
 
 type StartUploadIdempotencyResult =
     | { type: "started"; recordId: bigint; leaseToken: string }
@@ -17,14 +17,12 @@ export async function startUploadIdempotency(
     documentType: IdempotentDocumentType,
     requestHash: string,
 ): Promise<StartUploadIdempotencyResult> {
-    const idempotencyKey = normalizeIdempotencyKey(
-        request.headers.get(IDEMPOTENCY_HEADERS.PRIMARY),
-    );
+    const idempotencyKey = getRequestIdempotencyKey(request);
     if (!idempotencyKey) {
         return {
             type: "response",
             response: NextResponse.json(
-                { error: "กรุณาระบุ Idempotency-Key ที่ถูกต้อง" },
+                { error: IDEMPOTENCY_MESSAGES.REQUIRED_KEY },
                 { status: 400 },
             ),
         };
