@@ -68,10 +68,8 @@ export async function getAllFilesForAdmin(
         },
     });
 
-    const sanitizedFiles = (allUserFiles as unknown as RawFile[]).map(
-        sanitizeFile,
-    );
-    return filterOutAttachmentFiles(sanitizedFiles);
+    const rawFiles = allUserFiles as unknown as RawFile[];
+    return filterOutAttachmentFiles(rawFiles).map(sanitizeFile);
 }
 
 export async function getFilesByUserId({
@@ -115,13 +113,12 @@ export async function getFilesByUserId({
     });
 
     const pageFiles = userFiles.slice(0, safeLimit);
-    const sanitizedFiles = (pageFiles as unknown as RawFile[]).map((file) => ({
+    const rawPageFiles = pageFiles as unknown as RawFile[];
+    const items = filterOutAttachmentFiles(rawPageFiles).map((file) => ({
         ...sanitizeFile(file),
         userName: "",
         userEmail: "",
     }));
-
-    const items = filterOutAttachmentFiles(sanitizedFiles);
     const cursorFile = pageFiles.at(-1);
     const nextCursor =
         userFiles.length > safeLimit && cursorFile

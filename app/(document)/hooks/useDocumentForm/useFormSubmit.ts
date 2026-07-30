@@ -70,8 +70,7 @@ export function useFormSubmit<T extends object>({
                         contentType.includes("application/json")
                     ) {
                         const result = await response.json();
-                        const fileUrl =
-                            result.storagePath || result.downloadUrl;
+                        const fileUrl = result.downloadUrl;
 
                         if (result.success && fileUrl) {
                             setGeneratedFileUrl(fileUrl);

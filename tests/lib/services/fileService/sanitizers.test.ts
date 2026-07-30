@@ -5,7 +5,6 @@ import {
     filterOutAttachmentFiles,
 } from "@/lib/services/fileService/sanitizers";
 import type { RawFile, RawAttachment } from "@/lib/services/fileService/types";
-import type { AdminDocumentFile } from "@/type/models";
 
 // Helper to create mock dates
 const mockDate = new Date("2025-01-15T10:00:00Z");
@@ -58,8 +57,12 @@ describe("sanitizeAttachments", () => {
         expect(result).toHaveLength(2);
         expect(result[0].id).toBe("1");
         expect(result[0].fileName).toBe("file1.pdf");
-        expect(result[0].filePath).toBe("/storage/attachment.pdf");
-        expect(result[1].filePath).toBeUndefined();
+        expect(result[0].downloadUrl).toBe("/api/attachment/download/1");
+        expect(result[0].previewUrl).toBe(
+            "/api/preview?fileId=1&type=attachment",
+        );
+        expect(result[0]).not.toHaveProperty("filePath");
+        expect(result[1]).not.toHaveProperty("filePath");
     });
 
     it("should convert bigint id to string", () => {
@@ -80,7 +83,11 @@ describe("sanitizeFile", () => {
         expect(result.id).toBe("1");
         expect(result.userId).toBe("100");
         expect(result.originalFileName).toBe("document.docx");
-        expect(result.storagePath).toBe("/storage/document.docx");
+        expect(result.downloadUrl).toBe("/api/user-docs/download/1");
+        expect(result.previewUrl).toBe(
+            "/api/preview?fileId=1&type=userFile",
+        );
+        expect(result).not.toHaveProperty("storagePath");
         expect(result.fileExtension).toBe("docx");
         expect(result.downloadStatus).toBe("pending");
         expect(result.userName).toBe("Test User");
@@ -137,50 +144,41 @@ describe("sanitizeFile", () => {
 });
 
 describe("filterOutAttachmentFiles", () => {
-    const createAdminFile = (
+    const createRawFileForFiltering = (
         id: string,
         storagePath: string,
-        attachmentFiles?: AdminDocumentFile["attachmentFiles"],
-    ): AdminDocumentFile => ({
-        id,
-        userId: "100",
-        originalFileName: `file-${id}.pdf`,
-        storagePath,
-        fileExtension: "pdf",
-        downloadStatus: "pending",
-        created_at: mockDate.toISOString(),
-        updated_at: mockDate.toISOString(),
-        fileName: `file-${id}.pdf`,
-        createdAt: mockDate.toISOString(),
-        lastModified: mockDate.toISOString(),
-        attachmentFiles,
-    });
+        attachmentFiles?: RawAttachment[],
+    ): RawFile =>
+        createRawFile({
+            id: BigInt(id),
+            originalFileName: `file-${id}.pdf`,
+            storagePath,
+            fileExtension: "pdf",
+            attachmentFiles,
+        });
 
     it("should filter out files that are attachments of other files", () => {
-        const files: AdminDocumentFile[] = [
-            createAdminFile("1", "/storage/main.pdf", [
-                {
-                    id: "att1",
-                    fileName: "attachment.pdf",
+        const files: RawFile[] = [
+            createRawFileForFiltering("1", "/storage/main.pdf", [
+                createRawAttachment({
+                    id: BigInt(1),
                     filePath: "/storage/attachment.pdf",
-                    fileSize: 100,
-                    mimeType: "application/pdf",
-                },
+                }),
             ]),
-            createAdminFile("2", "/storage/attachment.pdf"), // This is an attachment
-            createAdminFile("3", "/storage/other.pdf"),
+            createRawFileForFiltering("2", "/storage/attachment.pdf"),
+            createRawFileForFiltering("3", "/storage/other.pdf"),
         ];
 
         const result = filterOutAttachmentFiles(files);
 
         expect(result).toHaveLength(2);
-        expect(result.map((f) => f.id)).toEqual(["1", "3"]);
+        expect(result.map((f) => f.id.toString())).toEqual(["1", "3"]);
     });
 
     it("should return all files when no attachments", () => {
-        const files: AdminDocumentFile[] = [
-            createAdminFile("1", "/storage/file1.pdf"),
-            createAdminFile("2", "/storage/file2.pdf"),
+        const files: RawFile[] = [
+            createRawFileForFiltering("1", "/storage/file1.pdf"),
+            createRawFileForFiltering("2", "/storage/file2.pdf"),
         ];
 
         const result = filterOutAttachmentFiles(files);
@@ -189,9 +187,9 @@ describe("filterOutAttachmentFiles", () => {
     });
 
     it("should handle empty attachmentFiles array", () => {
-        const files: AdminDocumentFile[] = [
-            createAdminFile("1", "/storage/file1.pdf", []),
-            createAdminFile("2", "/storage/file2.pdf", []),
+        const files: RawFile[] = [
+            createRawFileForFiltering("1", "/storage/file1.pdf", []),
+            createRawFileForFiltering("2", "/storage/file2.pdf", []),
         ];
 
         const result = filterOutAttachmentFiles(files);
@@ -200,16 +198,11 @@ describe("filterOutAttachmentFiles", () => {
     });
 
     it("should handle attachments without filePath", () => {
-        const files: AdminDocumentFile[] = [
-            createAdminFile("1", "/storage/main.pdf", [
-                {
-                    id: "att1",
-                    fileName: "attachment.pdf",
-                    fileSize: 100,
-                    mimeType: "application/pdf",
-                }, // no filePath
+        const files: RawFile[] = [
+            createRawFileForFiltering("1", "/storage/main.pdf", [
+                createRawAttachment({ filePath: null }),
             ]),
-            createAdminFile("2", "/storage/file2.pdf"),
+            createRawFileForFiltering("2", "/storage/file2.pdf"),
         ];
 
         const result = filterOutAttachmentFiles(files);
@@ -218,7 +211,7 @@ describe("filterOutAttachmentFiles", () => {
     });
 
     it("should handle empty input", () => {
-        const result = filterOutAttachmentFiles([]);
+        const result = filterOutAttachmentFiles([] as RawFile[]);
         expect(result).toEqual([]);
     });
 });

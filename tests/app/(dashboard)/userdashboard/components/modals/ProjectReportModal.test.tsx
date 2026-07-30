@@ -50,10 +50,11 @@ const submittedReport: ProjectReport = {
     file: {
         id: "501",
         originalFileName: "report.pdf",
-        storagePath: "storage/reports/report.pdf",
         created_at: "2026-01-02T00:00:00.000Z",
         updated_at: "2026-01-02T00:00:00.000Z",
         fileExtension: ".pdf",
+        downloadUrl: "/api/user-docs/download/501",
+        previewUrl: "/api/preview?fileId=501&type=userFile",
     },
 };
 

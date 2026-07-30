@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getFileResourceUrls } from "@/lib/domain/files";
 import { isGuardError, requireUserSession } from "@/lib/server/auth/guards";
 import { prisma } from "@/lib/server/db";
 import path from "path";
@@ -233,13 +234,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 actorUserId: guard.userId,
             });
 
+            const fileId = createdFile.id.toString();
             const responseBody = {
                 success: true,
                 message: "อัปโหลดไฟล์สำเร็จ",
+                fileId,
                 file: {
-                    id: createdFile.id.toString(),
+                    id: fileId,
                     originalFileName: createdFile.originalFileName,
-                    storagePath: createdFile.storagePath,
+                    ...getFileResourceUrls(fileId, "userFile"),
                 },
                 project: {
                     id: project.id.toString(),

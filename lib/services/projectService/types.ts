@@ -50,8 +50,8 @@ export interface RawProjectReportSummary {
 }
 
 export interface ProjectsResult {
-    projects: AdminProject[];
-    orphanFiles?: AdminDocumentFile[];
+    projects: RawProject[];
+    orphanFiles?: RawFile[];
 }
 
 export interface StatusCounts {

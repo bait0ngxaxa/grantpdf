@@ -8,7 +8,6 @@ import {
     filterOutAttachments,
 } from "@/lib/services/projectService/sanitizers";
 import type { RawProject, RawFile, RawAttachment } from "@/lib/services/projectService/types";
-import type { AdminProject, AdminDocumentFile } from "@/type/models";
 
 // Helper to create mock dates
 const mockDate = new Date("2025-01-15T10:00:00Z");
@@ -78,7 +77,10 @@ describe("sanitizeAttachments", () => {
         expect(result!).toHaveLength(2);
         expect(result![0].id).toBe("1");
         expect(result![0].fileName).toBe("file1.pdf");
-        expect(result![1].filePath).toBeUndefined();
+        expect(result![0].downloadUrl).toBe(
+            "/api/attachment/download/1",
+        );
+        expect(result![1]).not.toHaveProperty("filePath");
     });
 });
 
@@ -223,67 +225,32 @@ describe("sanitizeOrphanFiles", () => {
 
 describe("collectAttachmentPaths", () => {
     it("should collect paths from projects and orphan files", () => {
-        const projects: AdminProject[] = [
-            {
-                id: "1",
-                name: "Project",
-                status: "active",
-                created_at: mockDate.toISOString(),
-                updated_at: mockDate.toISOString(),
-                userId: "100",
-                userName: "User",
-                userEmail: "user@test.com",
+        const projects: RawProject[] = [
+            createRawProject({
                 files: [
-                    {
-                        id: "1",
-                        userId: "100",
-                        originalFileName: "doc.pdf",
-                        storagePath: "/storage/doc.pdf",
-                        fileExtension: "pdf",
-                        downloadStatus: "pending",
-                        created_at: mockDate.toISOString(),
-                        updated_at: mockDate.toISOString(),
-                        fileName: "doc.pdf",
-                        createdAt: mockDate.toISOString(),
-                        lastModified: mockDate.toISOString(),
+                    createRawFile({
                         attachmentFiles: [
-                            {
-                                id: "1",
-                                fileName: "att1.pdf",
+                            createRawAttachment({
+                                id: BigInt(1),
                                 filePath: "/att/1.pdf",
-                                fileSize: 100,
-                                mimeType: "application/pdf",
-                            },
+                            }),
                         ],
-                    },
+                    }),
                 ],
-                _count: { files: 1 },
-            },
+            }),
         ];
 
-        const orphanFiles: AdminDocumentFile[] = [
-            {
-                id: "2",
-                userId: "100",
-                originalFileName: "orphan.pdf",
+        const orphanFiles: RawFile[] = [
+            createRawFile({
+                id: BigInt(2),
                 storagePath: "/storage/orphan.pdf",
-                fileExtension: "pdf",
-                downloadStatus: "pending",
-                created_at: mockDate.toISOString(),
-                updated_at: mockDate.toISOString(),
-                fileName: "orphan.pdf",
-                createdAt: mockDate.toISOString(),
-                lastModified: mockDate.toISOString(),
                 attachmentFiles: [
-                    {
-                        id: "2",
-                        fileName: "att2.pdf",
+                    createRawAttachment({
+                        id: BigInt(2),
                         filePath: "/att/2.pdf",
-                        fileSize: 200,
-                        mimeType: "application/pdf",
-                    },
+                    }),
                 ],
-            },
+            }),
         ];
 
         const result = collectAttachmentPaths(projects, orphanFiles);
@@ -294,41 +261,16 @@ describe("collectAttachmentPaths", () => {
     });
 
     it("should skip attachments without filePath", () => {
-        const projects: AdminProject[] = [
-            {
-                id: "1",
-                name: "Project",
-                status: "active",
-                created_at: mockDate.toISOString(),
-                updated_at: mockDate.toISOString(),
-                userId: "100",
-                userName: "User",
-                userEmail: "user@test.com",
+        const projects: RawProject[] = [
+            createRawProject({
                 files: [
-                    {
-                        id: "1",
-                        userId: "100",
-                        originalFileName: "doc.pdf",
-                        storagePath: "/storage/doc.pdf",
-                        fileExtension: "pdf",
-                        downloadStatus: "pending",
-                        created_at: mockDate.toISOString(),
-                        updated_at: mockDate.toISOString(),
-                        fileName: "doc.pdf",
-                        createdAt: mockDate.toISOString(),
-                        lastModified: mockDate.toISOString(),
+                    createRawFile({
                         attachmentFiles: [
-                            {
-                                id: "1",
-                                fileName: "att1.pdf",
-                                fileSize: 100,
-                                mimeType: "application/pdf",
-                            }, // no filePath
+                            createRawAttachment({ filePath: null }),
                         ],
-                    },
+                    }),
                 ],
-                _count: { files: 1 },
-            },
+            }),
         ];
 
         const result = collectAttachmentPaths(projects, []);
@@ -339,56 +281,27 @@ describe("collectAttachmentPaths", () => {
 
 describe("filterOutAttachments", () => {
     it("should filter out files that are attachments", () => {
-        const mockDateStr = mockDate.toISOString();
-        const projects: AdminProject[] = [
-            {
-                id: "1",
-                name: "Project",
-                status: "active",
-                created_at: mockDateStr,
-                updated_at: mockDateStr,
-                userId: "100",
-                userName: "User",
-                userEmail: "user@test.com",
+        const projects: RawProject[] = [
+            createRawProject({
                 files: [
-                    {
-                        id: "1",
-                        userId: "100",
-                        originalFileName: "main.pdf",
+                    createRawFile({
                         storagePath: "/storage/main.pdf",
-                        fileExtension: "pdf",
-                        downloadStatus: "pending",
-                        created_at: mockDateStr,
-                        updated_at: mockDateStr,
-                        fileName: "main.pdf",
-                        createdAt: mockDateStr,
-                        lastModified: mockDateStr,
-                        attachmentFiles: [],
-                    },
-                    {
-                        id: "2",
-                        userId: "100",
+                    }),
+                    createRawFile({
+                        id: BigInt(2),
                         originalFileName: "attachment.pdf",
-                        storagePath: "/storage/attachment.pdf", // This is an attachment path
-                        fileExtension: "pdf",
-                        downloadStatus: "pending",
-                        created_at: mockDateStr,
-                        updated_at: mockDateStr,
-                        fileName: "attachment.pdf",
-                        createdAt: mockDateStr,
-                        lastModified: mockDateStr,
-                        attachmentFiles: [],
-                    },
+                        storagePath: "/storage/attachment.pdf",
+                    }),
                 ],
                 _count: { files: 2 },
-            },
+            }),
         ];
 
         const attachmentPaths = new Set(["/storage/attachment.pdf"]);
         const result = filterOutAttachments(projects, [], attachmentPaths);
 
         expect(result.projects[0].files).toHaveLength(1);
-        expect(result.projects[0].files[0].storagePath).toBe(
+        expect(result.projects[0]?.files?.[0]?.storagePath).toBe(
             "/storage/main.pdf",
         );
     });

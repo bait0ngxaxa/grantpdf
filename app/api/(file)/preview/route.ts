@@ -1,5 +1,5 @@
 // API สำหรับ preview ไฟล์ (PDF) - รองรับทั้ง user และ admin
-// รับ storagePath เป็น query parameter
+// รับ fileId และ type เป็น query parameters
 
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
@@ -15,63 +15,67 @@ import { getFullPathFromStoragePath, getMimeType } from "@/lib/server/storage";
 import { publicErrorResponse } from "@/lib/api/responses";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import { canAccessProjectFile } from "@/lib/services/projectService";
+import { parsePositiveIntId } from "@/lib/shared/http/id";
+import type { FileResourceType } from "@/lib/domain/files";
 
-const SAFE_PATH_PREFIX = "storage/";
-
-/** Reject path traversal and ensure the path starts with storage/ */
-function isValidStoragePath(p: string): boolean {
-    return p.startsWith(SAFE_PATH_PREFIX) && !p.includes("..");
-}
-
-/** Resolve the file owner ID and display name from UserFile or AttachmentFile */
-async function resolveFileOwnership(
-    storagePath: string
-): Promise<{
+interface PreviewFile {
+    storagePath: string;
     ownerId: number;
     displayName: string;
     projectId: number | null;
-} | null> {
-    const userFile = await prisma.userFile.findFirst({
-        where: {
-            storagePath,
-            deletionStatus: FILE_DELETION_STATUS.ACTIVE,
-        },
-        select: {
-            userId: true,
-            projectId: true,
-            originalFileName: true,
-        },
-    });
+}
 
-    if (userFile) {
-        return {
-            ownerId: userFile.userId,
-            displayName: userFile.originalFileName,
-            projectId: userFile.projectId,
-        };
+/** Resolve the owner and internal path from a file ID. */
+async function resolvePreviewFile(
+    fileId: number,
+    type: FileResourceType,
+): Promise<PreviewFile | null> {
+    if (type === "userFile") {
+        const userFile = await prisma.userFile.findFirst({
+            where: {
+                id: fileId,
+                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+            },
+            select: {
+                storagePath: true,
+                userId: true,
+                projectId: true,
+                originalFileName: true,
+            },
+        });
+
+        return userFile
+            ? {
+                  storagePath: userFile.storagePath,
+                  ownerId: userFile.userId,
+                  displayName: userFile.originalFileName,
+                  projectId: userFile.projectId,
+              }
+            : null;
     }
 
     const attachmentFile = await prisma.attachmentFile.findFirst({
         where: {
-            filePath: storagePath,
+            id: fileId,
             userFile: { deletionStatus: FILE_DELETION_STATUS.ACTIVE },
         },
-        include: {
+        select: {
+            filePath: true,
+            fileName: true,
             userFile: {
                 select: { userId: true, projectId: true },
             },
         },
     });
 
-    if (attachmentFile) {
-        return {
-            ownerId: attachmentFile.userFile.userId,
-            displayName: attachmentFile.fileName,
-            projectId: attachmentFile.userFile.projectId,
-        };
-    }
-
-    return null;
+    return attachmentFile
+        ? {
+              storagePath: attachmentFile.filePath,
+              ownerId: attachmentFile.userFile.userId,
+              displayName: attachmentFile.fileName,
+              projectId: attachmentFile.userFile.projectId,
+          }
+        : null;
 }
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -80,17 +84,23 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         const guard = await requireUserSession();
         if (isGuardError(guard)) return guard;
 
-        // 2. Input validation — prevent path traversal
-        const storagePath = req.nextUrl.searchParams.get("path");
-        if (!storagePath || !isValidStoragePath(storagePath)) {
+        // 2. Input validation
+        const fileId = parsePositiveIntId(
+            req.nextUrl.searchParams.get("fileId"),
+        );
+        const type = req.nextUrl.searchParams.get("type");
+        if (
+            fileId === null ||
+            (type !== "userFile" && type !== "attachment")
+        ) {
             return NextResponse.json(
-                { error: "พาธไฟล์ไม่ถูกต้องหรือไม่ได้ระบุพาธไฟล์" },
+                { error: "ข้อมูลไฟล์ไม่ถูกต้องหรือไม่ได้ระบุไฟล์" },
                 { status: 400 }
             );
         }
 
-        // 3. DB lookup — resolve owner for permission check
-        const ownership = await resolveFileOwnership(storagePath);
+        // 3. DB lookup — resolve owner and internal path for permission check
+        const ownership = await resolvePreviewFile(fileId, type);
         if (!ownership) {
             return NextResponse.json(
                 { error: "ไม่พบไฟล์" },
@@ -116,7 +126,25 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
 
         // 5. Read file via streaming (non-blocking)
-        const fullPath = getFullPathFromStoragePath(storagePath);
+        let fullPath: string;
+        try {
+            fullPath = getFullPathFromStoragePath(ownership.storagePath);
+        } catch (error: unknown) {
+            if (
+                error instanceof Error &&
+                error.message === "STORAGE_PATH_OUTSIDE_ROOT"
+            ) {
+                console.error("Preview file path is outside storage root", {
+                    fileId,
+                    type,
+                });
+                return NextResponse.json(
+                    { error: "ไม่พบไฟล์" },
+                    { status: 404 },
+                );
+            }
+            throw error;
+        }
 
         let fileSize: number;
         try {

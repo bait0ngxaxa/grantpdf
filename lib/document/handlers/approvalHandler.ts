@@ -377,7 +377,7 @@ export async function handleApprovalGeneration(
         idempotency,
         projectResolution.project,
     );
-    let relativeStoragePath: string | null = null;
+    let resourceId: number | null = null;
     let copiedAttachments: CopiedAttachmentFiles = { files: [], paths: [] };
 
     try {
@@ -386,7 +386,7 @@ export async function handleApprovalGeneration(
             userId,
             async () => {
                 copiedAttachments = await copyAttachmentFiles(attachmentFiles);
-                ({ relativeStoragePath } = await saveDocumentToStorage(
+                ({ resourceId } = await saveDocumentToStorage(
                     outputBuffer,
                     projectName,
                     "docx",
@@ -458,11 +458,11 @@ export async function handleApprovalGeneration(
         throw error;
     }
 
-    if (relativeStoragePath === null) {
-        throw new Error("DOCUMENT_STORAGE_PATH_REQUIRED");
+    if (resourceId === null) {
+        throw new Error("DOCUMENT_RESOURCE_ID_REQUIRED");
     }
 
     await invalidateDashboardStats([userId]);
 
-    return buildSuccessResponse(relativeStoragePath, projectResolution.project);
+    return buildSuccessResponse(resourceId, projectResolution.project);
 }

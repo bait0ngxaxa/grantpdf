@@ -166,6 +166,7 @@ describe("approval handler attachment storage", () => {
                 return {
                     filePath: "storage/documents/approval.docx",
                     relativeStoragePath: "storage/documents/approval.docx",
+                    resourceId: 99,
                 };
             },
         );

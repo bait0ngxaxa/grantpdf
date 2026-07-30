@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getFileResourceUrls } from "@/lib/domain/files";
 import type {
     DocumentIdempotencyContext,
     DocumentRecordCompletion,
@@ -13,12 +14,14 @@ export function handleDocumentError(error: unknown): NextResponse {
 }
 
 export function createDocumentResponseBody(
-    storagePath: string,
+    fileId: number,
     project: ProjectResult,
 ): Record<string, unknown> {
+    const id = fileId.toString();
     return {
         success: true,
-        storagePath,
+        fileId: id,
+        ...getFileResourceUrls(id, "userFile"),
         project: {
             id: project.id.toString(),
             name: project.name,
@@ -32,17 +35,17 @@ export function createDocumentRecordCompletion(
     project: ProjectResult,
 ): DocumentRecordCompletion | undefined {
     if (!idempotency) return undefined;
-    return (tx, resourceId, storagePath) =>
+    return (tx, resourceId) =>
         idempotency.complete(
             tx,
             resourceId,
-            createDocumentResponseBody(storagePath, project),
+            createDocumentResponseBody(resourceId, project),
         );
 }
 
 export function buildSuccessResponse(
-    storagePath: string,
+    fileId: number,
     project: ProjectResult,
 ): NextResponse {
-    return NextResponse.json(createDocumentResponseBody(storagePath, project));
+    return NextResponse.json(createDocumentResponseBody(fileId, project));
 }

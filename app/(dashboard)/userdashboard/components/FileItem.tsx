@@ -24,7 +24,6 @@ interface FileItemProps {
         originalFileName: string;
         fileExtension: string;
         created_at: string;
-        storagePath: string;
         userName?: string;
         userEmail?: string;
         attachmentFiles?: AttachmentFile[];

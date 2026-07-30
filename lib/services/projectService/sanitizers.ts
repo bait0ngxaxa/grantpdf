@@ -71,13 +71,13 @@ export function sanitizeOrphanFiles(files: RawFile[]): AdminDocumentFile[] {
 }
 
 export function collectAttachmentPaths(
-    projects: AdminProject[],
-    orphanFiles: AdminDocumentFile[],
+    projects: RawProject[],
+    orphanFiles: RawFile[],
 ): Set<string> {
     const paths = new Set<string>();
 
     for (const project of projects) {
-        for (const file of project.files) {
+        for (const file of project.files ?? []) {
             for (const att of file.attachmentFiles || []) {
                 if (att.filePath) paths.add(att.filePath);
             }
@@ -94,13 +94,13 @@ export function collectAttachmentPaths(
 }
 
 export function filterOutAttachments(
-    projects: AdminProject[],
-    orphanFiles: AdminDocumentFile[],
+    projects: RawProject[],
+    orphanFiles: RawFile[],
     attachmentPaths: Set<string>,
 ): ProjectsResult {
     const filteredProjects = projects.map((project) => ({
         ...project,
-        files: project.files.filter(
+        files: (project.files ?? []).filter(
             (file) => !attachmentPaths.has(file.storagePath),
         ),
     }));

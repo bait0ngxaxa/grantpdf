@@ -150,7 +150,7 @@ export function useFormSubmit({
                     const result = await response.json();
                     if (
                         result.success &&
-                        (result.storagePath || result.downloadUrl)
+                        result.downloadUrl
                     ) {
                         setIsSuccessModalOpen(true);
                     } else {

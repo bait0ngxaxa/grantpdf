@@ -124,9 +124,19 @@ export interface DashboardStatsApiResponse {
 
 export interface FileUploadApiResponse {
     success: boolean;
+    message: string;
     fileId: string;
-    fileName: string;
-    storagePath: string;
+    file: {
+        id: string;
+        originalFileName: string;
+        downloadUrl: string;
+        previewUrl: string;
+    };
+    project: {
+        id: string;
+        name: string;
+        description: string | null;
+    };
 }
 
 export interface UserDocumentsApiResponse {

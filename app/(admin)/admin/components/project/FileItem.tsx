@@ -105,31 +105,29 @@ export default function FileItem({ file }: FileItemProps): React.JSX.Element {
 
                 {/* Action Buttons */}
                 <div className="flex items-center space-x-2 flex-shrink-0 pl-12 sm:pl-0">
-                    {file.storagePath && (
-                        <button
-                            type="button"
-                            onClick={() =>
-                                download({
-                                    fileId: file.id,
-                                    type: "userFile",
-                                    fromAdminPanel: true,
-                                })
-                            }	                            
-                            disabled={isDownloading}
-                            aria-busy={isDownloading}
-                            aria-label={
-                                isDownloading ? "กำลังดาวน์โหลด" : "ดาวน์โหลด"
-                            }
-                            className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:cursor-progress disabled:opacity-60"
-                            title={isDownloading ? "กำลังดาวน์โหลด…" : "ดาวน์โหลด"}
-                        >
-                            {isDownloading ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Download className="h-4 w-4" />
-                            )}
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        onClick={() =>
+                            download({
+                                fileId: file.id,
+                                type: "userFile",
+                                fromAdminPanel: true,
+                            })
+                        }
+                        disabled={isDownloading}
+                        aria-busy={isDownloading}
+                        aria-label={
+                            isDownloading ? "กำลังดาวน์โหลด" : "ดาวน์โหลด"
+                        }
+                        className="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:cursor-progress disabled:opacity-60"
+                        title={isDownloading ? "กำลังดาวน์โหลด…" : "ดาวน์โหลด"}
+                    >
+                        {isDownloading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Download className="h-4 w-4" />
+                        )}
+                    </button>
                 </div>
             </div>
 

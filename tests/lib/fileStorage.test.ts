@@ -1,9 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
+import path from "path";
 import {
     getMimeType,
     validateFileMime,
     getStoragePath,
     getRelativeStoragePath,
+    getFullPathFromStoragePath,
+    STORAGE_ROOT,
     ALLOWED_MIME_TYPES,
     MIME_TYPES,
 } from "@/lib/server/storage";
@@ -238,6 +241,23 @@ describe("fileStorage - Security Tests", () => {
             expect(path).toContain("storage");
             expect(path).toContain("documents");
             expect(path).toContain("test.pdf");
+        });
+
+        it("should resolve stored paths inside the storage root", () => {
+            expect(getFullPathFromStoragePath("storage/documents/test.pdf")).toBe(
+                path.join(STORAGE_ROOT, "documents", "test.pdf"),
+            );
+        });
+
+        it.each([
+            "../outside.txt",
+            "storage/../outside.txt",
+            "storage/documents/../../outside.txt",
+            path.resolve(process.cwd(), "outside.txt"),
+        ])("should reject paths outside the storage root: %s", (value) => {
+            expect(() => getFullPathFromStoragePath(value)).toThrow(
+                "STORAGE_PATH_OUTSIDE_ROOT",
+            );
         });
 
         it("should construct correct relative paths", () => {

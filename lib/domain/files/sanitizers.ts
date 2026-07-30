@@ -1,4 +1,5 @@
 import type { AdminDocumentFile, AttachmentFile } from "@/type/models";
+import { getFileResourceUrls } from "./urls";
 import type { RawAttachment, RawFile } from "./types";
 
 interface FileOwnerFallback {
@@ -15,13 +16,16 @@ export function sanitizeAttachmentFiles(
     attachments: RawAttachment[] | undefined,
 ): AttachmentFile[] {
     return (
-        attachments?.map((attachment) => ({
-            id: attachment.id.toString(),
-            fileName: attachment.fileName,
-            filePath: attachment.filePath ?? undefined,
-            fileSize: attachment.fileSize,
-            mimeType: attachment.mimeType,
-        })) || []
+        attachments?.map((attachment) => {
+            const id = attachment.id.toString();
+            return {
+                id,
+                fileName: attachment.fileName,
+                fileSize: attachment.fileSize,
+                mimeType: attachment.mimeType,
+                ...getFileResourceUrls(id, "attachment"),
+            };
+        }) || []
     );
 }
 
@@ -29,12 +33,13 @@ export function sanitizeAdminDocumentFile(
     file: RawFile,
     fallback: FileOwnerFallback = UNKNOWN_FILE_OWNER,
 ): AdminDocumentFile {
+    const id = file.id.toString();
     return {
-        id: file.id.toString(),
+        id,
         userId: file.userId.toString(),
         originalFileName: file.originalFileName,
-        storagePath: file.storagePath,
         fileExtension: file.fileExtension,
+        ...getFileResourceUrls(id, "userFile"),
         downloadStatus: file.downloadStatus || "pending",
         downloadedAt: file.downloadedAt?.toISOString(),
         created_at: file.created_at.toISOString(),

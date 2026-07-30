@@ -5,7 +5,6 @@ import {
 } from "@/lib/shared/constants";
 import { prisma } from "@/lib/server/db";
 import type { AdminProject } from "@/type/models";
-import { collectAttachmentPaths, filterOutAttachments } from "./sanitizers";
 import type { PaginatedProjectsResult, RawProject } from "./types";
 import {
     buildActiveUserFilesWhere,
@@ -124,15 +123,8 @@ export async function getProjectsByUserIdPaginated({
     const sanitizedProjects = sanitizeUserProjects(
         projects as unknown as RawProject[],
     );
-    const attachmentPaths = collectAttachmentPaths(sanitizedProjects, []);
-    const filteredResult = filterOutAttachments(
-        sanitizedProjects,
-        [],
-        attachmentPaths,
-    );
-
     return {
-        projects: filteredResult.projects,
+        projects: sanitizedProjects,
         totalFiles,
         total,
         page,

@@ -188,7 +188,9 @@ describe("document generate route idempotency", () => {
             Response.json(
                 {
                     success: true,
-                    storagePath: "storage/documents/test.docx",
+                    fileId: "41",
+                    downloadUrl: "/api/user-docs/download/41",
+                    previewUrl: "/api/preview?fileId=41&type=userFile",
                     project: {
                         id: "1",
                         name: "โครงการทดสอบ",
@@ -241,7 +243,9 @@ describe("document generate route idempotency", () => {
                 statusCode: 200,
                 responseBody: {
                     success: true,
-                    storagePath: "storage/documents/replayed.docx",
+                    fileId: "42",
+                    downloadUrl: "/api/user-docs/download/42",
+                    previewUrl: "/api/preview?fileId=42&type=userFile",
                     project: { id: "1", name: "replayed", description: null },
                 },
             },
@@ -254,7 +258,8 @@ describe("document generate route idempotency", () => {
 
         expect(response.status).toBe(200);
         expect(response.headers.get("Idempotent-Replayed")).toBe("true");
-        expect(body.storagePath).toBe("storage/documents/replayed.docx");
+        expect(body.fileId).toBe("42");
+        expect(body.downloadUrl).toBe("/api/user-docs/download/42");
         expect(mockedHandleTorGeneration).not.toHaveBeenCalled();
     });
 

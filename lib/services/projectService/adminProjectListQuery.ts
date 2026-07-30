@@ -91,16 +91,15 @@ export async function getAllProjectsPaginated({
         projects = paginatedProjects as unknown as RawProject[];
     }
 
-    const sanitizedProjects = sanitizeProjects(projects);
-    const attachmentPaths = collectAttachmentPaths(sanitizedProjects, []);
+    const attachmentPaths = collectAttachmentPaths(projects, []);
     const filteredResult = filterOutAttachments(
-        sanitizedProjects,
+        projects,
         [],
         attachmentPaths,
     );
 
     return {
-        projects: filteredResult.projects,
+        projects: sanitizeProjects(filteredResult.projects),
         totalFiles,
         total,
         page,

@@ -109,6 +109,20 @@ function isObjectRecord(
     return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function containsInternalStoragePath(value: Prisma.JsonValue): boolean {
+    if (Array.isArray(value)) {
+        return value.some(containsInternalStoragePath);
+    }
+    if (typeof value !== "object" || value === null) return false;
+
+    const record = value as Prisma.JsonObject;
+    return Object.entries(record).some(([key, nestedValue]) => {
+        if (key === "storagePath" || key === "filePath") return true;
+        if (nestedValue === undefined) return false;
+        return containsInternalStoragePath(nestedValue);
+    });
+}
+
 function createLease(now: Date = new Date()): IdempotencyLease {
     return {
         leaseToken: randomUUID(),
@@ -193,6 +207,9 @@ export async function startDocumentIdempotency(
             typeof existing.responseStatus === "number" &&
             isObjectRecord(existing.responseBody)
         ) {
+            if (containsInternalStoragePath(existing.responseBody)) {
+                return { type: "recovery_required" };
+            }
             return {
                 type: "replay",
                 replay: {

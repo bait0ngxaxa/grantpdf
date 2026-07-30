@@ -16,14 +16,14 @@ export function sanitizeFile(file: RawFile): AdminDocumentFile {
 }
 
 export function filterOutAttachmentFiles(
-    files: AdminDocumentFile[],
-): AdminDocumentFile[] {
+    files: RawFile[],
+): RawFile[] {
     const attachmentPaths = new Set(
         files.flatMap(
             (file) =>
                 file.attachmentFiles
                     ?.map((att) => att.filePath)
-                    .filter(Boolean) || [],
+                    .filter((path): path is string => Boolean(path)) || [],
         ),
     );
 

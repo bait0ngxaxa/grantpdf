@@ -5,13 +5,15 @@ import type {
     RawReportFile,
     UserFile,
 } from "./types";
+import { getFileResourceUrls } from "@/lib/domain/files";
 
 export function sanitizeReportFile(file: RawReportFile): UserFile {
+    const id = file.id.toString();
     return {
-        id: file.id.toString(),
+        id,
         originalFileName: file.originalFileName,
-        storagePath: file.storagePath,
         fileExtension: file.fileExtension,
+        ...getFileResourceUrls(id, "userFile"),
         downloadStatus: file.downloadStatus,
         downloadedAt: file.downloadedAt?.toISOString(),
         created_at: file.created_at.toISOString(),

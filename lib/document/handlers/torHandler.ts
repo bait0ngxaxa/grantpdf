@@ -170,7 +170,7 @@ export async function handleTorGeneration(
     );
 
     // Save document + create database record (with cleanup on DB failure)
-    const { relativeStoragePath } = await withDocumentProjectCompensation(
+    const { resourceId } = await withDocumentProjectCompensation(
         projectResolution,
         userId,
         () =>
@@ -194,5 +194,9 @@ export async function handleTorGeneration(
             ),
     );
 
-    return buildSuccessResponse(relativeStoragePath, projectResolution.project);
+    if (resourceId === null) {
+        throw new Error("DOCUMENT_RESOURCE_ID_REQUIRED");
+    }
+
+    return buildSuccessResponse(resourceId, projectResolution.project);
 }

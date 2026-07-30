@@ -11,6 +11,7 @@ export type { ProjectResolutionOrigin } from "@/lib/services/projectService/type
 export interface DocumentSaveResult {
     filePath: string;
     relativeStoragePath: string;
+    resourceId: number | null;
 }
 
 export interface DocumentIdempotencyContext {
@@ -24,7 +25,6 @@ export interface DocumentIdempotencyContext {
 export type DocumentRecordCompletion = (
     tx: Prisma.TransactionClient,
     resourceId: number,
-    relativeStoragePath: string,
 ) => Promise<void>;
 
 // ============================================================================

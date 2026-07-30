@@ -54,6 +54,7 @@ export async function saveDocumentToStorage(
     );
 
     let movedToFinal = false;
+    let resourceId: number | null = null;
     try {
         await fs.writeFile(tempFilePath, Buffer.from(outputBuffer));
         await fs.rename(tempFilePath, filePath);
@@ -62,12 +63,12 @@ export async function saveDocumentToStorage(
         if (persistRecord) {
             try {
                 await prisma.$transaction(async (tx) => {
-                    const resourceId = await persistRecord(relativeStoragePath, tx);
+                    resourceId = await persistRecord(relativeStoragePath, tx);
                     if (completion && resourceId === null) {
                         throw new Error("DOCUMENT_RESOURCE_ID_REQUIRED");
                     }
                     if (completion && resourceId !== null) {
-                        await completion(tx, resourceId, relativeStoragePath);
+                        await completion(tx, resourceId);
                     }
                 });
             } catch (error) {
@@ -81,5 +82,5 @@ export async function saveDocumentToStorage(
         }
     }
 
-    return { filePath, relativeStoragePath };
+    return { filePath, relativeStoragePath, resourceId };
 }

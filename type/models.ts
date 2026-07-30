@@ -1,18 +1,20 @@
 export interface AttachmentFile {
     id: string;
     fileName: string;
-    filePath?: string;
     fileSize: number;
     mimeType: string | null;
+    downloadUrl: string;
+    previewUrl: string;
 }
 
 export interface UserFile {
     id: string;
     originalFileName: string;
-    storagePath: string;
     created_at: string;
     updated_at: string;
     fileExtension: string;
+    downloadUrl: string;
+    previewUrl: string;
     userName?: string;
     userId?: string;
     userEmail?: string;

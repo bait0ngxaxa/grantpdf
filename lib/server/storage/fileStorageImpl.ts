@@ -11,7 +11,9 @@ import {
     type OfficeOpenXmlValidationResult,
 } from "./officeOpenXml";
 
-export const STORAGE_ROOT = path.join(process.cwd(), "storage");
+export const STORAGE_ROOT = path.resolve(process.cwd(), "storage");
+
+const STORED_STORAGE_PREFIX = "storage/";
 
 // Storage paths for different file types
 export const STORAGE_PATHS = {
@@ -24,7 +26,7 @@ export const STORAGE_PATHS = {
 export type StorageType = keyof typeof STORAGE_PATHS;
 
 export function getStoragePath(type: StorageType, filename: string): string {
-    return path.join(STORAGE_PATHS[type], filename);
+    return resolveStoragePath(path.join(type, filename));
 }
 
 export function getRelativeStoragePath(
@@ -38,8 +40,37 @@ export async function ensureStorageDir(type: StorageType): Promise<void> {
     await mkdir(STORAGE_PATHS[type], { recursive: true });
 }
 
+function normalizeStoredStoragePath(storagePath: string): string {
+    if (typeof storagePath !== "string" || storagePath.length === 0) {
+        throw new Error("STORAGE_PATH_INVALID");
+    }
+
+    const normalizedPath = storagePath.replaceAll("\\", "/");
+    if (normalizedPath === "storage") return ".";
+    if (normalizedPath.startsWith(STORED_STORAGE_PREFIX)) {
+        return normalizedPath.slice(STORED_STORAGE_PREFIX.length);
+    }
+    return normalizedPath;
+}
+
+export function resolveStoragePath(relativePath: string): string {
+    const resolved = path.resolve(
+        STORAGE_ROOT,
+        normalizeStoredStoragePath(relativePath),
+    );
+
+    if (
+        resolved !== STORAGE_ROOT &&
+        !resolved.startsWith(`${STORAGE_ROOT}${path.sep}`)
+    ) {
+        throw new Error("STORAGE_PATH_OUTSIDE_ROOT");
+    }
+
+    return resolved;
+}
+
 export function getFullPathFromStoragePath(storagePath: string): string {
-    return path.join(process.cwd(), storagePath);
+    return resolveStoragePath(storagePath);
 }
 
 export const MIME_TYPES = DOCUMENT_MIME_TYPES;

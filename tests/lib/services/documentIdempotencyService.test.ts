@@ -96,7 +96,7 @@ describe("documentIdempotencyService", () => {
             expect(mockedFindUnique).not.toHaveBeenCalled();
         });
 
-        it("returns replay when unique conflict and existing completed row exists", async () => {
+        it("requires recovery when a completed response contains a storage path", async () => {
             mockedCreate.mockRejectedValue(createP2002Error());
             mockedFindUnique.mockResolvedValue({
                 id: BigInt(124),
@@ -115,16 +115,7 @@ describe("documentIdempotencyService", () => {
                 requestHash: REQUEST_HASH,
             });
 
-            expect(result).toEqual({
-                type: "replay",
-                replay: {
-                    statusCode: 200,
-                    responseBody: {
-                        success: true,
-                        storagePath: "storage/documents/replay.docx",
-                    },
-                },
-            });
+            expect(result).toEqual({ type: "recovery_required" });
         });
 
         it("rejects the same key when the request hash differs", async () => {
