@@ -34,6 +34,11 @@ export interface ProjectResult {
     description: string | null;
 }
 
+export interface ProjectResolution {
+    project: ProjectResult;
+    createdByThisRequest: boolean;
+}
+
 /**
  * DocxModule interface for docxtemplater modules (e.g., ImageModule).
  * Based on the common module pattern used by docxtemplater plugins.
@@ -58,7 +63,7 @@ export interface DocxParserOptions {
 // ============================================================================
 
 export function isProjectError(
-    result: ProjectResult | NextResponse,
+    result: ProjectResolution | NextResponse,
 ): result is NextResponse {
     return result instanceof NextResponse;
 }

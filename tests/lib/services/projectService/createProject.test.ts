@@ -124,6 +124,7 @@ describe("createProject", () => {
         );
 
         expect(result.id).toBe("88");
+        expect(result.createdByThisRequest).toBe(true);
         expect(tx.project.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 data: expect.objectContaining({

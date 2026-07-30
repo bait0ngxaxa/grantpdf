@@ -10,6 +10,7 @@ import {
     isProjectError,
     buildSuccessResponse,
     createDocumentRecordCompletion,
+    withDocumentProjectCompensation,
 } from "@/lib/document";
 import {
     fixThaiDistributed,
@@ -20,6 +21,7 @@ import { prisma } from "@/lib/server/db";
 import {
     copyAttachmentFiles,
     removeCopiedAttachmentFiles,
+    type CopiedAttachmentFiles,
 } from "@/lib/document/attachmentStorage";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import PizZip from "pizzip";
@@ -360,90 +362,107 @@ export async function handleApprovalGeneration(
     });
 
     // Find or create project
-    const projectResult = await findOrCreateProject(
+    const projectResolution = await findOrCreateProject(
         userId,
         projectName,
         formData.get("projectId") as string | null,
         readProgramIdFromForm(formData),
         "สร้างจากเอกสารขออนุมัติ",
     );
-    if (isProjectError(projectResult)) {
-        return projectResult;
+    if (isProjectError(projectResolution)) {
+        return projectResolution;
     }
-
 
     const completion = createDocumentRecordCompletion(
         idempotency,
-        projectResult,
+        projectResolution.project,
     );
-    const copiedAttachments = await copyAttachmentFiles(attachmentFiles);
-    let relativeStoragePath: string;
+    let relativeStoragePath: string | null = null;
+    let copiedAttachments: CopiedAttachmentFiles = { files: [], paths: [] };
 
     try {
-        ({ relativeStoragePath } = await saveDocumentToStorage(
-            outputBuffer,
-            projectName,
-            "docx",
-            async (storagePath: string, tx): Promise<number> => {
-                const hasDocumentQuota = await reserveStorageQuota(
-                    userId,
-                    outputBuffer.byteLength,
-                    tx,
-                );
-                if (!hasDocumentQuota) {
-                    throw new Error("STORAGE_QUOTA_EXCEEDED");
-                }
+        await withDocumentProjectCompensation(
+            projectResolution,
+            userId,
+            async () => {
+                copiedAttachments = await copyAttachmentFiles(attachmentFiles);
+                ({ relativeStoragePath } = await saveDocumentToStorage(
+                    outputBuffer,
+                    projectName,
+                    "docx",
+                    async (storagePath: string, tx): Promise<number> => {
+                        const hasDocumentQuota = await reserveStorageQuota(
+                            userId,
+                            outputBuffer.byteLength,
+                            tx,
+                        );
+                        if (!hasDocumentQuota) {
+                            throw new Error("STORAGE_QUOTA_EXCEEDED");
+                        }
 
-                const attachmentBytes = copiedAttachments.files.reduce(
-                    (total, file) => total + file.fileSize,
-                    0,
-                );
-                if (
-                    attachmentBytes > 0 &&
-                    !(await reserveStorageQuota(userId, attachmentBytes, tx))
-                ) {
-                    throw new Error("STORAGE_QUOTA_EXCEEDED");
-                }
+                        const attachmentBytes = copiedAttachments.files.reduce(
+                            (total, file) => total + file.fileSize,
+                            0,
+                        );
+                        if (
+                            attachmentBytes > 0 &&
+                            !(await reserveStorageQuota(
+                                userId,
+                                attachmentBytes,
+                                tx,
+                            ))
+                        ) {
+                            throw new Error("STORAGE_QUOTA_EXCEEDED");
+                        }
 
-                const savedFile = await tx.userFile.create({
-                    data: {
-                        originalFileName: projectName + ".docx",
-                        storagePath,
-                        fileExtension: "docx",
-                        fileSize: BigInt(outputBuffer.byteLength),
-                        userId,
-                        projectId: projectResult.id,
+                        const savedFile = await tx.userFile.create({
+                            data: {
+                                originalFileName: projectName + ".docx",
+                                storagePath,
+                                fileExtension: "docx",
+                                fileSize: BigInt(outputBuffer.byteLength),
+                                userId,
+                                projectId: projectResolution.project.id,
+                            },
+                        });
+
+                        if (copiedAttachments.files.length > 0) {
+                            await tx.attachmentFile.createMany({
+                                data: copiedAttachments.files.map(
+                                    (attachmentFile) => ({
+                                        fileName:
+                                            attachmentFile.originalFileName,
+                                        filePath: attachmentFile.storagePath,
+                                        fileSize: attachmentFile.fileSize,
+                                        mimeType: attachmentFile.mimeType,
+                                        userFileId: savedFile.id,
+                                    }),
+                                ),
+                            });
+                        }
+
+                        await notifyProjectDocumentUploaded(tx, {
+                            fileId: savedFile.id,
+                            projectId: projectResolution.project.id,
+                            fileName: savedFile.originalFileName,
+                            actorUserId: userId,
+                        });
+                        return savedFile.id;
                     },
-                });
-
-                if (copiedAttachments.files.length > 0) {
-                    await tx.attachmentFile.createMany({
-                        data: copiedAttachments.files.map((attachmentFile) => ({
-                            fileName: attachmentFile.originalFileName,
-                            filePath: attachmentFile.storagePath,
-                            fileSize: attachmentFile.fileSize,
-                            mimeType: attachmentFile.mimeType,
-                            userFileId: savedFile.id,
-                        })),
-                    });
-                }
-
-                await notifyProjectDocumentUploaded(tx, {
-                    fileId: savedFile.id,
-                    projectId: projectResult.id,
-                    fileName: savedFile.originalFileName,
-                    actorUserId: userId,
-                });
-                return savedFile.id;
+                    completion,
+                ));
             },
-            completion,
-        ));
+        );
     } catch (error: unknown) {
         await removeCopiedAttachmentFiles(copiedAttachments.paths);
         throw error;
     }
 
+    if (relativeStoragePath === null) {
+        throw new Error("DOCUMENT_STORAGE_PATH_REQUIRED");
+    }
+
     await invalidateDashboardStats([userId]);
 
-    return buildSuccessResponse(relativeStoragePath, projectResult);
+    return buildSuccessResponse(relativeStoragePath, projectResolution.project);
 }

@@ -7,7 +7,7 @@ import {
     findProjectByNameAndUser,
     createProject,
 } from "@/lib/services/projectService";
-import type { ProjectResult } from "./types";
+import type { ProjectResolution } from "./types";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 import { reserveStorageQuota } from "@/lib/services/storageQuotaService";
@@ -32,8 +32,14 @@ export async function findOrCreateProject(
     projectIdFromForm: string | null,
     programId: number | null,
     documentTypeDescription: string,
-): Promise<ProjectResult | NextResponse> {
-    let project;
+): Promise<ProjectResolution | NextResponse> {
+    let project: {
+        id: number;
+        name: string;
+        description: string | null;
+        programId: number | null;
+    } | null = null;
+    let createdByThisRequest = false;
 
     if (projectIdFromForm) {
         // Find existing project by ID
@@ -96,15 +102,85 @@ export async function findOrCreateProject(
                 id: parseInt(newProject.id),
                 name: newProject.name,
                 description: newProject.description,
+                programId: newProject.programId,
             };
+            createdByThisRequest = newProject.createdByThisRequest;
         }
     }
 
+    if (!project) {
+        throw new Error("DOCUMENT_PROJECT_NOT_FOUND");
+    }
+
     return {
-        id: project.id,
-        name: project.name,
-        description: project.description,
+        project: {
+            id: project.id,
+            name: project.name,
+            description: project.description,
+        },
+        createdByThisRequest,
     };
+}
+
+export async function compensateCreatedProject(
+    resolution: ProjectResolution,
+    userId: number,
+): Promise<void> {
+    if (!resolution.createdByThisRequest) return;
+
+    try {
+        const deleted = await prisma.$transaction(async (tx) => {
+            const notificationEvents = await tx.notificationEvent.findMany({
+                where: { projectId: resolution.project.id },
+                select: { id: true },
+            });
+            const result = await tx.project.deleteMany({
+                where: {
+                    id: resolution.project.id,
+                    userId,
+                    deletedAt: null,
+                    files: { none: {} },
+                    reports: { none: {} },
+                    coOwners: { none: {} },
+                },
+            });
+
+            if (result.count !== 1) return false;
+
+            if (notificationEvents.length > 0) {
+                await tx.notificationEvent.deleteMany({
+                    where: {
+                        id: {
+                            in: notificationEvents.map((event) => event.id),
+                        },
+                    },
+                });
+            }
+
+            return true;
+        });
+
+        if (deleted) await invalidateDashboardStats([userId]);
+    } catch (error: unknown) {
+        console.error("Failed to compensate document project creation:", {
+            projectId: resolution.project.id,
+            userId,
+            error,
+        });
+    }
+}
+
+export async function withDocumentProjectCompensation<T>(
+    resolution: ProjectResolution,
+    userId: number,
+    operation: () => Promise<T>,
+): Promise<T> {
+    try {
+        return await operation();
+    } catch (error: unknown) {
+        await compensateCreatedProject(resolution, userId);
+        throw error;
+    }
 }
 
 export function readProgramIdFromForm(formData: FormData): number | null {

@@ -11,6 +11,7 @@ import {
     saveDocumentToStorage,
     buildSuccessResponse,
     createDocumentRecordCompletion,
+    withDocumentProjectCompensation,
 } from "@/lib/document";
 import { formatNumericWithCommas } from "@/lib/shared/utils";
 
@@ -151,20 +152,20 @@ export async function handleSummaryGeneration(
     });
 
     // Find or create project
-    const projectResult = await findOrCreateProject(
+    const projectResolution = await findOrCreateProject(
         userId,
         projectName,
         formData.get("projectId") as string | null,
         readProgramIdFromForm(formData),
         "สร้างจากแบบสรุปโครงการ",
     );
-    if (isProjectError(projectResult)) {
-        return projectResult;
+    if (isProjectError(projectResolution)) {
+        return projectResolution;
     }
 
     const completion = createDocumentRecordCompletion(
         idempotency,
-        projectResult,
+        projectResolution.project,
     );
 
     // Generate output
@@ -172,26 +173,29 @@ export async function handleSummaryGeneration(
     const outputBuffer = Buffer.from(buffer);
 
     // Save document + create database record (with cleanup on DB failure)
-    const { relativeStoragePath } = await saveDocumentToStorage(
-        outputBuffer,
-        fileName,
-        "xlsx",
-        async (storagePath: string, tx): Promise<number> => {
-            const savedFile = await createUserFileRecord(
-                {
-                    userId,
-                    projectId: projectResult.id,
-                    originalFileName: fileName,
-                    storagePath,
-                    fileSize: outputBuffer.byteLength,
-                    extension: "xlsx",
-                    transaction: tx,
+    const { relativeStoragePath } = await withDocumentProjectCompensation(
+        projectResolution,
+        userId,
+        () =>
+            saveDocumentToStorage(
+                outputBuffer,
+                fileName,
+                "xlsx",
+                async (storagePath: string, tx): Promise<number> => {
+                    const savedFile = await createUserFileRecord({
+                        userId,
+                        projectId: projectResolution.project.id,
+                        originalFileName: fileName,
+                        storagePath,
+                        fileSize: outputBuffer.byteLength,
+                        extension: "xlsx",
+                        transaction: tx,
+                    });
+                    return savedFile.id;
                 },
-            );
-            return savedFile.id;
-        },
-        completion,
+                completion,
+            ),
     );
 
-    return buildSuccessResponse(relativeStoragePath, projectResult);
+    return buildSuccessResponse(relativeStoragePath, projectResolution.project);
 }

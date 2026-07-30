@@ -10,6 +10,7 @@ import {
     createUserFileRecord,
     buildSuccessResponse,
     createDocumentRecordCompletion,
+    withDocumentProjectCompensation,
 } from "@/lib/document";
 import { fixThaiDistributed, normalizeRichEditorText } from "../fixThaiwordUtils";
 import { formatNumericWithCommas } from "@/lib/shared/utils";
@@ -101,43 +102,46 @@ export async function handleContractGeneration(
     });
 
     // Find or create project
-    const projectResult = await findOrCreateProject(
+    const projectResolution = await findOrCreateProject(
         userId,
         projectName,
         formData.get("projectId") as string | null,
         readProgramIdFromForm(formData),
         "สร้างจากเอกสารสัญญาจ้างปฎิบัติงาน",
     );
-    if (isProjectError(projectResult)) {
-        return projectResult;
+    if (isProjectError(projectResolution)) {
+        return projectResolution;
     }
 
     const completion = createDocumentRecordCompletion(
         idempotency,
-        projectResult,
+        projectResolution.project,
     );
 
     // Save document + create database record (with cleanup on DB failure)
-    const { relativeStoragePath } = await saveDocumentToStorage(
-        outputBuffer,
-        fileName,
-        "docx",
-        async (storagePath: string, tx): Promise<number> => {
-            const savedFile = await createUserFileRecord(
-                {
-                    userId,
-                    projectId: projectResult.id,
-                    originalFileName: fileName,
-                    storagePath,
-                    fileSize: outputBuffer.byteLength,
-                    extension: "docx",
-                    transaction: tx,
+    const { relativeStoragePath } = await withDocumentProjectCompensation(
+        projectResolution,
+        userId,
+        () =>
+            saveDocumentToStorage(
+                outputBuffer,
+                fileName,
+                "docx",
+                async (storagePath: string, tx): Promise<number> => {
+                    const savedFile = await createUserFileRecord({
+                        userId,
+                        projectId: projectResolution.project.id,
+                        originalFileName: fileName,
+                        storagePath,
+                        fileSize: outputBuffer.byteLength,
+                        extension: "docx",
+                        transaction: tx,
+                    });
+                    return savedFile.id;
                 },
-            );
-            return savedFile.id;
-        },
-        completion,
+                completion,
+            ),
     );
 
-    return buildSuccessResponse(relativeStoragePath, projectResult);
+    return buildSuccessResponse(relativeStoragePath, projectResolution.project);
 }

@@ -12,6 +12,10 @@ import {
 } from "./mutationShared";
 import type { ProjectAuditContext } from "./types";
 
+export type ProjectCreationResult = ({ id: string } & Omit<Project, "id">) & {
+    createdByThisRequest: boolean;
+};
+
 function normalizeProjectText(
     name: string,
     description?: string,
@@ -47,11 +51,11 @@ export async function createProject(
     name: string,
     description?: string,
     programId?: number,
-): Promise<{ id: string } & Omit<Project, "id">> {
+): Promise<ProjectCreationResult> {
     const normalized = normalizeProjectText(name, description);
 
     try {
-        const project = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
             const existing = await tx.project.findUnique({
                 where: { userId_name: { userId, name: normalized.name } },
                 select: { id: true, programId: true, deletedAt: true },
@@ -109,11 +113,17 @@ export async function createProject(
                     actorUserId: userId,
                 });
             }
-            return created;
+            return {
+                project: created,
+                createdByThisRequest: existing === null,
+            };
         });
 
         await invalidateDashboardStats([userId]);
-        return toProjectWithStringId(project);
+        return {
+            ...toProjectWithStringId(result.project),
+            createdByThisRequest: result.createdByThisRequest,
+        };
     } catch (error) {
         if (!isUniqueConstraintError(error)) throw error;
 
@@ -162,7 +172,10 @@ export async function createProject(
                   : await getProjectForCreate(existing.id);
 
         await invalidateDashboardStats([userId]);
-        return toProjectWithStringId(project);
+        return {
+            ...toProjectWithStringId(project),
+            createdByThisRequest: false,
+        };
     }
 }
 

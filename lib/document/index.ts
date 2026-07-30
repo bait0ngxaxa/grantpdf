@@ -4,6 +4,7 @@ export type {
     DocumentIdempotencyContext,
     DocumentRecordCompletion,
     ProjectResult,
+    ProjectResolution,
     DocxModule,
     DocxParserOptions,
 } from "./types";
@@ -27,6 +28,7 @@ export { saveDocumentToStorage } from "./storage";
 export {
     findOrCreateProject,
     createUserFileRecord,
+    withDocumentProjectCompensation,
     readProgramIdFromForm,
 } from "./projectService";
 

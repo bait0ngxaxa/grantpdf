@@ -38,9 +38,12 @@ vi.mock("@/lib/document", () => ({
     loadTemplate: vi.fn().mockResolvedValue(Buffer.from("template")),
     saveDocumentToStorage: mocks.saveDocumentToStorage,
     findOrCreateProject: vi.fn().mockResolvedValue({
-        id: 10,
-        name: "โครงการทดสอบ",
-        description: null,
+        project: {
+            id: 10,
+            name: "โครงการทดสอบ",
+            description: null,
+        },
+        createdByThisRequest: false,
     }),
     readProgramIdFromForm: vi.fn().mockReturnValue(null),
     isProjectError: vi.fn().mockReturnValue(false),
@@ -48,6 +51,11 @@ vi.mock("@/lib/document", () => ({
         new Response(JSON.stringify({ success: true }), { status: 200 }),
     ),
     createDocumentRecordCompletion: vi.fn().mockReturnValue(undefined),
+    withDocumentProjectCompensation: async (
+        _resolution: unknown,
+        _userId: number,
+        operation: () => Promise<unknown>,
+    ): Promise<unknown> => operation(),
 }));
 
 vi.mock("@/lib/document/fixThaiwordUtils", () => ({
