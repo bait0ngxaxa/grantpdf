@@ -29,6 +29,7 @@ export type {
     ProjectStatusUpdateRequest,
     ProjectStatusUpdateResponse,
     StatusCounts,
+    UserDocumentsApiResponse,
     UserApiData,
     UsersApiResponse,
 } from "./api";

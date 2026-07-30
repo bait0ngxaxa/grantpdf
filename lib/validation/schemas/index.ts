@@ -83,6 +83,8 @@ export {
 export {
     generateSignedUrlSchema,
     type GenerateSignedUrlInput,
+    userDocumentsQuerySchema,
+    type UserDocumentsQueryInput,
 } from "./file.schema";
 
 // Shared helpers

@@ -3,8 +3,20 @@ import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { FILE_DELETION_STATUS } from "@/lib/shared/constants";
 import { buildAccessibleUserFileWhere } from "@/lib/services/projectService/fileAccess";
 import type { AdminDocumentFile } from "@/type/models";
-import type { RawFile, FileForDeletion } from "./types";
+import type { Prisma } from "@prisma/client";
+import { encodeUserFileCursor } from "@/lib/domain/files/cursor";
+import type {
+    RawFile,
+    FileForDeletion,
+    GetFilesByUserIdParams,
+    UserFilesPage,
+} from "./types";
 import { sanitizeFile, filterOutAttachmentFiles } from "./sanitizers";
+import {
+    buildCursorWhere,
+    normalizeUserFileLimit,
+    parseUserFileCursor,
+} from "./pagination";
 
 const DEFAULT_ADMIN_FILE_LIMIT = 50;
 const MAX_ADMIN_FILE_LIMIT = 100;
@@ -62,14 +74,24 @@ export async function getAllFilesForAdmin(
     return filterOutAttachmentFiles(sanitizedFiles);
 }
 
-export async function getFilesByUserId(
-    userId: number,
-): Promise<AdminDocumentFile[]> {
+export async function getFilesByUserId({
+    userId,
+    limit,
+    cursor,
+}: GetFilesByUserIdParams): Promise<UserFilesPage> {
+    const safeLimit = normalizeUserFileLimit(limit);
+    const decodedCursor = parseUserFileCursor(cursor);
+
+    const accessWhere = buildAccessibleUserFileWhere(userId);
+    const where: Prisma.UserFileWhereInput = decodedCursor
+        ? {
+              AND: [accessWhere, buildCursorWhere(decodedCursor)],
+          }
+        : accessWhere;
     const userFiles = await prisma.userFile.findMany({
-        where: buildAccessibleUserFileWhere(userId),
-        orderBy: {
-            created_at: "desc",
-        },
+        where,
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        take: safeLimit + 1,
         select: {
             id: true,
             originalFileName: true,
@@ -92,13 +114,21 @@ export async function getFilesByUserId(
         },
     });
 
-    const sanitizedFiles = (userFiles as unknown as RawFile[]).map((file) => ({
+    const pageFiles = userFiles.slice(0, safeLimit);
+    const sanitizedFiles = (pageFiles as unknown as RawFile[]).map((file) => ({
         ...sanitizeFile(file),
         userName: "",
         userEmail: "",
     }));
 
-    return filterOutAttachmentFiles(sanitizedFiles);
+    const items = filterOutAttachmentFiles(sanitizedFiles);
+    const cursorFile = pageFiles.at(-1);
+    const nextCursor =
+        userFiles.length > safeLimit && cursorFile
+            ? encodeUserFileCursor(cursorFile.created_at, cursorFile.id)
+            : null;
+
+    return { items, nextCursor };
 }
 
 export async function fileExists(id: number): Promise<boolean> {

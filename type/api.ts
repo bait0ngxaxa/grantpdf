@@ -129,6 +129,11 @@ export interface FileUploadApiResponse {
     storagePath: string;
 }
 
+export interface UserDocumentsApiResponse {
+    items: AdminDocumentFile[];
+    nextCursor: string | null;
+}
+
 // ============================================
 // Project Status Update API
 // ============================================

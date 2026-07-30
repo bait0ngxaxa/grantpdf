@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { decodeUserFileCursor } from "@/lib/domain/files/cursor";
+import { PAGINATION } from "@/lib/shared/constants";
 
 export const generateSignedUrlSchema = z.object({
     fileId: z.coerce
@@ -16,3 +18,24 @@ export const generateSignedUrlSchema = z.object({
 });
 
 export type GenerateSignedUrlInput = z.infer<typeof generateSignedUrlSchema>;
+
+export const userDocumentsQuerySchema = z.object({
+    cursor: z
+        .string()
+        .trim()
+        .max(512, "ตัวระบุหน้าถัดไปไม่ถูกต้อง")
+        .refine(
+            (value) => decodeUserFileCursor(value) !== null,
+            "ตัวระบุหน้าถัดไปไม่ถูกต้อง",
+        )
+        .optional(),
+    limit: z.coerce
+        .number()
+        .int("จำนวนรายการไม่ถูกต้อง")
+        .min(1, "จำนวนรายการไม่ถูกต้อง")
+        .default(PAGINATION.USER_DOCUMENTS_API_DEFAULT_LIMIT),
+});
+
+export type UserDocumentsQueryInput = z.infer<
+    typeof userDocumentsQuerySchema
+>;

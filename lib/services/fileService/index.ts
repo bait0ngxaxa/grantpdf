@@ -1,5 +1,11 @@
 // Types
-export type { RawFile, RawAttachment, FileForDeletion } from "./types";
+export type {
+    RawFile,
+    RawAttachment,
+    FileForDeletion,
+    GetFilesByUserIdParams,
+    UserFilesPage,
+} from "./types";
 
 // Sanitizers
 export {
