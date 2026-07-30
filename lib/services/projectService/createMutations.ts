@@ -10,10 +10,14 @@ import {
     isUniqueConstraintError,
     toProjectWithStringId,
 } from "./mutationShared";
-import type { ProjectAuditContext } from "./types";
+import type {
+    ProjectAuditContext,
+    ProjectResolutionOrigin,
+} from "./types";
 
 export type ProjectCreationResult = ({ id: string } & Omit<Project, "id">) & {
-    createdByThisRequest: boolean;
+    origin: ProjectResolutionOrigin;
+    previousDeletedAt: Date | null;
 };
 
 function normalizeProjectText(
@@ -44,6 +48,13 @@ function shouldRejectProgramConflict(
             existing.programId !== null &&
             existing.programId !== programId,
     );
+}
+
+function getProjectResolutionOrigin(
+    existing: { deletedAt: Date | null } | null,
+): ProjectResolutionOrigin {
+    if (existing === null) return "created";
+    return existing.deletedAt === null ? "existing" : "restored";
 }
 
 export async function createProject(
@@ -115,14 +126,16 @@ export async function createProject(
             }
             return {
                 project: created,
-                createdByThisRequest: existing === null,
+                origin: getProjectResolutionOrigin(existing),
+                previousDeletedAt: existing?.deletedAt ?? null,
             };
         });
 
         await invalidateDashboardStats([userId]);
         return {
             ...toProjectWithStringId(result.project),
-            createdByThisRequest: result.createdByThisRequest,
+            origin: result.origin,
+            previousDeletedAt: result.previousDeletedAt,
         };
     } catch (error) {
         if (!isUniqueConstraintError(error)) throw error;
@@ -174,7 +187,8 @@ export async function createProject(
         await invalidateDashboardStats([userId]);
         return {
             ...toProjectWithStringId(project),
-            createdByThisRequest: false,
+            origin: getProjectResolutionOrigin(existing),
+            previousDeletedAt: existing.deletedAt,
         };
     }
 }

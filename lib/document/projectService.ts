@@ -7,7 +7,7 @@ import {
     findProjectByNameAndUser,
     createProject,
 } from "@/lib/services/projectService";
-import type { ProjectResolution } from "./types";
+import type { ProjectResolution, ProjectResolutionOrigin } from "./types";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
 import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 import { reserveStorageQuota } from "@/lib/services/storageQuotaService";
@@ -39,7 +39,8 @@ export async function findOrCreateProject(
         description: string | null;
         programId: number | null;
     } | null = null;
-    let createdByThisRequest = false;
+    let origin: ProjectResolutionOrigin = "existing";
+    let previousDeletedAt: Date | null = null;
 
     if (projectIdFromForm) {
         // Find existing project by ID
@@ -104,7 +105,8 @@ export async function findOrCreateProject(
                 description: newProject.description,
                 programId: newProject.programId,
             };
-            createdByThisRequest = newProject.createdByThisRequest;
+            origin = newProject.origin;
+            previousDeletedAt = newProject.previousDeletedAt;
         }
     }
 
@@ -118,49 +120,89 @@ export async function findOrCreateProject(
             name: project.name,
             description: project.description,
         },
-        createdByThisRequest,
+        origin,
+        previousDeletedAt,
     };
+}
+
+function getProjectCompensationWhere(
+    resolution: ProjectResolution,
+    userId: number,
+) {
+    return {
+        id: resolution.project.id,
+        userId,
+        deletedAt: null,
+        files: { none: {} },
+        reports: { none: {} },
+        coOwners: { none: {} },
+    };
+}
+
+async function deleteCreatedProject(
+    tx: Prisma.TransactionClient,
+    resolution: ProjectResolution,
+    userId: number,
+): Promise<boolean> {
+    const notificationEvents = await tx.notificationEvent.findMany({
+        where: { projectId: resolution.project.id },
+        select: { id: true },
+    });
+    const result = await tx.project.deleteMany({
+        where: getProjectCompensationWhere(resolution, userId),
+    });
+
+    if (result.count !== 1) return false;
+
+    if (notificationEvents.length > 0) {
+        await tx.notificationEvent.deleteMany({
+            where: {
+                id: {
+                    in: notificationEvents.map((event) => event.id),
+                },
+            },
+        });
+    }
+
+    return true;
+}
+
+async function restoreProject(
+    tx: Prisma.TransactionClient,
+    resolution: ProjectResolution,
+    userId: number,
+): Promise<boolean> {
+    if (resolution.previousDeletedAt === null) {
+        throw new Error("DOCUMENT_PROJECT_RESTORE_STATE_MISSING");
+    }
+
+    const result = await tx.project.updateMany({
+        where: getProjectCompensationWhere(resolution, userId),
+        data: {
+            deletedAt: resolution.previousDeletedAt,
+            updated_at: new Date(),
+        },
+    });
+
+    return result.count === 1;
 }
 
 export async function compensateCreatedProject(
     resolution: ProjectResolution,
     userId: number,
 ): Promise<void> {
-    if (!resolution.createdByThisRequest) return;
+    if (resolution.origin === "existing") return;
 
     try {
-        const deleted = await prisma.$transaction(async (tx) => {
-            const notificationEvents = await tx.notificationEvent.findMany({
-                where: { projectId: resolution.project.id },
-                select: { id: true },
-            });
-            const result = await tx.project.deleteMany({
-                where: {
-                    id: resolution.project.id,
-                    userId,
-                    deletedAt: null,
-                    files: { none: {} },
-                    reports: { none: {} },
-                    coOwners: { none: {} },
-                },
-            });
-
-            if (result.count !== 1) return false;
-
-            if (notificationEvents.length > 0) {
-                await tx.notificationEvent.deleteMany({
-                    where: {
-                        id: {
-                            in: notificationEvents.map((event) => event.id),
-                        },
-                    },
-                });
+        const compensated = await prisma.$transaction(async (tx) => {
+            if (resolution.origin === "created") {
+                return deleteCreatedProject(tx, resolution, userId);
             }
 
-            return true;
+            return restoreProject(tx, resolution, userId);
         });
 
-        if (deleted) await invalidateDashboardStats([userId]);
+        if (compensated) await invalidateDashboardStats([userId]);
     } catch (error: unknown) {
         console.error("Failed to compensate document project creation:", {
             projectId: resolution.project.id,

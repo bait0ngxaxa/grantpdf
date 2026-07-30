@@ -5,6 +5,7 @@ export type {
     DocumentRecordCompletion,
     ProjectResult,
     ProjectResolution,
+    ProjectResolutionOrigin,
     DocxModule,
     DocxParserOptions,
 } from "./types";

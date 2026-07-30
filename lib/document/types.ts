@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
+import type { ProjectResolutionOrigin } from "@/lib/services/projectService/types";
+
+export type { ProjectResolutionOrigin } from "@/lib/services/projectService/types";
 
 // ============================================================================
 // Document Types
@@ -36,7 +39,8 @@ export interface ProjectResult {
 
 export interface ProjectResolution {
     project: ProjectResult;
-    createdByThisRequest: boolean;
+    origin: ProjectResolutionOrigin;
+    previousDeletedAt: Date | null;
 }
 
 /**

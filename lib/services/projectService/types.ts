@@ -3,6 +3,8 @@ import type { RawFile } from "@/lib/domain/files/types";
 
 export type { RawAttachment, RawFile } from "@/lib/domain/files/types";
 
+export type ProjectResolutionOrigin = "existing" | "created" | "restored";
+
 export interface RawProject {
     id: bigint;
     userId: bigint;

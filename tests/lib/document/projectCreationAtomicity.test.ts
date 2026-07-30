@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     createProject: vi.fn(),
     reserveStorageQuota: vi.fn(),
     projectDeleteMany: vi.fn(),
+    projectUpdateMany: vi.fn(),
     notificationFindMany: vi.fn(),
     notificationDeleteMany: vi.fn(),
     userFileCreate: vi.fn(),
@@ -62,10 +63,12 @@ import { handleFormProjectGeneration } from "@/lib/document/handlers/formProject
 
 describe("document project creation atomicity", () => {
     let projectExists: boolean;
+    let projectDeletedAt: Date | null;
 
     beforeEach(() => {
         vi.clearAllMocks();
         projectExists = false;
+        projectDeletedAt = null;
 
         mocks.findProjectByNameAndUser.mockResolvedValue(null);
         mocks.createProject.mockImplementation(async () => {
@@ -74,7 +77,8 @@ describe("document project creation atomicity", () => {
                 id: "88",
                 name: "โครงการใหม่",
                 description: "สร้างจากเอกสาร",
-                createdByThisRequest: true,
+                origin: "created",
+                previousDeletedAt: null,
             };
         });
         mocks.reserveStorageQuota.mockResolvedValue(false);
@@ -86,11 +90,19 @@ describe("document project creation atomicity", () => {
         mocks.projectDeleteMany.mockImplementation(async () => {
             if (!projectExists) return { count: 0 };
             projectExists = false;
+            projectDeletedAt = null;
+            return { count: 1 };
+        });
+        mocks.projectUpdateMany.mockImplementation(async () => {
+            projectDeletedAt = new Date("2026-06-27T01:00:00.000Z");
             return { count: 1 };
         });
 
         const transactionClient = {
-            project: { deleteMany: mocks.projectDeleteMany },
+            project: {
+                deleteMany: mocks.projectDeleteMany,
+                updateMany: mocks.projectUpdateMany,
+            },
             notificationEvent: {
                 findMany: mocks.notificationFindMany,
                 deleteMany: mocks.notificationDeleteMany,
@@ -120,7 +132,8 @@ describe("document project creation atomicity", () => {
                 name: "โครงการใหม่",
                 description: "สร้างจากเอกสาร",
             },
-            createdByThisRequest: true,
+            origin: "created",
+            previousDeletedAt: null,
         });
 
         await expect(
@@ -160,5 +173,63 @@ describe("document project creation atomicity", () => {
 
         expect(projectExists).toBe(false);
         expect(mocks.projectDeleteMany).toHaveBeenCalledTimes(1);
+    });
+
+    it("restores an archived project when document persistence fails", async () => {
+        const archivedAt = new Date("2026-06-27T01:00:00.000Z");
+        projectExists = true;
+        projectDeletedAt = archivedAt;
+        mocks.createProject.mockResolvedValue({
+            id: "88",
+            name: "โครงการใหม่",
+            description: "สร้างจากเอกสาร",
+            origin: "restored",
+            previousDeletedAt: archivedAt,
+        });
+
+        const resolution = await findOrCreateProject(
+            7,
+            "โครงการใหม่",
+            null,
+            3,
+            "สร้างจากเอกสาร",
+        );
+        if (isProjectError(resolution)) {
+            throw new Error("PROJECT_RESOLUTION_FAILED");
+        }
+
+        expect(resolution).toMatchObject({
+            origin: "restored",
+            previousDeletedAt: archivedAt,
+        });
+
+        await expect(
+            withDocumentProjectCompensation(resolution, 7, () =>
+                createUserFileRecord({
+                    userId: 7,
+                    projectId: resolution.project.id,
+                    originalFileName: "เอกสารล้มเหลว",
+                    storagePath: "storage/documents/failed.docx",
+                    fileSize: 256,
+                }),
+            ),
+        ).rejects.toThrow("STORAGE_QUOTA_EXCEEDED");
+
+        expect(projectDeletedAt).toEqual(archivedAt);
+        expect(mocks.projectDeleteMany).not.toHaveBeenCalled();
+        expect(mocks.projectUpdateMany).toHaveBeenCalledWith({
+            where: {
+                id: 88,
+                userId: 7,
+                deletedAt: null,
+                files: { none: {} },
+                reports: { none: {} },
+                coOwners: { none: {} },
+            },
+            data: {
+                deletedAt: archivedAt,
+                updated_at: expect.any(Date),
+            },
+        });
     });
 });

@@ -92,6 +92,7 @@ function createProjectRecord(): MockProjectRecord {
 
 const mockedTransaction = vi.mocked(prisma.$transaction);
 const mockedFindUnique = vi.mocked(prisma.project.findUnique);
+const mockedProjectUpdate = vi.mocked(prisma.project.update);
 
 function createP2002Error(): Prisma.PrismaClientKnownRequestError {
     return new Prisma.PrismaClientKnownRequestError("duplicate", {
@@ -124,7 +125,8 @@ describe("createProject", () => {
         );
 
         expect(result.id).toBe("88");
-        expect(result.createdByThisRequest).toBe(true);
+        expect(result.origin).toBe("created");
+        expect(result.previousDeletedAt).toBeNull();
         expect(tx.project.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 data: expect.objectContaining({
@@ -146,6 +148,32 @@ describe("createProject", () => {
                         ],
                     },
                 }),
+            }),
+        );
+    });
+
+    it("marks an archived project as restored and preserves its deletion timestamp", async () => {
+        const archivedAt = new Date("2026-06-27T01:00:00.000Z");
+        const existing = createProjectRecord();
+        existing.deletedAt = archivedAt;
+        tx.project.findUnique.mockResolvedValue({
+            id: existing.id,
+            programId: existing.programId,
+            deletedAt: archivedAt,
+        });
+        tx.project.update.mockResolvedValue({
+            ...existing,
+            deletedAt: null,
+        });
+
+        const result = await createProject(7, existing.name, "รายละเอียดใหม่", 3);
+
+        expect(result.origin).toBe("restored");
+        expect(result.previousDeletedAt).toBe(archivedAt);
+        expect(tx.project.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { id: existing.id },
+                data: expect.objectContaining({ deletedAt: null }),
             }),
         );
     });
@@ -175,6 +203,33 @@ describe("createProject", () => {
 
         expect(tx.project.update).not.toHaveBeenCalled();
         expect(tx.auditLog.create).not.toHaveBeenCalled();
+    });
+
+    it("marks an archived project as restored after a concurrent unique race", async () => {
+        const archivedAt = new Date("2026-06-27T01:00:00.000Z");
+        const existing = createProjectRecord();
+        existing.deletedAt = archivedAt;
+        tx.project.create.mockRejectedValue(createP2002Error());
+        mockedFindUnique.mockResolvedValue({
+            id: existing.id,
+            programId: existing.programId,
+            deletedAt: archivedAt,
+        } as never);
+        mockedProjectUpdate.mockResolvedValue({
+            ...existing,
+            deletedAt: null,
+        } as never);
+
+        const result = await createProject(7, existing.name, "รายละเอียดใหม่", 3);
+
+        expect(result.origin).toBe("restored");
+        expect(result.previousDeletedAt).toBe(archivedAt);
+        expect(mockedProjectUpdate).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { id: existing.id },
+                data: expect.objectContaining({ deletedAt: null }),
+            }),
+        );
     });
 
     it("does not restore an archived duplicate through create", async () => {
