@@ -26,4 +26,10 @@ export {
     purgeDeletedUsers,
     type UserPurgeOptions,
     type UserPurgeResult,
+    type UserPurgeOutcome,
 } from "./purge";
+
+export {
+    findUserPurgeBlockers,
+    type UserPurgeBlockers,
+} from "./purgeBlockers";

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
     transaction: vi.fn(),
     userFindMany: vi.fn(),
+    projectFindMany: vi.fn(),
     userDeleteMany: vi.fn(),
     auditCreate: vi.fn(),
     markUserFilesDeleting: vi.fn(),
@@ -15,6 +16,9 @@ vi.mock("@/lib/server/db", () => ({
         $transaction: mocks.transaction,
         user: {
             findMany: mocks.userFindMany,
+        },
+        project: {
+            findMany: mocks.projectFindMany,
         },
     },
 }));
@@ -48,6 +52,7 @@ describe("purgeDeletedUsers", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.userFindMany.mockResolvedValue([{ id: 7 }]);
+        mocks.projectFindMany.mockResolvedValue([]);
         mocks.markUserFilesDeleting.mockResolvedValue(2);
         mocks.reconcileDeletingFiles.mockResolvedValue({
             scanned: 2,
@@ -64,11 +69,20 @@ describe("purgeDeletedUsers", () => {
 
     it("reconciles due user files before hard-deleting the user", async () => {
         const now = new Date("2026-08-29T00:00:00.000Z");
+        mocks.projectFindMany.mockResolvedValue([
+            {
+                id: 10,
+                coOwners: [],
+                files: [],
+                reports: [],
+            },
+        ]);
 
         await expect(purgeDeletedUsers({ now, limit: 10 })).resolves.toEqual({
             scanned: 1,
             purged: 1,
             waitingForFiles: 0,
+            blockedBySharedProjects: 0,
             failed: 0,
         });
 
@@ -99,6 +113,23 @@ describe("purgeDeletedUsers", () => {
                         deletionStatus: { not: "deleted" },
                     },
                 },
+                projects: {
+                    none: {
+                        OR: [
+                            { coOwners: { some: {} } },
+                            {
+                                files: {
+                                    some: { userId: { not: 7 } },
+                                },
+                            },
+                            {
+                                reports: {
+                                    some: { userId: { not: 7 } },
+                                },
+                            },
+                        ],
+                    },
+                },
             },
         });
         expect(mocks.auditCreate).toHaveBeenCalledWith({
@@ -126,6 +157,7 @@ describe("purgeDeletedUsers", () => {
             scanned: 1,
             purged: 0,
             waitingForFiles: 1,
+            blockedBySharedProjects: 0,
             failed: 0,
         });
     });

@@ -27,6 +27,7 @@ describe("user purge route", () => {
             scanned: 1,
             purged: 1,
             waitingForFiles: 0,
+            blockedBySharedProjects: 0,
             failed: 0,
         });
     });
@@ -55,6 +56,7 @@ describe("user purge route", () => {
             scanned: 1,
             purged: 1,
             waitingForFiles: 0,
+            blockedBySharedProjects: 0,
             failed: 0,
         });
     });

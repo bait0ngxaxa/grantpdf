@@ -9,10 +9,24 @@ import {
     markUserFilesDeleting,
     reconcileDeletingFiles,
 } from "@/lib/services/fileService";
+import {
+    buildNoSharedProjectDataWhere,
+    findUserPurgeBlockers,
+    type UserPurgeBlockers,
+} from "./purgeBlockers";
 
 const DEFAULT_PURGE_LIMIT = 100;
 const MAX_PURGE_LIMIT = 500;
 const PURGE_FILE_BATCH_LIMIT = 500;
+
+const USER_PURGE_OUTCOME = {
+    PURGED: "purged",
+    WAITING_FOR_FILES: "waiting_for_files",
+    BLOCKED_BY_SHARED_PROJECT: "blocked_by_shared_project",
+} as const;
+
+export type UserPurgeOutcome =
+    (typeof USER_PURGE_OUTCOME)[keyof typeof USER_PURGE_OUTCOME];
 
 export interface UserPurgeOptions {
     now?: Date;
@@ -23,6 +37,7 @@ export interface UserPurgeResult {
     scanned: number;
     purged: number;
     waitingForFiles: number;
+    blockedBySharedProjects: number;
     failed: number;
 }
 
@@ -65,6 +80,7 @@ async function hardDeleteUserIfReady(
                         },
                     },
                 },
+                ...buildNoSharedProjectDataWhere(userId),
             },
         });
         if (result.count !== 1) return false;
@@ -87,7 +103,29 @@ async function hardDeleteUserIfReady(
     return deleted;
 }
 
-async function purgeOneUser(userId: number, now: Date): Promise<boolean> {
+function logSharedProjectBlocker(
+    userId: number,
+    blockers: UserPurgeBlockers,
+): void {
+    console.warn("User purge blocked by shared project data", {
+        userId,
+        projectIds: blockers.projectIds,
+        hasCoOwners: blockers.hasCoOwners,
+        hasForeignFiles: blockers.hasForeignFiles,
+        hasForeignReports: blockers.hasForeignReports,
+    });
+}
+
+async function purgeOneUser(
+    userId: number,
+    now: Date,
+): Promise<UserPurgeOutcome> {
+    const blockers = await findUserPurgeBlockers(userId);
+    if (blockers.blocked) {
+        logSharedProjectBlocker(userId, blockers);
+        return USER_PURGE_OUTCOME.BLOCKED_BY_SHARED_PROJECT;
+    }
+
     await markUserFilesDeleting(userId);
     await reconcileDeletingFiles({
         userId,
@@ -95,7 +133,17 @@ async function purgeOneUser(userId: number, now: Date): Promise<boolean> {
         limit: PURGE_FILE_BATCH_LIMIT,
     });
 
-    return hardDeleteUserIfReady(userId, now);
+    if (await hardDeleteUserIfReady(userId, now)) {
+        return USER_PURGE_OUTCOME.PURGED;
+    }
+
+    const remainingBlockers = await findUserPurgeBlockers(userId);
+    if (remainingBlockers.blocked) {
+        logSharedProjectBlocker(userId, remainingBlockers);
+        return USER_PURGE_OUTCOME.BLOCKED_BY_SHARED_PROJECT;
+    }
+
+    return USER_PURGE_OUTCOME.WAITING_FOR_FILES;
 }
 
 export async function purgeDeletedUsers(
@@ -105,13 +153,18 @@ export async function purgeDeletedUsers(
     const users = await findDueDeletedUsers(now, normalizeLimit(options.limit));
     const purgedUserIds: number[] = [];
     let waitingForFiles = 0;
+    let blockedBySharedProjects = 0;
     let failed = 0;
 
     for (const user of users) {
         try {
-            const purged = await purgeOneUser(user.id, now);
-            if (purged) {
+            const outcome = await purgeOneUser(user.id, now);
+            if (outcome === USER_PURGE_OUTCOME.PURGED) {
                 purgedUserIds.push(user.id);
+            } else if (
+                outcome === USER_PURGE_OUTCOME.BLOCKED_BY_SHARED_PROJECT
+            ) {
+                blockedBySharedProjects += 1;
             } else {
                 waitingForFiles += 1;
             }
@@ -129,6 +182,7 @@ export async function purgeDeletedUsers(
         scanned: users.length,
         purged: purgedUserIds.length,
         waitingForFiles,
+        blockedBySharedProjects,
         failed,
     };
 }
