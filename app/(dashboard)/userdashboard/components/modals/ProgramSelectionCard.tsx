@@ -38,7 +38,10 @@ export function ProgramSelectionCard({
             <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-center gap-2">
                     <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent.dot}`} />
-                    <p className="line-clamp-2 text-sm font-bold leading-5 text-slate-800 dark:text-slate-100">
+                    <p
+                        className="line-clamp-2 text-sm font-bold leading-5 break-words text-slate-800 dark:text-slate-100"
+                        title={program.name}
+                    >
                         {program.name}
                     </p>
                 </div>
@@ -85,7 +88,10 @@ export function SelectedProgramBadge({
                 </p>
                 <div className="flex min-w-0 items-center gap-1.5">
                     <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${accent.dot}`} />
-                    <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+                    <p
+                        className="line-clamp-2 break-words text-sm font-bold text-slate-800 dark:text-slate-100"
+                        title={program.name}
+                    >
                         {program.name}
                     </p>
                 </div>

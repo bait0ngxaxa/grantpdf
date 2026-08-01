@@ -7,14 +7,6 @@ import { useUserDashboardContext } from "../contexts";
 import { StatsCard } from "./StatsCard";
 import { ProjectStatusDetails } from "./ProjectStatusDetails";
 
-const truncateProjectName = (name: string, maxLength: number = 24): string => {
-    if (name.length <= maxLength) {
-        return name;
-    }
-
-    return `${name.slice(0, maxLength - 3)}...`;
-};
-
 export const StatsCards: React.FC = () => {
     const { totalProjects, totalDocuments, statusCounts, latestProject } =
         useUserDashboardContext();
@@ -51,7 +43,7 @@ export const StatsCards: React.FC = () => {
                 title="โครงการล่าสุด"
                 value={
                     latestProject
-                        ? truncateProjectName(latestProject.name)
+                        ? latestProject.name
                         : "-"
                 }
                 valueTitle={latestProject?.name}

@@ -78,10 +78,10 @@ export const StatsCard: React.FC<StatsCardProps> = ({
                     <div
                         title={valueTitle}
                         className={cn(
-                            "mb-2 min-w-0 max-w-full font-black leading-none text-slate-900 dark:text-slate-100",
+                            "mb-2 min-w-0 max-w-full font-black text-slate-900 dark:text-slate-100",
                             isTextValue
-                                ? "truncate whitespace-nowrap text-2xl sm:text-3xl"
-                                : "text-3xl",
+                                ? "line-clamp-2 break-words text-2xl leading-tight sm:text-3xl"
+                                : "text-3xl leading-none",
                         )}
                     >
                         {value}

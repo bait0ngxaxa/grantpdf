@@ -121,7 +121,7 @@ export default function ProjectCard({
                         <div className="min-w-0 flex-1">
                             <div className="flex items-start gap-2">
                                 <h3
-                                    className="line-clamp-3 min-w-0 flex-1 text-sm leading-5 font-bold break-words text-slate-800 dark:text-slate-100"
+                                    className="line-clamp-2 min-w-0 flex-1 text-sm leading-5 font-bold break-words text-slate-800 dark:text-slate-100"
                                     title={project.name}
                                 >
                                     {project.name}

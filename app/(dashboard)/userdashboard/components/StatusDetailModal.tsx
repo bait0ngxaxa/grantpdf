@@ -64,7 +64,7 @@ export const StatusDetailModal: React.FC<StatusDetailModalProps> = ({
                             <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">
                                 โครงการ
                             </p>
-                            <p className="truncate text-lg font-semibold text-slate-800 dark:text-slate-200">
+                            <p className="whitespace-normal break-words text-lg leading-7 font-semibold text-slate-800 [overflow-wrap:anywhere] dark:text-slate-200">
                                 {renderedProject.name}
                             </p>
                         </div>

@@ -216,7 +216,7 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
                             >
                                 รายงานโครงการ
                             </DialogTitle>
-                            <DialogDescription className="truncate text-sm text-slate-500 dark:text-slate-400">
+                            <DialogDescription className="whitespace-normal break-words text-sm leading-5 text-slate-500 [overflow-wrap:anywhere] dark:text-slate-400">
                                 {renderedProject.name}
                             </DialogDescription>
                         </div>

@@ -83,7 +83,7 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
               </div>
               <div className="min-w-0">
                 <DialogTitle
-                  className="truncate text-xl font-bold text-slate-800 dark:text-slate-100"
+                  className="whitespace-normal break-words text-xl leading-7 font-bold text-slate-800 [overflow-wrap:anywhere] dark:text-slate-100"
                   title={renderedProject.name}
                 >
                   {renderedProject.name}

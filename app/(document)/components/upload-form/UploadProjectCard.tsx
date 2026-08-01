@@ -46,7 +46,10 @@ export const UploadProjectCard = ({
                         <Building2 className="h-4 w-4" strokeWidth={1.8} />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="line-clamp-2 text-xs font-bold leading-5 text-slate-900 dark:text-slate-100">
+                        <h3
+                            className="line-clamp-2 text-xs font-bold leading-5 break-words text-slate-900 dark:text-slate-100"
+                            title={project.name}
+                        >
                             {project.name}
                         </h3>
                         <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500 dark:text-slate-400">
