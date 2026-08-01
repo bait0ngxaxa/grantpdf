@@ -57,19 +57,23 @@ export const Pagination: React.FC<PaginationProps> = ({
     const pageNumbers = getPageNumbers();
 
     return (
-        <div className={cn("mt-8 flex w-full justify-start overflow-x-auto sm:justify-center", className)}>
+        <nav
+            aria-label="การแบ่งหน้า"
+            className={cn("mt-8 flex w-full justify-start overflow-x-auto sm:justify-center", className)}
+        >
             <div className="inline-flex min-w-max items-center gap-1 rounded-2xl border border-slate-100 bg-white/80 p-1.5 shadow-lg shadow-slate-200/50 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-black/20">
                 {/* Previous Button */}
                 <button
+                    type="button"
                     onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                     className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
+                        "flex h-11 w-11 items-center justify-center rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
                         currentPage === 1
                             ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
                             : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer",
                     )}
-                    aria-label="Previous page"
+                    aria-label="ไปหน้าก่อนหน้า"
                 >
                     <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -80,20 +84,23 @@ export const Pagination: React.FC<PaginationProps> = ({
                         page === "…" ? (
                             <span
                                 key={`ellipsis-${index}`}
-                                className="flex h-8 w-8 items-center justify-center text-sm text-slate-400 sm:h-10 sm:w-10"
+                                className="flex h-11 w-11 items-center justify-center text-sm text-slate-400 sm:h-10 sm:w-10"
                             >
                                 •••
                             </span>
                         ) : (
                             <button
                                 key={page}
+                                type="button"
                                 onClick={() => onPageChange(page as number)}
                                 className={cn(
-                                    "h-8 w-8 cursor-pointer rounded-xl text-sm font-semibold transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
+                                    "flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl text-sm font-semibold transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
                                     currentPage === page
                                         ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-200 dark:shadow-none"
                                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200",
                                 )}
+                                aria-label={`ไปหน้าที่ ${page}`}
+                                aria-current={currentPage === page ? "page" : undefined}
                             >
                                 {page}
                             </button>
@@ -103,21 +110,22 @@ export const Pagination: React.FC<PaginationProps> = ({
 
                 {/* Next Button */}
                 <button
+                    type="button"
                     onClick={() =>
                         onPageChange(Math.min(totalPages, currentPage + 1))
                     }
                     disabled={currentPage === totalPages}
                     className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
+                        "flex h-11 w-11 items-center justify-center rounded-xl transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-200 sm:h-10 sm:w-10",
                         currentPage === totalPages
                             ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
                             : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer",
                     )}
-                    aria-label="Next page"
+                    aria-label="ไปหน้าถัดไป"
                 >
                     <ChevronRight className="w-5 h-5" />
                 </button>
             </div>
-        </div>
+        </nav>
     );
 };
