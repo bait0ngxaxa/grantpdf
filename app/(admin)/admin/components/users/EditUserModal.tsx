@@ -1,5 +1,12 @@
 import React, { type FormEvent } from "react";
 import { Button, Input } from "@/components/ui";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { ChevronDown, Loader2, X } from "lucide-react";
 import { ROLES, type UserRole } from "@/lib/shared/constants";
 import type { UserApiData } from "@/type";
@@ -36,62 +43,52 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
     isSaving,
     canSave,
 }) => {
+    const [displayedUser, setDisplayedUser] = React.useState(user);
     const handleClose = React.useCallback((): void => {
         if (isSaving) return;
         onClose();
     }, [isSaving, onClose]);
 
-    React.useEffect(() => {
-        if (!isOpen || isSaving) {
-            return;
+    const handleOpenAutoFocus = React.useCallback((_event: Event): void => {
+        if (user) {
+            setDisplayedUser(user);
         }
+    }, [user]);
 
-        const handleKeyDown = (event: KeyboardEvent): void => {
-            if (event.key === "Escape") {
-                handleClose();
-            }
-        };
-
-        document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [handleClose, isOpen, isSaving]);
-
-    if (!isOpen || !user) return null;
+    const renderedUser = user ?? displayedUser;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-            <button
-                type="button"
-                aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
-                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200"
-                onClick={handleClose}
-                disabled={isSaving}
-            />
-            <div
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="edit-user-modal-title"
-                className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_14px_rgba(15,23,42,0.12)] motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-200 sm:p-8 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
-            >
-                <button
-                    type="button"
-                    aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
-                    onClick={handleClose}
-                    disabled={isSaving}
-                    className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                if (!open) handleClose();
+            }}
+        >
+            {renderedUser && (
+                <DialogContent
+                    showCloseButton={false}
+                    onOpenAutoFocus={handleOpenAutoFocus}
+                    className="max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-md gap-0 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_14px_rgba(15,23,42,0.12)] sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:max-w-md sm:p-8 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
                 >
-                    <X className="h-5 w-5" />
-                </button>
+                    <DialogClose asChild>
+                        <button
+                            type="button"
+                            aria-label="ปิดหน้าต่างแก้ไขผู้ใช้งาน"
+                            disabled={isSaving}
+                            className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    </DialogClose>
                 <div className="mb-6">
-                    <h3
-                        id="edit-user-modal-title"
+                    <DialogTitle
                         className="break-words text-xl font-bold text-slate-800 text-balance dark:text-slate-100"
                     >
                         แก้ไขผู้ใช้งาน
-                    </h3>
-                    <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-400">
-                        อัปเดตข้อมูลของ {user.name}
-                    </p>
+                    </DialogTitle>
+                    <DialogDescription className="mt-1 break-words text-sm text-slate-500 dark:text-slate-400">
+                        อัปเดตข้อมูลของ {renderedUser.name}
+                    </DialogDescription>
                 </div>
 
                 <form onSubmit={onSubmit} className="space-y-5">
@@ -182,7 +179,8 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
                         </Button>
                     </div>
                 </form>
-            </div>
-        </div>
+                </DialogContent>
+            )}
+        </Dialog>
     );
 };

@@ -1,7 +1,14 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import useSWR from "swr";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { FileText, FolderOpen, X } from "lucide-react";
 import { FileListSkeleton } from "@/components/ui/FileListSkeleton";
 import type { AdminProject } from "@/type/models";
@@ -24,7 +31,18 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
   project,
   onClose,
 }) => {
-  const fallbackFiles = useMemo(() => project?.files || [], [project?.files]);
+  const [displayedProject, setDisplayedProject] = React.useState(project);
+  const handleOpenAutoFocus = React.useCallback((_event: Event): void => {
+    if (project) {
+      setDisplayedProject(project);
+    }
+  }, [project]);
+
+  const renderedProject = project ?? displayedProject;
+  const fallbackFiles = useMemo(
+    () => renderedProject?.files || [],
+    [renderedProject?.files],
+  );
   const filesKey =
     isOpen && project ? [API_ROUTES.ADMIN_FILES, project.id] : null;
   const {
@@ -38,44 +56,25 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
     { keepPreviousData: true },
   );
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen || !project) {
-    return null;
-  }
-
   const visibleFiles = filesData?.files ?? fallbackFiles;
-  const fileCount = isLoadingFiles ? project._count.files : visibleFiles.length;
+  const fileCount = isLoadingFiles
+    ? (renderedProject?._count.files ?? visibleFiles.length)
+    : visibleFiles.length;
   const filesError = projectFilesError ? "ไม่สามารถโหลดไฟล์ล่าสุดได้" : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-      <button
-        type="button"
-        aria-label="ปิดหน้าต่างรายการเอกสาร"
-        className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm duration-200 motion-safe:animate-in motion-safe:fade-in motion-reduce:animate-none"
-        onClick={onClose}
-      />
-
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="project-files-modal-title"
-        className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_8px_14px_rgba(15,23,42,0.12)] duration-200 motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:max-h-[calc(100dvh-2rem)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
-      >
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      {renderedProject && (
+        <DialogContent
+          onOpenAutoFocus={handleOpenAutoFocus}
+          showCloseButton={false}
+          className="flex max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-5xl flex-col gap-0 overflow-hidden rounded-2xl border border-slate-100 bg-white p-0 shadow-[0_8px_14px_rgba(15,23,42,0.12)] sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:max-w-5xl dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
+        >
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5 dark:border-slate-700">
           <div className="min-w-0">
             <div className="flex items-center gap-3">
@@ -83,35 +82,39 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
                 <FolderOpen className="h-6 w-6" />
               </div>
               <div className="min-w-0">
-                <h3
-                  id="project-files-modal-title"
+                <DialogTitle
                   className="truncate text-xl font-bold text-slate-800 dark:text-slate-100"
-                  title={project.name}
+                  title={renderedProject.name}
                 >
-                  {project.name}
-                </h3>
+                  {renderedProject.name}
+                </DialogTitle>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                  <span title={project.userName}>{project.userName}</span>
-                  {project.programName && (
+                  <DialogDescription asChild>
+                    <span title={renderedProject.userName}>
+                      {renderedProject.userName}
+                    </span>
+                  </DialogDescription>
+                  {renderedProject.programName && (
                     <span
                       className="inline-flex max-w-full items-center truncate rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:border-violet-800 dark:bg-violet-900/30 dark:text-violet-300"
-                      title={project.programName}
+                      title={renderedProject.programName}
                     >
-                      {project.programName}
+                      {renderedProject.programName}
                     </span>
                   )}
                 </div>
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            aria-label="ปิดหน้าต่างรายการเอกสาร"
-            onClick={onClose}
-            className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <DialogClose asChild>
+            <button
+              type="button"
+              aria-label="ปิดหน้าต่างรายการเอกสาร"
+              className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </DialogClose>
         </div>
 
         <div className="border-b border-slate-100 bg-slate-50/80 px-4 py-3 sm:px-6 dark:border-slate-700 dark:bg-slate-900/40">
@@ -123,10 +126,10 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
             <span
               className={cn(
                 "rounded-full border px-3 py-1 font-semibold shadow-sm",
-                getStatusColor(project.status),
+                getStatusColor(renderedProject.status),
               )}
             >
-              สถานะ: {project.status}
+              สถานะ: {renderedProject.status}
             </span>
           </div>
         </div>
@@ -159,7 +162,8 @@ export const ProjectFilesModal: React.FC<ProjectFilesModalProps> = ({
             </div>
           )}
         </div>
-      </div>
-    </div>
+        </DialogContent>
+      )}
+    </Dialog>
   );
 };

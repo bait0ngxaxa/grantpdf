@@ -50,10 +50,52 @@ function DialogContent({
     className,
     children,
     showCloseButton = true,
+    onOpenAutoFocus,
+    onCloseAutoFocus,
     ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
     showCloseButton?: boolean;
 }): React.JSX.Element {
+    const previouslyFocusedElementRef = React.useRef<HTMLElement | null>(
+        null,
+    );
+
+    const handleOpenAutoFocus = React.useCallback(
+        (event: Event): void => {
+            const activeElement = document.activeElement;
+            previouslyFocusedElementRef.current =
+                activeElement instanceof HTMLElement ? activeElement : null;
+            onOpenAutoFocus?.(event);
+        },
+        [onOpenAutoFocus],
+    );
+
+    const handleCloseAutoFocus = React.useCallback(
+        (event: Event): void => {
+            onCloseAutoFocus?.(event);
+
+            if (event.defaultPrevented) {
+                previouslyFocusedElementRef.current = null;
+                return;
+            }
+
+            const previouslyFocusedElement =
+                previouslyFocusedElementRef.current;
+            previouslyFocusedElementRef.current = null;
+
+            if (
+                !previouslyFocusedElement?.isConnected ||
+                previouslyFocusedElement.hasAttribute("disabled")
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+            previouslyFocusedElement.focus({ preventScroll: true });
+        },
+        [onCloseAutoFocus],
+    );
+
     return (
         <DialogPortal data-slot="dialog-portal">
             <DialogOverlay />
@@ -63,6 +105,8 @@ function DialogContent({
                     "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid max-h-[calc(100dvh-1rem)] w-full max-w-[calc(100%-1rem)] min-w-0 translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto overscroll-contain rounded-2xl border p-4 shadow-[0_8px_14px_rgba(15,23,42,0.12)] duration-200 motion-reduce:animate-none sm:max-h-[calc(100dvh-2rem)] sm:max-w-lg sm:p-6 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]",
                     className
                 )}
+                onOpenAutoFocus={handleOpenAutoFocus}
+                onCloseAutoFocus={handleCloseAutoFocus}
                 {...props}
             >
                 {children}

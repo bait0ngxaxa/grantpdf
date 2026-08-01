@@ -1,5 +1,12 @@
 import React from "react";
 import { Button } from "@/components/ui";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type {
   AdminProject,
   ProgramSummary,
@@ -139,6 +146,16 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
     closeStatusModal();
   }, [closeStatusModal, isUpdatingStatus]);
 
+  const [displayedProject, setDisplayedProject] = React.useState(
+    selectedProjectForStatus,
+  );
+  const handleOpenAutoFocus = React.useCallback((_event: Event): void => {
+    if (selectedProjectForStatus) {
+      setDisplayedProject(selectedProjectForStatus);
+    }
+  }, [selectedProjectForStatus]);
+  const renderedProject = selectedProjectForStatus ?? displayedProject;
+
   const hasCoOwnerChanges =
     allowCoOwners !== selectedProjectForStatus?.allowCoOwners ||
     selectedCoOwnerUserIds.join(",") !==
@@ -156,59 +173,41 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
       ? "กรุณาเลือกเจ้าของร่วมอย่างน้อย 1 คน"
       : null;
 
-  React.useEffect(() => {
-    if (!isStatusModalOpen) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") {
-        requestClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isStatusModalOpen, requestClose]);
-
   return (
-    <>
-      {isStatusModalOpen && selectedProjectForStatus && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-          <button
-            type="button"
-            aria-label="ปิดหน้าต่างจัดการสถานะ"
-            className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm duration-200 motion-safe:animate-in motion-safe:fade-in motion-reduce:animate-none"
-            onClick={requestClose}
-            disabled={isUpdatingStatus}
-          />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="project-status-modal-title"
-            className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto rounded-2xl border border-slate-100 bg-white p-4 shadow-[0_8px_14px_rgba(15,23,42,0.12)] duration-200 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:max-h-[calc(100dvh-2rem)] sm:p-6 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
-          >
+    <Dialog
+      open={isStatusModalOpen}
+      onOpenChange={(open) => {
+        if (!open) requestClose();
+      }}
+    >
+      {renderedProject && (
+        <DialogContent
+          showCloseButton={false}
+          onOpenAutoFocus={handleOpenAutoFocus}
+          className="max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-5xl gap-0 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-4 shadow-[0_8px_14px_rgba(15,23,42,0.12)] sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:max-w-5xl sm:p-6 dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
+        >
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
                   <ClipboardList className="h-6 w-6" />
                 </div>
-                <h3
-                  id="project-status-modal-title"
-                  className="text-xl font-bold text-balance text-slate-800 dark:text-slate-100"
-                >
+                <DialogTitle className="text-xl font-bold text-balance text-slate-800 dark:text-slate-100">
                   จัดการสถานะ
-                </h3>
+                </DialogTitle>
+                <DialogDescription className="sr-only">
+                  ปรับสถานะและรายละเอียดของโครงการ
+                </DialogDescription>
               </div>
-              <button
-                type="button"
-                aria-label="ปิดหน้าต่างจัดการสถานะ"
-                onClick={requestClose}
-                disabled={isUpdatingStatus}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <DialogClose asChild>
+                <button
+                  type="button"
+                  aria-label="ปิดหน้าต่างจัดการสถานะ"
+                  disabled={isUpdatingStatus}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </DialogClose>
             </div>
 
             <div className="mb-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
@@ -217,7 +216,7 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                   โครงการ
                 </p>
                 <p className="mb-4 whitespace-normal break-words text-lg font-semibold leading-7 text-slate-800 [overflow-wrap:anywhere] dark:text-slate-100">
-                  {selectedProjectForStatus.name}
+                  {renderedProject.name}
                 </p>
                 <div className="flex min-w-0 items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-600">
                   <span className="text-sm text-slate-500 dark:text-slate-400">
@@ -226,10 +225,10 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                   <span
                     className={cn(
                       "rounded-lg border px-3 py-1 text-xs font-semibold",
-                      getStatusColor(selectedProjectForStatus.status),
+                      getStatusColor(renderedProject.status),
                     )}
                   >
-                    {selectedProjectForStatus.status}
+                    {renderedProject.status}
                   </span>
                 </div>
               </div>
@@ -511,9 +510,8 @@ export const ProjectStatusModal: React.FC<ProjectStatusModalProps> = ({
                 )}
               </Button>
             </div>
-          </div>
-        </div>
+        </DialogContent>
       )}
-    </>
+    </Dialog>
   );
 };

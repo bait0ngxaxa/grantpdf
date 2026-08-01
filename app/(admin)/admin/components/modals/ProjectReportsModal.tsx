@@ -2,6 +2,13 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Skeleton } from "@/components/ui";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { API_ROUTES, PAGINATION } from "@/lib/shared/constants";
 import { useSignedDownload } from "@/lib/hooks/useSignedDownload";
 import type { AdminProject, AdminProjectReport } from "@/type";
@@ -79,6 +86,7 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
     project,
     onClose,
 }) => {
+    const [displayedProject, setDisplayedProject] = useState(project);
     const [reports, setReports] = useState<AdminProjectReport[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [updatingReportId, setUpdatingReportId] = useState<string | null>(
@@ -87,6 +95,14 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
     const [adminNotes, setAdminNotes] = useState<Record<string, string>>({});
     const { download, isDownloading } = useSignedDownload();
     const { fetchProjects } = useAdminDashboardContext();
+
+    const handleOpenAutoFocus = useCallback((_event: Event): void => {
+        if (project) {
+            setDisplayedProject(project);
+        }
+    }, [project]);
+
+    const renderedProject = project ?? displayedProject;
 
     const fetchReports = useCallback(async (): Promise<void> => {
         if (!project) return;
@@ -127,19 +143,6 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
 
         return () => window.cancelAnimationFrame(frameId);
     }, [fetchReports, isOpen]);
-
-    useEffect(() => {
-        if (!isOpen) return;
-
-        const handleKeyDown = (event: KeyboardEvent): void => {
-            if (event.key === "Escape") {
-                onClose();
-            }
-        };
-
-        document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [isOpen, onClose]);
 
     const updateReport = async (
         reportId: string,
@@ -189,37 +192,33 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
         void download({ fileId, fromAdminPanel: true });
     };
 
-    if (!isOpen || !project) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-            <button
-                type="button"
-                aria-label="ปิดหน้าต่างรายงานโครงการ"
-                className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm duration-200 motion-safe:animate-in motion-safe:fade-in motion-reduce:animate-none"
-                onClick={onClose}
-            />
-            <div
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="project-reports-modal-title"
-                className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_8px_14px_rgba(15,23,42,0.12)] duration-200 motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-reduce:animate-none sm:max-h-[calc(100dvh-2rem)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
-            >
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
+            {renderedProject && (
+                <DialogContent
+                    onOpenAutoFocus={handleOpenAutoFocus}
+                    showCloseButton={false}
+                    className="flex max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-5xl flex-col gap-0 overflow-hidden rounded-2xl border border-slate-100 bg-white p-0 shadow-[0_8px_14px_rgba(15,23,42,0.12)] sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:max-w-5xl dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_8px_14px_rgba(0,0,0,0.32)]"
+                >
                 <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5 dark:border-slate-700">
                     <div className="flex min-w-0 items-center gap-3">
                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
                             <FileText className="h-6 w-6" />
                         </div>
                         <div className="min-w-0">
-                            <h3
-                                id="project-reports-modal-title"
+                            <DialogTitle
                                 className="truncate text-xl font-bold text-slate-800 dark:text-slate-100"
                             >
                                 รายงานโครงการ
-                            </h3>
-                            <p className="truncate text-sm text-slate-500 dark:text-slate-400">
-                                {project.name}
-                            </p>
+                            </DialogTitle>
+                            <DialogDescription className="truncate text-sm text-slate-500 dark:text-slate-400">
+                                {renderedProject.name}
+                            </DialogDescription>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -234,14 +233,15 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
                             <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
                             รีเฟรช
                         </Button>
-                        <button
-                            type="button"
-                            aria-label="ปิดหน้าต่างรายงานโครงการ"
-                            onClick={onClose}
-                            className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-                        >
-                            <X className="h-5 w-5" />
-                        </button>
+                        <DialogClose asChild>
+                            <button
+                                type="button"
+                                aria-label="ปิดหน้าต่างรายงานโครงการ"
+                                className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </DialogClose>
                     </div>
                 </div>
 
@@ -283,7 +283,8 @@ export const ProjectReportsModal: React.FC<ProjectReportsModalProps> = ({
                         </ol>
                     )}
                 </div>
-            </div>
-        </div>
+                </DialogContent>
+            )}
+        </Dialog>
     );
 };
