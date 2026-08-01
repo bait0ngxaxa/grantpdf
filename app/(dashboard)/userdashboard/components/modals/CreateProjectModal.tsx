@@ -21,7 +21,10 @@ import {
     ArrowLeft,
 } from "lucide-react";
 import { useUserDashboardContext } from "../../contexts";
-import { API_ROUTES } from "@/lib/shared/constants";
+import {
+    API_ROUTES,
+    USER_DASHBOARD_TAB,
+} from "@/lib/shared/constants";
 import type { ProgramSummary } from "@/type/models";
 import {
     ProgramSelectionList,
@@ -122,7 +125,7 @@ export const CreateProjectModal: React.FC = () => {
     const handleCreate = async (): Promise<void> => {
         await onCreateProject();
         setStep("select-program");
-        setActiveTab("projects");
+        setActiveTab(USER_DASHBOARD_TAB.PROJECTS);
     };
 
     const handleClose = (): void => {

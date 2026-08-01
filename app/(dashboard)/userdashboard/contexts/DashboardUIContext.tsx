@@ -8,10 +8,14 @@ import React, {
     useEffect,
     type ReactNode,
 } from "react";
+import {
+    USER_DASHBOARD_TAB,
+    type UserDashboardTab,
+} from "@/lib/shared/constants";
 
 interface DashboardUIContextType {
-    activeTab: string;
-    setActiveTab: (tab: string) => void;
+    activeTab: UserDashboardTab;
+    setActiveTab: React.Dispatch<React.SetStateAction<UserDashboardTab>>;
     isSidebarOpen: boolean;
     setIsSidebarOpen: (open: boolean) => void;
     expandedProjects: Set<string>;
@@ -31,7 +35,9 @@ const DashboardUIContext = createContext<DashboardUIContextType | undefined>(
 );
 
 export function DashboardUIProvider({ children }: { children: ReactNode }) {
-    const [activeTab, setActiveTab] = useState("dashboard");
+    const [activeTab, setActiveTab] = useState<UserDashboardTab>(
+        USER_DASHBOARD_TAB.DASHBOARD,
+    );
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
         new Set(),

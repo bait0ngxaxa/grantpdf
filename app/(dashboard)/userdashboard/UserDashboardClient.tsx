@@ -6,7 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { useUserDashboardContext } from "./contexts";
 import { DashboardSkeleton, ErrorState } from "@/components/ui";
-import { STATUS_FILTER } from "@/lib/shared/constants";
+import {
+    STATUS_FILTER,
+    USER_DASHBOARD_TAB,
+} from "@/lib/shared/constants";
 import {
     NOTIFICATION_ACTION_QUERY,
     parseNotificationProjectId,
@@ -17,13 +20,6 @@ const ProjectsTab = dynamic(
     () =>
         import("./components/ProjectsTab").then((m) => ({
             default: m.ProjectsTab,
-        })),
-    { loading: () => <DashboardSkeleton compact variant="user" /> },
-);
-const CreateProjectTab = dynamic(
-    () =>
-        import("./components/CreateProjectTab").then((m) => ({
-            default: m.CreateProjectTab,
         })),
     { loading: () => <DashboardSkeleton compact variant="user" /> },
 );
@@ -53,7 +49,7 @@ export default function UserDashboardClient(): React.JSX.Element | null {
 
     useEffect(() => {
         if (!notificationProjectId) return;
-        setActiveTab("projects");
+        setActiveTab(USER_DASHBOARD_TAB.PROJECTS);
         setSearchTerm("");
         setSelectedStatus(STATUS_FILTER.ALL);
         setSelectedProgramFilterId("");
@@ -82,13 +78,12 @@ export default function UserDashboardClient(): React.JSX.Element | null {
     return (
         <>
             {/* Dashboard Tab */}
-            {activeTab === "dashboard" ? <DashboardOverview /> : null}
+            {activeTab === USER_DASHBOARD_TAB.DASHBOARD ? (
+                <DashboardOverview />
+            ) : null}
 
             {/* Projects Tab */}
-            {activeTab === "projects" ? <ProjectsTab /> : null}
-
-            {/* Create Tab */}
-            {activeTab === "create" ? <CreateProjectTab /> : null}
+            {activeTab === USER_DASHBOARD_TAB.PROJECTS ? <ProjectsTab /> : null}
 
             {/* All Modals */}
             <DashboardModals />

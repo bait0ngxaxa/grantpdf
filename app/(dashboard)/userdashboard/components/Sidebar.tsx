@@ -7,14 +7,27 @@ import {
     Plus,
     PanelLeftClose,
 } from "lucide-react";
+import {
+    USER_DASHBOARD_ACTION,
+    USER_DASHBOARD_TAB,
+    type UserDashboardTab,
+} from "@/lib/shared/constants";
 import { useUserDashboardContext } from "../contexts";
 import { SidebarLogoToggle } from "@/components/ui/SidebarLogoToggle";
 
-type MenuItemType = {
-    id: string;
-    name: string;
-    icon: React.ReactNode;
-};
+type MenuItemType =
+    | {
+          type: "tab";
+          id: UserDashboardTab;
+          name: string;
+          icon: React.ReactNode;
+      }
+    | {
+          type: "action";
+          id: typeof USER_DASHBOARD_ACTION.CREATE_PROJECT;
+          name: string;
+          icon: React.ReactNode;
+      };
 
 type SidebarTooltip = {
     name: string;
@@ -28,17 +41,20 @@ type MenuButtonEvent =
 
 const menuItems: MenuItemType[] = [
     {
-        id: "dashboard",
+        type: "tab",
+        id: USER_DASHBOARD_TAB.DASHBOARD,
         name: "ภาพรวม",
         icon: <Folder className="h-5 w-5" />,
     },
     {
-        id: "projects",
+        type: "tab",
+        id: USER_DASHBOARD_TAB.PROJECTS,
         name: "โครงการของฉัน",
         icon: <Building2 className="h-5 w-5" />,
     },
     {
-        id: "create-project",
+        type: "action",
+        id: USER_DASHBOARD_ACTION.CREATE_PROJECT,
         name: "สร้างโครงการ",
         icon: <Plus className="h-5 w-5" />,
     },
@@ -83,6 +99,8 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
         });
     };
     const hideSidebarTooltip = (): void => setSidebarTooltip(null);
+    const isMenuItemActive = (item: MenuItemType): boolean =>
+        item.type === "tab" && activeTab === item.id;
 
     React.useEffect(() => {
         if (!isSidebarOpen) {
@@ -263,7 +281,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                 <button
                                     aria-label={item.name}
                                     onClick={() => {
-                                        if (item.id === "create-project") {
+                                        if (item.type === "action") {
                                             setShowCreateProjectModal(true);
                                         } else {
                                             startTransition(() => {
@@ -284,13 +302,13 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                         "group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border px-3 py-3 text-left font-medium transition-[color,background-color,border-color,opacity,box-shadow,transform,filter] duration-300 xl:px-4 xl:py-3.5",
                                         !isSidebarOpen &&
                                             "lg:justify-center lg:px-0",
-                                        activeTab === item.id
+                                        isMenuItemActive(item)
                                             ? "border-blue-500/20 text-white shadow-lg shadow-blue-500/25"
                                             : "border-transparent text-slate-600 hover:border-blue-100 hover:bg-blue-50/70 hover:text-blue-700 dark:text-slate-300 dark:hover:border-blue-900/50 dark:hover:bg-blue-950/25 dark:hover:text-blue-300",
                                     )}
                                 >
                                     {/* Active Background Gradient */}
-                                    {activeTab === item.id && (
+                                    {isMenuItemActive(item) && (
                                         <>
                                             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500" />
                                             <div className="absolute inset-y-2 left-1 w-1 rounded-full bg-white/85" />
@@ -298,14 +316,14 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     )}
 
                                     {/* Hover slide effect for inactive items */}
-                                    {activeTab !== item.id && (
+                                    {!isMenuItemActive(item) && (
                                         <div className="absolute inset-0 bg-gradient-to-r from-blue-50/80 dark:from-slate-800/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
                                     )}
 
                                     <span
                                         className={cn(
                                             "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-105",
-                                            activeTab === item.id
+                                            isMenuItemActive(item)
                                                 ? "bg-white/15 text-white"
                                                 : "text-slate-400 group-hover:bg-white/80 group-hover:text-blue-600 dark:text-slate-500 dark:group-hover:bg-slate-900/70 dark:group-hover:text-blue-300",
                                         )}
@@ -322,7 +340,7 @@ export const Sidebar: React.FC = (): React.JSX.Element => {
                                     </span>
 
                                     {/* Right indicator for active item */}
-                                    {activeTab === item.id && (
+                                    {isMenuItemActive(item) && (
                                         <div
                                             className={cn(
                                                 "relative z-10 ml-auto flex items-center",

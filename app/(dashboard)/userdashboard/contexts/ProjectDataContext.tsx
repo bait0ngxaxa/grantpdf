@@ -11,6 +11,7 @@ import type { Project } from "@/type";
 import type { LatestProject } from "@/type/models";
 import type { UserProjectStats } from "../hooks/useUserData";
 import { useDashboardUI } from "./DashboardUIContext";
+import { USER_DASHBOARD_TAB } from "@/lib/shared/constants";
 
 interface ProjectDataContextType {
     projects: Project[];
@@ -65,7 +66,7 @@ export function ProjectDataProvider({
         selectedProgramFilterId,
         sortBy,
     } = useDashboardUI();
-    const shouldLoadProjects = activeTab === "projects";
+    const shouldLoadProjects = activeTab === USER_DASHBOARD_TAB.PROJECTS;
 
     const {
         projects,

@@ -10,11 +10,15 @@ import {
     LogOut,
     Loader2,
     Menu,
-    Plus,
     ShieldCheck,
     User,
 } from "lucide-react";
-import { ROUTES, ROLES } from "@/lib/shared/constants";
+import {
+    ROUTES,
+    ROLES,
+    USER_DASHBOARD_TAB,
+    type UserDashboardTab,
+} from "@/lib/shared/constants";
 import { signOutWithSessionRevoke } from "@/lib/client/auth";
 import { useRouter } from "next/navigation";
 import { useUserDashboardContext } from "../contexts";
@@ -27,21 +31,16 @@ type TopBarMenuItem = {
     icon: React.ReactNode;
 };
 
-const menuItems: Record<string, TopBarMenuItem> = {
-    dashboard: {
+const menuItems: Record<UserDashboardTab, TopBarMenuItem> = {
+    [USER_DASHBOARD_TAB.DASHBOARD]: {
         name: "ภาพรวม",
         subtitle: "พื้นที่ทำงานของคุณ",
         icon: <ChartBarBig className="h-5 w-5 text-blue-600 dark:text-blue-300" />,
     },
-    projects: {
+    [USER_DASHBOARD_TAB.PROJECTS]: {
         name: "โครงการของฉัน",
         subtitle: "ติดตามและจัดการโครงการ",
         icon: <Folder className="h-5 w-5 text-blue-600 dark:text-blue-300" />,
-    },
-    "create-project": {
-        name: "สร้างโครงการ",
-        subtitle: "เริ่มต้นคำขอทุนใหม่",
-        icon: <Plus className="h-5 w-5 text-blue-600 dark:text-blue-300" />,
     },
 };
 
@@ -55,7 +54,7 @@ export const TopBar: React.FC = (): React.JSX.Element => {
         setShowProfileModal,
     } = useUserDashboardContext();
     const [isNavigatingAdmin, setIsNavigatingAdmin] = useState(false);
-    const activeMenu = menuItems[activeTab] ?? menuItems.dashboard;
+    const activeMenu = menuItems[activeTab];
 
     const handleGoToAdmin = (): void => {
         setIsNavigatingAdmin(true);

@@ -11,6 +11,7 @@ import type { UserProjectStats } from "../hooks/useUserData";
 import type { Project } from "@/type";
 import type { LatestProject } from "@/type/models";
 import type { Session } from "@/lib/server/auth/types";
+import type { UserDashboardTab } from "@/lib/shared/constants";
 
 import { DashboardUIProvider, useDashboardUI } from "./DashboardUIContext";
 import { ModalProvider, useModalContext } from "./ModalContext";
@@ -21,8 +22,8 @@ interface UserDashboardContextType {
     session: Session;
 
     // UI State
-    activeTab: string;
-    setActiveTab: (tab: string) => void;
+    activeTab: UserDashboardTab;
+    setActiveTab: React.Dispatch<React.SetStateAction<UserDashboardTab>>;
     isSidebarOpen: boolean;
     setIsSidebarOpen: (open: boolean) => void;
     expandedProjects: Set<string>;
