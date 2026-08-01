@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ProjectSummary } from "@/type/models";
 import { useDocumentAuth } from "../../contexts/DocumentAuthContext";
+import type { CreateDocumentStep } from "../createDocsSteps";
 
 export interface UseCreateDocsStateReturn {
+    currentStep: CreateDocumentStep;
     selectedCategory: string | null;
     setSelectedCategory: (category: string | null) => void;
     selectedContractType: string | null;
@@ -22,22 +24,61 @@ export interface UseCreateDocsStateReturn {
 export const useCreateDocsState = (): UseCreateDocsStateReturn => {
     const searchParams = useSearchParams();
     const { isAdmin } = useDocumentAuth();
+    const initialProjectId = searchParams.get("projectId");
 
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(
-        null
+    const [currentStep, setCurrentStep] = useState<CreateDocumentStep>(
+        initialProjectId ? "select-category" : "select-project",
     );
-    const [selectedContractType, setSelectedContractType] = useState<
+
+    const [selectedCategory, setSelectedCategoryState] = useState<
         string | null
     >(null);
-    const [projects, setProjects] = useState<ProjectSummary[]>([]);
+    const [selectedContractType, setSelectedContractTypeState] = useState<
+        string | null
+    >(null);
+    const [selectedProjectId, setSelectedProjectIdState] = useState<
+        string | null
+    >(initialProjectId);
 
-    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-        searchParams.get("projectId")
+    const setSelectedProjectId = useCallback((id: string | null): void => {
+        setSelectedProjectIdState(id);
+        setCurrentStep(id ? "select-category" : "select-project");
+    }, []);
+
+    const setSelectedCategory = useCallback(
+        (category: string | null): void => {
+            setSelectedCategoryState(category);
+            setCurrentStep(
+                category
+                    ? "select-type"
+                    : selectedProjectId
+                      ? "select-category"
+                      : "select-project",
+            );
+        },
+        [selectedProjectId],
     );
+
+    const setSelectedContractType = useCallback(
+        (type: string | null): void => {
+            setSelectedContractTypeState(type);
+            setCurrentStep(
+                type || selectedCategory
+                    ? "select-type"
+                    : selectedProjectId
+                      ? "select-category"
+                      : "select-project",
+            );
+        },
+        [selectedCategory, selectedProjectId],
+    );
+
+    const [projects, setProjects] = useState<ProjectSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     return {
+        currentStep,
         selectedCategory,
         setSelectedCategory,
         selectedContractType,

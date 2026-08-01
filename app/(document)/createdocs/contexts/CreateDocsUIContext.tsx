@@ -10,9 +10,11 @@ import React, {
 import { useRouter } from "next/navigation";
 import { useCreateDocsState } from "../hooks";
 import { ROUTES } from "@/lib/shared/constants";
+import type { CreateDocumentStep } from "../createDocsSteps";
 
 interface CreateDocsUIContextType {
     // State
+    currentStep: CreateDocumentStep;
     selectedProjectId: string | null;
     setSelectedProjectId: (id: string | null) => void;
     selectedCategory: string | null;
@@ -38,6 +40,7 @@ const CreateDocsUIContext = createContext<CreateDocsUIContextType | undefined>(
 export function CreateDocsUIProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
     const {
+        currentStep,
         selectedCategory,
         setSelectedCategory,
         selectedContractType,
@@ -123,6 +126,7 @@ export function CreateDocsUIProvider({ children }: { children: ReactNode }) {
 
     const value = useMemo(
         () => ({
+            currentStep,
             selectedProjectId,
             setSelectedProjectId,
             selectedCategory,
@@ -139,6 +143,7 @@ export function CreateDocsUIProvider({ children }: { children: ReactNode }) {
             handleTorSelection,
         }),
         [
+            currentStep,
             selectedProjectId,
             setSelectedProjectId,
             selectedCategory,

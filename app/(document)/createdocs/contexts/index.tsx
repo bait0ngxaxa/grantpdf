@@ -13,10 +13,12 @@ import {
     CreateDocsDataProvider,
     useCreateDocsDataData,
 } from "./CreateDocsDataContext";
+import type { CreateDocumentStep } from "../createDocsSteps";
 
 // Unified Interface
 interface CreateDocsContextType {
     // State
+    currentStep: CreateDocumentStep;
     selectedProjectId: string | null;
     setSelectedProjectId: (id: string | null) => void;
     selectedCategory: string | null;

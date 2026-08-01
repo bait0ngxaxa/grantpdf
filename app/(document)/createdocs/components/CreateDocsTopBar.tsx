@@ -7,27 +7,15 @@ import { Button } from "@/components/ui";
 import Link from "next/link";
 import { ROUTES } from "@/lib/shared/constants";
 import { cn } from "@/lib/shared/utils";
+import {
+    CREATE_DOCUMENT_STEPS,
+    getCreateDocumentStepNumber,
+} from "../createDocsSteps";
 
 export const CreateDocsTopBar = (): React.JSX.Element => {
-    const {
-        selectedProjectId,
-        selectedCategory,
-        selectedContractType,
-        goBack,
-    } = useCreateDocsContext();
-
-    // Determine current step
-    let currentStep = 1;
-    if (selectedContractType)
-        currentStep = 4; // Final selection
-    else if (selectedCategory) currentStep = 3;
-    else if (selectedProjectId) currentStep = 2;
-
-    const steps = [
-        { number: 1, label: "เลือกโครงการ" },
-        { number: 2, label: "เลือกหมวดหมู่" }, // Main Menu
-        { number: 3, label: "เลือกประเภท" }, // Submenu
-    ];
+    const { currentStep, goBack } = useCreateDocsContext();
+    const currentStepNumber = getCreateDocumentStepNumber(currentStep);
+    const currentStepIndex = currentStepNumber - 1;
 
     return (
         <div className="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-700/60 sticky top-0 z-50">
@@ -55,12 +43,13 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
 
                     {/* Center: Stepper (Hidden on small screens) */}
                     <div className="hidden md:flex items-center space-x-2">
-                        {steps.map((step, index) => {
-                            const isCompleted = currentStep > step.number;
-                            const isActive = currentStep === step.number;
+                        {CREATE_DOCUMENT_STEPS.map((step, index) => {
+                            const stepNumber = index + 1;
+                            const isCompleted = index < currentStepIndex;
+                            const isActive = index === currentStepIndex;
 
                             return (
-                                <React.Fragment key={step.number}>
+                                <React.Fragment key={step.id}>
                                     {/* Connector Line */}
                                     {index > 0 && (
                                         <div
@@ -88,7 +77,7 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
                                             {isCompleted ? (
                                                 <Check className="h-4 w-4" />
                                             ) : (
-                                                step.number
+                                                stepNumber
                                             )}
                                         </div>
                                         <span
@@ -124,10 +113,10 @@ export const CreateDocsTopBar = (): React.JSX.Element => {
                 {/* Mobile text progress */}
                 <div className="md:hidden mt-4 flex items-center justify-between px-1">
                     <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                        ขั้นตอนที่ {currentStep} จาก 3
+                        ขั้นตอนที่ {currentStepNumber} จาก {CREATE_DOCUMENT_STEPS.length}
                     </span>
                     <span className="text-xs text-slate-500 dark:text-slate-400">
-                        {steps[currentStep - 1]?.label}
+                        {CREATE_DOCUMENT_STEPS[currentStepIndex]?.label}
                     </span>
                 </div>
             </div>
