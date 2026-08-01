@@ -28,6 +28,7 @@ interface ProjectDataContextType {
     hasInitialDataLoaded: boolean;
     error: string | null;
     fetchUserData: () => Promise<void>;
+    mutate: () => Promise<void>;
     fileToDelete: string | null;
     setFileToDelete: React.Dispatch<React.SetStateAction<string | null>>;
     projectToDelete: string | null;
@@ -76,6 +77,7 @@ export function ProjectDataProvider({
         hasInitialDataLoaded,
         error,
         fetchUserData,
+        mutate,
     } = useUserData(shouldLoadProjects, initialStats, {
         search: searchTerm,
         status: selectedStatus,
@@ -102,6 +104,7 @@ export function ProjectDataProvider({
         hasInitialDataLoaded,
         error,
         fetchUserData,
+        mutate,
         fileToDelete,
         setFileToDelete,
         projectToDelete,

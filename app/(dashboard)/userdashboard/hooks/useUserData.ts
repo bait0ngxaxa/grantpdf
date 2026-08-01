@@ -18,6 +18,22 @@ export interface UserProjectStats {
     latestProject: LatestProject | null;
 }
 
+type UserProjectStatusCounts = NonNullable<UserProjectStats["statusCounts"]>;
+
+export interface UserDataResult {
+    projects: ProjectsApiResponse["projects"];
+    totalFiles: number;
+    total: number;
+    totalPages: number;
+    statusCounts: UserProjectStatusCounts;
+    latestProject: LatestProject | null;
+    isLoading: boolean;
+    hasInitialDataLoaded: boolean;
+    error: string | null;
+    fetchUserData: () => Promise<void>;
+    mutate: () => Promise<void>;
+}
+
 interface UserProjectsRequestParams {
     search?: string;
     status?: string;
@@ -115,7 +131,7 @@ export const useUserData = (
     shouldLoadProjects: boolean = true,
     initialStats?: UserProjectStats,
     filters: UserProjectsRequestParams = {},
-) => {
+): UserDataResult => {
     const statsKey = API_ROUTES.PROJECTS_STATS;
 
     const {
@@ -160,6 +176,10 @@ export const useUserData = (
     const effectiveTotalProjects =
         statsData?.total ?? projectsData?.total ?? totalProjectsForDashboard;
 
+    const mutate = async (): Promise<void> => {
+        await Promise.all([mutateProjects(), mutateStats()]);
+    };
+
     return {
         projects: projectsData?.projects || [],
         totalFiles: shouldLoadProjects
@@ -182,9 +202,7 @@ export const useUserData = (
         error: projectsError
             ? "ไม่สามารถโหลดข้อมูลได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง"
             : null,
-        fetchUserData: async () => {
-            await Promise.all([mutateProjects(), mutateStats()]);
-        },
-        mutate: mutateProjects,
+        fetchUserData: mutate,
+        mutate,
     };
 };

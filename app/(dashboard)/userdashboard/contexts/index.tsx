@@ -46,6 +46,7 @@ interface UserDashboardContextType {
     hasInitialDataLoaded: boolean;
     error: string | null;
     fetchUserData: () => Promise<void>;
+    mutate: () => Promise<void>;
 
     // Modal Visibility
     showProfileModal: boolean;

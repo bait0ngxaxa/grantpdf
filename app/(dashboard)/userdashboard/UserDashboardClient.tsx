@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { DashboardOverview } from "./components/DashboardOverview";
 import { useUserDashboardContext } from "./contexts";
-import { DashboardSkeleton } from "@/components/ui";
+import { DashboardSkeleton, ErrorState } from "@/components/ui";
 import { STATUS_FILTER } from "@/lib/shared/constants";
 import {
     NOTIFICATION_ACTION_QUERY,
@@ -45,6 +45,7 @@ export default function UserDashboardClient(): React.JSX.Element | null {
         isLoading,
         hasInitialDataLoaded,
         error,
+        mutate,
     } = useUserDashboardContext();
     const notificationProjectId = parseNotificationProjectId(
         searchParams.get(NOTIFICATION_ACTION_QUERY.PROJECT_ID),
@@ -70,9 +71,11 @@ export default function UserDashboardClient(): React.JSX.Element | null {
 
     if (error) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-transparent p-4 text-center text-red-500">
-                <p>{error}</p>
-            </div>
+            <ErrorState
+                title="ไม่สามารถโหลดข้อมูลโครงการได้"
+                description="กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+                onRetry={mutate}
+            />
         );
     }
 

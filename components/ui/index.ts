@@ -12,6 +12,7 @@ export { ProjectGroupSkeleton } from "./ProjectGroupSkeleton";
 export { TableSkeleton } from "./TableSkeleton";
 export { FormSkeleton } from "./FormSkeleton";
 export { EmptyState } from "./EmptyState";
+export { ErrorState } from "./ErrorState";
 export { AttachmentList } from "./AttachmentList";
 export { Button, buttonVariants } from "./button";
 export {
