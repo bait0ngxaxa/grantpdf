@@ -17,7 +17,10 @@ import {
 } from "@/components/ui";
 import type { AdminProject } from "@/type/models";
 import { Archive } from "lucide-react";
-import { useUnreadNotificationMarkers } from "@/lib/hooks";
+import {
+    useProgramGroupExpansion,
+    useUnreadNotificationMarkers,
+} from "@/lib/hooks";
 import {
     NOTIFICATION_AUDIENCE,
     NOTIFICATION_TYPE,
@@ -31,17 +34,14 @@ import {
     parseNotificationProjectId,
     removeNotificationActionParams,
 } from "@/lib/notifications/deepLink";
-import {
-    fileStatIcon,
-    ProgramGroupHeader,
-} from "@/components/ProgramGroupHeader";
+import { fileStatIcon } from "@/components/ProgramGroupHeader";
+import { ProgramGroupAccordion } from "@/components/ProgramGroupAccordion";
 import {
     buildAdminProjectGroupViews,
     hasActiveAdminProjectFilters,
     type AdminProjectGroupView,
 } from "@/lib/domain/projects/adminGrouping";
 import { paginateGroupItems } from "@/lib/domain/projects/groupPagination";
-import { cn } from "@/lib/shared/utils";
 import { PAGINATION } from "@/lib/shared/constants";
 import { useAdminModalStates } from "../../hooks";
 
@@ -96,9 +96,11 @@ export default function ProjectsList({
     const searchParams = useSearchParams();
     const searchParamsText = searchParams.toString();
     const handledNotificationFocusRef = useRef<string | null>(null);
-    const [expandedProgramGroups, setExpandedProgramGroups] = useState<
-        Set<string>
-    >(new Set());
+    const {
+        expandedGroups: expandedProgramGroups,
+        toggleGroup,
+        expandGroup: expandProgramGroup,
+    } = useProgramGroupExpansion();
     const [programGroupPages, setProgramGroupPages] = useState<
         Record<string, number>
     >({});
@@ -163,12 +165,7 @@ export default function ProjectsList({
         if (!notificationFocusGroupKey || !notificationFocusPage) return;
 
         const frameId = window.requestAnimationFrame(() => {
-            setExpandedProgramGroups((prev) => {
-                if (prev.has(notificationFocusGroupKey)) return prev;
-                const next = new Set(prev);
-                next.add(notificationFocusGroupKey);
-                return next;
-            });
+            expandProgramGroup(notificationFocusGroupKey);
             setProgramGroupPages((prev) => {
                 if (prev[notificationFocusGroupKey] === notificationFocusPage) {
                     return prev;
@@ -182,7 +179,11 @@ export default function ProjectsList({
         });
 
         return () => window.cancelAnimationFrame(frameId);
-    }, [notificationFocusGroupKey, notificationFocusPage]);
+    }, [
+        expandProgramGroup,
+        notificationFocusGroupKey,
+        notificationFocusPage,
+    ]);
 
     useEffect(() => {
         if (
@@ -261,15 +262,7 @@ export default function ProjectsList({
             return;
         }
 
-        setExpandedProgramGroups((prev) => {
-            const next = new Set(prev);
-            if (next.has(groupKey)) {
-                next.delete(groupKey);
-            } else {
-                next.add(groupKey);
-            }
-            return next;
-        });
+        toggleGroup(groupKey);
     };
 
     const setProgramGroupPage = (groupKey: string, page: number): void => {
@@ -343,132 +336,105 @@ export default function ProjectsList({
                     );
 
                     return (
-                        <div
+                        <ProgramGroupAccordion
                             key={group.key}
+                            groupKey={group.key}
+                            label={group.label}
+                            isUngrouped={group.isUngrouped}
+                            isExpanded={isExpanded}
+                            onToggle={() => toggleProgramGroup(group.key)}
                             className="min-w-0 overflow-hidden rounded-3xl border border-slate-100 bg-slate-50/60 shadow-sm dark:border-slate-700 dark:bg-slate-900/40"
+                            triggerClassName="group flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 sm:flex-row sm:items-center sm:px-6 dark:bg-slate-800 dark:hover:bg-slate-700/70"
+                            showChevron={!hasActiveFilters}
+                            stats={[
+                                {
+                                    label: hasActiveFilters
+                                        ? `พบ ${group.matchedProjectCount} จาก ${group.totalProjectCount} โครงการย่อย`
+                                        : `${group.totalProjectCount} โครงการย่อย`,
+                                },
+                                {
+                                    label: hasActiveFilters
+                                        ? `${group.matchedFiles} จาก ${group.totalFiles} ไฟล์`
+                                        : `${group.totalFiles} ไฟล์`,
+                                    icon: fileStatIcon(),
+                                },
+                            ]}
                         >
-                            <button
-                                type="button"
-                                onClick={() => toggleProgramGroup(group.key)}
-                                className="group flex w-full flex-col items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 sm:flex-row sm:items-center sm:px-6 dark:bg-slate-800 dark:hover:bg-slate-700/70"
-                            >
-                                <ProgramGroupHeader
-                                    groupKey={group.key}
-                                    label={group.label}
-                                    isUngrouped={group.isUngrouped}
-                                    isExpanded={isExpanded}
-                                    showChevron={!hasActiveFilters}
-                                    stats={[
-                                        {
-                                            label: hasActiveFilters
-                                                ? `พบ ${group.matchedProjectCount} จาก ${group.totalProjectCount} โครงการย่อย`
-                                                : `${group.totalProjectCount} โครงการย่อย`,
-                                        },
-                                        {
-                                            label: hasActiveFilters
-                                                ? `${group.matchedFiles} จาก ${group.totalFiles} ไฟล์`
-                                                : `${group.totalFiles} ไฟล์`,
-                                            icon: fileStatIcon(),
-                                        },
-                                    ]}
-                                />
-                            </button>
-
-                            <div
-                                className={cn(
-                                    "grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-in-out",
-                                    isExpanded
-                                        ? "grid-rows-[1fr] opacity-100"
-                                        : "grid-rows-[0fr] opacity-0",
-                                )}
-                            >
-                                <div
-                                    className={cn(
-                                        "min-h-0 overflow-hidden transition-transform duration-300 ease-out motion-reduce:transition-none",
-                                        isExpanded
-                                            ? "translate-y-0"
-                                            : "-translate-y-1",
-                                    )}
-                                >
-                                    <div className="space-y-3 p-4 sm:p-5">
-                                        {paginatedProjects.items.map(
-                                            (project) => (
-                                                <ProjectCard
-                                                    key={project.id}
-                                                    project={project}
-                                                    focusElementId={buildNotificationProjectElementId(
-                                                        "admin",
-                                                        project.id,
-                                                    )}
-                                                    isNotificationFocused={
-                                                        notificationProjectId ===
-                                                        project.id
-                                                    }
-                                                    showNewBadge={
-                                                        projectCreatedProjectIds.has(
-                                                            project.id,
-                                                        )
-                                                    }
-                                                    hasUnreadReport={
-                                                        reportSubmittedProjectIds.has(
-                                                            project.id,
-                                                        )
-                                                    }
-                                                    hasUnreadDocument={
-                                                        documentUploadedProjectIds.has(
-                                                            project.id,
-                                                        )
-                                                    }
-                                                    onProjectViewed={() =>
-                                                        markProjectNotificationsRead(
-                                                            project.id,
-                                                            [
-                                                                NOTIFICATION_TYPE.PROJECT_CREATED,
-                                                            ],
-                                                        )
-                                                    }
-                                                    onFilesViewed={() =>
-                                                        markProjectNotificationsRead(
-                                                            project.id,
-                                                            [
-                                                                NOTIFICATION_TYPE.PROJECT_DOCUMENT_UPLOADED,
-                                                            ],
-                                                        )
-                                                    }
-                                                    onReportsViewed={() =>
-                                                        markProjectNotificationsRead(
-                                                            project.id,
-                                                            [
-                                                                NOTIFICATION_TYPE.PROJECT_REPORT_SUBMITTED,
-                                                            ],
-                                                        )
-                                                    }
-                                                />
-                                            ),
+                            <div className="space-y-3 p-4 sm:p-5">
+                                {paginatedProjects.items.map((project) => (
+                                    <ProjectCard
+                                        key={project.id}
+                                        project={project}
+                                        focusElementId={buildNotificationProjectElementId(
+                                            "admin",
+                                            project.id,
                                         )}
-                                    </div>
-                                    {paginatedProjects.totalPages > 1 && (
-                                        <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 dark:border-slate-700">
-                                            <Pagination
-                                                currentPage={
-                                                    paginatedProjects.currentPage
-                                                }
-                                                totalPages={
-                                                    paginatedProjects.totalPages
-                                                }
-                                                onPageChange={(page) =>
-                                                    setProgramGroupPage(
-                                                        group.key,
-                                                        page,
-                                                    )
-                                                }
-                                                className="mt-4"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                                        isNotificationFocused={
+                                            notificationProjectId ===
+                                            project.id
+                                        }
+                                        showNewBadge={
+                                            projectCreatedProjectIds.has(
+                                                project.id,
+                                            )
+                                        }
+                                        hasUnreadReport={
+                                            reportSubmittedProjectIds.has(
+                                                project.id,
+                                            )
+                                        }
+                                        hasUnreadDocument={
+                                            documentUploadedProjectIds.has(
+                                                project.id,
+                                            )
+                                        }
+                                        onProjectViewed={() =>
+                                            markProjectNotificationsRead(
+                                                project.id,
+                                                [
+                                                    NOTIFICATION_TYPE.PROJECT_CREATED,
+                                                ],
+                                            )
+                                        }
+                                        onFilesViewed={() =>
+                                            markProjectNotificationsRead(
+                                                project.id,
+                                                [
+                                                    NOTIFICATION_TYPE.PROJECT_DOCUMENT_UPLOADED,
+                                                ],
+                                            )
+                                        }
+                                        onReportsViewed={() =>
+                                            markProjectNotificationsRead(
+                                                project.id,
+                                                [
+                                                    NOTIFICATION_TYPE.PROJECT_REPORT_SUBMITTED,
+                                                ],
+                                            )
+                                        }
+                                    />
+                                ))}
                             </div>
-                        </div>
+                            {paginatedProjects.totalPages > 1 && (
+                                <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 dark:border-slate-700">
+                                    <Pagination
+                                        currentPage={
+                                            paginatedProjects.currentPage
+                                        }
+                                        totalPages={
+                                            paginatedProjects.totalPages
+                                        }
+                                        onPageChange={(page) =>
+                                            setProgramGroupPage(
+                                                group.key,
+                                                page,
+                                            )
+                                        }
+                                        className="mt-4"
+                                    />
+                                </div>
+                            )}
+                        </ProgramGroupAccordion>
                     );
                 })}
             </div>

@@ -10,21 +10,20 @@ import {
     ProjectGroupSkeleton,
 } from "@/components/ui";
 import { Building2 } from "lucide-react";
-import {
-    fileStatIcon,
-    ProgramGroupHeader,
-} from "@/components/ProgramGroupHeader";
+import { fileStatIcon } from "@/components/ProgramGroupHeader";
+import { ProgramGroupAccordion } from "@/components/ProgramGroupAccordion";
 import { PAGINATION, ROUTES } from "@/lib/shared/constants";
+import { useProgramGroupExpansion } from "@/lib/hooks";
 import { useCreateDocsContext } from "../contexts";
 import { groupProjectsByProgram } from "@/lib/domain/projects/programGrouping";
 import { paginateGroupItems } from "@/lib/domain/projects/groupPagination";
-import { cn } from "@/lib/shared/utils";
 
 export const ProjectSelection = (): React.JSX.Element => {
     const { projects, isLoading, error } = useCreateDocsContext();
-    const [expandedProgramGroups, setExpandedProgramGroups] = useState<
-        Set<string>
-    >(new Set());
+    const {
+        expandedGroups: expandedProgramGroups,
+        toggleGroup: toggleProgramGroup,
+    } = useProgramGroupExpansion();
     const [programGroupPages, setProgramGroupPages] = useState<
         Record<string, number>
     >({});
@@ -32,18 +31,6 @@ export const ProjectSelection = (): React.JSX.Element => {
         () => groupProjectsByProgram(projects),
         [projects],
     );
-
-    const toggleProgramGroup = (groupKey: string): void => {
-        setExpandedProgramGroups((prev) => {
-            const next = new Set(prev);
-            if (next.has(groupKey)) {
-                next.delete(groupKey);
-            } else {
-                next.add(groupKey);
-            }
-            return next;
-        });
-    };
 
     const setProgramGroupPage = (groupKey: string, page: number): void => {
         setProgramGroupPages((prev) => ({
@@ -103,83 +90,57 @@ export const ProjectSelection = (): React.JSX.Element => {
                             );
 
                             return (
-                                <div
+                                <ProgramGroupAccordion
                                     key={group.key}
+                                    groupKey={group.key}
+                                    label={group.label}
+                                    isUngrouped={group.isUngrouped}
+                                    isExpanded={isExpanded}
+                                    onToggle={() =>
+                                        toggleProgramGroup(group.key)
+                                    }
                                     className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                                    triggerClassName="group flex w-full items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:outline-none focus-visible:ring-inset sm:px-6 dark:bg-slate-800 dark:hover:bg-slate-700/70"
+                                    stats={[
+                                        {
+                                            label: `${group.projectCount} โครงการย่อย`,
+                                        },
+                                        {
+                                            label: `${group.totalFiles} รายการเอกสาร`,
+                                            icon: fileStatIcon(),
+                                        },
+                                    ]}
                                 >
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            toggleProgramGroup(group.key)
-                                        }
-                                        className="group flex w-full items-start justify-between gap-4 bg-white px-4 py-4 text-left transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:outline-none focus-visible:ring-inset sm:px-6 dark:bg-slate-800 dark:hover:bg-slate-700/70"
-                                    >
-                                        <ProgramGroupHeader
-                                            groupKey={group.key}
-                                            label={group.label}
-                                            isUngrouped={group.isUngrouped}
-                                            isExpanded={isExpanded}
-                                            stats={[
-                                                {
-                                                    label: `${group.projectCount} โครงการย่อย`,
-                                                },
-                                                {
-                                                    label: `${group.totalFiles} รายการเอกสาร`,
-                                                    icon: fileStatIcon(),
-                                                },
-                                            ]}
-                                        />
-                                    </button>
-
-                                    <div
-                                        className={cn(
-                                            "grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-in-out",
-                                            isExpanded
-                                                ? "grid-rows-[1fr] opacity-100"
-                                                : "grid-rows-[0fr] opacity-0",
+                                    <div className="space-y-3 bg-slate-50/60 p-4 sm:p-5 dark:bg-slate-900/40">
+                                        {paginatedProjects.items.map(
+                                            (project) => (
+                                                <ProjectCard
+                                                    key={project.id}
+                                                    project={project}
+                                                />
+                                            ),
                                         )}
-                                    >
-                                        <div
-                                            className={cn(
-                                                "min-h-0 overflow-hidden transition-transform duration-300 ease-out motion-reduce:transition-none",
-                                                isExpanded
-                                                    ? "translate-y-0"
-                                                    : "-translate-y-1",
-                                            )}
-                                        >
-                                            <div className="space-y-3 bg-slate-50/60 p-4 sm:p-5 dark:bg-slate-900/40">
-                                                {paginatedProjects.items.map(
-                                                    (project) => (
-                                                        <ProjectCard
-                                                            key={project.id}
-                                                            project={project}
-                                                        />
-                                                    ),
-                                                )}
-                                            </div>
-                                            {paginatedProjects.totalPages >
-                                                1 && (
-                                                <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 dark:border-slate-700">
-                                                    <Pagination
-                                                        currentPage={
-                                                            paginatedProjects.currentPage
-                                                        }
-                                                        totalPages={
-                                                            paginatedProjects.totalPages
-                                                        }
-                                                        onPageChange={(page) =>
-                                                            setProgramGroupPage(
-                                                                group.key,
-                                                                page,
-                                                            )
-                                                        }
-                                                        className="mt-4"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
-                                </div>
+                                    {paginatedProjects.totalPages > 1 && (
+                                        <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 dark:border-slate-700">
+                                            <Pagination
+                                                currentPage={
+                                                    paginatedProjects.currentPage
+                                                }
+                                                totalPages={
+                                                    paginatedProjects.totalPages
+                                                }
+                                                onPageChange={(page) =>
+                                                    setProgramGroupPage(
+                                                        group.key,
+                                                        page,
+                                                    )
+                                                }
+                                                className="mt-4"
+                                            />
+                                        </div>
+                                    )}
+                                </ProgramGroupAccordion>
                             );
                         })}
                     </div>
