@@ -74,6 +74,7 @@ export default function SigninClient({
     e.preventDefault();
     setError("");
     setIsLoading(true);
+    let isNavigating = false;
 
     try {
       const preflightResponse = await fetch("/api/auth/signin-rate-limit", {
@@ -107,29 +108,29 @@ export default function SigninClient({
 
       const result = await grantSignIn(email, password);
 
-      if (!result.ok) {
-        const data: unknown = await result.json().catch(() => null);
-        const message =
-          typeof data === "object" &&
-          data !== null &&
-          "error" in data &&
-          typeof (data as { error?: unknown }).error === "string"
-            ? (data as { error: string }).error
-            : "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
-
-        setError(message);
-        console.error("Login failed:", message);
-        toast.error("เข้าสู่ระบบไม่สำเร็จ", {
-          description: message,
-        });
-      } else {
-        toast.success("เข้าสู่ระบบสำเร็จ!", {
+      if (result.ok) {
+        toast.success("เข้าสู่ระบบสำเร็จ", {
           description: "ยินดีต้อนรับเข้าสู่ระบบ กำลังนำคุณไปยังหน้าหลัก…",
         });
-        setTimeout(() => {
-          router.push(callbackUrl ?? ROUTES.DASHBOARD);
-        }, 1500);
+        router.replace(callbackUrl ?? ROUTES.DASHBOARD);
+        isNavigating = true;
+        return;
       }
+
+      const data: unknown = await result.json().catch(() => null);
+      const message =
+        typeof data === "object" &&
+        data !== null &&
+        "error" in data &&
+        typeof (data as { error?: unknown }).error === "string"
+          ? (data as { error: string }).error
+          : "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+
+      setError(message);
+      console.error("Login failed:", message);
+      toast.error("เข้าสู่ระบบไม่สำเร็จ", {
+        description: message,
+      });
     } catch (err) {
       console.error("An unexpected error occurred:", err);
       setError("ไม่สามารถเข้าสู่ระบบได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง");
@@ -137,7 +138,9 @@ export default function SigninClient({
         description: "ไม่สามารถเชื่อมต่อกับระบบได้ กรุณาลองใหม่อีกครั้ง",
       });
     } finally {
-      setIsLoading(false);
+      if (!isNavigating) {
+        setIsLoading(false);
+      }
     }
   };
 
