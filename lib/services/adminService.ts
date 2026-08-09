@@ -6,9 +6,10 @@ import {
 } from "@/lib/shared/constants";
 import { getJsonCache, setJsonCache } from "@/lib/services/redisJsonCache";
 import {
-    ADMIN_DASHBOARD_STATS_CACHE_KEY,
     DASHBOARD_STATS_CACHE_TTL_SECONDS,
+    getAdminDashboardStatsCacheKey,
 } from "@/lib/services/dashboardStatsCache";
+import { getBangkokDayRange } from "@/lib/shared/dateTime/bangkok";
 
 interface AdminStatusCounts {
     pending: number;
@@ -83,12 +84,12 @@ function isAdminStatsResult(value: unknown): value is AdminStatsResult {
     return (
         typeof stats.totalProjects === "number" &&
         typeof stats.totalFiles === "number" &&
-            typeof stats.totalUsers === "number" &&
-            typeof stats.todayProjects === "number" &&
-            typeof stats.todayFiles === "number" &&
-            typeof stats.todayProjectFiles === "number" &&
-            typeof stats.todayReportFiles === "number" &&
-            isLatestUser(stats.latestUser) &&
+        typeof stats.totalUsers === "number" &&
+        typeof stats.todayProjects === "number" &&
+        typeof stats.todayFiles === "number" &&
+        typeof stats.todayProjectFiles === "number" &&
+        typeof stats.todayReportFiles === "number" &&
+        isLatestUser(stats.latestUser) &&
         isLatestProject(stats.latestProject) &&
         isAdminStatusCounts(stats.statusCounts)
     );
@@ -99,16 +100,11 @@ function isAdminStatsResult(value: unknown): value is AdminStatsResult {
  * Used by both the API route and server-side layout prefetch.
  */
 export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
-    const cached = await getJsonCache(
-        ADMIN_DASHBOARD_STATS_CACHE_KEY,
-        isAdminStatsResult,
-    );
+    const referenceDate = new Date();
+    const { start, endExclusive } = getBangkokDayRange(referenceDate);
+    const cacheKey = getAdminDashboardStatsCacheKey(referenceDate);
+    const cached = await getJsonCache(cacheKey, isAdminStatsResult);
     if (cached) return cached;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const [
         totalUsers,
@@ -131,18 +127,18 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         prisma.project.count({
             where: {
                 deletedAt: null,
-                created_at: { gte: today, lt: tomorrow },
+                created_at: { gte: start, lt: endExclusive },
             },
         }),
         prisma.userFile.count({
             where: {
-                created_at: { gte: today, lt: tomorrow },
+                created_at: { gte: start, lt: endExclusive },
                 deletionStatus: FILE_DELETION_STATUS.ACTIVE,
                 projectReports: { none: {} },
             },
         }),
         prisma.projectReport.count({
-            where: { submittedAt: { gte: today, lt: tomorrow } },
+            where: { submittedAt: { gte: start, lt: endExclusive } },
         }),
         prisma.user.findFirst({
             where: { status: USER_LIFECYCLE_STATUS.ACTIVE, deletedAt: null },
@@ -207,10 +203,6 @@ export async function getAdminDashboardStats(): Promise<AdminStatsResult> {
         },
     };
 
-    await setJsonCache(
-        ADMIN_DASHBOARD_STATS_CACHE_KEY,
-        result,
-        DASHBOARD_STATS_CACHE_TTL_SECONDS,
-    );
+    await setJsonCache(cacheKey, result, DASHBOARD_STATS_CACHE_TTL_SECONDS);
     return result;
 }

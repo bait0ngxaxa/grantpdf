@@ -13,6 +13,7 @@ interface MockTransactionClient {
     project: {
         findFirst: ReturnType<typeof vi.fn>;
         update: ReturnType<typeof vi.fn>;
+        updateMany: ReturnType<typeof vi.fn>;
         delete: ReturnType<typeof vi.fn>;
     };
     auditLog: {
@@ -25,6 +26,7 @@ function createTransactionClient(): MockTransactionClient {
         project: {
             findFirst: vi.fn(),
             update: vi.fn(),
+            updateMany: vi.fn(),
             delete: vi.fn(),
         },
         auditLog: {
@@ -51,6 +53,7 @@ describe("deleteProjectWithAudit", () => {
             userId: 7,
         });
         tx.project.update.mockResolvedValue({ id: 10 });
+        tx.project.updateMany.mockResolvedValue({ count: 1 });
         tx.auditLog.create.mockResolvedValue({ id: BigInt(1) });
     });
 
@@ -61,8 +64,8 @@ describe("deleteProjectWithAudit", () => {
         });
 
         expect(tx.project.delete).not.toHaveBeenCalled();
-        expect(tx.project.update).toHaveBeenCalledWith({
-            where: { id: 10 },
+        expect(tx.project.updateMany).toHaveBeenCalledWith({
+            where: { id: 10, userId: 7, deletedAt: null },
             data: {
                 name: "โครงการอ้างอิง__deleted_10",
                 deletedAt: expect.any(Date),
@@ -82,8 +85,8 @@ describe("deleteProjectWithAudit", () => {
     it("releases the original name so the owner can create a new project with it", async () => {
         await deleteProjectWithAudit(10, 7, { actorUserId: "7" });
 
-        expect(tx.project.update).toHaveBeenCalledWith({
-            where: { id: 10 },
+        expect(tx.project.updateMany).toHaveBeenCalledWith({
+            where: { id: 10, userId: 7, deletedAt: null },
             data: {
                 name: "โครงการอ้างอิง__deleted_10",
                 deletedAt: expect.any(Date),
@@ -102,8 +105,8 @@ describe("deleteProjectWithAudit", () => {
 
         await deleteProjectWithAudit(10, 7, { actorUserId: "7" });
 
-        expect(tx.project.update).toHaveBeenCalledWith({
-            where: { id: 10 },
+        expect(tx.project.updateMany).toHaveBeenCalledWith({
+            where: { id: 10, userId: 7, deletedAt: null },
             data: {
                 name: `${"ก".repeat(243)}__deleted_10`,
                 deletedAt: expect.any(Date),
@@ -119,7 +122,17 @@ describe("deleteProjectWithAudit", () => {
             deleteProjectWithAudit(10, 7, { actorUserId: "7" }),
         ).rejects.toThrow("PROJECT_NOT_FOUND");
 
-        expect(tx.project.update).not.toHaveBeenCalled();
+        expect(tx.project.updateMany).not.toHaveBeenCalled();
+        expect(tx.auditLog.create).not.toHaveBeenCalled();
+    });
+
+    it("does not audit success when the project is archived during the transaction", async () => {
+        tx.project.updateMany.mockResolvedValueOnce({ count: 0 });
+
+        await expect(
+            deleteProjectWithAudit(10, 7, { actorUserId: "7" }),
+        ).rejects.toThrow("PROJECT_NOT_FOUND");
+
         expect(tx.auditLog.create).not.toHaveBeenCalled();
     });
 
@@ -165,7 +178,7 @@ describe("deleteProjectWithAudit", () => {
                 },
             },
         });
-        expect(tx.project.update).not.toHaveBeenCalled();
+        expect(tx.project.updateMany).not.toHaveBeenCalled();
         expect(tx.auditLog.create).not.toHaveBeenCalled();
     });
 });

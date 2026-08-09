@@ -23,7 +23,10 @@ export {
 export { createDocxRenderer, loadTemplate } from "./templateRenderer";
 
 // Storage
-export { saveDocumentToStorage } from "./storage";
+export {
+    saveDocumentToStorage,
+    saveDocumentToStorageInTransaction,
+} from "./storage";
 
 // Project Service
 export {

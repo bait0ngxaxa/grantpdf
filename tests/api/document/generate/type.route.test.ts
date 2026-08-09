@@ -79,6 +79,7 @@ import {
 } from "@/lib/services/documentIdempotencyService";
 import {
     handleApprovalGeneration,
+    handleContractGeneration,
     handleTorGeneration,
 } from "@/lib/document/handlers";
 import { createDocumentRequestHash } from "@/lib/services/documentRequestFingerprint";
@@ -90,6 +91,7 @@ const mockedFailDocumentIdempotency = vi.mocked(failDocumentIdempotency);
 const mockedHandleApprovalGeneration = vi.mocked(
     handleApprovalGeneration,
 );
+const mockedHandleContractGeneration = vi.mocked(handleContractGeneration);
 const mockedHandleTorGeneration = vi.mocked(handleTorGeneration);
 const mockedCreateDocumentRequestHash = vi.mocked(createDocumentRequestHash);
 
@@ -100,6 +102,7 @@ function buildParams(type: string): Promise<{ type: string }> {
 function buildRequest(
     idempotencyKey?: string,
     activities = "[]",
+    contractNumber = "TEST-001",
 ): Request {
     const formData = new FormData();
     formData.set("projectName", "โครงการทดสอบ");
@@ -109,7 +112,7 @@ function buildRequest(
     formData.set("email", "tester@example.com");
     formData.set("tel", "0812345678");
     formData.set("timeline", "3 เดือน");
-    formData.set("contractnumber", "TEST-001");
+    formData.set("contractnumber", contractNumber);
     formData.set("cost", "1000");
     formData.set("topic1", "หัวข้อ");
     formData.set("objective1", "วัตถุประสงค์");
@@ -261,6 +264,35 @@ describe("document generate route idempotency", () => {
         expect(body.fileId).toBe("42");
         expect(body.downloadUrl).toBe("/api/user-docs/download/42");
         expect(mockedHandleTorGeneration).not.toHaveBeenCalled();
+    });
+
+    it("replays a completed contract without entering number allocation", async () => {
+        mockedStartDocumentIdempotency.mockResolvedValue({
+            type: "replay",
+            replay: {
+                statusCode: 200,
+                responseBody: {
+                    success: true,
+                    fileId: "52",
+                    project: {
+                        id: "1",
+                        name: "โครงการทดสอบ",
+                        description: null,
+                    },
+                },
+            },
+        } as never);
+
+        const response = await POST(
+            buildRequest("idem-contract-replay", "[]", "ABS"),
+            { params: buildParams("contract") },
+        );
+
+        expect(response.status).toBe(200);
+        expect(mockedStartDocumentIdempotency).toHaveBeenCalledWith(
+            expect.objectContaining({ documentType: "contract" }),
+        );
+        expect(mockedHandleContractGeneration).not.toHaveBeenCalled();
     });
 
     it("rejects a reused key when the request payload differs", async () => {

@@ -189,4 +189,28 @@ describe("admin project co-owners route", () => {
         expect(response.status).toBe(400);
         expect(body.error).toBe("เลือกได้เฉพาะผู้ใช้ที่มีอยู่ในระบบเท่านั้น");
     });
+
+    it("returns 404 without a success audit when the project is archived", async () => {
+        mockedUpdateProjectCoOwners.mockRejectedValue(
+            new Error("PROJECT_NOT_FOUND"),
+        );
+
+        const request = new Request(
+            "http://localhost/api/admin/project-co-owners",
+            {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    projectId: 10,
+                    allowCoOwners: true,
+                    coOwnerUserIds: [4],
+                }),
+            },
+        );
+
+        const response = await PUT(request);
+
+        expect(response.status).toBe(404);
+        expect(mockedLogAudit).not.toHaveBeenCalled();
+    });
 });

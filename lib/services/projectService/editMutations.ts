@@ -62,12 +62,20 @@ export async function updateProjectWithAudit(
                 throw new Error("PROJECT_NOT_FOUND");
             }
 
-            const updated = await tx.project.update({
-                where: { id: projectId },
+            const updateResult = await tx.project.updateMany({
+                where: buildProjectAccessWhere(projectId, userId),
                 data: {
                     name: normalized.name,
                     description: normalized.description,
                 },
+            });
+
+            if (updateResult.count !== 1) {
+                throw new Error("PROJECT_NOT_FOUND");
+            }
+
+            const updated = await tx.project.findFirst({
+                where: buildProjectAccessWhere(projectId, userId),
                 include: {
                     files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
                     _count: {
@@ -77,6 +85,9 @@ export async function updateProjectWithAudit(
                     },
                 },
             });
+            if (!updated) {
+                throw new Error("PROJECT_NOT_FOUND");
+            }
 
             await tx.auditLog.create({
                 data: {
@@ -146,14 +157,18 @@ export async function deleteProjectWithAudit(
             throw new Error("PROJECT_DELETE_FORBIDDEN");
         }
 
-        await tx.project.update({
-            where: { id: projectId },
+        const archivedAt = new Date();
+        const archiveResult = await tx.project.updateMany({
+            where: { id: projectId, userId, deletedAt: null },
             data: {
                 name: getArchivedProjectName(existing.name, existing.id),
-                deletedAt: new Date(),
-                updated_at: new Date(),
+                deletedAt: archivedAt,
+                updated_at: archivedAt,
             },
         });
+        if (archiveResult.count !== 1) {
+            throw new Error("PROJECT_NOT_FOUND");
+        }
 
         await tx.auditLog.create({
             data: {

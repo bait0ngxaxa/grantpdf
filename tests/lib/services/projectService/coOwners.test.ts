@@ -11,8 +11,8 @@ import { updateProjectCoOwners } from "@/lib/services/projectService/mutations";
 
 interface MockTransactionClient {
     project: {
-        findUnique: ReturnType<typeof vi.fn>;
-        update: ReturnType<typeof vi.fn>;
+        findFirst: ReturnType<typeof vi.fn>;
+        updateMany: ReturnType<typeof vi.fn>;
     };
     user: {
         findMany: ReturnType<typeof vi.fn>;
@@ -33,8 +33,8 @@ interface MockTransactionClient {
 function createTransactionClient(): MockTransactionClient {
     return {
         project: {
-            findUnique: vi.fn(),
-            update: vi.fn(),
+            findFirst: vi.fn(),
+            updateMany: vi.fn(),
         },
         user: {
             findMany: vi.fn(),
@@ -64,13 +64,13 @@ describe("updateProjectCoOwners", () => {
         mockedTransaction.mockImplementation(async (callback) =>
             callback(tx as never),
         );
-        tx.project.findUnique.mockResolvedValue({
+        tx.project.findFirst.mockResolvedValue({
             id: 10,
             name: "โครงการทดสอบ",
             userId: 2,
             coOwners: [],
         });
-        tx.project.update.mockResolvedValue({ id: 10 });
+        tx.project.updateMany.mockResolvedValue({ count: 1 });
         tx.projectCoOwner.deleteMany.mockResolvedValue({ count: 0 });
         tx.projectCoOwner.findMany.mockResolvedValue([]);
         tx.notificationRecipient.findMany.mockResolvedValue([]);
@@ -86,13 +86,12 @@ describe("updateProjectCoOwners", () => {
         });
 
         expect(tx.user.findMany).not.toHaveBeenCalled();
-        expect(tx.project.update).toHaveBeenCalledWith({
-            where: { id: 10 },
+        expect(tx.project.updateMany).toHaveBeenCalledWith({
+            where: { id: 10, deletedAt: null },
             data: {
                 allowCoOwners: false,
                 updated_at: expect.any(Date),
             },
-            select: { id: true },
         });
         expect(tx.projectCoOwner.deleteMany).toHaveBeenCalledWith({
             where: {
@@ -117,6 +116,42 @@ describe("updateProjectCoOwners", () => {
         ).rejects.toThrow("INVALID_CO_OWNER_USER");
 
         expect(tx.projectCoOwner.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it("rejects an archived project before changing co-owners or creating notifications", async () => {
+        tx.project.findFirst.mockResolvedValueOnce(null);
+
+        await expect(
+            updateProjectCoOwners({
+                projectId: 10,
+                allowCoOwners: true,
+                coOwnerUserIds: [4],
+                assignedById: 1,
+            }),
+        ).rejects.toThrow("PROJECT_NOT_FOUND");
+
+        expect(tx.project.updateMany).not.toHaveBeenCalled();
+        expect(tx.projectCoOwner.deleteMany).not.toHaveBeenCalled();
+        expect(tx.projectCoOwner.upsert).not.toHaveBeenCalled();
+        expect(tx.notificationEvent.create).not.toHaveBeenCalled();
+    });
+
+    it("rolls back before co-owner writes when the project is archived during the transaction", async () => {
+        tx.project.updateMany.mockResolvedValueOnce({ count: 0 });
+
+        await expect(
+            updateProjectCoOwners({
+                projectId: 10,
+                allowCoOwners: true,
+                coOwnerUserIds: [3],
+                assignedById: 1,
+            }),
+        ).rejects.toThrow("PROJECT_NOT_FOUND");
+
+        expect(tx.user.findMany).not.toHaveBeenCalled();
+        expect(tx.projectCoOwner.deleteMany).not.toHaveBeenCalled();
+        expect(tx.projectCoOwner.upsert).not.toHaveBeenCalled();
+        expect(tx.notificationEvent.create).not.toHaveBeenCalled();
     });
 
     it("upserts unique co-owners and skips the primary owner", async () => {
@@ -175,7 +210,8 @@ describe("updateProjectCoOwners", () => {
             expect.objectContaining({
                 data: expect.objectContaining({
                     type: "PROJECT_CO_OWNER_ASSIGNED",
-                    actionUrl: "/userdashboard?projectId=10&notificationTarget=project",
+                    actionUrl:
+                        "/userdashboard?projectId=10&notificationTarget=project",
                     recipients: {
                         create: [{ recipientUserId: 3, audience: "user" }],
                     },
@@ -185,7 +221,7 @@ describe("updateProjectCoOwners", () => {
     });
 
     it("notifies an existing co-owner that does not have an assignment notification yet", async () => {
-        tx.project.findUnique.mockResolvedValue({
+        tx.project.findFirst.mockResolvedValue({
             id: 10,
             name: "โครงการทดสอบ",
             userId: 2,
@@ -225,7 +261,8 @@ describe("updateProjectCoOwners", () => {
             expect.objectContaining({
                 data: expect.objectContaining({
                     type: "PROJECT_CO_OWNER_ASSIGNED",
-                    actionUrl: "/userdashboard?projectId=10&notificationTarget=project",
+                    actionUrl:
+                        "/userdashboard?projectId=10&notificationTarget=project",
                     recipients: {
                         create: [{ recipientUserId: 1, audience: "user" }],
                     },
@@ -235,7 +272,7 @@ describe("updateProjectCoOwners", () => {
     });
 
     it("notifies an existing co-owner again when the previous notification used another audience", async () => {
-        tx.project.findUnique.mockResolvedValue({
+        tx.project.findFirst.mockResolvedValue({
             id: 10,
             name: "โครงการทดสอบ",
             userId: 2,
@@ -264,7 +301,8 @@ describe("updateProjectCoOwners", () => {
             expect.objectContaining({
                 data: expect.objectContaining({
                     type: "PROJECT_CO_OWNER_ASSIGNED",
-                    actionUrl: "/userdashboard?projectId=10&notificationTarget=project",
+                    actionUrl:
+                        "/userdashboard?projectId=10&notificationTarget=project",
                     recipients: {
                         create: [{ recipientUserId: 3, audience: "user" }],
                     },

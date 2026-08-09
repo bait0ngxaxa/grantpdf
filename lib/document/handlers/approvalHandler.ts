@@ -8,6 +8,7 @@ import {
     findOrCreateProject,
     readProgramIdFromForm,
     isProjectError,
+    createUserFileRecord,
     buildSuccessResponse,
     createDocumentRecordCompletion,
     withDocumentProjectCompensation,
@@ -35,7 +36,6 @@ import {
 } from "@/lib/validation/schemas";
 import { SIGNATURE_UPLOAD } from "@/lib/shared/constants";
 import { invalidateDashboardStats } from "@/lib/services/dashboardStatsCache";
-import { notifyProjectDocumentUploaded } from "@/lib/services/notificationEventService";
 import { reserveStorageQuota } from "@/lib/services/storageQuotaService";
 
 const ALLOWED_SIGNATURE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
@@ -168,6 +168,7 @@ export async function handleApprovalGeneration(
 ): Promise<Response> {
     // Extract form fields
     const head = formData.get("head") as string;
+    const fileName = formData.get("fileName") as string;
     const projectName = formData.get("projectName") as string;
     const date = formData.get("date") as string;
     const topicdetail = formData.get("topicdetail") as string;
@@ -388,17 +389,18 @@ export async function handleApprovalGeneration(
                 copiedAttachments = await copyAttachmentFiles(attachmentFiles);
                 ({ resourceId } = await saveDocumentToStorage(
                     outputBuffer,
-                    projectName,
+                    fileName,
                     "docx",
                     async (storagePath: string, tx): Promise<number> => {
-                        const hasDocumentQuota = await reserveStorageQuota(
+                        const savedFile = await createUserFileRecord({
                             userId,
-                            outputBuffer.byteLength,
-                            tx,
-                        );
-                        if (!hasDocumentQuota) {
-                            throw new Error("STORAGE_QUOTA_EXCEEDED");
-                        }
+                            projectId: projectResolution.project.id,
+                            originalFileName: fileName,
+                            storagePath,
+                            fileSize: outputBuffer.byteLength,
+                            extension: "docx",
+                            transaction: tx,
+                        });
 
                         const attachmentBytes = copiedAttachments.files.reduce(
                             (total, file) => total + file.fileSize,
@@ -415,17 +417,6 @@ export async function handleApprovalGeneration(
                             throw new Error("STORAGE_QUOTA_EXCEEDED");
                         }
 
-                        const savedFile = await tx.userFile.create({
-                            data: {
-                                originalFileName: projectName + ".docx",
-                                storagePath,
-                                fileExtension: "docx",
-                                fileSize: BigInt(outputBuffer.byteLength),
-                                userId,
-                                projectId: projectResolution.project.id,
-                            },
-                        });
-
                         if (copiedAttachments.files.length > 0) {
                             await tx.attachmentFile.createMany({
                                 data: copiedAttachments.files.map(
@@ -441,12 +432,6 @@ export async function handleApprovalGeneration(
                             });
                         }
 
-                        await notifyProjectDocumentUploaded(tx, {
-                            fileId: savedFile.id,
-                            projectId: projectResolution.project.id,
-                            fileName: savedFile.originalFileName,
-                            actorUserId: userId,
-                        });
                         return savedFile.id;
                     },
                     completion,

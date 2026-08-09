@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/server/db", () => ({
     prisma: {
@@ -17,39 +17,51 @@ const mockedPrisma = vi.mocked(prisma);
 describe("getNextContractNumber", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-08-09T03:00:00.000Z"));
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it("allocates through the caller transaction without opening an independent transaction", async () => {
+        const tx = {
+            contractCounter: {
+                createMany: vi.fn().mockResolvedValue({ count: 1 }),
+                update: vi.fn().mockResolvedValue({ currentNumber: 2 }),
+            },
+        };
+
+        const result = await getNextContractNumber("ABS", tx as never);
+
+        expect(result).toBe("ABS 01/2569");
+        expect(mockedPrisma.$transaction).not.toHaveBeenCalled();
     });
 
     it("generates prefixed contract number from counter", async () => {
-        const upsertMock = vi.fn().mockResolvedValue(undefined);
+        const createManyMock = vi.fn().mockResolvedValue({ count: 1 });
         const updateMock = vi.fn().mockResolvedValue({ currentNumber: 2 });
+        const tx = {
+            contractCounter: {
+                createMany: createManyMock,
+                update: updateMock,
+            },
+        };
 
-        mockedPrisma.$transaction.mockImplementation(async (fn) => {
-            const tx = {
-                contractCounter: {
-                    upsert: upsertMock,
-                    update: updateMock,
-                },
-            };
-            return fn(tx as never);
-        });
-
-        const result = await getNextContractNumber("ABS");
+        const result = await getNextContractNumber("ABS", tx as never);
         const buddhistYear = getCurrentBuddhistYear();
 
         expect(result).toBe(`ABS 01/${buddhistYear}`);
-        expect(upsertMock).toHaveBeenCalledWith({
-            where: {
-                contractType_buddhistYear: {
+        expect(createManyMock).toHaveBeenCalledWith({
+            data: [
+                {
                     contractType: "ABS",
                     buddhistYear,
+                    currentNumber: 1,
                 },
-            },
-            update: {},
-            create: {
-                contractType: "ABS",
-                buddhistYear,
-                currentNumber: 1,
-            },
+            ],
+            skipDuplicates: true,
         });
         expect(updateMock).toHaveBeenCalledWith({
             where: {
@@ -70,17 +82,14 @@ describe("getNextContractNumber", () => {
     });
 
     it("keeps at least two digits when number grows", async () => {
-        mockedPrisma.$transaction.mockImplementation(async (fn) => {
-            const tx = {
-                contractCounter: {
-                    upsert: vi.fn().mockResolvedValue(undefined),
-                    update: vi.fn().mockResolvedValue({ currentNumber: 13 }),
-                },
-            };
-            return fn(tx as never);
-        });
+        const tx = {
+            contractCounter: {
+                createMany: vi.fn().mockResolvedValue({ count: 0 }),
+                update: vi.fn().mockResolvedValue({ currentNumber: 13 }),
+            },
+        };
 
-        const result = await getNextContractNumber("DMR");
+        const result = await getNextContractNumber("DMR", tx as never);
         const buddhistYear = getCurrentBuddhistYear();
 
         expect(result).toBe(`DMR 12/${buddhistYear}`);

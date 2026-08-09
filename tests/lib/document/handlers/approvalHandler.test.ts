@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
     stat: vi.fn(),
     unlink: vi.fn(),
     reserveStorageQuota: vi.fn(),
+    notifyProjectDocumentUploaded: vi.fn(),
 }));
 
 vi.mock("@/lib/server/db", () => ({
@@ -34,30 +35,34 @@ vi.mock("fs/promises", () => ({
     unlink: mocks.unlink,
 }));
 
-vi.mock("@/lib/document", () => ({
-    loadTemplate: vi.fn().mockResolvedValue(Buffer.from("template")),
-    saveDocumentToStorage: mocks.saveDocumentToStorage,
-    findOrCreateProject: vi.fn().mockResolvedValue({
-        project: {
-            id: 10,
-            name: "โครงการทดสอบ",
-            description: null,
-        },
-        origin: "existing",
-        previousDeletedAt: null,
-    }),
-    readProgramIdFromForm: vi.fn().mockReturnValue(null),
-    isProjectError: vi.fn().mockReturnValue(false),
-    buildSuccessResponse: vi.fn().mockReturnValue(
-        new Response(JSON.stringify({ success: true }), { status: 200 }),
-    ),
-    createDocumentRecordCompletion: vi.fn().mockReturnValue(undefined),
-    withDocumentProjectCompensation: async (
-        _resolution: unknown,
-        _userId: number,
-        operation: () => Promise<unknown>,
-    ): Promise<unknown> => operation(),
-}));
+vi.mock("@/lib/document", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@/lib/document")>();
+    return {
+        ...actual,
+        loadTemplate: vi.fn().mockResolvedValue(Buffer.from("template")),
+        saveDocumentToStorage: mocks.saveDocumentToStorage,
+        findOrCreateProject: vi.fn().mockResolvedValue({
+            project: {
+                id: 10,
+                name: "โครงการทดสอบ",
+                description: null,
+            },
+            origin: "existing",
+            previousDeletedAt: null,
+        }),
+        readProgramIdFromForm: vi.fn().mockReturnValue(null),
+        isProjectError: vi.fn().mockReturnValue(false),
+        buildSuccessResponse: vi.fn().mockReturnValue(
+            new Response(JSON.stringify({ success: true }), { status: 200 }),
+        ),
+        createDocumentRecordCompletion: vi.fn().mockReturnValue(undefined),
+        withDocumentProjectCompensation: async (
+            _resolution: unknown,
+            _userId: number,
+            operation: () => Promise<unknown>,
+        ): Promise<unknown> => operation(),
+    };
+});
 
 vi.mock("@/lib/document/fixThaiwordUtils", () => ({
     fixThaiDistributed: (value: string): string => value,
@@ -100,7 +105,7 @@ vi.mock("@/lib/services/dashboardStatsCache", () => ({
 }));
 
 vi.mock("@/lib/services/notificationEventService", () => ({
-    notifyProjectDocumentUploaded: vi.fn(),
+    notifyProjectDocumentUploaded: mocks.notifyProjectDocumentUploaded,
 }));
 
 vi.mock("@/lib/services/storageQuotaService", () => ({
@@ -117,6 +122,7 @@ const mockedSaveDocumentToStorage = vi.mocked(saveDocumentToStorage);
 
 function createFormData(attachments = "[]"): FormData {
     const formData = new FormData();
+    formData.set("fileName", "หนังสือขออนุมัติ");
     formData.set("projectName", "โครงการทดสอบ");
     formData.set("attachments", attachments);
     formData.set("attachmentFileIds", JSON.stringify([7]));
@@ -139,10 +145,12 @@ describe("approval handler attachment storage", () => {
         mocks.rename.mockResolvedValue(undefined);
         mocks.unlink.mockResolvedValue(undefined);
         mocks.reserveStorageQuota.mockResolvedValue(true);
-        mocks.userFileCreate.mockResolvedValue({
-            id: 99,
-            originalFileName: "โครงการทดสอบ.docx",
-        });
+        mocks.userFileCreate.mockImplementation(
+            async ({ data }: { data: { originalFileName: string } }) => ({
+                id: 99,
+                originalFileName: data.originalFileName,
+            }),
+        );
         mocks.attachmentCreateMany.mockResolvedValue({ count: 1 });
         mockedTransaction.mockImplementation(async (callback) =>
             callback({
@@ -184,6 +192,38 @@ describe("approval handler attachment storage", () => {
             expect(mockedSaveDocumentToStorage).not.toHaveBeenCalled();
         },
     );
+
+    it("uses the submitted filename for storage and persisted file metadata", async () => {
+        const formData = createFormData();
+        formData.set("projectName", "Project A");
+        formData.set("fileName", "Approval Letter");
+
+        const response = await handleApprovalGeneration(formData, 1);
+
+        expect(response.status).toBe(200);
+        expect(mockedSaveDocumentToStorage.mock.calls[0]?.[1]).toBe(
+            "Approval Letter",
+        );
+        expect(mockedSaveDocumentToStorage.mock.calls[0]?.[1]).not.toBe(
+            "Project A",
+        );
+        expect(mocks.userFileCreate).toHaveBeenCalledWith({
+            data: expect.objectContaining({
+                originalFileName: "Approval Letter.docx",
+            }),
+        });
+        expect(mocks.userFileCreate).not.toHaveBeenCalledWith({
+            data: expect.objectContaining({
+                originalFileName: "Project A.docx",
+            }),
+        });
+        expect(mocks.notifyProjectDocumentUploaded).toHaveBeenCalledWith(
+            expect.any(Object),
+            expect.objectContaining({
+                fileName: "Approval Letter.docx",
+            }),
+        );
+    });
 
     it("copies selected attachment content before opening the transaction", async () => {
         const response = await handleApprovalGeneration(createFormData(), 1);

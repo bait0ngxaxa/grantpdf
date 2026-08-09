@@ -1,47 +1,49 @@
-import { prisma } from "@/lib/server/db";
+import type { Prisma } from "@prisma/client";
+import { getBangkokCalendarYear } from "@/lib/shared/dateTime/bangkok";
 
-export function getCurrentBuddhistYear(): number {
-    const bangkokNow = new Date(
-        new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" }),
-    );
-    return bangkokNow.getFullYear() + 543;
+export type ContractCounterTransactionClient = Pick<
+    Prisma.TransactionClient,
+    "contractCounter"
+>;
+
+export function getCurrentBuddhistYear(
+    referenceDate: Date = new Date(),
+): number {
+    return getBangkokCalendarYear(referenceDate) + 543;
 }
 
-export async function getNextContractNumber(contractType: string): Promise<string> {
+export async function getNextContractNumber(
+    contractType: string,
+    tx: ContractCounterTransactionClient,
+): Promise<string> {
     const buddhistYear = getCurrentBuddhistYear();
 
-    const updatedCounter = await prisma.$transaction(async (tx) => {
-        await tx.contractCounter.upsert({
-            where: {
-                contractType_buddhistYear: {
-                    contractType,
-                    buddhistYear,
-                },
-            },
-            update: {},
-            create: {
+    await tx.contractCounter.createMany({
+        data: [
+            {
                 contractType,
                 buddhistYear,
                 currentNumber: 1,
             },
-        });
+        ],
+        skipDuplicates: true,
+    });
 
-        return tx.contractCounter.update({
-            where: {
-                contractType_buddhistYear: {
-                    contractType,
-                    buddhistYear,
-                },
+    const updatedCounter = await tx.contractCounter.update({
+        where: {
+            contractType_buddhistYear: {
+                contractType,
+                buddhistYear,
             },
-            data: {
-                currentNumber: {
-                    increment: 1,
-                },
+        },
+        data: {
+            currentNumber: {
+                increment: 1,
             },
-            select: {
-                currentNumber: true,
-            },
-        });
+        },
+        select: {
+            currentNumber: true,
+        },
     });
 
     const issuedNumber = Math.max(updatedCounter.currentNumber - 1, 1);

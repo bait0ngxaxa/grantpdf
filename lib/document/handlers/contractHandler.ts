@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import {
     loadTemplate,
     createDocxRenderer,
-    saveDocumentToStorage,
+    saveDocumentToStorageInTransaction,
     findOrCreateProject,
     readProgramIdFromForm,
     isProjectError,
@@ -58,11 +58,9 @@ export async function handleContractGeneration(
         );
     }
 
-    // Handle contract number generation for specific types
-    let finalContractNumber = contractnumber;
-    if (contractnumber && AUTO_CONTRACT_TYPES.has(contractnumber)) {
-        finalContractNumber = await getNextContractNumber(contractnumber);
-    }
+    const autoContractType = AUTO_CONTRACT_TYPES.has(contractnumber)
+        ? contractnumber
+        : null;
 
     // Load template
     const templateBuffer = await loadTemplate("contract.docx");
@@ -79,7 +77,6 @@ export async function handleContractGeneration(
         address: normalizeRichEditorText(address || ""),
         citizenid: citizenid || "",
         citizenexpire: citizenexpire || "",
-        contractnumber: finalContractNumber || "",
         projectOffer: normalizeRichEditorText(projectOffer || ""),
         owner: fixThaiDistributed(owner || ""),
         projectCo: fixThaiDistributed(projectCo || ""),
@@ -92,14 +89,6 @@ export async function handleContractGeneration(
         date: date || "",
         witness: fixThaiDistributed(witness || ""),
     };
-
-    doc.render(processedData);
-
-    // Generate output
-    const outputBuffer = doc.getZip().generate({
-        type: "uint8array",
-        compression: "DEFLATE",
-    });
 
     // Find or create project
     const projectResolution = await findOrCreateProject(
@@ -123,11 +112,29 @@ export async function handleContractGeneration(
         projectResolution,
         userId,
         () =>
-            saveDocumentToStorage(
-                outputBuffer,
+            saveDocumentToStorageInTransaction(
+                async (tx): Promise<Uint8Array> => {
+                    const finalContractNumber = autoContractType
+                        ? await getNextContractNumber(autoContractType, tx)
+                        : contractnumber;
+
+                    doc.render({
+                        ...processedData,
+                        contractnumber: finalContractNumber || "",
+                    });
+
+                    return doc.getZip().generate({
+                        type: "uint8array",
+                        compression: "DEFLATE",
+                    });
+                },
                 fileName,
                 "docx",
-                async (storagePath: string, tx): Promise<number> => {
+                async (
+                    storagePath: string,
+                    tx,
+                    outputBuffer: Uint8Array,
+                ): Promise<number> => {
                     const savedFile = await createUserFileRecord({
                         userId,
                         projectId: projectResolution.project.id,

@@ -103,8 +103,8 @@ export async function updateProjectCoOwners({
     const requestedCoOwnerIds = allowCoOwners ? uniquePositiveIds(coOwnerUserIds) : [];
 
     const result = await prisma.$transaction(async (tx) => {
-        const project = await tx.project.findUnique({
-            where: { id: projectId },
+        const project = await tx.project.findFirst({
+            where: { id: projectId, deletedAt: null },
             select: {
                 id: true,
                 name: true,
@@ -114,6 +114,15 @@ export async function updateProjectCoOwners({
         });
 
         if (!project) {
+            throw new Error("PROJECT_NOT_FOUND");
+        }
+
+        const assignedAt = new Date();
+        const projectUpdate = await tx.project.updateMany({
+            where: { id: projectId, deletedAt: null },
+            data: { allowCoOwners, updated_at: assignedAt },
+        });
+        if (projectUpdate.count !== 1) {
             throw new Error("PROJECT_NOT_FOUND");
         }
 
@@ -137,14 +146,6 @@ export async function updateProjectCoOwners({
             previousCoOwnerIds,
             notifiedCoOwnerUserIds,
         );
-        const assignedAt = new Date();
-
-        await tx.project.update({
-            where: { id: projectId },
-            data: { allowCoOwners, updated_at: assignedAt },
-            select: { id: true },
-        });
-
         await tx.projectCoOwner.deleteMany({
             where: {
                 projectId,

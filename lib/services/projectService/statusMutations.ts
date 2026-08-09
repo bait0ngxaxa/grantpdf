@@ -72,24 +72,41 @@ export async function updateProjectStatus(
 ): Promise<Partial<AdminProject>> {
     assertValidStatusInput(params);
 
-    const updatedProject = await prisma.project.update({
-        where: { id: params.projectId },
-        data: {
-            status: params.status,
-            statusNote: params.statusNote || null,
-            programId: params.programId,
-            updated_at: new Date(),
-        },
-        include: {
-            program: { select: { id: true, name: true } },
-            user: { select: { id: true, name: true, email: true } },
-            coOwners: { select: { coOwnerUserId: true } },
-            _count: {
-                select: {
-                    files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+    const updatedProject = await prisma.$transaction(async (tx) => {
+        const updateResult = await tx.project.updateMany({
+            where: { id: params.projectId, deletedAt: null },
+            data: {
+                status: params.status,
+                statusNote: params.statusNote || null,
+                programId: params.programId,
+                updated_at: new Date(),
+            },
+        });
+        if (updateResult.count !== 1) {
+            throw new Error("PROJECT_NOT_FOUND");
+        }
+
+        const project = await tx.project.findFirst({
+            where: { id: params.projectId, deletedAt: null },
+            include: {
+                program: { select: { id: true, name: true } },
+                user: { select: { id: true, name: true, email: true } },
+                coOwners: { select: { coOwnerUserId: true } },
+                _count: {
+                    select: {
+                        files: {
+                            where: {
+                                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                            },
+                        },
+                    },
                 },
             },
-        },
+        });
+        if (!project) {
+            throw new Error("PROJECT_NOT_FOUND");
+        }
+        return project;
     });
 
     await invalidateDashboardStats(getProjectDashboardUserIds(updatedProject));
@@ -103,8 +120,8 @@ export async function updateProjectStatusWithAudit(
     assertValidStatusInput(params);
 
     const updatedProject = await prisma.$transaction(async (tx) => {
-        const beforeProject = await tx.project.findUnique({
-            where: { id: params.projectId },
+        const beforeProject = await tx.project.findFirst({
+            where: { id: params.projectId, deletedAt: null },
             select: {
                 id: true,
                 name: true,
@@ -121,24 +138,38 @@ export async function updateProjectStatusWithAudit(
         }
 
         const updatedAt = new Date();
-        const updated = await tx.project.update({
-            where: { id: params.projectId },
+        const updateResult = await tx.project.updateMany({
+            where: { id: params.projectId, deletedAt: null },
             data: {
                 status: params.status,
                 statusNote: params.statusNote || null,
                 programId: params.programId,
                 updated_at: updatedAt,
             },
+        });
+        if (updateResult.count !== 1) {
+            throw new Error("PROJECT_NOT_FOUND");
+        }
+
+        const updated = await tx.project.findFirst({
+            where: { id: params.projectId, deletedAt: null },
             include: {
                 program: { select: { id: true, name: true } },
                 user: { select: { id: true, name: true, email: true } },
                 _count: {
                     select: {
-                        files: { where: { deletionStatus: FILE_DELETION_STATUS.ACTIVE } },
+                        files: {
+                            where: {
+                                deletionStatus: FILE_DELETION_STATUS.ACTIVE,
+                            },
+                        },
                     },
                 },
             },
         });
+        if (!updated) {
+            throw new Error("PROJECT_NOT_FOUND");
+        }
 
         await createProjectStatusAudit(tx, beforeProject, updated, params, audit);
         await notifyProjectStatusUpdated(tx, {

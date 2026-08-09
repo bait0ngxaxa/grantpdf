@@ -1,7 +1,15 @@
 import { deleteJsonCache } from "@/lib/services/redisJsonCache";
+import { getBangkokDayRange } from "@/lib/shared/dateTime/bangkok";
 
 export const ADMIN_DASHBOARD_STATS_CACHE_KEY = "grant:stats:admin";
 export const DASHBOARD_STATS_CACHE_TTL_SECONDS = 30;
+
+export function getAdminDashboardStatsCacheKey(
+    referenceDate: Date = new Date(),
+): string {
+    const { start } = getBangkokDayRange(referenceDate);
+    return `${ADMIN_DASHBOARD_STATS_CACHE_KEY}:${start.toISOString()}`;
+}
 
 export function getUserDashboardStatsCacheKey(userId: number): string {
     return `grant:stats:user:${userId}`;
@@ -24,7 +32,7 @@ export async function invalidateDashboardStats(
     userIds: readonly number[],
 ): Promise<void> {
     const cacheKeys = [
-        ADMIN_DASHBOARD_STATS_CACHE_KEY,
+        getAdminDashboardStatsCacheKey(),
         ...uniquePositiveUserIds(userIds).map(getUserDashboardStatsCacheKey),
     ];
 

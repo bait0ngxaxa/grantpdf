@@ -11,14 +11,7 @@ import { attachmentsSchema } from "./nested.schema";
 
 export const approvalSchema = z.object({
     head: requiredString("เลขที่หนังสือ"),
-    fileName: z
-        .string()
-        .trim()
-        .max(DOCUMENT_FILE_NAME_MAX_LENGTH, {
-            message: "ชื่อไฟล์ยาวเกินไป",
-        })
-        .optional()
-        .default(""),
+    fileName: requiredBoundedString("ชื่อไฟล์", DOCUMENT_FILE_NAME_MAX_LENGTH),
     projectName: requiredBoundedString("ชื่อโครงการ", PROJECT_NAME_MAX_LENGTH),
     date: requiredString("วันที่"),
     topicdetail: requiredString("รายละเอียดเรื่อง"),
