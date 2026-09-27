@@ -36,7 +36,7 @@ export const options = {
   },
 };
 
-export default function () {
+export default function stressScenario() {
   // Mix ของ requests ที่จำลอง traffic จริง
 
   // 60% — ดูหน้าเว็บ (GET pages)

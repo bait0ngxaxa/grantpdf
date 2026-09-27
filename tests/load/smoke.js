@@ -15,7 +15,7 @@ export const options = {
   thresholds: THRESHOLDS,
 };
 
-export default function () {
+export default function smokeScenario() {
   // 1. Homepage
   const homeRes = http.get(`${BASE_URL}/`);
   check(homeRes, {

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type * as RateLimitModule from "@/lib/server/rate-limit/rateLimit";
 import bcrypt from "bcryptjs";
 import { SESSION } from "@/lib/shared/constants";
 
@@ -25,7 +26,7 @@ vi.mock("@/lib/services/authSessionService", () => ({
 }));
 
 vi.mock("@/lib/server/rate-limit/rateLimit", async () => {
-    const actual = await vi.importActual<typeof import("@/lib/server/rate-limit/rateLimit")>(
+    const actual = await vi.importActual<typeof RateLimitModule>(
         "@/lib/server/rate-limit/rateLimit"
     );
 

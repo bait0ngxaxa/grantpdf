@@ -74,13 +74,13 @@ describe("sanitizeAttachments", () => {
 
         const result = sanitizeAttachments(rawAttachments);
 
-        expect(result!).toHaveLength(2);
-        expect(result![0].id).toBe("1");
-        expect(result![0].fileName).toBe("file1.pdf");
-        expect(result![0].downloadUrl).toBe(
+        expect(result).toHaveLength(2);
+        expect(result?.[0].id).toBe("1");
+        expect(result?.[0].fileName).toBe("file1.pdf");
+        expect(result?.[0].downloadUrl).toBe(
             "/api/attachment/download/1",
         );
-        expect(result![1]).not.toHaveProperty("filePath");
+        expect(result?.[1]).not.toHaveProperty("filePath");
     });
 });
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Prisma } from "@prisma/client";
+import type * as DocumentModule from "@/lib/document";
 
 const mocks = vi.hoisted(() => ({
     findMany: vi.fn(),
@@ -36,7 +37,7 @@ vi.mock("fs/promises", () => ({
 }));
 
 vi.mock("@/lib/document", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("@/lib/document")>();
+    const actual = await importOriginal<typeof DocumentModule>();
     return {
         ...actual,
         loadTemplate: vi.fn().mockResolvedValue(Buffer.from("template")),

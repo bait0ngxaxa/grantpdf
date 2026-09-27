@@ -59,7 +59,7 @@ function login() {
   return loginRes;
 }
 
-export default function () {
+export default function loadScenario() {
   // ---- ขั้น 1: Login ----
   group("01_Login", () => {
     login();

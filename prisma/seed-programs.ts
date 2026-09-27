@@ -18,7 +18,7 @@ const PROGRAMS = [
 ] as const;
 
 async function main(): Promise<void> {
-    console.log("Seeding programs...");
+    process.stdout.write("Seeding programs...\n");
 
     for (const program of PROGRAMS) {
         await prisma.program.upsert({
@@ -30,10 +30,10 @@ async function main(): Promise<void> {
                 isActive: true,
             },
         });
-        console.log(`  ✓ ${program.name}`);
+        process.stdout.write(`  ✓ ${program.name}\n`);
     }
 
-    console.log(`Seeded ${PROGRAMS.length} programs successfully.`);
+    process.stdout.write(`Seeded ${PROGRAMS.length} programs successfully.\n`);
 }
 
 main()

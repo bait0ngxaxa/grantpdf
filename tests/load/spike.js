@@ -32,7 +32,7 @@ export const options = {
   },
 };
 
-export default function () {
+export default function spikeScenario() {
   // ดูหน้า dashboard (จำลองคนเข้ามาดูผล)
   const pageRes = http.get(`${BASE_URL}/`);
   check(pageRes, {

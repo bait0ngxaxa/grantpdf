@@ -21,7 +21,7 @@ export const options = {
   },
 };
 
-export default function () {
+export default function soakScenario() {
   // จำลอง user flow ปกติ
 
   // ดูหน้าเว็บ

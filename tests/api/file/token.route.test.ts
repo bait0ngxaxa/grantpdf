@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type * as FsModule from "fs";
+import type * as FsPromisesModule from "fs/promises";
 import { Readable } from "node:stream";
 
 vi.mock("@/lib/server/db", () => ({
@@ -32,7 +34,7 @@ vi.mock("@/lib/server/audit/auditLog", () => ({
 }));
 
 vi.mock("fs", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("fs")>();
+    const actual = await importOriginal<typeof FsModule>();
     const createReadStream = vi.fn();
     return {
         ...actual,
@@ -42,7 +44,7 @@ vi.mock("fs", async (importOriginal) => {
 });
 
 vi.mock("fs/promises", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("fs/promises")>();
+    const actual = await importOriginal<typeof FsPromisesModule>();
     const stat = vi.fn();
     return {
         ...actual,

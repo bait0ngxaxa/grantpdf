@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type * as ValidationSchemas from "@/lib/validation/schemas";
 import { POST } from "@/app/api/(document)/generate/[type]/route";
 
 vi.mock("@/lib/document", () => ({
@@ -58,7 +59,7 @@ vi.mock("@/lib/document/handlers", () => ({
 
 vi.mock("@/lib/validation/schemas", async (importOriginal) => {
     const actual = await importOriginal<
-        typeof import("@/lib/validation/schemas")
+        typeof ValidationSchemas
     >();
     const ok = { safeParse: vi.fn(() => ({ success: true })) };
     return {
