@@ -40,7 +40,7 @@ function createNonce(): string {
     return btoa(String.fromCharCode(...bytes));
 }
 
-export function buildContentSecurityPolicy(nonce: string): string {
+export function buildContentSecurityPolicy(_nonce: string): string {
     const scriptSrc = isDevelopment()
         ? "'self' 'unsafe-inline' 'unsafe-eval' http: https:"
         : `'self' 'unsafe-inline' ${CLOUDFLARE_INSIGHTS_SCRIPT_SRC}`;
@@ -160,7 +160,7 @@ function redirectToSessionRefresh(req: NextRequest, nonce: string): NextResponse
     return applySecurityHeaders(NextResponse.redirect(url), nonce);
 }
 
-export async function middleware(
+export async function proxy(
     req: NextRequest
 ): Promise<NextResponse | Response> {
     const nonce = createNonce();

@@ -262,7 +262,7 @@ Request จาก Internet
 ┌──────────────────────────────┐
 │  Next.js Application        │
 │                              │
-│  ⑥ CSRF Validation           │  middleware.ts
+│  ⑥ CSRF Validation           │  proxy.ts
 │  ⑦ App-Level Rate Limiting   │  lib/ratelimit.ts
 │     - signin:      10/min    │
 │     - signup:       5/min    │
@@ -270,7 +270,7 @@ Request จาก Internet
 │     - reset-pw:     5/15min  │
 │     - project:     20/min    │
 │     - doc-gen:     12/min    │
-│  ⑧ Auth/Role Check           │  middleware + route guards
+│  ⑧ Auth/Role Check           │  proxy + route guards
 │                              │
 └──────────────────────────────┘
 ```

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildContentSecurityPolicy } from "@/middleware";
+import { buildContentSecurityPolicy } from "@/proxy";
 
 function getDirective(csp: string, name: string): string {
     return (

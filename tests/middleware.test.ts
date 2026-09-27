@@ -1,9 +1,40 @@
+// @vitest-environment node
+
 import { afterEach, describe, it, expect, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { middleware } from "@/middleware";
+import { createAccessToken } from "@/lib/server/auth/accessToken";
+import { ROUTES, SESSION } from "@/lib/shared/constants";
+import { config, proxy } from "@/proxy";
 
-// Extract CSRF validation logic for testing
-// Since middleware uses Next.js runtime, we test the core logic
+function buildProxyRequest(
+    url: string,
+    method = "GET",
+    headers: Record<string, string> = {},
+): NextRequest {
+    return new NextRequest(url, {
+        method,
+        headers: { host: "localhost", ...headers },
+    });
+}
+
+async function buildAuthenticatedProxyRequest(
+    url: string,
+    role: string,
+): Promise<NextRequest> {
+    vi.stubEnv("AUTH_ACCESS_TOKEN_SECRET", "01234567890123456789012345678901");
+    const accessToken = await createAccessToken({
+        userId: 1,
+        role,
+        sessionId: "test-session",
+        sessionVersion: 1,
+    });
+
+    return buildProxyRequest(url, "GET", {
+        cookie: `${SESSION.ACCESS_COOKIE_NAME}=${accessToken}`,
+    });
+}
+
+// Test isolated policy decisions here; request-level coverage exercises Proxy below.
 function validateCSRF(
     origin: string | null,
     referer: string | null,
@@ -355,7 +386,7 @@ describe("Internal job CSRF bypass", () => {
             },
         );
 
-        const response = await middleware(request);
+        const response = await proxy(request);
 
         expect(response.status).toBe(200);
     });
@@ -373,8 +404,183 @@ describe("Internal job CSRF bypass", () => {
             },
         );
 
-        const response = await middleware(request);
+        const response = await proxy(request);
 
         expect(response.status).toBe(403);
+    });
+
+    it("allows the authenticated file deletion scheduler request", async () => {
+        vi.stubEnv("FILE_DELETION_RECONCILIATION_SECRET", "test-secret");
+        const request = buildProxyRequest(
+            "http://localhost/api/internal/file-deletions",
+            "POST",
+            { authorization: "Bearer test-secret" },
+        );
+
+        const response = await proxy(request);
+
+        expect(response.status).toBe(200);
+    });
+});
+
+describe("Next.js Proxy security behavior", () => {
+    afterEach(() => {
+        vi.unstubAllEnvs();
+    });
+
+    it("redirects anonymous dashboard requests to sign in", async () => {
+        const response = await proxy(
+            buildProxyRequest("http://localhost/userdashboard"),
+        );
+        const location = new URL(response.headers.get("location") ?? "");
+
+        expect(location.pathname).toBe(ROUTES.SIGNIN);
+        expect(location.searchParams.get("callbackUrl")).toBe("/userdashboard");
+    });
+
+    it("redirects anonymous admin requests to sign in with the callback URL", async () => {
+        const response = await proxy(
+            buildProxyRequest("http://localhost/admin/users?tab=active"),
+        );
+        const location = new URL(response.headers.get("location") ?? "");
+
+        expect(location.pathname).toBe(ROUTES.SIGNIN);
+        expect(location.searchParams.get("callbackUrl")).toBe(
+            "/admin/users?tab=active",
+        );
+        expect(location.searchParams.get("reason")).toBe("session-expired");
+    });
+
+    it("allows an authenticated user to access the dashboard", async () => {
+        const request = await buildAuthenticatedProxyRequest(
+            "http://localhost/userdashboard",
+            "user",
+        );
+
+        const response = await proxy(request);
+
+        expect(response.status).toBe(200);
+    });
+
+    it("denies a non-admin user access to admin pages", async () => {
+        const request = await buildAuthenticatedProxyRequest(
+            "http://localhost/admin/users",
+            "user",
+        );
+
+        const response = await proxy(request);
+        const location = new URL(response.headers.get("location") ?? "");
+
+        expect(location.pathname).toBe(ROUTES.ACCESS_DENIED);
+    });
+
+    it("allows an admin user to access admin pages", async () => {
+        const request = await buildAuthenticatedProxyRequest(
+            "http://localhost/admin",
+            "admin",
+        );
+
+        const response = await proxy(request);
+
+        expect(response.status).toBe(200);
+    });
+
+    it("uses the session refresh flow when an access token is missing", async () => {
+        const request = buildProxyRequest(
+            "http://localhost/userdashboard?tab=projects",
+            "GET",
+            { cookie: `${SESSION.SESSION_HINT_COOKIE_NAME}=1` },
+        );
+
+        const response = await proxy(request);
+        const location = new URL(response.headers.get("location") ?? "");
+
+        expect(location.pathname).toBe(ROUTES.SESSION_REFRESH);
+        expect(location.searchParams.get("callbackUrl")).toBe(
+            "/userdashboard?tab=projects",
+        );
+    });
+
+    it("sends an invalid access token without a refresh hint to sign in", async () => {
+        const request = buildProxyRequest("http://localhost/userdashboard", "GET", {
+            cookie: `${SESSION.ACCESS_COOKIE_NAME}=invalid-token`,
+        });
+
+        const response = await proxy(request);
+        const location = new URL(response.headers.get("location") ?? "");
+
+        expect(location.pathname).toBe(ROUTES.SIGNIN);
+    });
+
+    it("requires a token before serving the reset-password page", async () => {
+        const response = await proxy(
+            buildProxyRequest("http://localhost/reset-password"),
+        );
+        const location = new URL(response.headers.get("location") ?? "");
+
+        expect(location.pathname).toBe(ROUTES.FORGOT_PASSWORD);
+    });
+
+    it("blocks mutation requests with missing or malformed origin information", async () => {
+        const requests = [
+            buildProxyRequest("http://localhost/api/auth/refresh", "POST"),
+            buildProxyRequest("http://localhost/api/auth/refresh", "POST", {
+                origin: "not-a-valid-url",
+            }),
+            buildProxyRequest("http://localhost/api/auth/refresh", "POST", {
+                referer: "not-a-valid-url",
+            }),
+            buildProxyRequest("http://localhost/api/auth/refresh", "POST", {
+                referer: "https://attacker.example/action",
+            }),
+        ];
+
+        for (const request of requests) {
+            const response = await proxy(request);
+            expect(response.status).toBe(403);
+        }
+    });
+
+    it("allows same-origin mutation requests", async () => {
+        const response = await proxy(
+            buildProxyRequest("http://localhost/api/auth/refresh", "POST", {
+                origin: "http://localhost",
+            }),
+        );
+
+        expect(response.status).toBe(200);
+    });
+
+    it("sets CSP, nonce propagation, and security headers", async () => {
+        const response = await proxy(buildProxyRequest("http://localhost/"));
+        const csp = response.headers.get("Content-Security-Policy");
+        const nonce = response.headers.get("x-middleware-request-x-nonce");
+        const overriddenHeaders =
+            response.headers.get("x-middleware-override-headers") ?? "";
+
+        expect(csp).toContain("default-src 'self'");
+        expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/);
+        expect(overriddenHeaders).toContain("x-nonce");
+        expect(response.headers.get("x-middleware-request-content-security-policy")).toBe(
+            csp,
+        );
+        expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+        expect(response.headers.get("X-Frame-Options")).toBe("SAMEORIGIN");
+        expect(response.headers.get("Referrer-Policy")).toBe(
+            "strict-origin-when-cross-origin",
+        );
+        expect(response.headers.get("Permissions-Policy")).toBe(
+            "camera=(), microphone=(), geolocation=()",
+        );
+        expect(response.headers.get("Cross-Origin-Opener-Policy")).toBe(
+            "same-origin",
+        );
+        expect(response.headers.get("X-DNS-Prefetch-Control")).toBe("off");
+    });
+
+    it("keeps static assets excluded from the Proxy matcher", () => {
+        expect(config.matcher).toEqual([
+            "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map)$).*)",
+        ]);
     });
 });
