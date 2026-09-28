@@ -109,6 +109,45 @@ describe("usePreventNavigation", () => {
         });
     });
 
+    it("continues Back without re-arming when native confirmation is accepted", () => {
+        const pushState = vi.spyOn(window.history, "pushState");
+        const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+        renderHook(() => usePreventNavigation({ isDirty: true }));
+        window.history.replaceState({ __NA: true }, "", window.location.href);
+
+        act(() => {
+            window.dispatchEvent(new PopStateEvent("popstate"));
+        });
+
+        expect(confirm).toHaveBeenCalledTimes(1);
+        expect(pushState).toHaveBeenCalledTimes(1);
+        expect(mockRouter.back).toHaveBeenCalledTimes(1);
+    });
+
+    it("re-arms after native confirmation is canceled", () => {
+        const pushState = vi.spyOn(window.history, "pushState");
+        let pushStateCallsWhenConfirmRuns: number | undefined;
+        const confirm = vi.spyOn(window, "confirm").mockImplementation(() => {
+            pushStateCallsWhenConfirmRuns = pushState.mock.calls.length;
+            return false;
+        });
+        renderHook(() => usePreventNavigation({ isDirty: true }));
+        window.history.replaceState({ __NA: true }, "", window.location.href);
+
+        act(() => {
+            window.dispatchEvent(new PopStateEvent("popstate"));
+        });
+
+        expect(confirm).toHaveBeenCalledTimes(1);
+        expect(pushStateCallsWhenConfirmRuns).toBe(1);
+        expect(pushState).toHaveBeenCalledTimes(2);
+        expect(mockRouter.back).not.toHaveBeenCalled();
+        expect(window.history.state).toEqual({
+            __NA: true,
+            __grantpdfNavigationGuard: true,
+        });
+    });
+
     it("does not reopen confirmation or re-arm history after allowNavigation", () => {
         const pushState = vi.spyOn(window.history, "pushState");
         const onNavigationAttempt = vi.fn();

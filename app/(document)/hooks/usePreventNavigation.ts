@@ -82,21 +82,21 @@ export function usePreventNavigation({
                 return;
             }
 
-            armNavigationGuard();
-
             const onNavigationAttempt = onNavigationAttemptRef.current;
             if (onNavigationAttempt) {
+                armNavigationGuard();
                 onNavigationAttempt();
                 return;
             }
 
             const confirmLeave = window.confirm(messageRef.current);
-            if (!confirmLeave) {
+            if (confirmLeave) {
+                isNavigatingRef.current = true;
+                routerRef.current.back();
                 return;
             }
 
-            isNavigatingRef.current = true;
-            routerRef.current.back();
+            armNavigationGuard();
         };
 
         armNavigationGuard();
