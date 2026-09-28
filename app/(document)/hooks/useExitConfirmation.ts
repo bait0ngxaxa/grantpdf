@@ -30,19 +30,21 @@ export function useExitConfirmation({
     // Use a ref to store the confirm handler to avoid circular dependency with usePreventNavigation
     const confirmExitRef = useRef<() => void>(() => {});
 
+    const handleNavigationAttempt = useCallback(() => {
+        showConfirm({
+            title: "คุณแน่ใจหรือไม่?",
+            description:
+                "ข้อมูลที่คุณกรอกยังไม่ได้บันทึก หากออกจากหน้านี้ข้อมูลจะสูญหาย",
+            confirmText: "ตกลง",
+            cancelText: "ยกเลิก",
+            isDestructive: true,
+            onConfirm: () => confirmExitRef.current(),
+        });
+    }, [showConfirm]);
+
     const { allowNavigation } = usePreventNavigation({
         isDirty,
-        onNavigationAttempt: () => {
-            showConfirm({
-                title: "คุณแน่ใจหรือไม่?",
-                description:
-                    "ข้อมูลที่คุณกรอกยังไม่ได้บันทึก หากออกจากหน้านี้ข้อมูลจะสูญหาย",
-                confirmText: "ตกลง",
-                cancelText: "ยกเลิก",
-                isDestructive: true,
-                onConfirm: () => confirmExitRef.current(),
-            });
-        },
+        onNavigationAttempt: handleNavigationAttempt,
     });
 
     const handleConfirmExit = useCallback(() => {

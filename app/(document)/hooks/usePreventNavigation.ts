@@ -9,6 +9,29 @@ interface UsePreventNavigationOptions {
     onNavigationAttempt?: () => void;
 }
 
+const NAVIGATION_GUARD_STATE_KEY = "__grantpdfNavigationGuard";
+
+function isHistoryStateRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function armNavigationGuard(): void {
+    const currentState: unknown = window.history.state;
+    const historyState = isHistoryStateRecord(currentState) ? currentState : {};
+
+    if (historyState[NAVIGATION_GUARD_STATE_KEY] === true) {
+        return;
+    }
+
+    window.history.pushState(
+        {
+            ...historyState,
+            [NAVIGATION_GUARD_STATE_KEY]: true,
+        },
+        "",
+    );
+}
+
 export function usePreventNavigation({
     isDirty,
     message = "ข้อมูลที่คุณกรอกจะไม่ถูกบันทึก คุณต้องการออกจากหน้านี้ใช่หรือไม่?",
@@ -16,6 +39,21 @@ export function usePreventNavigation({
 }: UsePreventNavigationOptions): { allowNavigation: () => void } {
     const router = useRouter();
     const isNavigatingRef = useRef(false);
+    const onNavigationAttemptRef = useRef(onNavigationAttempt);
+    const messageRef = useRef(message);
+    const routerRef = useRef(router);
+
+    useEffect(() => {
+        onNavigationAttemptRef.current = onNavigationAttempt;
+    }, [onNavigationAttempt]);
+
+    useEffect(() => {
+        messageRef.current = message;
+    }, [message]);
+
+    useEffect(() => {
+        routerRef.current = router;
+    }, [router]);
 
     // Prevent browser refresh/close
     useEffect(() => {
@@ -39,30 +77,35 @@ export function usePreventNavigation({
     useEffect(() => {
         if (!isDirty) return;
 
-        const handlePopState = (_e: PopStateEvent): void => {
-            if (isDirty && !isNavigatingRef.current) {
-                window.history.pushState(null, "", window.location.href);
-
-                if (onNavigationAttempt) {
-                    onNavigationAttempt();
-                } else {
-                    const confirmLeave = window.confirm(message);
-                    if (confirmLeave) {
-                        isNavigatingRef.current = true;
-                        router.back();
-                    }
-                }
+        const handlePopState = (): void => {
+            if (!isDirty || isNavigatingRef.current) {
+                return;
             }
+
+            armNavigationGuard();
+
+            const onNavigationAttempt = onNavigationAttemptRef.current;
+            if (onNavigationAttempt) {
+                onNavigationAttempt();
+                return;
+            }
+
+            const confirmLeave = window.confirm(messageRef.current);
+            if (!confirmLeave) {
+                return;
+            }
+
+            isNavigatingRef.current = true;
+            routerRef.current.back();
         };
 
-        // Push initial state to history to intercept back button
-        window.history.pushState(null, "", window.location.href);
+        armNavigationGuard();
         window.addEventListener("popstate", handlePopState);
 
         return (): void => {
             window.removeEventListener("popstate", handlePopState);
         };
-    }, [isDirty, message, router, onNavigationAttempt]);
+    }, [isDirty]);
 
     const allowNavigation = useCallback((): void => {
         isNavigatingRef.current = true;
